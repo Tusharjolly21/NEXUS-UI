@@ -12,10 +12,21 @@ export interface PullToRefreshProps {
   autoplay?: boolean;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
+  /** How far (px) the card has to travel before letting go refreshes it, 90 by default. Clamped to 50 to 130. */
+  pullDistance?: number;
+  /** How long (s) the card holds and spins before it springs back, 1.3 by default. Clamped to 0.4 to 5. */
+  refreshTime?: number;
+  /** How much the card stretches as it is pulled, 1 is the default and 0 keeps it rigid. Clamped to 0 to 3. */
+  stretch?: number;
+  /** How much the card overshoots when it springs back, 1 is the default. Higher bounces more. Clamped to 0.5 to 2.5. */
+  bounce?: number;
+  /** How far the card follows the pointer while you drag it down, 0.55 by default. Lower feels heavier. Clamped to 0.3 to 1. */
+  elasticity?: number;
 }
 
 /** How far (px) the card has to travel before letting go refreshes it. */
 const LINE = 90;
+const clamp = (v: number, lo: number, hi: number) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : lo);
 
 /** Each character rolls in from above when it changes; keyed from the right so digits stay put as the number grows. */
 export function RollingDigits({ text }: { text: string }) {
@@ -53,15 +64,31 @@ function series(seed: number) {
  * commits, holds while it spins, then springs back with a little overshoot as
  * the balance rolls and the chart redraws.
  */
-export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay = false, enableSound = true }: PullToRefreshProps) {
+export function PullToRefresh({
+  initialBalance = 58834.75,
+  onRefresh,
+  autoplay = false,
+  enableSound = true,
+  pullDistance = LINE,
+  refreshTime = 1.3,
+  stretch: stretchAmount = 1,
+  bounce = 1,
+  elasticity = 0.55,
+}: PullToRefreshProps) {
   const play = useSound(enableSound);
   const y = useMotionValue(0);
+  const line = clamp(pullDistance, 50, 130);
+  // Read inside handlers and motion transforms so the tuning applies live, without a remount.
+  const opts = useRef({ line, hold: clamp(refreshTime, 0.4, 5) * 1000, stretch: clamp(stretchAmount, 0, 3), bounce: clamp(bounce, 0.5, 2.5) });
+  useEffect(() => {
+    opts.current = { line, hold: clamp(refreshTime, 0.4, 5) * 1000, stretch: clamp(stretchAmount, 0, 3), bounce: clamp(bounce, 0.5, 2.5) };
+  }, [line, refreshTime, stretchAmount, bounce]);
   const [phase, setPhase] = useState<"idle" | "ready" | "loading">("idle");
   const [bal, setBal] = useState(initialBalance);
   const [delta, setDelta] = useState(1204.6);
   const [seed, setSeed] = useState(7);
-  const stretch = useTransform(y, (v) => 1 + Math.max(0, v) / 900);
-  const ring = useTransform(y, (v) => Math.min(1, Math.max(0, v) / LINE));
+  const stretch = useTransform(y, (v) => 1 + (Math.max(0, v) / 900) * opts.current.stretch);
+  const ring = useTransform(y, (v) => Math.min(1, Math.max(0, v) / opts.current.line));
   const ringOpacity = useTransform(y, [0, 30], [0, 1]);
   const touched = useRef(false);
   const loading = useRef(false);
@@ -80,7 +107,7 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
   useMotionValueEvent(y, "change", (v) => {
-    const past = v >= LINE;
+    const past = v >= opts.current.line;
     if (past !== pastLine.current) {
       pastLine.current = past;
       // One tick as the card crosses the release line, only while the user (or the autoplay pull) is pulling.
@@ -89,7 +116,7 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
         else if (autoDriven.current) play.auto("tick", past ? 0.6 : 0.35);
       }
     }
-    if (phase !== "loading") setPhase(v >= LINE ? "ready" : "idle");
+    if (phase !== "loading") setPhase(v >= opts.current.line ? "ready" : "idle");
   });
 
   const refresh = useCallback(() => {
@@ -109,18 +136,18 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
       setBal(next);
       onRefreshRef.current?.(next, ch);
       setSeed((s) => s + 11);
-      animate(y, 0, { type: "spring", stiffness: 300, damping: 14 });
+      animate(y, 0, { type: "spring", stiffness: 300, damping: 14 / opts.current.bounce });
       setPhase("idle");
       loading.current = false;
       if (audible) play("done");
       else if (auto) play.auto("done");
-    }, 1300);
+    }, opts.current.hold);
   }, [y, play]);
 
   /** The same pull the demo does: ease down past the line, then commit. */
   const pull = useCallback(() => {
     if (loading.current) return;
-    animate(y, 120, { duration: 0.7, ease: [0.3, 0, 0.3, 1], onComplete: refresh });
+    animate(y, opts.current.line + 30, { duration: 0.7, ease: [0.3, 0, 0.3, 1], onComplete: refresh });
   }, [y, refresh]);
 
   useEffect(() => {
@@ -177,14 +204,14 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
         <motion.div
           drag={phase === "loading" ? false : "y"}
           dragConstraints={{ top: 0, bottom: 0 }}
-          dragElastic={{ top: 0, bottom: 0.55 }}
+          dragElastic={{ top: 0, bottom: clamp(elasticity, 0.3, 1) }}
           onDragStart={() => {
             touched.current = true;
             userDriven.current = true;
             y.stop();
           }}
           onDragEnd={() => {
-            if (y.get() >= LINE) refresh();
+            if (y.get() >= opts.current.line) refresh();
             else userDriven.current = false;
           }}
           tabIndex={0}

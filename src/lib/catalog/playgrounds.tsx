@@ -1805,15 +1805,47 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "MoodWheel",
     importPath: "@/components/mood-wheel",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Spin by itself", defaultValue: false, startOn: true }],
-    render: (v) => <MoodWheel key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "radius", label: "Wheel radius", min: 140, max: 300, step: 10, unit: "px", defaultValue: 220 },
+      { kind: "range", prop: "spacing", label: "Word spacing", min: 0.24, max: 0.5, step: 0.02, defaultValue: 0.32 },
+      { kind: "range", prop: "orbSize", label: "Orb size", min: 90, max: 190, step: 10, unit: "px", defaultValue: 150 },
+      { kind: "range", prop: "glide", label: "Glide", min: 0.4, max: 3, step: 0.1, defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Spin by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <MoodWheel
+        key={String(v.autoplay)}
+        radius={v.radius as number}
+        spacing={v.spacing as number}
+        orbSize={v.orbSize as number}
+        glide={v.glide as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "swipe-stack": {
     componentName: "SwipeStack",
     importPath: "@/components/swipe-stack",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Swipe by itself", defaultValue: false, startOn: true }],
-    render: (v) => <SwipeStack key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "swipeDistance", label: "Swipe distance", min: 40, max: 200, step: 10, unit: "px", defaultValue: 110 },
+      { kind: "range", prop: "tilt", label: "Tilt", min: 0, max: 40, step: 2, unit: "deg", defaultValue: 18 },
+      { kind: "range", prop: "spacing", label: "Stack spacing", min: 0, max: 28, step: 2, unit: "px", defaultValue: 12 },
+      { kind: "range", prop: "bounce", label: "Snap-back bounce", min: 0.5, max: 2.5, step: 0.1, defaultValue: 1 },
+      { kind: "range", prop: "flingSpeed", label: "Throw speed", min: 0.5, max: 2.5, step: 0.1, defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Swipe by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <SwipeStack
+        key={String(v.autoplay)}
+        swipeDistance={v.swipeDistance as number}
+        tilt={v.tilt as number}
+        spacing={v.spacing as number}
+        bounce={v.bounce as number}
+        flingSpeed={v.flingSpeed as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "flight-tracker": {
     lightOnly: true,
@@ -1893,8 +1925,25 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "FalloffAccordion",
     importPath: "@/components/falloff-accordion",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false, startOn: true }],
-    render: (v) => <FalloffAccordion key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "expand", label: "Open width", min: 2, max: 12, step: 1, unit: "x", defaultValue: 7 },
+      { kind: "range", prop: "spread", label: "Reach", min: 0.3, max: 3, step: 0.1, defaultValue: 1.1 },
+      { kind: "range", prop: "gap", label: "Gap", min: 0, max: 16, step: 2, unit: "px", defaultValue: 6 },
+      { kind: "range", prop: "radius", label: "Corner radius", min: 0, max: 32, step: 2, unit: "px", defaultValue: 16 },
+      { kind: "range", prop: "speed", label: "Speed", min: 0.5, max: 2, step: 0.1, defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <FalloffAccordion
+        key={String(v.autoplay)}
+        expand={v.expand as number}
+        spread={v.spread as number}
+        gap={v.gap as number}
+        radius={v.radius as number}
+        speed={v.speed as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "magnet-select": {
     componentName: "MagnetSelect",
@@ -1911,8 +1960,25 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "AspectCrop",
     importPath: "@/components/aspect-crop",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle by itself", defaultValue: false, startOn: true }],
-    render: (v) => <AspectCrop key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "size", label: "Frame size", min: 140, max: 260, step: 10, unit: "px", defaultValue: 220 },
+      { kind: "range", prop: "radius", label: "Corner radius", min: 0, max: 40, step: 2, unit: "px", defaultValue: 18 },
+      { kind: "select", prop: "guides", label: "Grid lines", options: ["flash", "always", "off"], defaultValue: "flash" },
+      { kind: "range", prop: "speed", label: "Speed", min: 0.5, max: 2, step: 0.1, defaultValue: 1 },
+      { kind: "range", prop: "bounce", label: "Bounce", min: 0.5, max: 2.5, step: 0.1, defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Cycle by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <AspectCrop
+        key={String(v.autoplay)}
+        size={v.size as number}
+        radius={v.radius as number}
+        guides={v.guides as "flash" | "always" | "off"}
+        speed={v.speed as number}
+        bounce={v.bounce as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "slosh-slider": {
     componentName: "SloshSlider",
@@ -1929,8 +1995,25 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "GooReorder",
     importPath: "@/components/goo-reorder",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Shuffle by itself", defaultValue: false, startOn: true }],
-    render: (v) => <GooReorder key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "goo", label: "Gooeyness", min: 1, max: 14, step: 1, defaultValue: 7 },
+      { kind: "range", prop: "gap", label: "Row gap", min: 4, max: 24, step: 2, unit: "px", defaultValue: 10 },
+      { kind: "range", prop: "rowHeight", label: "Row height", min: 36, max: 64, step: 2, unit: "px", defaultValue: 48 },
+      { kind: "range", prop: "lift", label: "Lift on drag", min: 1, max: 1.2, step: 0.02, defaultValue: 1.06 },
+      { kind: "range", prop: "bounce", label: "Bounce", min: 0.5, max: 2.5, step: 0.1, defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Shuffle by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <GooReorder
+        key={String(v.autoplay)}
+        goo={v.goo as number}
+        gap={v.gap as number}
+        rowHeight={v.rowHeight as number}
+        lift={v.lift as number}
+        bounce={v.bounce as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "hop-labels": {
     componentName: "HopLabels",
@@ -1957,15 +2040,47 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "PullToRefresh",
     importPath: "@/components/pull-to-refresh",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Pull by itself", defaultValue: false, startOn: true }],
-    render: (v) => <PullToRefresh key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "pullDistance", label: "Pull distance", min: 60, max: 120, step: 5, unit: "px", defaultValue: 90 },
+      { kind: "range", prop: "refreshTime", label: "Refresh time", min: 0.5, max: 3, step: 0.1, unit: "s", defaultValue: 1.3 },
+      { kind: "range", prop: "stretch", label: "Stretch", min: 0, max: 2, step: 0.1, defaultValue: 1 },
+      { kind: "range", prop: "bounce", label: "Bounce", min: 0.5, max: 2, step: 0.1, defaultValue: 1 },
+      { kind: "range", prop: "elasticity", label: "Card follows pointer", min: 0.4, max: 1, step: 0.05, defaultValue: 0.55 },
+      { kind: "toggle", prop: "autoplay", label: "Pull by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <PullToRefresh
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        pullDistance={v.pullDistance as number}
+        refreshTime={v.refreshTime as number}
+        stretch={v.stretch as number}
+        bounce={v.bounce as number}
+        elasticity={v.elasticity as number}
+      />
+    ),
   },
   "runaway-button": {
     componentName: "RunawayButton",
     importPath: "@/components/runaway-button",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Dodge by itself", defaultValue: false, startOn: true }],
-    render: (v) => <RunawayButton key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "dodgeRadius", label: "Notice distance", min: 70, max: 170, step: 5, unit: "px", defaultValue: 78 },
+      { kind: "range", prop: "maxDodges", label: "Dodges before it gives up", min: 1, max: 8, step: 1, defaultValue: 4 },
+      { kind: "range", prop: "speed", label: "Escape speed", min: 0.4, max: 3, step: 0.1, defaultValue: 1 },
+      { kind: "range", prop: "wobble", label: "Wobble", min: 0, max: 2.5, step: 0.1, defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Dodge by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <RunawayButton
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        dodgeRadius={v.dodgeRadius as number}
+        maxDodges={v.maxDodges as number}
+        speed={v.speed as number}
+        wobble={v.wobble as number}
+      />
+    ),
   },
   "wake-slider": {
     componentName: "WakeSlider",
@@ -2005,8 +2120,23 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "AssignPicker",
     importPath: "@/components/assign-picker",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false, startOn: true }],
-    render: (v) => <AssignPicker key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "toggle", prop: "multiple", label: "Pick several", defaultValue: true },
+      { kind: "range", prop: "maxFaces", label: "Faces in the pill", min: 1, max: 5, step: 1, defaultValue: 3 },
+      { kind: "range", prop: "faceSize", label: "Face size", min: 22, max: 36, step: 1, unit: "px", defaultValue: 28 },
+      { kind: "range", prop: "bounce", label: "Bounce", min: 0.5, max: 2, step: 0.1, defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <AssignPicker
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        multiple={v.multiple as boolean}
+        maxFaces={v.maxFaces as number}
+        faceSize={v.faceSize as number}
+        bounce={v.bounce as number}
+      />
+    ),
   },
   "bend-text": {
     componentName: "BendText",
@@ -2123,8 +2253,23 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "PolaroidDevelop",
     importPath: "@/components/polaroid-develop",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Shake by itself", defaultValue: false, startOn: true }],
-    render: (v) => <PolaroidDevelop key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "sensitivity", label: "Shake sensitivity", min: 0.3, max: 4, step: 0.1, defaultValue: 1 },
+      { kind: "range", prop: "swing", label: "Swing", min: 0, max: 2, step: 0.1, defaultValue: 1 },
+      { kind: "range", prop: "elasticity", label: "Drag stretch", min: 0.1, max: 1, step: 0.05, defaultValue: 0.5 },
+      { kind: "toggle", prop: "selfDevelop", label: "Develops on its own", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Shake by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <PolaroidDevelop
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        sensitivity={v.sensitivity as number}
+        swing={v.swing as number}
+        elasticity={v.elasticity as number}
+        selfDevelop={v.selfDevelop as boolean}
+      />
+    ),
   },
   "wallet-stack": {
     lightOnly: true,
@@ -2230,10 +2375,23 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "MarbleProgress",
     importPath: "@/components/marble-progress",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Tick by itself", defaultValue: false, startOn: true }],
+    controls: [
+      { kind: "range", prop: "marbleSize", label: "Marble size", min: 6, max: 11, step: 0.5, unit: "px", defaultValue: 9 },
+      { kind: "range", prop: "bounciness", label: "Bounciness", min: 0.05, max: 0.85, step: 0.05, defaultValue: 0.45 },
+      { kind: "range", prop: "gravity", label: "Gravity", min: 0.4, max: 1.6, step: 0.1, defaultValue: 1 },
+      { kind: "color", prop: "glowColor", label: "Full-jar glow", options: ["#30d158", "#0071e3", "#ff9f0a", "#ff375f", "#bf5af2"], defaultValue: "#30d158" },
+      { kind: "toggle", prop: "autoplay", label: "Tick by itself", defaultValue: false, startOn: true },
+    ],
     render: (v) => (
       <React.Suspense fallback={null}>
-        <MarbleProgress key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+        <MarbleProgress
+          key={String(v.autoplay)}
+          autoplay={v.autoplay as boolean}
+          marbleSize={v.marbleSize as number}
+          bounciness={v.bounciness as number}
+          gravity={v.gravity as number}
+          glowColor={v.glowColor as string}
+        />
       </React.Suspense>
     ),
   },
@@ -3378,15 +3536,47 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "VinylPlayer",
     importPath: "@/components/vinyl-player",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true }],
-    render: (v) => <VinylPlayer key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "speed", label: "Record speed", min: 0.5, max: 2.5, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "coast", label: "Fling coast", min: 0.25, max: 4, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "armStiffness", label: "Arm snap", min: 20, max: 300, step: 5, defaultValue: 80 },
+      { kind: "range", prop: "gloss", label: "Groove shine", min: 0, max: 3, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <VinylPlayer
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        speed={v.speed as number}
+        coast={v.coast as number}
+        armStiffness={v.armStiffness as number}
+        gloss={v.gloss as number}
+      />
+    ),
   },
   "ferrofluid-record": {
     componentName: "FerrofluidRecord",
     importPath: "@/components/ferrofluid-record",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Move the magnet", defaultValue: false, startOn: true }],
-    render: (v) => <FerrofluidRecord key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "spikes", label: "Spikes", min: 8, max: 48, step: 1, defaultValue: 26 },
+      { kind: "range", prop: "pull", label: "Magnet pull", min: 0.3, max: 1.6, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "size", label: "Drop size", min: 0.7, max: 1.3, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "springiness", label: "Springiness", min: 0.3, max: 2, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "voice", label: "Voice bristle", min: 0, max: 2, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Move the magnet", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <FerrofluidRecord
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        spikes={v.spikes as number}
+        pull={v.pull as number}
+        size={v.size as number}
+        springiness={v.springiness as number}
+        voice={v.voice as number}
+      />
+    ),
   },
   "sand-timer": {
     componentName: "SandTimer",
@@ -3423,16 +3613,48 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "DominoSelect",
     importPath: "@/components/domino-select",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Topple by itself", defaultValue: false, startOn: true }],
-    render: (v) => <DominoSelect key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "rows", label: "Rows", min: 2, max: 7, step: 1, defaultValue: 7 },
+      { kind: "range", prop: "stagger", label: "Time between rows", min: 0.02, max: 0.3, step: 0.005, unit: "s", defaultValue: 0.075 },
+      { kind: "range", prop: "lean", label: "Topple depth", min: 0.3, max: 1.4, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#30d158", "#ff9f0a", "#bf5af2", "#ff3b30"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "enableSound", label: "Knock sounds", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Topple by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <DominoSelect
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        rows={v.rows as number}
+        stagger={v.stagger as number}
+        lean={v.lean as number}
+        accent={v.accent === "#0071e3" ? undefined : (v.accent as string)}
+        enableSound={v.enableSound as boolean}
+      />
+    ),
   },
   "lenticular-pass": {
     lightOnly: true,
     componentName: "LenticularPass",
     importPath: "@/components/lenticular-pass",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Rock by itself", defaultValue: false, startOn: true }],
-    render: (v) => <LenticularPass key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "strips", label: "Ridges", min: 12, max: 80, step: 1, defaultValue: 44 },
+      { kind: "range", prop: "tilt", label: "Tilt", min: 0, max: 1.6, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "stiffness", label: "Spring", min: 60, max: 320, step: 5, defaultValue: 170 },
+      { kind: "range", prop: "shine", label: "Shine", min: 0, max: 2, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Rock by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <LenticularPass
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        strips={v.strips as number}
+        tilt={v.tilt as number}
+        stiffness={v.stiffness as number}
+        shine={v.shine as number}
+      />
+    ),
   },
   "origami-pricing": {
     componentName: "OrigamiPricing",
@@ -3653,8 +3875,25 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "RippleNowPlaying",
     importPath: "@/components/ripple-now-playing",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true }],
-    render: (v) => <RippleNowPlaying key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "strength", label: "Ripple strength", min: 0, max: 2.5, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "reach", label: "Ripple reach", min: 0.4, max: 1.6, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "spread", label: "Ripple speed", min: 0.4, max: 2.5, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "tempo", label: "Beat rate", min: 0.4, max: 2.5, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "swell", label: "Cover swell", min: 0, max: 3, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <RippleNowPlaying
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        strength={v.strength as number}
+        reach={v.reach as number}
+        spread={v.spread as number}
+        tempo={v.tempo as number}
+        swell={v.swell as number}
+      />
+    ),
   },
   "chladni-upload": {
     componentName: "ChladniUpload",

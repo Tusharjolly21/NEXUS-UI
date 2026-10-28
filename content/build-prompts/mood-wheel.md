@@ -52,6 +52,14 @@ export interface MoodWheelProps {
   moods?: Mood[];
   /** Spins to a random mood every 2 s until someone drags, scrolls or uses the keys. */
   autoplay?: boolean;
+  /** Size of the wheel the words sit on, in px. Smaller curves the words more tightly, larger lays them out flatter. */
+  radius?: number;
+  /** Gap between neighbouring words around the wheel, in radians. Larger spreads the words further apart. */
+  spacing?: number;
+  /** Width and height of the colour orb, in px. */
+  orbSize?: number;
+  /** How far the wheel keeps rolling after you let go, 1 is the default. Higher glides further, lower stops sooner. */
+  glide?: number;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
@@ -71,11 +79,13 @@ export const DEFAULT_MOODS: Mood[] = [
 
 const STEP = 0.32; // radians between words
 const R = 220;
+const ORB = 150;
+const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 
-function Word({ i, pos, text }: { i: number; pos: MotionValue<number>; text: string }) {
-  const a = useTransform(pos, (p) => (i - p) * STEP);
-  const x = useTransform(a, (v) => Math.cos(v) * R - R);
-  const y = useTransform(a, (v) => Math.sin(v) * R);
+function Word({ i, pos, text, step, r }: { i: number; pos: MotionValue<number>; text: string; step: number; r: number }) {
+  const a = useTransform(pos, (p) => (i - p) * step);
+  const x = useTransform(a, (v) => Math.cos(v) * r - r);
+  const y = useTransform(a, (v) => Math.sin(v) * r);
   const rotate = useTransform(a, (v) => (v * 180) / Math.PI);
   const opacity = useTransform(a, (v) => Math.max(0, 1 - Math.abs(v) / 1.25));
   const scale = useTransform(a, (v) => 1 + Math.max(0, 0.45 - Math.abs(v) * 1.2));
@@ -95,8 +105,12 @@ function Word({ i, pos, text }: { i: number; pos: MotionValue<number>; text: str
  * past; the one at the centre gets bracketed, fills the sentence, and the orb
  * beside it melts into that mood's colours.
  */
-export function MoodWheel({ moods = DEFAULT_MOODS, autoplay = false, enableSound = true }: MoodWheelProps) {
+export function MoodWheel({ moods = DEFAULT_MOODS, autoplay = false, radius = R, spacing = STEP, orbSize = ORB, glide = 1, enableSound = true }: MoodWheelProps) {
   const reduce = useReducedMotion();
+  const wheelR = clamp(radius, 100, 360);
+  const wheelStep = clamp(spacing, 0.2, 0.6);
+  const orb = clamp(orbSize, 60, 200);
+  const roll = clamp(glide, 0.25, 4);
   const play = useSound(enableSound);
   const pos = useMotionValue(2);
   const [idx, setIdx] = useState(2);
@@ -130,7 +144,7 @@ export function MoodWheel({ moods = DEFAULT_MOODS, autoplay = false, enableSound
       type: "inertia",
       velocity,
       power: 0.4,
-      timeConstant: 260,
+      timeConstant: 260 * roll,
       modifyTarget: (t) => Math.max(0, Math.min(last, Math.round(t))),
       min: 0,
       max: last,
@@ -211,7 +225,8 @@ export function MoodWheel({ moods = DEFAULT_MOODS, autoplay = false, enableSound
       >
         {/* orb */}
         <motion.div
-          className="absolute right-8 top-1/2 -mt-[75px] h-[150px] w-[150px] rounded-full"
+          className="absolute right-8 top-1/2 rounded-full"
+          style={{ width: orb, height: orb, marginTop: -orb / 2 }}
           initial={false}
           animate={{
             background: `radial-gradient(circle at 35% 30%, #ffffff 0%, ${m.b} 30%, ${m.a} 72%, ${m.a} 100%)`,
@@ -220,14 +235,14 @@ export function MoodWheel({ moods = DEFAULT_MOODS, autoplay = false, enableSound
           transition={{ duration: 0.8 }}
         />
         <motion.div
-          className="absolute right-8 top-1/2 -mt-[75px] h-[150px] w-[150px] rounded-full mix-blend-overlay"
+          className="absolute right-8 top-1/2 rounded-full mix-blend-overlay"
           animate={reduce ? { rotate: 0 } : { rotate: 360 }}
           transition={reduce ? { duration: 0 } : { duration: 14, repeat: Infinity, ease: "linear" }}
-          style={{ background: "conic-gradient(from 0deg, rgba(255,255,255,.5), rgba(255,255,255,0) 40%, rgba(255,255,255,.4) 70%, rgba(255,255,255,0))" }}
+          style={{ width: orb, height: orb, marginTop: -orb / 2, background: "conic-gradient(from 0deg, rgba(255,255,255,.5), rgba(255,255,255,0) 40%, rgba(255,255,255,.4) 70%, rgba(255,255,255,0))" }}
         />
         {/* wheel */}
         {moods.map((md, i) => (
-          <Word key={md.word} i={i} pos={pos} text={md.word} />
+          <Word key={`${md.word}-${wheelR}-${wheelStep}`} i={i} pos={pos} text={md.word} step={wheelStep} r={wheelR} />
         ))}
         {/* brackets around the centre slot */}
         <span className="pointer-events-none absolute left-[50px] top-1/2 -mt-[22px] h-[44px] w-[8px] rounded-l-md border-y-2 border-l-2 border-[#1d1d1f] dark:border-[#f5f5f7]" aria-hidden="true" />

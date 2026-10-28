@@ -2,12 +2,23 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
-const S = 300, C = S / 2, N = 26;
+const S = 300, C = S / 2;
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Number.isFinite(v) ? v : lo));
 const STEP = 1000 / 60; // the simulation advances in fixed 60 Hz steps, whatever the display refresh rate
 
 export interface FerrofluidRecordProps {
   /** Moves a pretend magnet around the drop and records a few short notes until someone touches it. */
   autoplay?: boolean;
+  /** How many spikes the drop can grow, 26 is the default. Fewer gives fat horns, more gives a fine mane. Restarts the drop when it changes. */
+  spikes?: number;
+  /** How hard the magnet pulls the spikes out, 1 is the default. 0.3 is a gentle bristle, 1.6 is a hedgehog. */
+  pull?: number;
+  /** The size of the resting drop, 1 is the default. */
+  size?: number;
+  /** How springy the spikes are, 1 is the default. Lower is thick and slow like syrup, higher is quick and twitchy. */
+  springiness?: number;
+  /** How much the surface bristles to the voice while recording, 1 is the default. 0 keeps it calm. */
+  voice?: number;
 }
 
 type Note = { id: number; secs: number };
@@ -18,7 +29,7 @@ type Note = { id: number; secs: number };
  * surface bristles in time with your voice (a simulated voice: the
  * microphone is never opened). Stop, and the spikes melt back into a smooth bead.
  */
-export function FerrofluidRecord({ autoplay = false }: FerrofluidRecordProps) {
+export function FerrofluidRecord({ autoplay = false, spikes = 26, pull = 1, size = 1, springiness = 1, voice: voiceGain = 1 }: FerrofluidRecordProps) {
   const root = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const magnet = useRef<{ x: number; y: number; on: boolean }>({ x: C, y: C, on: false });
@@ -32,9 +43,13 @@ export function FerrofluidRecord({ autoplay = false }: FerrofluidRecordProps) {
   const active = useRef(true); // on screen and tab visible
   const gate = useRef<((on: boolean) => void) | null>(null);
   const reduced = useReducedMotion();
+  // the feel settings are read inside the animation loop through a ref, so they apply live
+  const feel = useRef({ pull: 1, size: 1, spring: 1, voice: 1 });
+  const count = Math.round(clamp(spikes, 8, 48));
 
   useEffect(() => {
     secsRef.current = secs;
+    feel.current = { pull: clamp(pull, 0.3, 1.6), size: clamp(size, 0.7, 1.3), spring: clamp(springiness, 0.3, 2), voice: clamp(voiceGain, 0, 2) };
   });
 
   // track whether the component is on screen and the tab is visible
@@ -66,18 +81,19 @@ export function FerrofluidRecord({ autoplay = false }: FerrofluidRecordProps) {
     const mo = new MutationObserver(() => { dark = html.classList.contains("dark"); });
     mo.observe(html, { attributes: true, attributeFilter: ["class"] });
 
+    const N = count;
     const theta = Array.from({ length: N }, (_, i) => (i / N) * Math.PI * 2 + Math.sin(i * 7.3) * 0.04);
     const h = new Float32Array(N), hv = new Float32Array(N);
-    let R = 46, Rv = 0, cx = C, cy = C, t = 0, level = 0;
+    let R = 46 * feel.current.size, Rv = 0, cx = C, cy = C, t = 0, level = 0;
     const W = ((Math.PI * 2) / N) * 1.6;
 
     const step = () => {
       t += 1 / 60;
-      const m = magnet.current, recording = recRef.current;
+      const m = magnet.current, recording = recRef.current, f = feel.current;
       // a fake voice: syllables riding on a slower phrase envelope
       const voice = recording ? Math.max(0, Math.sin(t * 2.1) * 0.5 + 0.5) * (0.45 + 0.55 * Math.abs(Math.sin(t * 9.7) * Math.sin(t * 5.3))) : 0;
       level += (voice - level) * 0.25;
-      const targetR = recording ? 54 : 46;
+      const targetR = (recording ? 54 : 46) * f.size;
       Rv += ((targetR - R) * 0.08 - Rv * 0.25); R += Rv;
       const mx = m.x - C, my = m.y - C, md = Math.hypot(mx, my), ma = Math.atan2(my, mx);
       const pull = m.on ? Math.max(0, Math.min(1, 1 - (md - R) / 170)) : 0;
@@ -88,8 +104,8 @@ export function FerrofluidRecord({ autoplay = false }: FerrofluidRecordProps) {
         let d = Math.abs(theta[i] - ma) % (Math.PI * 2); if (d > Math.PI) d = Math.PI * 2 - d;
         const align = Math.pow(Math.max(0, Math.cos(d)), 3);
         const noise = Math.sin(t * 3 + i * 2.17) * 0.5 + Math.sin(t * 7.1 + i * 0.73) * 0.5;
-        const target = Math.pow(align, 1.5) * pull * 64 + level * (24 + 14 * noise) + (recording ? 7 : 0);
-        hv[i] += (target - h[i]) * 0.12 - hv[i] * 0.22;
+        const target = Math.pow(align, 1.5) * pull * 64 * f.pull + level * (24 + 14 * noise) * f.voice + (recording ? 7 : 0);
+        hv[i] += (target - h[i]) * 0.12 * f.spring - hv[i] * 0.22;
         h[i] += hv[i];
       }
     };
@@ -148,7 +164,7 @@ export function FerrofluidRecord({ autoplay = false }: FerrofluidRecordProps) {
     gate.current = run;
     run(active.current);
     return () => { gate.current = null; run(false); mo.disconnect(); };
-  }, []);
+  }, [count]);
 
   useEffect(() => {
     if (!rec) return;

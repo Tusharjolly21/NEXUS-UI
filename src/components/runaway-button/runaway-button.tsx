@@ -12,6 +12,14 @@ export interface RunawayButtonProps {
   autoplay?: boolean;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
   enableSound?: boolean;
+  /** How close (px) the pointer can get before the button slips away, 78 by default. Clamped to 70 to 170. */
+  dodgeRadius?: number;
+  /** How many times it dodges before it gives up and lets you click it, 4 by default. Clamped to 1 to 8. */
+  maxDodges?: number;
+  /** How fast it slides to its new spot, 1 is the default. Higher is snappier and a little tighter. Clamped to 0.4 to 3. */
+  speed?: number;
+  /** How hard it wobbles each time it dodges, 1 is the default and 0 turns the wobble off. Clamped to 0 to 2.5. */
+  wobble?: number;
 }
 
 const W = 320,
@@ -23,6 +31,7 @@ const HOME = { x: W - BW - 20, y: H - BH - 20 };
 export const RUNAWAY_LINES = ["Yes, cancel", "Are you sure?", "Really?", "Fine.", "Okay, cancel"];
 /** Dodges before it gives up and lets the pointer click it. */
 const MAX_TRIES = 4;
+const clamp = (v: number, lo: number, hi: number) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : lo);
 
 /**
  * A cancel button with opinions. Bring the pointer close and it slips away to
@@ -30,10 +39,30 @@ const MAX_TRIES = 4;
  * place and lets you click it. Keyboard users get a normal button: it never
  * moves while it has keyboard focus, and Enter or Space always activates it.
  */
-export function RunawayButton({ onCancel, onKeep, autoplay = false, enableSound = true }: RunawayButtonProps) {
+export function RunawayButton({
+  onCancel,
+  onKeep,
+  autoplay = false,
+  enableSound = true,
+  dodgeRadius = 78,
+  maxDodges = MAX_TRIES,
+  speed = 1,
+  wobble = 1,
+}: RunawayButtonProps) {
   const play = useSound(enableSound);
-  const x = useSpring(HOME.x, { stiffness: 260, damping: 18 });
-  const y = useSpring(HOME.y, { stiffness: 260, damping: 18 });
+  const radius = clamp(dodgeRadius, 70, 170);
+  const limit = Math.round(clamp(maxDodges, 1, 8));
+  const pace = clamp(speed, 0.4, 3);
+  const shake = clamp(wobble, 0, 2.5);
+  // Damping grows with the square root of stiffness, so the slide keeps the same feel at any speed.
+  const spring = { stiffness: 260 * pace, damping: 18 * Math.sqrt(pace) };
+  const x = useSpring(HOME.x, spring);
+  const y = useSpring(HOME.y, spring);
+  // Read inside the pointer and timer handlers so the tuning applies live.
+  const opts = useRef({ radius, limit });
+  useEffect(() => {
+    opts.current = { radius, limit };
+  }, [radius, limit]);
   const [tries, setTriesState] = useState(0);
   const [done, setDone] = useState<"none" | "kept" | "cancelled">("none");
   const box = useRef<HTMLDivElement>(null);
@@ -43,7 +72,7 @@ export function RunawayButton({ onCancel, onKeep, autoplay = false, enableSound 
   const keyboardFocus = useRef(false);
   /** Set when a screen was left from the keyboard, so focus moves to the next screen's button. */
   const refocus = useRef<"keep" | "restart" | null>(null);
-  const tired = tries >= MAX_TRIES;
+  const tired = tries >= limit;
 
   const setTries = useCallback((n: number) => {
     triesRef.current = n;
@@ -58,7 +87,7 @@ export function RunawayButton({ onCancel, onKeep, autoplay = false, enableSound 
   const flee = useCallback(
     (px: number, py: number) => {
       const now = performance.now();
-      if (triesRef.current >= MAX_TRIES || keyboardFocus.current || now - cool.current < 260) return;
+      if (triesRef.current >= opts.current.limit || keyboardFocus.current || now - cool.current < 260) return;
       cool.current = now;
       let best = { x: 20, y: 70 },
         bestD = -1;
@@ -88,7 +117,7 @@ export function RunawayButton({ onCancel, onKeep, autoplay = false, enableSound 
     if (!autoplay) return;
     const t = window.setInterval(() => {
       if (touched.current) return window.clearInterval(t);
-      if (triesRef.current >= MAX_TRIES) {
+      if (triesRef.current >= opts.current.limit) {
         goHome();
         setTries(0);
         return;
@@ -107,7 +136,7 @@ export function RunawayButton({ onCancel, onKeep, autoplay = false, enableSound 
       py = e.clientY - r.top;
     const bx = x.get() + BW / 2,
       by = y.get() + BH / 2;
-    if (Math.hypot(px - bx, py - by) < 78) flee(px, py);
+    if (Math.hypot(px - bx, py - by) < opts.current.radius) flee(px, py);
   };
 
   // A click with detail 0 came from the keyboard (Enter / Space).
@@ -178,11 +207,11 @@ export function RunawayButton({ onCancel, onKeep, autoplay = false, enableSound 
               }}
               style={{ x, y, width: BW, height: BH }}
               // The last keyframe alternates by a hair so every dodge re-runs the wobble.
-              animate={{ rotate: tired ? 0 : [0, -4, 3, (tries % 2) * 0.001] }}
+              animate={{ rotate: tired ? 0 : [0, -4 * shake, 3 * shake, (tries % 2) * 0.001] }}
               transition={{ duration: 0.4 }}
               className="absolute left-0 top-0 flex items-center justify-center rounded-full bg-[#f0f0f3] text-[14px] font-medium text-[#d70015] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:bg-[#2c2c2e] dark:text-[#ff453a] dark:focus-visible:ring-[#0a84ff]"
             >
-              {RUNAWAY_LINES[Math.min(tries, RUNAWAY_LINES.length - 1)]}
+              {RUNAWAY_LINES[tired ? RUNAWAY_LINES.length - 1 : Math.min(tries, RUNAWAY_LINES.length - 2)]}
             </motion.button>
           </motion.div>
         ) : (

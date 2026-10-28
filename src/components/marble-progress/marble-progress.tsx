@@ -18,6 +18,14 @@ export interface MarbleProgressProps {
   autoplay?: boolean;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
+  /** Radius in px of each marble as it drops, 9 by default. Clamped to 6 to 11. Applies to the next marble dropped. */
+  marbleSize?: number;
+  /** How much a marble bounces when it lands, 0.45 by default. Clamped to 0.05 to 0.85. Applies to the next marble dropped. */
+  bounciness?: number;
+  /** How hard gravity pulls, 1 is the default. Lower drifts down slowly, higher rattles through. Clamped to 0.4 to 1.6. */
+  gravity?: number;
+  /** Colour (6-digit hex) of the light that fills the jar when every step is done. */
+  glowColor?: string;
 }
 
 const STEPS: MarbleStep[] = [
@@ -30,15 +38,40 @@ const STEPS: MarbleStep[] = [
 const STEP = 1000 / 60;
 const RW = 120, RH = 300, R = 9;
 
-type Marble = { body: Matter.Body; step: number; color: string; pop?: number };
+type Marble = { body: Matter.Body; step: number; color: string; r: number; pop?: number };
+
+const clamp = (v: number, lo: number, hi: number) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : lo);
+/** "r,g,b" for a 6-digit hex, or the default green when the value isn't one. */
+function rgbOf(hex: string) {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex.trim());
+  const n = parseInt(m ? m[1] : "30d158", 16);
+  return `${n >> 16},${(n >> 8) & 255},${n & 255}`;
+}
 
 /**
  * An onboarding checklist that keeps score with marbles. Tick a step and a
  * marble drops in at the top, rattles down the ramps and settles in the jar;
  * untick it and that marble pops. When the jar is full it lights up.
  */
-export function MarbleProgress({ steps = STEPS, autoplay = false, enableSound = true }: MarbleProgressProps) {
+export function MarbleProgress({
+  steps = STEPS,
+  autoplay = false,
+  enableSound = true,
+  marbleSize = R,
+  bounciness = 0.45,
+  gravity = 1,
+  glowColor = "#30d158",
+}: MarbleProgressProps) {
   const play = useSound(enableSound);
+  const size = clamp(marbleSize, 6, 11);
+  const bounce = clamp(bounciness, 0.05, 0.85);
+  const pull = clamp(gravity, 0.4, 1.6);
+  const glowRgb = rgbOf(glowColor);
+  // Read inside the physics loop and the drop, so the tuning applies live without a remount.
+  const opts = useRef({ size, bounce, glowRgb });
+  useEffect(() => {
+    opts.current = { size, bounce, glowRgb };
+  }, [size, bounce, glowRgb]);
   const canvas = useRef<HTMLCanvasElement>(null);
   const engine = useRef<Matter.Engine | null>(null);
   const marbles = useRef<Marble[]>([]);
@@ -111,8 +144,8 @@ export function MarbleProgress({ steps = STEPS, autoplay = false, enableSound = 
       glow += ((fullRef.current ? 1 : 0) - glow) * 0.06;
       if (glow > 0.01) {
         const g = ctx.createRadialGradient(RW / 2, RH - 40, 4, RW / 2, RH - 40, 80);
-        g.addColorStop(0, `rgba(48,209,88,${(isDark ? 0.42 : 0.35) * glow})`);
-        g.addColorStop(1, "rgba(48,209,88,0)");
+        g.addColorStop(0, `rgba(${opts.current.glowRgb},${(isDark ? 0.42 : 0.35) * glow})`);
+        g.addColorStop(1, `rgba(${opts.current.glowRgb},0)`);
         ctx.fillStyle = g;
         ctx.fillRect(0, RH - 130, RW, 130);
       }
@@ -131,7 +164,7 @@ export function MarbleProgress({ steps = STEPS, autoplay = false, enableSound = 
       marbles.current = marbles.current.filter((m) => !(m.pop !== undefined && m.pop > 1));
       marbles.current.forEach((m) => {
         const { x, y } = m.body.position;
-        let r = R;
+        let r = m.r;
         if (m.pop !== undefined) { m.pop += dt / 220; r = R * (1 + m.pop * 0.6); ctx.globalAlpha = Math.max(0, 1 - m.pop); }
         const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.1, x, y, r);
         g.addColorStop(0, "#ffffff"); g.addColorStop(0.25, m.color); g.addColorStop(1, shade(m.color));
@@ -176,13 +209,19 @@ export function MarbleProgress({ steps = STEPS, autoplay = false, enableSound = 
     };
   }, []);
 
+  // Gravity lives on the engine, so it is set once the engine exists and again whenever it changes.
+  useEffect(() => {
+    if (engine.current) engine.current.gravity.y = pull;
+  }, [pull]);
+
   const drop = (i: number) => {
     const e = engine.current;
     if (!e) return;
-    const body = Matter.Bodies.circle(14 + Math.random() * 10, -R * 2, R, { restitution: 0.45, friction: 0.005, frictionAir: 0.004, density: 0.004 });
+    const r = opts.current.size;
+    const body = Matter.Bodies.circle(14 + Math.random() * 10, -r * 2, r, { restitution: opts.current.bounce, friction: 0.005, frictionAir: 0.004, density: 0.004 });
     Matter.Body.setVelocity(body, { x: 1.2, y: 0 });
     Matter.Composite.add(e.world, body);
-    marbles.current.push({ body, step: i, color: steps[i].color });
+    marbles.current.push({ body, step: i, color: steps[i].color, r });
   };
   const pop = (i: number) => {
     const e = engine.current;

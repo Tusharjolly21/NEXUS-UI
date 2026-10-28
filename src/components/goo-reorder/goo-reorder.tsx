@@ -25,9 +25,21 @@ export interface GooReorderProps {
   onReorder?: (items: GooReorderItem[]) => void;
   /** Swaps two random rows every 1.6s until someone touches the list. */
   autoplay?: boolean;
+  /** How strongly the rows melt into each other. Higher gives thicker, longer necks between rows, 1 is almost none. */
+  goo?: number;
+  /** Space between rows, in px. */
+  gap?: number;
+  /** Height of each row, in px. The ends stay fully round. */
+  rowHeight?: number;
+  /** How much the row you are dragging grows, 1 is no growth. */
+  lift?: number;
+  /** How much rows wobble as they settle into place, 1 is the default. Higher bounces more, lower settles dead. */
+  bounce?: number;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
+
+const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 
 /**
  * A reorderable list made of liquid. Drag a row and it stays joined to its
@@ -35,8 +47,13 @@ export interface GooReorderProps {
  * it lands. The goo comes from one SVG filter; the text is composited back on
  * top so it stays sharp.
  */
-export function GooReorder({ items: initial = DEFAULT_GOO_ITEMS, onReorder, autoplay = false, enableSound = true }: GooReorderProps) {
+export function GooReorder({ items: initial = DEFAULT_GOO_ITEMS, onReorder, autoplay = false, goo = 7, gap = 10, rowHeight = 48, lift = 1.06, bounce = 1, enableSound = true }: GooReorderProps) {
   const play = useSound(enableSound);
+  const blur = clamp(goo, 1, 16);
+  const space = clamp(gap, 2, 32);
+  const rowH = clamp(rowHeight, 32, 72);
+  const grow = clamp(lift, 1, 1.25);
+  const give = clamp(bounce, 0.4, 2.5);
   const [items, setItems] = useState(initial);
   const id = useId().replace(/:/g, "");
   const touched = useRef(false);
@@ -92,7 +109,7 @@ export function GooReorder({ items: initial = DEFAULT_GOO_ITEMS, onReorder, auto
     >
       <svg width="0" height="0" className="absolute" aria-hidden="true">
         <filter id={`goo-${id}`}>
-          <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur" />
+          <feGaussianBlur in="SourceGraphic" stdDeviation={blur} result="blur" />
           <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="goo" />
           <feComposite in="SourceGraphic" in2="goo" operator="atop" />
         </filter>
@@ -106,8 +123,8 @@ export function GooReorder({ items: initial = DEFAULT_GOO_ITEMS, onReorder, auto
           commit(next);
         }}
         aria-label="Reorderable list"
-        className="m-0 flex w-[280px] list-none flex-col gap-[10px] p-0"
-        style={{ filter: `url(#goo-${id})` }}
+        className="m-0 flex w-[280px] list-none flex-col p-0"
+        style={{ filter: `url(#goo-${id})`, gap: space }}
       >
         {items.map((it, i) => (
           <Reorder.Item
@@ -118,9 +135,10 @@ export function GooReorder({ items: initial = DEFAULT_GOO_ITEMS, onReorder, auto
             onKeyDown={(e: KeyboardEvent) => move(e, i)}
             onDragStart={() => play("lift", 0.7)}
             onDragEnd={() => play("drop", 0.7)}
-            whileDrag={{ scale: 1.06 }}
-            transition={{ type: "spring", stiffness: 420, damping: 30 }}
-            className="flex h-[48px] cursor-grab select-none items-center gap-3 rounded-[24px] bg-[#1d1d1f] px-4 text-[14px] font-medium text-white outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0a84ff] active:cursor-grabbing dark:bg-[#3a3a3c]"
+            whileDrag={{ scale: grow }}
+            transition={{ type: "spring", stiffness: 420, damping: 30 / give }}
+            style={{ height: rowH, borderRadius: rowH / 2 }}
+            className="flex cursor-grab select-none items-center gap-3 bg-[#1d1d1f] px-4 text-[14px] font-medium text-white outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0a84ff] active:cursor-grabbing dark:bg-[#3a3a3c]"
           >
             <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full text-[11px] font-bold text-[#1d1d1f]" style={{ background: it.color }}>
               {i + 1}

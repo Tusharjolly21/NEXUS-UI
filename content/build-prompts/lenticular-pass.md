@@ -30,10 +30,18 @@ import { animate, motion, useMotionValue, useMotionValueEvent, useSpring, useTra
 export interface LenticularPassProps {
   /** Rocks the card back and forth by itself until someone touches it. */
   autoplay?: boolean;
+  /** How many ridges the card is cut into, 44 is the default. Fewer gives coarse bands, more gives a finer print. */
+  strips?: number;
+  /** How far the card leans as you move across it, 1 is the default. 0.4 barely leans, 1.6 swings right over. */
+  tilt?: number;
+  /** How stiffly the card follows your pointer, 170 is the default. Lower is soft and floaty, higher is quick and a little bouncy. */
+  stiffness?: number;
+  /** How bright the light running along the ridges is, 1 is the default. 0 turns the shine off. */
+  shine?: number;
 }
 
-const W = 300, H = 400, N = 44;
-const STRIPS = Array.from({ length: N }, (_, i) => i);
+const W = 300, H = 400, N0 = 44;
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Number.isFinite(v) ? v : lo));
 
 /** Paints the day or night print onto a canvas and returns it as a JPEG data URL. */
 function scene(night: boolean) {
@@ -79,12 +87,12 @@ const getPrints = () => (printCache ??= [scene(false), scene(true)] as const);
 const getServerPrints = () => null;
 const subscribeNever = () => () => {};
 
-function Strip({ i, mix, glint }: { i: number; mix: MotionValue<number>; glint: MotionValue<number> }) {
-  const w = W / N;
+function Strip({ i, n, mix, glint, shine }: { i: number; n: number; mix: MotionValue<number>; glint: MotionValue<number>; shine: MotionValue<number> }) {
+  const w = W / n;
   // each strip changes over a slightly different tilt, so the switch sweeps across the card
-  const phase = (i / (N - 1) - 0.5) * 0.35;
+  const phase = (i / (n - 1) - 0.5) * 0.35;
   const op = useTransform(mix, (m) => { const t = Math.min(1, Math.max(0, (m + phase - 0.5) * 5 + 0.5)); return t * t * (3 - 2 * t); });
-  const hl = useTransform(glint, (g) => `linear-gradient(90deg, rgba(255,255,255,0) ${g * 100 - 30}%, rgba(255,255,255,.22) ${g * 100}%, rgba(255,255,255,0) ${g * 100 + 30}%)`);
+  const hl = useTransform([glint, shine], ([g, k]: number[]) => `linear-gradient(90deg, rgba(255,255,255,0) ${g * 100 - 30}%, rgba(255,255,255,${0.22 * k}) ${g * 100}%, rgba(255,255,255,0) ${g * 100 + 30}%)`);
   const bg = (v: string) => ({ backgroundImage: `var(${v})`, backgroundSize: `${W}px ${H}px`, backgroundPosition: `${-i * w}px 0` });
   return (
     <div className="absolute top-0 h-full overflow-hidden" style={{ left: i * w, width: w + 0.5 }}>
@@ -102,16 +110,22 @@ function Strip({ i, mix, glint }: { i: number; mix: MotionValue<number>; glint: 
  * pass: the switch sweeps across the ridges strip by strip and light runs
  * along them as the card turns.
  */
-export function LenticularPass({ autoplay = false }: LenticularPassProps) {
+export function LenticularPass({ autoplay = false, strips = N0, tilt = 1, stiffness = 170, shine = 1 }: LenticularPassProps) {
   const prints = useSyncExternalStore(subscribeNever, getPrints, getServerPrints);
   const root = useRef<HTMLDivElement>(null);
   const tx = useMotionValue(0), ty = useMotionValue(0);
-  const sx = useSpring(tx, { stiffness: 170, damping: 18 }), sy = useSpring(ty, { stiffness: 170, damping: 18 });
-  const rotateY = useTransform(sx, [-1, 1], [-22, 22]);
-  const rotateX = useTransform(sy, [-1, 1], [14, -14]);
+  const count = Math.round(clamp(strips, 12, 80));
+  const stripList = Array.from({ length: count }, (_, i) => i);
+  const sx = useSpring(tx, { stiffness: clamp(stiffness, 60, 320), damping: 18 }), sy = useSpring(ty, { stiffness: clamp(stiffness, 60, 320), damping: 18 });
+  // tilt and shine ride on motion values, so the sliders change the card while it is resting
+  const tiltMv = useMotionValue(clamp(tilt, 0, 1.6)), shineMv = useMotionValue(clamp(shine, 0, 2));
+  useEffect(() => { tiltMv.set(clamp(tilt, 0, 1.6)); shineMv.set(clamp(shine, 0, 2)); }, [tilt, shine, tiltMv, shineMv]);
+  const unit = (v: number) => Math.min(1, Math.max(-1, v));
+  const rotateY = useTransform([sx, tiltMv], ([v, k]: number[]) => unit(v) * 22 * k);
+  const rotateX = useTransform([sy, tiltMv], ([v, k]: number[]) => unit(v) * -14 * k);
   const mix = useTransform(sx, [-0.6, 0.6], [0, 1], { clamp: true });
   const glint = useTransform(sx, [-1, 1], [0.1, 0.9]);
-  const sheen = useTransform(sx, (v) => `linear-gradient(${105 + v * 20}deg, rgba(255,255,255,0) 30%, rgba(255,255,255,${0.12 + Math.abs(v) * 0.12}) 50%, rgba(255,255,255,0) 70%)`);
+  const sheen = useTransform([sx, shineMv], ([v, k]: number[]) => `linear-gradient(${105 + v * 20}deg, rgba(255,255,255,0) 30%, rgba(255,255,255,${(0.12 + Math.abs(v) * 0.12) * k}) 50%, rgba(255,255,255,0) 70%)`);
   const [night, setNight] = useState(false);
   useMotionValueEvent(mix, "change", (m) => setNight(m > 0.5));
   const touched = useRef(false);
@@ -154,7 +168,7 @@ export function LenticularPass({ autoplay = false }: LenticularPassProps) {
         role="img"
         aria-label={night ? "Nexus Summit night pass, Afterparty from 21:00" : "Nexus Summit day pass, talks 09:00 to 18:00"}
       >
-        {STRIPS.map((i) => <Strip key={i} i={i} mix={mix} glint={glint} />)}
+        {stripList.map((i) => <Strip key={`${count}-${i}`} i={i} n={count} mix={mix} glint={glint} shine={shineMv} />)}
         <motion.div className="pointer-events-none absolute inset-0" style={{ backgroundImage: sheen }} />
         <div className="pointer-events-none absolute inset-x-5 bottom-5 flex items-end justify-between text-white">
           <div className="flex flex-col"><span className="text-[11px] uppercase tracking-[0.14em] opacity-75">Admit one</span><span className="font-mono text-[15px] tracking-[0.1em]">NXS-0427</span></div>

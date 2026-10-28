@@ -8022,6 +8022,10 @@ export default function Page() {
     props: [
       { name: "moods", type: "Mood[]", defaultValue: "DEFAULT_MOODS", description: "Words on the wheel, each as { word, a, b } where a is the main orb colour and b the light one. Ten moods from Calm to Grateful by default." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Spins to a random mood every 2 s until someone drags, scrolls or uses the keys." },
+      { name: "radius", type: "number", defaultValue: "220", description: "Size of the wheel the words sit on, in px (100 to 360). Smaller curves the words more tightly, larger lays them out flatter." },
+      { name: "spacing", type: "number", defaultValue: "0.32", description: "Gap between neighbouring words around the wheel, in radians (0.2 to 0.6). Larger spreads the words further apart." },
+      { name: "orbSize", type: "number", defaultValue: "150", description: "Width and height of the colour orb, in px (60 to 200)." },
+      { name: "glide", type: "number", defaultValue: "1", description: "How far the wheel keeps rolling after you let go (0.25 to 4). Higher glides further, lower stops sooner." },
     ],
     Preview: Previews.PreviewMoodWheel,
     previewShell: "plain",
@@ -8045,6 +8049,23 @@ export default function Page() {
     </section>
   );
 }`,
+    reactExamples: [
+      {
+        title: "Tune the feel",
+        code: `// src/app/page.tsx
+
+import { MoodWheel } from "@/components/mood-wheel";
+
+// A tighter wheel with the words packed close, a bigger orb, and a long glide after you let go.
+export default function Page() {
+  return (
+    <section className="flex flex-col items-center py-12">
+      <MoodWheel radius={170} spacing={0.28} orbSize={180} glide={2} />
+    </section>
+  );
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -8064,6 +8085,11 @@ export default function Page() {
       { name: "payments", type: "SwipePayment[]", defaultValue: "DEFAULT_PAYMENTS", description: "Cards to review, top first: { amount, from, to, note, when, hue }. \"Load more\" deals the same list again." },
       { name: "onDecide", type: "(payment: SwipePayment, approved: boolean) => void", defaultValue: "undefined", description: "Called after a card is thrown; approved is true for right / approve and false for left / flag." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Throws a card every 1.7 s (mostly approvals) and reloads when empty, until someone touches it." },
+      { name: "swipeDistance", type: "number", defaultValue: "110", description: "How far, in px, a card has to be dragged before letting go throws it (30 to 220). A quick flick still throws it from less." },
+      { name: "tilt", type: "number", defaultValue: "18", description: "How far the top card tilts at the edge of a drag, in degrees (0 to 45). 0 keeps it flat." },
+      { name: "spacing", type: "number", defaultValue: "12", description: "Vertical gap, in px, between the cards waiting under the top one (0 to 32). 0 stacks them straight behind it." },
+      { name: "bounce", type: "number", defaultValue: "1", description: "How much a card that is not thrown wobbles as it snaps back (0.4 to 2.5). Higher bounces more, lower settles dead." },
+      { name: "flingSpeed", type: "number", defaultValue: "1", description: "How fast a card flies off once it is thrown (0.4 to 3). Higher is quicker." },
       { name: "SwipeRows.items", type: "SwipeRowItem[]", defaultValue: "DEFAULT_SWIPE_MAIL", description: "Rows to show, each { id, from, subject, time, color }." },
       { name: "SwipeRows.title", type: "string", defaultValue: "\"Inbox\"", description: "Heading at the top of the list." },
       { name: "SwipeRows.onArchive", type: "(item: SwipeRowItem) => void", description: "Called when the user archives a row (swipe right or the right arrow key)." },
@@ -8136,6 +8162,19 @@ export default function Page() {
     />
   );
 }`,
+    reactExamples: [
+      {
+        title: "Tune the feel",
+        code: `// src/app/page.tsx
+
+import { SwipeStack } from "@/components/swipe-stack";
+
+// A light touch throws the card, it tilts hard, the deck fans out and a card that is let go springs back with a wobble.
+export default function Page() {
+  return <SwipeStack swipeDistance={70} tilt={28} spacing={20} bounce={1.8} flingSpeed={1.5} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -8455,6 +8494,11 @@ export default function Page() {
     props: [
       { name: "strips", type: "FalloffStrip[]", defaultValue: "DEFAULT_FALLOFF_STRIPS", description: "Each strip has a unique title, a meta line and art (any CSS background, e.g. a gradient or url(...) center / cover)." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens every other strip in turn until someone points at the row." },
+      { name: "expand", type: "number", defaultValue: "7", description: "How many times wider the strip under the pointer grows compared with a resting one (1 to 14)." },
+      { name: "spread", type: "number", defaultValue: "1.1", description: "How far the opening reaches into the neighbours (0.2 to 4). Higher opens more strips around the pointer, lower keeps it to the one you are on." },
+      { name: "gap", type: "number", defaultValue: "6", description: "Space between strips, in px (0 to 24)." },
+      { name: "radius", type: "number", defaultValue: "16", description: "Corner radius of each strip, in px (0 to 40)." },
+      { name: "speed", type: "number", defaultValue: "1", description: "How quickly the row opens and closes (0.3 to 3). Higher is snappier." },
     ],
     Preview: Previews.PreviewFalloffAccordion,
     previewShell: "plain",
@@ -8472,6 +8516,19 @@ const places = [
 export default function Page() {
   return <FalloffAccordion strips={places} />;
 }`,
+    reactExamples: [
+      {
+        title: "Tune the feel",
+        code: `// src/app/page.tsx
+
+import { FalloffAccordion } from "@/components/falloff-accordion";
+
+// The open strip grows less, but the opening reaches further along the row. Tight gaps, sharper corners, a slower spring.
+export default function Page() {
+  return <FalloffAccordion expand={5} spread={2.2} gap={2} radius={8} speed={0.7} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -8532,6 +8589,11 @@ export default function Page() {
       { name: "alt", type: "string", defaultValue: '""', description: "Alt text for src." },
       { name: "onChange", type: "(id: string) => void", description: "Called with the ratio id when the user picks one." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Cycles through the ratios until someone touches it." },
+      { name: "size", type: "number", defaultValue: "220", description: "Side of the square whose area every crop keeps, in px (100 to 280). A bigger number gives a bigger frame at every ratio." },
+      { name: "radius", type: "number", defaultValue: "18", description: "Corner radius of the frame, in px (0 to 60)." },
+      { name: "guides", type: "\"flash\" | \"always\" | \"off\"", defaultValue: "\"flash\"", description: "When the thirds grid shows: flash while the frame moves, always, or off." },
+      { name: "speed", type: "number", defaultValue: "1", description: "How quickly the frame springs to its new shape (0.3 to 3). Higher is snappier." },
+      { name: "bounce", type: "number", defaultValue: "1", description: "How much the frame overshoots before it settles (0.4 to 2.5). Higher bounces more, lower settles dead." },
     ],
     Preview: Previews.PreviewAspectCrop,
     previewShell: "plain",
@@ -8552,6 +8614,19 @@ export default function Page() {
     />
   );
 }`,
+    reactExamples: [
+      {
+        title: "Tune the feel",
+        code: `// src/app/page.tsx
+
+import { AspectCrop } from "@/components/aspect-crop";
+
+// A bigger, sharper frame with the thirds grid always on, and a springy, slightly bouncy change of shape.
+export default function Page() {
+  return <AspectCrop size={250} radius={6} guides="always" speed={1.4} bounce={1.6} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -8607,6 +8682,11 @@ export default function Page() {
       { name: "items", type: "GooReorderItem[]", defaultValue: "DEFAULT_GOO_ITEMS", description: "Starting rows, each { id, label, color } where color tints the numbered badge." },
       { name: "onReorder", type: "(items: GooReorderItem[]) => void", description: "Called with the new order after the user drags a row or moves it with the arrow keys." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Swaps two random rows every 1.6s until someone touches the list." },
+      { name: "goo", type: "number", defaultValue: "7", description: "How strongly the rows melt into each other (1 to 16). Higher gives thicker, longer necks between rows, 1 is almost none." },
+      { name: "gap", type: "number", defaultValue: "10", description: "Space between rows, in px (2 to 32)." },
+      { name: "rowHeight", type: "number", defaultValue: "48", description: "Height of each row, in px (32 to 72). The ends stay fully round." },
+      { name: "lift", type: "number", defaultValue: "1.06", description: "How much the row you are dragging grows (1 to 1.25). 1 is no growth." },
+      { name: "bounce", type: "number", defaultValue: "1", description: "How much rows wobble as they settle into place (0.4 to 2.5). Higher bounces more, lower settles dead." },
     ],
     Preview: Previews.PreviewGooReorder,
     previewShell: "plain",
@@ -8624,6 +8704,19 @@ const steps = [
 export default function Page() {
   return <GooReorder items={steps} />;
 }`,
+    reactExamples: [
+      {
+        title: "Tune the feel",
+        code: `// src/app/page.tsx
+
+import { GooReorder } from "@/components/goo-reorder";
+
+// Thicker ink between taller rows, a bigger lift on the dragged row and a loose, bouncy settle.
+export default function Page() {
+  return <GooReorder goo={10} gap={16} rowHeight={56} lift={1.12} bounce={1.6} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -8720,6 +8813,11 @@ export default function Page() {
       { name: "initialBalance", type: "number", defaultValue: "58834.75", description: "Balance shown before the first refresh." },
       { name: "onRefresh", type: "(balance: number, delta: number) => void", defaultValue: "undefined", description: "Called each time a pull commits, with the new balance and the change." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Pulls the card down and refreshes every 4.2 s, until someone drags it or uses the keyboard." },
+      { name: "pullDistance", type: "number", defaultValue: "90", description: "How far in px the card has to travel before letting go refreshes it. Clamped to 50 to 130." },
+      { name: "refreshTime", type: "number", defaultValue: "1.3", description: "How long in seconds the card holds and spins before it springs back. Clamped to 0.4 to 5." },
+      { name: "stretch", type: "number", defaultValue: "1", description: "How much the card stretches as it is pulled. 0 keeps it rigid. Clamped to 0 to 3." },
+      { name: "bounce", type: "number", defaultValue: "1", description: "How much the card overshoots when it springs back. Higher bounces more. Clamped to 0.5 to 2.5." },
+      { name: "elasticity", type: "number", defaultValue: "0.55", description: "How far the card follows the pointer while you drag it down. Lower feels heavier. Clamped to 0.3 to 1." },
     ],
     Preview: Previews.PreviewPullToRefresh,
     previewShell: "plain",
@@ -8734,6 +8832,19 @@ export default function Page() {
     />
   );
 }`,
+    reactExamples: [
+      {
+        title: "Tune the feel",
+        code: `// src/app/page.tsx
+
+import { PullToRefresh } from "@/components/pull-to-refresh";
+
+// A heavier card that needs a longer pull, holds a little longer and settles with less bounce.
+export default function Page() {
+  return <PullToRefresh pullDistance={110} refreshTime={2} stretch={0.6} bounce={0.7} elasticity={0.45} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -8753,6 +8864,10 @@ export default function Page() {
       { name: "onCancel", type: "() => void", defaultValue: "undefined", description: "Called when the cancel button is finally clicked or activated from the keyboard." },
       { name: "onKeep", type: "() => void", defaultValue: "undefined", description: "Called when \"Keep my plan\" is clicked." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Hops the cancel button around the dialog every 1.1 s, until someone points at it, focuses it or presses a key." },
+      { name: "dodgeRadius", type: "number", defaultValue: "78", description: "How close in px the pointer can get to the button before it slips away. Clamped to 70 to 170." },
+      { name: "maxDodges", type: "number", defaultValue: "4", description: "How many times it dodges before it gives up and lets you click it. Clamped to 1 to 8." },
+      { name: "speed", type: "number", defaultValue: "1", description: "How fast it slides to its new spot. Higher is snappier. Clamped to 0.4 to 3." },
+      { name: "wobble", type: "number", defaultValue: "1", description: "How hard it wobbles each time it dodges. 0 turns the wobble off. Clamped to 0 to 2.5." },
     ],
     Preview: Previews.PreviewRunawayButton,
     previewShell: "plain",
@@ -8768,6 +8883,20 @@ export default function Page() {
     />
   );
 }`,
+    reactExamples: [
+      {
+        title: "Tune the chase",
+        code: `// src/app/page.tsx
+"use client";
+
+import { RunawayButton } from "@/components/runaway-button";
+
+// Spots the pointer from further away, dodges six times and slides away quickly.
+export default function Page() {
+  return <RunawayButton dodgeRadius={120} maxDodges={6} speed={1.6} wobble={1.5} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -8906,6 +9035,10 @@ export default function Page() {
       { name: "defaultValue", type: "string[]", defaultValue: "[]", description: "Ids selected on first render." },
       { name: "onChange", type: "(ids: string[]) => void", defaultValue: "undefined", description: "Called with the selected ids, in the order they were picked." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens the menu, ticks four people, closes and clears, on a loop until the user clicks." },
+      { name: "multiple", type: "boolean", defaultValue: "true", description: "Lets several people be ticked. Turn it off and each pick replaces the last and closes the menu." },
+      { name: "maxFaces", type: "number", defaultValue: "3", description: "How many faces the pill shows before the rest collapse into a +N count. Clamped to 1 to 5." },
+      { name: "faceSize", type: "number", defaultValue: "28", description: "Diameter in px of the faces in the pill. Clamped to 22 to 36." },
+      { name: "bounce", type: "number", defaultValue: "1", description: "How much the faces overshoot as they land in the pill. Higher bounces more, lower settles flat. Clamped to 0.5 to 2." },
     ],
     Preview: Previews.PreviewAssignPicker,
     previewShell: "plain",
@@ -8930,6 +9063,20 @@ export default function Page() {
     </div>
   );
 }`,
+    reactExamples: [
+      {
+        title: "Single assignee",
+        code: `// src/app/page.tsx
+"use client";
+
+import { AssignPicker } from "@/components/assign-picker";
+
+// One owner per task: each pick replaces the last and closes the menu.
+export default function Page() {
+  return <AssignPicker multiple={false} faceSize={32} bounce={1.4} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -9277,6 +9424,10 @@ export default function Page() {
       { name: "scenes", type: "PolaroidScene[]", defaultValue: "DEFAULT_POLAROID_SCENES", description: "Drawn scenes cycled by New photo, each { sky, sea, sun, land, caption }." },
       { name: "onDeveloped", type: "(caption: string) => void", description: "Called when the photo finishes developing, with its caption (or alt)." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Shakes the photo by itself and swaps to a new one until someone touches it." },
+      { name: "sensitivity", type: "number", defaultValue: "1", description: "How quickly a shake clears the haze. Higher develops with gentler shakes. Clamped to 0.3 to 4." },
+      { name: "swing", type: "number", defaultValue: "1", description: "How far the photo tilts as you move it. 0 keeps it level. Clamped to 0 to 2." },
+      { name: "elasticity", type: "number", defaultValue: "0.5", description: "How far the photo follows the pointer when you drag it past its limit. Clamped to 0.1 to 1." },
+      { name: "selfDevelop", type: "boolean", defaultValue: "true", description: "Lets the photo develop slowly by itself, the way a real one does. Turn it off and only shaking develops it." },
       { name: "className", type: "string", description: "Extra classes for the root." },
     ],
     Preview: Previews.PreviewPolaroidDevelop,
@@ -9294,6 +9445,19 @@ export default function Page() {
     />
   );
 }`,
+    reactExamples: [
+      {
+        title: "Shake to develop",
+        code: `// src/app/page.tsx
+
+import { PolaroidDevelop } from "@/components/polaroid-develop";
+
+// Needs a proper shake, and never develops on its own.
+export default function Page() {
+  return <PolaroidDevelop sensitivity={0.5} swing={1.4} selfDevelop={false} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -9564,6 +9728,10 @@ export default function Page() {
     props: [
       { name: "steps", type: "MarbleStep[]", defaultValue: "5 setup steps", description: "Each step has a label (unique) and a color (6-digit hex) used for its checkbox and marble." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Ticks the steps one by one, then clears them, until someone clicks a step. Off under reduced motion." },
+      { name: "marbleSize", type: "number", defaultValue: "9", description: "Radius in px of each marble as it drops. Clamped to 6 to 11. Applies to the next marble dropped." },
+      { name: "bounciness", type: "number", defaultValue: "0.45", description: "How much a marble bounces when it lands. Clamped to 0.05 to 0.85. Applies to the next marble dropped." },
+      { name: "gravity", type: "number", defaultValue: "1", description: "How hard gravity pulls. Lower drifts down slowly, higher rattles through. Clamped to 0.4 to 1.6." },
+      { name: "glowColor", type: "string", defaultValue: '"#30d158"', description: "Colour (6-digit hex) of the light that fills the jar when every step is done." },
     ],
     Preview: Previews.PreviewMarbleProgress,
     previewShell: "plain",
@@ -9580,6 +9748,19 @@ const STEPS = [
 export default function Page() {
   return <MarbleProgress steps={STEPS} />;
 }`,
+    reactExamples: [
+      {
+        title: "Heavier, bouncier marbles",
+        code: `// src/app/page.tsx
+
+import { MarbleProgress } from "@/components/marble-progress";
+
+// Bigger marbles that bounce more and fall slowly, with a blue glow when the jar is full.
+export default function Page() {
+  return <MarbleProgress marbleSize={10} bounciness={0.7} gravity={0.7} glowColor="#0071e3" />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -9639,6 +9820,10 @@ export default function Page() {
     props: [
       { name: "tracks", type: "VinylTrack[]", description: "Records on the shelf. Each has title, artist, length (seconds) and label, two CSS colours for the centre label. Defaults to three sample tracks." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Starts the record, scratches now and then and changes records until someone touches the player." },
+      { name: "speed", type: "number", defaultValue: "1", description: "How fast the platter turns, as a share of 33⅓ rpm. 1.35 is a 45, 2.3 is a 78. A faster record carries less audio per turn, so scrubbing follows. Kept between 0.5 and 2.5." },
+      { name: "coast", type: "number", defaultValue: "1", description: "How long a flung record keeps coasting after you let go. Higher coasts for longer. Kept between 0.25 and 4." },
+      { name: "armStiffness", type: "number", defaultValue: "80", description: "How briskly the tonearm swings on and off the record. Higher snaps and overshoots a little, lower glides. Kept between 20 and 300." },
+      { name: "gloss", type: "number", defaultValue: "1", description: "How strongly light glints across the grooves. 0 turns the glint off. Kept between 0 and 3." },
     ],
     Preview: Previews.PreviewVinylPlayer,
     previewShell: "plain",
@@ -9656,6 +9841,19 @@ export default function Page() {
     />
   );
 }`,
+    reactExamples: [
+      {
+        title: "A 45 with a slow arm",
+        code: `// src/app/page.tsx
+
+import { VinylPlayer } from "@/components/vinyl-player";
+
+// A faster platter, a record that coasts a long way when flung, and a tonearm that glides on.
+export default function Page() {
+  return <VinylPlayer speed={1.35} coast={2} armStiffness={40} gloss={1.5} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -9673,6 +9871,11 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Moves a pretend magnet around the drop and records a few short notes until someone touches it. Skipped when the user prefers reduced motion." },
+      { name: "spikes", type: "number", defaultValue: "26", description: "How many spikes the drop can grow. Fewer gives fat horns, more gives a fine mane. Restarts the drop when it changes. Kept between 8 and 48." },
+      { name: "pull", type: "number", defaultValue: "1", description: "How hard the magnet pulls the spikes out. 0.3 is a gentle bristle, 1.6 is a hedgehog. Kept between 0.3 and 1.6." },
+      { name: "size", type: "number", defaultValue: "1", description: "The size of the resting drop. Kept between 0.7 and 1.3." },
+      { name: "springiness", type: "number", defaultValue: "1", description: "How springy the spikes are. Lower is thick and slow like syrup, higher is quick and twitchy. Kept between 0.3 and 2." },
+      { name: "voice", type: "number", defaultValue: "1", description: "How much the surface bristles to the voice while recording. 0 keeps it calm. Kept between 0 and 2." },
     ],
     Preview: Previews.PreviewFerrofluidRecord,
     previewShell: "plain",
@@ -9687,6 +9890,19 @@ export default function Page() {
     </div>
   );
 }`,
+    reactExamples: [
+      {
+        title: "A spikier, heavier drop",
+        code: `// src/app/page.tsx
+
+import { FerrofluidRecord } from "@/components/ferrofluid-record";
+
+// Fewer, bigger horns that pull out hard and settle slowly, like thick fluid.
+export default function Page() {
+  return <FerrofluidRecord spikes={14} pull={1.4} springiness={0.6} size={1.15} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -9809,6 +10025,11 @@ export default function Page() {
       { name: "messages", type: "DominoMessage[]", description: "Rows to list; each has from, subject, time and color (avatar colour). Defaults to seven sample emails. Changing the row count resets the selection." },
       { name: "onSelectionChange", type: "(selected: number[]) => void", description: "Called with the indexes of the ticked rows whenever the selection changes; during a chain it fires once per row." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Ticks and unticks the master box by itself until someone interacts." },
+      { name: "rows", type: "number", description: "Shows only the first this-many rows of messages. Leave it out to show them all. Changing the number resets the selection." },
+      { name: "stagger", type: "number", defaultValue: "0.075", description: "Seconds between one row tipping and the next. Smaller is a rattle, larger is a slow, deliberate fall. Kept between 0.02 and 0.3." },
+      { name: "lean", type: "number", defaultValue: "1", description: "How far each row tips before it springs back. Below 1 is a polite nod, above 1 is a full topple. Kept between 0.3 and 1.4." },
+      { name: "accent", type: "string", description: "The colour of ticked boxes and selected rows, any CSS colour. Defaults to the blue used across the library." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Plays interface sounds on interaction. They follow the site-wide sound switch." },
     ],
     Preview: Previews.PreviewDominoSelect,
     previewShell: "plain",
@@ -9828,6 +10049,19 @@ export default function Page() {
     </div>
   );
 }`,
+    reactExamples: [
+      {
+        title: "A slow topple in your brand colour",
+        code: `// src/app/page.tsx
+
+import { DominoSelect } from "@/components/domino-select";
+
+// Five rows that tip one by one, a little further than usual, in green.
+export default function Page() {
+  return <DominoSelect rows={5} stagger={0.14} lean={1.2} accent="#30d158" />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -9845,6 +10079,10 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Rocks the card back and forth by itself until someone touches it. Skipped when the visitor prefers reduced motion." },
+      { name: "strips", type: "number", defaultValue: "44", description: "How many ridges the card is cut into. Fewer gives coarse bands, more gives a finer print. Kept between 12 and 80." },
+      { name: "tilt", type: "number", defaultValue: "1", description: "How far the card leans as you move across it. 0 keeps it flat, 1.6 swings right over. Kept between 0 and 1.6." },
+      { name: "stiffness", type: "number", defaultValue: "170", description: "How stiffly the card follows your pointer. Lower is soft and floaty, higher is quick and a little bouncy. Kept between 60 and 320." },
+      { name: "shine", type: "number", defaultValue: "1", description: "How bright the light running along the ridges is. 0 turns the shine off. Kept between 0 and 2." },
     ],
     Preview: Previews.PreviewLenticularPass,
     previewShell: "plain",
@@ -9859,6 +10097,19 @@ export default function Page() {
     </div>
   );
 }`,
+    reactExamples: [
+      {
+        title: "A finer print that swings wide",
+        code: `// src/app/page.tsx
+
+import { LenticularPass } from "@/components/lenticular-pass";
+
+// More ridges for a smoother switch, a bigger lean and a softer spring.
+export default function Page() {
+  return <LenticularPass strips={64} tilt={1.3} stiffness={110} shine={1.4} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -10444,6 +10695,11 @@ export default function Page() {
     props: [
       { name: "tracks", type: "RippleNowPlayingTrack[]", defaultValue: "three demo tracks", description: "The playlist: title, artist, bpm (the ripples follow it), length in seconds, three gradient colours (a, b, c) and the ink colour of the title." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Starts playing by itself and skips to the next track every seven seconds until someone touches the card. Pauses off screen and never runs under reduced motion. Without it the card waits, paused, until you press play." },
+      { name: "strength", type: "number", defaultValue: "1", description: "How hard each ripple pushes the artwork around. 0 keeps the cover still, 2.5 makes it slosh. Kept between 0 and 2.5." },
+      { name: "reach", type: "number", defaultValue: "1", description: "How far each ripple travels across the cover before it fades. Kept between 0.4 and 1.6." },
+      { name: "spread", type: "number", defaultValue: "1", description: "How fast each ripple spreads. Higher is a quick splash, lower is a slow swell. Kept between 0.4 and 2.5." },
+      { name: "tempo", type: "number", defaultValue: "1", description: "Scales how often a ripple lands. 1 follows the track's bpm exactly, 0.5 is half as often, 2 is twice as often. Kept between 0.4 and 2.5." },
+      { name: "swell", type: "number", defaultValue: "1", description: "How much the whole cover swells on each beat. 0 holds it still. Kept between 0 and 3." },
       { name: "className", type: "string", description: "Extra classes for the card." },
     ],
     Preview: Previews.PreviewRippleNowPlaying,
@@ -10459,6 +10715,23 @@ export default function Page() {
     </aside>
   );
 }`,
+    reactExamples: [
+      {
+        title: "Big, slow ripples",
+        code: `// src/app/page.tsx
+
+import { RippleNowPlaying } from "@/components/ripple-now-playing";
+
+// Strong ripples that spread wide and slowly, landing at half the track's pace.
+export default function Page() {
+  return (
+    <aside className="mx-auto w-full max-w-[360px] py-10">
+      <RippleNowPlaying strength={1.6} reach={1.3} spread={0.6} tempo={0.5} />
+    </aside>
+  );
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
