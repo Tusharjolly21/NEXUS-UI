@@ -5,6 +5,7 @@ import {
   libraryComponents,
 } from "@/lib/catalog/library-components";
 import { createMetadata, siteConfig } from "@/lib/seo";
+import { LivePreviewStage } from "@/components/library/live-preview-stage";
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ v?: string }> };
 
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-/** Full-window catalog preview — no site chrome, component fills the viewport. */
+/** Full-window catalog preview. No site chrome; the stage scales the component to fill the screen without leaving it. */
 export default async function LivePreviewPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { v } = await searchParams;
@@ -35,11 +36,11 @@ export default async function LivePreviewPage({ params, searchParams }: Props) {
   const Preview = item.previewSections?.[index]?.Preview ?? item.Preview;
 
   return (
-    <div className="dark min-h-dvh bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 md:p-10">
+    <div className="dark fixed inset-0 overflow-hidden bg-gradient-to-b from-zinc-900 to-zinc-950">
       <h1 className="sr-only">{item.name} — live preview</h1>
-      <div className="mx-auto flex w-full max-w-6xl justify-center py-8 md:py-12">
+      <LivePreviewStage>
         <Preview compact={false} />
-      </div>
+      </LivePreviewStage>
     </div>
   );
 }
