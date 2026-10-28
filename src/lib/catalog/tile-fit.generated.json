@@ -4359,6 +4359,26 @@
   "bg": null,
   "coverage": 0.15
  },
+ "ring-gallery": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   160,
+   180,
+   642,
+   380
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "ripple-field": {
   "canvas": [
    960,

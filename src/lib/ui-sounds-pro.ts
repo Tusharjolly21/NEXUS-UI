@@ -1,6 +1,6 @@
 /**
- * The Nexus UI Pro sound pack: 32 more interface sounds in five sets (Glass, Paper and wood,
- * Arcade, Studio, Devices), made the same way as the free ones, from oscillators and filtered noise with the
+ * The Nexus UI Pro sound pack: 39 more interface sounds in six sets (Glass, Paper and wood,
+ * Arcade, Studio, Devices, Gallery), made the same way as the free ones, from oscillators and filtered noise with the
  * Web Audio API. No audio files. It builds on `@/lib/ui-sounds`, which installs with it, and follows
  * the same on/off switch.
  *
@@ -16,7 +16,7 @@
 import * as React from "react";
 import { audioAwake, hiss, playDef, tone, useAutoplaySoundAllowed, type SoundDef } from "@/lib/ui-sounds";
 
-export type ProSoundCategory = "Glass" | "Paper and wood" | "Arcade" | "Studio" | "Devices";
+export type ProSoundCategory = "Glass" | "Paper and wood" | "Arcade" | "Studio" | "Devices" | "Gallery";
 type ProDef = SoundDef & { category: ProSoundCategory };
 
 export const PRO_SOUNDS = {
@@ -61,6 +61,45 @@ export const PRO_SOUNDS = {
   bloop: { category: "Devices", label: "Bloop", play: (c, o) => { tone(c, o, { freq: 300, to: 720, glide: 0.09, decay: 0.12, gain: 0.3 }); tone(c, o, { at: 0.05, freq: 640, to: 1200, glide: 0.05, decay: 0.06, gain: 0.1 }); } },
   crumble: { category: "Devices", label: "Crumble", play: (c, o) => { [[0, 2400], [0.03, 1900], [0.07, 2600], [0.1, 1500], [0.15, 2100], [0.19, 1200], [0.26, 1700], [0.31, 900]].forEach(([at, f]) => hiss(c, o, { at, attack: 0.002, decay: 0.035, freq: f, gain: 0.12, q: 2 })); tone(c, o, { freq: 95, to: 60, decay: 0.22, gain: 0.12 }); } },
   pour: { category: "Devices", label: "Pour", play: (c, o) => { hiss(c, o, { attack: 0.04, decay: 0.5, freq: 3000, to: 1600, gain: 0.09, q: 1.2 }); hiss(c, o, { at: 0.08, attack: 0.05, decay: 0.4, freq: 5200, gain: 0.05, filter: "highpass" }); } },
+
+  // Gallery: a ring of photo cards. Light, papery and airy, with a soft glass edge. They are written to follow the
+  // motion of the Ring Gallery: a tick for each card that passes, a thud when the ring settles, a whoosh that swells
+  // and fades with the speed of the spin-in. None plays on hover.
+  "ring-tick": { category: "Gallery", label: "Ring tick", play: (c, o) => { const j = 0.94 + Math.random() * 0.12; hiss(c, o, { freq: 3800 * j, decay: 0.013, gain: 0.36, q: 3.2 }); tone(c, o, { freq: 1300 * j, to: 920 * j, decay: 0.03, gain: 0.17, type: "triangle" }); } },
+  "ring-settle": { category: "Gallery", label: "Ring settle", play: (c, o) => { tone(c, o, { freq: 150, to: 92, glide: 0.1, decay: 0.16, gain: 0.28 }); hiss(c, o, { freq: 700, decay: 0.06, gain: 0.1, filter: "lowpass" }); tone(c, o, { at: 0.01, freq: 2093, decay: 0.5, gain: 0.035 }); } },
+  "ring-spool": { category: "Gallery", label: "Ring spool", length: 2.2, play: (c, o) => {
+    // Two seconds shaped like the spin it goes with: slow, fastest in the middle, slow again. A band of air opens as
+    // the ring picks up speed and closes as it slows, with a low whine that rises and falls the same way.
+    const t0 = c.currentTime, T = 2, K = 64;
+    const bell = (k: number) => Math.pow(Math.sin((Math.PI * k) / (K - 1)), 1.6);
+    const buf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const air = c.createBufferSource();
+    air.buffer = buf;
+    air.loop = true;
+    const band = c.createBiquadFilter();
+    band.type = "bandpass";
+    band.Q.value = 0.9;
+    band.frequency.setValueCurveAtTime(Float32Array.from({ length: K }, (_, k) => 260 * Math.pow(10, bell(k))), t0, T);
+    const ag = c.createGain();
+    ag.gain.setValueCurveAtTime(Float32Array.from({ length: K }, (_, k) => 0.0001 + 0.15 * bell(k)), t0, T);
+    air.connect(band).connect(ag).connect(o);
+    air.start(t0);
+    air.stop(t0 + T + 0.05);
+    const whine = c.createOscillator();
+    whine.type = "triangle";
+    whine.frequency.setValueCurveAtTime(Float32Array.from({ length: K }, (_, k) => 90 * Math.pow(3.8, bell(k))), t0, T);
+    const wg = c.createGain();
+    wg.gain.setValueCurveAtTime(Float32Array.from({ length: K }, (_, k) => 0.0001 + 0.06 * bell(k) * bell(k)), t0, T);
+    whine.connect(wg).connect(o);
+    whine.start(t0);
+    whine.stop(t0 + T + 0.05);
+  } },
+  "ring-open": { category: "Gallery", label: "Entry open", play: (c, o) => { hiss(c, o, { attack: 0.12, decay: 0.22, freq: 500, to: 3200, gain: 0.1, q: 0.9 }); tone(c, o, { freq: 196, to: 130, glide: 0.14, attack: 0.01, decay: 0.28, gain: 0.2 }); tone(c, o, { at: 0.2, freq: 1568, decay: 0.5, gain: 0.07 }); tone(c, o, { at: 0.24, freq: 2349, decay: 0.55, gain: 0.05 }); } },
+  "ring-close": { category: "Gallery", label: "Entry close", play: (c, o) => { tone(c, o, { freq: 2349, decay: 0.25, gain: 0.05 }); tone(c, o, { at: 0.06, freq: 1568, decay: 0.3, gain: 0.07 }); hiss(c, o, { at: 0.02, attack: 0.06, decay: 0.22, freq: 3200, to: 500, gain: 0.09, q: 0.9 }); tone(c, o, { at: 0.22, freq: 170, to: 110, glide: 0.1, decay: 0.22, gain: 0.18 }); } },
+  "ring-next": { category: "Gallery", label: "Next entry", play: (c, o) => { hiss(c, o, { attack: 0.01, decay: 0.08, freq: 2200, to: 4200, gain: 0.18, q: 0.9 }); tone(c, o, { freq: 740, to: 988, glide: 0.07, decay: 0.09, gain: 0.13, type: "triangle" }); } },
+  "ring-prev": { category: "Gallery", label: "Previous entry", play: (c, o) => { hiss(c, o, { attack: 0.01, decay: 0.08, freq: 4200, to: 2200, gain: 0.18, q: 0.9 }); tone(c, o, { freq: 988, to: 740, glide: 0.07, decay: 0.09, gain: 0.13, type: "triangle" }); } },
 } satisfies Record<string, ProDef>;
 
 export type ProSoundName = keyof typeof PRO_SOUNDS;

@@ -11714,6 +11714,115 @@ export default function Page() {
     ],
     tailwindSource: tw,
   },
+  {
+    slug: "ring-gallery",
+    name: "Ring Gallery",
+    registryCliName: "ring-gallery",
+    description:
+      "A ring of photos standing on edge like the leaves of a turbine. Scroll, swipe or drag and it spins, glides and settles; move around it and the camera tilts and swings with your hand. Hover a photo and it rises out of the ring into the corner with its title, click it and that photo grows into a full entry page with links to the previous and next entry. Pure CSS 3D with spring-eased motion, keyboard control, and sounds that follow the ring: a tick per card, a thud as it settles, a whoosh as it spins in.",
+    categorySlug: "three-d-components",
+    tags: ["gallery", "photo", "ring", "carousel", "3d", "turbine", "scroll", "drag", "parallax", "portfolio", "sound", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 186,
+    createdAt: "2026-10-28",
+    animationKinds: ["scroll", "drag", "3d", "spring", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "RingItem[]", description: "The photos: { src, title, date?, summary?, sections? }. src can be a URL or a data: URI. A card without a src draws a soft gradient plate, so the default works with no image files." },
+      { name: "count", type: "number", description: "Cards in the ring, 12 to 120. Defaults to your photos repeated to about 60." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Drifts the camera on its own until the visitor touches it. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
+      { name: "intro", type: "boolean", defaultValue: "true", description: "Spins in with two turns the first time the ring scrolls into view." },
+      { name: "captureWheel", type: "boolean", defaultValue: "true", description: "Scrolling over the ring turns it and keeps the page still. Set false to turn it and still scroll the page." },
+      { name: "detail", type: "boolean", defaultValue: "true", description: "Opens the built-in entry page when a photo is clicked. Set false to handle onSelect yourself." },
+      { name: "onSelect", type: "(item: RingItem, index: number) => void", description: "Called when a photo is clicked or opened with Enter." },
+      { name: "className", type: "string", description: "Extra classes for the outer card." },
+    ],
+    Preview: Previews.PreviewRingGallery,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { RingGallery } from "@/components/ring-gallery";
+
+// Scroll, swipe or drag to turn the ring. Move around it to tilt, click a photo to open it.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[820px]">
+        <RingGallery />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Your own photos",
+        code: `// src/app/page.tsx
+
+import { RingGallery, type RingItem } from "@/components/ring-gallery";
+
+const photos: RingItem[] = [
+  { src: "/photos/bay.jpg", title: "Bays at Dusk", date: "Oct 24, 2026", summary: "Warm light drains out of a ridge of bare hills." },
+  { src: "/photos/glacier.jpg", title: "Glacier in Cloud", date: "Oct 19, 2026", summary: "A tongue of blue ice between black rock walls." },
+  { src: "/photos/shore.jpg", title: "Shoreline from Above", date: "Oct 11, 2026", summary: "Green water meets wet sand in a line of foam." },
+];
+
+// Eight or more photos fill the ring best. They repeat around it until it holds about 60 cards.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[820px] bg-[#f5f5f7] p-6">
+      <RingGallery items={photos} />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Plays by itself",
+        code: `// src/app/page.tsx
+
+import { RingGallery } from "@/components/ring-gallery";
+
+// autoplay drifts the camera round the ring until the visitor touches it.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[820px] bg-[#f5f5f7] p-6">
+      <RingGallery autoplay />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Handle the click yourself",
+        code: `// src/app/page.tsx
+"use client";
+
+import { RingGallery } from "@/components/ring-gallery";
+
+// detail={false} skips the built-in entry page; onSelect tells you which photo was picked.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[820px]">
+      <RingGallery detail={false} onSelect={(item, index) => console.log(index, item.title)} />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Silent",
+        code: `// src/app/page.tsx
+
+import { RingGallery } from "@/components/ring-gallery";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[820px]">
+      <RingGallery enableSound={false} />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */

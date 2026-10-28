@@ -49,6 +49,7 @@ const EXTRA_INTERACTIONS: Record<string, Interaction[]> = {
 
 /** Previews that already play their own demo (they render a DemoCursor themselves). */
 const SELF_DEMO = new Set([
+  "ring-gallery",
   "global-deploy",
   "card-reader-verify",
   "intelligence-glow",
@@ -372,6 +373,8 @@ const TINT_OF: Record<string, TileTint> = {
  * the latest additions are always on its first page.
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // twentieth batch (Motion Kit Pro: Ring Gallery)
+  "ring-gallery",
   // nineteenth batch (Motion Kit Pro: Global Deploy, Card Reader Verify, Intelligence Glow, Cloud Sync, Smart Light, Range Calendar, Storage Clean)
   "global-deploy",
   "card-reader-verify",
