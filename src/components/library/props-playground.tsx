@@ -9,7 +9,7 @@ import type {
 } from "@/lib/catalog/playgrounds";
 import { AutoplaySound } from "@/lib/ui-sounds";
 import { cn } from "@/lib/utils";
-import { ProLock, useProAccess } from "@/components/pro/pro-access";
+import { useProAccess } from "@/components/pro/pro-access";
 
 type Fill = "light" | "dark";
 
@@ -382,7 +382,7 @@ export function LivePropsPlayground({
           </p>
         </div>
 
-        <ProLock locked={locked && !playground.tryIt} name={name} label="Edit it with Pro" className="mt-1 rounded-2xl">
+        <div className="mt-1">
         {playground.lightOnly ? null : (
           <div className="mt-5 flex items-center justify-between">
             <span className="text-[13px] text-foreground/75">Fill</span>
@@ -401,7 +401,7 @@ export function LivePropsPlayground({
           ))}
         </div>
 
-        </ProLock>
+        </div>
 
         <div className="mt-6 grid gap-2">
           <button
@@ -421,7 +421,7 @@ export function LivePropsPlayground({
             {locked ? <Lock className="size-3.5" /> : copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
             {locked ? "Copy code with Pro" : copied ? "Copied" : "Copy code"}
           </button>
-          {locked && playground.tryIt ? (
+          {locked ? (
             <p className="px-1 text-center text-[12px] leading-relaxed text-muted-foreground">
               The code you copy has the settings you chose. Pro also gives you the one-line install and a build prompt to
               rebuild it with your AI tool.{" "}

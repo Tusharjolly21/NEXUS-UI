@@ -293,8 +293,8 @@ export type Playground = {
   defaultFill?: "light" | "dark";
   /** A fixed scene (own photo, shader or dark card) that ignores light/dark: the stage stays light and the Fill switch is hidden, so it never looks like the switch is broken. */
   lightOnly?: boolean;
-  /** Visitors without Pro can use the controls too (and try their own content); only copying the code needs Pro. */
-  tryIt?: boolean;
+  /** One line shown above the playground, for a component with something more to try than the controls (its own content, say). */
+  blurb?: string;
   /** The component fills whatever box it is given (a full-bleed background): keep the stage at a fixed height instead of letting it grow to the component. */
   fillStage?: boolean;
   render: (values: PlaygroundValues, fill: "light" | "dark") => React.ReactNode;
@@ -3711,7 +3711,7 @@ export const playgrounds: Record<string, Playground> = {
   },
   "ring-gallery": {
     lightOnly: true,
-    tryIt: true,
+    blurb: "Move the controls and watch it change, or put your own photos in it. Copy code gives you a snippet with the settings you chose.",
     componentName: "RingGallery",
     importPath: "@/components/ring-gallery",
     defaultFill: "light",
