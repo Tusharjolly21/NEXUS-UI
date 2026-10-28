@@ -222,6 +222,8 @@ import { CloudSync } from "@/components/cloud-sync";
 import { SmartLight } from "@/components/smart-light";
 import { RangeCalendar } from "@/components/range-calendar";
 import { StorageClean } from "@/components/storage-clean";
+import { RingGallery } from "@/components/ring-gallery";
+import { RING_PHOTOS } from "@/lib/catalog/ring-photos";
 import { DartRating } from "@/components/dart-rating";
 import { DominoProgress } from "@/components/domino-progress";
 import { PumpkinReveal } from "@/components/pumpkin-reveal";
@@ -3703,6 +3705,29 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => (
       <div className="mx-auto w-full max-w-[440px]">
         <StorageClean key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "ring-gallery": {
+    lightOnly: true,
+    componentName: "RingGallery",
+    importPath: "@/components/ring-gallery",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "intro", label: "Spin in on load", defaultValue: true },
+      { kind: "toggle", prop: "detail", label: "Open entry page", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[820px]">
+        <RingGallery
+          key={`${String(v.autoplay)}-${String(v.intro)}`}
+          items={RING_PHOTOS}
+          autoplay={v.autoplay as boolean}
+          intro={v.intro as boolean}
+          detail={v.detail as boolean}
+          captureWheel={false}
+        />
       </div>
     ),
   },

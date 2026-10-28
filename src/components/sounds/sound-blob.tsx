@@ -18,6 +18,7 @@ export const BLOB_COLORS: Record<string, [string, string]> = {
   Arcade: ["#e879f9", "#16a34a"],
   Studio: ["#facc15", "#92400e"],
   Devices: ["#93c5fd", "#4338ca"],
+  Gallery: ["#fbcfe8", "#6d28d9"],
   Recorded: ["#fda4af", "#be123c"],
 };
 

@@ -489,6 +489,48 @@
       "name": "Storage Clean"
     }
   ],
+  "ring-close": [
+    {
+      "slug": "ring-gallery",
+      "name": "Ring Gallery"
+    }
+  ],
+  "ring-next": [
+    {
+      "slug": "ring-gallery",
+      "name": "Ring Gallery"
+    }
+  ],
+  "ring-open": [
+    {
+      "slug": "ring-gallery",
+      "name": "Ring Gallery"
+    }
+  ],
+  "ring-prev": [
+    {
+      "slug": "ring-gallery",
+      "name": "Ring Gallery"
+    }
+  ],
+  "ring-settle": [
+    {
+      "slug": "ring-gallery",
+      "name": "Ring Gallery"
+    }
+  ],
+  "ring-spool": [
+    {
+      "slug": "ring-gallery",
+      "name": "Ring Gallery"
+    }
+  ],
+  "ring-tick": [
+    {
+      "slug": "ring-gallery",
+      "name": "Ring Gallery"
+    }
+  ],
   "scan-sweep": [
     {
       "slug": "card-reader-verify",

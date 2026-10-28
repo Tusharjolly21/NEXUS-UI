@@ -38,4 +38,11 @@ export const PRO_SOUND_META: { name: string; label: string; category: ProSoundCa
   { name: "bloop", label: "Bloop", category: "Devices" },
   { name: "crumble", label: "Crumble", category: "Devices" },
   { name: "pour", label: "Pour", category: "Devices" },
+  { name: "ring-tick", label: "Ring tick", category: "Gallery" },
+  { name: "ring-settle", label: "Ring settle", category: "Gallery" },
+  { name: "ring-spool", label: "Ring spool", category: "Gallery" },
+  { name: "ring-open", label: "Entry open", category: "Gallery" },
+  { name: "ring-close", label: "Entry close", category: "Gallery" },
+  { name: "ring-next", label: "Next entry", category: "Gallery" },
+  { name: "ring-prev", label: "Previous entry", category: "Gallery" },
 ];

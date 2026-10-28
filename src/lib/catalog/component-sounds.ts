@@ -34,6 +34,7 @@ export const COMPONENT_SOUNDS: Record<string, string> = {
   "liquid-dial": "Taps when you pick an action.",
   "wheel-selector": "Ticks as each item passes the top and drops softly when the dial settles on a choice.",
   "throw-wheel": "Ticks as each card passes the front and drops softly when it settles on a card.",
+  "ring-gallery": "Ticks as each card passes the front, louder the faster the ring turns, thuds softly when it settles, whooshes as it spins in and as an entry opens or closes, and flicks as you step between entries. Nothing plays on hover.",
   "cloud-sync": "Sweeps when a backup starts, taps as each app lifts off, bloops as it sinks into the cloud, then chimes with a confirmation beep when everything is up to date, with soft pings as the apps float back out.",
   "card-reader-verify": "Clicks when you pick up the card, slides and clicks as it seats in the reader, sweeps while it scans, ticks as each check completes, then chimes access granted and thumps as the Verified stamp lands; a flipped card gets two low buzzes and a shake.",
   "range-calendar": "Taps when the ribbon snaps onto each day you drag across, clinks when you grab a date and chimes when the range is set, opens softly when a quick range flows in, and flips like a page when the month turns.",
