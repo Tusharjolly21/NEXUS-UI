@@ -423,9 +423,16 @@ function Stage({
               type="button"
               onClick={() => requestUpgrade(name, "full-screen preview")}
               aria-label="Full-screen preview is part of Pro"
-              className="pg-glass grid size-9 place-items-center rounded-full bg-card text-foreground"
+              className="pg-glass relative grid size-9 place-items-center rounded-full bg-card text-foreground"
             >
-              <Lock className="size-4" aria-hidden />
+              <Expand className="size-4" aria-hidden />
+              {/* Same arrows as the unlocked button, with a small lock on its corner to mark it Pro */}
+              <span
+                aria-hidden
+                className="absolute -right-1 -top-1 grid size-[17px] place-items-center rounded-full bg-foreground text-background ring-2 ring-card"
+              >
+                <Lock className="size-[9px]" strokeWidth={3} />
+              </span>
             </button>
           ) : (
             <Link
