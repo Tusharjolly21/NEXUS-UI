@@ -115,7 +115,7 @@ export function LivePreviewStage({ children }: { children: React.ReactNode }) {
   // Everything the component has covered so far (relative to its own top-left, at scale 1).
   // A demo that swings or grows after mount widens it, so the scale only ever tightens and the
   // result is steady instead of breathing with the animation.
-  const seen = React.useRef<{ width: number; box: Box; floor: number } | null>(null);
+  const seen = React.useRef<{ width: number; box: Box; recent: Box[] } | null>(null);
 
   // Installed before any child effect can run (children mount first, so a probe in this
   // component's effect would be too late; a layout-time module probe is not).
@@ -144,43 +144,58 @@ export function LivePreviewStage({ children }: { children: React.ReactNode }) {
       const availW = sw - pad * 2;
       const availH = sh - pad * 2;
       const width = Math.max(240, Math.min(BASE_WIDTH, availW));
-      setBaseWidth((w) => (w === width ? w : width));
-      // Measure at scale 1 and the new width, then restore.
-      const prevT = el.style.transform;
-      const prevW = el.style.width;
-      const prevTr = el.style.transition;
-      el.style.transition = "none";
-      el.style.transform = "none";
-      el.style.width = `${width}px`;
+      // A width change re-lays the component out; measure again once it has (the resize
+      // observer on the inner box schedules that).
+      if (Math.abs(el.offsetWidth - width) > 0.5) {
+        setBaseWidth((w) => (w === width ? w : width));
+        return;
+      }
+      // Measure in place. Switching the transform off to measure and back on would make the
+      // browser animate from the unscaled state each time, which reads as flicker; instead
+      // read the rects as they are and divide the current scale back out.
       const { box, fixed } = measureContent(el);
       const origin = el.getBoundingClientRect();
-      el.style.transform = prevT;
-      el.style.width = prevW;
-      el.style.transition = prevTr;
+      const cur = new DOMMatrixReadOnly(getComputedStyle(el).transform);
+      const k = cur.a > 0.01 ? cur.a : 1;
       if (fixed || !box) {
         setFit((f) => (f.scale === 1 && f.x === 0 && f.y === 0 && f.ready ? f : { scale: 1, x: 0, y: 0, ready: true }));
         scaleRef.current = 1;
         return;
       }
       const m = box as Box;
-      const local: Box = { left: m.left - origin.left, top: m.top - origin.top, right: m.right - origin.left, bottom: m.bottom - origin.top };
+      const local: Box = {
+        left: (m.left - origin.left) / k,
+        top: (m.top - origin.top) / k,
+        right: (m.right - origin.left) / k,
+        bottom: (m.bottom - origin.top) / k,
+      };
       const prev = seen.current;
       // Entrance animations start displaced; don't let that early shape stick
       const settling = performance.now() - startedAt < 1000;
       const fresh = settling || !prev || prev.width !== width;
-      const merged = fresh ? local : grow(prev.box, local);
+      // Only what three samples in a row all cover (about a second) widens the box. Something
+      // that really grew (a pill that gained an avatar, an island that opened) is in all of
+      // them; a card thrown across the stage for a moment is not, so it can't shrink everything.
+      const window3 = [...(prev && !fresh ? prev.recent : []), local];
+      const both: Box | null =
+        fresh || window3.length < 3
+          ? null
+          : {
+              left: Math.max(...window3.map((b) => b.left)),
+              top: Math.max(...window3.map((b) => b.top)),
+              right: Math.min(...window3.map((b) => b.right)),
+              bottom: Math.min(...window3.map((b) => b.bottom)),
+            };
+      const hasBoth = both && both.right > both.left && both.bottom > both.top;
+      const merged = fresh ? local : hasBoth ? grow(prev.box, both) : prev.box;
       const fitOf = (b: Box) =>
         Math.min(MAX_SCALE, Math.max(MIN_SCALE, Math.min(availW / Math.max(1, b.right - b.left), availH / Math.max(1, b.bottom - b.top))));
-      // A demo that throws a card across the stage must not shrink everything for good: the
-      // scale may tighten for things that really widen the component, but only down to 70%
-      // of the size it settled at.
-      const floor = fresh ? fitOf(local) * 0.7 : prev.floor;
-      seen.current = { width, box: merged, floor };
+      seen.current = { width, box: merged, recent: window3.slice(-2) };
       const bx = merged.left;
       const by = merged.top;
       const bw = Math.max(1, merged.right - merged.left);
       const bh = Math.max(1, merged.bottom - merged.top);
-      const scale = Math.max(fitOf(merged), Math.min(MAX_SCALE, floor));
+      const scale = fitOf(merged);
       const x = (sw - bw * scale) / 2 - bx * scale;
       const y = (sh - bh * scale) / 2 - by * scale;
       setFit((f) => {
@@ -198,7 +213,7 @@ export function LivePreviewStage({ children }: { children: React.ReactNode }) {
 
     schedule();
     // Entrance animations and autoplay demos change the box for a while; keep checking early on.
-    timers = [250, 600, 1000, 1500, 2200, 3000, 4000, 5500, 7500, 10000, 13000].map((ms) => window.setTimeout(schedule, ms));
+    timers = Array.from({ length: 44 }, (_, i) => 350 * (i + 1)).map((ms) => window.setTimeout(schedule, ms));
     const ro = new ResizeObserver(schedule);
     ro.observe(st);
     ro.observe(el);
@@ -220,14 +235,17 @@ export function LivePreviewStage({ children }: { children: React.ReactNode }) {
   return (
     <div
       ref={stage}
-      className={scrollMode ? "relative min-h-dvh p-4 md:p-8" : "fixed inset-0 overflow-hidden"}
+      className={scrollMode ? "relative min-h-dvh p-4 md:p-8" : "fixed left-0 top-0 w-full overflow-hidden"}
+      // svh, not dvh: the small viewport height doesn't change when a phone's address bar slides
+      // away, so the preview doesn't re-fit (and visibly jump) as the visitor touches the page.
+      style={scrollMode ? undefined : { height: "100svh" }}
       data-live-stage
       data-mode={scrollMode ? "scroll" : "fit"}
     >
       <div
         ref={inner}
         data-live-inner
-        className={scrollMode ? "mx-auto" : "absolute left-0 top-0 origin-top-left will-change-transform"}
+        className={scrollMode ? "mx-auto" : "absolute left-0 top-0 origin-top-left"}
         style={
           scrollMode
             ? { width: "100%", maxWidth: 1280 }
@@ -235,7 +253,7 @@ export function LivePreviewStage({ children }: { children: React.ReactNode }) {
                 width: baseWidth,
                 transform: `translate(${fit.x}px, ${fit.y}px) scale(${fit.scale})`,
                 opacity: fit.ready ? 1 : 0,
-                transition: fit.ready ? "transform 280ms cubic-bezier(.2,.7,.2,1), opacity 160ms" : "none",
+                transition: fit.ready ? "opacity 160ms" : "none",
               }
         }
       >
