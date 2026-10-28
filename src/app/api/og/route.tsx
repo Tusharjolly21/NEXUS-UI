@@ -1,14 +1,16 @@
 import { ImageResponse } from "next/og";
 import { siteConfig } from "@/lib/seo";
+import { ogText } from "@/lib/og-text";
 
 export const runtime = "nodejs"; //changed edge to nodejs for better image rendering performance
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const title = searchParams.get("title") ?? siteConfig.name;
-  const description = searchParams.get("description") ?? siteConfig.tagline;
+  // These come from the URL, so they are cleaned and length-limited before they go anywhere near the renderer.
+  const title = ogText(searchParams.get("title"), 120) || siteConfig.name;
+  const description = ogText(searchParams.get("description"), 200) || siteConfig.tagline;
   const domain = siteConfig.url.replace(/^https?:\/\//, "");
-  const type = searchParams.get("type") ?? "";
+  const type = ogText(searchParams.get("type"), 24);
 
   return new ImageResponse(
     <div

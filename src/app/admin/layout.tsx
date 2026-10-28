@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured, getAdminEmails } from "@/lib/env";
+import { isSupabaseConfigured, isAdminUser } from "@/lib/env";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -23,11 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/login?next=/admin");
   }
 
-  const admins = getAdminEmails();
-  const email = user.email?.toLowerCase() ?? "";
-  const isAdmin =
-    admins.includes(email) ||
-    (user.user_metadata as { role?: string } | undefined)?.role === "admin";
+  const isAdmin = isAdminUser(user);
 
   if (!isAdmin) {
     redirect("/");
