@@ -47,7 +47,17 @@ export interface PolaroidDevelopProps {
   autoplay?: boolean;
   /** Extra classes for the root. */
   className?: string;
+  /** How quickly a shake clears the haze, 1 is the default. Higher develops with gentler shakes. Clamped to 0.3 to 4. */
+  sensitivity?: number;
+  /** How far the photo tilts as you move it, 1 is the default and 0 keeps it level. Clamped to 0 to 2. */
+  swing?: number;
+  /** How far the photo follows the pointer when you drag it past its limit, 0.5 by default. Clamped to 0.1 to 1. */
+  elasticity?: number;
+  /** Lets the photo develop slowly by itself, the way a real one does. Turn it off and only shaking develops it. */
+  selfDevelop?: boolean;
 }
+
+const clamp = (v: number, lo: number, hi: number) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : lo);
 
 const SHAKE = [-40, 36, -32, 30, -26, 22, -16, 10, 0];
 const HAND = "'Bradley Hand', 'Segoe Print', 'Comic Sans MS', cursive";
@@ -86,7 +96,16 @@ export function PolaroidDevelop({
   onDeveloped,
   autoplay = false,
   className = "",
+  sensitivity = 1,
+  swing = 1,
+  elasticity = 0.5,
+  selfDevelop = true,
 }: PolaroidDevelopProps) {
+  // Read inside motion callbacks and timers, so the tuning applies live without a remount.
+  const opts = useRef({ sensitivity: clamp(sensitivity, 0.3, 4), swing: clamp(swing, 0, 2), selfDevelop });
+  useEffect(() => {
+    opts.current = { sensitivity: clamp(sensitivity, 0.3, 4), swing: clamp(swing, 0, 2), selfDevelop };
+  }, [sensitivity, swing, selfDevelop]);
   const [k, setK] = useState(0);
   const dev = useMotionValue(0);
   const [done, setDone] = useState(false);
@@ -94,7 +113,7 @@ export function PolaroidDevelop({
   const y = useMotionValue(0);
   const vx = useVelocity(x);
   const vy = useVelocity(y);
-  const lean = useTransform(vx, (v) => Math.max(-14, Math.min(14, v / 60)));
+  const lean = useTransform(vx, (v) => Math.max(-14, Math.min(14, v / 60)) * opts.current.swing);
   const rotate = useSpring(lean, { stiffness: 200, damping: 14 });
   const haze = useTransform(dev, (d) => 1 - d);
   const filter = useTransform(
@@ -112,7 +131,7 @@ export function PolaroidDevelop({
 
   useMotionValueEvent(vx, "change", () => {
     const speed = Math.hypot(vx.get(), vy.get());
-    if (speed > 300 && dev.get() < 1) dev.set(Math.min(1, dev.get() + speed / 90000));
+    if (speed > 300 && dev.get() < 1) dev.set(Math.min(1, dev.get() + (speed / 90000) * opts.current.sensitivity));
   });
   useMotionValueEvent(dev, "change", (d) => {
     if (d >= 1 && !done) {
@@ -124,7 +143,7 @@ export function PolaroidDevelop({
   useEffect(() => {
     // Develops very slowly on its own, like the real thing.
     const t = window.setInterval(() => {
-      if (dev.get() < 1) dev.set(Math.min(1, dev.get() + 0.004));
+      if (opts.current.selfDevelop && dev.get() < 1) dev.set(Math.min(1, dev.get() + 0.004));
     }, 100);
     return () => window.clearInterval(t);
   }, [dev]);
@@ -187,7 +206,7 @@ export function PolaroidDevelop({
       <motion.div
         drag
         dragSnapToOrigin
-        dragElastic={0.5}
+        dragElastic={clamp(elasticity, 0.1, 1)}
         dragTransition={{ bounceStiffness: 260, bounceDamping: 14 }}
         onDragStart={() => {
           touched.current = true;

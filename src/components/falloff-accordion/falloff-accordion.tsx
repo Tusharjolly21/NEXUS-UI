@@ -25,7 +25,19 @@ export interface FalloffAccordionProps {
   strips?: FalloffStrip[];
   /** Opens every other strip in turn until someone points at the row. */
   autoplay?: boolean;
+  /** How many times wider the strip under the pointer grows compared with a resting one. */
+  expand?: number;
+  /** How far the opening reaches into the neighbours, 1.1 is the default. Higher opens more strips around the pointer, lower keeps it to the one you are on. */
+  spread?: number;
+  /** Space between strips, in px. */
+  gap?: number;
+  /** Corner radius of each strip, in px. */
+  radius?: number;
+  /** How quickly the row opens and closes, 1 is the default. */
+  speed?: number;
 }
+
+const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 
 /**
  * Photo strips in a fixed-width row. Hover one and it opens while its
@@ -33,7 +45,12 @@ export interface FalloffAccordionProps {
  * pointer instead of one item snapping open. The caption rises on the open
  * strip.
  */
-export function FalloffAccordion({ strips = DEFAULT_FALLOFF_STRIPS, autoplay = false }: FalloffAccordionProps) {
+export function FalloffAccordion({ strips = DEFAULT_FALLOFF_STRIPS, autoplay = false, expand = 7, spread = 1.1, gap = 6, radius = 16, speed = 1 }: FalloffAccordionProps) {
+  const peak = clamp(expand, 1, 14);
+  const reach = clamp(spread, 0.2, 4);
+  const space = clamp(gap, 0, 24);
+  const corner = clamp(radius, 0, 40);
+  const pace = clamp(speed, 0.3, 3);
   const [focus, setFocus] = useState<number | null>(null);
   const touched = useRef(false);
 
@@ -54,7 +71,8 @@ export function FalloffAccordion({ strips = DEFAULT_FALLOFF_STRIPS, autoplay = f
   return (
     <div className="flex flex-col items-center gap-3">
       <div
-        className="flex h-[290px] w-[440px] max-w-full gap-1.5"
+        className="flex h-[290px] w-[440px] max-w-full"
+        style={{ gap: `${space / 16}rem` }}
         onPointerLeave={() => setFocus(null)}
         onPointerEnter={() => {
           touched.current = true;
@@ -62,8 +80,8 @@ export function FalloffAccordion({ strips = DEFAULT_FALLOFF_STRIPS, autoplay = f
       >
         {strips.map((s, i) => {
           const d = focus === null ? 0 : Math.abs(i - focus);
-          // Gaussian falloff: the focused strip grows 7x, its neighbours a little less.
-          const grow = focus === null ? 1 : 1 + 6 * Math.exp(-(d * d) / 1.1);
+          // Gaussian falloff: the focused strip grows 7x by default, its neighbours a little less.
+          const grow = focus === null ? 1 : 1 + (peak - 1) * Math.exp(-(d * d) / reach);
           const on = focus === i;
           return (
             <motion.button
@@ -77,9 +95,9 @@ export function FalloffAccordion({ strips = DEFAULT_FALLOFF_STRIPS, autoplay = f
                 setFocus(i);
               }}
               animate={{ flexGrow: grow }}
-              transition={{ type: "spring", stiffness: 200, damping: 24 }}
-              className="relative min-w-0 basis-0 overflow-hidden rounded-[16px] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black"
-              style={{ flexGrow: 1 }}
+              transition={{ type: "spring", stiffness: 200 * pace, damping: 24 * Math.sqrt(pace) }}
+              className="relative min-w-0 basis-0 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black"
+              style={{ flexGrow: 1, borderRadius: corner }}
             >
               <motion.span
                 className="absolute inset-0"

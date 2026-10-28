@@ -45,10 +45,19 @@ export interface AspectCropProps {
   onChange?: (id: string) => void;
   /** Cycles through the ratios by itself until someone touches it. */
   autoplay?: boolean;
+  /** Side of the square whose area every crop keeps, in px. A bigger number gives a bigger frame at every ratio. */
+  size?: number;
+  /** Corner radius of the frame, in px. */
+  radius?: number;
+  /** When the thirds grid shows: "flash" while the frame moves, "always", or "off". */
+  guides?: "flash" | "always" | "off";
+  /** How quickly the frame springs to its new shape, 1 is the default. */
+  speed?: number;
+  /** How much the frame overshoots before it settles, 1 is the default. Higher bounces more, lower settles dead. */
+  bounce?: number;
 }
 
-/** Every crop keeps the area of a 220×220 square. */
-const AREA = 220 * 220;
+const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 
 function Sunset() {
   return (
@@ -75,7 +84,7 @@ function Sunset() {
  * springs to its new shape, the photo stays put underneath, and thirds grid
  * lines flash while it moves.
  */
-export function AspectCrop({ ratios = DEFAULT_ASPECT_RATIOS, src, alt = "", onChange, autoplay = false }: AspectCropProps) {
+export function AspectCrop({ ratios = DEFAULT_ASPECT_RATIOS, src, alt = "", onChange, autoplay = false, size = 220, radius = 18, guides = "flash", speed = 1, bounce = 1 }: AspectCropProps) {
   const [r, setR] = useState(0);
   // Starts true so the thirds flash once on mount, as the frame settles.
   const [moving, setMoving] = useState(true);
@@ -83,8 +92,16 @@ export function AspectCrop({ ratios = DEFAULT_ASPECT_RATIOS, src, alt = "", onCh
   const flashTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const uid = useId().replace(/:/g, "");
   const { w, h } = ratios[r] ?? ratios[0] ?? { w: 1, h: 1 };
-  const width = Math.sqrt((AREA * w) / h);
-  const height = Math.sqrt((AREA * h) / w);
+  // Every crop keeps the area of a square this size (220 by default).
+  const area = clamp(size, 100, 280) ** 2;
+  const pace = clamp(speed, 0.3, 3);
+  const give = clamp(bounce, 0.4, 2.5);
+  const width = Math.sqrt((area * w) / h);
+  const height = Math.sqrt((area * h) / w);
+  // The stage and the photo grow only when the largest frame would not fit the usual 300 and 340.
+  const biggest = Math.max(0, ...ratios.map((o) => Math.sqrt((area * Math.max(o.w, o.h)) / Math.min(o.w, o.h))));
+  const stage = Math.max(300, Math.ceil(biggest));
+  const photo = Math.max(340, Math.ceil(biggest));
 
   const flash = () => {
     setMoving(true);
@@ -128,13 +145,14 @@ export function AspectCrop({ ratios = DEFAULT_ASPECT_RATIOS, src, alt = "", onCh
         touched.current = true;
       }}
     >
-      <div className="relative flex h-[300px] w-[300px] items-center justify-center">
+      <div className="relative flex items-center justify-center" style={{ width: stage, height: stage }}>
         <motion.div
-          className="relative overflow-hidden rounded-[18px] shadow-[0_24px_40px_-24px_rgba(0,0,0,.45)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_40px_-24px_rgba(0,0,0,.9)]"
+          className="relative overflow-hidden shadow-[0_24px_40px_-24px_rgba(0,0,0,.45)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_40px_-24px_rgba(0,0,0,.9)]"
+          style={{ borderRadius: clamp(radius, 0, 60) }}
           animate={{ width, height }}
-          transition={{ type: "spring", stiffness: 260, damping: 26 }}
+          transition={{ type: "spring", stiffness: 260 * pace, damping: (26 * Math.sqrt(pace)) / give }}
         >
-          <div className="absolute left-1/2 top-1/2 h-[340px] w-[340px] -translate-x-1/2 -translate-y-1/2">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ width: photo, height: photo }}>
             {src ? (
               // eslint-disable-next-line @next/next/no-img-element -- any URL the caller passes, no loader config needed
               <img src={src} alt={alt} draggable={false} className="h-full w-full select-none object-cover" />
@@ -144,7 +162,7 @@ export function AspectCrop({ ratios = DEFAULT_ASPECT_RATIOS, src, alt = "", onCh
           </div>
           <motion.div
             className="pointer-events-none absolute inset-0"
-            animate={{ opacity: moving ? 1 : 0 }}
+            animate={{ opacity: guides === "always" || (guides === "flash" && moving) ? 1 : 0 }}
             transition={{ duration: 0.25 }}
             aria-hidden="true"
           >

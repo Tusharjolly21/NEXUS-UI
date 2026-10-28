@@ -42,6 +42,16 @@ export interface SwipeStackProps {
   onDecide?: (payment: SwipePayment, approved: boolean) => void;
   /** Throws a card every 1.7 s (mostly approvals) and reloads when empty, until someone touches it. */
   autoplay?: boolean;
+  /** How far, in px, a card has to be dragged before letting go throws it. A quick flick still throws it from less. */
+  swipeDistance?: number;
+  /** How far the top card tilts at the edge of a drag, in degrees. 0 keeps it flat. */
+  tilt?: number;
+  /** Vertical gap, in px, between the cards waiting under the top one. 0 stacks them straight behind it. */
+  spacing?: number;
+  /** How much a card that is not thrown wobbles as it snaps back, 1 is the default. Higher bounces more, lower settles dead. */
+  bounce?: number;
+  /** How fast a card flies off once thrown, 1 is the default. */
+  flingSpeed?: number;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
@@ -56,22 +66,32 @@ export const DEFAULT_PAYMENTS: SwipePayment[] = [
   { amount: "$1,050", from: "Noor", to: "you", note: "flight split", when: "3d", hue: 340 },
 ];
 
+const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+
 /**
  * Payments to review as a stack of cards. Drag the top card right to approve
  * or left to flag; it tilts as you pull, a stamp fades in, and once thrown the
  * next card rises from the deck.
  */
-export function SwipeStack({ payments = DEFAULT_PAYMENTS, onDecide, autoplay = false, enableSound = true }: SwipeStackProps) {
+export function SwipeStack({ payments = DEFAULT_PAYMENTS, onDecide, autoplay = false, swipeDistance = 110, tilt = 18, spacing = 12, bounce = 1, flingSpeed = 1, enableSound = true }: SwipeStackProps) {
   const play = useSound(enableSound);
+  const dist = clamp(swipeDistance, 30, 220);
+  const maxTilt = clamp(tilt, 0, 45);
+  const gap = clamp(spacing, 0, 32);
+  const snap = clamp(bounce, 0.4, 2.5);
+  const fly = clamp(flingSpeed, 0.4, 3);
+  // read inside the drag and throw handlers, so changing them never needs a remount
+  const feel = useRef({ tilt: maxTilt, dist, fly });
   const [cards, setCards] = useState<Card[]>(() => payments.map((d, i) => ({ ...d, id: i })));
   const [log, setLog] = useState<{ ok: boolean; amount: string } | null>(null);
   const nextId = useRef(payments.length);
   const touched = useRef(false);
   const busy = useRef(false);
   const x = useMotionValue(0);
-  const rotate = useTransform(x, [-240, 240], [-18, 18]);
-  const approve = useTransform(x, [20, 120], [0, 1]);
-  const flag = useTransform(x, [-120, -20], [1, 0]);
+  const rotate = useTransform(x, (v) => clamp(v / 240, -1, 1) * feel.current.tilt);
+  // the stamps reach full strength just past the distance that commits the throw
+  const approve = useTransform(x, (v) => clamp((v - 20) / Math.max(20, feel.current.dist - 10), 0, 1));
+  const flag = useTransform(x, (v) => clamp((-v - 20) / Math.max(20, feel.current.dist - 10), 0, 1));
 
   const cardsRef = useRef(cards);
   const paymentsRef = useRef(payments);
@@ -83,6 +103,9 @@ export function SwipeStack({ payments = DEFAULT_PAYMENTS, onDecide, autoplay = f
     paymentsRef.current = payments;
     onDecideRef.current = onDecide;
   }, [payments, onDecide]);
+  useEffect(() => {
+    feel.current = { tilt: maxTilt, dist, fly };
+  }, [maxTilt, dist, fly]);
 
   const fling = useCallback(
     async (dir: 1 | -1, byUser = true) => {
@@ -92,7 +115,7 @@ export function SwipeStack({ payments = DEFAULT_PAYMENTS, onDecide, autoplay = f
       const say = byUser ? play : play.auto;
       say("swipe");
       say(dir > 0 ? "success" : "off", 0.6);
-      await animate(x, dir * 520, { type: "spring", stiffness: 180, damping: 24, velocity: dir * 800 });
+      await animate(x, dir * 520, { type: "spring", stiffness: 180 * feel.current.fly, damping: 24 * Math.sqrt(feel.current.fly), velocity: dir * 800 * feel.current.fly });
       setLog({ ok: dir > 0, amount: top.amount });
       setCards((c) => c.slice(1));
       x.set(0);
@@ -119,8 +142,8 @@ export function SwipeStack({ payments = DEFAULT_PAYMENTS, onDecide, autoplay = f
   }, [autoplay, fling, reset]);
 
   const onEnd = (_: unknown, info: PanInfo) => {
-    if (Math.abs(info.offset.x) > 110 || Math.abs(info.velocity.x) > 600) void fling(info.offset.x > 0 ? 1 : -1);
-    else animate(x, 0, { type: "spring", stiffness: 400, damping: 26 });
+    if (Math.abs(info.offset.x) > dist || Math.abs(info.velocity.x) > 600) void fling(info.offset.x > 0 ? 1 : -1);
+    else animate(x, 0, { type: "spring", stiffness: 400, damping: 26 / snap });
   };
 
   const press = (dir: 1 | -1) => {
@@ -148,7 +171,7 @@ export function SwipeStack({ payments = DEFAULT_PAYMENTS, onDecide, autoplay = f
                 dragMomentum={false}
                 onDragEnd={top ? onEnd : undefined}
                 initial={{ y: -40, scale: 0.8, opacity: 0 }}
-                animate={{ y: -i * 12, scale: 1 - i * 0.05, opacity: i > 2 ? 0 : 1 }}
+                animate={{ y: -i * gap, scale: 1 - i * 0.05, opacity: i > 2 ? 0 : 1 }}
                 exit={{ opacity: 0, transition: { duration: 0.15 } }}
                 transition={{ type: "spring", stiffness: 300, damping: 26 }}
                 aria-hidden={top ? undefined : true}

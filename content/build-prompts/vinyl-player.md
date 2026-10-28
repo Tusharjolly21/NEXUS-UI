@@ -41,6 +41,14 @@ export interface VinylPlayerProps {
   tracks?: VinylTrack[];
   /** Starts the record, scratches now and then and changes records until someone touches it. */
   autoplay?: boolean;
+  /** How fast the platter turns, as a share of 33⅓ rpm: 1 is the default, 1.35 is a 45, 2.3 is a 78. A faster record carries less audio per turn, so scrubbing follows. */
+  speed?: number;
+  /** How long a flung record keeps coasting after you let go, 1 is the default. Higher coasts for longer. */
+  coast?: number;
+  /** How briskly the tonearm swings on and off the record, 80 is the default. Higher snaps and overshoots a little, lower glides. */
+  armStiffness?: number;
+  /** How strongly light glints across the grooves, 1 is the default. 0 turns the glint off. */
+  gloss?: number;
 }
 
 const DEFAULT_TRACKS: VinylTrack[] = [
@@ -49,7 +57,7 @@ const DEFAULT_TRACKS: VinylTrack[] = [
   { title: "Night Garden", artist: "Oda & Kei", length: 242, label: ["#30d158", "#0b7a3b"] },
 ];
 const RPM = 33.333;
-const SEC_PER_TURN = 60 / RPM; // one revolution of the platter = 1.8 s of audio
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Number.isFinite(v) ? v : lo));
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
 /**
@@ -61,7 +69,7 @@ const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).p
  *
  * The player is a visual instrument only: it never makes a sound.
  */
-export function VinylPlayer({ tracks, autoplay = false }: VinylPlayerProps) {
+export function VinylPlayer({ tracks, autoplay = false, speed: speedProp = 1, coast = 1, armStiffness = 80, gloss = 1 }: VinylPlayerProps) {
   const list = tracks && tracks.length ? tracks : DEFAULT_TRACKS;
   const [i, setI] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -80,9 +88,15 @@ export function VinylPlayer({ tracks, autoplay = false }: VinylPlayerProps) {
   const track = list[Math.min(i, list.length - 1)];
   const playingRef = useRef(playing);
   const trackRef = useRef(track);
+  // the feel settings are read through a ref, so changing them never restarts the record
+  const feel = useRef({ secPerTurn: 60 / RPM, coast: 1 });
+  const rate = clamp(speedProp, 0.5, 2.5);
+  const secPerTurn = 60 / (RPM * rate); // one revolution of the platter = this many seconds of audio (1.8 at 33⅓)
+  const glint = clamp(gloss, 0, 3);
   useEffect(() => {
     playingRef.current = playing;
     trackRef.current = track;
+    feel.current = { secPerTurn, coast: clamp(coast, 0.25, 4) };
   });
 
   // pause the simulation while the player is off screen or the tab is hidden
@@ -101,12 +115,12 @@ export function VinylPlayer({ tracks, autoplay = false }: VinylPlayerProps) {
     const len = trackRef.current.length;
     speed.current += ((playingRef.current ? 1 : 0) - speed.current) * Math.min(1, dt * (playingRef.current ? 2.2 : 1.4));
     setAtRest(!playingRef.current && speed.current < 0.05);
-    let degPerSec = speed.current * (360 / SEC_PER_TURN);
-    if (Math.abs(spin.current) > 1) { degPerSec += spin.current; spin.current *= Math.pow(0.08, dt); } else spin.current = 0;
+    let degPerSec = speed.current * (360 / feel.current.secPerTurn);
+    if (Math.abs(spin.current) > 1) { degPerSec += spin.current; spin.current *= Math.pow(0.08, dt / feel.current.coast); } else spin.current = 0;
     const d = degPerSec * dt;
     if (!d) return;
     angle.set(angle.get() + d);
-    pos.current = Math.max(0, Math.min(len, pos.current + (d / 360) * SEC_PER_TURN));
+    pos.current = Math.max(0, Math.min(len, pos.current + (d / 360) * feel.current.secPerTurn));
     if (pos.current >= len) setPlaying(false);
     setTime(pos.current);
   });
@@ -133,7 +147,7 @@ export function VinylPlayer({ tracks, autoplay = false }: VinylPlayerProps) {
     g.t = d / Math.max(0.008, (now - g.last) / 1000);
     g.a = a; g.last = now;
     angle.set(angle.get() + d);
-    pos.current = Math.max(0, Math.min(track.length, pos.current + (d / 360) * SEC_PER_TURN));
+    pos.current = Math.max(0, Math.min(track.length, pos.current + (d / 360) * secPerTurn));
     setTime(pos.current);
   };
   const up = () => {
@@ -148,7 +162,7 @@ export function VinylPlayer({ tracks, autoplay = false }: VinylPlayerProps) {
       e.preventDefault();
       touched.current = true;
       pos.current = Math.max(0, Math.min(track.length, pos.current + d));
-      angle.set(angle.get() + (d / SEC_PER_TURN) * 360);
+      angle.set(angle.get() + (d / secPerTurn) * 360);
       setTime(pos.current);
     }
   };
@@ -216,18 +230,18 @@ export function VinylPlayer({ tracks, autoplay = false }: VinylPlayerProps) {
                 </div>
               </motion.div>
               {/* the sheen stays put while the record turns under it */}
-              <div className="pointer-events-none absolute inset-0 rounded-full" style={{ background: "conic-gradient(from 20deg, rgba(255,255,255,0) 0deg, rgba(255,255,255,.16) 28deg, rgba(255,255,255,0) 60deg, rgba(255,255,255,0) 180deg, rgba(255,255,255,.12) 208deg, rgba(255,255,255,0) 240deg)", WebkitMaskImage: "radial-gradient(circle, transparent 18%, #000 19%)", maskImage: "radial-gradient(circle, transparent 18%, #000 19%)" }} />
+              <div className="pointer-events-none absolute inset-0 rounded-full" style={{ background: `conic-gradient(from 20deg, rgba(255,255,255,0) 0deg, rgba(255,255,255,${0.16 * glint}) 28deg, rgba(255,255,255,0) 60deg, rgba(255,255,255,0) 180deg, rgba(255,255,255,${0.12 * glint}) 208deg, rgba(255,255,255,0) 240deg)`, WebkitMaskImage: "radial-gradient(circle, transparent 18%, #000 19%)", maskImage: "radial-gradient(circle, transparent 18%, #000 19%)" }} />
             </motion.div>
           </AnimatePresence>
         </div>
         {/* tonearm */}
-        <motion.div className="pointer-events-none absolute right-[9%] top-[8%] h-[58%] w-[14px]" style={{ transformOrigin: "50% 9px" }} animate={{ rotate: armAngle }} transition={{ type: "spring", stiffness: 80, damping: 16 }}>
+        <motion.div className="pointer-events-none absolute right-[9%] top-[8%] h-[58%] w-[14px]" style={{ transformOrigin: "50% 9px" }} animate={{ rotate: armAngle }} transition={{ type: "spring", stiffness: clamp(armStiffness, 20, 300), damping: 16 }}>
           <span className="absolute left-1/2 top-0 h-[18px] w-[18px] -translate-x-1/2 rounded-full bg-gradient-to-br from-[#f5f5f7] to-[#a1a1a6] shadow-[0_2px_4px_rgba(0,0,0,.3)]" />
           <span className="absolute left-1/2 top-[9px] h-[calc(100%-9px)] w-[4px] -translate-x-1/2 rounded-full bg-gradient-to-r from-[#e8e8ed] to-[#aeaeb2]" />
           <span className="absolute bottom-[-6px] left-1/2 h-[16px] w-[10px] -translate-x-1/2 rotate-[18deg] rounded-[3px] bg-gradient-to-b from-[#d2d2d7] to-[#8e8e93] shadow-[0_2px_4px_rgba(0,0,0,.35)]" />
         </motion.div>
         <span className="absolute bottom-[6%] right-[8%] flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-[#86868b] dark:text-[#8e8e93]">
-          <span className={`h-1.5 w-1.5 rounded-full ${playing ? "bg-[#30d158]" : "bg-[#c7c7cc] dark:bg-[#48484a]"}`} />33⅓
+          <span className={`h-1.5 w-1.5 rounded-full ${playing ? "bg-[#30d158]" : "bg-[#c7c7cc] dark:bg-[#48484a]"}`} />{rate === 1 ? "33⅓" : Math.round(RPM * rate * 10) / 10}
         </span>
       </div>
 

@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useRef, useState, type CSSProperties } from "react";
 import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
@@ -23,6 +23,14 @@ export interface DominoSelectProps {
   autoplay?: boolean;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
+  /** Shows only the first this-many rows. Leave it out to show them all. Changing the number resets the selection. */
+  rows?: number;
+  /** Seconds between one row tipping and the next, 0.075 is the default. Smaller is a rattle, larger is a slow, deliberate fall. */
+  stagger?: number;
+  /** How far each row tips before it springs back, 1 is the default. Below 1 is a polite nod, above 1 is a full topple. */
+  lean?: number;
+  /** The colour of ticked boxes and selected rows (any CSS colour). Defaults to the blue of the rest of the library. */
+  accent?: string;
 }
 
 const MAIL: DominoMessage[] = [
@@ -35,9 +43,10 @@ const MAIL: DominoMessage[] = [
   { from: "Dodo", subject: "Your payout settings were updated", time: "Mon", color: "#30d158" },
 ];
 const GAP = 0.075; // seconds between each domino
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Number.isFinite(v) ? v : lo));
 
 const BOX_OFF = "bg-white shadow-[inset_0_0_0_1.5px_#c7c7cc] dark:bg-[#1c1c1e] dark:shadow-[inset_0_0_0_1.5px_#636366]";
-const BOX_ON = "bg-[#0071e3] dark:bg-[#0a84ff]";
+const BOX_ON = "bg-[color:var(--ds-accent,#0071e3)] dark:bg-[color:var(--ds-accent,#0a84ff)]";
 const FOCUS = "focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:focus-visible:ring-[#2997ff]";
 
 function Box({ on }: { on: boolean }) {
@@ -79,7 +88,7 @@ function Row({
         aria-label={`${m.from}: ${m.subject}`}
         onClick={onToggle}
         className={`flex w-full items-center gap-3 rounded-[14px] px-3 py-2.5 text-left outline-none transition-colors ${FOCUS} ${
-          on ? "bg-[#eef5ff] dark:bg-[#0a84ff]/20" : "bg-white dark:bg-[#2c2c2e]"
+          on ? "bg-[color:var(--ds-tint,#eef5ff)] dark:bg-[color:var(--ds-tint-dark,rgba(10,132,255,.2))]" : "bg-white dark:bg-[#2c2c2e]"
         } shadow-[0_0_0_1px_rgba(0,0,0,.06),0_1px_2px_rgba(0,0,0,.05)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]`}
         style={{ zIndex: n - i }}
       >
@@ -109,11 +118,12 @@ function Row({
  * with every box ticked. Untick and the chain runs the other way, from the
  * bottom up. Single rows still toggle on their own with a small nod.
  */
-export function DominoSelect({ messages = MAIL, onSelectionChange, autoplay = false, enableSound = true }: DominoSelectProps) {
-  return <DominoList key={messages.length} messages={messages} onSelectionChange={onSelectionChange} autoplay={autoplay} enableSound={enableSound} />;
+export function DominoSelect({ messages = MAIL, onSelectionChange, autoplay = false, enableSound = true, rows, stagger = GAP, lean = 1, accent }: DominoSelectProps) {
+  const shown = rows === undefined ? messages : messages.slice(0, Math.round(clamp(rows, 1, messages.length || 1)));
+  return <DominoList key={shown.length} messages={shown} onSelectionChange={onSelectionChange} autoplay={autoplay} enableSound={enableSound} stagger={clamp(stagger, 0.02, 0.3)} lean={clamp(lean, 0.3, 1.4)} accent={accent} />;
 }
 
-function DominoList({ messages, onSelectionChange, autoplay, enableSound }: Required<Pick<DominoSelectProps, "messages" | "autoplay" | "enableSound">> & Pick<DominoSelectProps, "onSelectionChange">) {
+function DominoList({ messages, onSelectionChange, autoplay, enableSound, stagger, lean, accent }: Required<Pick<DominoSelectProps, "messages" | "autoplay" | "enableSound" | "stagger" | "lean">> & Pick<DominoSelectProps, "onSelectionChange" | "accent">) {
   const play = useSound(enableSound);
   const n = messages.length;
   const [on, setOn] = useState<boolean[]>(() => messages.map(() => false));
@@ -128,6 +138,7 @@ function DominoList({ messages, onSelectionChange, autoplay, enableSound }: Requ
   const timers = useRef<number[]>([]);
   const firstReport = useRef(true);
   const onChangeRef = useRef(onSelectionChange);
+  const feel = useRef({ stagger, lean });
   const all = n > 0 && on.every(Boolean);
   const some = on.some(Boolean);
   const count = on.filter(Boolean).length;
@@ -139,6 +150,7 @@ function DominoList({ messages, onSelectionChange, autoplay, enableSound }: Requ
   useEffect(() => {
     reducedRef.current = !!reduced;
     onChangeRef.current = onSelectionChange;
+    feel.current = { stagger, lean };
   });
 
   useEffect(() => {
@@ -177,13 +189,14 @@ function DominoList({ messages, onSelectionChange, autoplay, enableSound }: Requ
       return;
     }
     busy.current = true;
+    const { stagger: gap, lean: tip } = feel.current;
     const order = [...Array(n).keys()];
     if (!select) order.reverse();
     await Promise.all(
       order.map((idx, k) => {
         const last = k === n - 1;
-        const fall = select ? (last ? -84 : -58) : last ? 84 : 58;
-        const delay = k * GAP;
+        const fall = (select ? (last ? -84 : -58) : last ? 84 : 58) * tip;
+        const delay = k * gap;
         // flip each box at the moment its row stands back up
         timers.current.push(
           window.setTimeout(() => {
@@ -226,9 +239,11 @@ function DominoList({ messages, onSelectionChange, autoplay, enableSound }: Requ
     return () => clearInterval(id);
   }, [autoplay, reduced]);
 
+  const tint = accent ? ({ "--ds-accent": accent, "--ds-tint": `color-mix(in srgb, ${accent} 10%, white)`, "--ds-tint-dark": `color-mix(in srgb, ${accent} 20%, transparent)` } as CSSProperties) : undefined;
   return (
     <div
       ref={root}
+      style={tint}
       className="w-[380px] max-w-full rounded-[26px] bg-[#f5f5f7] p-3 shadow-[0_0_0_1px_rgba(0,0,0,.04)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]"
       onPointerDown={() => {
         touched.current = true;

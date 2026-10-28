@@ -41,6 +41,7 @@ const TRACKS: Track[] = [
   { title: "Night Swim", artist: "Paloma Veil", bpm: 84, length: 231, a: "#bf5af2", b: "#ff2d92", c: "#1b0838", ink: "#ffffff" },
 ];
 
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Number.isFinite(v) ? v : lo));
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
 /** A radial ripple displacement map: red/green encode the outward push of a few rings. */
@@ -78,11 +79,21 @@ export interface RippleNowPlayingProps {
   autoplay?: boolean;
   /** The playlist: title, artist, bpm (the ripples follow it), length in seconds, three gradient colours (a, b, c) and the ink colour of the title. Defaults to three demo tracks. */
   tracks?: Track[];
+  /** How hard each ripple pushes the artwork around, 1 is the default. 0 keeps the cover still, 2.5 makes it slosh. */
+  strength?: number;
+  /** How far each ripple travels across the cover before it fades, 1 is the default. */
+  reach?: number;
+  /** How fast each ripple spreads, 1 is the default. Higher is a quick splash, lower is a slow swell. */
+  spread?: number;
+  /** Scales how often a ripple lands, 1 follows the track's bpm exactly. 0.5 is half as often, 2 is twice as often. */
+  tempo?: number;
+  /** How much the whole cover swells on each beat, 1 is the default. 0 holds it still. */
+  swell?: number;
   /** Extra classes for the card. */
   className?: string;
 }
 
-export function RippleNowPlaying({ autoplay = false, tracks = TRACKS, className }: RippleNowPlayingProps) {
+export function RippleNowPlaying({ autoplay = false, tracks = TRACKS, strength = 1, reach = 1, spread = 1, tempo = 1, swell = 1, className }: RippleNowPlayingProps) {
   const reduce = useReducedMotion() ?? false;
   const cardRef = useRef<HTMLDivElement>(null);
   const onScreen = useDemoActive(cardRef, true);
@@ -98,10 +109,13 @@ export function RippleNowPlaying({ autoplay = false, tracks = TRACKS, className 
   const playingRef = useRef(autoplay && !reduce);
   const track = tracks[index % tracks.length];
   const trackRef = useRef(track);
+  // the ripple settings are read through a ref, so changing them applies on the next beat without a restart
+  const feel = useRef({ strength: 1, reach: 1, spread: 1, tempo: 1, swell: 1 });
   useEffect(() => {
     trackRef.current = track;
     playingRef.current = playing;
     onScreenRef.current = onScreen;
+    feel.current = { strength: clamp(strength, 0, 2.5), reach: clamp(reach, 0.4, 1.6), spread: clamp(spread, 0.4, 2.5), tempo: clamp(tempo, 0.4, 2.5), swell: clamp(swell, 0, 3) };
   });
 
   const time = useMotionValue(37);
@@ -126,7 +140,7 @@ export function RippleNowPlaying({ autoplay = false, tracks = TRACKS, className 
   useEffect(() => {
     const apply = () => {
       const r = ring.get();
-      const size = 40 + r * 520;
+      const size = 40 + r * 520 * feel.current.reach;
       const img = imgRef.current;
       const disp = dispRef.current;
       if (img) {
@@ -135,7 +149,7 @@ export function RippleNowPlaying({ autoplay = false, tracks = TRACKS, className 
         img.setAttribute("width", String(size));
         img.setAttribute("height", String(size));
       }
-      if (disp) disp.setAttribute("scale", String((1 - r) * 46 * energy.get()));
+      if (disp) disp.setAttribute("scale", String((1 - r) * 46 * feel.current.strength * energy.get()));
     };
     const a = ring.on("change", apply);
     const b = energy.on("change", apply);
@@ -150,8 +164,8 @@ export function RippleNowPlaying({ autoplay = false, tracks = TRACKS, className 
     origin.current = { x, y };
     energy.set(strength);
     ring.set(0);
-    animate(ring, 1, { duration: 1.25, ease: [0.2, 0.7, 0.3, 1] });
-    breathe.set(1.025);
+    animate(ring, 1, { duration: 1.25 / feel.current.spread, ease: [0.2, 0.7, 0.3, 1] });
+    breathe.set(1 + 0.025 * feel.current.swell);
     window.setTimeout(() => breathe.set(1), 90);
   };
 
@@ -170,7 +184,7 @@ export function RippleNowPlaying({ autoplay = false, tracks = TRACKS, className 
         if (t >= tr.length) t = 0;
         time.set(t);
         beatAcc += dt;
-        const period = 60 / tr.bpm;
+        const period = 60 / (tr.bpm * feel.current.tempo);
         if (beatAcc >= period) {
           beatAcc -= period;
           beatN++;
@@ -325,7 +339,7 @@ export function RippleNowPlaying({ autoplay = false, tracks = TRACKS, className 
             </motion.div>
           </AnimatePresence>
         </div>
-        <span className="flex-none rounded-full bg-[#f5f5f7] px-2.5 py-1 text-[12px] font-medium tabular-nums text-[#6e6e73] dark:bg-[#2c2c2e] dark:text-[#a1a1a6]">{track.bpm} BPM</span>
+        <span className="flex-none rounded-full bg-[#f5f5f7] px-2.5 py-1 text-[12px] font-medium tabular-nums text-[#6e6e73] dark:bg-[#2c2c2e] dark:text-[#a1a1a6]">{Math.round(track.bpm * clamp(tempo, 0.4, 2.5))} BPM</span>
       </div>
 
       <div
