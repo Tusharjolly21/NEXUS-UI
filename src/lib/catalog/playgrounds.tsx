@@ -293,8 +293,8 @@ export type Playground = {
   defaultFill?: "light" | "dark";
   /** A fixed scene (own photo, shader or dark card) that ignores light/dark: the stage stays light and the Fill switch is hidden, so it never looks like the switch is broken. */
   lightOnly?: boolean;
-  /** Visitors without Pro can use the controls too (and try their own content); only copying the code needs Pro. */
-  tryIt?: boolean;
+  /** One line shown above the playground, for a component with something more to try than the controls (its own content, say). */
+  blurb?: string;
   /** The component fills whatever box it is given (a full-bleed background): keep the stage at a fixed height instead of letting it grow to the component. */
   fillStage?: boolean;
   render: (values: PlaygroundValues, fill: "light" | "dark") => React.ReactNode;
@@ -1000,8 +1000,25 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "SharedElementCards",
     importPath: "@/components/shared-element-cards",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false, startOn: true }],
-    render: (v) => <SharedElementCards key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "stiffness", label: "Spring stiffness", min: 100, max: 600, step: 10, defaultValue: 300 },
+      { kind: "range", prop: "damping", label: "Spring damping", min: 10, max: 50, step: 1, defaultValue: 32 },
+      { kind: "range", prop: "height", label: "Height", min: 280, max: 460, step: 10, unit: "px", defaultValue: 340 },
+      { kind: "range", prop: "radius", label: "Corner radius", min: 0, max: 44, step: 2, unit: "px", defaultValue: 24 },
+      { kind: "range", prop: "gap", label: "Gap between cards", min: 0, max: 32, step: 2, unit: "px", defaultValue: 12 },
+      { kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <SharedElementCards
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        stiffness={v.stiffness as number}
+        damping={v.damping as number}
+        height={v.height as number}
+        radius={v.radius as number}
+        gap={v.gap as number}
+      />
+    ),
   },
   "rotating-headline": {
     componentName: "RotatingHeadline",
@@ -1112,8 +1129,23 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "AnimatedIcons",
     importPath: "@/components/animated-icons",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true }],
-    render: (v) => <AnimatedIcons key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "iconSize", label: "Icon size", min: 16, max: 44, step: 1, unit: "px", defaultValue: 26 },
+      { kind: "range", prop: "tileSize", label: "Tile size", min: 56, max: 96, step: 2, unit: "px", defaultValue: 72 },
+      { kind: "range", prop: "tileRadius", label: "Tile corners", min: 0, max: 48, step: 2, unit: "px", defaultValue: 20 },
+      { kind: "range", prop: "speed", label: "Animation speed", min: 0.4, max: 2.5, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <AnimatedIcons
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        iconSize={v.iconSize as number}
+        tileSize={v.tileSize as number}
+        tileRadius={v.tileRadius as number}
+        speed={v.speed as number}
+      />
+    ),
   },
   "folder-peek": {
     componentName: "FolderPeek",
@@ -1130,8 +1162,27 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "MagnifyDock",
     importPath: "@/components/magnify-dock",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Sweep by itself", defaultValue: false, startOn: true }],
-    render: (v) => <MagnifyDock key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "baseSize", label: "Icon size", min: 32, max: 64, step: 1, unit: "px", defaultValue: 46 },
+      { kind: "range", prop: "maxSize", label: "Size under the pointer", min: 48, max: 104, step: 1, unit: "px", defaultValue: 76 },
+      { kind: "range", prop: "reach", label: "Reach", min: 60, max: 300, step: 10, unit: "px", defaultValue: 150 },
+      { kind: "range", prop: "gap", label: "Gap between icons", min: 0, max: 28, step: 1, unit: "px", defaultValue: 10 },
+      { kind: "range", prop: "stiffness", label: "Spring stiffness", min: 100, max: 800, step: 10, defaultValue: 320 },
+      { kind: "toggle", prop: "showLabels", label: "Show labels", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Sweep by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <MagnifyDock
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        baseSize={v.baseSize as number}
+        maxSize={v.maxSize as number}
+        reach={v.reach as number}
+        gap={v.gap as number}
+        stiffness={v.stiffness as number}
+        showLabels={v.showLabels as boolean}
+      />
+    ),
   },
   "upload-chips": {
     componentName: "UploadChips",
@@ -1146,15 +1197,53 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "NotificationStack",
     importPath: "@/components/notification-stack",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Push samples", defaultValue: false, startOn: true }],
-    render: (v) => <NotificationStack key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "duration", label: "Stays for", min: 1000, max: 10000, step: 200, unit: "ms", defaultValue: 4200 },
+      { kind: "range", prop: "visible", label: "Toasts shown when folded", min: 1, max: 5, step: 1, defaultValue: 3 },
+      { kind: "range", prop: "peek", label: "Peek when folded", min: 4, max: 30, step: 1, unit: "px", defaultValue: 13 },
+      { kind: "range", prop: "gap", label: "Gap when spread", min: 0, max: 20, step: 1, unit: "px", defaultValue: 10 },
+      { kind: "range", prop: "stiffness", label: "Spring stiffness", min: 150, max: 800, step: 10, defaultValue: 380 },
+      { kind: "select", prop: "direction", label: "Stack grows", options: ["up", "down"], defaultValue: "up" },
+      { kind: "toggle", prop: "autoplay", label: "Push samples", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <NotificationStack
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        duration={v.duration as number}
+        visible={v.visible as number}
+        peek={v.peek as number}
+        gap={v.gap as number}
+        stiffness={v.stiffness as number}
+        direction={v.direction as "up" | "down"}
+      />
+    ),
   },
   "island-morph": {
     componentName: "IslandMorph",
     importPath: "@/components/island-morph",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle states", defaultValue: false, startOn: true }],
-    render: (v) => <IslandMorph key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "stiffness", label: "Spring stiffness", min: 150, max: 700, step: 10, defaultValue: 380 },
+      { kind: "range", prop: "damping", label: "Spring damping", min: 12, max: 50, step: 1, defaultValue: 30 },
+      { kind: "range", prop: "blur", label: "Content blur", min: 0, max: 20, step: 1, unit: "px", defaultValue: 10 },
+      { kind: "range", prop: "contentDelay", label: "Content delay", min: 0, max: 0.4, step: 0.02, unit: "s", defaultValue: 0.08 },
+      { kind: "color", prop: "surface", label: "Pill colour", options: ["#000000", "#1c1c3a", "#0a3d2e", "#4a0f1f", "#2c2c2e"], defaultValue: "#000000" },
+      { kind: "color", prop: "timerColor", label: "Timer colour", options: ["#ff9f0a", "#30d158", "#0a84ff", "#ff375f", "#bf5af2"], defaultValue: "#ff9f0a" },
+      { kind: "toggle", prop: "autoplay", label: "Cycle states", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <IslandMorph
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        stiffness={v.stiffness as number}
+        damping={v.damping as number}
+        blur={v.blur as number}
+        contentDelay={v.contentDelay as number}
+        surface={v.surface as string}
+        timerColor={v.timerColor as string}
+      />
+    ),
   },
   "lanyard-badge": {
     componentName: "LanyardBadge",
@@ -1248,15 +1337,49 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "ThrowWheel",
     importPath: "@/components/throw-wheel",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Throw by itself", defaultValue: false, startOn: true }],
-    render: (v) => <ThrowWheel key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "count", label: "Cards on the wheel", min: 5, max: 10, step: 1, defaultValue: 10 },
+      { kind: "range", prop: "cardSize", label: "Card size", min: 0.6, max: 1.2, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "glide", label: "Glide", min: 0.3, max: 3, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "tilt", label: "Edge-on turn", min: 0, max: 2, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "blur", label: "Speed blur", min: 0, max: 2, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Throw by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <ThrowWheel
+        key={`${v.autoplay}-${v.count}`}
+        count={v.count as number}
+        cardSize={v.cardSize as number}
+        glide={v.glide as number}
+        tilt={v.tilt as number}
+        blur={v.blur as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "pixel-select": {
     componentName: "PixelSelect",
     importPath: "@/components/pixel-select",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false, startOn: true }],
-    render: (v) => <PixelSelect key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "pixelSize", label: "Pixel size", min: 10, max: 24, step: 2, unit: "px", defaultValue: 12 },
+      { kind: "range", prop: "speed", label: "Speed", min: 0.5, max: 2, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "stagger", label: "Ripple", min: 0, max: 2, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "scatter", label: "Scatter", min: 0, max: 2, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "select", prop: "origin", label: "Builds from", options: ["top-left", "top-right", "bottom-left", "bottom-right", "center"], defaultValue: "top-left" },
+      { kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <PixelSelect
+        key={String(v.autoplay)}
+        pixelSize={v.pixelSize as number}
+        speed={v.speed as number}
+        stagger={v.stagger as number}
+        scatter={v.scatter as number}
+        origin={v.origin as "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center"}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "scrub-inputs": {
     componentName: "ScrubInputs",
@@ -1339,8 +1462,25 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "WeatherPuck",
     importPath: "@/components/weather-puck",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Sweep by itself", defaultValue: false, startOn: true }],
-    render: (v) => <WeatherPuck key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "spacing", label: "Dot spacing", min: 8, max: 24, step: 1, unit: "px", defaultValue: 14 },
+      { kind: "range", prop: "dotSize", label: "Dot size", min: 0.6, max: 1.8, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "reach", label: "Light reach", min: 0.5, max: 2, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "lift", label: "Dot lift", min: 0, max: 2, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "toggle", prop: "showClock", label: "Show clock", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Sweep by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <WeatherPuck
+        key={String(v.autoplay)}
+        spacing={v.spacing as number}
+        dotSize={v.dotSize as number}
+        reach={v.reach as number}
+        lift={v.lift as number}
+        showClock={v.showClock as boolean}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "metal-orbs": {
     componentName: "MetalOrbs",
@@ -1368,15 +1508,49 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "LayoutSwitch",
     importPath: "@/components/layout-switch",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle layouts", defaultValue: false, startOn: true }],
-    render: (v) => <LayoutSwitch key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "count", label: "Photos", min: 3, max: 6, step: 1, defaultValue: 6 },
+      { kind: "range", prop: "gap", label: "Gap", min: 0, max: 24, step: 1, unit: "px", defaultValue: 10 },
+      { kind: "range", prop: "radius", label: "Corner radius", min: 0, max: 32, step: 1, unit: "px", defaultValue: 16 },
+      { kind: "range", prop: "stiffness", label: "Spring strength", min: 100, max: 500, step: 10, defaultValue: 220 },
+      { kind: "range", prop: "damping", label: "Spring damping", min: 12, max: 40, step: 1, defaultValue: 26 },
+      { kind: "toggle", prop: "autoplay", label: "Cycle layouts", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <LayoutSwitch
+        key={String(v.autoplay)}
+        count={v.count as number}
+        gap={v.gap as number}
+        radius={v.radius as number}
+        stiffness={v.stiffness as number}
+        damping={v.damping as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "fan-deck": {
     componentName: "FanDeck",
     importPath: "@/components/fan-deck",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Fan by itself", defaultValue: false, startOn: true }],
-    render: (v) => <FanDeck key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "count", label: "Chips", min: 4, max: 12, step: 1, defaultValue: 12 },
+      { kind: "range", prop: "spread", label: "Fan spread", min: 60, max: 180, step: 5, unit: "deg", defaultValue: 180 },
+      { kind: "range", prop: "chipSize", label: "Chip size", min: 0.7, max: 1.15, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "lift", label: "Hover lift", min: 0, max: 32, step: 1, unit: "px", defaultValue: 16 },
+      { kind: "range", prop: "stagger", label: "Open one by one", min: 0, max: 2, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Fan by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <FanDeck
+        key={String(v.autoplay)}
+        count={v.count as number}
+        spread={v.spread as number}
+        chipSize={v.chipSize as number}
+        lift={v.lift as number}
+        stagger={v.stagger as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "receipt-unfold": {
     componentName: "ReceiptUnfold",
@@ -1433,8 +1607,25 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "GlassBubbles",
     importPath: "@/components/glass-bubbles",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Nudge by itself", defaultValue: false, startOn: true }],
-    render: (v) => <GlassBubbles key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "size", label: "Bubble size", min: 0.6, max: 1.3, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "threadLength", label: "Thread length", min: 0.5, max: 1.3, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "gravity", label: "Gravity", min: 0.2, max: 3, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "drag", label: "Air drag", min: 0.25, max: 4, step: 0.25, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "push", label: "Pointer push", min: 0.2, max: 3, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Nudge by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <GlassBubbles
+        key={String(v.autoplay)}
+        size={v.size as number}
+        threadLength={v.threadLength as number}
+        gravity={v.gravity as number}
+        drag={v.drag as number}
+        push={v.push as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "box-spill": {
     componentName: "BoxSpill",
@@ -1451,8 +1642,24 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "CurvedReel",
     importPath: "@/components/curved-reel",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Drift by itself", defaultValue: true }],
-    render: (v) => <CurvedReel autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "cardSize", label: "Poster size", min: 0.7, max: 1.3, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "gap", label: "Gap", min: 0, max: 48, step: 2, unit: "px", defaultValue: 16 },
+      { kind: "range", prop: "curve", label: "Curve", min: 0, max: 1.6, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "speed", label: "Drift speed", min: 10, max: 120, step: 2, unit: "px/s", defaultValue: 38 },
+      { kind: "range", prop: "glide", label: "Glide after a fling", min: 0.3, max: 3, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Drift by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <CurvedReel
+        cardSize={v.cardSize as number}
+        gap={v.gap as number}
+        curve={v.curve as number}
+        speed={v.speed as number}
+        glide={v.glide as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "squeeze-progress": {
     lightOnly: true,
@@ -1490,8 +1697,25 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "TapeShelf",
     importPath: "@/components/tape-shelf",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false, startOn: true }],
-    render: (v) => <TapeShelf key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "size", label: "Case size", min: 0.8, max: 1.3, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "spacing", label: "Spacing", min: 0, max: 20, step: 1, unit: "px", defaultValue: 6 },
+      { kind: "range", prop: "tilt", label: "Shelf angle", min: 0, max: 1.6, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "lift", label: "Hover lift", min: 0, max: 2, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "snap", label: "Spring speed", min: 0.5, max: 2.5, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <TapeShelf
+        key={String(v.autoplay)}
+        size={v.size as number}
+        spacing={v.spacing as number}
+        tilt={v.tilt as number}
+        lift={v.lift as number}
+        snap={v.snap as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "packet-router": {
     componentName: "PacketRouter",
@@ -1513,16 +1737,48 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "StampSwirl",
     importPath: "@/components/stamp-swirl",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Lift by itself", defaultValue: false, startOn: true }],
-    render: (v) => <StampSwirl key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "size", label: "Stamp size", min: 0.7, max: 1.2, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "spacing", label: "Spacing", min: 4, max: 28, step: 1, unit: "px", defaultValue: 16 },
+      { kind: "range", prop: "swirl", label: "Swirl strength", min: 0, max: 2, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "speed", label: "Flow speed", min: 0.2, max: 3, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "hoverScale", label: "Hover grow", min: 1.1, max: 1.8, step: 0.05, unit: "x", defaultValue: 1.45 },
+      { kind: "toggle", prop: "autoplay", label: "Lift by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <StampSwirl
+        key={String(v.autoplay)}
+        size={v.size as number}
+        spacing={v.spacing as number}
+        swirl={v.swirl as number}
+        speed={v.speed as number}
+        hoverScale={v.hoverScale as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "bubble-cluster": {
     lightOnly: true,
     componentName: "BubbleCluster",
     importPath: "@/components/bubble-cluster",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle groups", defaultValue: false, startOn: true }],
-    render: (v) => <BubbleCluster key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+    controls: [
+      { kind: "range", prop: "gap", label: "Gap", min: 0, max: 24, step: 1, unit: "px", defaultValue: 5 },
+      { kind: "range", prop: "sizeContrast", label: "Size contrast", min: 0, max: 2, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "bounce", label: "Bounce", min: 0.5, max: 2.5, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "liquid", label: "Liquid backdrop", min: 0, max: 4, step: 0.25, unit: "x", defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Cycle groups", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <BubbleCluster
+        key={String(v.autoplay)}
+        gap={v.gap as number}
+        sizeContrast={v.sizeContrast as number}
+        bounce={v.bounce as number}
+        liquid={v.liquid as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
   },
   "sticker-toss": {
     componentName: "StickerToss",
@@ -3711,7 +3967,7 @@ export const playgrounds: Record<string, Playground> = {
   },
   "ring-gallery": {
     lightOnly: true,
-    tryIt: true,
+    blurb: "Move the controls and watch it change, or put your own photos in it. Copy code gives you a snippet with the settings you chose.",
     componentName: "RingGallery",
     importPath: "@/components/ring-gallery",
     defaultFill: "light",

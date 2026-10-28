@@ -41,7 +41,19 @@ export interface StampSwirlProps {
   stamps?: SwirlStamp[];
   /** Lifts the stamps one after another until the pointer enters. */
   autoplay?: boolean;
+  /** Size of each stamp, 0.7 to 1.2. Default 1. */
+  size?: number;
+  /** Space between the stamps in px, 4 to 28. Default 16. */
+  spacing?: number;
+  /** How strongly the artwork swirls, 0 to 2. 0 keeps it still and sharp. Default 1. */
+  swirl?: number;
+  /** How fast the ink flows, 0.2 to 3. Default 1. */
+  speed?: number;
+  /** How much a hovered stamp grows, 1.1 to 1.8. Default 1.45. */
+  hoverScale?: number;
 }
+
+const clamp = (v: number, lo: number, hi: number) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : lo);
 
 export const DEFAULT_STAMPS: SwirlStamp[] = [
   { name: "Tidepool", date: "1974", value: "12c", art: "radial-gradient(60% 50% at 30% 30%, #ffe6b8, rgba(255,230,184,0) 60%), radial-gradient(50% 60% at 75% 70%, #2ec4b6, rgba(46,196,182,0) 65%), linear-gradient(160deg,#9be7d8,#126e82)" },
@@ -72,32 +84,38 @@ const PAPER_MASK: CSSProperties = {
 };
 
 /** The artwork, pushed around by an animated SVG turbulence field through a displacement map. */
-function StampArt({ stamp, active, index }: { stamp: SwirlStamp; active: boolean; index: number }) {
+function StampArt({ stamp, active, index, swirl, speed }: { stamp: SwirlStamp; active: boolean; index: number; swirl: number; speed: number }) {
   const fid = "s" + useId().replace(/[^a-zA-Z0-9]/g, "");
   const turb = useRef<SVGFETurbulenceElement>(null);
   const disp = useRef<SVGFEDisplacementMapElement>(null);
   const strength = useRef(10);
+  const phase = useRef<number | null>(null);
   const reduce = useReducedMotion();
 
   useEffect(() => {
     turb.current?.setAttribute("seed", String(1 + index));
     if (reduce) {
       // Still artwork: a fixed field, a little stronger while lifted.
-      strength.current = active ? 34 : 12;
+      strength.current = (active ? 34 : 12) * swirl;
       disp.current?.setAttribute("scale", String(strength.current));
       return;
     }
     let raf = 0;
+    let last = performance.now();
+    if (phase.current === null) phase.current = last / 1000;
     const loop = (now: number) => {
-      const t = now / 1000 + index * 2.3;
-      strength.current += ((active ? 34 : 12) - strength.current) * 0.06;
+      // The flow clock is accumulated, so changing the speed never makes the ink jump.
+      phase.current = (phase.current ?? 0) + ((now - last) / 1000) * speed;
+      last = now;
+      const t = phase.current + index * 2.3;
+      strength.current += ((active ? 34 : 12) * swirl - strength.current) * 0.06;
       turb.current?.setAttribute("baseFrequency", `${(0.012 + Math.sin(t * 0.7) * 0.004).toFixed(4)} ${(0.018 + Math.cos(t * 0.5) * 0.005).toFixed(4)}`);
       disp.current?.setAttribute("scale", strength.current.toFixed(1));
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [active, index, reduce]);
+  }, [active, index, reduce, swirl, speed]);
 
   return (
     <>
@@ -116,7 +134,7 @@ function StampArt({ stamp, active, index }: { stamp: SwirlStamp; active: boolean
  * Postage stamps whose artwork slowly swirls like wet ink. Hover or focus one and it lifts
  * out of the row, the swirl gets stronger, and its name and year appear underneath.
  */
-export function StampSwirl({ stamps = DEFAULT_STAMPS, autoplay = false }: StampSwirlProps) {
+export function StampSwirl({ stamps = DEFAULT_STAMPS, autoplay = false, size = 1, spacing = 16, swirl = 1, speed = 1, hoverScale = 1.45 }: StampSwirlProps) {
   const [hover, setHover] = useState<number | null>(null);
   const touched = useRef(false);
 
@@ -132,6 +150,11 @@ export function StampSwirl({ stamps = DEFAULT_STAMPS, autoplay = false }: StampS
   }, [autoplay, stamps.length]);
 
   const current = hover !== null ? stamps[hover] : undefined;
+  const k = clamp(size, 0.7, 1.2);
+  const gp = clamp(spacing, 4, 28);
+  const swirlK = clamp(swirl, 0, 2);
+  const speedK = clamp(speed, 0.2, 3);
+  const grow = clamp(hoverScale, 1.1, 1.8);
 
   return (
     <div
@@ -140,7 +163,7 @@ export function StampSwirl({ stamps = DEFAULT_STAMPS, autoplay = false }: StampS
         touched.current = true;
       }}
     >
-      <div className="flex h-[210px] items-center gap-4">
+      <div className="flex items-center" style={{ height: Math.round(210 * k), gap: gp }}>
         {stamps.map((s, i) => {
           const on = hover === i;
           return (
@@ -157,14 +180,14 @@ export function StampSwirl({ stamps = DEFAULT_STAMPS, autoplay = false }: StampS
               onBlur={() => setHover(null)}
               className="relative outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0071e3] dark:focus-visible:outline-[#0a84ff]"
               initial={false}
-              animate={{ scale: on ? 1.45 : hover !== null ? 0.92 : 1, rotate: on ? 0 : TILT[i % 4], y: on ? -6 : 0, zIndex: on ? 10 : 1 }}
+              animate={{ scale: on ? grow : hover !== null ? 0.92 : 1, rotate: on ? 0 : TILT[i % 4], y: on ? -6 : 0, zIndex: on ? 10 : 1 }}
               transition={{ type: "spring", stiffness: 260, damping: 20 }}
-              style={{ width: 84, height: 104, filter: on ? "drop-shadow(0 18px 22px rgba(0,0,0,.28))" : "drop-shadow(0 6px 10px rgba(0,0,0,.14))" }}
+              style={{ width: 84 * k, height: 104 * k, filter: on ? "drop-shadow(0 18px 22px rgba(0,0,0,.28))" : "drop-shadow(0 6px 10px rgba(0,0,0,.14))" }}
             >
               {/* paper with perforated edges */}
               <span className="absolute inset-0 bg-white" style={PAPER_MASK} />
               <span className="absolute inset-[7px] overflow-hidden">
-                <StampArt stamp={s} active={on} index={i} />
+                <StampArt stamp={s} active={on} index={i} swirl={swirlK * k} speed={speedK} />
                 <span className="absolute bottom-1 right-1.5 text-[11px] font-bold text-white [text-shadow:0_1px_3px_rgba(0,0,0,.4)]">{s.value}</span>
               </span>
             </motion.button>

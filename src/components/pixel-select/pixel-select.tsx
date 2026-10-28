@@ -21,6 +21,13 @@ const MOODS: Mood[] = [
 const CELL = 12;
 const MW = 216;
 
+export type PixelSelectOrigin = "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center";
+
+function clampNum(v: number | undefined, fallback: number, lo: number, hi: number) {
+  const n = typeof v === "number" && Number.isFinite(v) ? v : fallback;
+  return Math.min(hi, Math.max(lo, n));
+}
+
 type Phase = "closed" | "opening" | "open" | "closing";
 
 export interface PixelSelectProps {
@@ -30,6 +37,16 @@ export interface PixelSelectProps {
   autoplay?: boolean;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
+  /** Width and height of each pixel in px, 10 to 24. Smaller pixels look finer but draw more of them. */
+  pixelSize?: number;
+  /** Speed of the build and the dissolve, 0.5 to 2. Higher is quicker. */
+  speed?: number;
+  /** How much the build ripples across the menu, 0 to 2. 0 makes every pixel appear together. */
+  stagger?: number;
+  /** How far the pixels scatter as the menu dissolves, 0 to 2. 0 makes them fade in place. */
+  scatter?: number;
+  /** Where the menu starts building from. */
+  origin?: PixelSelectOrigin;
 }
 
 /** Small seeded generator so every open gets fresh jitter without impure renders. */
@@ -48,7 +65,7 @@ function seeded(seed: number) {
  * A dropdown that assembles itself out of pixels tinted with the current mood,
  * then dissolves back into a shower of them when it closes.
  */
-export function PixelSelect({ options = MOODS, onChange, autoplay = false, enableSound = true }: PixelSelectProps) {
+export function PixelSelect({ options = MOODS, onChange, autoplay = false, enableSound = true, pixelSize = CELL, speed = 1, stagger = 1, scatter = 1, origin = "top-left" }: PixelSelectProps) {
   const play = useSound(enableSound);
   const uid = useId();
   const [value, setValue] = useState((options[1] ?? options[0]).id);
@@ -57,32 +74,38 @@ export function PixelSelect({ options = MOODS, onChange, autoplay = false, enabl
   const touched = useRef(false);
   const autoK = useRef(0);
   const MH = options.length * 40 + 12;
-  const cols = Math.ceil(MW / CELL), rows = Math.ceil(MH / CELL);
+  const px = Math.round(clampNum(pixelSize, CELL, 10, 24));
+  const k = 1 / clampNum(speed, 1, 0.5, 2);
+  const stag = clampNum(stagger, 1, 0, 2);
+  const scat = clampNum(scatter, 1, 0, 2);
+  const cols = Math.ceil(MW / px), rows = Math.ceil(MH / px);
   const current = options.find((o) => o.id === value) ?? options[0];
   const [seed, setSeed] = useState(0);
   const cells = useMemo(() => {
     const rand = seeded(seed * 9973 + 17);
     return Array.from({ length: cols * rows }, (_, i) => {
       const c = i % cols, r = Math.floor(i / cols);
-      // Build from the top-left corner outwards, with jitter.
-      const dist = Math.hypot(c / cols, r / rows);
-      return { c, r, delay: dist * 0.22 + rand() * 0.08, fall: 40 + rand() * 140, drift: (rand() - 0.5) * 60, spin: (rand() - 0.5) * 180 };
+      // Build outwards from the chosen corner (or the middle), with jitter.
+      const fx = origin === "top-right" || origin === "bottom-right" ? 1 - c / cols : c / cols;
+      const fy = origin === "bottom-left" || origin === "bottom-right" ? 1 - r / rows : r / rows;
+      const dist = origin === "center" ? Math.hypot(c / cols - 0.5, r / rows - 0.5) * 2 : Math.hypot(fx, fy);
+      return { c, r, delay: (dist * 0.22 + rand() * 0.08) * stag, fall: (40 + rand() * 140) * scat, drift: (rand() - 0.5) * 60 * scat, spin: (rand() - 0.5) * 180 };
     });
-  }, [cols, rows, seed]);
+  }, [cols, rows, seed, origin, stag, scat]);
 
   const openMenu = () => {
     if (phase !== "closed") return;
     play("pop", 0.7);
     setSeed((s) => s + 1);
     setPhase("opening");
-    setTimeout(() => setPhase("open"), 420);
+    setTimeout(() => setPhase("open"), 420 * k);
   };
   const closeMenu = (pick?: string) => {
     if (phase !== "open") return;
     if (pick) { play("tap", 0.8); setValue(pick); onChange?.(pick); }
     setSeed((s) => s + 1);
     setPhase("closing");
-    setTimeout(() => setPhase("closed"), 900);
+    setTimeout(() => setPhase("closed"), 900 * k);
   };
 
   const autoRun = useEffectEvent((ts: number[]) => {
@@ -90,7 +113,7 @@ export function PixelSelect({ options = MOODS, onChange, autoplay = false, enabl
     play.auto("pop", 0.7);
     setSeed((s) => s + 1);
     setPhase("opening");
-    ts.push(window.setTimeout(() => setPhase("open"), 420));
+    ts.push(window.setTimeout(() => setPhase("open"), 420 * k));
     autoK.current += 2;
     const pick = options[autoK.current % options.length];
     ts.push(window.setTimeout(() => { if (!touched.current) setHover(pick.id); }, 900));
@@ -100,7 +123,7 @@ export function PixelSelect({ options = MOODS, onChange, autoplay = false, enabl
       setValue(pick.id);
       setSeed((s) => s + 1);
       setPhase("closing");
-      ts.push(window.setTimeout(() => setPhase("closed"), 900));
+      ts.push(window.setTimeout(() => setPhase("closed"), 900 * k));
     }, 1700));
   });
 
@@ -136,7 +159,7 @@ export function PixelSelect({ options = MOODS, onChange, autoplay = false, enabl
               <motion.span
                 key={i}
                 className="absolute rounded-[2px]"
-                style={{ left: cell.c * CELL, top: cell.r * CELL, width: CELL - 1, height: CELL - 1, background: current.color }}
+                style={{ left: cell.c * px, top: cell.r * px, width: px - 1, height: px - 1, background: current.color }}
                 initial={phase === "opening" ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1, x: 0, y: 0, rotate: 0 }}
                 animate={
                   phase === "opening"
@@ -145,7 +168,7 @@ export function PixelSelect({ options = MOODS, onChange, autoplay = false, enabl
                       ? { scale: 1, opacity: 0 }
                       : { y: cell.fall, x: cell.drift, rotate: cell.spin, opacity: 0, scale: 0.4 }
                 }
-                transition={phase === "opening" ? { duration: 0.24, delay: cell.delay } : phase === "open" ? { duration: 0.3, delay: cell.delay * 0.4 } : { duration: 0.7, delay: cell.delay * 0.6, ease: [0.4, 0, 1, 1] }}
+                transition={phase === "opening" ? { duration: 0.24 * k, delay: cell.delay * k } : phase === "open" ? { duration: 0.3 * k, delay: cell.delay * 0.4 * k } : { duration: 0.7 * k, delay: cell.delay * 0.6 * k, ease: [0.4, 0, 1, 1] }}
               />
             ))}
           </div>

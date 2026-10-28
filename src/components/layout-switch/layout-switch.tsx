@@ -25,14 +25,19 @@ const PHOTOS = [
 const LAYOUTS: LayoutSwitchLayout[] = ["grid", "row", "feature", "pile"];
 const W = 640;
 const H = 320;
-const G = 10;
 
-function rects(layout: LayoutSwitchLayout, n: number): Rect[] {
+function clampNum(v: number | undefined, fallback: number, lo: number, hi: number) {
+  const n = typeof v === "number" && Number.isFinite(v) ? v : fallback;
+  return Math.min(hi, Math.max(lo, n));
+}
+
+function rects(layout: LayoutSwitchLayout, n: number, G: number): Rect[] {
   return Array.from({ length: n }, (_, i) => {
     switch (layout) {
       case "grid": {
+        const rowCount = Math.ceil(n / 3);
         const w = (W - G * 2) / 3,
-          h = (H - G) / 2;
+          h = (H - G * (rowCount - 1)) / rowCount;
         return { x: (i % 3) * (w + G), y: Math.floor(i / 3) * (h + G), w, h, r: 0, z: 1 };
       }
       case "row": {
@@ -43,7 +48,7 @@ function rects(layout: LayoutSwitchLayout, n: number): Rect[] {
       case "feature": {
         if (i === 0) return { x: 0, y: 0, w: 420, h: H, r: 0, z: 1 };
         const h = (H - G * (n - 2)) / (n - 1);
-        return { x: 430, y: (i - 1) * (h + G), w: W - 430, h, r: 0, z: 1 };
+        return { x: 420 + G, y: (i - 1) * (h + G), w: W - 420 - G, h, r: 0, z: 1 };
       }
       case "pile": {
         const rot = [-9, 6, -4, 10, -2, 3][i % 6];
@@ -58,6 +63,16 @@ export interface LayoutSwitchProps {
   autoplay?: boolean;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
+  /** How many photos to show, 3 to 6. Defaults to all six. */
+  count?: number;
+  /** Space between photos in px, 0 to 24. */
+  gap?: number;
+  /** Roundness of the photo corners in px, 0 to 32. A photo opened full size is 8px rounder. */
+  radius?: number;
+  /** How strongly photos spring toward their new place, 100 to 500. Higher moves faster. */
+  stiffness?: number;
+  /** How quickly the spring settles, 12 to 40. Lower overshoots and bounces more. */
+  damping?: number;
 }
 
 /**
@@ -65,13 +80,19 @@ export interface LayoutSwitchProps {
  * one springs from its old box to its new one, and clicking a photo grows it to
  * fill the frame.
  */
-export function LayoutSwitch({ autoplay = false, enableSound = true }: LayoutSwitchProps) {
+export function LayoutSwitch({ autoplay = false, enableSound = true, count = PHOTOS.length, gap = 10, radius = 16, stiffness = 220, damping = 26 }: LayoutSwitchProps) {
   const play = useSound(enableSound);
   const [layout, setLayout] = useState<LayoutSwitchLayout>("grid");
-  const [open, setOpen] = useState<string | null>(null);
+  const [openId, setOpen] = useState<string | null>(null);
   const touched = useRef(false);
   const seg = useId();
-  const boxes = rects(layout, PHOTOS.length);
+  const photos = PHOTOS.slice(0, Math.round(clampNum(count, PHOTOS.length, 3, PHOTOS.length)));
+  const g = clampNum(gap, 10, 0, 24);
+  const round = clampNum(radius, 16, 0, 32);
+  const spring = { type: "spring" as const, stiffness: clampNum(stiffness, 220, 100, 500), damping: clampNum(damping, 26, 12, 40), mass: 0.9 };
+  const boxes = rects(layout, photos.length, g);
+  // A photo that the count has since removed cannot stay open.
+  const open = photos.some((p) => p.id === openId) ? openId : null;
 
   useEffect(() => {
     if (!autoplay) return;
@@ -122,7 +143,7 @@ export function LayoutSwitch({ autoplay = false, enableSound = true }: LayoutSwi
       </div>
       <div className="relative w-full max-w-[640px] overflow-hidden" style={{ height: H, aspectRatio: `${W} / ${H}` }}>
         <div className="absolute left-1/2 top-0 origin-top" style={{ width: W, height: H, marginLeft: -W / 2 }}>
-          {PHOTOS.map((p, i) => {
+          {photos.map((p, i) => {
             const isOpen = open === p.id;
             const b = isOpen ? { x: 0, y: 0, w: W, h: H, r: 0, z: 50 } : boxes[i];
             return (
@@ -136,8 +157,8 @@ export function LayoutSwitch({ autoplay = false, enableSound = true }: LayoutSwi
                 }}
                 className="absolute left-0 top-0 overflow-hidden text-left outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black"
                 initial={false}
-                animate={{ x: b.x, y: b.y, width: b.w, height: b.h, rotate: b.r, zIndex: b.z, opacity: open && !isOpen ? 0.25 : 1, borderRadius: isOpen ? 24 : 16 }}
-                transition={{ type: "spring", stiffness: 220, damping: 26, mass: 0.9, delay: open ? 0 : i * 0.025, zIndex: { duration: 0 } }}
+                animate={{ x: b.x, y: b.y, width: b.w, height: b.h, rotate: b.r, zIndex: b.z, opacity: open && !isOpen ? 0.25 : 1, borderRadius: isOpen ? round + 8 : round }}
+                transition={{ ...spring, delay: open ? 0 : i * 0.025, zIndex: { duration: 0 } }}
                 style={{ background: p.art, boxShadow: layout === "pile" || isOpen ? "0 18px 40px -16px rgba(0,0,0,.45)" : "0 0 0 1px rgba(0,0,0,.04)" }}
                 whileHover={{ scale: open ? 1 : 1.02 }}
               >

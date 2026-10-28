@@ -16,6 +16,22 @@ export interface ThrowWheelProps {
   autoplay?: boolean;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
+  /** How many of the cards go on the wheel, 3 up to the number of cards you pass. Defaults to all of them. */
+  count?: number;
+  /** Size of every card, 0.6 to 1.2. 1 is the original 150 by 200 card. */
+  cardSize?: number;
+  /** How far the wheel keeps gliding after a throw, 0.3 to 3. Higher glides further. */
+  glide?: number;
+  /** How far cards turn edge-on while the wheel spins, 0 to 2. 0 keeps every card flat. */
+  tilt?: number;
+  /** How much cards blur with speed, 0 to 2. 0 keeps them sharp. */
+  blur?: number;
+}
+
+/** Keeps a number inside a range and falls back to the default for NaN or Infinity. */
+function clampNum(v: number | undefined, fallback: number, lo: number, hi: number) {
+  const n = typeof v === "number" && Number.isFinite(v) ? v : fallback;
+  return Math.min(hi, Math.max(lo, n));
 }
 
 const CARDS: WheelCard[] = [
@@ -34,7 +50,7 @@ const CARDS: WheelCard[] = [
 const CW = 150;
 const CH = 200;
 
-function Card({ card, i, n, rot, tilt, blur, radius }: { card: WheelCard; i: number; n: number; rot: MotionValue<number>; tilt: MotionValue<number>; blur: MotionValue<number>; radius: number }) {
+function Card({ card, i, n, rot, tilt, blur, radius, cw, ch }: { card: WheelCard; i: number; n: number; rot: MotionValue<number>; tilt: MotionValue<number>; blur: MotionValue<number>; radius: number; cw: number; ch: number }) {
   const step = 360 / n;
   // Cards nearer the front straighten first: each gets its own spring.
   const distance = useTransform(rot, (r) => {
@@ -48,7 +64,7 @@ function Card({ card, i, n, rot, tilt, blur, radius }: { card: WheelCard; i: num
   return (
     <motion.div
       className="absolute left-1/2 top-1/2"
-      style={{ width: CW, height: CH, marginLeft: -CW / 2, marginTop: -CH / 2, transform: `rotateY(${i * step}deg) translateZ(${radius}px)`, transformStyle: "preserve-3d", opacity }}
+      style={{ width: cw, height: ch, marginLeft: -cw / 2, marginTop: -ch / 2, transform: `rotateY(${i * step}deg) translateZ(${radius}px)`, transformStyle: "preserve-3d", opacity }}
     >
       <motion.div
         className="flex h-full w-full flex-col justify-end overflow-hidden rounded-[18px] p-3.5 shadow-[0_18px_30px_-16px_rgba(0,0,0,.45)]"
@@ -66,15 +82,24 @@ function Card({ card, i, n, rot, tilt, blur, radius }: { card: WheelCard; i: num
  * direction of travel and blurs with speed; as it slows they straighten one by
  * one and the wheel snaps a card to the front.
  */
-export function ThrowWheel({ cards = CARDS, autoplay = false, enableSound = true }: ThrowWheelProps) {
+export function ThrowWheel({ cards: allCards = CARDS, autoplay = false, enableSound = true, count, cardSize = 1, glide = 1, tilt: tiltAmount = 1, blur: blurAmount = 1 }: ThrowWheelProps) {
   const play = useSound(enableSound);
+  const cards = count === undefined ? allCards : allCards.slice(0, Math.round(clampNum(count, allCards.length, Math.min(3, allCards.length), allCards.length)));
   const n = cards.length;
   const step = 360 / n;
-  const radius = Math.round(CW / 2 / Math.tan(Math.PI / n)) + 40;
+  const size = clampNum(cardSize, 1, 0.6, 1.2);
+  const cw = Math.round(CW * size);
+  const ch = Math.round(CH * size);
+  const radius = Math.round(cw / 2 / Math.tan(Math.PI / n)) + 40;
   const rot = useMotionValue(0);
   const vel = useVelocity(rot);
-  const tilt = useTransform(vel, (v) => Math.max(-70, Math.min(70, -v * 0.09)));
-  const blur = useTransform(vel, (v) => Math.min(6, Math.abs(v) * 0.006));
+  // Live values for the motion transforms and throws, so changing them never restarts the wheel.
+  const live = useRef({ glide: 1, tilt: 1, blur: 1 });
+  useEffect(() => {
+    live.current = { glide: clampNum(glide, 1, 0.3, 3), tilt: clampNum(tiltAmount, 1, 0, 2), blur: clampNum(blurAmount, 1, 0, 2) };
+  }, [glide, tiltAmount, blurAmount]);
+  const tilt = useTransform(vel, (v) => Math.max(-70, Math.min(70, -v * 0.09 * live.current.tilt)));
+  const blur = useTransform(vel, (v) => Math.min(6, Math.abs(v) * 0.006 * live.current.blur));
   const [front, setFront] = useState(0);
   const drag = useRef<{ x: number; r: number; lastX: number; lastT: number; v: number } | null>(null);
   const ctl = useRef<{ stop: () => void } | null>(null);
@@ -105,7 +130,7 @@ export function ThrowWheel({ cards = CARDS, autoplay = false, enableSound = true
       type: "inertia",
       velocity,
       power: 0.55,
-      timeConstant: 420,
+      timeConstant: 420 * live.current.glide,
       modifyTarget: (t) => Math.round(t / step) * step,
       onComplete: () => { if (Math.abs(rot.get() - from) > 0.5) sound("drop", 0.5); },
     });
@@ -164,7 +189,7 @@ export function ThrowWheel({ cards = CARDS, autoplay = false, enableSound = true
       >
         <motion.div className="absolute inset-0" style={{ transformStyle: "preserve-3d", rotateY: rot, z: -radius }}>
           {cards.map((c, i) => (
-            <Card key={c.title} card={c} i={i} n={n} rot={rot} tilt={tilt} blur={blur} radius={radius} />
+            <Card key={c.title} card={c} i={i} n={n} rot={rot} tilt={tilt} blur={blur} radius={radius} cw={cw} ch={ch} />
           ))}
         </motion.div>
       </div>

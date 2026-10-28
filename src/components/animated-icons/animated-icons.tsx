@@ -4,24 +4,38 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useSound, type SoundName } from "@/lib/ui-sounds";
 
 const S = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-const spring = { type: "spring", stiffness: 420, damping: 24 } as const;
 
-export function MenuIcon({ on }: { on: boolean }) {
+/** Playback speed shared by every icon: 1 is the designed pace, 2 is twice as fast. Kept between 0.25 and 4. */
+type Speed = { speed?: number };
+const pace = (speed = 1) => Math.min(4, Math.max(0.25, Number.isFinite(speed) ? speed : 1));
+/** A spring that is `speed` times quicker (stiffness grows with the square so the wobble keeps its shape). */
+const springAt = (stiffness: number, damping: number, speed = 1) => {
+  const p = pace(speed);
+  return { type: "spring", stiffness: stiffness * p * p, damping: damping * p } as const;
+};
+/** A timed transition (seconds) that plays `speed` times quicker, delay included. */
+const timed = (duration: number, speed = 1, delay?: number) => {
+  const p = pace(speed);
+  return delay === undefined ? { duration: duration / p } : { duration: duration / p, delay: delay / p };
+};
+
+export function MenuIcon({ on, speed, size = 26 }: { on: boolean; size?: number } & Speed) {
+  const spring = springAt(420, 24, speed);
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" {...S} aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" {...S} aria-hidden="true">
       <motion.line x1="4" x2="20" y1="7" y2="7" animate={on ? { rotate: 45, y: 5 } : { rotate: 0, y: 0 }} transition={spring} />
-      <motion.line x1="4" x2="20" y1="12" y2="12" animate={{ opacity: on ? 0 : 1, scaleX: on ? 0 : 1 }} transition={{ duration: 0.15 }} />
+      <motion.line x1="4" x2="20" y1="12" y2="12" animate={{ opacity: on ? 0 : 1, scaleX: on ? 0 : 1 }} transition={timed(0.15, speed)} />
       <motion.line x1="4" x2="20" y1="17" y2="17" animate={on ? { rotate: -45, y: -5 } : { rotate: 0, y: 0 }} transition={spring} />
     </svg>
   );
 }
 
-export function PlayIcon({ on }: { on: boolean }) {
+export function PlayIcon({ on, speed, size = 26 }: { on: boolean; size?: number } & Speed) {
   const play = "M7 5 L12.5 8.4 L12.5 15.6 L7 19 Z M12.5 8.4 L18.5 12 L18.5 12 L12.5 15.6 Z";
   const pause = "M6.5 5 L10 5 L10 19 L6.5 19 Z M14 5 L17.5 5 L17.5 19 L14 19 Z";
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <motion.path initial={false} animate={{ d: on ? pause : play }} transition={{ type: "spring", stiffness: 300, damping: 26 }} />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <motion.path initial={false} animate={{ d: on ? pause : play }} transition={springAt(300, 26, speed)} />
     </svg>
   );
 }
@@ -39,7 +53,7 @@ function seeded(seed: number) {
   };
 }
 
-export function HeartIcon({ on, burst }: { on: boolean; burst: number }) {
+export function HeartIcon({ on, burst, speed, size = 26 }: { on: boolean; burst: number; size?: number } & Speed) {
   // A fresh burst every time, so no two likes look the same.
   const parts = useMemo(() => {
     if (!burst) return [];
@@ -63,41 +77,42 @@ export function HeartIcon({ on, burst }: { on: boolean; burst: number }) {
               initial={{ x: 0, y: 0, scale: 1, opacity: 1 }}
               animate={{ x: p.x, y: p.y, scale: 0, opacity: 1, rotate: p.r ? 0 : 180 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ ...timed(0.7, speed), ease: [0.16, 1, 0.3, 1] }}
             />
           ))}
       </AnimatePresence>
-      <motion.svg key={burst} width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" animate={on && burst ? { scale: [1, 0.7, 1.25, 1] } : { scale: 1 }} transition={{ duration: 0.45 }}>
+      <motion.svg key={burst} width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" animate={on && burst ? { scale: [1, 0.7, 1.25, 1] } : { scale: 1 }} transition={timed(0.45, speed)}>
         <motion.path
           d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"
           strokeWidth={2}
           strokeLinejoin="round"
           initial={false}
           animate={{ fill: on ? "#ff375f" : "rgba(255,55,95,0)", stroke: on ? "#ff375f" : "currentColor" }}
-          transition={{ duration: 0.2 }}
+          transition={timed(0.2, speed)}
         />
       </motion.svg>
     </span>
   );
 }
 
-export function BellIcon({ on }: { on: boolean }) {
+export function BellIcon({ on, speed, size = 26 }: { on: boolean; size?: number } & Speed) {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" {...S} aria-hidden="true">
-      <motion.g style={{ originX: "50%", originY: "10%" }} animate={on ? { rotate: [0, -20, 16, -11, 7, -3, 0] } : { rotate: 0 }} transition={{ duration: 0.75 }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" {...S} aria-hidden="true">
+      <motion.g style={{ originX: "50%", originY: "10%" }} animate={on ? { rotate: [0, -20, 16, -11, 7, -3, 0] } : { rotate: 0 }} transition={timed(0.75, speed)}>
         <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" />
         <path d="M10 20.5a2 2 0 0 0 4 0" />
       </motion.g>
-      <motion.path d="M3 3l18 18" initial={false} animate={{ pathLength: on ? 0 : 1, opacity: on ? 0 : 1 }} transition={{ duration: 0.3 }} />
-      <motion.circle cx="18" cy="5.5" r="3" fill="#ff3b30" stroke="none" initial={false} animate={{ scale: on ? 1 : 0 }} transition={{ type: "spring", stiffness: 600, damping: 14, delay: on ? 0.2 : 0 }} />
+      <motion.path d="M3 3l18 18" initial={false} animate={{ pathLength: on ? 0 : 1, opacity: on ? 0 : 1 }} transition={timed(0.3, speed)} />
+      <motion.circle cx="18" cy="5.5" r="3" fill="#ff3b30" stroke="none" initial={false} animate={{ scale: on ? 1 : 0 }} transition={{ ...springAt(600, 14, speed), delay: (on ? 0.2 : 0) / pace(speed) }} />
     </svg>
   );
 }
 
-export function ThemeIcon({ on }: { on: boolean }) {
+export function ThemeIcon({ on, speed, size = 26 }: { on: boolean; size?: number } & Speed) {
+  const spring = springAt(420, 24, speed);
   const id = `theme-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" {...S} aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" {...S} aria-hidden="true">
       <mask id={id}>
         <rect x="0" y="0" width="24" height="24" fill="white" stroke="none" />
         <motion.circle r="7" fill="black" stroke="none" initial={false} animate={on ? { cx: 17, cy: 7 } : { cx: 30, cy: -6 }} transition={spring} />
@@ -112,13 +127,13 @@ export function ThemeIcon({ on }: { on: boolean }) {
   );
 }
 
-export function BookmarkIcon({ on }: { on: boolean }) {
+export function BookmarkIcon({ on, speed, size = 26 }: { on: boolean; size?: number } & Speed) {
   const id = `save-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const d = "M6 4h12v17l-6-4-6 4z";
   return (
-    <motion.svg width="26" height="26" viewBox="0 0 24 24" {...S} aria-hidden="true" animate={on ? { y: [0, -4, 0] } : { y: 0 }} transition={{ duration: 0.35 }}>
+    <motion.svg width={size} height={size} viewBox="0 0 24 24" {...S} aria-hidden="true" animate={on ? { y: [0, -4, 0] } : { y: 0 }} transition={timed(0.35, speed)}>
       <clipPath id={id}>
-        <motion.rect x="0" width="24" height="24" initial={false} animate={{ y: on ? 0 : 24 }} transition={{ type: "spring", stiffness: 260, damping: 24 }} />
+        <motion.rect x="0" width="24" height="24" initial={false} animate={{ y: on ? 0 : 24 }} transition={springAt(260, 24, speed)} />
       </clipPath>
       <path d={d} />
       <path d={d} fill="#0a84ff" stroke="#0a84ff" clipPath={`url(#${id})`} />
@@ -126,21 +141,21 @@ export function BookmarkIcon({ on }: { on: boolean }) {
   );
 }
 
-export function VolumeIcon({ on }: { on: boolean }) {
+export function VolumeIcon({ on, speed, size = 26 }: { on: boolean; size?: number } & Speed) {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" {...S} aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" {...S} aria-hidden="true">
       <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" />
-      <motion.path d="M15.5 9.2a4 4 0 0 1 0 5.6" initial={false} animate={{ pathLength: on ? 0 : 1, opacity: on ? 0 : 1 }} transition={{ duration: 0.2, delay: on ? 0.12 : 0 }} />
-      <motion.path d="M18 6.8a7.5 7.5 0 0 1 0 10.4" initial={false} animate={{ pathLength: on ? 0 : 1, opacity: on ? 0 : 1 }} transition={{ duration: 0.2, delay: on ? 0 : 0.12 }} />
-      <motion.path d="M16 9.5l5 5M21 9.5l-5 5" initial={false} animate={{ pathLength: on ? 1 : 0, opacity: on ? 1 : 0 }} transition={{ duration: 0.25, delay: on ? 0.2 : 0 }} />
+      <motion.path d="M15.5 9.2a4 4 0 0 1 0 5.6" initial={false} animate={{ pathLength: on ? 0 : 1, opacity: on ? 0 : 1 }} transition={timed(0.2, speed, on ? 0.12 : 0)} />
+      <motion.path d="M18 6.8a7.5 7.5 0 0 1 0 10.4" initial={false} animate={{ pathLength: on ? 0 : 1, opacity: on ? 0 : 1 }} transition={timed(0.2, speed, on ? 0 : 0.12)} />
+      <motion.path d="M16 9.5l5 5M21 9.5l-5 5" initial={false} animate={{ pathLength: on ? 1 : 0, opacity: on ? 1 : 0 }} transition={timed(0.25, speed, on ? 0.2 : 0)} />
     </svg>
   );
 }
 
-export function LockIcon({ on }: { on: boolean }) {
+export function LockIcon({ on, speed, size = 26 }: { on: boolean; size?: number } & Speed) {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" {...S} aria-hidden="true">
-      <motion.path initial={false} animate={{ d: on ? "M8 11 V5.5 A4 4 0 0 1 16 5.5 V6.5" : "M8 11 V8 A4 4 0 0 1 16 8 V11" }} transition={{ type: "spring", stiffness: 380, damping: 18 }} />
+    <svg width={size} height={size} viewBox="0 0 24 24" {...S} aria-hidden="true">
+      <motion.path initial={false} animate={{ d: on ? "M8 11 V5.5 A4 4 0 0 1 16 5.5 V6.5" : "M8 11 V8 A4 4 0 0 1 16 8 V11" }} transition={springAt(380, 18, speed)} />
       <motion.rect x="5" y="11" width="14" height="9.5" rx="2.5" initial={false} animate={{ fill: on ? "rgba(52,199,89,1)" : "rgba(52,199,89,0)", stroke: on ? "#34c759" : "currentColor" }} />
     </svg>
   );
@@ -170,8 +185,18 @@ const CUES: Record<Key, [on: [SoundName, number], off: [SoundName, number]]> = {
   lock: [["off", 1], ["on", 1]],
 };
 
-export function AnimatedIcons({ autoplay = false, enableSound = true }: {
+const clampTo = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Number.isFinite(n) ? n : lo));
+
+export function AnimatedIcons({ autoplay = false, enableSound = true, iconSize = 26, tileSize = 72, tileRadius = 20, speed = 1 }: {
   autoplay?: boolean;
+  /** Size of each icon in pixels. Kept between 14 and 48 (and never bigger than the tile). */
+  iconSize?: number;
+  /** Width and height of each button tile in pixels. Kept between 48 and 96. */
+  tileSize?: number;
+  /** Corner radius of the tiles in pixels. Kept between 0 and half the tile, which makes a circle. */
+  tileRadius?: number;
+  /** How fast the icon animations play: 1 is the designed pace, 2 is twice as fast. Kept between 0.25 and 4. */
+  speed?: number;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }) {
@@ -209,17 +234,22 @@ export function AnimatedIcons({ autoplay = false, enableSound = true }: {
     return () => clearInterval(t);
   }, [autoplay]);
 
+  const tile = clampTo(tileSize, 48, 96);
+  const glyph = clampTo(iconSize, 14, Math.min(48, tile));
+  const radius = clampTo(tileRadius, 0, tile / 2);
+
   const icon = (k: Key): ReactNode => {
     const on = state[k];
+    const p = { on, speed, size: glyph };
     switch (k) {
-      case "menu": return <MenuIcon on={on} />;
-      case "play": return <PlayIcon on={on} />;
-      case "like": return <HeartIcon on={on} burst={burst} />;
-      case "bell": return <BellIcon on={on} />;
-      case "theme": return <ThemeIcon on={on} />;
-      case "save": return <BookmarkIcon on={on} />;
-      case "mute": return <VolumeIcon on={on} />;
-      case "lock": return <LockIcon on={on} />;
+      case "menu": return <MenuIcon {...p} />;
+      case "play": return <PlayIcon {...p} />;
+      case "like": return <HeartIcon {...p} burst={burst} />;
+      case "bell": return <BellIcon {...p} />;
+      case "theme": return <ThemeIcon {...p} />;
+      case "save": return <BookmarkIcon {...p} />;
+      case "mute": return <VolumeIcon {...p} />;
+      case "lock": return <LockIcon {...p} />;
     }
   };
 
@@ -238,13 +268,14 @@ export function AnimatedIcons({ autoplay = false, enableSound = true }: {
             }}
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.88 }}
-            className="flex h-[72px] w-[72px] items-center justify-center rounded-[20px] bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_8px_20px_-12px_rgba(0,0,0,.3)] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]"
+            style={{ width: tile, height: tile, borderRadius: radius }}
+            className="flex items-center justify-center bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_8px_20px_-12px_rgba(0,0,0,.3)] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]"
           >
             {icon(key)}
           </motion.button>
           <span className="relative h-4 w-[80px] overflow-hidden text-center text-[12px] text-[#86868b] dark:text-[#98989d]">
             <AnimatePresence mode="popLayout" initial={false}>
-              <motion.span key={String(state[key])} className="absolute inset-x-0" initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -12, opacity: 0 }} transition={{ type: "spring", stiffness: 500, damping: 32 }}>
+              <motion.span key={String(state[key])} className="absolute inset-x-0" initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -12, opacity: 0 }} transition={springAt(500, 32, speed)}>
                 {label[state[key] ? 1 : 0]}
               </motion.span>
             </AnimatePresence>

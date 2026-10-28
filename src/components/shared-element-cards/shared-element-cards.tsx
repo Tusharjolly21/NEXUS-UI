@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 export interface StoryCard {
@@ -37,9 +37,21 @@ export interface SharedElementCardsProps {
   cards?: StoryCard[];
   /** Opens and closes the cards by itself until the user interacts. */
   autoplay?: boolean;
+  /** How firmly the spring pulls the card open and shut. Higher is faster and snappier. Kept between 80 and 800. */
+  stiffness?: number;
+  /** How quickly the spring settles. Lower overshoots and wobbles, higher stops dead. Kept between 8 and 60. */
+  damping?: number;
+  /** Height of the whole stage in pixels. Kept between 280 and 460. */
+  height?: number;
+  /** Corner radius of the cards in pixels; the open sheet is 4px rounder. Kept between 0 and 44. */
+  radius?: number;
+  /** Space between the cards in pixels. Kept between 0 and 32. */
+  gap?: number;
 }
 
-export function SharedElementCards({ cards = CARDS, autoplay = false }: SharedElementCardsProps) {
+const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Number.isFinite(n) ? n : lo));
+
+export function SharedElementCards({ cards = CARDS, autoplay = false, stiffness = 300, damping = 32, height = 340, radius = 24, gap = 12 }: SharedElementCardsProps) {
   const ns = useId();
   const [open, setOpen] = useState<string | null>(null);
   const touched = useRef(false);
@@ -63,11 +75,16 @@ export function SharedElementCards({ cards = CARDS, autoplay = false }: SharedEl
   }, [autoplay, cards]);
 
   const lid = (id: string, part: string) => `${ns}-${id}-${part}`;
-  const spring = { type: "spring", stiffness: 300, damping: 32 } as const;
+  const spring = { type: "spring", stiffness: clamp(stiffness, 80, 800), damping: clamp(damping, 8, 60) } as const;
+  const r = clamp(radius, 0, 44);
 
   return (
-    <div className="relative h-[340px] w-full max-w-[460px]" onPointerDown={() => (touched.current = true)}>
-      <div className="grid h-full grid-cols-2 gap-3">
+    <div
+      className="relative w-full max-w-[460px]"
+      style={{ height: clamp(height, 280, 460), "--sec-r": `${r}px`, "--sec-r-open": `${r + 4}px` } as CSSProperties}
+      onPointerDown={() => (touched.current = true)}
+    >
+      <div className="grid h-full grid-cols-2" style={{ gap: clamp(gap, 0, 32) }}>
         {cards.map((c) => (
           <motion.button
             key={c.id}
@@ -77,7 +94,7 @@ export function SharedElementCards({ cards = CARDS, autoplay = false }: SharedEl
             onClick={() => setOpen(c.id)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
-            className="relative flex flex-col overflow-hidden rounded-[24px] text-left shadow-[0_18px_40px_-22px_rgba(0,0,0,.4)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0071e3]"
+            className="relative flex flex-col overflow-hidden rounded-[var(--sec-r)] text-left shadow-[0_18px_40px_-22px_rgba(0,0,0,.4)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0071e3]"
             style={{ background: c.art, visibility: open === c.id ? "hidden" : "visible" }}
             aria-label={`Open ${c.title}`}
           >
@@ -94,7 +111,7 @@ export function SharedElementCards({ cards = CARDS, autoplay = false }: SharedEl
           <>
             <motion.div
               key="scrim"
-              className="absolute -inset-3 z-10 rounded-[28px] bg-white/60 backdrop-blur-md dark:bg-black/50"
+              className="absolute -inset-3 z-10 rounded-[var(--sec-r-open)] bg-white/60 backdrop-blur-md dark:bg-black/50"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -107,7 +124,7 @@ export function SharedElementCards({ cards = CARDS, autoplay = false }: SharedEl
               role="dialog"
               aria-modal="true"
               aria-label={active.title}
-              className="absolute inset-0 z-20 flex flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_30px_70px_-20px_rgba(0,0,0,.45)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_30px_70px_-20px_rgba(0,0,0,.8)]"
+              className="absolute inset-0 z-20 flex flex-col overflow-hidden rounded-[var(--sec-r-open)] bg-white shadow-[0_30px_70px_-20px_rgba(0,0,0,.45)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_30px_70px_-20px_rgba(0,0,0,.8)]"
             >
               <div className="relative h-[150px] flex-none" style={{ background: active.art }}>
                 <motion.div layoutId={lid(active.id, "text")} transition={spring} className="absolute bottom-0 left-0 flex flex-col gap-1 p-5">

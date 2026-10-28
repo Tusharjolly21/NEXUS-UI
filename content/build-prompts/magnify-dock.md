@@ -62,15 +62,22 @@ const MAX = 76;
 const RANGE = 150;
 const GAP = 10;
 const PAD = 10;
+const STIFFNESS = 320;
 
-function Icon({ app, mouseX, fit, running, onLaunch }: { app: DockApp; mouseX: MotionValue<number>; fit: MotionValue<number>; running: boolean; onLaunch: () => void }) {
+const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Number.isFinite(n) ? n : lo));
+
+/** The sizes the dock works from, already clamped so no setting can break the layout. */
+interface DockTuning { base: number; max: number; range: number; stiffness: number; labels: boolean }
+
+function Icon({ app, mouseX, fit, running, onLaunch, tune }: { app: DockApp; mouseX: MotionValue<number>; fit: MotionValue<number>; running: boolean; onLaunch: () => void; tune: DockTuning }) {
+  const { base, max, range, stiffness, labels } = tune;
   const ref = useRef<HTMLButtonElement>(null);
   const dist = useTransform(mouseX, (x) => {
     const r = ref.current?.getBoundingClientRect();
     return r ? x - (r.left + r.width / 2) : Infinity;
   });
-  const sizeRaw = useTransform([dist, fit], ([d, k]: number[]) => mapRange(d, [-RANGE * k, 0, RANGE * k], [BASE * k, MAX * k, BASE * k]));
-  const size = useSpring(sizeRaw, { stiffness: 320, damping: 22, mass: 0.2 });
+  const sizeRaw = useTransform([dist, fit], ([d, k]: number[]) => mapRange(d, [-range * k, 0, range * k], [base * k, max * k, base * k]));
+  const size = useSpring(sizeRaw, { stiffness, damping: 22, mass: 0.2 });
   const [hover, setHover] = useState(false);
   const [bounce, setBounce] = useState(0);
   const [iconFailed, setIconFailed] = useState(false);
@@ -79,7 +86,7 @@ function Icon({ app, mouseX, fit, running, onLaunch }: { app: DockApp; mouseX: M
   return (
     <div className="relative flex flex-col items-center">
       <AnimatePresence>
-        {hover && (
+        {hover && labels && (
           <motion.span
             initial={{ opacity: 0, y: 6, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -132,9 +139,25 @@ export interface MagnifyDockProps {
   autoplay?: boolean;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
   enableSound?: boolean;
+  /** Resting size of every icon in pixels. Kept between 32 and 64. */
+  baseSize?: number;
+  /** Size of the icon under the pointer in pixels, never smaller than `baseSize`. Kept up to 104. */
+  maxSize?: number;
+  /** How far from the pointer, in pixels, icons still swell. Kept between 40 and 320. */
+  reach?: number;
+  /** Space between icons in pixels. Kept between 0 and 28. */
+  gap?: number;
+  /** How firmly the icons spring to their new size. Higher is snappier. Kept between 100 and 800. */
+  stiffness?: number;
+  /** Shows each app's name above it while hovered or focused. */
+  showLabels?: boolean;
 }
 
-export function MagnifyDock({ apps = APPS, autoplay = false, enableSound = true }: MagnifyDockProps) {
+export function MagnifyDock({ apps = APPS, autoplay = false, enableSound = true, baseSize = BASE, maxSize = MAX, reach = RANGE, gap = GAP, stiffness = STIFFNESS, showLabels = true }: MagnifyDockProps) {
+  const base = clamp(baseSize, 32, 64);
+  const max = clamp(maxSize, base, 104);
+  const spacing = clamp(gap, 0, 28);
+  const tune: DockTuning = { base, max, range: clamp(reach, 40, 320), stiffness: clamp(stiffness, 100, 800), labels: showLabels };
   const play = useSound(enableSound);
   const mouseX = useMotionValue(Infinity);
   const [running, setRunning] = useState<string[]>(["intelligence"]);
@@ -150,7 +173,7 @@ export function MagnifyDock({ apps = APPS, autoplay = false, enableSound = true 
     const f = frame.current;
     if (!f) return;
     const measure = () => {
-      const need = apps.length * BASE + (apps.length - 1) * GAP + PAD * 2 + (MAX - BASE) * 2;
+      const need = apps.length * base + (apps.length - 1) * spacing + PAD * 2 + (max - base) * 2;
       const next = Math.min(1, f.clientWidth / need);
       fit.set(next);
       setK(next);
@@ -159,7 +182,7 @@ export function MagnifyDock({ apps = APPS, autoplay = false, enableSound = true 
     const ro = new ResizeObserver(measure);
     ro.observe(f);
     return () => ro.disconnect();
-  }, [apps.length, fit]);
+  }, [apps.length, fit, base, max, spacing]);
 
   useEffect(() => {
     if (!autoplay) return;
@@ -175,10 +198,10 @@ export function MagnifyDock({ apps = APPS, autoplay = false, enableSound = true 
   }, [autoplay, mouseX]);
 
   return (
-    <div ref={frame} className="flex h-[150px] w-full items-end justify-center">
+    <div ref={frame} style={{ height: Math.max(150, 74 + max) }} className="flex w-full items-end justify-center">
       <div
         ref={bar}
-        style={{ height: 66 * k, gap: GAP * k, paddingInline: PAD * k, paddingBottom: 6 * k, borderRadius: 22 * k }}
+        style={{ height: (base + 20) * k, gap: spacing * k, paddingInline: PAD * k, paddingBottom: 6 * k, borderRadius: 22 * k }}
         onPointerMove={(e) => { hovering.current = true; mouseX.set(e.clientX); }}
         onPointerLeave={() => { hovering.current = false; mouseX.set(Infinity); }}
         className="flex items-end bg-white/70 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_20px_40px_-20px_rgba(0,0,0,.35)] backdrop-blur-2xl dark:bg-[#2c2c2e]/70 dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-20px_rgba(0,0,0,.7)]"
@@ -186,7 +209,7 @@ export function MagnifyDock({ apps = APPS, autoplay = false, enableSound = true 
         aria-label="Dock"
       >
         {apps.map((app) => (
-          <Icon key={app.id} app={app} mouseX={mouseX} fit={fit} running={running.includes(app.id)} onLaunch={() => {
+          <Icon key={app.id} app={app} mouseX={mouseX} fit={fit} tune={tune} running={running.includes(app.id)} onLaunch={() => {
             play("pop");
             setRunning((r) => (r.includes(app.id) ? r : [...r, app.id]));
           }} />

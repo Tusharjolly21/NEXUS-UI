@@ -15,7 +15,7 @@ Copy the code exactly as it is. Do not restyle, simplify or rename anything, and
 
 ```tsx
 "use client";
-import { useEffect, useRef, useState, type ReactNode, type KeyboardEvent as RKeyboardEvent, type PointerEvent as RPointerEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode, type KeyboardEvent as RKeyboardEvent, type PointerEvent as RPointerEvent } from "react";
 import { motion, motionValue, type MotionValue } from "framer-motion";
 
 const W = 440;
@@ -24,7 +24,19 @@ const H = 300;
 export interface GlassBubblesProps {
   /** Nudges a random bubble every 2.6s until someone moves the pointer through them. */
   autoplay?: boolean;
+  /** Size of every orb, 0.6 to 1.3. Bigger orbs knock into each other sooner. Default 1. */
+  size?: number;
+  /** Length of every thread, 0.5 to 1.3. Longer threads swing wider and slower. Default 1. */
+  threadLength?: number;
+  /** How hard the orbs are pulled down, 0.2 to 3. Lower floats, higher snaps back faster. Default 1. */
+  gravity?: number;
+  /** How quickly swinging dies away, 0.25 to 4. Lower keeps swinging, higher settles fast. Default 1. */
+  drag?: number;
+  /** How hard the pointer shoves an orb, 0.2 to 3. Default 1. */
+  push?: number;
 }
+
+const clamp = (v: number, lo: number, hi: number) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : lo);
 
 /** One hanging orb: anchor x on the top edge, thread length, radius, tint, icon and label. */
 export interface GlassBubble {
@@ -53,8 +65,16 @@ const BUBBLES: GlassBubble[] = [
  * Simple verlet pendulums with circle collisions, rendered as DOM so the
  * glass can use real CSS gradients and blur.
  */
-export function GlassBubbles({ autoplay = false }: GlassBubblesProps) {
+export function GlassBubbles({ autoplay = false, size = 1, threadLength = 1, gravity = 1, drag = 1, push = 1 }: GlassBubblesProps) {
   const stage = useRef<HTMLDivElement>(null);
+  const sizeK = clamp(size, 0.6, 1.3);
+  const lenK = clamp(threadLength, 0.5, 1.3);
+  // Scaled copies used for drawing; the physics loop reads the same numbers through a ref so changes apply live.
+  const bubbles = useMemo(() => BUBBLES.map((b) => ({ ...b, r: b.r * sizeK, len: b.len * lenK })), [sizeK, lenK]);
+  const live = useRef({ bubbles, gravity: 1, drag: 1, push: 1 });
+  useEffect(() => {
+    live.current = { bubbles, gravity: clamp(gravity, 0.2, 3), drag: clamp(drag, 0.25, 4), push: clamp(push, 0.2, 3) };
+  }, [bubbles, gravity, drag, push]);
   const [pos] = useState(() => BUBBLES.map((b) => ({ x: motionValue(b.ax), y: motionValue(b.len), rot: motionValue(0) })));
   const [threads] = useState(() => BUBBLES.map((b) => motionValue(`M ${b.ax} 0 L ${b.ax} ${b.len}`)));
   const pointer = useRef<{ x: number; y: number; vx: number; vy: number } | null>(null);
@@ -63,7 +83,7 @@ export function GlassBubbles({ autoplay = false }: GlassBubblesProps) {
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const s = BUBBLES.map((b) => ({ x: b.ax, y: b.len, px: b.ax, py: b.len, rot: 0, vr: 0 }));
+    const s = live.current.bubbles.map((b) => ({ x: b.ax, y: b.len, px: b.ax, py: b.len, rot: 0, vr: 0 }));
     let raf = 0;
     let last = performance.now();
     let t0 = performance.now();
@@ -81,34 +101,36 @@ export function GlassBubbles({ autoplay = false }: GlassBubblesProps) {
         for (const b of s) b.px -= kick.current * 9;
         kick.current = 0;
       }
+      const { bubbles: B, gravity: g, drag: dr, push: ps } = live.current;
+      const keep = 1 - 0.008 * dr;
       for (const b of s) {
-        const vx = (b.x - b.px) * 0.992, vy = (b.y - b.py) * 0.992;
+        const vx = (b.x - b.px) * keep, vy = (b.y - b.py) * keep;
         b.px = b.x; b.py = b.y;
-        b.x += vx; b.y += vy + 1400 * dt * dt;
+        b.x += vx; b.y += vy + 1400 * g * dt * dt;
       }
       // pointer pushes
       const p = pointer.current;
       if (p) {
         s.forEach((b, i) => {
-          const dx = b.x - p.x, dy = b.y - p.y, d = Math.hypot(dx, dy), min = BUBBLES[i].r + 22;
+          const dx = b.x - p.x, dy = b.y - p.y, d = Math.hypot(dx, dy), min = B[i].r + 22;
           if (d < min && d > 0.01) {
-            const push = (min - d) / d;
-            b.x += dx * push * 0.5; b.y += dy * push * 0.5;
-            b.vr += (p.vx * 0.02) * (dy > 0 ? -1 : 1);
+            const shove = ((min - d) / d) * Math.min(1, 0.5 * ps);
+            b.x += dx * shove; b.y += dy * shove;
+            b.vr += (p.vx * 0.02 * ps) * (dy > 0 ? -1 : 1);
           }
         });
       }
       for (let it = 0; it < 4; it++) {
         // threads (max length, can go slack)
         s.forEach((b, i) => {
-          const B = BUBBLES[i];
-          const dx = b.x - B.ax, dy = b.y, d = Math.hypot(dx, dy);
-          if (d > B.len) { b.x = B.ax + (dx / d) * B.len; b.y = (dy / d) * B.len; }
+          const T = B[i];
+          const dx = b.x - T.ax, dy = b.y, d = Math.hypot(dx, dy);
+          if (d > T.len) { b.x = T.ax + (dx / d) * T.len; b.y = (dy / d) * T.len; }
         });
         // collisions
         for (let i = 0; i < s.length; i++) for (let j = i + 1; j < s.length; j++) {
           const a = s[i], c = s[j];
-          const dx = c.x - a.x, dy = c.y - a.y, d = Math.hypot(dx, dy), min = BUBBLES[i].r + BUBBLES[j].r;
+          const dx = c.x - a.x, dy = c.y - a.y, d = Math.hypot(dx, dy), min = B[i].r + B[j].r;
           if (d < min && d > 0.01) {
             const o = (min - d) / d / 2;
             a.x -= dx * o; a.y -= dy * o; c.x += dx * o; c.y += dy * o;
@@ -118,7 +140,7 @@ export function GlassBubbles({ autoplay = false }: GlassBubblesProps) {
         }
         // walls
         s.forEach((b, i) => {
-          const r = BUBBLES[i].r;
+          const r = B[i].r;
           if (b.x < r) b.x = r;
           if (b.x > W - r) b.x = W - r;
           if (b.y > H - r) b.y = H - r;
@@ -128,10 +150,10 @@ export function GlassBubbles({ autoplay = false }: GlassBubblesProps) {
         b.vr *= 0.97;
         b.rot += b.vr;
         pos[i].x.set(b.x); pos[i].y.set(b.y); pos[i].rot.set(b.rot);
-        const B = BUBBLES[i];
-        const d = Math.hypot(b.x - B.ax, b.y);
-        const sag = Math.sqrt(Math.max(0, B.len * B.len - d * d)) * 0.5;
-        threads[i].set(`M ${B.ax} 0 Q ${(B.ax + b.x) / 2 + sag * 0.3} ${b.y / 2 + sag} ${b.x} ${b.y - BUBBLES[i].r}`);
+        const T = B[i];
+        const d = Math.hypot(b.x - T.ax, b.y);
+        const sag = Math.sqrt(Math.max(0, T.len * T.len - d * d)) * 0.5;
+        threads[i].set(`M ${T.ax} 0 Q ${(T.ax + b.x) / 2 + sag * 0.3} ${b.y / 2 + sag} ${b.x} ${b.y - T.r}`);
       });
       raf = requestAnimationFrame(step);
     };
@@ -175,7 +197,7 @@ export function GlassBubbles({ autoplay = false }: GlassBubblesProps) {
         <svg className="pointer-events-none absolute inset-0" width={W} height={H} aria-hidden="true">
           {threads.map((t, i) => <motion.path key={i} d={t} fill="none" stroke="var(--gb-thread)" strokeWidth={1.2} />)}
         </svg>
-        {BUBBLES.map((b, i) => <Orb key={b.label} b={b} x={pos[i].x} y={pos[i].y} rot={pos[i].rot} />)}
+        {bubbles.map((b, i) => <Orb key={b.label} b={b} x={pos[i].x} y={pos[i].y} rot={pos[i].rot} />)}
       </div>
       <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">Sweep your pointer through the bubbles.</span>
     </div>

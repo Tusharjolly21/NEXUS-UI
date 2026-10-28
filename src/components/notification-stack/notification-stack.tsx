@@ -11,7 +11,21 @@ export interface NotificationStackProps {
   autoplay?: boolean;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
+  /** How long a toast stays before it dismisses itself, in milliseconds. Kept between 1000 and 12000. */
+  duration?: number;
+  /** How many toasts show while the stack is folded up. The rest wait behind them. Kept between 1 and 5. */
+  visible?: number;
+  /** How much of each toast behind the front one peeks out, in pixels, while folded. Kept between 4 and 30. */
+  peek?: number;
+  /** Space between toasts in pixels while the stack is spread out. Kept between 0 and 20. */
+  gap?: number;
+  /** How firmly the toasts spring into place. Higher is snappier. Kept between 150 and 800. */
+  stiffness?: number;
+  /** Which way the stack grows: "up" from the bottom, or "down" from the top. */
+  direction?: "up" | "down";
 }
+
+const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Number.isFinite(n) ? n : lo));
 
 const SAMPLES: Omit<Toast, "id">[] = [
   { kind: "success", title: "Changes saved", body: "Your profile is up to date." },
@@ -30,8 +44,20 @@ const ICON: Record<Kind, { color: string; path: string }> = {
 const GAP = 10;
 const HEIGHT = 68;
 
-export function NotificationStack({ autoplay = false, enableSound = true }: NotificationStackProps) {
+export function NotificationStack({ autoplay = false, enableSound = true, duration = 4200, visible = 3, peek = 13, gap = GAP, stiffness = 380, direction = "up" }: NotificationStackProps) {
   const play = useSound(enableSound);
+  const stay = clamp(duration, 1000, 12000);
+  const shown = Math.round(clamp(visible, 1, 5));
+  const peekPx = clamp(peek, 4, 30);
+  const spread = clamp(gap, 0, 20);
+  const spring = clamp(stiffness, 150, 800);
+  const down = direction === "down";
+  const dir = down ? 1 : -1;
+  // The timers are set up in handlers that outlive a render, so they read the latest stay time from here.
+  const stayRef = useRef(stay);
+  useEffect(() => {
+    stayRef.current = stay;
+  }, [stay]);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [expanded, setExpanded] = useState(false);
   const nextId = useRef(1);
@@ -45,7 +71,7 @@ export function NotificationStack({ autoplay = false, enableSound = true }: Noti
     setToasts((t) => t.filter((x) => x.id !== id));
   };
 
-  const schedule = (id: number, ms = 4200) => {
+  const schedule = (id: number, ms = stayRef.current) => {
     clearTimeout(timers.current.get(id));
     timers.current.set(id, window.setTimeout(() => dismiss(id), ms));
   };
@@ -75,14 +101,14 @@ export function NotificationStack({ autoplay = false, enableSound = true }: Noti
   // Pause auto-dismiss while hovered.
   useEffect(() => {
     if (expanded) timers.current.forEach((t) => clearTimeout(t));
-    else toasts.forEach((t) => t.kind !== "loading" && schedule(t.id, 2600));
+    else toasts.forEach((t) => t.kind !== "loading" && schedule(t.id, Math.min(2600, stayRef.current)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expanded]);
 
   const ordered = [...toasts].reverse(); // newest first
 
   return (
-    <div className="flex w-full flex-col items-center gap-6">
+    <div className={`flex w-full items-center gap-6 ${down ? "flex-col-reverse" : "flex-col"}`}>
       <ol
         aria-live="polite"
         className="relative h-[240px] w-full max-w-[380px]"
@@ -91,7 +117,7 @@ export function NotificationStack({ autoplay = false, enableSound = true }: Noti
       >
         <AnimatePresence initial={false}>
           {ordered.map((t, i) => {
-            const hidden = !expanded && i > 2;
+            const hidden = !expanded && i > shown - 1;
             return (
               <motion.li
                 key={t.id}
@@ -99,17 +125,17 @@ export function NotificationStack({ autoplay = false, enableSound = true }: Noti
                 dragSnapToOrigin
                 dragElastic={0.6}
                 onDragEnd={(_, info) => { if (Math.abs(info.offset.x) > 90) dismiss(t.id); }}
-                initial={{ y: 80, opacity: 0, scale: 0.9 }}
+                initial={{ y: 80 * -dir, opacity: 0, scale: 0.9 }}
                 animate={{
-                  y: expanded ? -i * (HEIGHT + GAP) : -i * 13,
+                  y: expanded ? dir * i * (HEIGHT + spread) : dir * i * peekPx,
                   scale: expanded ? 1 : 1 - i * 0.05,
                   opacity: hidden ? 0 : 1,
                   zIndex: 100 - i,
                 }}
-                exit={{ opacity: 0, scale: 0.9, y: 30, transition: { duration: 0.2 } }}
-                transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                className="absolute inset-x-0 bottom-0 flex h-[68px] cursor-grab items-center gap-3 rounded-[20px] bg-white/90 pl-3.5 pr-2 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_12px_30px_-12px_rgba(0,0,0,.25)] backdrop-blur-xl active:cursor-grabbing dark:bg-[#2c2c2e]/90 dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_12px_30px_-12px_rgba(0,0,0,.6)]"
-                style={{ transformOrigin: "50% 100%" }}
+                exit={{ opacity: 0, scale: 0.9, y: 30 * -dir, transition: { duration: 0.2 } }}
+                transition={{ type: "spring", stiffness: spring, damping: 32 }}
+                className={`absolute inset-x-0 ${down ? "top-0" : "bottom-0"} flex h-[68px] cursor-grab items-center gap-3 rounded-[20px] bg-white/90 pl-3.5 pr-2 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_12px_30px_-12px_rgba(0,0,0,.25)] backdrop-blur-xl active:cursor-grabbing dark:bg-[#2c2c2e]/90 dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_12px_30px_-12px_rgba(0,0,0,.6)]`}
+                style={{ transformOrigin: down ? "50% 0%" : "50% 100%" }}
               >
                 <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full" style={{ background: `${ICON[t.kind].color}1f` }}>
                   <AnimatePresence mode="popLayout" initial={false}>
@@ -134,7 +160,7 @@ export function NotificationStack({ autoplay = false, enableSound = true }: Noti
           })}
         </AnimatePresence>
         {toasts.length === 0 && (
-          <motion.li initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-x-0 bottom-6 list-none text-center text-[13px] text-[#86868b] dark:text-[#98989d]">
+          <motion.li initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`absolute inset-x-0 ${down ? "top-6" : "bottom-6"} list-none text-center text-[13px] text-[#86868b] dark:text-[#98989d]`}>
             Notifications appear here
           </motion.li>
         )}
