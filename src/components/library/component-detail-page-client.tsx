@@ -1310,7 +1310,9 @@ export function ComponentDetailPageClient({
             <section aria-labelledby="playground-heading" className="mt-20">
               <SectionTitle id="playground-heading">Play with it</SectionTitle>
               <p className="mb-6 mt-3 max-w-[560px] text-[17px] text-muted-foreground">
-                Move the controls and watch it change. Copy code gives you a snippet with only the props you changed.
+                {livePlayground.tryIt
+                  ? "Move the controls and watch it change, or put your own content in it. Copy code gives you a snippet with the settings you chose."
+                  : "Move the controls and watch it change. Copy code gives you a snippet with only the props you changed."}
               </p>
               <LivePropsPlayground playground={livePlayground} name={name} description={description} locked={locked} />
             </section>
