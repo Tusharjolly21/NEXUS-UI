@@ -5550,6 +5550,11 @@ export default function Page() {
     props: [
       { name: "cards", type: "StoryCard[]", description: "Each card has id, eyebrow, title, art (any CSS background) and body paragraphs." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens and closes the cards by itself until someone interacts." },
+      { name: "stiffness", type: "number", defaultValue: "300", description: "How firmly the spring pulls a card open and shut, 80 to 800. Higher is faster and snappier." },
+      { name: "damping", type: "number", defaultValue: "32", description: "How quickly the spring settles, 8 to 60. Lower overshoots and wobbles, higher stops dead." },
+      { name: "height", type: "number", defaultValue: "340", description: "Height of the whole stage in px, 280 to 460." },
+      { name: "radius", type: "number", defaultValue: "24", description: "Corner radius of the cards in px, 0 to 44. The open sheet is 4px rounder." },
+      { name: "gap", type: "number", defaultValue: "12", description: "Space between the two cards in px, 0 to 32." },
     ],
     Preview: Previews.PreviewSharedElementCards,
     previewShell: "plain",
@@ -5579,6 +5584,19 @@ export default function Page() {
     />
   );
 }`,
+    reactExamples: [
+      {
+        title: "Tune the feel",
+        code: `// src/app/page.tsx
+
+import { SharedElementCards } from "@/components/shared-element-cards";
+
+// Softer, rounder cards that open with a slow, bouncy spring.
+export default function Page() {
+  return <SharedElementCards stiffness={180} damping={16} radius={36} gap={16} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -6042,6 +6060,11 @@ export default function Page() {
       { name: "on", type: "boolean", description: "Each icon (MenuIcon, PlayIcon, HeartIcon, BellIcon, ThemeIcon, BookmarkIcon, VolumeIcon, LockIcon) takes its state as on." },
       { name: "burst", type: "number", description: "HeartIcon only: increase it to play a new burst." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "AnimatedIcons grid only: toggles the icons in turn until someone interacts." },
+      { name: "speed", type: "number", defaultValue: "1", description: "How fast the animation plays, 0.25 to 4. Higher is quicker. Every icon takes it, and so does the grid." },
+      { name: "size", type: "number", defaultValue: "26", description: "Each icon only: width and height in px." },
+      { name: "iconSize", type: "number", defaultValue: "26", description: "AnimatedIcons grid only: size of each icon in px, 14 to 48." },
+      { name: "tileSize", type: "number", defaultValue: "72", description: "AnimatedIcons grid only: width and height of each button tile in px, 48 to 96." },
+      { name: "tileRadius", type: "number", defaultValue: "20", description: "AnimatedIcons grid only: corner radius of the tiles in px. Half the tile size makes a circle." },
     ],
     Preview: Previews.PreviewAnimatedIcons,
     previewShell: "plain",
@@ -6065,6 +6088,19 @@ export default function Page() {
     </div>
   );
 }`,
+    reactExamples: [
+      {
+        title: "Round, bigger tiles",
+        code: `// src/app/page.tsx
+
+import { AnimatedIcons } from "@/components/animated-icons";
+
+// Circular tiles with larger icons that animate a little faster.
+export default function Page() {
+  return <AnimatedIcons tileSize={84} tileRadius={42} iconSize={34} speed={1.4} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -6118,6 +6154,12 @@ export default function Page() {
     props: [
       { name: "apps", type: "DockApp[]", defaultValue: "Apple Intelligence, Maps, Music, TV, Claude, Chrome", description: "Each app has id, label, icon (an image URL of the finished app icon), and bg (any CSS background) and glyph (an icon) for the tile that shows when there is no icon or it fails to load." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps an invisible pointer across the dock until someone hovers it." },
+      { name: "baseSize", type: "number", defaultValue: "46", description: "Resting size of every icon in px, 32 to 64." },
+      { name: "maxSize", type: "number", defaultValue: "76", description: "Size of the icon right under the pointer in px, up to 104. It never goes below baseSize." },
+      { name: "reach", type: "number", defaultValue: "150", description: "How far from the pointer, in px, icons still swell, 40 to 320. A small reach magnifies one icon, a large one lifts a whole group." },
+      { name: "gap", type: "number", defaultValue: "10", description: "Space between icons in px, 0 to 28." },
+      { name: "stiffness", type: "number", defaultValue: "320", description: "How firmly icons spring to their new size, 100 to 800. Higher is snappier." },
+      { name: "showLabels", type: "boolean", defaultValue: "true", description: "Shows the app's name above it while it is hovered or focused." },
     ],
     Preview: Previews.PreviewMagnifyDock,
     previewShell: "plain",
@@ -6132,6 +6174,19 @@ export default function Page() {
     </div>
   );
 }`,
+    reactExamples: [
+      {
+        title: "Big swell",
+        code: `// src/app/page.tsx
+
+import { MagnifyDock } from "@/components/magnify-dock";
+
+// Small resting icons that swell a long way, with a wide reach and no labels.
+export default function Page() {
+  return <MagnifyDock baseSize={36} maxSize={96} reach={220} showLabels={false} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -6192,6 +6247,12 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Pushes sample toasts by itself until someone presses a trigger." },
+      { name: "duration", type: "number", defaultValue: "4200", description: "How long a toast stays before it dismisses itself, in ms, 1000 to 12000." },
+      { name: "visible", type: "number", defaultValue: "3", description: "How many toasts show while the stack is folded, 1 to 5. The rest wait out of sight behind them." },
+      { name: "peek", type: "number", defaultValue: "13", description: "How much of each toast behind the front one peeks out, in px, while folded, 4 to 30." },
+      { name: "gap", type: "number", defaultValue: "10", description: "Space between toasts in px while the stack is spread out, 0 to 20." },
+      { name: "stiffness", type: "number", defaultValue: "380", description: "How firmly toasts spring into place, 150 to 800. Higher is snappier." },
+      { name: "direction", type: "\"up\" | \"down\"", defaultValue: "\"up\"", description: "Which way the stack grows: up from the bottom, or down from the top." },
     ],
     Preview: Previews.PreviewNotificationStack,
     previewShell: "plain",
@@ -6206,6 +6267,19 @@ export default function Page() {
     </div>
   );
 }`,
+    reactExamples: [
+      {
+        title: "Top-down, quick to leave",
+        code: `// src/app/page.tsx
+
+import { NotificationStack } from "@/components/notification-stack";
+
+// Toasts drop in from the top, show five when folded, and clear after two seconds.
+export default function Page() {
+  return <NotificationStack direction="down" visible={5} duration={2000} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -6223,6 +6297,12 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Cycles through idle, timer, call and music until a control is pressed." },
+      { name: "stiffness", type: "number", defaultValue: "380", description: "How firmly the pill springs to its next shape, 120 to 800. Higher is snappier." },
+      { name: "damping", type: "number", defaultValue: "30", description: "How quickly the pill settles, 10 to 60. Lower overshoots and wobbles, higher stops dead." },
+      { name: "blur", type: "number", defaultValue: "10", description: "How blurry the content is as it fades in and out, in px, 0 to 24. 0 is a plain fade." },
+      { name: "contentDelay", type: "number", defaultValue: "0.08", description: "Seconds the content waits for the shape to land before it appears, 0 to 0.6." },
+      { name: "surface", type: "string", defaultValue: "\"#000000\"", description: "Colour of the pill. Any CSS colour; keep it dark so the white content stays readable." },
+      { name: "timerColor", type: "string", defaultValue: "\"#ff9f0a\"", description: "Colour of the timer's clock icon and numbers. Any CSS colour." },
     ],
     Preview: Previews.PreviewIslandMorph,
     previewShell: "plain",
@@ -6237,6 +6317,19 @@ export default function Page() {
     </div>
   );
 }`,
+    reactExamples: [
+      {
+        title: "Bouncy and tinted",
+        code: `// src/app/page.tsx
+
+import { IslandMorph } from "@/components/island-morph";
+
+// A loose, wobbly spring on a midnight-blue pill with a green timer.
+export default function Page() {
+  return <IslandMorph stiffness={260} damping={16} surface="#1c1c3a" timerColor="#30d158" />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -6555,6 +6648,11 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "cards", type: "WheelCard[]", description: "Each card has title, sub and art (any CSS background). Ten travel destinations by default." },
+      { name: "count", type: "number", description: "How many cards go on the wheel, 3 up to the number of cards you pass. Defaults to all of them." },
+      { name: "cardSize", type: "number", defaultValue: "1", description: "Size of every card, 0.6 to 1.2. The wheel grows or shrinks with the cards." },
+      { name: "glide", type: "number", defaultValue: "1", description: "How far the wheel keeps gliding after a throw, 0.3 to 3. Higher glides further before it snaps to a card." },
+      { name: "tilt", type: "number", defaultValue: "1", description: "How far cards turn edge-on while the wheel spins, 0 to 2. 0 keeps every card flat." },
+      { name: "blur", type: "number", defaultValue: "1", description: "How much cards blur with speed, 0 to 2. 0 keeps them sharp." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Throws the wheel every few seconds until someone grabs it." },
     ],
     Preview: Previews.PreviewThrowWheel,
@@ -6577,6 +6675,19 @@ const collections: WheelCard[] = [
 export default function Page() {
   return <ThrowWheel cards={collections} />;
 }`,
+    reactExamples: [
+      {
+        title: "Tune the feel",
+        code: `// src/app/page.tsx
+
+import { ThrowWheel } from "@/components/throw-wheel";
+
+// Smaller cards on a short wheel that glides a long way, stays flat and keeps every card sharp.
+export default function Page() {
+  return <ThrowWheel count={7} cardSize={0.8} glide={2} tilt={0} blur={0} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -6595,6 +6706,11 @@ export default function Page() {
     props: [
       { name: "options", type: "Mood[]", description: "Each option has id, label and color; the pixels take the selected option's colour. Six moods by default." },
       { name: "onChange", type: "(id: string) => void", description: "Called with the option id when the user picks one." },
+      { name: "pixelSize", type: "number", defaultValue: "12", description: "Width and height of each pixel in px, 10 to 24. Smaller pixels look finer but draw more of them." },
+      { name: "speed", type: "number", defaultValue: "1", description: "Speed of the build and the dissolve, 0.5 to 2. Higher is quicker." },
+      { name: "stagger", type: "number", defaultValue: "1", description: "How much the build ripples across the menu, 0 to 2. 0 makes every pixel appear together." },
+      { name: "scatter", type: "number", defaultValue: "1", description: "How far the pixels fly as the menu dissolves, 0 to 2. 0 makes them fade where they are." },
+      { name: "origin", type: "\"top-left\" | \"top-right\" | \"bottom-left\" | \"bottom-right\" | \"center\"", defaultValue: "\"top-left\"", description: "Where the menu starts building from." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens and picks options by itself until someone interacts." },
     ],
     Preview: Previews.PreviewPixelSelect,
@@ -6615,6 +6731,19 @@ export default function Page() {
   // id is the theme the visitor picked: save it or apply it here.
   return <PixelSelect options={themes} onChange={(id) => console.log(id)} />;
 }`,
+    reactExamples: [
+      {
+        title: "Tune the dissolve",
+        code: `// src/app/page.tsx
+
+import { PixelSelect } from "@/components/pixel-select";
+
+// Finer pixels that build from the middle, then burst outwards and fall further when the menu closes.
+export default function Page() {
+  return <PixelSelect pixelSize={10} origin="center" scatter={1.6} speed={1.3} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -6902,6 +7031,11 @@ export default function Page() {
     animationKinds: ["drag", "gradient"],
     dependencies: ["framer-motion"],
     props: [
+      { name: "spacing", type: "number", defaultValue: "14", description: "Gap between the dots in px, 8 to 24. Smaller packs more dots in." },
+      { name: "dotSize", type: "number", defaultValue: "1", description: "Size of the dots, 0.6 to 1.8." },
+      { name: "reach", type: "number", defaultValue: "1", description: "How far the light reaches across the dots, 0.5 to 2. Higher lights up more of them." },
+      { name: "lift", type: "number", defaultValue: "1", description: "How high nearby dots rise, 0 to 2. 0 keeps them flat." },
+      { name: "showClock", type: "boolean", defaultValue: "true", description: "Shows the clock under the name of the hour. Set false to show only the name." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps the light across the day until someone drags it." },
     ],
     Preview: Previews.PreviewWeatherPuck,
@@ -6918,6 +7052,19 @@ export default function Page() {
     </section>
   );
 }`,
+    reactExamples: [
+      {
+        title: "Tune the dots",
+        code: `// src/app/page.tsx
+
+import { WeatherPuck } from "@/components/weather-puck";
+
+// Tight, small dots that the light lifts high, with the name of the hour but no clock.
+export default function Page() {
+  return <WeatherPuck spacing={10} dotSize={0.8} lift={1.6} showClock={false} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -7009,6 +7156,11 @@ export default function Page() {
     animationKinds: ["layout", "spring", "press"],
     dependencies: ["framer-motion"],
     props: [
+      { name: "count", type: "number", defaultValue: "6", description: "How many photos to show, 3 to 6." },
+      { name: "gap", type: "number", defaultValue: "10", description: "Space between photos in px, 0 to 24." },
+      { name: "radius", type: "number", defaultValue: "16", description: "Roundness of the photo corners in px, 0 to 32. A photo opened full size is 8px rounder." },
+      { name: "stiffness", type: "number", defaultValue: "220", description: "How strongly photos spring toward their new place, 100 to 500. Higher moves faster." },
+      { name: "damping", type: "number", defaultValue: "26", description: "How quickly the spring settles, 12 to 40. Lower overshoots and bounces more." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Changes layouts by itself until someone interacts." },
     ],
     Preview: Previews.PreviewLayoutSwitch,
@@ -7025,6 +7177,19 @@ export default function Page() {
     </section>
   );
 }`,
+    reactExamples: [
+      {
+        title: "Tune the feel",
+        code: `// src/app/page.tsx
+
+import { LayoutSwitch } from "@/components/layout-switch";
+
+// Four photos with tight gaps and square corners on a loose, bouncy spring.
+export default function Page() {
+  return <LayoutSwitch count={4} gap={4} radius={0} stiffness={160} damping={16} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -7042,6 +7207,11 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "chips", type: "FanDeckChip[]", defaultValue: "12 chips, Ember to Rosewood", description: "The swatches as { name, hex }, in the order they fan out from left to right." },
+      { name: "count", type: "number", defaultValue: "all chips", description: "How many chips go in the deck, 2 up to the number you pass." },
+      { name: "spread", type: "number", defaultValue: "180", description: "How wide the fan opens in degrees, 60 to 180. 180 is a half circle." },
+      { name: "chipSize", type: "number", defaultValue: "1", description: "Size of the chips, 0.7 to 1.15." },
+      { name: "lift", type: "number", defaultValue: "16", description: "How far a chip rises when hovered, in px, 0 to 32." },
+      { name: "stagger", type: "number", defaultValue: "1", description: "How long each chip waits for the one before it when the deck opens, 0 to 2. 0 opens every chip together." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Fans out and closes by itself until someone interacts." },
     ],
     Preview: Previews.PreviewFanDeck,
@@ -7063,6 +7233,19 @@ const brand = [
 export default function Page() {
   return <FanDeck chips={brand} />;
 }`,
+    reactExamples: [
+      {
+        title: "Tune the fan",
+        code: `// src/app/page.tsx
+
+import { FanDeck } from "@/components/fan-deck";
+
+// A narrower fan of eight chips that opens all at once and lifts high when hovered.
+export default function Page() {
+  return <FanDeck count={8} spread={120} stagger={0} lift={24} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -7264,6 +7447,11 @@ export default function Page() {
     animationKinds: ["hover", "spring"],
     dependencies: ["framer-motion"],
     props: [
+      { name: "size", type: "number", defaultValue: "1", description: "Size of every orb, 0.6 to 1.3. Bigger orbs knock into each other sooner." },
+      { name: "threadLength", type: "number", defaultValue: "1", description: "Length of every thread, 0.5 to 1.3. Longer threads swing wider and slower." },
+      { name: "gravity", type: "number", defaultValue: "1", description: "How hard the orbs are pulled down, 0.2 to 3. Lower floats, higher snaps back faster." },
+      { name: "drag", type: "number", defaultValue: "1", description: "How quickly swinging dies away, 0.25 to 4. Lower keeps swinging, higher settles fast." },
+      { name: "push", type: "number", defaultValue: "1", description: "How hard the pointer shoves an orb, 0.2 to 3." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Nudges a random bubble every 2.6 seconds until someone moves the pointer through them (skipped with reduced motion)." },
     ],
     Preview: Previews.PreviewGlassBubbles,
@@ -7280,6 +7468,19 @@ export default function Page() {
     </section>
   );
 }`,
+    reactExamples: [
+      {
+        title: "Heavy and slow",
+        code: `// src/app/page.tsx
+
+import { GlassBubbles } from "@/components/glass-bubbles";
+
+// Bigger orbs on longer threads, with more drag so a push dies away gently.
+export default function Page() {
+  return <GlassBubbles size={1.2} threadLength={1.2} gravity={0.6} drag={2} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -7330,6 +7531,11 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "posters", type: "ReelPoster[]", description: "Each poster has bg, fg, big (the large glyph), small (caption) and an optional serif flag. Defaults to ten type posters." },
+      { name: "cardSize", type: "number", defaultValue: "1", description: "Size of each poster, 0.7 to 1.3. The reel gets taller with it." },
+      { name: "gap", type: "number", defaultValue: "16", description: "Space between posters in pixels, 0 to 48." },
+      { name: "curve", type: "number", defaultValue: "1", description: "How much the reel bends, 0 to 1.6. 0 lays it flat; higher swings the edge posters round and pushes the centre back." },
+      { name: "speed", type: "number", defaultValue: "38", description: "How fast the reel drifts when autoplay is on, in pixels per second, 10 to 120." },
+      { name: "glide", type: "number", defaultValue: "1", description: "How far the reel coasts after a fling, 0.3 to 3. Higher glides further." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Drifts the reel at 38px per second; it pauses for 2.5 seconds after a drag or key press. Off by default: the reel moves when you drag it." },
     ],
     Preview: Previews.PreviewCurvedReel,
@@ -7352,6 +7558,19 @@ const issues: ReelPoster[] = [
 export default function Page() {
   return <CurvedReel posters={issues} />;
 }`,
+    reactExamples: [
+      {
+        title: "Tune the curve",
+        code: `// src/app/page.tsx
+
+import { CurvedReel } from "@/components/curved-reel";
+
+// A deeper bend with tighter, smaller posters that drift slowly and coast a long way after a fling.
+export default function Page() {
+  return <CurvedReel curve={1.4} cardSize={0.85} gap={8} glide={2} autoplay speed={24} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -7534,6 +7753,11 @@ export default function Page() {
     props: [
       { name: "tapes", type: "ShelfTape[]", defaultValue: "DEFAULT_TAPES", description: "Cases on the shelf, left to right: title, artist, color (spine and label) and ink (text colour on them)." },
       { name: "onPick", type: "(index: number | null) => void", description: "Called with the picked index when someone picks a tape, or null when it goes back." },
+      { name: "size", type: "number", defaultValue: "1", description: "Size of the cases, 0.8 to 1.3. The shelf gets taller with it." },
+      { name: "spacing", type: "number", defaultValue: "6", description: "Space between the cases in pixels, 0 to 20." },
+      { name: "tilt", type: "number", defaultValue: "1", description: "How far the shelf is turned away from you, 0 to 1.6. 0 shows the spines straight on." },
+      { name: "lift", type: "number", defaultValue: "1", description: "How far a hovered case slides up, 0 to 2." },
+      { name: "snap", type: "number", defaultValue: "1", description: "How quickly the cases spring into place, 0.5 to 2.5. Lower is slow and soft, higher is snappy." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Pulls out the 3rd, 6th and 1st tapes in turn, putting each back, every 1.8s until someone touches the shelf." },
     ],
     Preview: Previews.PreviewTapeShelf,
@@ -7553,6 +7777,19 @@ const mixtapes = [
 export default function Page() {
   return <TapeShelf tapes={mixtapes} />;
 }`,
+    reactExamples: [
+      {
+        title: "Looser shelf",
+        code: `// src/app/page.tsx
+
+import { TapeShelf } from "@/components/tape-shelf";
+
+// Bigger cases with room between them, turned further away, that spring softly.
+export default function Page() {
+  return <TapeShelf size={1.15} spacing={12} tilt={1.4} lift={1.5} snap={0.7} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -7603,6 +7840,11 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "stamps", type: "SwirlStamp[]", defaultValue: "Tidepool, Ember Fields, Night Bloom, Moss & Stone", description: "Stamps as { name, date, value, art }; art is any CSS background (layered gradients work best)." },
+      { name: "size", type: "number", defaultValue: "1", description: "Size of each stamp, 0.7 to 1.2." },
+      { name: "spacing", type: "number", defaultValue: "16", description: "Space between the stamps in pixels, 4 to 28." },
+      { name: "swirl", type: "number", defaultValue: "1", description: "How strongly the artwork swirls, 0 to 2. 0 keeps it still and sharp." },
+      { name: "speed", type: "number", defaultValue: "1", description: "How fast the ink flows, 0.2 to 3." },
+      { name: "hoverScale", type: "number", defaultValue: "1.45", description: "How much a hovered stamp grows, 1.1 to 1.8." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Lifts the stamps one after another until the pointer enters." },
     ],
     Preview: Previews.PreviewStampSwirl,
@@ -7620,6 +7862,19 @@ const stamps: SwirlStamp[] = [
 export default function Page() {
   return <StampSwirl stamps={stamps} />;
 }`,
+    reactExamples: [
+      {
+        title: "Wet ink",
+        code: `// src/app/page.tsx
+
+import { StampSwirl } from "@/components/stamp-swirl";
+
+// A stronger, slower swirl, with stamps that grow less on hover.
+export default function Page() {
+  return <StampSwirl swirl={1.6} speed={0.6} hoverScale={1.25} spacing={22} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -7638,6 +7893,10 @@ export default function Page() {
     props: [
       { name: "people", type: "ClusterPerson[]", defaultValue: "12 sample contacts", description: "Everyone who can appear, as { id, name, hue }; hue (0-360) tints the bubble." },
       { name: "groups", type: "Record<string, Record<string, number>>", defaultValue: "Family, Close friends, Work", description: "Group name to { person id: closeness 1-5 }. Closeness sets bubble size; people left out of a group hide in it." },
+      { name: "gap", type: "number", defaultValue: "5", description: "Space between bubbles, 0 to 24." },
+      { name: "sizeContrast", type: "number", defaultValue: "1", description: "How much closeness changes size, 0 to 2. 0 makes every bubble the same size; higher makes the closest people much bigger." },
+      { name: "bounce", type: "number", defaultValue: "1", description: "How bouncy the bubbles are when they move, 0.5 to 2.5. Lower is smooth and settled, higher wobbles." },
+      { name: "liquid", type: "number", defaultValue: "1", description: "Strength of the faint liquid backdrop, 0 to 4. 0 hides it." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Steps through the groups every 2.6s until someone presses the cluster or the switcher." },
     ],
     Preview: Previews.PreviewBubbleCluster,
@@ -7666,6 +7925,19 @@ export default function Page() {
     />
   );
 }`,
+    reactExamples: [
+      {
+        title: "Tune the cluster",
+        code: `// src/app/page.tsx
+
+import { BubbleCluster } from "@/components/bubble-cluster";
+
+// Closeness matters more, bubbles sit tighter and wobble more, and the backdrop is stronger.
+export default function Page() {
+  return <BubbleCluster sizeContrast={1.5} gap={2} bounce={1.6} liquid={2} />;
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {

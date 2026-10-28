@@ -16,6 +16,16 @@ export interface CurvedReelProps {
   posters?: ReelPoster[];
   /** Drifts the reel at 38px/s; pauses for 2.5s after a drag. Off by default: the reel moves when you drag it. */
   autoplay?: boolean;
+  /** Size of each poster, 0.7 to 1.3. The reel gets taller with it. Default 1. */
+  cardSize?: number;
+  /** Space between posters in px, 0 to 48. Default 16. */
+  gap?: number;
+  /** How much the reel bends, 0 to 1.6. 0 lays it flat; higher swings the edge posters round and pushes the centre back. Default 1. */
+  curve?: number;
+  /** How fast it drifts when autoplay is on, in px per second, 10 to 120. Default 38. */
+  speed?: number;
+  /** How far it coasts after a fling, 0.3 to 3. Higher glides further. Default 1. */
+  glide?: number;
 }
 
 const POSTERS: ReelPoster[] = [
@@ -33,28 +43,30 @@ const POSTERS: ReelPoster[] = [
 
 const CW = 150;
 const CH = 210;
-const GAP = 16;
+const STAGE_H = 300;
 const VIEW = 760;
 
-function Card({ p, i, offset, total }: { p: ReelPoster; i: number; offset: MotionValue<number>; total: number }) {
+const clamp = (v: number, lo: number, hi: number) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : lo);
+
+function Card({ p, i, offset, total, cw, ch, gap, curve }: { p: ReelPoster; i: number; offset: MotionValue<number>; total: number; cw: number; ch: number; gap: number; curve: number }) {
   // Position on a looping track, measured from the centre of the view.
   const x = useTransform(offset, (o) => {
-    let v = i * (CW + GAP) - o;
+    let v = i * (cw + gap) - o;
     v = ((v % total) + total) % total;
     if (v > total / 2) v -= total;
     return v;
   });
   const d = useTransform(x, (v) => Math.max(-1.4, Math.min(1.4, v / (VIEW / 2))));
-  const rotateY = useTransform(d, (v) => -v * 48);
-  const scale = useTransform(d, (v) => 0.82 + Math.pow(Math.abs(v), 1.6) * 0.42);
-  const z = useTransform(d, (v) => Math.abs(v) * 90);
+  const rotateY = useTransform(d, (v) => -v * 48 * curve);
+  const scale = useTransform(d, (v) => 1 + (-0.18 + Math.pow(Math.abs(v), 1.6) * 0.42) * curve);
+  const z = useTransform(d, (v) => Math.abs(v) * 90 * curve);
   const opacity = useTransform(d, (v) => (Math.abs(v) > 1.25 ? 0 : 1));
   const bright = useTransform(d, (v) => `brightness(${1 - Math.min(0.25, Math.abs(v) * 0.18)})`);
   return (
-    <motion.div className="absolute left-1/2 top-1/2" style={{ x, rotateY, scale, z, opacity, width: CW, height: CH, marginLeft: -CW / 2, marginTop: -CH / 2, filter: bright }}>
+    <motion.div className="absolute left-1/2 top-1/2" style={{ x, rotateY, scale, z, opacity, width: cw, height: ch, marginLeft: -cw / 2, marginTop: -ch / 2, filter: bright }}>
       <div className="flex h-full w-full flex-col justify-between overflow-hidden rounded-[14px] p-4 shadow-[0_20px_40px_-24px_rgba(0,0,0,.5)]" style={{ background: p.bg, color: p.fg }}>
         <span className="text-[9px] font-semibold uppercase tracking-[0.18em] opacity-70">No. {String(i + 1).padStart(2, "0")}</span>
-        <span className={`leading-none tracking-[-0.04em] ${p.serif ? "font-serif italic" : "font-semibold"}`} style={{ fontSize: p.big.length > 2 ? 46 : 72 }}>{p.big}</span>
+        <span className={`leading-none tracking-[-0.04em] ${p.serif ? "font-serif italic" : "font-semibold"}`} style={{ fontSize: (p.big.length > 2 ? 46 : 72) * (cw / CW) }}>{p.big}</span>
         <span className="text-[11px] font-medium opacity-80">{p.small}</span>
       </div>
     </motion.div>
@@ -66,9 +78,16 @@ function Card({ p, i, offset, total }: { p: ReelPoster; i: number; offset: Motio
  * pinch in, cards toward the edges swing round, grow and come forward. It drifts
  * on its own; drag to scrub it and fling it to let it coast.
  */
-export function CurvedReel({ posters = POSTERS, autoplay = false }: CurvedReelProps) {
+export function CurvedReel({ posters = POSTERS, autoplay = false, cardSize = 1, gap = 16, curve = 1, speed = 38, glide = 1 }: CurvedReelProps) {
   const offset = useMotionValue(0);
-  const total = posters.length * (CW + GAP);
+  const k = clamp(cardSize, 0.7, 1.3);
+  const cw = CW * k;
+  const ch = CH * k;
+  const gp = clamp(gap, 0, 48);
+  const bend = clamp(curve, 0, 1.6);
+  const drift = clamp(speed, 10, 120);
+  const coast = clamp(glide, 0.3, 3);
+  const total = posters.length * (cw + gp);
   const drag = useRef<{ x: number; o: number; v: number; lx: number; lt: number } | null>(null);
   const ctl = useRef<{ stop: () => void } | null>(null);
   const idleUntil = useRef(0);
@@ -78,12 +97,12 @@ export function CurvedReel({ posters = POSTERS, autoplay = false }: CurvedReelPr
     const loop = (now: number) => {
       const dt = (now - last) / 1000;
       last = now;
-      if (autoplay && !drag.current && now > idleUntil.current) offset.set(offset.get() + dt * 38);
+      if (autoplay && !drag.current && now > idleUntil.current) offset.set(offset.get() + dt * drift);
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [autoplay, offset]);
+  }, [autoplay, offset, drift]);
 
   useEffect(() => () => ctl.current?.stop(), []);
 
@@ -91,15 +110,15 @@ export function CurvedReel({ posters = POSTERS, autoplay = false }: CurvedReelPr
     const d = drag.current;
     drag.current = null;
     idleUntil.current = performance.now() + 2500;
-    if (d) ctl.current = animate(offset, [offset.get()], { type: "inertia", velocity: d.v, power: 0.5, timeConstant: 500 });
+    if (d) ctl.current = animate(offset, [offset.get()], { type: "inertia", velocity: d.v, power: 0.5, timeConstant: 500 * coast });
   };
 
   return (
     <div className="flex w-full flex-col items-center gap-3">
       <div
         tabIndex={0}
-        className="relative h-[300px] w-full max-w-[760px] cursor-grab touch-pan-y select-none overflow-hidden rounded-[18px] active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0071e3] dark:focus-visible:outline-[#2997ff]"
-        style={{ perspective: 900, maskImage: "linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)", WebkitMaskImage: "linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)" }}
+        className="relative w-full max-w-[760px] cursor-grab touch-pan-y select-none overflow-hidden rounded-[18px] active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0071e3] dark:focus-visible:outline-[#2997ff]"
+        style={{ height: Math.round(STAGE_H * k), perspective: 900, maskImage: "linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)", WebkitMaskImage: "linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)" }}
         onPointerDown={(e) => {
           ctl.current?.stop();
           e.currentTarget.setPointerCapture(e.pointerId);
@@ -120,7 +139,7 @@ export function CurvedReel({ posters = POSTERS, autoplay = false }: CurvedReelPr
           e.preventDefault();
           ctl.current?.stop();
           idleUntil.current = performance.now() + 2500;
-          const step = (e.key === "ArrowRight" ? 1 : -1) * (CW + GAP);
+          const step = (e.key === "ArrowRight" ? 1 : -1) * (cw + gp);
           ctl.current = animate(offset, offset.get() + step, { type: "spring", stiffness: 220, damping: 28 });
         }}
         role="region"
@@ -128,7 +147,7 @@ export function CurvedReel({ posters = POSTERS, autoplay = false }: CurvedReelPr
         aria-label="Poster reel. Drag to scroll, or use the left and right arrow keys."
       >
         <div className="absolute inset-0" style={{ transformStyle: "preserve-3d" }}>
-          {posters.map((p, i) => <Card key={i} p={p} i={i} offset={offset} total={total} />)}
+          {posters.map((p, i) => <Card key={i} p={p} i={i} offset={offset} total={total} cw={cw} ch={ch} gap={gp} curve={bend} />)}
         </div>
       </div>
       <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">Drag the reel, or fling it.</span>

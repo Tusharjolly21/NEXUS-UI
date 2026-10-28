@@ -53,7 +53,19 @@ export interface TapeShelfProps {
   onPick?: (index: number | null) => void;
   /** Pulls a few tapes out and puts them back until someone touches the shelf. */
   autoplay?: boolean;
+  /** Size of the cases, 0.8 to 1.3. The shelf gets taller with it. Default 1. */
+  size?: number;
+  /** Space between the cases in px, 0 to 20. Default 6. */
+  spacing?: number;
+  /** How far the shelf is turned away from you, 0 to 1.6. 0 shows the spines straight on. Default 1. */
+  tilt?: number;
+  /** How far a hovered case slides up, 0 to 2. Default 1. */
+  lift?: number;
+  /** How quickly the cases spring into place, 0.5 to 2.5. Lower is slow and soft, higher is snappy. Default 1. */
+  snap?: number;
 }
+
+const clamp = (v: number, lo: number, hi: number) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : lo);
 
 const SPINE = 22;
 const GAP = 6;
@@ -86,7 +98,7 @@ function Reel({ spin }: { spin: boolean }) {
  * swings out to show its cover with the reels turning, while the shelf behind
  * steps back.
  */
-export function TapeShelf({ tapes = DEFAULT_TAPES, onPick, autoplay = false }: TapeShelfProps) {
+export function TapeShelf({ tapes = DEFAULT_TAPES, onPick, autoplay = false, size = 1, spacing = GAP, tilt = 1, lift = 1, snap = 1 }: TapeShelfProps) {
   const [hover, setHover] = useState<number | null>(null);
   const [pick, setPickState] = useState<number | null>(null);
   const touched = useRef(false);
@@ -109,7 +121,12 @@ export function TapeShelf({ tapes = DEFAULT_TAPES, onPick, autoplay = false }: T
     return () => clearInterval(t);
   }, [autoplay, n]);
 
-  const rowW = n * (SPINE + GAP);
+  const k = clamp(size, 0.8, 1.3);
+  const gp = clamp(spacing, 0, 20);
+  const tiltK = clamp(tilt, 0, 1.6);
+  const liftK = clamp(lift, 0, 2);
+  const snapK = clamp(snap, 0.5, 2.5);
+  const rowW = n * (SPINE + gp);
   const picked = pick !== null && pick < n ? pick : null;
 
   return (
@@ -123,10 +140,10 @@ export function TapeShelf({ tapes = DEFAULT_TAPES, onPick, autoplay = false }: T
         if (e.key === "Escape" && picked !== null) setPick(null);
       }}
     >
-      <div className="relative h-[250px] w-[420px] max-w-full" style={{ perspective: 1000 }}>
+      <div className="relative w-[420px] max-w-full" style={{ height: 54 + TH * k + 56, perspective: 1000 }}>
         <div
-          className="absolute left-1/2 top-[54px]"
-          style={{ width: rowW, marginLeft: -rowW / 2, height: TH, transformStyle: "preserve-3d", transform: "rotateY(-18deg) rotateX(6deg)" }}
+          className="absolute left-1/2"
+          style={{ top: 54 + (TH * (k - 1)) / 2, width: rowW, marginLeft: -rowW / 2, height: TH, transformStyle: "preserve-3d", transform: `rotateY(${-18 * tiltK}deg) rotateX(${6 * tiltK}deg) scale(${k})` }}
         >
           {tapes.map((t, i) => {
             const isPick = picked === i;
@@ -147,14 +164,14 @@ export function TapeShelf({ tapes = DEFAULT_TAPES, onPick, autoplay = false }: T
                   setPick(isPick ? null : i);
                 }}
                 className="absolute top-0 outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:focus-visible:ring-[#0a84ff]"
-                style={{ left: i * (SPINE + GAP), width: SPINE, height: TH, transformStyle: "preserve-3d", originX: 0.5 }}
+                style={{ left: i * (SPINE + gp), width: SPINE, height: TH, transformStyle: "preserve-3d", originX: 0.5 }}
                 initial={false}
                 animate={
                   isPick
-                    ? { x: rowW / 2 - i * (SPINE + GAP) - (CW * 1.6) / 2, y: -16, z: 150, rotateY: -84, scale: 1.05, opacity: 1 }
-                    : { x: spread, y: lifted ? -18 : 0, z: lifted ? 8 : 0, rotateY: 0, scale: 1, opacity: picked !== null ? 0.55 : 1 }
+                    ? { x: rowW / 2 - i * (SPINE + gp) - (CW * 1.6) / 2, y: -16, z: 150, rotateY: -84, scale: 1.05, opacity: 1 }
+                    : { x: spread, y: lifted ? -18 * liftK : 0, z: lifted ? 8 * liftK : 0, rotateY: 0, scale: 1, opacity: picked !== null ? 0.55 : 1 }
                 }
-                transition={{ type: "spring", stiffness: 160, damping: 20 }}
+                transition={{ type: "spring", stiffness: 160 * snapK, damping: 20 * Math.sqrt(snapK) }}
               >
                 {/* spine */}
                 <span
@@ -194,7 +211,8 @@ export function TapeShelf({ tapes = DEFAULT_TAPES, onPick, autoplay = false }: T
           })}
         </div>
         <div
-          className="absolute inset-x-10 top-[200px] h-3 rounded-full bg-[radial-gradient(closest-side,rgba(0,0,0,.18),rgba(0,0,0,0))] dark:bg-[radial-gradient(closest-side,rgba(0,0,0,.7),rgba(0,0,0,0))]"
+          className="absolute inset-x-10 h-3 rounded-full bg-[radial-gradient(closest-side,rgba(0,0,0,.18),rgba(0,0,0,0))] dark:bg-[radial-gradient(closest-side,rgba(0,0,0,.7),rgba(0,0,0,0))]"
+          style={{ top: 54 + TH * k + 6 }}
           aria-hidden="true"
         />
       </div>

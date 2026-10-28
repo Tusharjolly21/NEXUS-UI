@@ -36,7 +36,21 @@ export interface IslandMorphProps {
   autoplay?: boolean;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
+  /** How firmly the pill springs to its next shape. Higher is snappier. Kept between 120 and 800. */
+  stiffness?: number;
+  /** How quickly the pill settles. Lower overshoots and wobbles, higher stops dead. Kept between 10 and 60. */
+  damping?: number;
+  /** How blurry the content is as it fades in and out, in pixels. 0 is a plain fade. Kept between 0 and 24. */
+  blur?: number;
+  /** How long, in seconds, the content waits for the shape to land before it appears. Kept between 0 and 0.6. */
+  contentDelay?: number;
+  /** Colour of the pill (any CSS colour, such as #000000). */
+  surface?: string;
+  /** Colour of the timer's clock icon and numbers (any CSS colour, such as #ff9f0a). */
+  timerColor?: string;
 }
+
+const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Number.isFinite(n) ? n : lo));
 
 const SIZES: Record<IslandMode, { width: number; height: number; radius: number }> = {
   idle: { width: 126, height: 37, radius: 22 },
@@ -45,10 +59,11 @@ const SIZES: Record<IslandMode, { width: number; height: number; radius: number 
   music: { width: 370, height: 186, radius: 46 },
 };
 
-const morph = { type: "spring", stiffness: 380, damping: 30, mass: 0.9 } as const;
-
-export function IslandMorph({ autoplay = false, enableSound = true }: IslandMorphProps) {
+export function IslandMorph({ autoplay = false, enableSound = true, stiffness = 380, damping = 30, blur = 10, contentDelay = 0.08, surface = "#000000", timerColor = "#ff9f0a" }: IslandMorphProps) {
   const play = useSound(enableSound);
+  const morph = { type: "spring", stiffness: clamp(stiffness, 120, 800), damping: clamp(damping, 10, 60), mass: 0.9 } as const;
+  const fuzz = `blur(${clamp(blur, 0, 24)}px)`;
+  const wait = clamp(contentDelay, 0, 0.6);
   const uid = useId();
   const [mode, setMode] = useState<IslandMode>("idle");
   const [secs, setSecs] = useState(272);
@@ -90,24 +105,25 @@ export function IslandMorph({ autoplay = false, enableSound = true }: IslandMorp
           initial={false}
           animate={{ width: size.width, height: size.height, borderRadius: size.radius }}
           transition={morph}
-          className="relative overflow-hidden bg-black text-white shadow-[0_20px_40px_-20px_rgba(0,0,0,.5)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.12),0_20px_40px_-20px_rgba(0,0,0,.8)]"
+          style={{ background: surface }}
+          className="relative overflow-hidden text-white shadow-[0_20px_40px_-20px_rgba(0,0,0,.5)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.12),0_20px_40px_-20px_rgba(0,0,0,.8)]"
           role="status"
           aria-live="polite"
         >
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
               key={mode}
-              initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
-              animate={{ opacity: 1, scale: 1, filter: "blur(0px)", transition: { ...morph, delay: 0.08 } }}
-              exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)", transition: { duration: 0.18 } }}
+              initial={{ opacity: 0, scale: 0.9, filter: fuzz }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)", transition: { ...morph, delay: wait } }}
+              exit={{ opacity: 0, scale: 0.9, filter: fuzz, transition: { duration: 0.18 } }}
               className="absolute inset-0"
             >
               {mode === "timer" && (
                 <div className="flex h-full items-center justify-between pl-3 pr-4">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#ff9f0a]/20">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff9f0a" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2 2M10 2h4" /></svg>
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${timerColor} 20%, transparent)` }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={timerColor} strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2 2M10 2h4" /></svg>
                   </span>
-                  <span className="text-[17px] font-semibold tabular-nums text-[#ff9f0a]">{mm}:{ss}</span>
+                  <span className="text-[17px] font-semibold tabular-nums" style={{ color: timerColor }}>{mm}:{ss}</span>
                 </div>
               )}
               {mode === "call" && (

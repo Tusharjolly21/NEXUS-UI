@@ -35,7 +35,17 @@ export interface BubbleClusterProps {
   groups?: ClusterGroups;
   /** Steps through the groups by itself until someone presses the cluster or the switcher. */
   autoplay?: boolean;
+  /** Space between bubbles, 0 to 24. Default 5. */
+  gap?: number;
+  /** How much closeness changes size, 0 to 2. 0 makes every bubble the same size; higher makes the closest people much bigger. Default 1. */
+  sizeContrast?: number;
+  /** How bouncy the bubbles are when they move, 0.5 to 2.5. Lower is smooth and settled, higher wobbles. Default 1. */
+  bounce?: number;
+  /** Strength of the faint liquid backdrop, 0 to 4. 0 hides it. Default 1. */
+  liquid?: number;
 }
+
+const clamp = (v: number, lo: number, hi: number) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : lo);
 
 export const DEFAULT_PEOPLE: ClusterPerson[] = [
   { id: "mo", name: "Mom", hue: 340 }, { id: "da", name: "Dad", hue: 210 }, { id: "ri", name: "Riya", hue: 280 },
@@ -57,19 +67,19 @@ const W = 420;
 const H = 290;
 
 /** Pack circles around the centre: pull-to-centre (a little harder up and down, so the cluster is wide like its stage) plus overlap removal. */
-function pack(weights: Record<string, number>): Placed[] {
+function pack(weights: Record<string, number>, gap = 5, contrast = 1): Placed[] {
   const items = Object.entries(weights)
     .filter(([, w]) => w > 0)
     .sort((a, b) => b[1] - a[1])
     .map(([id, w], i) => {
       const a = i * 2.4;
-      return { id, r: 20 + w * 8, x: Math.cos(a) * (i * 14), y: Math.sin(a) * (i * 12) };
+      return { id, r: Math.max(14, 44 + (w - 3) * 8 * contrast), x: Math.cos(a) * (i * 14), y: Math.sin(a) * (i * 12) };
     });
   for (let step = 0; step < 400; step++) {
     for (const p of items) { p.x *= 0.97; p.y *= 0.94; }
     for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
       const a = items[i], b = items[j];
-      const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.01, m = a.r + b.r + 5;
+      const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.01, m = a.r + b.r + gap;
       if (d < m) { const o = (m - d) / 2 / d; a.x -= dx * o; a.y -= dy * o; b.x += dx * o; b.y += dy * o; }
     }
   }
@@ -86,7 +96,6 @@ function fit(items: Placed[]): Placed[] {
   return items.map((p) => ({ id: p.id, x: (p.x - cx) * k, y: (p.y - cy) * k, r: p.r * k }));
 }
 
-const spring = { type: "spring", stiffness: 170, damping: 17 } as const;
 
 /** Scale the fixed-size stage to the width it is given, so the layout is the same on a phone. */
 function useStageScale() {
@@ -110,7 +119,11 @@ function useStageScale() {
  * the group shrink away, and a faint liquid backdrop re-forms around the cluster. Hover a person
  * to read how close they are.
  */
-export function BubbleCluster({ people = DEFAULT_PEOPLE, groups = DEFAULT_GROUPS, autoplay = false }: BubbleClusterProps) {
+export function BubbleCluster({ people = DEFAULT_PEOPLE, groups = DEFAULT_GROUPS, autoplay = false, gap = 5, sizeContrast = 1, bounce = 1, liquid = 1 }: BubbleClusterProps) {
+  const gapPx = clamp(gap, 0, 24);
+  const contrast = clamp(sizeContrast, 0, 2);
+  const spring = { type: "spring", stiffness: 170, damping: 17 / clamp(bounce, 0.5, 2.5) } as const;
+  const liquidK = clamp(liquid, 0, 4);
   const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
   const fid = "b" + uid;
   const names = useMemo(() => Object.keys(groups), [groups]);
@@ -118,7 +131,7 @@ export function BubbleCluster({ people = DEFAULT_PEOPLE, groups = DEFAULT_GROUPS
   const [hover, setHover] = useState<string | null>(null);
   const group = names.includes(picked) ? picked : names[0];
   const touched = useRef(false);
-  const layouts = useMemo(() => Object.fromEntries(names.map((g) => [g, fit(pack(groups[g]))])) as Record<string, Placed[]>, [names, groups]);
+  const layouts = useMemo(() => Object.fromEntries(names.map((g) => [g, fit(pack(groups[g], gapPx, contrast))])) as Record<string, Placed[]>, [names, groups, gapPx, contrast]);
   const placed = layouts[group] ?? [];
   const weights = groups[group] ?? {};
   const [stageRef, scale] = useStageScale();
@@ -150,7 +163,11 @@ export function BubbleCluster({ people = DEFAULT_PEOPLE, groups = DEFAULT_GROUPS
             </filter>
           </svg>
           {/* liquid backdrop: blurred blobs thresholded back to a sharp edge, then lightened to a faint tint */}
-          <div className="absolute inset-0 opacity-[0.1] dark:opacity-[0.2]" aria-hidden="true">
+          <div
+            className="absolute inset-0 opacity-[var(--bc-o)] dark:opacity-[var(--bc-od)]"
+            style={{ ["--bc-o" as string]: Math.min(1, 0.1 * liquidK), ["--bc-od" as string]: Math.min(1, 0.2 * liquidK) }}
+            aria-hidden="true"
+          >
             <div className="absolute inset-0" style={{ filter: `url(#${fid})` }}>
               {people.map((p) => {
                 const q = placed.find((x) => x.id === p.id);

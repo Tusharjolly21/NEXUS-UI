@@ -11,6 +11,21 @@ const LABELS = ["Before dawn", "Sunrise", "Midday", "Golden hour", "Dusk", "Nigh
 export interface WeatherPuckProps {
   /** Sweeps the light across the day until the user drags it. */
   autoplay?: boolean;
+  /** Gap between the dots in px, 8 to 24. Smaller packs more dots in. */
+  spacing?: number;
+  /** How far the light reaches across the dots, 0.5 to 2. Higher lights up more of them. */
+  reach?: number;
+  /** How high nearby dots lift, 0 to 2. 0 keeps them flat. */
+  lift?: number;
+  /** Size of the dots, 0.6 to 1.8. */
+  dotSize?: number;
+  /** Shows the clock under the name of the hour. */
+  showClock?: boolean;
+}
+
+function clampNum(v: number | undefined, fallback: number, lo: number, hi: number) {
+  const n = typeof v === "number" && Number.isFinite(v) ? v : fallback;
+  return Math.min(hi, Math.max(lo, n));
 }
 
 /**
@@ -18,7 +33,7 @@ export interface WeatherPuckProps {
  * landscape above relights in real time: sky, sun, ridges and the name of the
  * hour all interpolate from the puck's position.
  */
-export function WeatherPuck({ autoplay = false }: WeatherPuckProps) {
+export function WeatherPuck({ autoplay = false, spacing = 14, reach = 1, lift = 1, dotSize = 1, showClock = true }: WeatherPuckProps) {
   const px = useMotionValue(W * 0.45);
   const py = useMotionValue(FIELD / 2);
   const t = useTransform(px, [22, W - 22], [0, 1]);
@@ -37,6 +52,16 @@ export function WeatherPuck({ autoplay = false }: WeatherPuckProps) {
   const [clock, setClock] = useState("12:00");
   const canvas = useRef<HTMLCanvasElement>(null);
   const touched = useRef(false);
+  // The dot field reads these every frame, so changing them never restarts it.
+  const look = useRef({ spacing: 14, reach: 1, lift: 1, dotSize: 1 });
+  useEffect(() => {
+    look.current = {
+      spacing: Math.round(clampNum(spacing, 14, 8, 24)),
+      reach: clampNum(reach, 1, 0.5, 2),
+      lift: clampNum(lift, 1, 0, 2),
+      dotSize: clampNum(dotSize, 1, 0.6, 1.8),
+    };
+  }, [spacing, reach, lift, dotSize]);
 
   useMotionValueEvent(t, "change", (v) => {
     let best = 0;
@@ -62,8 +87,9 @@ export function WeatherPuck({ autoplay = false }: WeatherPuckProps) {
     });
     mo.observe(root, { attributes: true, attributeFilter: ["class"] });
     let raf = 0;
-    const G = 14;
     const frame = () => {
+      const { spacing: G, reach: R, lift: L, dotSize: S } = look.current;
+      const sigma = 46 * R;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, W, FIELD);
       const x0 = px.get(),
@@ -72,10 +98,10 @@ export function WeatherPuck({ autoplay = false }: WeatherPuckProps) {
       for (let y = G / 2; y < FIELD; y += G) {
         for (let x = G / 2; x < W; x += G) {
           const d = Math.hypot(x - x0, y - y0);
-          const f = Math.exp(-(d * d) / (2 * 46 * 46));
-          const lift = f * 10;
+          const f = Math.exp(-(d * d) / (2 * sigma * sigma));
+          const rise = f * 10 * L;
           ctx.beginPath();
-          ctx.arc(x, y - lift, 1.5 + f * 2.6, 0, Math.PI * 2);
+          ctx.arc(x, y - rise, (1.5 + f * 2.6) * S, 0, Math.PI * 2);
           if (f > 0.08) {
             ctx.fillStyle = col;
             ctx.globalAlpha = 0.35 + f * 0.65;
@@ -138,7 +164,7 @@ export function WeatherPuck({ autoplay = false }: WeatherPuckProps) {
                 </motion.span>
               </AnimatePresence>
             </span>
-            <span className="text-[12px] font-medium tabular-nums text-white/85 [text-shadow:0_1px_6px_rgba(0,0,0,.25)]">{clock}</span>
+            {showClock && <span className="text-[12px] font-medium tabular-nums text-white/85 [text-shadow:0_1px_6px_rgba(0,0,0,.25)]">{clock}</span>}
           </div>
         </motion.div>
         <div className="relative" style={{ height: FIELD }}>
