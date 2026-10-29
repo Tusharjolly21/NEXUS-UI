@@ -1499,6 +1499,26 @@
   "bg": null,
   "coverage": 0.08
  },
+ "dust-snap": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   10,
+   224,
+   740,
+   486
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.97
+ },
  "dynamic-island": {
   "canvas": [
    960,

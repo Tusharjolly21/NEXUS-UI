@@ -12033,6 +12033,78 @@ export default function Page() {
     tailwindSource: tw,
   },
   {
+    slug: "dust-snap",
+    name: "Dust Snap",
+    registryCliName: "dust-snap",
+    description:
+      "A word that turns to dust when you snap, the way it happens on film. It shivers; then, from one end, the surface goes dark and grainy in creeping patches and gives way. It does not vanish as smoke: it becomes a dense cloud of dry, earthy specks that holds the word's shape for a beat before a wind carries it off to the right in wisps. Snap again and the dust is drawn back in against the wind, last gone first home. The sound is built from the animation itself: a dry finger snap, crackle and grains that follow the crumbling front, a breath of air that swells and thins with the cloud, and a soft knock when the word is whole again.",
+    categorySlug: "motion-effects",
+    tags: ["dust","snap","dissolve","disintegrate","thanos","particles","canvas","text","sound","autoplay","motion kit"],
+    premium: true,
+    trendingScore: 184,
+    createdAt: "2026-10-29",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "text", type: "string", defaultValue: "\"NexusUI\"", description: "The word that turns to dust. It is fitted to the card whatever the width." },
+      { name: "theme", type: "\"light\" | \"dark\"", defaultValue: "\"light\"", description: "Light (dark dust on a pale ground, as in the film) or dark (pale dust on near-black)." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Snaps by itself, waits for the dust to settle and snaps again, until the first real click. Never runs under reduced motion (the word fades instead) and pauses while the card is off screen." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Plays a dry finger snap, then crackle and grains that follow the crumbling front, a breath of air that swells and thins with the cloud, ticks as the dust lands on the way back and a soft knock when the word is whole. Every layer is driven by the picture, frame by frame, so it stays in step. Follows the site-wide sound switch; autoplay makes the same sounds once the visitor has used the page." },
+      { name: "volume", type: "number", defaultValue: "0.7", description: "Sound volume, 0 to 1." },
+      { name: "onChange", type: "(gone: boolean) => void", description: "Called when it finishes turning to dust (true) or coming back (false)." },
+    ],
+    Preview: Previews.PreviewDustSnap,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { DustSnap } from "@/components/dust-snap";
+
+// Click Snap and the word turns to dust. Click again and it is drawn back in.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[760px]">
+        <DustSnap text="Goodbye" />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Dark theme, your own word, and a callback",
+        code: `// src/app/page.tsx
+"use client";
+
+import { DustSnap } from "@/components/dust-snap";
+
+// onChange(true) fires when the dust has blown away, onChange(false) when the word is whole again.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[760px]">
+      <DustSnap theme="dark" text="Deleted" onChange={(gone) => console.log(gone ? "gone" : "back")} />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Silent, and plays by itself until the first click",
+        code: `// src/app/page.tsx
+
+import { DustSnap } from "@/components/dust-snap";
+
+// enableSound={false} keeps it quiet; autoplay snaps it from time to time until someone clicks.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[760px]">
+      <DustSnap autoplay enableSound={false} />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
     slug: "lightfall",
     name: "Lightfall",
     registryCliName: "lightfall",
