@@ -11967,9 +11967,9 @@ export default function Page() {
     name: "Lightfall",
     registryCliName: "lightfall",
     description:
-      "A WebGL background. Lanes of light pour down a wall, round a cove and run out across a glossy floor towards you, with pulses streaking along every lane and the wall faintly mirrored in the floor. Move over it and the lanes part around your cursor like water around a finger; click, or press Space, to send a surge of light down every lane at once. Three palettes (Dusk, Tide, Ember) ease into each other from a built-in switcher. Until you touch it an invisible hand drifts across it and surges fire on their own. Put your own content on top with children.",
+      "A WebGL background. Lanes of light pour down a wall, round a cove and run out across a glossy floor towards you, with pulses streaking along every lane and the wall faintly mirrored in the floor. Move over it and the lanes part around your cursor like water around a finger; click, or press Space, to send a surge of light down every lane at once. Three palettes (Dusk, Tide, Ember) ease into each other from a built-in switcher. Until you touch it an invisible hand drifts across it and surges fire on their own. It has its own sound: a slow drone that changes with the palette, a note for each lane your cursor crosses (left to right climbs the scale), a run of notes falling down the wall with every surge, and a sting when you switch palette. Put your own content on top with children.",
     categorySlug: "background-effects",
-    tags: ["background", "webgl", "shader", "lights", "hero", "cursor", "glow", "pulse", "gradient", "dark", "autoplay", "motion kit", "framer-motion"],
+    tags: ["background", "webgl", "shader", "lights", "hero", "cursor", "glow", "pulse", "gradient", "dark", "autoplay", "sound", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 181,
     createdAt: "2026-10-29",
@@ -11981,6 +11981,8 @@ export default function Page() {
       { name: "speed", type: "number", defaultValue: "1", description: "Multiplier for how fast the pulses travel." },
       { name: "autoplay", type: "boolean", defaultValue: "true", description: "Until the first touch, an invisible hand drifts across the lanes and surges fire every few seconds. Slowed under reduced motion and paused while the stage is off screen." },
       { name: "showModes", type: "boolean", defaultValue: "true", description: "Shows the Dusk / Tide / Ember switcher in the corner." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Plays the sound: a drone that changes with the palette, a note for each lane the cursor crosses, a falling run of notes on every surge and a sting when the palette changes. It follows the visitor's site-wide sound switch (off until they switch it on) and starts after the first click or key press. Pass false to keep it silent." },
+      { name: "volume", type: "number", defaultValue: "0.7", description: "How loud the sound is, 0 to 1." },
       { name: "hint", type: "ReactNode", description: "Optional caption under the stage." },
       { name: "children", type: "ReactNode", description: "Content layered over the lights. Defaults to a small title; pass null for none." },
       { name: "className", type: "string", description: "Extra classes for the outer wrapper." },
@@ -12029,6 +12031,17 @@ import { Lightfall } from "@/components/lightfall";
 // autoplay={false} keeps the lanes calm until the visitor touches them.
 export default function Page() {
   return <Lightfall mode="ember" speed={0.6} autoplay={false} hint="Click, or press Space, to send a surge." />;
+}`,
+      },
+      {
+        title: "A silent hero",
+        code: `// src/app/page.tsx
+
+import { Lightfall } from "@/components/lightfall";
+
+// The sound is on by default for visitors who have switched site sound on. enableSound={false} removes it.
+export default function Page() {
+  return <Lightfall enableSound={false} />;
 }`,
       },
     ],

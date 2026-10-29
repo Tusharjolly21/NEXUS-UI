@@ -626,6 +626,9 @@ const NEW_WINDOW_MS = 42 * 24 * 60 * 60 * 1000;
 /** The wall's New tab lists what was added in the last week of additions (counted back from the newest one). */
 const NEW_TAB_DAYS = 7;
 
+/** Components listed under every category, as well as their own. */
+const PINNED_EVERYWHERE = new Set(["lightfall"]);
+
 function hashIndex(s: string, n: number) {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
@@ -662,6 +665,7 @@ function toItem(c: LibraryComponent): GalleryItem | null {
     isNew: NEWEST - (Date.parse(c.createdAt) || 0) < NEW_WINDOW_MS,
     isRecent: NEWEST - (Date.parse(c.createdAt) || 0) <= NEW_TAB_DAYS * 24 * 60 * 60 * 1000,
     addedAt: Date.parse(c.createdAt) || 0,
+    pinned: PINNED_EVERYWHERE.has(c.slug) || undefined,
     premium: c.premium,
     hasPrompt: hasBuildPrompt(c.slug),
     sound: soundFor(c.slug),

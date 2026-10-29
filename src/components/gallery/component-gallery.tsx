@@ -147,11 +147,17 @@ export function ComponentGallery({
     (i) =>
       (access === "all" || (access === "pro") === i.premium) &&
       (interaction === "all" || i.interactions.includes(interaction)) &&
-      (category === "all" || (category === NEW_TAB ? i.isRecent : i.group === category)) &&
+      (category === "all" || i.pinned || (category === NEW_TAB ? i.isRecent : i.group === category)) &&
       (!needle || `${i.name} ${i.description} ${i.categoryLabel}`.toLowerCase().includes(needle)),
   );
   // the New tab lists the newest first; the sort is stable, so ties keep the wall's order
-  const matches = category === NEW_TAB ? [...filtered].sort((a, b) => (b.addedAt ?? 0) - (a.addedAt ?? 0)) : filtered;
+  // a pinned component (Lightfall) is under every category chip, first in the ones that are not its own
+  const matches =
+    category === NEW_TAB
+      ? [...filtered].sort((a, b) => (b.addedAt ?? 0) - (a.addedAt ?? 0))
+      : category === "all"
+        ? filtered
+        : [...filtered].sort((a, b) => Number(!!b.pinned && b.group !== category) - Number(!!a.pinned && a.group !== category));
   const recentCount = React.useMemo(() => items.filter((i) => i.isRecent).length, [items]);
   const paged = !(limit && !filtering);
   const infinite = useInfiniteCount({

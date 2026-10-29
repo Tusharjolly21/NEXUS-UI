@@ -27,6 +27,8 @@ export type GalleryItem = {
   isRecent?: boolean;
   /** When it was added (ms since epoch), used to put the newest first under the New tab. */
   addedAt?: number;
+  /** Shown under every category chip and on every category page, not only its own. */
+  pinned?: boolean;
   /** Pro component: previews for everyone, code and controls only with Pro. */
   premium: boolean;
   /** Has a build prompt (the brief to recreate it with an AI agent), free on free components, Pro on Pro ones. */

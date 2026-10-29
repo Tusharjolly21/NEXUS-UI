@@ -46,7 +46,10 @@ export default async function ComponentCategoryPage({ params }: Props) {
   if (items.length === 0) notFound();
 
   const slugs = new Set(items.map((c) => c.slug));
-  const galleryItems = allGalleryItems().filter((g) => slugs.has(g.slug));
+  // pinned components (Lightfall) appear on every category page, first in the ones that are not their own
+  const galleryItems = allGalleryItems()
+    .filter((g) => slugs.has(g.slug) || g.pinned)
+    .sort((a, b) => Number(!!b.pinned && !slugs.has(b.slug)) - Number(!!a.pinned && !slugs.has(a.slug)));
 
   const label = getComponentCategoryLabel(category);
   const copy = getCategoryCopy(category);

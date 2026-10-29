@@ -3,13 +3,17 @@
 import {
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
   type KeyboardEvent as RKeyboardEvent,
   type PointerEvent as RPointerEvent,
   type ReactNode,
+  type RefObject,
 } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
+import { getSoundsEnabled, useAutoplaySoundAllowed } from "@/lib/ui-sounds";
+import { createLightfallSound, type LightfallFrame, type LightfallSound } from "./lightfall-sound";
 
 // ─── Palettes ──────────────────────────────────────────────────────────────────
 
@@ -174,6 +178,83 @@ function program(gl: WebGLRenderingContext, vs: string, fs: string) {
   return p;
 }
 
+// ─── Sound ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Owns the sound engine for one stage. It is made on the visitor's first click or key press (browsers
+ * only allow audio after one), or, for the self-playing demo, once the visitor has used the page and the
+ * site lets demos be heard. It follows the site-wide sound switch, and goes quiet when the stage is off
+ * screen or the tab is hidden.
+ */
+function useLightfallAudio(enableSound: boolean, volume: number, inViewRef: RefObject<boolean>, engaged: RefObject<boolean>) {
+  const autoOk = useAutoplaySoundAllowed();
+  const cfg = useRef({ enableSound, volume, autoOk });
+  const eng = useRef<LightfallSound | null>(null);
+  const tried = useRef(false);
+  useEffect(() => {
+    cfg.current = { enableSound, volume, autoOk };
+    eng.current?.setVolume(volume);
+  }, [enableSound, volume, autoOk]);
+  useEffect(() => {
+    const onHide = () => {
+      if (document.hidden) eng.current?.hush();
+    };
+    document.addEventListener("visibilitychange", onHide);
+    return () => {
+      document.removeEventListener("visibilitychange", onHide);
+      eng.current?.close();
+      eng.current = null;
+      tried.current = false;
+    };
+  }, []);
+  return useMemo(() => {
+    /** Whether the stage may make sound right now: asked for, switched on, on screen, and used or allowed to demo. */
+    const on = () => {
+      const c = cfg.current;
+      if (!c.enableSound || !getSoundsEnabled() || document.hidden || !inViewRef.current) return false;
+      return engaged.current || c.autoOk;
+    };
+    const wake = (gesture: boolean) => {
+      if (eng.current) {
+        eng.current.wake();
+        return;
+      }
+      if (tried.current || !cfg.current.enableSound) return;
+      if (!gesture && !navigator.userActivation?.hasBeenActive) return;
+      tried.current = true;
+      eng.current = createLightfallSound(cfg.current.volume);
+      eng.current?.wake();
+    };
+    return {
+      wake,
+      /** Once per animation frame, with where the cursor is. */
+      frame(f: LightfallFrame) {
+        const live = on();
+        if (live && !eng.current) wake(false);
+        const e = eng.current;
+        if (e) e.frame(f, live && e.awake());
+      },
+      /** The stage is off screen: let go of the drone. */
+      idle() {
+        eng.current?.hush();
+      },
+      surge(strength: number) {
+        if (!on()) return;
+        wake(false);
+        const e = eng.current;
+        // a context made on this very click may take a moment to start; its notes are queued and play when it does
+        e?.surge(strength);
+      },
+      mode(m: LightfallMode) {
+        if (!on()) return;
+        wake(false);
+        const e = eng.current;
+        e?.mode(m);
+      },
+    };
+  }, [inViewRef, engaged]);
+}
+
 export interface LightfallProps {
   /** Stage height in px. */
   height?: number;
@@ -185,6 +266,10 @@ export interface LightfallProps {
   autoplay?: boolean;
   /** Show the Dusk / Tide / Ember palette switcher. */
   showModes?: boolean;
+  /** Plays the sound: a drone and a note for each lane you cross, a falling run of notes on a surge, and a sting when the palette changes. It follows the visitor's sound switch (off until switched on on this site) and starts after the first click or key press. */
+  enableSound?: boolean;
+  /** How loud the sound is, 0 to 1. */
+  volume?: number;
   /** Optional caption under the stage. */
   hint?: ReactNode;
   /** Content layered over the lights. Defaults to a small title; pass `null` for none. */
@@ -200,6 +285,12 @@ export interface LightfallProps {
  * Space) to send a surge of light down every lane at once. Three palettes.
  * Until you touch it, an invisible hand drifts across it and surges fire on
  * their own. Put any content on top with `children`.
+ *
+ * It has its own sound, made with the Web Audio API (no files): a slow drone
+ * that changes with the palette, a note each time the cursor crosses a lane
+ * (left to right climbs the scale), a run of notes falling with each surge and a
+ * sting when you switch palette. It follows the site-wide sound switch; pass
+ * `enableSound={false}` to keep it silent.
  */
 export function Lightfall({
   height = 500,
@@ -207,6 +298,8 @@ export function Lightfall({
   speed = 1,
   autoplay = true,
   showModes = true,
+  enableSound = true,
+  volume = 0.7,
   hint,
   children,
   className = "",
@@ -227,6 +320,10 @@ export function Lightfall({
   }
   const [failed, setFailed] = useState(false);
   const touched = useRef(!autoplay);
+  // the visitor has clicked or pressed a key on this stage: it may make sound even where demos are muted
+  const engaged = useRef(false);
+  const modeRef = useRef(mode);
+  const audio = useLightfallAudio(enableSound, volume, inViewRef, engaged);
   const sim = useRef({
     t: 0,
     pal: MODES[modeProp].c.map(rgb),
@@ -251,6 +348,7 @@ export function Lightfall({
   }, [autoplay]);
   useEffect(() => {
     sim.current.target = MODES[mode].c.map(rgb);
+    modeRef.current = mode;
   }, [mode]);
 
   const surge = (strength = 1) => {
@@ -259,6 +357,7 @@ export function Lightfall({
     S.surges[i * 3] = S.t;
     S.surges[i * 3 + 1] = strength;
     S.nextSurge++;
+    audio.surge(strength);
   };
 
   useEffect(() => {
@@ -354,7 +453,10 @@ export function Lightfall({
       raf = requestAnimationFrame(tick);
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
-      if (!inViewRef.current) return;
+      if (!inViewRef.current) {
+        audio.idle();
+        return;
+      }
       const slow = reduceRef.current;
       S.t += dt * speedRef.current * (slow ? 0.18 : 1);
 
@@ -378,6 +480,7 @@ export function Lightfall({
       S.cur.y += (S.want.y - S.cur.y) * kc;
       S.cur.s += (S.want.s - S.cur.s) * (1 - Math.exp(-dt * 4));
       S.cam += (S.cur.x * S.cur.s - S.cam) * (1 - Math.exp(-dt * 1.5));
+      audio.frame({ x: S.cur.x, y: S.cur.y, presence: S.cur.s, speed: speedRef.current, mode: modeRef.current });
 
       const W = cv.width;
       const H = cv.height;
@@ -438,6 +541,8 @@ export function Lightfall({
   };
   const onDown = (e: RPointerEvent<HTMLDivElement>) => {
     touched.current = true;
+    engaged.current = true;
+    audio.wake(true);
     const p = toNdc(e);
     Object.assign(sim.current.want, { x: p.x, y: p.y, s: 1 });
     surge(1);
@@ -446,6 +551,8 @@ export function Lightfall({
     if (e.key === " " || e.key === "Enter") {
       e.preventDefault();
       touched.current = true;
+      engaged.current = true;
+      audio.wake(true);
       surge(1);
     }
   };
@@ -494,6 +601,9 @@ export function Lightfall({
                   aria-checked={on}
                   onClick={() => {
                     touched.current = true;
+                    engaged.current = true;
+                    audio.wake(true);
+                    if (m !== mode) audio.mode(m);
                     setMode(m);
                   }}
                   className="relative flex h-8 items-center gap-2 rounded-full border-0 bg-transparent px-2.5 text-[12.5px] font-medium text-white outline-none [font-family:inherit] focus-visible:ring-2 focus-visible:ring-white"
