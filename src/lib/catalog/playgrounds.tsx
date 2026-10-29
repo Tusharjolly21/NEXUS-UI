@@ -215,6 +215,7 @@ import { BlackHoleDelete } from "@/components/black-hole-delete";
 import { PortalCard } from "@/components/portal-card";
 import { TestimonialWall } from "@/components/testimonial-wall";
 import { ShredderDelete } from "@/components/shredder-delete";
+import { Lightfall } from "@/components/lightfall";
 import { GlobalDeploy } from "@/components/global-deploy";
 import { CardReaderVerify } from "@/components/card-reader-verify";
 import { IntelligenceGlow } from "@/components/intelligence-glow";
@@ -4033,6 +4034,31 @@ export const playgrounds: Record<string, Playground> = {
         </div>
       );
     },
+  },
+  lightfall: {
+    lightOnly: true,
+    componentName: "Lightfall",
+    importPath: "@/components/lightfall",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "mode", label: "Palette", options: ["dusk", "tide", "ember"], defaultValue: "dusk" },
+      { kind: "range", prop: "speed", label: "Speed", min: 0.2, max: 3, step: 0.05, unit: "×", defaultValue: 1 },
+      { kind: "range", prop: "height", label: "Height", min: 300, max: 700, step: 10, unit: "px", defaultValue: 500 },
+      { kind: "toggle", prop: "showModes", label: "Palette switcher", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[1000px]">
+        <Lightfall
+          key={String(v.autoplay)}
+          autoplay={v.autoplay as boolean}
+          mode={v.mode as "dusk"}
+          speed={v.speed as number}
+          height={v.height as number}
+          showModes={v.showModes as boolean}
+        />
+      </div>
+    ),
   },
   "shredder-delete": {
     lightOnly: true,
