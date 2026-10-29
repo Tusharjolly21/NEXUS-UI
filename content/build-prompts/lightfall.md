@@ -574,10 +574,11 @@ void main(){
   vec2 n = vec2(-dir.y, dir.x);
   // width follows perspective but never drops below a hairline
   float wpx = max(u_minw, u_width * u_res.y * 0.5 / cp.w);
-  // the cursor parts the lanes like a finger in running water
+  // the cursor bends the lanes like a soft lens in running water: every lane leans away in
+  // proportion to how far it is from the cursor, so there is no hard split down the middle
   vec2 d = (np - u_cur.xy) * u_res * 0.5;
   float f = exp(-dot(d, d) / (u_rad * u_rad)) * u_cur.z;
-  float push = sign(dot(d, n) + 1e-4) * f * u_rad * 0.3;
+  float push = dot(d, n) * f * 0.5;
   vec2 offPx = n * (a_v.y * wpx * 0.5 + push);
   gl_Position = vec4((np + offPx / (u_res * 0.5)) * cp.w, cp.z, cp.w);
   v_s = s;
@@ -625,7 +626,7 @@ void main(){
   vec3 col = pick < 0.55 ? u_c0 : pick < 0.8 ? u_c1 : pick < 0.93 ? u_c2 : u_c3;
   float prof = u_glow > 0.5 ? exp(-v_side * v_side * 2.2) * 0.16 : exp(-v_side * v_side * 1.6);
   float laneGain = 0.55 + 0.9 * h(seed * 5.3);
-  float b = (0.13 + pulse * 1.5) * laneGain + surge * 1.4 + v_near * (0.25 + pulse);
+  float b = (0.13 + pulse * 1.5) * laneGain + surge * 1.4 + v_near * (0.07 + pulse * 0.5);
   vec3 c = mix(col, vec3(1.0), clamp(pow(pulse, 3.0) * 0.55 + surge * 0.5, 0.0, 1.0)) * b * prof * v_fade;
   gl_FragColor = vec4(c, max(c.r, max(c.g, c.b)));
 }`;
@@ -970,7 +971,7 @@ export function Lightfall({
           surge(0.9);
         }
       }
-      const kc = 1 - Math.exp(-dt * 7);
+      const kc = 1 - Math.exp(-dt * 5.5);
       S.cur.x += (S.want.x - S.cur.x) * kc;
       S.cur.y += (S.want.y - S.cur.y) * kc;
       S.cur.s += (S.want.s - S.cur.s) * (1 - Math.exp(-dt * 4));
@@ -990,7 +991,7 @@ export function Lightfall({
       gl.uniformMatrix4fv(u.vp, false, new Float32Array(vp));
       gl.uniform2f(u.res, W, H);
       gl.uniform3f(u.cur, S.cur.x, S.cur.y, S.cur.s);
-      gl.uniform1f(u.rad, 64 * (W / Math.max(1, cv.clientWidth)));
+      gl.uniform1f(u.rad, 92 * (W / Math.max(1, cv.clientWidth)));
       gl.uniform1f(u.time, S.t);
       gl.uniform3fv(u.surge, new Float32Array(S.surges));
       S.pal.forEach((c, i) => gl.uniform3f(u.c[i], c[0], c[1], c[2]));
