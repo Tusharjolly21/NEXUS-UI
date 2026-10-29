@@ -11963,6 +11963,76 @@ export default function Page() {
     tailwindSource: tw,
   },
   {
+    slug: "pluck-frame",
+    name: "Pluck Frame",
+    registryCliName: "pluck-frame",
+    description:
+      "A rounded frame drawn as one elastic string. Bring the pointer to an edge and the string catches on it; keep going and it stretches out with you, widening as it goes, until it slips off and rings. The ring is drawn the way a camera sees a vibrating string: a translucent veil between rest and the furthest swing, brightest at both ends of the swing, spreading along the frame, wrapping the corners and fading. Click, or press Enter, and the whole frame rings.",
+    categorySlug: "motion-effects",
+    tags: ["frame","string","elastic","pluck","canvas","pointer","drag","physics","spring","ring","autoplay","motion kit"],
+    premium: true,
+    trendingScore: 182,
+    createdAt: "2026-10-29",
+    animationKinds: ["drag", "hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plucks the frame by itself, out through the right edge, the top, the lower-left corner and the bottom, until the pointer arrives. Never runs under reduced motion (a still frame is shown) and pauses while the card is off screen." },
+      { name: "theme", type: "\"dark\" | \"light\"", defaultValue: "\"dark\"", description: "Dark (white string on near-black) or light (graphite string on pale grey)." },
+      { name: "children", type: "ReactNode", description: "Content centred inside the frame. Defaults to a small hint; the frame ignores the pointer over it." },
+    ],
+    Preview: Previews.PreviewPluckFrame,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { PluckFrame } from "@/components/pluck-frame";
+
+// A square frame drawn as one elastic string. Pull an edge and let go, or click it to ring the whole frame.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[440px]">
+        <PluckFrame />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Your own content inside, in the light theme",
+        code: `// src/app/page.tsx
+
+import { PluckFrame } from "@/components/pluck-frame";
+
+// children sit in the middle of the frame and never block the pointer.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px]">
+      <PluckFrame theme="light">
+        <span className="text-[15px] font-semibold text-[#1d1d1f]">Pull me</span>
+      </PluckFrame>
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Plays by itself until the pointer arrives",
+        code: `// src/app/page.tsx
+
+import { PluckFrame } from "@/components/pluck-frame";
+
+// autoplay plucks it from every side. The first real pointer takes over.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px]">
+      <PluckFrame autoplay />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
     slug: "lightfall",
     name: "Lightfall",
     registryCliName: "lightfall",

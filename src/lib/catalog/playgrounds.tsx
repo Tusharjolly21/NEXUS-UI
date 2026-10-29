@@ -216,6 +216,7 @@ import { PortalCard } from "@/components/portal-card";
 import { TestimonialWall } from "@/components/testimonial-wall";
 import { ShredderDelete } from "@/components/shredder-delete";
 import { Lightfall } from "@/components/lightfall";
+import { PluckFrame } from "@/components/pluck-frame";
 import { TetheredSubmit } from "@/components/tethered-submit";
 import { DependentForm } from "@/components/dependent-form";
 import { GlassEdit } from "@/components/glass-edit";
@@ -4167,6 +4168,21 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => (
       <div className="mx-auto w-full max-w-[520px]">
         <SkeletonMorphRows key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "pluck-frame": {
+    lightOnly: true,
+    componentName: "PluckFrame",
+    importPath: "@/components/pluck-frame",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "theme", label: "Theme", options: ["dark", "light"], defaultValue: "dark" },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[440px]">
+        <PluckFrame key={String(v.autoplay)} autoplay={v.autoplay as boolean} theme={v.theme as "dark"} />
       </div>
     ),
   },

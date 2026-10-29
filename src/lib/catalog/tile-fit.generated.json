@@ -4119,6 +4119,26 @@
   "bg": "#ffffff",
   "coverage": 0.01
  },
+ "pluck-frame": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   10,
+   140,
+   706,
+   570
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.99
+ },
  "polaroid-develop": {
   "canvas": [
    960,
