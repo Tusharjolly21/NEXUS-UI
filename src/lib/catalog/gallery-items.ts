@@ -380,33 +380,24 @@ const TINT_OF: Record<string, TileTint> = {
 };
 
 /**
- * The Motion Kit components, newest batch first. They lead the components wall in this order, so
- * the latest additions are always on its first page.
+ * The Motion Kit components, in the order they lead the components wall. The older, most colourful
+ * and polished ones keep the top; the newest additions are spread among them on purpose, and they
+ * are all gathered, newest first, under the wall's New tab (see NEW_TAB_DAYS).
  */
 export const MOTION_KIT_ORDER: string[] = [
-  // twenty-second batch (Everyday: Tethered Submit, Dependent Form, Glass Edit, Live Summary, Scoped Search, Ink Autosave, Sort Stack, Reading Spine, Skeleton Morph Rows)
-  "tethered-submit",
-  "dependent-form",
-  "glass-edit",
-  "live-summary",
-  "scoped-search",
-  "ink-autosave",
-  "sort-stack",
-  "reading-spine",
-  "skeleton-morph-rows",
-  // twenty-first batch (Lightfall)
-  "lightfall",
   // twentieth batch (Motion Kit Pro: Ring Gallery)
   "ring-gallery",
   // nineteenth batch (Motion Kit Pro: Global Deploy, Card Reader Verify, Intelligence Glow, Cloud Sync, Smart Light, Range Calendar, Storage Clean)
   "global-deploy",
   "card-reader-verify",
   "intelligence-glow",
+  "lightfall", // newest batch, placed among the older ones on purpose
   "cloud-sync",
   "smart-light",
   "range-calendar",
   "storage-clean",
   // eighteenth batch (Dart Rating, Domino Progress, Pumpkin Reveal, Catch Undo)
+  "live-summary", // newest batch, placed among the older ones on purpose
   "dart-rating",
   "domino-progress",
   "pumpkin-reveal",
@@ -414,18 +405,21 @@ export const MOTION_KIT_ORDER: string[] = [
   // seventeenth batch (Shredder Delete)
   "shredder-delete",
   // sixteenth batch (Testimonial Wall)
+  "glass-edit", // newest batch, placed among the older ones on purpose
   "testimonial-wall",
   // fifteenth batch (Venom Button, Web Sling Button, Frost Input, Black Hole Delete, Portal Card)
   "venom-button",
   "web-sling-button",
   "frost-input",
   "black-hole-delete",
+  "reading-spine", // newest batch, placed among the older ones on purpose
   "portal-card",
   // fourteenth batch (Mesh Net, Particle Reveal, Morphing Text, Code Snippet, Workflow Network)
   "mesh-net",
   "particle-reveal",
   "morphing-text",
   "code-snippet",
+  "scoped-search", // newest batch, placed among the older ones on purpose
   "workflow-network",
   // thirteenth batch (Cubes Grid)
   "cubes-grid",
@@ -433,28 +427,33 @@ export const MOTION_KIT_ORDER: string[] = [
   "sound-mark",
   "ripple-now-playing",
   "chladni-upload",
+  "tethered-submit", // newest batch, placed among the older ones on purpose
   "tank-recorder",
   "ripple-toast",
   // eleventh batch (States and Essentials)
   "empty-projects",
   "no-results",
   "empty-chart",
+  "sort-stack", // newest batch, placed among the older ones on purpose
   "empty-team",
   "streaming-answer",
   "diff-review",
   "agent-run",
   "ghost-autocomplete",
+  "dependent-form", // newest batch, placed among the older ones on purpose
   "skeleton-morph",
   "morphing-dialog",
   "travelling-tooltip",
   // tenth batch (Rare)
   "vinyl-player",
   "ferrofluid-record",
+  "ink-autosave", // newest batch, placed among the older ones on purpose
   "sand-timer",
   "zipper-reveal",
   "slingshot-send",
   "domino-select",
   "lenticular-pass",
+  "skeleton-morph-rows", // newest batch, placed among the older ones on purpose
   "origami-pricing",
   // ninth batch (Depth)
   "tag-pit",
@@ -624,6 +623,8 @@ const GROUP_OF = new Map<string, string>(
 /** Anything added in the last six weeks of the newest component counts as new. */
 const NEWEST = Math.max(...libraryComponents.map((c) => Date.parse(c.createdAt) || 0));
 const NEW_WINDOW_MS = 42 * 24 * 60 * 60 * 1000;
+/** The wall's New tab lists what was added in the last week of additions (counted back from the newest one). */
+const NEW_TAB_DAYS = 7;
 
 function hashIndex(s: string, n: number) {
   let h = 0;
@@ -659,6 +660,8 @@ function toItem(c: LibraryComponent): GalleryItem | null {
     fit: getTileFit(c.slug),
     install: c.registryCliName ?? c.slug,
     isNew: NEWEST - (Date.parse(c.createdAt) || 0) < NEW_WINDOW_MS,
+    isRecent: NEWEST - (Date.parse(c.createdAt) || 0) <= NEW_TAB_DAYS * 24 * 60 * 60 * 1000,
+    addedAt: Date.parse(c.createdAt) || 0,
     premium: c.premium,
     hasPrompt: hasBuildPrompt(c.slug),
     sound: soundFor(c.slug),

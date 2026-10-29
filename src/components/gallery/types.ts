@@ -23,6 +23,10 @@ export type GalleryItem = {
   install: string;
   /** Added in the last few weeks. */
   isNew: boolean;
+  /** Added in the last week or so of additions: what the wall's New tab lists. */
+  isRecent?: boolean;
+  /** When it was added (ms since epoch), used to put the newest first under the New tab. */
+  addedAt?: number;
   /** Pro component: previews for everyone, code and controls only with Pro. */
   premium: boolean;
   /** Has a build prompt (the brief to recreate it with an AI agent), free on free components, Pro on Pro ones. */

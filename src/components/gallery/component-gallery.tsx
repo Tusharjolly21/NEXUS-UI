@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Lock, LockOpen, Search, X } from "lucide-react";
+import { Lock, LockOpen, Search, Sparkles, X } from "lucide-react";
 import { ProBadge, useProAccess } from "@/components/pro/pro-access";
 import { PillLink } from "@/components/site/pill-link";
 import { PRICES, formatPrice } from "@/lib/pricing";
@@ -15,6 +15,9 @@ import { useUrlParam } from "./use-url-param";
 import { InfiniteSentinel, useInfiniteCount } from "./infinite-scroll";
 
 export type CategoryFilter = { id: string; label: string };
+
+/** The category chip that lists recent additions instead of a taxonomy group. */
+const NEW_TAB = "new";
 
 /** Where the plans card sits in the wall: after this many tiles, once, so it is passed rather than chased. */
 const PLANS_CARD_AFTER = 11;
@@ -140,13 +143,16 @@ export function ComponentGallery({
   const { isPro, proCount } = useProAccess();
   const needle = query.trim().toLowerCase();
   const filtering = interaction !== "all" || category !== "all" || needle !== "" || access !== "all";
-  const matches = items.filter(
+  const filtered = items.filter(
     (i) =>
       (access === "all" || (access === "pro") === i.premium) &&
       (interaction === "all" || i.interactions.includes(interaction)) &&
-      (category === "all" || i.group === category) &&
+      (category === "all" || (category === NEW_TAB ? i.isRecent : i.group === category)) &&
       (!needle || `${i.name} ${i.description} ${i.categoryLabel}`.toLowerCase().includes(needle)),
   );
+  // the New tab lists the newest first; the sort is stable, so ties keep the wall's order
+  const matches = category === NEW_TAB ? [...filtered].sort((a, b) => (b.addedAt ?? 0) - (a.addedAt ?? 0)) : filtered;
+  const recentCount = React.useMemo(() => items.filter((i) => i.isRecent).length, [items]);
   const paged = !(limit && !filtering);
   const infinite = useInfiniteCount({
     total: matches.length,
@@ -240,6 +246,21 @@ export function ComponentGallery({
             >
               Every category
             </Chip>
+            {recentCount ? (
+              <Chip
+                active={category === NEW_TAB}
+                icon={<Sparkles className="size-3.5 text-[#ff9f0a]" strokeWidth={2.4} aria-hidden />}
+                onClick={() => {
+                  setCategory(NEW_TAB);
+                }}
+                className="py-1.5 text-[13px]"
+              >
+                New
+                <span className={cn("tabular-nums text-[12px]", category === NEW_TAB ? "text-background/60" : "text-muted-foreground")}>
+                  {recentCount}
+                </span>
+              </Chip>
+            ) : null}
             {categories.map((c) => (
               <Chip
                 key={c.id}
