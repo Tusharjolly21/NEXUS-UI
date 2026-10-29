@@ -221,8 +221,10 @@ function Line({ from, src, root, reduce, children }: { from: RefObject<Partial<R
     const s = from.current?.[src], e = el.current;
     if (!s || !e || reduce) return;
     const S = s.getBoundingClientRect(), E = e.getBoundingClientRect();
-    x.set(S.left + Math.min(S.width, 200) / 2 - (E.left + E.width / 2));
-    y.set(S.top + S.height / 2 - (E.top + E.height / 2));
+    // rects are in screen pixels; x and y are in the line's own, which differ inside a scaled preview
+    const k = e.offsetWidth ? E.width / e.offsetWidth : 1;
+    x.set((S.left + Math.min(S.width, 200) / 2 - (E.left + E.width / 2)) / k);
+    y.set((S.top + S.height / 2 - (E.top + E.height / 2)) / k);
     animate(x, 0, FLY);
     animate(y, 0, FLY);
     // eslint-disable-next-line react-hooks/exhaustive-deps

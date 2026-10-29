@@ -94,7 +94,9 @@ export function ScopedSearch({ autoplay = false, items = MAIL }: { autoplay?: bo
     const m = mirror.current, i = input.current, f = field.current;
     if (!m || !i || !f) return 0;
     m.textContent = before;
-    return i.getBoundingClientRect().left - f.getBoundingClientRect().left + m.offsetWidth - i.scrollLeft;
+    const F = f.getBoundingClientRect();
+    const k = f.offsetWidth ? F.width / f.offsetWidth : 1; // the field may sit inside a scaled preview
+    return (i.getBoundingClientRect().left - F.left) / k + m.offsetWidth - i.scrollLeft;
   };
 
   const promote = (key: Token["key"], value: string) => {
@@ -292,7 +294,9 @@ function Chip({ t, selected, field, reduce, onRemove }: { t: Token & { fromX: nu
   useLayoutEffect(() => {
     const f = field.current, c = el.current;
     if (!f || !c || reduce) return;
-    const left = c.getBoundingClientRect().left - f.getBoundingClientRect().left;
+    const F = f.getBoundingClientRect();
+    const k = f.offsetWidth ? F.width / f.offsetWidth : 1; // the field may sit inside a scaled preview
+    const left = (c.getBoundingClientRect().left - F.left) / k;
     x.set(t.fromX - left);
     animate(x, 0, SPRING);
     // eslint-disable-next-line react-hooks/exhaustive-deps

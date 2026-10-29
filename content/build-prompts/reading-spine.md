@@ -153,9 +153,11 @@ export function ReadingSpine({ autoplay = false, sections = ARTICLE }: { autopla
 
   // scrubbing: press anywhere on the rail and drag; the capsule follows your finger
   const scrubAt = (clientY: number) => {
-    const r = rail.current?.getBoundingClientRect();
-    if (!r) return;
-    const p = Math.min(1, Math.max(0, (clientY - r.top - thumbH / 2) / span));
+    const el = rail.current;
+    const r = el?.getBoundingClientRect();
+    if (!el || !r) return;
+    const k = el.offsetHeight ? r.height / el.offsetHeight : 1; // the rail may sit inside a scaled preview
+    const p = Math.min(1, Math.max(0, ((clientY - r.top) / k - thumbH / 2) / span));
     scrollTo(p * geo.max, false);
   };
   const down = (e: RPointerEvent<HTMLDivElement>) => { e.currentTarget.setPointerCapture(e.pointerId); setDrag(true); setPanel(false); scrubAt(e.clientY); };

@@ -82,9 +82,11 @@ export function TetheredSubmit({ autoplay = false, onSubmit }: { autoplay?: bool
     // the checkbox sits right above the button, so it is pointed out by its own glow rather than a line
     if (!r || !b || !f || target === "terms") return setGeo(null);
     const R = r.getBoundingClientRect(), B = b.getBoundingClientRect(), F = f.getBoundingClientRect();
-    const sx = B.right - R.left - 34, sy = B.top - R.top;
-    const ex = F.right - R.left, ey = F.top - R.top + F.height / 2;
-    const gx = R.width - 14;
+    // the form can sit inside a scaled preview (a gallery tile): rects are in screen pixels, the line is drawn in the form's own
+    const k = r.offsetWidth ? R.width / r.offsetWidth : 1;
+    const sx = (B.right - R.left) / k - 34, sy = (B.top - R.top) / k;
+    const ex = (F.right - R.left) / k, ey = (F.top - R.top + F.height / 2) / k;
+    const gx = r.offsetWidth - 14;
     const d = `M${sx} ${sy} C${sx} ${sy - 18} ${gx} ${sy - 10} ${gx} ${sy - 34} L${gx} ${ey + 14} Q${gx} ${ey} ${ex + 2} ${ey}`;
     setGeo({ d, ex, ey });
   }, [target]);
