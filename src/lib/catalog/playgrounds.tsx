@@ -216,6 +216,15 @@ import { PortalCard } from "@/components/portal-card";
 import { TestimonialWall } from "@/components/testimonial-wall";
 import { ShredderDelete } from "@/components/shredder-delete";
 import { Lightfall } from "@/components/lightfall";
+import { TetheredSubmit } from "@/components/tethered-submit";
+import { DependentForm } from "@/components/dependent-form";
+import { GlassEdit } from "@/components/glass-edit";
+import { LiveSummary } from "@/components/live-summary";
+import { ScopedSearch } from "@/components/scoped-search";
+import { InkAutosave } from "@/components/ink-autosave";
+import { SortStack } from "@/components/sort-stack";
+import { ReadingSpine } from "@/components/reading-spine";
+import { SkeletonMorphRows } from "@/components/skeleton-morph-rows";
 import { GlobalDeploy } from "@/components/global-deploy";
 import { CardReaderVerify } from "@/components/card-reader-verify";
 import { IntelligenceGlow } from "@/components/intelligence-glow";
@@ -4034,6 +4043,132 @@ export const playgrounds: Record<string, Playground> = {
         </div>
       );
     },
+  },
+  "tethered-submit": {
+    lightOnly: true,
+    componentName: "TetheredSubmit",
+    importPath: "@/components/tethered-submit",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[520px]">
+        <TetheredSubmit key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "dependent-form": {
+    lightOnly: true,
+    componentName: "DependentForm",
+    importPath: "@/components/dependent-form",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[520px]">
+        <DependentForm key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "glass-edit": {
+    lightOnly: true,
+    componentName: "GlassEdit",
+    importPath: "@/components/glass-edit",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[520px]">
+        <GlassEdit key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "live-summary": {
+    lightOnly: true,
+    componentName: "LiveSummary",
+    importPath: "@/components/live-summary",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[640px]">
+        <LiveSummary key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "scoped-search": {
+    lightOnly: true,
+    componentName: "ScopedSearch",
+    importPath: "@/components/scoped-search",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[640px]">
+        <ScopedSearch key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "ink-autosave": {
+    lightOnly: true,
+    componentName: "InkAutosave",
+    importPath: "@/components/ink-autosave",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[520px]">
+        <InkAutosave key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "sort-stack": {
+    lightOnly: true,
+    componentName: "SortStack",
+    importPath: "@/components/sort-stack",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[640px]">
+        <SortStack key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "reading-spine": {
+    lightOnly: true,
+    componentName: "ReadingSpine",
+    importPath: "@/components/reading-spine",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[640px]">
+        <ReadingSpine key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "skeleton-morph-rows": {
+    lightOnly: true,
+    componentName: "SkeletonMorphRows",
+    importPath: "@/components/skeleton-morph-rows",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[520px]">
+        <SkeletonMorphRows key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
   },
   lightfall: {
     lightOnly: true,

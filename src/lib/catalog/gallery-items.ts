@@ -50,6 +50,16 @@ const EXTRA_INTERACTIONS: Record<string, Interaction[]> = {
 /** Previews that already play their own demo (they render a DemoCursor themselves). */
 const SELF_DEMO = new Set([
   "lightfall",
+  "tethered-submit",
+  "dependent-form",
+  "glass-edit",
+  "live-summary",
+  "scoped-search",
+  "ink-autosave",
+  "sort-stack",
+  "reading-spine",
+  "skeleton-morph-rows",
+
   "ring-gallery",
   "global-deploy",
   "card-reader-verify",
@@ -374,6 +384,16 @@ const TINT_OF: Record<string, TileTint> = {
  * the latest additions are always on its first page.
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // twenty-second batch (Everyday: Tethered Submit, Dependent Form, Glass Edit, Live Summary, Scoped Search, Ink Autosave, Sort Stack, Reading Spine, Skeleton Morph Rows)
+  "tethered-submit",
+  "dependent-form",
+  "glass-edit",
+  "live-summary",
+  "scoped-search",
+  "ink-autosave",
+  "sort-stack",
+  "reading-spine",
+  "skeleton-morph-rows",
   // twenty-first batch (Lightfall)
   "lightfall",
   // twentieth batch (Motion Kit Pro: Ring Gallery)

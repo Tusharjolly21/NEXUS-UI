@@ -11469,6 +11469,500 @@ export default function Page() {
     tailwindSource: tw,
   },
   {
+    slug: "tethered-submit",
+    name: "Tethered Submit",
+    registryCliName: "tethered-submit",
+    description:
+      "A sign-up button that explains why it is not ready. Hover, focus or press it and a hairline draws out to the first field that still needs something, which lights up with a one-line hint. Fill that field and the tether swings to the next. The button counts what is left and turns solid when nothing is.",
+    categorySlug: "signup-forms",
+    tags: ["signup", "form", "button", "validation", "tether", "hint", "svg", "spring", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 178,
+    createdAt: "2026-10-29",
+    animationKinds: ["hover", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Fills the form in by itself and shows the tether, until the visitor touches it. Never runs under reduced motion and pauses while the card is off screen." },
+      { name: "onSubmit", type: "(values: { name: string; email: string; password: string; terms: string }) => void", description: "Called with the field values when the button is pressed with nothing left to fill." },
+    ],
+    Preview: Previews.PreviewTetheredSubmit,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { TetheredSubmit } from "@/components/tethered-submit";
+
+// A short sign-up form. Press the button before it is ready and a line draws out to the first field that still needs something.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[520px]">
+        <TetheredSubmit />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Handle the submit",
+        code: `// src/app/page.tsx
+
+import { TetheredSubmit } from "@/components/tethered-submit";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[520px]">
+      <TetheredSubmit
+      onSubmit={(values) => console.log(values)}
+      />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "dependent-form",
+    name: "Dependent Form",
+    registryCliName: "dependent-form",
+    description:
+      "A billing form whose fields follow your answers. Choose Business and the company fields unfold from the row above, hanging off a line that shows what they depend on. Change country and the fields that keep their meaning simply relabel, while the ones that no longer apply fold away.",
+    categorySlug: "inputs-controls",
+    tags: ["form", "billing", "conditional fields", "layout", "fold", "3d", "spring", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 176,
+    createdAt: "2026-10-29",
+    animationKinds: ["layout", "3d", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Answers the questions by itself so the fields can be seen unfolding, until the visitor touches the form. Never runs under reduced motion and pauses while the card is off screen." },
+      { name: "onSubmit", type: "(values: Record<string, string>) => void", description: "Called when the form is submitted, with the account type, the country and the value of every field." },
+    ],
+    Preview: Previews.PreviewDependentForm,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { DependentForm } from "@/components/dependent-form";
+
+// A billing form. Switch to Business or change the country and watch the fields follow.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[520px]">
+        <DependentForm />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Handle the submit",
+        code: `// src/app/page.tsx
+
+import { DependentForm } from "@/components/dependent-form";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[520px]">
+      <DependentForm
+      onSubmit={(values) => console.log(values)}
+      />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "glass-edit",
+    name: "Glass Edit",
+    registryCliName: "glass-edit",
+    description:
+      "A profile you edit where it stands. Point at any text and it sinks into a faint recess; click it and it lifts onto a pane of glass while the rest of the card steps back. Enter presses it back down with a pass of light to say it saved; Escape winds it back.",
+    categorySlug: "inputs-controls",
+    tags: ["inline edit", "profile", "glass", "3d", "spring", "hover", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 175,
+    createdAt: "2026-10-29",
+    animationKinds: ["3d", "spring", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Edits a field by itself so the lift can be seen, until the visitor touches the card. Never runs under reduced motion and pauses while the card is off screen." },
+      { name: "initial", type: "Record<\"name\" | \"role\" | \"location\" | \"bio\", string>", description: "Starting text of the four fields." },
+      { name: "onChange", type: "(key: \"name\" | \"role\" | \"location\" | \"bio\", value: string) => void", description: "Called with the field and its new text each time an edit is committed with Enter or by clicking away, if the text changed." },
+    ],
+    Preview: Previews.PreviewGlassEdit,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { GlassEdit } from "@/components/glass-edit";
+
+// Point at any text, then click it to edit. Enter saves, Escape puts it back.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[520px]">
+        <GlassEdit />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Your own profile",
+        code: `// src/app/page.tsx
+
+import { GlassEdit } from "@/components/glass-edit";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[520px]">
+      <GlassEdit
+      initial={{ name: "Sam Rivera", role: "Engineer", location: "Lisbon", bio: "Builds quiet tools." }}
+      onChange={(key, value) => console.log(key, value)}
+      />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "live-summary",
+    name: "Live Summary",
+    registryCliName: "live-summary",
+    description:
+      "A booking form that writes its own receipt. Every choice sends a line across to the summary, flying from the control you touched; change a number and only the digits that change roll. Press Reserve and the receipt folds itself into the confirmation.",
+    categorySlug: "inputs-controls",
+    tags: ["booking", "form", "receipt", "summary", "price", "rolling digits", "layout", "spring", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 177,
+    createdAt: "2026-10-29",
+    animationKinds: ["layout", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Makes choices by itself so the lines can be seen flying to the receipt, until the visitor touches the form. Never runs under reduced motion and pauses while the card is off screen." },
+      { name: "onReserve", type: "(booking: { room: string; nights: number; guests: number; breakfast: boolean; late: boolean; total: number }) => void", description: "Called when Reserve is pressed, with the room, nights, guests, extras and the total." },
+    ],
+    Preview: Previews.PreviewLiveSummary,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { LiveSummary } from "@/components/live-summary";
+
+// Choose a room, nights and extras. Each choice flies to the receipt, then Reserve folds it into a confirmation.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[900px]">
+        <LiveSummary />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Handle the reservation",
+        code: `// src/app/page.tsx
+
+import { LiveSummary } from "@/components/live-summary";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[900px]">
+      <LiveSummary
+      onReserve={(booking) => console.log(booking.total)}
+      />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "scoped-search",
+    name: "Scoped Search",
+    registryCliName: "scoped-search",
+    description:
+      "A search field that understands filters. Type from:anna or is:unread and the words lift out of the text into a chip, from exactly where you typed them. Remove one by pressing it, by Backspace twice, or by dragging it out. Results fold away and slide up instead of blinking.",
+    categorySlug: "inputs-controls",
+    tags: ["search", "filter", "chips", "operators", "drag", "layout", "type", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 180,
+    createdAt: "2026-10-29",
+    animationKinds: ["layout", "drag", "type"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a search by itself so a chip can be seen forming, until the visitor touches the field. Never runs under reduced motion and pauses while the card is off screen." },
+      { name: "items", type: "{ id: number; from: string; who: string; subject: string; preview: string; time: string; unread?: boolean; starred?: boolean; attachment?: boolean; archived?: boolean }[]", defaultValue: "a sample inbox", description: "The messages to search. from: matches who, and is:unread, is:starred, has:attachment and is:archived match the flags." },
+    ],
+    Preview: Previews.PreviewScopedSearch,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { ScopedSearch } from "@/components/scoped-search";
+
+// Type from:anna or is:unread, then remove a chip with Backspace or by dragging it out.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[640px]">
+        <ScopedSearch />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Your own messages",
+        code: `// src/app/page.tsx
+
+import { ScopedSearch } from "@/components/scoped-search";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[640px]">
+      <ScopedSearch
+      items={[
+        { id: 1, from: "Anna Lee", who: "anna", subject: "Design review", preview: "Moved to Thursday.", time: "9:41", unread: true },
+        { id: 2, from: "Leo Park", who: "leo", subject: "Lunch?", preview: "Friday at noon.", time: "Tue" },
+      ]}
+      />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "ink-autosave",
+    name: "Ink Autosave",
+    registryCliName: "ink-autosave",
+    description:
+      "A note that shows its save state as ink. What is saved is dry black ink; what you have typed since is wet blue at the end of the rule. Pause and it dries left to right. Go offline and it dries grey with a drop hanging off the nib, which falls in when you reconnect.",
+    categorySlug: "inputs-controls",
+    tags: ["autosave", "note", "editor", "offline", "status", "ink", "type", "spring", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 172,
+    createdAt: "2026-10-29",
+    animationKinds: ["type", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Writes a line by itself and goes offline and back, until the visitor touches the note. Never runs under reduced motion and pauses while the card is off screen." },
+      { name: "save", type: "(text: string) => Promise<void>", description: "Called about a second after typing pauses. Resolve it when the text is stored; the ink dries when it does. Left out, the note pretends to save for under half a second." },
+      { name: "initial", type: "string", defaultValue: "a sample note", description: "Starting text of the note." },
+    ],
+    Preview: Previews.PreviewInkAutosave,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { InkAutosave } from "@/components/ink-autosave";
+
+// Type in the note. Pause and the ink dries; toggle offline to see it wait.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[520px]">
+        <InkAutosave />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Save to your backend",
+        code: `// src/app/page.tsx
+
+import { InkAutosave } from "@/components/ink-autosave";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[520px]">
+      <InkAutosave
+      save={async (text) => {
+        await fetch("/api/notes", { method: "PUT", body: text });
+      }}
+      />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "sort-stack",
+    name: "Sort Stack",
+    registryCliName: "sort-stack",
+    description:
+      "A table that sorts like a stack of cards. Press a column and the rows lift apart, slide past each other to their new places with the furthest travellers riding highest, then close back into a table, so you can follow any row through the sort.",
+    categorySlug: "dashboards",
+    tags: ["table", "sort", "rows", "layout", "spring", "dashboard", "data", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 174,
+    createdAt: "2026-10-29",
+    animationKinds: ["layout", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Presses the column headers by itself, until the visitor touches the table. Never runs under reduced motion and pauses while the card is off screen." },
+      { name: "rows", type: "{ id: number; name: string; email: string; plan: \"Pro\" | \"Team\" | \"Free\"; seats: number; spend: number; active: number; activeLabel: string; tone: string }[]", defaultValue: "a sample team", description: "The rows of the table." },
+    ],
+    Preview: Previews.PreviewSortStack,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { SortStack } from "@/components/sort-stack";
+
+// Press a column header and follow any row through the sort.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[900px]">
+        <SortStack />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Your own rows",
+        code: `// src/app/page.tsx
+
+import { SortStack } from "@/components/sort-stack";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[900px]">
+      <SortStack
+      rows={[
+        { id: 1, name: "Sam Rivera", email: "sam@acme.co", plan: "Pro", seats: 3, spend: 360, active: 12, activeLabel: "12 min ago", tone: "#d6e4f5" },
+        { id: 2, name: "Kai Okafor", email: "kai@acme.co", plan: "Team", seats: 9, spend: 1080, active: 240, activeLabel: "4 hr ago", tone: "#dcecd6" },
+      ]}
+      />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "reading-spine",
+    name: "Reading Spine",
+    registryCliName: "reading-spine",
+    description:
+      "A scroll bar that knows the article. A slim rail carries a tick where each section starts and a capsule for your place. Scroll or scrub it and a glass label rides alongside with the section and the minutes left, like the Photos scrubber. Rest on the rail for a glass contents panel showing how much of each section you have read.",
+    categorySlug: "blog-components",
+    tags: ["scrollbar", "progress", "article", "reading", "scrubber", "glass", "toc", "scroll", "drag", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 179,
+    createdAt: "2026-10-29",
+    animationKinds: ["scroll", "drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Scrolls the article by itself so the label and contents panel can be seen, until the visitor touches it. Never runs under reduced motion and pauses while the card is off screen." },
+      { name: "sections", type: "{ id: string; title: string; body: string[] }[]", defaultValue: "a sample article", description: "The sections of the article. Each body string is one paragraph." },
+    ],
+    Preview: Previews.PreviewReadingSpine,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { ReadingSpine } from "@/components/reading-spine";
+
+// Scroll the article or drag the rail. Rest on the rail for the contents.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[640px]">
+        <ReadingSpine />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Your own article",
+        code: `// src/app/page.tsx
+
+import { ReadingSpine } from "@/components/reading-spine";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[640px]">
+      <ReadingSpine
+      sections={[
+        { id: "intro", title: "Introduction", body: ["First paragraph.", "Second paragraph."] },
+        { id: "detail", title: "The detail", body: ["A longer paragraph goes here."] },
+      ]}
+      />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "skeleton-morph-rows",
+    name: "Skeleton Morph Rows",
+    registryCliName: "skeleton-morph-rows",
+    description:
+      "A loading state that becomes the content instead of being swapped for it. Each grey shape knows what it stands for: when the data lands it stretches to that piece's exact box and dissolves as the real thing appears inside it, row by row.",
+    categorySlug: "loaders",
+    tags: ["skeleton", "loading", "feed", "shared layout", "placeholder", "layout", "spring", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 171,
+    createdAt: "2026-10-29",
+    animationKinds: ["layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Reloads the feed on a loop so the morph can be seen, until the visitor touches it. Never runs under reduced motion and pauses while the card is off screen." },
+      { name: "load", type: "() => Promise<{ who: string; tone: string; action: string; target: string; time: string; quote?: string; art?: [string, string] }[]>", defaultValue: "a 1.5 second pretend load", description: "Loads the activity. The skeleton shows until the promise resolves." },
+    ],
+    Preview: Previews.PreviewSkeletonMorphRows,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { SkeletonMorphRows } from "@/components/skeleton-morph-rows";
+
+// Press Reload to watch the skeleton turn into the feed.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[520px]">
+        <SkeletonMorphRows />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Load your own feed",
+        code: `// src/app/page.tsx
+
+import { SkeletonMorphRows } from "@/components/skeleton-morph-rows";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[520px]">
+      <SkeletonMorphRows
+      load={async () => {
+        const res = await fetch("/api/activity");
+        return res.json();
+      }}
+      />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
     slug: "lightfall",
     name: "Lightfall",
     registryCliName: "lightfall",
