@@ -49,7 +49,7 @@ export type DustFrame = {
   landed: number;
   /** 0 to 1: how much of the word is dark and grainy right now. */
   ashen: number;
-  /** 0 to 1: how much of the dust is in the air, blowing away. */
+  /** 0 to 1: how much dust you can see in the air right now (each speck counts by how bright it still is). */
   airborne: number;
   /** 0 to 1: how much of the dust is flying home right now (the part you can see moving). */
   returning: number;
@@ -184,17 +184,20 @@ export function createDustSound(volume = 0.7): DustSound | null {
   airLp.frequency.value = 2600;
   const airG = c.createGain();
   airG.gain.value = 0;
+  // the gust scales the air (it never adds to it), so when the level is zero the air is truly silent
+  const gustG = c.createGain();
+  gustG.gain.value = 0.86;
   const gust = c.createOscillator();
   gust.type = "sine";
   gust.frequency.value = 0.42;
   const gustDepth = c.createGain();
-  gustDepth.gain.value = 0.012;
-  gust.connect(gustDepth).connect(airG.gain);
+  gustDepth.gain.value = 0.14;
+  gust.connect(gustDepth).connect(gustG.gain);
   gust.start();
   const airPan = panner(0);
-  air.connect(airBp).connect(airLp).connect(airG);
-  if (airPan) airG.connect(airPan).connect(bus);
-  else airG.connect(bus);
+  air.connect(airBp).connect(airLp).connect(airG).connect(gustG);
+  if (airPan) gustG.connect(airPan).connect(bus);
+  else gustG.connect(bus);
 
   // a low breath under the air so a big cloud has some weight
   const body = loopSrc(noiseBuf);
@@ -313,12 +316,13 @@ export function createDustSound(volume = 0.7): DustSound | null {
     // 1 when specks are leaving fast (a few thousand a second at the busiest)
     const busy = clamp(smoothE / 2200);
     const home = clamp(smoothL / 1800);
-    const going = f.phase === "going" || f.phase === "gone";
+    // "gone" and "whole" are silent: once the last speck has blown away nothing may keep playing
+    const going = f.phase === "going";
     const coming = f.phase === "coming";
     const pan = clamp(f.x, -0.9, 0.9);
 
     // the crackle: the surface is dark and grainy, then breaking away. Faster clicks the busier it is
-    to(gritG.gain, going ? (0.1 + 0.9 * busy) * 0.2 * (0.5 + 0.5 * f.ashen) : coming ? home * 0.08 : 0, 0.05);
+    to(gritG.gain, going ? (busy * 0.9 + f.ashen * 0.35) * 0.2 : coming ? home * 0.08 : 0, 0.05);
     grit.playbackRate.setTargetAtTime(0.55 + 1.6 * (going ? busy : home), c.currentTime, 0.08);
     to(sandG.gain, going ? busy * 0.085 : coming ? home * 0.03 : 0, 0.06);
     to(sandBp.frequency, 2600 + busy * 1900, 0.1);
@@ -327,8 +331,9 @@ export function createDustSound(volume = 0.7): DustSound | null {
 
     // the cloud: air that swells with it and thins as it thins, leaning right with the wind
     if (going) {
-      const a = Math.pow(clamp(f.airborne), 0.8);
-      to(airG.gain, a * 0.16, 0.12);
+      // `airborne` is how much dust you can actually see, so the air thins as the specks fade and ends with them
+      const a = f.airborne < 0.015 ? 0 : Math.pow(clamp(f.airborne), 0.8);
+      to(airG.gain, a * 0.16, 0.1);
       to(airBp.frequency, 380 + a * 900, 0.2);
       to(bodyG.gain, a * 0.11, 0.15);
       if (airPan) to(airPan.pan, 0.15 + 0.6 * (1 - a * 0.4), 0.3);
@@ -342,8 +347,8 @@ export function createDustSound(volume = 0.7): DustSound | null {
       to(bodyG.gain, r * 0.07, 0.12);
       if (airPan) to(airPan.pan, -0.3 * (1 - p), 0.3);
     } else {
-      to(airG.gain, 0, 0.12);
-      to(bodyG.gain, 0, 0.12);
+      to(airG.gain, 0, 0.05);
+      to(bodyG.gain, 0, 0.05);
     }
 
     // grains: each speck that breaks away is a tiny tick; the more that leave, the more you hear
@@ -530,10 +535,11 @@ function useDustAudio(enableSound: boolean, volume: number, inViewRef: RefObject
  *
  * `text` is the word. `theme` is "light" (dark dust on a pale ground, as in the film) or "dark". `enableSound` plays a
  * dry finger snap, then crackle, grains and a breath of air that follow the picture frame by frame (it follows the
- * site-wide sound switch, and browsers only allow it after a click). `volume` is 0 to 1. `onChange(gone)` fires when
+ * site-wide sound switch, and browsers only allow it after a click). `volume` is 0 to 1. `framed` (default true) draws
+ * the card with its rounded corners and shadow; pass false to fill whatever surface you put it on. `onChange(gone)` fires when
  * it finishes either way. `autoplay` loops it until the first real interaction. Reduced motion fades instead.
  */
-export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", enableSound = true, volume = 0.7, onChange }: { autoplay?: boolean; text?: string; theme?: "dark" | "light"; enableSound?: boolean; volume?: number; onChange?: (gone: boolean) => void }) {
+export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", enableSound = true, volume = 0.7, framed = true, onChange }: { autoplay?: boolean; text?: string; theme?: "dark" | "light"; enableSound?: boolean; volume?: number; framed?: boolean; onChange?: (gone: boolean) => void }) {
   const reduce = useReducedMotion();
   const wrap = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -770,7 +776,7 @@ export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", 
 
       buf.fill(0);
       const shards: number[] = [];
-      let emitted = 0, landed = 0, airN = 0, outN = 0, xs = 0, xn = 0;
+      let emitted = 0, landed = 0, seen = 0, outN = 0, xs = 0, xn = 0;
       if (mode === "going" || mode === "gone") {
         // the surface darkens and gives way, grain by grain
         if (mode === "going") paintSurface(true);
@@ -793,10 +799,11 @@ export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", 
           const age = clock - t0[i];
           if (age > life[i]) { state[i] = 2; continue; }
           move(i, age, dt, clock);
-          live++; airN++;
+          live++;
           // dense at first, thinning slowly to a haze, and the settled dust fades last
           // thick as it leaves, thinning to nothing as it streams away
           const a = bright[i] * Math.pow(Math.max(0, 1 - age / life[i]), 0.9);
+          seen += a;
           if (size[i] > 1.9) shards.push(i); else plot(i, a, size[i]);
         }
         if (mode === "going" && !live) { mode = "gone"; setPhase("gone"); onChange?.(true); ashenFrac = 0; }
@@ -832,7 +839,7 @@ export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", 
       const heard: DustFrame = {
         phase: mode, dt, emitted, landed,
         ashen: mode === "going" ? ashenFrac : 0,
-        airborne: n ? airN / (n * 0.6) : 0,
+        airborne: n && mode === "going" ? seen / (n * 0.42) : 0,
         returning: mode === "coming" ? outN / leftN : 0,
         home: mode === "coming" ? landedAcc / leftN : 0,
         x: panX,
@@ -912,7 +919,7 @@ export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", 
   const dark = theme === "dark";
 
   return (
-    <div className="w-full max-w-[760px] select-none overflow-hidden rounded-[28px] shadow-[0_0_0_1px_rgba(0,0,0,.06),0_30px_60px_-30px_rgba(0,0,0,.4)]" style={{ background: look.bg, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif" }}>
+    <div className={`w-full select-none overflow-hidden ${framed ? "max-w-[760px] rounded-[28px] shadow-[0_0_0_1px_rgba(0,0,0,.06),0_30px_60px_-30px_rgba(0,0,0,.4)]" : ""}`} style={{ background: look.bg, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif" }}>
       <div ref={wrap} className="relative w-full">
         <canvas ref={canvas} onClick={press} className="block w-full cursor-pointer" role="img" aria-label={gone ? `${text}, turned to dust` : text} style={reduce ? { opacity: phase === "gone" ? 0 : 1, transition: "opacity .6s" } : undefined} />
       </div>

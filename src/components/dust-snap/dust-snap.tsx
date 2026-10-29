@@ -120,10 +120,11 @@ function useDustAudio(enableSound: boolean, volume: number, inViewRef: RefObject
  *
  * `text` is the word. `theme` is "light" (dark dust on a pale ground, as in the film) or "dark". `enableSound` plays a
  * dry finger snap, then crackle, grains and a breath of air that follow the picture frame by frame (it follows the
- * site-wide sound switch, and browsers only allow it after a click). `volume` is 0 to 1. `onChange(gone)` fires when
+ * site-wide sound switch, and browsers only allow it after a click). `volume` is 0 to 1. `framed` (default true) draws
+ * the card with its rounded corners and shadow; pass false to fill whatever surface you put it on. `onChange(gone)` fires when
  * it finishes either way. `autoplay` loops it until the first real interaction. Reduced motion fades instead.
  */
-export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", enableSound = true, volume = 0.7, onChange }: { autoplay?: boolean; text?: string; theme?: "dark" | "light"; enableSound?: boolean; volume?: number; onChange?: (gone: boolean) => void }) {
+export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", enableSound = true, volume = 0.7, framed = true, onChange }: { autoplay?: boolean; text?: string; theme?: "dark" | "light"; enableSound?: boolean; volume?: number; framed?: boolean; onChange?: (gone: boolean) => void }) {
   const reduce = useReducedMotion();
   const wrap = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -360,7 +361,7 @@ export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", 
 
       buf.fill(0);
       const shards: number[] = [];
-      let emitted = 0, landed = 0, airN = 0, outN = 0, xs = 0, xn = 0;
+      let emitted = 0, landed = 0, seen = 0, outN = 0, xs = 0, xn = 0;
       if (mode === "going" || mode === "gone") {
         // the surface darkens and gives way, grain by grain
         if (mode === "going") paintSurface(true);
@@ -383,10 +384,11 @@ export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", 
           const age = clock - t0[i];
           if (age > life[i]) { state[i] = 2; continue; }
           move(i, age, dt, clock);
-          live++; airN++;
+          live++;
           // dense at first, thinning slowly to a haze, and the settled dust fades last
           // thick as it leaves, thinning to nothing as it streams away
           const a = bright[i] * Math.pow(Math.max(0, 1 - age / life[i]), 0.9);
+          seen += a;
           if (size[i] > 1.9) shards.push(i); else plot(i, a, size[i]);
         }
         if (mode === "going" && !live) { mode = "gone"; setPhase("gone"); onChange?.(true); ashenFrac = 0; }
@@ -422,7 +424,7 @@ export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", 
       const heard: DustFrame = {
         phase: mode, dt, emitted, landed,
         ashen: mode === "going" ? ashenFrac : 0,
-        airborne: n ? airN / (n * 0.6) : 0,
+        airborne: n && mode === "going" ? seen / (n * 0.42) : 0,
         returning: mode === "coming" ? outN / leftN : 0,
         home: mode === "coming" ? landedAcc / leftN : 0,
         x: panX,
@@ -502,7 +504,7 @@ export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", 
   const dark = theme === "dark";
 
   return (
-    <div className="w-full max-w-[760px] select-none overflow-hidden rounded-[28px] shadow-[0_0_0_1px_rgba(0,0,0,.06),0_30px_60px_-30px_rgba(0,0,0,.4)]" style={{ background: look.bg, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif" }}>
+    <div className={`w-full select-none overflow-hidden ${framed ? "max-w-[760px] rounded-[28px] shadow-[0_0_0_1px_rgba(0,0,0,.06),0_30px_60px_-30px_rgba(0,0,0,.4)]" : ""}`} style={{ background: look.bg, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif" }}>
       <div ref={wrap} className="relative w-full">
         <canvas ref={canvas} onClick={press} className="block w-full cursor-pointer" role="img" aria-label={gone ? `${text}, turned to dust` : text} style={reduce ? { opacity: phase === "gone" ? 0 : 1, transition: "opacity .6s" } : undefined} />
       </div>

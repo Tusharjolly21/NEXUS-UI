@@ -1961,6 +1961,34 @@
       ]
     },
     {
+      "name": "dust-snap",
+      "type": "registry:component",
+      "title": "Dust Snap",
+      "description": "A word that turns to dust when you snap, the way it happens on film. It shivers; then, from one end, the surface goes dark and grainy in creeping patches and gives way. It does not vanish as smoke: it becomes a dense cloud of dry, earthy specks that holds the word's shape for a beat before a wind carries it off to the right in wisps. Snap again and the dust is drawn back in against the wind, last gone first home. The sound is built from the animation itself: a dry finger snap, crackle and grains that follow the crumbling front, a breath of air that swells and thins with the cloud, and a soft knock when the word is whole again.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
+      ],
+      "files": [
+        {
+          "path": "next-ui/dust-snap/dust-snap-sound.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/dust-snap/dust-snap.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/dust-snap/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "lightfall",
       "type": "registry:component",
       "title": "Lightfall",

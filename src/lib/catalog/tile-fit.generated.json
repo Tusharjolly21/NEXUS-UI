@@ -1501,23 +1501,23 @@
  },
  "dust-snap": {
   "canvas": [
-   960,
-   720
+   820,
+   450
   ],
   "surface": [
    0,
    0,
-   960,
-   720
+   820,
+   450
   ],
   "content": [
-   10,
-   224,
-   740,
-   486
+   12,
+   64,
+   798,
+   376
   ],
-  "bg": "#f6f6f6",
-  "coverage": 0.97
+  "bg": "#f0f0ea",
+  "coverage": 0.88
  },
  "dynamic-island": {
   "canvas": [
