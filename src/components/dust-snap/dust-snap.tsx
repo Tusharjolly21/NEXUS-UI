@@ -165,12 +165,13 @@ export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", 
     const pack = (r: number, g: number, b: number, a: number) => ((a << 24) | (b << 16) | (g << 8) | r) >>> 0;
 
     const layout = () => {
-      const r = box.getBoundingClientRect();
-      W = Math.max(280, Math.round(r.width)); H = Math.round(Math.min(320, Math.max(200, W * 0.4)));
+      // layout width, not getBoundingClientRect: gallery tiles scale previews with a transform, and a scaled
+      // measurement would draw the canvas narrower than the box it is stretched across
+      W = Math.max(280, Math.round(box.offsetWidth)); H = Math.round(Math.min(320, Math.max(200, W * 0.36)));
       dpr = Math.min(2, window.devicePixelRatio || 1);
       for (const c of [cv, src, stand, dust]) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
       cv.style.height = `${H}px`;
-      fs = Math.min(150, W / (text.length * 0.62));
+      fs = Math.min(170, W / (text.length * 0.62));
       sx.setTransform(dpr, 0, 0, dpr, 0, 0);
       sx.clearRect(0, 0, W, H);
       sx.fillStyle = look.ink;
@@ -178,13 +179,14 @@ export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", 
       sx.textBaseline = "middle";
       const setFont = () => {
         sx.font = `700 ${fs}px -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif`;
-        (sx as CanvasRenderingContext2D & { letterSpacing?: string }).letterSpacing = `${-fs * 0.035}px`;
+        (sx as CanvasRenderingContext2D & { letterSpacing?: string }).letterSpacing = `${-fs * 0.012}px`;
       };
       setFont();
-      // fit the word to the card with room for the dust to drift, whatever the width
+      // fit the word to the card with room around it and for the dust to drift, whatever the width
       const tw = sx.measureText(text).width;
-      if (tw > W * 0.8) { fs *= (W * 0.8) / tw; setFont(); }
-      sx.fillText(text, W / 2, H / 2 - fs * 0.06);
+      if (tw > W * 0.76) { fs *= (W * 0.76) / tw; setFont(); }
+      // a touch below the middle of the canvas, so the word sits in the middle of the whole card (the caption row is under it)
+      sx.fillText(text, W / 2, H * 0.57 - fs * 0.06);
       tx.setTransform(1, 0, 0, 1, 0, 0);
       tx.clearRect(0, 0, stand.width, stand.height);
       tx.drawImage(src, 0, 0);
@@ -468,8 +470,8 @@ export function DustSnap({ autoplay = false, text = "NexusUI", theme = "light", 
     layout();
     const still = () => { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = look.bg; ctx.fillRect(0, 0, cv.width, cv.height); ctx.drawImage(stand, 0, 0); };
     if (reduce) still(); else raf = requestAnimationFrame(frame);
-    let rw = box.getBoundingClientRect().width;
-    const ro = new ResizeObserver(() => { const w = box.getBoundingClientRect().width; if (Math.abs(w - rw) > 4 && mode === "whole") { rw = w; layout(); if (reduce) still(); } });
+    let rw = box.offsetWidth;
+    const ro = new ResizeObserver(() => { const w = box.offsetWidth; if (Math.abs(w - rw) > 4 && mode === "whole") { rw = w; layout(); if (reduce) still(); } });
     ro.observe(box);
     const vis = new IntersectionObserver(([en]) => { cancelAnimationFrame(raf); inViewRef.current = en.isIntersecting; if (en.isIntersecting && !reduce) { last = performance.now(); raf = requestAnimationFrame(frame); } else audio.idle(); });
     vis.observe(cv);

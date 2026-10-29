@@ -20,7 +20,7 @@
     ]
   },
   "canvas": {
-    "dust-snap": [820, 450],
+    "dust-snap": [800, 500],
     "mac-keyboard": [
       1100,
       560
@@ -91,7 +91,7 @@
     ]
   },
   "overrides": {
-    "dust-snap": { "scene": true, "surface": "card" },
+    "dust-snap": { "focus": [40, 44, 720, 400] },
     "otp-input": {
       "focus": [
         236,

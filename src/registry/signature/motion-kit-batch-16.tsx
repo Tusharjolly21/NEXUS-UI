@@ -21,14 +21,14 @@ export function PreviewPluckFrame({ compact = false }: { compact?: boolean } = {
 }
 
 /**
- * Dust Snap snaps itself (autoplay) until a real click arrives. The preview fills the whole tile with the
- * card's own warm paper colour (no card, no shadow, no empty frame around it) so the word is as large as it can be.
+ * Dust Snap snaps itself (autoplay) until a real click arrives. It sits as a card with room all round it,
+ * large enough to read from the wall, and the word keeps clear of the card's edges.
  */
 export function PreviewDustSnap({ compact = false }: { compact?: boolean } = {}) {
   return (
-    <div className={`flex h-full w-full items-center justify-center bg-[#f2f0ec] dark:bg-[#f2f0ec] ${compact ? "min-h-[240px]" : "min-h-[360px]"}`}>
-      <div className="w-full max-w-[820px]">
-        <DustSnap autoplay framed={false} />
+    <div className={`${STAGE} ${compact ? "min-h-[300px]" : "min-h-[420px]"}`}>
+      <div className="w-full max-w-[620px]">
+        <DustSnap autoplay />
       </div>
     </div>
   );
