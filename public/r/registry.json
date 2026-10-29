@@ -1961,6 +1961,29 @@
       ]
     },
     {
+      "name": "lightfall",
+      "type": "registry:component",
+      "title": "Lightfall",
+      "description": "A WebGL background. Lanes of light pour down a wall, round a cove and run out across a glossy floor towards you, with pulses streaking along every lane and the wall faintly mirrored in the floor. Move over it and the lanes part around your cursor like water around a finger; click, or press Space, to send a surge of light down every lane at once. Three palettes (Dusk, Tide, Ember) ease into each other from a built-in switcher. Until you touch it an invisible hand drifts across it and surges fire on their own. Put your own content on top with children.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/lightfall/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/lightfall/lightfall.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "shredder-delete",
       "type": "registry:component",
       "title": "Shredder Delete",

@@ -11469,6 +11469,78 @@ export default function Page() {
     tailwindSource: tw,
   },
   {
+    slug: "lightfall",
+    name: "Lightfall",
+    registryCliName: "lightfall",
+    description:
+      "A WebGL background. Lanes of light pour down a wall, round a cove and run out across a glossy floor towards you, with pulses streaking along every lane and the wall faintly mirrored in the floor. Move over it and the lanes part around your cursor like water around a finger; click, or press Space, to send a surge of light down every lane at once. Three palettes (Dusk, Tide, Ember) ease into each other from a built-in switcher. Until you touch it an invisible hand drifts across it and surges fire on their own. Put your own content on top with children.",
+    categorySlug: "background-effects",
+    tags: ["background", "webgl", "shader", "lights", "hero", "cursor", "glow", "pulse", "gradient", "dark", "autoplay", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 181,
+    createdAt: "2026-10-29",
+    animationKinds: ["hover", "press", "gradient"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "height", type: "number", defaultValue: "500", description: "Height of the stage in pixels. The width is the width of its container." },
+      { name: "mode", type: '"dusk" | "tide" | "ember"', defaultValue: '"dusk"', description: "Starting palette. The built-in switcher changes it afterwards, and changing the prop moves the stage to the new palette." },
+      { name: "speed", type: "number", defaultValue: "1", description: "Multiplier for how fast the pulses travel." },
+      { name: "autoplay", type: "boolean", defaultValue: "true", description: "Until the first touch, an invisible hand drifts across the lanes and surges fire every few seconds. Slowed under reduced motion and paused while the stage is off screen." },
+      { name: "showModes", type: "boolean", defaultValue: "true", description: "Shows the Dusk / Tide / Ember switcher in the corner." },
+      { name: "hint", type: "ReactNode", description: "Optional caption under the stage." },
+      { name: "children", type: "ReactNode", description: "Content layered over the lights. Defaults to a small title; pass null for none." },
+      { name: "className", type: "string", description: "Extra classes for the outer wrapper." },
+    ],
+    Preview: Previews.PreviewLightfall,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { Lightfall } from "@/components/lightfall";
+
+// A dark stage of falling light. It plays itself until the visitor moves over it or clicks.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[1000px]">
+        <Lightfall />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "A hero with your own content on top",
+        code: `// src/app/page.tsx
+
+import { Lightfall } from "@/components/lightfall";
+
+// children sit above the lights. pointer-events-none keeps the cursor parting the lanes through the text.
+export default function Page() {
+  return (
+    <Lightfall height={560} mode="tide" showModes={false}>
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <h1 className="text-5xl font-semibold tracking-[-0.03em] text-white">Ship the light.</h1>
+        <p className="max-w-md text-white/70">A background that answers the cursor.</p>
+      </div>
+    </Lightfall>
+  );
+}`,
+      },
+      {
+        title: "Slower, in Ember, without the demo hand",
+        code: `// src/app/page.tsx
+
+import { Lightfall } from "@/components/lightfall";
+
+// autoplay={false} keeps the lanes calm until the visitor touches them.
+export default function Page() {
+  return <Lightfall mode="ember" speed={0.6} autoplay={false} hint="Click, or press Space, to send a surge." />;
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
     slug: "shredder-delete",
     name: "Shredder Delete",
     registryCliName: "shredder-delete",
