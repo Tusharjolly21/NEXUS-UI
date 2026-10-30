@@ -12110,9 +12110,9 @@ export default function Page() {
     name: "AI Composer",
     registryCliName: "ai-composer",
     description:
-      "The prompt box every AI product needs. It grows as you type, cycles through suggestions while it is empty, takes attachments as chips and lets you pick a model. Send, and your words dissolve into particles that drift up into the thread while the send button folds into Stop; the reply shows a shimmering Thinking, then streams in word by word. Enter sends, Shift+Enter adds a line, Escape stops the reply. Until you touch it, it types and sends suggestions on its own. Pass onSend to stream your own replies.",
+      "The prompt box every AI product needs. It grows as you type, cycles through suggestions while it is empty and lets you pick a model. The + opens a menu like the ones in AI apps: add photos (they show as thumbnails, and you can paste one), add files, or switch on a skill such as web search, deep research, image creation or code, which sits in the box as a chip you can remove. Send, and your words dissolve into particles that drift up into the thread while the send button folds into Stop; the reply shows a shimmering Thinking, then streams in word by word. Enter sends, Shift+Enter adds a line, Escape stops the reply. Until you touch it, it types and sends suggestions on its own, opening the + menu now and then. Pass onSend to stream your own replies.",
     categorySlug: "ai-components",
-    tags: ["ai", "chat", "prompt", "composer", "input", "textarea", "attachments", "model picker", "streaming", "particles", "autoplay", "motion kit", "framer-motion"],
+    tags: ["ai", "chat", "prompt", "composer", "input", "textarea", "attachments", "photos", "skills", "plus menu", "model picker", "streaming", "particles", "autoplay", "motion kit", "framer-motion"],
     premium: true,
     trendingScore: 182,
     createdAt: "2026-10-30",
@@ -12120,9 +12120,10 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "models", type: "{ id: string; name: string; note: string }[]", defaultValue: "Swift, Deep, Vision", description: "The models in the picker. The first one is selected to start with." },
+      { name: "skills", type: "{ id: string; name: string; note: string; icon?: \"globe\" | \"search\" | \"image\" | \"code\" | \"spark\"; used?: string }[]", defaultValue: "Web search, Deep research, Create image, Write code", description: "The skills listed under the + menu. Switching one on adds a chip to the box and passes it to onSend; the reply notes what it used. Pass an empty array to leave the skills out." },
       { name: "ideas", type: "string[]", defaultValue: "4 prompts", description: "Suggestions shown as the rotating placeholder and as the chips under the greeting (the first three)." },
       { name: "greeting", type: "string", defaultValue: "\"What can I help with?\"", description: "The heading shown above the box before the first message." },
-      { name: "onSend", type: "(message: { text: string; files: ComposerFile[]; model: ComposerModel }) => string | Promise<string> | void", description: "Called when a message is sent. Return the reply, or a promise of it, and it streams in word by word. Without it, a short demo reply is used." },
+      { name: "onSend", type: "(message: { text: string; files: ComposerFile[]; skills: ComposerSkill[]; model: ComposerModel }) => string | Promise<string> | void", description: "Called when a message is sent, with the text, the attached files (photos carry a preview URL), the skills switched on and the chosen model. Return the reply, or a promise of it, and it streams in word by word. Without it, a short demo reply is used." },
       { name: "autoplay", type: "boolean", defaultValue: "true", description: "Types and sends the suggestions in turn until the first touch. Off under reduced motion." },
       { name: "className", type: "string", description: "Extra classes for the outer wrapper. The composer is at most 560px wide." },
     ],
@@ -12140,8 +12141,9 @@ export default function Page() {
       <div className="mx-auto w-full max-w-[560px]">
         <AIComposer
           autoplay={false}
-          onSend={async ({ text, model }) => {
-            const res = await fetch("/api/chat", { method: "POST", body: JSON.stringify({ text, model: model.id }) });
+          onSend={async ({ text, model, skills }) => {
+            const body = JSON.stringify({ text, model: model.id, skills: skills.map((k) => k.id) });
+            const res = await fetch("/api/chat", { method: "POST", body });
             return (await res.json()).reply as string;
           }}
         />

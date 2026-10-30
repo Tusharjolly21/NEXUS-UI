@@ -2,7 +2,7 @@
 
 Add the "AI Composer" component from Nexus UI to my project.
 
-The prompt box every AI product needs. It grows as you type, cycles through suggestions while it is empty, takes attachments as chips and lets you pick a model. Send, and your words dissolve into particles that drift up into the thread while the send button folds into Stop; the reply shows a shimmering Thinking, then streams in word by word. Enter sends, Shift+Enter adds a line, Escape stops the reply. Until you touch it, it types and sends suggestions on its own. Pass onSend to stream your own replies.
+The prompt box every AI product needs. It grows as you type, cycles through suggestions while it is empty and lets you pick a model. The + opens a menu like the ones in AI apps: add photos (they show as thumbnails, and you can paste one), add files, or switch on a skill such as web search, deep research, image creation or code, which sits in the box as a chip you can remove. Send, and your words dissolve into particles that drift up into the thread while the send button folds into Stop; the reply shows a shimmering Thinking, then streams in word by word. Enter sends, Shift+Enter adds a line, Escape stops the reply. Until you touch it, it types and sends suggestions on its own, opening the + menu now and then. Pass onSend to stream your own replies.
 
 Please:
 
@@ -25,13 +25,36 @@ const SPRING = { type: "spring", stiffness: 420, damping: 30 } as const;
 const POP = { type: "spring", stiffness: 520, damping: 22 } as const;
 
 export type ComposerModel = { id: string; name: string; note: string };
-export type ComposerFile = { id: string; name: string; size: string; kind: string };
-type Msg = { id: number; role: "user" | "ai"; text: string; files?: ComposerFile[]; streaming?: boolean; stopped?: boolean };
+export type ComposerFile = {
+  id: string;
+  name: string;
+  size: string;
+  kind: string;
+  /** An object URL for a photo's thumbnail. Photos added from the menu or pasted get one. */
+  preview?: string;
+};
+/** Something the + menu can switch on for the next messages, like web search or image creation. */
+export type ComposerSkill = {
+  id: string;
+  name: string;
+  note: string;
+  icon?: "globe" | "search" | "image" | "code" | "spark";
+  /** What the reply says it did, for example "Searched 5 sources". Defaults to the skill name. */
+  used?: string;
+};
+type Msg = { id: number; role: "user" | "ai"; text: string; files?: ComposerFile[]; used?: string[]; image?: boolean; streaming?: boolean; stopped?: boolean };
 
 const MODELS: ComposerModel[] = [
   { id: "swift", name: "Swift", note: "Quick answers" },
   { id: "deep", name: "Deep", note: "Thinks it through" },
   { id: "vision", name: "Vision", note: "Reads images and PDFs" },
+];
+
+const SKILLS: ComposerSkill[] = [
+  { id: "web", name: "Web search", note: "Look it up online", icon: "globe", used: "Searched 5 sources" },
+  { id: "research", name: "Deep research", note: "Reads widely, writes a report", icon: "search", used: "Read 12 sources" },
+  { id: "image", name: "Create image", note: "Turn words into a picture", icon: "image", used: "Created an image" },
+  { id: "code", name: "Write code", note: "Small, tested snippets", icon: "code", used: "Wrote code" },
 ];
 
 const IDEAS = ["Summarise this report in three bullets", "Draft a friendly reply to a late invoice", "Plan a four-day trip to Lisbon", "Explain this chart to a new hire"];
@@ -41,7 +64,10 @@ const DEMO_FILES: ComposerFile[] = [
   { id: "f2", name: "launch-shot.png", size: "860 KB", kind: "PNG" },
 ];
 
-function demoReply(prompt: string) {
+function demoReply(prompt: string, skills: ComposerSkill[]) {
+  const has = (id: string) => skills.some((k) => k.id === id);
+  if (has("image")) return "Here is a first take, soft light over a quiet harbour. Tell me what to change and I will redraw it.";
+  if (has("code")) return "Here is a small function for it. It adds up the rows, skips the empty ones and returns a number, with a test for each case.";
   const p = prompt.toLowerCase();
   if (p.includes("summar")) return "Revenue grew 18% on the quarter, led by the new team plan. Costs held flat because hosting moved to the edge network. The one risk is churn among small accounts, which rose two points.";
   if (p.includes("invoice") || p.includes("reply")) return "Hi Sam, hope your week is going well. A quick nudge on invoice 2041, which was due on the 3rd. If it has already gone out, thank you and please ignore this. Happy to resend it if that helps.";
@@ -50,6 +76,54 @@ function demoReply(prompt: string) {
 }
 
 const KIND_TONE: Record<string, string> = { PDF: "#ff3b30", PNG: "#0071e3", JPG: "#0071e3", MD: "#6e6e73", TXT: "#6e6e73", CSV: "#30d158" };
+
+function Glyph({ name }: { name: NonNullable<ComposerSkill["icon"]> | "photo" | "file" }) {
+  const common = { width: 16, height: 16, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true } as const;
+  switch (name) {
+    case "globe":
+      return (
+        <svg {...common}>
+          <circle cx="8" cy="8" r="6" />
+          <path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" />
+        </svg>
+      );
+    case "search":
+      return (
+        <svg {...common}>
+          <circle cx="7" cy="7" r="4.5" />
+          <path d="M10.5 10.5L14 14" />
+        </svg>
+      );
+    case "image":
+    case "photo":
+      return (
+        <svg {...common}>
+          <rect x="2" y="3" width="12" height="10" rx="2.5" />
+          <circle cx="6" cy="7" r="1.2" />
+          <path d="M3 12l3.5-3.5 2.5 2.5 2-2 2 2" />
+        </svg>
+      );
+    case "code":
+      return (
+        <svg {...common}>
+          <path d="M5.5 5L2.5 8l3 3M10.5 5l3 3-3 3" />
+        </svg>
+      );
+    case "file":
+      return (
+        <svg {...common}>
+          <path d="M4 2.5h5l3 3v8H4z" />
+          <path d="M9 2.5v3h3" />
+        </svg>
+      );
+    default:
+      return (
+        <svg {...common}>
+          <path d="M8 2l1.4 3.6L13 7l-3.6 1.4L8 12l-1.4-3.6L3 7l3.6-1.4z" />
+        </svg>
+      );
+  }
+}
 
 function sizeOf(b: number) {
   if (b > 1e6) return `${(b / 1e6).toFixed(1)} MB`;
@@ -60,26 +134,30 @@ function sizeOf(b: number) {
 export type AIComposerProps = {
   /** The models in the picker. The first one is selected to start with. */
   models?: ComposerModel[];
+  /** The skills listed under + (web search, image creation and so on). Pass an empty array to hide them. */
+  skills?: ComposerSkill[];
   /** Suggestions shown as the rotating placeholder and as the chips under the greeting. */
   ideas?: string[];
   greeting?: string;
   /** Type and send demo prompts until the first interaction. Off under reduced motion. */
   autoplay?: boolean;
   /** Return the reply (or a promise of it) to stream; without it a demo reply is used. */
-  onSend?: (message: { text: string; files: ComposerFile[]; model: ComposerModel }) => string | Promise<string> | void;
+  onSend?: (message: { text: string; files: ComposerFile[]; skills: ComposerSkill[]; model: ComposerModel }) => string | Promise<string> | void;
   className?: string;
 };
 
 /**
  * AI Composer: the prompt box every AI product needs. It grows as you type,
- * cycles through suggestions while empty, takes attachments as chips and lets
- * you pick a model. Send, and your words dissolve into particles that drift up
+ * cycles through suggestions while empty and lets you pick a model. The +
+ * opens a menu: add photos (with thumbnails, or paste one), add files, or switch
+ * on a skill such as web search or image creation, which shows as a chip in the box. Send, and your words dissolve into particles that drift up
  * into the thread while the send button folds into a stop button; the reply
  * shows a shimmering "Thinking" then streams in word by word. Enter sends,
  * Shift+Enter adds a line, Escape stops. Pass `onSend` to stream your own replies.
  */
 export function AIComposer({
   models = MODELS,
+  skills = SKILLS,
   ideas = IDEAS,
   greeting = "What can I help with?",
   autoplay = true,
@@ -92,13 +170,20 @@ export function AIComposer({
   const area = useRef<HTMLTextAreaElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const photoInput = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const plusRef = useRef<HTMLDivElement>(null);
+  const plusBtn = useRef<HTMLButtonElement>(null);
+  const plusList = useRef<HTMLDivElement>(null);
+  const urls = useRef<Set<string>>(new Set());
   const inView = useInView(root, { amount: 0.4 });
   const touched = useRef(false);
   const [text, setText] = useState("");
   const [files, setFiles] = useState<ComposerFile[]>([]);
   const [model, setModel] = useState(models[0]);
   const [menu, setMenu] = useState(false);
+  const [plus, setPlus] = useState(false);
+  const [picked, setPicked] = useState<string[]>([]);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [busy, setBusy] = useState(false);
   const [hint, setHint] = useState(0);
@@ -128,13 +213,32 @@ export function AIComposer({
     el.style.height = `${Math.min(144, Math.max(24, el.scrollHeight))}px`;
   }, [text]);
 
-  // close the model menu on outside click
+  // close the model and + menus on outside click
   useEffect(() => {
-    if (!menu) return;
-    const off = (e: MouseEvent) => !menuRef.current?.contains(e.target as Node) && setMenu(false);
+    if (!menu && !plus) return;
+    const off = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (menu && !menuRef.current?.contains(t)) setMenu(false);
+      if (plus && !plusRef.current?.contains(t)) setPlus(false);
+    };
     window.addEventListener("mousedown", off);
     return () => window.removeEventListener("mousedown", off);
-  }, [menu]);
+  }, [menu, plus]);
+
+  // a person opening the + menu lands on its first item; the demo never takes focus
+  useEffect(() => {
+    if (!plus || !touched.current) return;
+    plusList.current?.querySelector<HTMLElement>('[role^="menuitem"]')?.focus();
+  }, [plus]);
+
+  // thumbnails are object URLs; release them when the composer goes away
+  useEffect(() => {
+    const set = urls.current;
+    return () => {
+      set.forEach((u) => URL.revokeObjectURL(u));
+      set.clear();
+    };
+  }, []);
 
   /** draw the words into the canvas and blow them away as particles */
   const vanish = useCallback((value: string) => {
@@ -148,7 +252,7 @@ export function AIComposer({
     cv.height = H * dpr;
     cv.style.width = `${W}px`;
     cv.style.height = `${H}px`;
-    const ctx = cv.getContext("2d");
+    const ctx = cv.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
     const cs = getComputedStyle(ta);
     ctx.scale(dpr, dpr);
@@ -237,7 +341,7 @@ export function AIComposer({
   }, []);
 
   const send = useCallback(
-    async (value: string, withFiles: ComposerFile[]) => {
+    async (value: string, withFiles: ComposerFile[], withSkills: ComposerSkill[]) => {
       const t = value.trim();
       if (!t || busyRef.current) return;
       vanish(value);
@@ -250,11 +354,15 @@ export function AIComposer({
       const uidUser = nextId.current++;
       const uidAi = nextId.current++;
       window.setTimeout(() => {
-        setMsgs((m) => [...m.slice(-2), { id: uidUser, role: "user", text: t, files: withFiles }, { id: uidAi, role: "ai", text: "", streaming: true }]);
+        setMsgs((m) => [
+          ...m.slice(-2),
+          { id: uidUser, role: "user", text: t, files: withFiles },
+          { id: uidAi, role: "ai", text: "", streaming: true, used: withSkills.map((k) => k.used ?? k.name), image: withSkills.some((k) => k.id === "image") },
+        ]);
       }, 380);
-      let reply = demoReply(t);
+      let reply = demoReply(t, withSkills);
       try {
-        const out = onSend?.({ text: t, files: withFiles, model });
+        const out = onSend?.({ text: t, files: withFiles, skills: withSkills, model });
         const r = out instanceof Promise ? await out : out;
         if (typeof r === "string" && r) reply = r;
       } catch {
@@ -285,9 +393,20 @@ export function AIComposer({
       while (alive && !touched.current) {
         const idea = ideas[k % ideas.length];
         const attach = k % 2 === 0 ? [DEMO_FILES[k % 4 === 0 ? 0 : 1]] : [];
+        const skill = k % 2 === 1 ? skills[k % skills.length] : undefined;
         if (attach.length) {
           setFiles(attach);
           await wait(500);
+        }
+        if (skill) {
+          // show the + menu: open it, pick a skill, let the chip land
+          setPlus(true);
+          await wait(1100);
+          if (!alive || touched.current) break;
+          setPicked([skill.id]);
+          await wait(450);
+          setPlus(false);
+          await wait(450);
         }
         for (let i = 1; i <= idea.length && alive && !touched.current; i++) {
           setText(idea.slice(0, i));
@@ -295,45 +414,81 @@ export function AIComposer({
         }
         if (!alive || touched.current) break;
         await wait(450);
-        send(idea, attach);
+        send(idea, attach, skill ? [skill] : []);
         await wait(1500);
         while (alive && busyRef.current) await wait(200);
         await wait(2200);
+        setPicked([]);
         k += 1;
       }
     })();
     return () => {
       alive = false;
     };
-  }, [autoplay, reduce, inView, ideas, send]);
+  }, [autoplay, reduce, inView, ideas, skills, send]);
 
   const touch = () => {
     if (!touched.current) {
       touched.current = true;
       setText("");
       setFiles([]);
+      setPicked([]);
+      setPlus(false);
     }
   };
+
+  const chosen = skills.filter((k) => picked.includes(k.id));
 
   const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      send(text, files);
+      send(text, files, chosen);
     } else if (e.key === "Escape" && busy) stop();
   };
 
+  const ingest = (picked: File[]) => {
+    const list = picked.map((f, i) => {
+      const preview = f.type.startsWith("image/") ? URL.createObjectURL(f) : undefined;
+      if (preview) urls.current.add(preview);
+      return {
+        id: `${Date.now()}-${i}`,
+        name: f.name,
+        size: sizeOf(f.size),
+        kind: (f.name.split(".").pop() || "FILE").toUpperCase().slice(0, 4),
+        preview,
+      };
+    });
+    if (list.length) setFiles((fs) => [...fs, ...list].slice(-4));
+  };
+
   const addFiles = (e: ChangeEvent<HTMLInputElement>) => {
-    const list = Array.from(e.target.files ?? []).map((f, i) => ({
-      id: `${Date.now()}-${i}`,
-      name: f.name,
-      size: sizeOf(f.size),
-      kind: (f.name.split(".").pop() || "FILE").toUpperCase().slice(0, 4),
-    }));
-    setFiles((fs) => [...fs, ...list].slice(-4));
+    ingest(Array.from(e.target.files ?? []));
     e.target.value = "";
   };
 
+  const toggleSkill = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+
+  const onPlusKey = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setPlus(false);
+      plusBtn.current?.focus();
+      return;
+    }
+    if (e.key === "Tab") {
+      setPlus(false);
+      return;
+    }
+    const items = Array.from(plusList.current?.querySelectorAll<HTMLElement>('[role^="menuitem"]') ?? []);
+    const at = items.indexOf(document.activeElement as HTMLElement);
+    const go = e.key === "ArrowDown" ? at + 1 : e.key === "ArrowUp" ? at - 1 : e.key === "Home" ? 0 : e.key === "End" ? items.length - 1 : null;
+    if (go === null) return;
+    e.preventDefault();
+    items[(go + items.length) % items.length]?.focus();
+  };
+
   const ready = !!text.trim() && !busy;
+  const chips = files.length > 0 || chosen.length > 0;
 
   return (
     <div ref={root} onPointerDown={touch} className={`flex w-full max-w-[560px] flex-col gap-3 ${className}`}>
@@ -369,11 +524,16 @@ export function AIComposer({
                 <motion.div key={m.id} layout="position" initial={{ opacity: 0, y: 40, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -20 }} transition={POP} style={{ originX: 1, originY: 1 }} className="mb-2 flex flex-col items-end gap-1.5">
                   {!!m.files?.length && (
                     <div className="flex gap-1.5">
-                      {m.files.map((f) => (
-                        <span key={f.id} className="rounded-[10px] bg-white px-2 py-1 text-[11px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06)]">
-                          {f.name}
-                        </span>
-                      ))}
+                      {m.files.map((f) =>
+                        f.preview ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img key={f.id} src={f.preview} alt={f.name} className="h-14 w-14 rounded-[12px] object-cover shadow-[0_0_0_1px_rgba(0,0,0,.08)]" />
+                        ) : (
+                          <span key={f.id} className="rounded-[10px] bg-white px-2 py-1 text-[11px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06)]">
+                            {f.name}
+                          </span>
+                        ),
+                      )}
                     </div>
                   )}
                   <div className="max-w-[80%] rounded-[20px] rounded-br-[6px] bg-[#0071e3] px-4 py-2.5 text-[14.5px] leading-[1.4] text-white">{m.text}</div>
@@ -382,6 +542,15 @@ export function AIComposer({
                 <motion.div key={m.id} layout="position" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={SPRING} className="mb-2 flex items-start gap-2.5">
                   <span aria-hidden="true" className="mt-0.5 h-6 w-6 flex-none rounded-full" style={{ background: "conic-gradient(from 90deg, #0071e3, #bf5af2, #ff9f0a, #30d158, #0071e3)" }} />
                   <div className="min-w-0 pt-0.5 text-[14.5px] leading-[1.5] text-[#1d1d1f]">
+                    {!!m.used?.length && (
+                      <div className="mb-1 flex flex-wrap gap-1.5">
+                        {m.used.map((u) => (
+                          <span key={u} className="rounded-full bg-[#0071e3]/10 px-2 py-0.5 text-[11.5px] font-medium text-[#0066cc]">
+                            {u}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     {m.streaming && !m.text ? (
                       <motion.span
                         className="bg-clip-text font-medium text-transparent"
@@ -398,6 +567,16 @@ export function AIComposer({
                         {m.stopped && <span className="ml-1.5 text-[12px] text-[#86868b]">Stopped</span>}
                       </>
                     )}
+                    {m.image && !m.streaming && !m.stopped && (
+                      <motion.div
+                        aria-hidden="true"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={POP}
+                        className="mt-2 h-[84px] w-[150px] rounded-[16px] shadow-[0_0_0_1px_rgba(0,0,0,.06)]"
+                        style={{ background: "radial-gradient(circle at 70% 34%, #fff4cf 0 9%, transparent 10%), linear-gradient(180deg, #ffb36b 0%, #ff7a9c 52%, #7b6cff 100%)" }}
+                      />
+                    )}
                   </div>
                 </motion.div>
               ),
@@ -409,14 +588,30 @@ export function AIComposer({
       {/* composer */}
       <motion.div layout transition={SPRING} className="relative rounded-[26px] bg-white p-2.5 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_20px_40px_-26px_rgba(0,0,0,.35)] focus-within:shadow-[0_0_0_1px_rgba(0,113,227,.45),0_0_0_4px_rgba(0,113,227,.12),0_20px_40px_-26px_rgba(0,0,0,.35)]">
         <AnimatePresence initial={false} mode="popLayout">
-          {files.length > 0 && (
+          {chips && (
             <motion.div key="files" layout initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={SPRING} className="flex flex-wrap gap-2 px-1 pb-2 pt-0.5">
               <AnimatePresence initial={false} mode="popLayout">
+                {chosen.map((k) => (
+                  <motion.div key={k.id} layout initial={{ opacity: 0, scale: 0.6, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.6 }} transition={POP} className="flex h-[38px] items-center gap-1.5 rounded-full bg-[#0071e3]/10 pl-3 pr-1.5 text-[#0066cc]">
+                    <Glyph name={k.icon ?? "spark"} />
+                    <span className="text-[12.5px] font-medium">{k.name}</span>
+                    <button type="button" aria-label={`Turn off ${k.name}`} onClick={() => toggleSkill(k.id)} className="grid h-5 w-5 place-items-center rounded-full border-0 bg-[#0071e3]/15 p-0 text-[#0066cc] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]">
+                      <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true">
+                        <path d="M1 1l6 6M7 1L1 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                      </svg>
+                    </button>
+                  </motion.div>
+                ))}
                 {files.map((f) => (
                   <motion.div key={f.id} layout initial={{ opacity: 0, scale: 0.6, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.6 }} transition={POP} className="flex items-center gap-2 rounded-[14px] bg-[#f5f5f7] py-1.5 pl-1.5 pr-2">
-                    <span className="grid h-8 w-8 place-items-center rounded-[9px] text-[9px] font-bold text-white" style={{ background: KIND_TONE[f.kind] ?? "#6e6e73" }}>
-                      {f.kind}
-                    </span>
+                    {f.preview ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={f.preview} alt="" className="h-8 w-8 rounded-[9px] object-cover" />
+                    ) : (
+                      <span className="grid h-8 w-8 place-items-center rounded-[9px] text-[9px] font-bold text-white" style={{ background: KIND_TONE[f.kind] ?? "#6e6e73" }}>
+                        {f.kind}
+                      </span>
+                    )}
                     <span className="flex flex-col leading-[1.2]">
                       <span className="max-w-[140px] truncate text-[12.5px] font-medium text-[#1d1d1f]">{f.name}</span>
                       <span className="text-[11px] text-[#6e6e73]">{f.size}</span>
@@ -444,6 +639,13 @@ export function AIComposer({
             }}
             onKeyDown={onKey}
             onFocus={touch}
+            onPaste={(e) => {
+              const pics = Array.from(e.clipboardData.files).filter((f) => f.type.startsWith("image/"));
+              if (!pics.length) return;
+              e.preventDefault();
+              touch();
+              ingest(pics);
+            }}
             aria-label="Message"
             placeholder=""
             className="block w-full resize-none border-0 bg-transparent p-0 text-[16px] leading-[24px] text-[#1d1d1f] outline-none [font-family:inherit]"
@@ -462,21 +664,121 @@ export function AIComposer({
         </div>
 
         <div className="mt-2 flex items-center gap-1.5">
-          <input ref={fileInput} type="file" multiple className="sr-only" tabIndex={-1} onChange={addFiles} />
-          <motion.button
-            type="button"
-            whileTap={{ scale: 0.88 }}
-            aria-label="Attach files"
-            onClick={() => {
-              touch();
-              fileInput.current?.click();
-            }}
-            className="grid h-9 w-9 place-items-center rounded-full border-0 bg-[#f5f5f7] p-0 text-[#1d1d1f] outline-none hover:bg-[#e8e8ed] focus-visible:ring-2 focus-visible:ring-[#0071e3]"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
-          </motion.button>
+          <input ref={fileInput} type="file" multiple className="sr-only" tabIndex={-1} aria-hidden="true" onChange={addFiles} />
+          <input ref={photoInput} type="file" accept="image/*" multiple className="sr-only" tabIndex={-1} aria-hidden="true" onChange={addFiles} />
+          <div ref={plusRef} className="relative">
+            <motion.button
+              ref={plusBtn}
+              type="button"
+              whileTap={{ scale: 0.88 }}
+              aria-label="Add photos, files and skills"
+              aria-haspopup="menu"
+              aria-expanded={plus}
+              aria-controls={`plus-${uid}`}
+              onClick={() => {
+                touch();
+                setMenu(false);
+                setPlus((o) => !o);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setPlus(false);
+                if (e.key === "ArrowDown" && !plus) {
+                  e.preventDefault();
+                  touched.current = true;
+                  setMenu(false);
+                  setPlus(true);
+                }
+              }}
+              className="grid h-9 w-9 place-items-center rounded-full border-0 bg-[#f5f5f7] p-0 text-[#1d1d1f] outline-none hover:bg-[#e8e8ed] focus-visible:ring-2 focus-visible:ring-[#0071e3]"
+              style={{ backgroundColor: plus ? "#e8e8ed" : undefined }}
+            >
+              <motion.svg width="16" height="16" viewBox="0 0 16 16" animate={{ rotate: plus ? 45 : 0 }} transition={POP} aria-hidden="true">
+                <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </motion.svg>
+            </motion.button>
+            <AnimatePresence>
+              {plus && (
+                <motion.div
+                  ref={plusList}
+                  id={`plus-${uid}`}
+                  role="menu"
+                  aria-label="Add to your message"
+                  onKeyDown={onPlusKey}
+                  initial={{ opacity: 0, y: 8, scale: 0.94 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                  transition={POP}
+                  style={{ originX: 0, originY: 1 }}
+                  className="absolute bottom-[calc(100%+8px)] left-0 z-20 w-[264px] rounded-[20px] bg-white p-1.5 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_24px_48px_-20px_rgba(0,0,0,.35)]"
+                >
+                  <div className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6e6e73]" role="presentation">
+                    Add
+                  </div>
+                  {(
+                    [
+                      { id: "photos", name: "Add photos", note: "From your device, or paste one", icon: "photo" },
+                      { id: "files", name: "Add files", note: "PDFs, docs, spreadsheets", icon: "file" },
+                    ] as const
+                  ).map((a) => (
+                    <button
+                      key={a.id}
+                      type="button"
+                      role="menuitem"
+                      tabIndex={-1}
+                      onClick={() => {
+                        setPlus(false);
+                        (a.id === "photos" ? photoInput : fileInput).current?.click();
+                      }}
+                      className="flex w-full items-center gap-3 rounded-[14px] border-0 bg-transparent px-2.5 py-1.5 text-left outline-none [font-family:inherit] hover:bg-[#f5f5f7] focus-visible:bg-[#f5f5f7] focus-visible:ring-2 focus-visible:ring-[#0071e3]"
+                    >
+                      <span className="grid h-8 w-8 flex-none place-items-center rounded-[10px] bg-[#f5f5f7] text-[#1d1d1f]">
+                        <Glyph name={a.icon} />
+                      </span>
+                      <span className="flex min-w-0 flex-col leading-[1.25]">
+                        <span className="text-[13.5px] font-medium text-[#1d1d1f]">{a.name}</span>
+                        <span className="text-[12px] text-[#6e6e73]">{a.note}</span>
+                      </span>
+                    </button>
+                  ))}
+                  {skills.length > 0 && (
+                    <>
+                      <div className="mx-3 my-1.5 h-px bg-black/[0.06]" role="separator" />
+                      <div className="px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6e6e73]" role="presentation">
+                        Skills
+                      </div>
+                      {skills.map((k) => {
+                        const on = picked.includes(k.id);
+                        return (
+                          <button
+                            key={k.id}
+                            type="button"
+                            role="menuitemcheckbox"
+                            aria-checked={on}
+                            tabIndex={-1}
+                            onClick={() => toggleSkill(k.id)}
+                            className="flex w-full items-center gap-3 rounded-[14px] border-0 bg-transparent px-2.5 py-1.5 text-left outline-none [font-family:inherit] hover:bg-[#f5f5f7] focus-visible:bg-[#f5f5f7] focus-visible:ring-2 focus-visible:ring-[#0071e3]"
+                          >
+                            <span className={`grid h-8 w-8 flex-none place-items-center rounded-[10px] transition-colors ${on ? "bg-[#0071e3] text-white" : "bg-[#f5f5f7] text-[#1d1d1f]"}`}>
+                              <Glyph name={k.icon ?? "spark"} />
+                            </span>
+                            <span className="flex min-w-0 flex-1 flex-col leading-[1.25]">
+                              <span className="text-[13.5px] font-medium text-[#1d1d1f]">{k.name}</span>
+                              <span className="text-[12px] text-[#6e6e73]">{k.note}</span>
+                            </span>
+                            {on && (
+                              <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" className="flex-none">
+                                <path d="M3 7.5l2.6 2.6L11 4.5" fill="none" stroke="#0071e3" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <div ref={menuRef} className="relative">
             <motion.button
@@ -487,6 +789,7 @@ export function AIComposer({
               aria-controls={`models-${uid}`}
               onClick={() => {
                 touch();
+                setPlus(false);
                 setMenu((m) => !m);
               }}
               onKeyDown={(e) => e.key === "Escape" && setMenu(false)}
@@ -549,7 +852,7 @@ export function AIComposer({
             onClick={() => {
               touch();
               if (busy) stop();
-              else send(text, files);
+              else send(text, files, chosen);
             }}
             whileTap={{ scale: 0.86 }}
             animate={{ backgroundColor: busy ? "#1d1d1f" : ready ? "#0071e3" : "#e8e8ed" }}
