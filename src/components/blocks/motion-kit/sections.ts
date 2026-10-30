@@ -62,6 +62,7 @@ import { CardRail } from "./card-rail";
 import { StickyScrollStory } from "./sticky-scroll-story";
 import { BeamTimeline } from "./beam-timeline";
 import { StackingCards } from "./stacking-cards";
+import { BentoFeatures } from "./bento-features";
 import { PreviewBlockVariantMkScrollNavbar } from "@/registry/blocks/nexus-essentials-blocks-c";
 import { MorphMenu } from "./morph-menu";
 import { AnnounceBar } from "./announce-bar";
@@ -82,6 +83,7 @@ export const MOTION_KIT_SECTIONS: Record<string, ComponentType<{ autoplay?: bool
   "mk-sticky-scroll-story": StickyScrollStory as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-beam-timeline": BeamTimeline as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-stacking-cards": StackingCards as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-bento-features": BentoFeatures as unknown as ComponentType<{ autoplay?: boolean }>,
   // The navbar needs a scrolling frame with a page inside it, so the section is its preview.
   "mk-scroll-navbar": asSection(PreviewBlockVariantMkScrollNavbar),
   "mk-morph-menu": MorphMenu as unknown as ComponentType<{ autoplay?: boolean }>,

@@ -1,4 +1,24 @@
 {
+ "ai-composer": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   10,
+   184,
+   752,
+   526
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "animated-bento-grid": {
   "canvas": [
    1200,
@@ -2917,6 +2937,26 @@
    780
   ],
   "bg": "#ffffff",
+  "coverage": 1
+ },
+ "mk-bento-features": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   10,
+   40,
+   1146,
+   810
+  ],
+  "bg": "#f6f6f6",
   "coverage": 1
  },
  "mk-bento-grid-skeleton": {

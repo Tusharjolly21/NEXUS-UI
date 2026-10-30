@@ -149,6 +149,7 @@ const baseVariants: BlockVariant[] = [
   mk("drawn-timeline", "block-features", "Drawn Timeline", "DrawnTimeline"),
   mk("integrations-orbit", "block-features", "Integrations Orbit", "IntegrationsOrbit"),
   mk("stacking-cards", "block-features", "Stacking Cards", "StackingCards"),
+  mk("bento-features", "block-features", "Bento Features", "BentoFeatures"),
   mk("beam-timeline", "block-features", "Beam Timeline", "BeamTimeline"),
   mk("sticky-scroll-story", "block-features", "Sticky Scroll Story", "StickyScrollStory"),
 

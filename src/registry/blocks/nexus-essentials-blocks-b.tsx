@@ -11,6 +11,7 @@ import { CardRail } from "@/components/blocks/motion-kit/card-rail";
 import { ParallaxSlider } from "@/components/blocks/motion-kit/parallax-slider";
 import { StackingCards } from "@/components/blocks/motion-kit/stacking-cards";
 import { StickyScrollStory } from "@/components/blocks/motion-kit/sticky-scroll-story";
+import { BentoFeatures } from "@/components/blocks/motion-kit/bento-features";
 
 export function PreviewBlockVariantMkParallaxSlider() {
   return (
@@ -32,6 +33,14 @@ export function PreviewBlockVariantMkStickyScrollStory() {
   return (
     <div className="flex min-h-[660px] w-full items-center bg-white dark:bg-black">
       <StickyScrollStory />
+    </div>
+  );
+}
+
+export function PreviewBlockVariantMkBentoFeatures() {
+  return (
+    <div className="flex min-h-[640px] w-full items-center justify-center bg-[#f5f5f7] p-4 dark:bg-[#f5f5f7] sm:p-6">
+      <BentoFeatures />
     </div>
   );
 }

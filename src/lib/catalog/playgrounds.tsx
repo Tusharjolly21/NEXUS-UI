@@ -218,6 +218,7 @@ import { ShredderDelete } from "@/components/shredder-delete";
 import { Lightfall } from "@/components/lightfall";
 import { PluckFrame } from "@/components/pluck-frame";
 import { GlassDrop } from "@/components/glass-drop";
+import { AIComposer } from "@/components/ai-composer";
 import { DustSnap } from "@/components/dust-snap";
 import { TetheredSubmit } from "@/components/tethered-submit";
 import { DependentForm } from "@/components/dependent-form";
@@ -4210,6 +4211,21 @@ export const playgrounds: Record<string, Playground> = {
           enableSound={v.enableSound as boolean}
           volume={v.volume as number}
         />
+      </div>
+    ),
+  },
+  "ai-composer": {
+    lightOnly: true,
+    componentName: "AIComposer",
+    importPath: "@/components/ai-composer",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "greeting", label: "Greeting", options: ["What can I help with?", "Ask the docs", "Where should we start?"], defaultValue: "What can I help with?" },
+      { kind: "toggle", prop: "autoplay", label: "Type and send by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[560px]">
+        <AIComposer key={String(v.autoplay)} greeting={v.greeting as string} autoplay={v.autoplay as boolean} />
       </div>
     ),
   },

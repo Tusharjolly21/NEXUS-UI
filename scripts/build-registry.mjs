@@ -1114,6 +1114,14 @@ const BLOCK_REGISTRY_PACKAGES = [
     components: ["blocks/motion-kit/sticky-scroll-story"],
   },
   {
+    name: "bento-features",
+    title: "Bento Features",
+    description: "An Apple-style feature grid where every tile shows its feature working: a chart drawing, devices syncing, a lock closing, a gauge dropping, switches flipping, cursors moving. A spotlight follows the cursor and a tap grows a tile into a detail view.",
+    premium: true,
+    dependencies: ["framer-motion"],
+    components: ["blocks/motion-kit/bento-features"],
+  },
+  {
     name: "beam-timeline",
     title: "Beam Timeline",
     description: "A milestone timeline with a beam of light that follows your scroll; the glowing head stretches with scroll speed and each milestone lights up as the beam reaches it.",
@@ -1166,7 +1174,7 @@ const BLOCK_REGISTRY_PACKAGES = [
     title: "Feature Blocks",
     description: "Auto-advancing feature tabs, a timeline that draws itself on scroll, and an integrations orbit.",
     premium: true,
-    components: ["blocks/motion-kit/auto-advancing-tabs", "blocks/motion-kit/drawn-timeline", "blocks/motion-kit/integrations-orbit", "blocks/motion-kit/sticky-scroll-story", "blocks/motion-kit/beam-timeline", "blocks/motion-kit/stacking-cards"],
+    components: ["blocks/motion-kit/auto-advancing-tabs", "blocks/motion-kit/drawn-timeline", "blocks/motion-kit/integrations-orbit", "blocks/motion-kit/sticky-scroll-story", "blocks/motion-kit/beam-timeline", "blocks/motion-kit/stacking-cards", "blocks/motion-kit/bento-features"],
   },
   {
     name: "social-proof-blocks",
