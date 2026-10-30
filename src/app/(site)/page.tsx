@@ -33,9 +33,10 @@ export const metadata: Metadata = {
   title: { absolute: `${siteConfig.siteName} — ${siteConfig.tagline}` },
 };
 
-const HOME_VIDEOS = ["launch-reel", "manifesto", "price-reveal", "route-story"];
+const HOME_VIDEOS = ["launch-reel", "feature-drop", "brand-film", "route-story"];
 
-const WALL_SLUGS = ["noir-studio", "helix-ai-platform", "launchfolio-portfolio", "ocean-flow", "aether-portfolio", "nexus-ai-launch"];
+// Dark and light alternate across the grid so the wall reads as a mix, not a single look.
+const WALL_SLUGS = ["kiln", "cairn", "strata", "wayfare", "afterglow", "side-b"];
 
 const FAQ = [
   {
