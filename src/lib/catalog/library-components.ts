@@ -12188,7 +12188,7 @@ export default function Page() {
       "A WebGL background. Lanes of light pour down a wall, round a cove and run out across a glossy floor towards you, with pulses streaking along every lane and the wall faintly mirrored in the floor. Move over it and the lanes part around your cursor like water around a finger; click, or press Space, to send a surge of light down every lane at once. Three palettes (Dusk, Tide, Ember) ease into each other from a built-in switcher. Until you touch it an invisible hand drifts across it and surges fire on their own. It has its own sound: a slow drone that changes with the palette, a note for each lane your cursor crosses (left to right climbs the scale), a run of notes falling down the wall with every surge, and a sting when you switch palette. Put your own content on top with children.",
     categorySlug: "background-effects",
     tags: ["background", "webgl", "shader", "lights", "hero", "cursor", "glow", "pulse", "gradient", "dark", "autoplay", "sound", "motion kit", "framer-motion"],
-    premium: false,
+    premium: true,
     trendingScore: 181,
     createdAt: "2026-10-29",
     animationKinds: ["hover", "press", "gradient"],
