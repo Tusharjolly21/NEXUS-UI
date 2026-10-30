@@ -1959,6 +1959,26 @@
   "bg": null,
   "coverage": 0.18
  },
+ "glass-drop": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   10,
+   194,
+   902,
+   516
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "glass-edit": {
   "canvas": [
    960,

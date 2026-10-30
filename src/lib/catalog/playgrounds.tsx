@@ -217,6 +217,7 @@ import { TestimonialWall } from "@/components/testimonial-wall";
 import { ShredderDelete } from "@/components/shredder-delete";
 import { Lightfall } from "@/components/lightfall";
 import { PluckFrame } from "@/components/pluck-frame";
+import { GlassDrop } from "@/components/glass-drop";
 import { DustSnap } from "@/components/dust-snap";
 import { TetheredSubmit } from "@/components/tethered-submit";
 import { DependentForm } from "@/components/dependent-form";
@@ -4208,6 +4209,30 @@ export const playgrounds: Record<string, Playground> = {
           theme={v.theme as "light"}
           enableSound={v.enableSound as boolean}
           volume={v.volume as number}
+        />
+      </div>
+    ),
+  },
+  "glass-drop": {
+    lightOnly: true,
+    componentName: "GlassDrop",
+    importPath: "@/components/glass-drop",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "ending", label: "Ending", options: ["logo", "logo-text"], defaultValue: "logo" },
+      { kind: "select", prop: "theme", label: "Theme", options: ["dark", "light", "blue"], defaultValue: "dark" },
+      { kind: "toggle", prop: "tint", label: "Cast logo in the theme's ink", defaultValue: false },
+      { kind: "toggle", prop: "loop", label: "Loop", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[860px]">
+        <GlassDrop
+          key={`${String(v.ending)}-${String(v.theme)}-${String(v.tint)}-${String(v.loop)}`}
+          ending={v.ending as "logo"}
+          theme={v.theme as "dark"}
+          tint={v.tint as boolean}
+          loop={v.loop as boolean}
+          height={420}
         />
       </div>
     ),
