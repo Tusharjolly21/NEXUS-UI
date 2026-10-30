@@ -52,6 +52,7 @@ const SELF_DEMO = new Set([
   "lightfall",
   "pluck-frame",
   "dust-snap",
+  "glass-drop",
   "tethered-submit",
   "dependent-form",
   "glass-edit",
@@ -398,6 +399,7 @@ export const MOTION_KIT_ORDER: string[] = [
   "smart-light",
   "pluck-frame", // newest batch, placed among the older ones on purpose
   "dust-snap", // newest batch, placed among the older ones on purpose
+  "glass-drop", // newest batch, placed among the older ones on purpose
   "range-calendar",
   "storage-clean",
   // eighteenth batch (Dart Rating, Domino Progress, Pumpkin Reveal, Catch Undo)

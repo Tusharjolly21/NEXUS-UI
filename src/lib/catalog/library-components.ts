@@ -12106,6 +12106,81 @@ export default function Page() {
     tailwindSource: tw,
   },
   {
+    slug: "glass-drop",
+    name: "Glass Drop",
+    registryCliName: "glass-drop",
+    description:
+      "A logo intro made of liquid glass. A droplet lands as a bubble that magnifies your logo hugely and fringes it with colour, swells into a rounded glass icon whose thick walls drag the logo out to the rim and split the light, then relaxes and melts away, leaving your logo crisp with a soft domed finish. Pick the ending: the logo alone, or the logo with your name, where a clear ball lands on the logo and opens into a rippling lens that sweeps out over the name. Three looks: dark, light and blue. Drop in any SVG or PNG and it uses that instead of the default mark. Plays when it comes into view, click to replay, and the light follows the pointer.",
+    categorySlug: "motion-effects",
+    tags: ["logo","intro","reveal","glass","liquid","droplet","refraction","webgl","shader","brand","splash","autoplay","motion kit"],
+    premium: true,
+    trendingScore: 183,
+    createdAt: "2026-10-30",
+    animationKinds: ["hover", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "logoSrc", type: "string", description: "An SVG or PNG to use instead of the default Nexus UI mark. It keeps its own colours unless tint is set. Visitors can also drop a file onto the stage when controls are on." },
+      { name: "name", type: "string", defaultValue: "\"Nexus UI\"", description: "The name revealed beside the logo by the \"logo-text\" ending." },
+      { name: "ending", type: "\"logo\" | \"logo-text\"", defaultValue: "\"logo\"", description: "\"logo\" ends on your logo alone. \"logo-text\" goes on to drop a clear ball on the logo that opens out over your name until the whole lockup is crisp. The built-in picker changes it afterwards; changing the prop resets it." },
+      { name: "theme", type: "\"dark\" | \"light\" | \"blue\"", defaultValue: "\"dark\"", description: "The stage and the glass. Dark is black with cool glass, light is pale grey with white glass and a soft glow, blue is a deep navy gradient." },
+      { name: "tint", type: "boolean", defaultValue: "false", description: "Casts your logo in the theme's ink (white on dark and blue, near-black on light) instead of its own colours." },
+      { name: "height", type: "number", defaultValue: "460", description: "Height of the stage in pixels. The width is the width of its container, up to 1000px." },
+      { name: "loop", type: "boolean", defaultValue: "false", description: "Replays forever, holding on the finished logo between runs. Otherwise it plays once when it first comes into view. Under reduced motion it shows the finished logo straight away." },
+      { name: "autoplay", type: "boolean", defaultValue: "true", description: "Plays when the stage first comes into view. Turn it off and it waits for a click or the Replay button." },
+      { name: "controls", type: "boolean", defaultValue: "true", description: "Shows the ending and theme pickers, the upload button and Replay along the bottom of the stage." },
+      { name: "className", type: "string", description: "Extra classes for the outer wrapper." },
+    ],
+    Preview: Previews.PreviewGlassDrop,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { GlassDrop } from "@/components/glass-drop";
+
+// A drop of liquid glass lands, swells around the logo and melts away. Click it to replay.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[1000px]">
+        <GlassDrop />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Your logo and your name, in the blue theme",
+        code: `// src/app/page.tsx
+
+import { GlassDrop } from "@/components/glass-drop";
+
+// logoSrc takes any SVG or PNG. The logo-text ending reveals the name beside it.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[1000px]">
+      <GlassDrop logoSrc="/logo.svg" name="Acme" ending="logo-text" theme="blue" />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "A clean splash: light theme, no controls, loops",
+        code: `// src/app/page.tsx
+
+import { GlassDrop } from "@/components/glass-drop";
+
+// controls={false} hides the pickers and upload button; loop replays it forever.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[1000px]">
+      <GlassDrop theme="light" controls={false} loop height={420} />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
     slug: "lightfall",
     name: "Lightfall",
     registryCliName: "lightfall",
