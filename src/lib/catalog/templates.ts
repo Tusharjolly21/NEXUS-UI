@@ -771,6 +771,52 @@ export const templates: MarketplaceTemplate[] = [
     },
     features: ["Before/after checkout hero whose divider drives three result metrics", "Case-study folders that peek open and link to each case", "Chapter switcher (Problem, Research, Design, Outcome) on a stretch nav", "Shipped components shown live: upload chips, component layers, scrub inputs, settings tabs", "Scroll-linked seven-week process timeline", "Project brief form with a stagger menu and demo send state"],
   },
+  {
+    slug: "afterglow",
+    title: "Afterglow — release analytics landing page",
+    description:
+      "A dark, motion-rich landing page for a product that lines up every deploy with the metrics that moved after it: a hero with a live release dashboard you can click through, a three-step setup, a bento of release diffs, alerts, funnels and replays, a full-width WebGL light trail, a wall of customer quotes, monthly and yearly plans, an FAQ and a closing call to action.",
+    category: "SaaS",
+    tags: ["saas", "analytics", "developer tools", "dark", "dashboard", "webgl", "motion-kit"],
+    difficulty: "Advanced",
+    premium: true,
+    trendingScore: 308,
+    createdAt: "2026-10-30",
+    techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
+    pages: ["/"],
+    sections: [
+      "Floating Nav",
+      "Hero with Live Release Dashboard",
+      "Customer Strip",
+      "Three-Step Setup",
+      "Release Diff Bento",
+      "Light Trail",
+      "Testimonial Wall",
+      "Pricing with Billing Switch",
+      "FAQ",
+      "Closing Call to Action",
+    ],
+    pageLabels: ["Dashboard", "Product", "Customers", "Pricing"],
+    previewImages: {
+      hero: "/templates/afterglow/hero.webp",
+      sections: [
+        "/templates/afterglow/section-1.webp",
+        "/templates/afterglow/section-2.webp",
+        "/templates/afterglow/section-3.webp",
+        "/templates/afterglow/section-4.webp",
+      ],
+    },
+    features: [
+      "Hero dashboard you can use: switch metrics, pick a release and watch the chart and table follow",
+      "Draggable before and after slider that snaps to the release",
+      "Alert cards that roll back, dismiss and refill",
+      "Funnel switch between two versions with the broken step called out",
+      "Full-width WebGL light trail that leans away from the cursor, with a striped fallback when WebGL is unavailable",
+      "Silent by design: no audio, no external fonts, no network calls at build time",
+      "Monthly and yearly switch with sliding price digits",
+      "Respects reduced motion and has no horizontal scroll at 390px",
+    ],
+  },
 ];
 
 /**
@@ -779,7 +825,7 @@ export const templates: MarketplaceTemplate[] = [
  * now disabled and says which scheme the template is designed in. Add a slug here only if a
  * template gains a real dark variant that responds to the `dark` class (then drop it from this map).
  */
-const FIXED_SCHEME: Record<string, "light" | "dark"> = { kiln: "dark", strata: "dark" };
+const FIXED_SCHEME: Record<string, "light" | "dark"> = { kiln: "dark", strata: "dark", afterglow: "dark" };
 
 /** The scheme a template is designed in; every template currently ignores the site theme. */
 export function templateScheme(slug: string): "light" | "dark" {

@@ -124,6 +124,11 @@ const StrataPage = nextDynamic(
   { loading: TemplateFallback },
 );
 
+const AfterglowPage = nextDynamic(
+  () => import("@/components/templates/afterglow-page").then((m) => ({ default: m.AfterglowPage })),
+  { loading: TemplateFallback },
+);
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -161,6 +166,8 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><CairnPage /></ThemeReceiver>;
   } else if (tmpl.slug === "strata") {
     return <ThemeReceiver><StrataPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "afterglow") {
+    return <ThemeReceiver><AfterglowPage /></ThemeReceiver>;
   } else if (tmpl.slug === "nexus-ai-launch") {
     return <ThemeReceiver><NexusAiLaunchTemplatePage /></ThemeReceiver>;
   } else if (tmpl.slug === "noir-studio") {
