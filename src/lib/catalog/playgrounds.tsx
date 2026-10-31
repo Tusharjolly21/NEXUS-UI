@@ -4237,6 +4237,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "select", prop: "ending", label: "Ending", options: ["logo", "logo-text"], defaultValue: "logo" },
       { kind: "select", prop: "theme", label: "Theme", options: ["dark", "light", "blue"], defaultValue: "dark" },
+      { kind: "range", prop: "depth", label: "Glass depth", min: 0, max: 6, step: 0.1, unit: "", defaultValue: 2.9 },
       { kind: "toggle", prop: "tint", label: "Cast logo in the theme's ink", defaultValue: false },
       { kind: "toggle", prop: "loop", label: "Loop", defaultValue: false },
     ],
@@ -4244,6 +4245,7 @@ export const playgrounds: Record<string, Playground> = {
       <div className="mx-auto w-full max-w-[860px]">
         <GlassDrop
           key={`${String(v.ending)}-${String(v.theme)}-${String(v.tint)}-${String(v.loop)}`}
+          depth={v.depth as number}
           ending={v.ending as "logo"}
           theme={v.theme as "dark"}
           tint={v.tint as boolean}

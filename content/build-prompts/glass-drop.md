@@ -2,7 +2,7 @@
 
 Add the "Glass Drop" component from Nexus UI to my project.
 
-A logo intro made of liquid glass. A droplet lands as a bubble that magnifies your logo hugely and fringes it with colour, swells into a rounded glass icon whose thick walls drag the logo out to the rim and split the light, then relaxes and melts away, leaving your logo crisp with a soft domed finish. Pick the ending: the logo alone, or the logo with your name, where a clear ball lands on the logo and opens into a rippling lens that sweeps out over the name. Three looks: dark, light and blue. Drop in any SVG or PNG and it uses that instead of the default mark. Plays when it comes into view, click to replay, and the light follows the pointer.
+A logo intro made of liquid glass. A droplet lands as a bubble that magnifies your logo, swells into a rounded glass tile whose thick edges bend the logo and split the light into colour, then clears to your logo at full size. Pick the ending: the logo alone, or the logo with your name, where a second drop lands and opens into a rippling lens that sweeps out over the name until the lockup is crisp. Three looks: dark, light and blue. Drop in any SVG or PNG and it uses that instead of the default mark. Plays when it comes into view and click to replay.
 
 Please:
 
@@ -18,465 +18,66 @@ Copy the code exactly as it is. Do not restyle, simplify or rename anything, and
 ```tsx
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent, type PointerEvent as RPointerEvent } from "react";
-import { motion, useInView, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties, type DragEvent } from "react";
+import { motion } from "framer-motion";
+import { LiquidGlassLogo, type LiquidGlassLogoHandle } from "./liquid-glass-logo";
+import {
+  liquidGlassLogoDuration,
+  liquidGlassLogoThemes,
+  type LiquidGlassLogoTuning,
+} from "./liquid-glass-logo-renderer";
 
-// ─── Logo ──────────────────────────────────────────────────────────────────────
-// The logo is drawn into a texture, so any image works: pass `logoSrc` (SVG or
-// PNG), drop a file onto the stage, or keep the default Nexus UI mark. Your
-// logo keeps its own colours; pass `tint` to cast it in the theme's ink.
-
-type Ink = { body: string; core: string; glint: string };
-
-function drawNexusMark(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, ink: Ink) {
-  const s = size / 100;
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(s, s);
-  ctx.lineCap = "round";
-  ctx.strokeStyle = ink.body;
-  ctx.fillStyle = ink.body;
-  ctx.lineWidth = 6.5;
-  const tips: [number, number][] = [
-    [50, 12],
-    [14, 74],
-    [86, 74],
-  ];
-  for (const [tx, ty] of tips) {
-    ctx.beginPath();
-    ctx.moveTo(50, 53);
-    ctx.lineTo(tx, ty);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(tx, ty, 7, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.fillStyle = ink.core;
-  ctx.beginPath();
-  ctx.arc(50, 53, 11.5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = ink.glint;
-  ctx.beginPath();
-  ctx.arc(46.4, 49.4, 3.3, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-}
-
-// ─── Shaders ───────────────────────────────────────────────────────────────────
-// One surface of liquid glass does everything, and the light really bends
-// through it: a droplet's dome magnifies, a slab's rounded edge reaches in
-// from the rim, and ripples run across it. It lands as a bubble that magnifies
-// the logo hugely and fringes it magenta, swells into a rounded glass icon whose
-// thick walls drag the logo out to the rim and split it into orange and blue,
-// then relaxes to 1x and melts away, leaving the logo with a soft domed finish.
-// For the name ending a clear ball lands on the logo, folds the name into rings,
-// then opens into a lens that ripples and sweeps outward, streaking the letters
-// at its rim, until the whole lockup sits there crisp.
-
-const VS = `#version 300 es
-in vec2 a;
-void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
-
-const FS = `#version 300 es
-precision highp float;
-out vec4 o;
-uniform vec2 u_res;
-uniform float u_T;          // icon half size, px
-uniform vec2 u_half;        // lens half size, icon units
-uniform float u_rad;        // lens corner radius
-// the glass surface
-uniform float u_dome;       // 0..1, how much of the droplet's dome is left
-uniform float u_domeD;      // dome depth: the centre magnifies 1 / (1 - domeD)
-uniform float u_domeCap;    // how steep the dome's rim gets (high folds it into rings)
-uniform float u_bevel;      // 0..1, the rounded edge of the slab
-uniform float u_bw;         // bevel width, share of the short half
-uniform float u_bevD;       // bevel reach: how far in from the rim the walls look, share of the short half
-uniform float u_wallK;      // how much the thick walls scatter: light from a thin stroke spreads into a broad glow
-uniform float u_disp;       // dispersion at the walls: red bends least, blue most
-uniform float u_dispD;      // dispersion through the dome
-uniform float u_dispK;      // the theme's dispersion strength
-uniform float u_M;          // overall zoom
-uniform vec2 u_focus;       // where the zoom is centred
-uniform float u_blur;       // mip bias, out of focus early on
-uniform float u_band;       // the name lens's rim: letters streak out through rippled glass
-uniform float u_jag;        // ripples running out from where the drop landed
-uniform float u_ring2;      // the inner line of a thick glass wall
-uniform float u_bodyA;      // glass body opacity
-uniform float u_lift;       // a bubble is lighter inside than the icon
-uniform float u_rimA;       // rim light
-uniform float u_spec;       // specular highlights
-uniform float u_rings;      // ripples in the halo around the lens
-uniform float u_lensA;
-uniform float u_mix;        // lens content: 0 logo, 1 logo with name
-uniform float u_time;
-uniform float u_outA;       // the logo outside any lens
-uniform float u_outMix;
-uniform float u_outScale;
-uniform float u_outGrey;
-uniform float u_puff;       // domed finish on the logo
-uniform float u_fade;
-uniform vec2 u_lHalf;
-uniform vec2 u_kHalf;
-uniform sampler2D u_logo;
-uniform sampler2D u_lock;
-uniform sampler2D u_lblur;
-uniform sampler2D u_kblur;
-uniform vec3 u_tint;
-uniform vec3 u_liftC;
-uniform vec3 u_rim;
-uniform vec3 u_env;
-uniform vec3 u_bg;
-uniform vec3 u_glowC;
-uniform vec2 u_light;
-uniform float u_glow;
-
-float sdRB(vec2 p, vec2 b, float r){
-  r = min(r, min(b.x, b.y));
-  vec2 q = abs(p) - b + r;
-  return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
-}
-vec4 tex(sampler2D s, vec2 q, vec2 h, float bias){
-  vec2 uv = q / (2.0 * h) + 0.5;
-  uv.y = 1.0 - uv.y;
-  if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) return vec4(0.0);
-  return texture(s, uv, bias);
-}
-vec4 content(vec2 q, float bias, float m){
-  if (m < 0.5) return tex(u_logo, q, u_lHalf, bias);
-  return tex(u_lock, q, u_kHalf, bias);
-}
-float soft(vec2 q, float m){
-  if (m < 0.5) return tex(u_lblur, q, u_lHalf, 0.0).r;
-  return tex(u_kblur, q, u_kHalf, 0.0).r;
-}
-// the domed finish: bright in the middle of every stroke, rolling off at the
-// edges, a touch darker on the side facing away from the light
-float puffAt(vec2 q, float m){
-  float h = m < 0.5 ? 0.012 : 0.0065;
-  float c = soft(q, m);
-  float bx = soft(q + vec2(h, 0.0), m) - soft(q - vec2(h, 0.0), m);
-  float by = soft(q + vec2(0.0, h), m) - soft(q - vec2(0.0, h), m);
-  vec3 N = normalize(vec3(-bx * 2.6, -by * 2.6, 1.0));
-  float dif = dot(N, normalize(vec3(-0.45, 0.55, 0.8)));
-  float inner = smoothstep(0.5, 0.8, c);
-  return clamp(mix(0.8, 1.0, inner) * (0.9 + 0.12 * dif), 0.0, 1.0);
-}
-float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-float vnoise(vec2 p){
-  vec2 i = floor(p), f = fract(p);
-  f = f * f * (3.0 - 2.0 * f);
-  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
-}
-// slope of a round profile, 0 on the flat and climbing steeply at the rim
-float roundSlope(float x, float cap){
-  x = clamp(x, 0.0, 0.995);
-  return min(x / sqrt(1.0 - x * x), cap);
-}
-
-// the logo outside any lens
-vec4 outsideLogo(vec2 p){
-  if (u_outA <= 0.001) return vec4(0.0);
-  vec2 po = p / u_outScale;
-  vec4 oc = content(po, 0.0, u_outMix);
-  vec3 ocol = oc.rgb;
-  if (u_puff > 0.001 && oc.a > 0.002) ocol *= mix(1.0, puffAt(po, u_outMix), u_puff);
-  ocol = mix(ocol, u_bg * oc.a, u_outGrey);
-  return vec4(ocol, oc.a) * u_outA;
-}
-// a soft halo around the lens on light pages, with the ripples running through it
-float haloAt(float sd, float minHalf, float aa){
-  float ho = max(sd, 0.0);
-  float halo = exp(-ho / (0.3 * minHalf)) * (1.0 - aa) * u_lensA * u_glow * (1.0 + 0.8 * u_dome) * (1.0 - u_bevel * (1.0 - u_ring2));
-  return halo * (1.0 + u_rings * 0.35 * cos(ho * 45.0 - u_time * 22.0) * exp(-ho / (0.6 * minHalf)));
-}
-
-// Light through the glass. Each colour is bent by a different amount (red the
-// least, blue the most), and each output channel takes its own channel from its
-// own bent sample. That alone makes every colour the real thing makes: where a
-// white edge is pulled apart it goes yellow on one side and cyan then blue on
-// the other, and dark gaps between white strokes fill with magenta.
-// Inside a thick wall the light scatters, so a thin stroke seen through it
-// spreads into a broad soft glow: the blurred coverage is lifted toward one.
-vec4 scatter(vec4 c, float gain){
-  float a2 = 1.0 - pow(max(1.0 - c.a, 0.0), gain);
-  vec3 rgb = c.a > 0.002 ? c.rgb / c.a : vec3(1.0);
-  return vec4(rgb * a2, a2);
-}
-void refracted(vec2 q0, vec2 dR, vec2 dG, vec2 dB, float bias, float gain, out vec3 rgb, out vec3 cov){
-  vec4 cR = scatter(content(q0 - dR, bias, u_mix), gain);
-  vec4 cG = scatter(content(q0 - dG, bias, u_mix), gain);
-  vec4 cB = scatter(content(q0 - dB, bias, u_mix), gain);
-  rgb = vec3(cR.r, cG.g, cB.b);
-  cov = vec3(cR.a, cG.a, cB.a);
-}
-
-void main(){
-  vec2 p = (gl_FragCoord.xy - u_res * 0.5) / u_T;
-  float px = 1.0 / u_T;
-  vec2 L = normalize(u_light);
-
-  // ── the lens outline ──
-  float sd = sdRB(p, u_half, u_rad);
-  vec2 e = vec2(0.002, 0.0);
-  vec2 g = vec2(sdRB(p + e.xy, u_half, u_rad) - sdRB(p - e.xy, u_half, u_rad), sdRB(p + e.yx, u_half, u_rad) - sdRB(p - e.yx, u_half, u_rad));
-  vec2 n2 = normalize(g + 1e-6);
-  float inside = -sd;
-  float minHalf = min(u_half.x, u_half.y);
-  // outside the glass there is only the bare logo and the halo: skip the lens
-  if (sd > 2.0 * px || u_lensA <= 0.001) {
-    vec4 res0 = outsideLogo(p);
-    float h0 = haloAt(sd, minHalf, 0.0);
-    res0.rgb += u_glowC * h0 * 0.4;
-    res0.a = clamp(res0.a + h0 * 0.4, 0.0, 1.0);
-    o = res0 * u_fade;
-    return;
-  }
-  float r = length(p);
-  vec2 rdir = r > 1e-5 ? p / r : vec2(0.0);
-
-  // ── the surface: a droplet's dome that flattens into a slab whose edge rolls
-  // over, and whose walls look a long way in from the rim ──
-  float xd = clamp(1.0 - inside / minHalf, 0.0, 1.0);
-  float sDome = roundSlope(xd, u_domeCap);
-  float bw = minHalf * u_bw;
-  float xb = clamp(1.0 - inside / bw, 0.0, 1.0);
-  // the wall's reach grows smoothly across the whole bevel, steepest at the rim
-  float sBev = xb * (0.45 + 0.55 * xb);
-  // ripples in the name lens's rim: rows of the glass bend by different amounts
-  sBev *= 1.0 + u_band * 0.35 * sin(p.y * 150.0 + sin(p.y * 41.0) * 1.7 + u_time * 6.0);
-  vec2 dDome = n2 * sDome * u_dome * u_domeD * minHalf;
-  vec2 dBev = n2 * sBev * u_bevel * u_bevD * minHalf;
-  vec2 q0 = p / u_M + u_focus;
-  // ripples running out from where the drop landed: fine rings; where they
-  // cross an edge in the picture it turns wavy and serrated
-  if (u_jag > 0.001) {
-    float ang2 = atan(p.y, p.x);
-    float rr2 = r + 0.012 * minHalf * sin(ang2 * 5.0 + u_time * 7.0);
-    float k = 6.2831 / 0.2;
-    float chop = u_bevel;
-    vec2 wob = rdir * sin(rr2 * k - u_time * 38.0) + 0.6 * chop * vec2(sin(p.y * 31.0 + u_time * 23.0), sin(p.x * 29.0 - u_time * 19.0));
-    q0 += wob * u_jag * 0.03 * smoothstep(0.0, 0.12 * minHalf, r) * (1.0 - chop * 0.4 * vnoise(p * 7.0 + u_time * 3.0));
-  }
-  // through the walls red bends least and blue most; through the drop's dome
-  // green focuses tightest, so a white shape wears a magenta edge all round
-  float kD = u_dispD * u_dispK * (1.0 - pow(xd, 3.0));
-  float kB = u_disp * u_dispK;
-  // the blue side of the split is the strong one; the warm side stays faint
-  vec2 dR = dDome * (1.0 + kD) + dBev * (1.0 - 0.3 * kB);
-  vec2 dG = dDome + dBev;
-  vec2 dB = dDome * (1.0 + kD * 1.3) + dBev * (1.0 + kB);
-  float wall = smoothstep(0.0, 0.5, xb) * u_bevel;
-  float bias = u_blur + 3.0 * wall + pow(xd, 4.0) * 2.0 * u_dome;
-  bias = mix(bias, min(bias, 1.2), u_band);
-  float gain = 1.0 + u_wallK * wall * (1.0 - u_band);
-
-  vec3 colour, cov;
-  refracted(q0, dR, dG, dB, bias, gain, colour, cov);
-  if (u_band > 0.001 && xb > 0.001) {
-    // at the name lens's rim the letters streak out along the light's path
-    vec3 accC = vec3(0.0), accA = vec3(0.0);
-    for (int i = 0; i < 6; i++) {
-      float k = 0.55 + 0.9 * float(i) / 5.0;
-      vec3 c1, a1;
-      refracted(q0, dR * k, dG * k, dB * k, bias + 0.4, 1.0, c1, a1);
-      accC += c1;
-      accA += a1;
-    }
-    float w = u_band * smoothstep(0.0, 0.3, xb);
-    colour = mix(colour, accC / 6.0, w);
-    cov = mix(cov, accA / 6.0, w);
-  }
-  float covA = max(max(cov.r, cov.g), cov.b);
-  if (u_puff > 0.001 && covA > 0.002) colour *= mix(1.0, puffAt(q0 - dG, u_mix), u_puff * (1.0 - u_dome) * (1.0 - wall));
-
-  float rr = length(p / max(u_half, vec2(0.001)));
-  vec3 body = u_tint + u_liftC * u_lift * (0.6 + 0.4 * clamp(1.0 - rr, 0.0, 1.0));
-  vec3 lensRGB = colour + body * u_bodyA * (1.0 - cov);
-  float covM = max(max(cov.r, cov.g), cov.b);
-  float lensA = covM + u_bodyA * (1.0 - covM);
-
-  // ── light on the surface: a glint off the rim, a soft window on the drop ──
-  vec2 grad = n2 * (sDome * u_dome * 0.8 + sBev * u_bevel * 0.9);
-  vec3 N = normalize(vec3(grad, 1.0));
-  vec3 L3 = normalize(vec3(L, 1.1));
-  vec3 Hv = normalize(L3 + vec3(0.0, 0.0, 1.0));
-  float nh = max(dot(N, Hv), 0.0);
-  float spec = pow(nh, 120.0) * 1.1 + pow(nh, 18.0) * 0.08;
-  vec2 sw = (p - vec2(-0.32, 0.36) * minHalf) / minHalf;
-  spec += u_dome * 0.55 * exp(-dot(sw, sw) / 0.02);
-  float fres = pow(1.0 - N.z, 1.6);
-  float lit = 0.5 + 0.5 * dot(n2, L);
-  float rim1 = exp(-pow(inside / (1.4 * px), 2.0));
-  float rim2 = exp(-pow((inside - minHalf * 0.1) / (1.6 * px), 2.0));
-  lensRGB += mix(u_env, u_rim, lit) * fres * (0.04 + 0.16 * lit) * u_rimA * (0.12 + 0.88 * u_bevel);
-  lensRGB += u_rim * rim1 * (0.05 + 0.35 * lit * lit) * u_rimA;
-  lensRGB += u_rim * rim2 * (0.03 + 0.2 * lit * lit) * u_ring2;
-  lensRGB += vec3(1.0) * spec * u_spec;
-  lensA = clamp(max(lensA, max(rim1 * 0.5 * u_rimA, max(fres * 0.5 * u_rimA * (0.12 + 0.88 * u_bevel), spec * u_spec))), 0.0, 1.0);
-
-  float aa = clamp(0.5 - sd / px, 0.0, 1.0) * u_lensA;
-
-  vec4 outside = outsideLogo(p);
-  float halo = haloAt(sd, minHalf, aa);
-
-  vec4 res = vec4(lensRGB, lensA) * aa + outside * (1.0 - lensA * aa);
-  res.rgb += u_glowC * halo * 0.4;
-  res.a = clamp(res.a + halo * 0.4, 0.0, 1.0);
-  o = res * u_fade;
-}`;
-
-// ─── Timeline ──────────────────────────────────────────────────────────────────
+// Glass Drop wraps the ReactDrops liquid glass logo renderer (liquid-glass-logo.tsx,
+// liquid-glass-logo-renderer.ts and liquid-glass-logo-shaders.ts, which keep their ReactDrops
+// license header). This file adds the three looks, the ending and theme pickers, "use your logo",
+// drag and drop, and click to replay.
 
 export type GlassDropEnding = "logo" | "logo-text";
 export type GlassDropTheme = "dark" | "light" | "blue";
 
-const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
-const smooth = (a: number, b: number, t: number) => {
-  const x = clamp01((t - a) / (b - a));
-  return x * x * (3 - 2 * x);
+/** When each ending is finished, in seconds at speed 1. The "logo" run stops at 1.8s. */
+const FINISH: Record<GlassDropEnding, number> = { logo: 1.8, "logo-text": liquidGlassLogoDuration };
+
+type Look = {
+  label: string;
+  dark: boolean;
+  /** Which of the renderer's two base themes this builds on. */
+  base: "dark" | "light";
+  colors: Partial<LiquidGlassLogoTuning>;
+  /** A CSS background laid over the flat page colour, for looks that are not one colour. */
+  backdrop?: string;
 };
-const outQuad = (x: number) => 1 - Math.pow(1 - clamp01(x), 2);
-const mixv = (a: number, b: number, k: number) => a + (b - a) * k;
 
-const A = 0.06; // the droplet lands
-const F = A + 1.22; // the glass has melted away
-const G = F + 0.14; // the clear drop lands (name ending)
-const LOGO_STEP_BACK = 0.7; // the logo shrinks to this before the drop lands on it
-const LOGO_IN_LOCKUP = 0.5; // and sits at this size beside the name
+const THEMES: Record<GlassDropTheme, Look> = {
+  dark: { label: "Dark", dark: true, base: "dark", colors: liquidGlassLogoThemes.dark },
+  light: { label: "Light", dark: false, base: "light", colors: liquidGlassLogoThemes.light },
+  // The renderer reads the page colour to decide how the glass sits on it, so the flat colour
+  // stays a deep navy and the gradient is only painted over it.
+  blue: {
+    label: "Blue",
+    dark: true,
+    base: "dark",
+    colors: { logoColor: "#ffffff", textColor: "#e6efff", tileColor: "#0a1c4a", background: "#050f2b" },
+    backdrop: "radial-gradient(60% 70% at 50% 50%, #1b2a6e 0%, #0d1540 50%, #04061a 100%)",
+  },
+};
 
-const FRAME_KEYS = [
-  "rad", "dome", "domeD", "domeCap", "bevel", "bw", "bevD", "wallK", "disp", "dispD", "M", "blur", "band", "jag", "ring2",
-  "bodyA", "lift", "rimA", "spec", "rings", "lensA", "mix", "outA", "outMix", "outScale", "outGrey",
-] as const;
-type Frame = Record<(typeof FRAME_KEYS)[number] | "hx" | "hy" | "fx" | "fy", number>;
-
-function frame(t: number, ending: GlassDropEnding, lockHX: number, focus: number[]): Frame {
-  const s = Math.max(0, t - A);
-  // The droplet swells from a small bubble to the icon's size over a third of a
-  // second, and rounds from a ball into the squircle on the way. Its centre
-  // magnifies the logo nearly four times at first and relaxes toward one; the
-  // dome does that magnifying while it is a drop, and the zoom takes over as it
-  // flattens, so the picture never jumps.
-  const R = mixv(0.4, 1.0, outQuad(s / 0.32));
-  const m = smooth(A + 0.15, A + 0.27, t);
-  const settle = 1 - smooth(A + 0.95, A + 1.12, t);
-  const Mc = 1 + (2.5 * Math.exp(-s / 0.11) + 0.42 * Math.exp(-s / 0.4)) * settle;
-  const domeD = 1 - 1 / Mc;
-  const f: Frame = {
-    hx: R,
-    hy: R,
-    rad: mixv(R, 0.44, m),
-    dome: 1 - m,
-    domeD,
-    domeCap: 1.25,
-    bevel: m,
-    bw: 0.4,
-    bevD: 0.62,
-    wallK: 3.5,
-    dispD: 0.035,
-    disp: 0.1,
-    M: 1 / (1 - m * domeD),
-    // the drop lands a little above the middle, over the top of the logo, and its view drifts to the centre
-    fx: -0.03 * Math.exp(-s / 0.18),
-    fy: 0.4 * Math.exp(-s / 0.18),
-    blur: 3.2 * Math.exp(-s / 0.1),
-    band: 0,
-    jag: 0,
-    ring2: 1,
-    bodyA: mixv(0.5, 1, m),
-    lift: 1 - m,
-    rimA: 1,
-    spec: 0.2,
-    rings: 0,
-    lensA: smooth(A, A + 0.07, t),
-    mix: 0,
-    outA: 0,
-    outMix: 0,
-    outScale: 1,
-    outGrey: 0,
-  };
-
-  // the glass melts away and leaves the logo
-  const melt = smooth(A + 1.04, A + 1.2, t);
-  f.lensA *= 1 - melt;
-  f.outA = smooth(A + 1.0, A + 1.08, t);
-  if (ending === "logo" || t < F) return f;
-
-  // the logo steps back and greys; a clear drop lands on it
-  const shrink = smooth(F, F + 0.1, t);
-  f.outScale = mixv(1, LOGO_STEP_BACK, shrink);
-  f.outGrey = 0.45 * smooth(F + 0.04, F + 0.12, t);
-  f.outA = 1 - smooth(G, G + 0.05, t);
-  f.outMix = 0;
-  if (t < G) return f;
-
-  // A round drop magnifies the middle of the name and folds the rest into rings
-  // at its rim. Ripples build in it until it overshoots through its focus (the
-  // picture flips), then it collapses flat and keeps spreading, in one unbroken
-  // motion, out over the whole lockup, the letters streaking at its edge until
-  // it has passed them.
-  const g = t - G;
-  const Rend = lockHX * 1.3 + 0.5;
-  const Rn = mixv(0.9, Rend, smooth(0, 1.3, g));
-  const flip = smooth(G + 0.29, G + 0.305, t);
-  const flat = smooth(G + 0.31, G + 0.345, t);
-  const dt = Math.max(0, t - (G + 0.335));
-  const gone = smooth(G + 1.25, G + 1.5, t);
-  const calm = 1 - smooth(G + 0.33, G + 0.5, t);
-  const passed = smooth(G + 1.0, G + 1.35, t);
-  return {
-    hx: Rn,
-    hy: Rn,
-    rad: Rn,
-    dome: 1 - flat,
-    domeD: mixv(0.62, 1.05, flip),
-    domeCap: 6,
-    bevel: smooth(G + 0.33, G + 0.42, t),
-    bw: 0.34,
-    bevD: 0.18 * (1 - 0.6 * passed),
-    wallK: 0,
-    disp: 0.22,
-    dispD: 0.03,
-    M: g < 0.335 ? 1 : 1 + 1.2 * Math.exp(-dt / 0.08),
-    fx: focus[0] * (1 - smooth(G + 0.335, G + 0.36, t)),
-    fy: focus[1] * (1 - smooth(G + 0.335, G + 0.36, t)),
-    blur: 0.3,
-    band: smooth(G + 0.4, G + 0.5, t) * (1 - passed),
-    jag: g < 0.31 ? 0.8 * smooth(G + 0.21, G + 0.3, t) : 1.2 * Math.exp(-Math.max(0, t - G - 0.31) / 0.08),
-    ring2: 0,
-    bodyA: mixv(0.55, 0.06, flat) * calm,
-    lift: 0,
-    rimA: mixv(0.75, 0.12, flat) * calm,
-    spec: mixv(0.8, 0.25, flat) * calm,
-    rings: 1 - smooth(G + 0.3, G + 0.4, t),
-    lensA: smooth(G, G + 0.03, t) * (1 - gone),
-    mix: 1,
-    outA: smooth(G + 1.0, G + 1.12, t),
-    outMix: 1,
-    outScale: 1,
-    outGrey: 0,
-  };
+/** The Nexus UI mark, inked to match the theme. Used until you pass `logoSrc` or upload a file. */
+function nexusMark(ink: string) {
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" fill="${ink}">` +
+    `<path d="M50 53V12M50 53L14 74M50 53L86 74" fill="none" stroke="${ink}" stroke-width="6.5" stroke-linecap="round"/>` +
+    `<circle cx="50" cy="12" r="7"/><circle cx="14" cy="74" r="7"/><circle cx="86" cy="74" r="7"/>` +
+    `<circle cx="50" cy="53" r="11.5"/></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
-const LENGTH = { logo: A + 1.3, "logo-text": G + 1.6 };
-
-const THEMES: Record<
-  GlassDropTheme,
-  { bg: string; bgC: number[]; ink: string; mark: Ink; tint: number[]; lift: number[]; rim: number[]; env: number[]; glowC: number[]; glow: number; puff: number; label: string; dark: boolean }
-> = {
-  dark: { label: "Dark", dark: true, bg: "#000000", bgC: [0, 0, 0], ink: "#eef0f5", mark: { body: "#eef0f5", core: "#8f8cff", glint: "#e3e2ff" }, tint: [0.018, 0.026, 0.05], lift: [0.07, 0.08, 0.1], rim: [0.78, 0.84, 0.95], env: [0.3, 0.36, 0.5], glowC: [0, 0, 0], glow: 0, puff: 1 },
-  light: { label: "Light", dark: false, bg: "#e3e3e6", bgC: [0.89, 0.89, 0.9], ink: "#0f1222", mark: { body: "#0f1222", core: "#6d68ff", glint: "#c9c7ff" }, tint: [0.925, 0.935, 0.955], lift: [0.03, 0.03, 0.03], rim: [1, 1, 1], env: [0.72, 0.8, 1], glowC: [0.76, 0.83, 1], glow: 0.5, puff: 0 },
-  blue: { label: "Blue", dark: true, bg: "radial-gradient(60% 70% at 50% 50%, #1b2a6e 0%, #0d1540 50%, #04061a 100%)", bgC: [0.07, 0.1, 0.27], ink: "#eef0f5", mark: { body: "#eef0f5", core: "#8f8cff", glint: "#e3e2ff" }, tint: [0.018, 0.026, 0.055], lift: [0.07, 0.08, 0.11], rim: [0.8, 0.86, 1], env: [0.26, 0.36, 0.86], glowC: [0, 0, 0], glow: 0, puff: 1 },
-};
-
-const FONT_FAMILY = `Inter, -apple-system, "SF Pro Display", "Segoe UI", system-ui, sans-serif`;
 
 /**
- * Glass Drop: a logo intro made of liquid glass. A droplet lands as a bubble that
- * magnifies your logo, swells into a glass icon whose walls bend the logo out to
- * the rim and split the light into colour, then clears to the logo, crisp and
- * full size with a soft domed finish. The "logo and name" ending then drops a clear
- * ball on the logo that opens out over your name. Three looks: dark, light and blue.
- * Drop any SVG or PNG on it and it uses that. Plays in view; click to replay.
+ * Glass Drop: a logo intro made of liquid glass. A droplet lands as a bubble that magnifies your
+ * logo, swells into a glass icon whose walls bend the logo out to the rim and split the light into
+ * colour, then clears to the logo at full size. The "logo and name" ending then drops a second
+ * ball that opens out over your name. Three looks: dark, light and blue. Drop any SVG or PNG on
+ * it and it uses that. Plays in view; click to replay.
  */
 export function GlassDrop({
   logoSrc,
@@ -484,13 +85,15 @@ export function GlassDrop({
   ending: endingProp = "logo",
   theme: themeProp = "dark",
   tint = false,
+  depth = 2.9,
   height = 460,
   loop = false,
   autoplay = true,
   controls = true,
+  tuning,
   className = "",
 }: {
-  /** an SVG or PNG to use instead of the Nexus UI mark */
+  /** an SVG or PNG to use instead of the Nexus UI mark. A file on another site needs CORS headers. */
   logoSrc?: string;
   /** the name revealed by the logo-text ending */
   name?: string;
@@ -500,368 +103,87 @@ export function GlassDrop({
   theme?: GlassDropTheme;
   /** cast your logo in the theme's ink (white on dark, ink on light) instead of its own colours */
   tint?: boolean;
+  /** how thick the glass is; deeper glass bends the logo more */
+  depth?: number;
   height?: number;
   /** replay forever; otherwise it plays once when it first comes into view */
   loop?: boolean;
-  /** play when it comes into view */
+  /** play when it comes into view; otherwise it rests on the finished logo until you replay it */
   autoplay?: boolean;
   /** show the pickers and the upload button */
   controls?: boolean;
+  /** any other setting of the glass (dispersion, caustics, bloom, speed…), passed straight through */
+  tuning?: Partial<LiquidGlassLogoTuning>;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
-  const stage = useRef<HTMLDivElement>(null);
-  const canvas = useRef<HTMLCanvasElement>(null);
+  const glass = useRef<LiquidGlassLogoHandle>(null);
   const fileInput = useRef<HTMLInputElement>(null);
-  const inView = useInView(stage, { amount: 0.5 });
   const [ending, setEnding] = useState<GlassDropEnding>(endingProp);
   const [theme, setTheme] = useState<GlassDropTheme>(themeProp);
   // the pickers change the look on their own; a new prop value resets them
   const [seenEnding, setSeenEnding] = useState(endingProp);
   const [seenTheme, setSeenTheme] = useState(themeProp);
+  // counts replays: 0 means it has only ever played by itself
+  const [runs, setRuns] = useState(0);
   if (seenEnding !== endingProp) {
     setSeenEnding(endingProp);
     setEnding(endingProp);
+    setRuns((n) => n + 1);
   }
   if (seenTheme !== themeProp) {
     setSeenTheme(themeProp);
     setTheme(themeProp);
+    setRuns((n) => n + 1);
   }
-  const [failed, setFailed] = useState(false);
   const [dropped, setDropped] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
-  const src = dropped ?? logoSrc;
-  const st = useRef({ start: -1, light: [-0.55, 0.8], want: [-0.55, 0.8], ending: endingProp, loop, reduce: false });
-  useEffect(() => {
-    st.current.ending = ending;
-    st.current.loop = loop;
-    st.current.reduce = !!reduce;
-  }, [ending, loop, reduce]);
 
-  const play = useCallback(() => {
-    st.current.start = performance.now();
-  }, []);
+  const look = THEMES[theme];
+  const ink = String(look.colors.logoColor);
+  const ownLogo = dropped ?? logoSrc;
+  // your own logo keeps its colours unless you ask for the theme's ink; the built-in mark always takes it
+  const inked = !ownLogo || tint;
+  const started = autoplay || runs > 0;
 
+  // A replay lands after the glass has applied the new look (child effects run first).
   useEffect(() => {
-    // plays the first time it is seen
-    if (inView && autoplay && st.current.start < 0) play();
-  }, [inView, autoplay, play]);
+    if (runs > 0) glass.current?.replay();
+  }, [runs]);
+  // Waiting for a click: rest on the finished logo rather than an empty stage.
+  useEffect(() => {
+    if (!autoplay) glass.current?.seek(FINISH[endingProp]);
+  }, [autoplay, endingProp]);
   useEffect(() => () => void (dropped && URL.revokeObjectURL(dropped)), [dropped]);
 
-  // the GL context lives as long as the canvas; theme, logo and name changes only rebuild textures
-  useEffect(() => {
-    const cv = canvas.current;
-    return () => void cv?.getContext("webgl2")?.getExtension("WEBGL_lose_context")?.loseContext();
-  }, []);
-
-  useEffect(() => {
-    const cv = canvas.current;
-    if (!cv) return;
-    const gl = cv.getContext("webgl2", { premultipliedAlpha: true, alpha: true, antialias: false });
-    if (!gl || gl.isContextLost()) {
-      setFailed(true);
-      return;
-    }
-    setFailed(false);
-    const shaders: WebGLShader[] = [];
-    const mk = (type: number, code: string) => {
-      const s = gl.createShader(type)!;
-      gl.shaderSource(s, code);
-      gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.warn(gl.getShaderInfoLog(s));
-      shaders.push(s);
-      return s;
-    };
-    const prog = gl.createProgram()!;
-    gl.attachShader(prog, mk(gl.VERTEX_SHADER, VS));
-    gl.attachShader(prog, mk(gl.FRAGMENT_SHADER, FS));
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-      console.warn(gl.getProgramInfoLog(prog));
-      setFailed(true);
-      return;
-    }
-    gl.useProgram(prog);
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-    const loc = gl.getAttribLocation(prog, "a");
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    const names = [
-      "u_res", "u_T", "u_half", "u_focus", "u_time", "u_puff", "u_fade", "u_lHalf", "u_kHalf", "u_logo", "u_lock", "u_lblur", "u_kblur",
-      "u_tint", "u_liftC", "u_rim", "u_env", "u_bg", "u_dispK", "u_glowC", "u_light", "u_glow", ...FRAME_KEYS.map((k) => `u_${k}`),
-    ];
-    const u = Object.fromEntries(names.map((n) => [n, gl.getUniformLocation(prog, n)]));
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-
-    const TH = THEMES[theme];
-    gl.uniform3fv(u.u_tint, TH.tint);
-    gl.uniform3fv(u.u_liftC, TH.lift);
-    gl.uniform3fv(u.u_rim, TH.rim);
-    gl.uniform3fv(u.u_env, TH.env);
-    gl.uniform3fv(u.u_bg, TH.bgC);
-    gl.uniform1f(u.u_dispK, TH.dark ? 1 : 0.5);
-    gl.uniform3fv(u.u_glowC, TH.glowC);
-    gl.uniform1f(u.u_glow, TH.glow);
-
-    // ── textures: the logo alone, the logo with the name, and soft copies for the domed finish ──
-    const textures: WebGLTexture[] = [];
-    const put = (unit: number, image: TexImageSource) => {
-      const t = gl.createTexture()!;
-      textures.push(t);
-      gl.activeTexture(gl.TEXTURE0 + unit);
-      gl.bindTexture(gl.TEXTURE_2D, t);
-      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-      gl.generateMipmap(gl.TEXTURE_2D);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    };
-    // a soft copy of the alpha, used as a height field for the domed finish
-    const softOf = (c: HTMLCanvasElement, radius: number) => {
-      const b = document.createElement("canvas");
-      b.width = Math.round(c.width / 2);
-      b.height = Math.round(c.height / 2);
-      const bx = b.getContext("2d")!;
-      bx.filter = `blur(${radius / 2}px)`;
-      if (bx.filter.startsWith("blur")) {
-        bx.drawImage(c, 0, 0, b.width, b.height);
-      } else {
-        // no canvas filters: blur by shrinking and growing back
-        const k = Math.max(2, Math.round(radius / 1.5));
-        const sm = document.createElement("canvas");
-        sm.width = Math.max(4, Math.round(c.width / k));
-        sm.height = Math.max(4, Math.round(c.height / k));
-        sm.getContext("2d")!.drawImage(c, 0, 0, sm.width, sm.height);
-        bx.imageSmoothingQuality = "high";
-        bx.drawImage(sm, 0, 0, b.width, b.height);
-      }
-      const id = bx.getImageData(0, 0, b.width, b.height);
-      for (let i = 0; i < id.data.length; i += 4) {
-        const a = id.data[i + 3];
-        id.data[i] = id.data[i + 1] = id.data[i + 2] = a;
-        id.data[i + 3] = 255;
-      }
-      bx.putImageData(id, 0, 0);
-      return b;
-    };
-    const castInk = (c: HTMLCanvasElement) => {
-      if (!tint) return;
-      const x = c.getContext("2d")!;
-      x.globalCompositeOperation = "source-in";
-      x.fillStyle = TH.ink;
-      x.fillRect(0, 0, c.width, c.height);
-      x.globalCompositeOperation = "source-over";
-    };
-
-    // the logo texture: a 512 square with the mark in a 410 box, the mark
-    // spanning 1.04 icon units (about half the glass tile)
-    // Both are drawn at twice the size they end up on screen, so the logo the
-    // glass leaves behind is sampled 2:1 and stays crisp; they are redrawn
-    // whenever the stage changes size.
-    const MARK_HALF = 0.68;
-    let TEX = 512;
-    let MARK = 410;
-    let KM = 220;
-    let lHalf = (TEX / MARK) * MARK_HALF;
-    let lockHX = 1.6;
-    let ballFocus = [0, 0];
-    let builtT = 0;
-    const sizeFor = (T: number) => {
-      builtT = T;
-      MARK = Math.max(128, Math.min(1024, Math.round(MARK_HALF * 2 * T * 2)));
-      TEX = Math.round((MARK * 512) / 410);
-      lHalf = (TEX / MARK) * MARK_HALF;
-      KM = Math.max(80, Math.min(600, Math.round(MARK_HALF * 2 * LOGO_IN_LOCKUP * T * 2)));
-    };
-    let drawLogo: (c: CanvasRenderingContext2D, x: number, y: number, size: number) => void = (c, x, y, sz) => drawNexusMark(c, x, y, sz, TH.mark);
-    const buildLogo = () => {
-      const lc = document.createElement("canvas");
-      lc.width = lc.height = TEX;
-      drawLogo(lc.getContext("2d")!, (TEX - MARK) / 2, (TEX - MARK) / 2, MARK);
-      castInk(lc);
-      put(0, lc);
-      put(2, softOf(lc, MARK * 0.04));
-      gl.uniform2f(u.u_lHalf, lHalf, lHalf);
-    };
-    const buildLockup = () => {
-      const fontPx = Math.round(KM * 1.3);
-      const font = `600 ${fontPx}px ${FONT_FAMILY}`;
-      const meas = document.createElement("canvas").getContext("2d")!;
-      meas.font = font;
-      (meas as unknown as { letterSpacing: string }).letterSpacing = `${-0.02 * fontPx}px`;
-      const tw = Math.ceil(meas.measureText(name).width);
-      const gap = Math.round(KM * 0.42);
-      const pad = Math.round(KM * 0.3);
-      const kc = document.createElement("canvas");
-      kc.width = pad * 2 + KM + gap + tw;
-      kc.height = pad * 2 + KM;
-      const k = kc.getContext("2d")!;
-      drawLogo(k, pad, pad, KM);
-      castInk(kc);
-      k.font = font;
-      (k as unknown as { letterSpacing: string }).letterSpacing = `${-0.02 * fontPx}px`;
-      k.fillStyle = TH.ink;
-      k.textBaseline = "alphabetic";
-      // centre the capitals on the logo
-      const capH = fontPx * 0.727;
-      k.fillText(name, pad + KM + gap, kc.height / 2 + capH / 2);
-      put(1, kc);
-      put(3, softOf(kc, KM * 0.04));
-      const unit = (MARK_HALF * LOGO_IN_LOCKUP * 2) / KM; // icon units per lockup pixel
-      gl.uniform2f(u.u_kHalf, (kc.width / 2) * unit, (kc.height / 2) * unit);
-      lockHX = ((kc.width - pad * 2) / 2) * unit;
-      // the drop centres its zoom on the round letter nearest the middle of the
-      // name, so it magnifies a bowl into a dark disc instead of whatever falls there
-      const bowls = "oOeadbpqgQDB0689", rounds = "cCsSuUGRP";
-      const mid = tw / 2;
-      let pick = -1;
-      let best = Infinity;
-      for (let i = 0; i < name.length; i++) {
-        const ch = name[i];
-        const score = bowls.includes(ch) ? 0 : rounds.includes(ch) ? 1 : -1;
-        if (score < 0) continue;
-        const x0 = meas.measureText(name.slice(0, i)).width;
-        const cx = x0 + meas.measureText(ch).width / 2;
-        const d = Math.abs(cx - mid) + score * tw * 0.25;
-        if (d < best) {
-          best = d;
-          pick = i;
-        }
-      }
-      if (pick >= 0) {
-        const ch = name[pick];
-        const cx = pad + KM + gap + meas.measureText(name.slice(0, pick)).width + meas.measureText(ch).width / 2;
-        const lower = ch === ch.toLowerCase() && !/[0-9]/.test(ch);
-        const baseY = kc.height / 2 + capH / 2;
-        const cy = baseY - (lower ? fontPx * 0.27 : capH / 2);
-        ballFocus = [(cx - kc.width / 2) * unit, (kc.height / 2 - cy) * unit];
-      } else ballFocus = [0, 0];
-    };
-    const buildAll = () => {
-      buildLogo();
-      buildLockup();
-      gl.uniform1i(u.u_logo, 0);
-      gl.uniform1i(u.u_lock, 1);
-      gl.uniform1i(u.u_lblur, 2);
-      gl.uniform1i(u.u_kblur, 3);
-    };
-    sizeFor(Math.min((cv.clientWidth || 800) * 0.11, (cv.clientHeight || 460) * 0.18) * Math.min(2, window.devicePixelRatio || 1));
-    buildAll();
-    let alive = true;
-    document.fonts?.load?.(`600 32px ${FONT_FAMILY}`).then(() => alive && buildLockup(), () => {});
-    if (src) {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        if (!alive) return;
-        drawLogo = (c, x, y, s) => {
-          const w = img.naturalWidth || 512;
-          const h = img.naturalHeight || 512;
-          const r = Math.min(s / w, s / h);
-          c.drawImage(img, x + (s - w * r) / 2, y + (s - h * r) / 2, w * r, h * r);
-        };
-        buildAll();
-        st.current.start = performance.now();
-      };
-      img.src = src;
-    }
-
-    const lost = (e: Event) => {
-      e.preventDefault();
-      setFailed(true);
-    };
-    cv.addEventListener("webglcontextlost", lost);
-    const resize = () => {
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
-      const w = Math.max(2, Math.round(cv.clientWidth * dpr));
-      const h = Math.max(2, Math.round(cv.clientHeight * dpr));
-      if (cv.width !== w || cv.height !== h) {
-        cv.width = w;
-        cv.height = h;
-      }
-    };
-    const ro = new ResizeObserver(resize);
-    ro.observe(cv);
-    resize();
-
-    let raf = 0;
-    const tick = (now: number) => {
-      raf = requestAnimationFrame(tick);
-      const S = st.current;
-      const W = cv.width;
-      const Hh = cv.height;
-      gl.viewport(0, 0, W, Hh);
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      if (S.start < 0) return;
-      let t = (now - S.start) / 1000;
-      let fade = 1;
-      if (S.reduce) t = 99;
-      else if (S.loop) {
-        const hold = LENGTH[S.ending] + 3.2;
-        fade = 1 - smooth(hold, hold + 0.4, t);
-        if (t > hold + 0.55) {
-          S.start = now;
-          t = 0;
-          fade = 1;
-        }
-      }
-      const f = frame(t, S.ending, lockHX, ballFocus);
-      S.light[0] += (S.want[0] - S.light[0]) * 0.08;
-      S.light[1] += (S.want[1] - S.light[1]) * 0.08;
-      // the glass tile is a third of the stage's height
-      const T = Math.min(W * 0.11, Hh * 0.18);
-      if (Math.abs(T - builtT) > 1) {
-        sizeFor(T);
-        buildAll();
-      }
-      gl.uniform2f(u.u_res, W, Hh);
-      gl.uniform1f(u.u_T, T);
-      gl.uniform2f(u.u_half, f.hx, f.hy);
-      for (const k of FRAME_KEYS) gl.uniform1f(u[`u_${k}`], f[k]);
-      gl.uniform1f(u.u_time, t);
-      gl.uniform2f(u.u_focus, f.fx, f.fy);
-      gl.uniform1f(u.u_puff, TH.puff);
-      gl.uniform1f(u.u_fade, fade);
-      gl.uniform2f(u.u_light, S.light[0], S.light[1]);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => {
-      alive = false;
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-      cv.removeEventListener("webglcontextlost", lost);
-      textures.forEach((t) => gl.deleteTexture(t));
-      gl.deleteBuffer(buf);
-      gl.deleteProgram(prog);
-      shaders.forEach((s) => gl.deleteShader(s));
-    };
-  }, [src, theme, name, tint]);
-
+  const replay = () => setRuns((n) => n + 1);
   const takeFile = (file?: File | null) => {
     if (!file || !/^image\/(svg\+xml|png|jpeg|webp)$/.test(file.type)) return;
     setDropped(URL.createObjectURL(file));
+    replay();
   };
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragOver(false);
     takeFile(e.dataTransfer.files?.[0]);
   };
-  const onMove = (e: RPointerEvent<HTMLDivElement>) => {
-    const b = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - b.left) / b.width) * 2 - 1;
-    const y = 1 - ((e.clientY - b.top) / b.height) * 2;
-    st.current.want = [-0.55 + x * 0.9, 0.8 + y * 0.6];
-  };
 
-  const TH = THEMES[theme];
-  const lightUI = !TH.dark;
+  // Only keys that are set go in: an explicit undefined would overwrite the theme's colour.
+  const settings: Partial<LiquidGlassLogoTuning> = {
+    ...look.colors,
+    ...tuning,
+    logo: ownLogo ?? nexusMark(ink),
+    mark: "logo",
+    text: name,
+    ending: ending === "logo" ? "logo" : "wordmark",
+    theme: look.base,
+    depth,
+    loop,
+    paused: !started,
+    ...(inked ? {} : { logoColor: "original" }),
+  };
+  const backdrop: CSSProperties = look.backdrop ? { background: look.backdrop } : {};
+
+  const lightUI = !look.dark;
   const pill = lightUI ? "bg-black/[.05] shadow-[inset_0_0_0_1px_rgba(0,0,0,.08)]" : "bg-white/[.07] shadow-[inset_0_0_0_1px_rgba(255,255,255,.1)]";
   const on = lightUI ? "bg-white text-[#1d1d1f] shadow-[0_1px_3px_rgba(0,0,0,.12)]" : "bg-white/[.16] text-white";
   const off = lightUI ? "bg-transparent text-[#1d1d1f]/60 hover:text-[#1d1d1f]" : "bg-transparent text-white/60 hover:text-white";
@@ -869,45 +191,23 @@ export function GlassDrop({
   return (
     <div className={`flex w-full max-w-[1000px] flex-col gap-3 ${className}`}>
       <div
-        ref={stage}
-        onPointerMove={onMove}
-        onPointerLeave={() => (st.current.want = [-0.55, 0.8])}
-        onClick={play}
+        onClick={replay}
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={onDrop}
-        className="relative w-full cursor-pointer overflow-hidden rounded-[24px] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] transition-[background] duration-500"
-        style={{ height, background: TH.bg }}
-        role="img"
-        aria-label={`The ${name} logo forming out of liquid glass. Click to replay.`}
+        className="relative w-full cursor-pointer overflow-hidden rounded-[24px] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)]"
+        style={{ height }}
       >
-        <canvas ref={canvas} className="absolute inset-0 h-full w-full" aria-hidden="true" />
-        {failed && (
-          <div className="absolute inset-0 flex items-center justify-center" aria-hidden="true">
-            {src ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={src} alt="" className="max-h-[96px] max-w-[96px]" />
-            ) : (
-              <svg width="96" height="96" viewBox="0 0 100 100">
-                {[
-                  [50, 12],
-                  [14, 74],
-                  [86, 74],
-                ].map(([x, y]) => (
-                  <g key={`${x}${y}`}>
-                    <line x1="50" y1="53" x2={x} y2={y} stroke={TH.mark.body} strokeWidth="6.5" strokeLinecap="round" />
-                    <circle cx={x} cy={y} r="7" fill={TH.mark.body} />
-                  </g>
-                ))}
-                <circle cx="50" cy="53" r="11.5" fill={TH.mark.core} />
-                <circle cx="46.4" cy="49.4" r="3.3" fill={TH.mark.glint} />
-              </svg>
-            )}
-          </div>
-        )}
+        <LiquidGlassLogo
+          ref={glass}
+          {...settings}
+          height="100%"
+          style={{ minHeight: 0, ...backdrop }}
+          aria-label={`The ${name} logo forming out of liquid glass. Click to replay.`}
+        />
         {dragOver && (
           <div className={`pointer-events-none absolute inset-3 flex items-center justify-center rounded-[18px] border-2 border-dashed text-[14px] font-medium ${lightUI ? "border-black/25 text-[#1d1d1f]" : "border-white/35 text-white"}`}>
             Drop an SVG or PNG to use it as the logo
@@ -929,8 +229,7 @@ export function GlassDrop({
                   aria-checked={ending === k}
                   onClick={() => {
                     setEnding(k);
-                    st.current.ending = k;
-                    play();
+                    replay();
                   }}
                   className={`h-7 rounded-full border-0 px-3 outline-none transition-colors [font-family:inherit] focus-visible:ring-2 focus-visible:ring-[#8f8cff] ${ending === k ? on : off}`}
                 >
@@ -948,7 +247,7 @@ export function GlassDrop({
                     aria-checked={theme === k}
                     onClick={() => {
                       setTheme(k);
-                      play();
+                      replay();
                     }}
                     className={`h-7 rounded-full border-0 px-3 outline-none transition-colors [font-family:inherit] focus-visible:ring-2 focus-visible:ring-[#8f8cff] ${theme === k ? on : off}`}
                   >
@@ -967,7 +266,7 @@ export function GlassDrop({
               <motion.button
                 type="button"
                 whileTap={{ scale: 0.92 }}
-                onClick={play}
+                onClick={replay}
                 className={`h-9 rounded-full border-0 px-4 text-[12.5px] font-medium outline-none [font-family:inherit] focus-visible:ring-2 focus-visible:ring-[#8f8cff] ${lightUI ? "bg-[#1d1d1f] text-white" : "bg-white text-black"}`}
               >
                 Replay
@@ -976,7 +275,7 @@ export function GlassDrop({
           </div>
         )}
       </div>
-      <p className="m-0 px-1 text-[12.5px] text-[#86868b]">Plays when it comes into view. Click to replay, drop in any SVG or PNG, move over it to move the light.</p>
+      <p className="m-0 px-1 text-[12.5px] text-[#86868b]">Plays when it comes into view. Click to replay, or drop in any SVG or PNG.</p>
     </div>
   );
 }
@@ -993,4 +292,2048 @@ import { GlassDrop } from "./glass-drop";
 export { GlassDrop };
 export type GlassDropProps = ComponentProps<typeof GlassDrop>;
 export type { GlassDropEnding, GlassDropTheme } from "./glass-drop";
+export type { LiquidGlassLogoTuning } from "./liquid-glass-logo-renderer";
+```
+
+--- components/glass-drop/liquid-glass-logo-renderer.ts ---
+
+```ts
+/*!
+ReactDrops Component License 1.0
+
+Copyright (c) 2026 ReactDrops
+
+1. Scope and definitions
+
+This license applies to ReactDrops software and associated documentation that
+expressly carry this license or are distributed under a LICENSE file containing
+it (the "Software"). "Licensor" means the copyright holder granting rights in
+the Software, and only to the extent that holder has authority to grant them.
+"You" means the individual or entity exercising these rights.
+
+An "End Product" is a website, application, service, or other finished project
+whose primary purpose is something other than providing reusable components,
+source code, templates, or development assets to others.
+
+2. Permitted uses
+
+Subject to this license, Licensor grants You a worldwide, non-exclusive,
+royalty-free license to use, copy, modify, and incorporate the Software into
+unlimited personal, internal, and commercial End Products. You may charge for
+End Products, subscriptions, development services, and work for clients.
+
+You may distribute the Software as an integrated part of an End Product,
+including in browser-delivered JavaScript. You may provide End Product source
+code to a client, and share the Software with employees and contractors who
+need it to develop or maintain End Products. Those recipients may use the
+Software for those purposes subject to this license. This permission does not
+authorize them to redistribute the Software as a reusable development asset.
+
+3. Restricted redistribution
+
+Unless You obtain separate written permission from Licensor, You may not sell,
+sublicense, publish, share, or otherwise redistribute the Software, or a
+substantial portion of it, whether unchanged or modified:
+
+(a) as a standalone component, component library, UI kit, source-code bundle,
+    registry, or other collection of reusable development assets;
+(b) as part of a theme, template, starter project, or similar product offered
+    to multiple recipients for reuse in their own projects; or
+(c) through a builder or generation service that offers the Software as
+    reusable blocks or source-code exports for others' projects.
+
+These restrictions apply to paid and free redistribution. Renaming, restyling,
+repackaging, translating, or modifying the Software does not remove them.
+Building separate finished websites or applications for multiple clients is
+permitted; offering a reusable template or kit containing the Software is not.
+
+Public source-code hosting by Licensor is not permission to republish the
+Software under another license. This license does not override any separate
+rights granted directly by Licensor or applicable code-hosting terms.
+
+4. Notices and ownership
+
+Retain this license and applicable copyright and third-party notices in source
+copies of the Software and permitted source distributions. No visible credit
+or ReactDrops logo is required in an End Product's user interface.
+
+Licensor retains ownership of its Software. You retain rights in Your own
+contributions, subject to the license for any incorporated Software. No rights
+to trademarks, trade names, or logos are granted by this license.
+
+5. Third-party materials and separate grants
+
+Dependencies, fonts, images, videos, and other third-party materials remain
+subject to their respective licenses. Separately identified third-party code
+is licensed under its stated terms, and these restrictions do not limit rights
+granted by its copyright holders. Retain all required third-party notices.
+Demo media are not licensed by this document; obtain Your own permission or
+replace them with media You are entitled to use.
+
+This license does not revoke rights granted under other valid licenses. It does
+not assert ownership of third-party work or grant rights Licensor lacks.
+
+6. Termination
+
+The permissions granted here continue unless terminated for a material breach.
+If You fail to cure a material breach within 30 days after receiving written
+notice from Licensor, Your permissions terminate. On termination, cease uses
+and distributions requiring this license. Rights under independently granted
+licenses and rights that applicable law does not allow to be restricted remain
+unaffected. Sections 3 through 7 survive termination.
+
+7. Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. TO THE MAXIMUM EXTENT
+PERMITTED BY APPLICABLE LAW, LICENSOR AND CONTRIBUTORS SHALL NOT BE LIABLE FOR
+ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT, OR OTHERWISE,
+ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
+
+This license does not limit rights or exceptions that applicable law makes
+non-waivable. No other permissions are granted by implication.
+*/
+
+import {
+  liquidGlassLogoComposite,
+  liquidGlassLogoRender,
+  liquidGlassLogoVertex,
+} from './liquid-glass-logo-shaders';
+
+export type LiquidGlassLogoTuning = {
+  /** Image URL (SVG, PNG, data URL…) for the logo. */
+  logo: string;
+  /** Image placed before the wordmark: "logo" reuses the logo, an empty string hides it. */
+  mark: string;
+  text: string;
+  /** Reveal the full wordmark, or finish on the original logo alone. */
+  ending: 'logo' | 'wordmark';
+  /** Lens edge in CSS pixels before fitting. */
+  logoSize: number;
+  /** Logo width or height as a fraction of the plate edge. */
+  logoScale: number;
+  /** Resting logo scale; 1 holds its normal size while the glass disappears. */
+  finalLogoScale: number;
+  /** Draw the logo on an icon plate. */
+  tile: boolean;
+  fontSize: number;
+  fontFamily: string;
+  fontWeight: number;
+  /** Canvas font stretch keyword, such as "normal" or "expanded". */
+  fontStretch: string;
+  /** Letter spacing in em. */
+  letterSpacing: number;
+  /** Gap between the mark and the text in em. */
+  markGap: number;
+  /** Color scheme for the logo, plate and background when they are not set. */
+  theme: 'dark' | 'light';
+  /** Recolor the logo silhouette; "original" keeps the image colors. */
+  logoColor: string;
+  /** Rounded shading on a recolored logo or wordmark: 0 is flat, 1 is full relief. */
+  logoRelief: number;
+  textColor: string;
+  tileColor: string;
+  background: string;
+  /** Optical depth as a multiple of the lens edge; deeper glass bends more. */
+  depth: number;
+  /** Spread between the wavelengths' indices of refraction. */
+  dispersion: number;
+  /** Intensity of the inset glass back face and its second refracted image. */
+  relief: number;
+  /** Brightness of light focused onto the artwork by the lens. */
+  caustics: number;
+  /** Strength of reflections caught by the glass reliefs. */
+  highlights: number;
+  /** Diffused light around bright glass and image edges. */
+  bloom: number;
+  /** Initial wordmark lens radius as a fraction of the plate edge. */
+  dropSize: number;
+  /** Strength of the lens curvature. */
+  dropStrength: number;
+  /** How much the faint line just outside the rim takes the plate color (0–1). */
+  echoTint: number;
+  /** 0 draws the full inner wall; 1 keeps it to the upper-left and lower-right corners. */
+  innerWallFocus: number;
+  /** Seconds for the secondary glass rings to fade. */
+  decay: number;
+  speed: number;
+  loop: boolean;
+  /** Seconds the finished wordmark holds before a loop restarts. */
+  loopDelay: number;
+  paused: boolean;
+  maxDpr: number;
+};
+
+const noteLogo = `data:image/svg+xml;utf8,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 104"><path fill="#fff" d="M35 24c0-2.6 1.7-4.8 4.2-5.5L79.6 7.6C82.6 6.8 85 9 85 12.1V64c0 8.9-7.3 17-16.5 19.2C59.3 85.4 52 81 52 73.2c0-9 7.5-16.9 16.7-19.1 3.3-.8 6.3-.9 8.3-.2V28.8L43 38.1V77c0 8.9-7.3 17-16.5 19.2C17.3 98.4 10 94 10 86.2c0-9 7.5-16.9 16.7-19.1 3.3-.8 6.3-.9 8.3-.2V24Z"/></svg>',
+)}`;
+
+const referenceMark = `data:image/svg+xml;utf8,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fff"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>',
+)}`;
+
+export const liquidGlassLogoDefaults: LiquidGlassLogoTuning = {
+  logo: noteLogo,
+  mark: referenceMark,
+  text: 'music',
+  ending: 'logo',
+  logoSize: 256,
+  logoScale: 0.72,
+  finalLogoScale: 1,
+  tile: true,
+  fontSize: 64,
+  fontFamily: 'system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif',
+  fontWeight: 850,
+  fontStretch: 'expanded',
+  letterSpacing: -0.01,
+  markGap: 0.12,
+  theme: 'dark',
+  logoColor: '#ffffff',
+  logoRelief: 1,
+  textColor: '#e2e6ee',
+  tileColor: '#060c18',
+  background: '#000000',
+  depth: 1.2,
+  dispersion: 1,
+  relief: 1,
+  caustics: 1,
+  highlights: 1,
+  bloom: 0.55,
+  dropSize: 0.32,
+  dropStrength: 1,
+  echoTint: 0.5,
+  innerWallFocus: 0,
+  decay: 1.4,
+  speed: 1,
+  loop: false,
+  loopDelay: 1.6,
+  paused: false,
+  maxDpr: 2,
+};
+
+export const liquidGlassLogoNoteLogo = noteLogo;
+export const liquidGlassLogoReferenceMark = referenceMark;
+
+/** Length of the scripted sequence at speed 1, in seconds. */
+export const liquidGlassLogoDuration = 3.3;
+const logoFinishTime = 1.8;
+
+type Keys = readonly (readonly [number, number])[];
+
+/** Smooth curve through [time, value] keys (Catmull-Rom with uneven spacing). */
+function track(keys: Keys, t: number) {
+  if (t <= keys[0][0]) return keys[0][1];
+  const last = keys[keys.length - 1];
+  if (t >= last[0]) return last[1];
+  let i = 0;
+  while (t > keys[i + 1][0]) i++;
+  const [t1, v1] = keys[i];
+  const [t2, v2] = keys[i + 1];
+  const [t0, v0] = keys[i - 1] ?? [t1 - (t2 - t1), v1];
+  const [t3, v3] = keys[i + 2] ?? [t2 + (t2 - t1), v2];
+  const span = t2 - t1;
+  const m1 = ((v2 - v0) / (t2 - t0)) * span;
+  const m2 = ((v3 - v1) / (t3 - t1)) * span;
+  const x = (t - t1) / span;
+  const x2 = x * x;
+  const x3 = x2 * x;
+  return (
+    (2 * x3 - 3 * x2 + 1) * v1 + (x3 - 2 * x2 + x) * m1 + (-2 * x3 + 3 * x2) * v2 + (x3 - x2) * m2
+  );
+}
+
+// Size of the artwork under the glass relative to its resting size, measured from the
+// reference: magnified by the young drop, slowly receding as the glass settles, then
+// drawn into the second drop. Independent of the artwork itself.
+const artworkScale: Keys = [
+  [0.12, 1.4],
+  [0.33, 1.45],
+  [0.46, 1.44],
+  [0.63, 1.33],
+  [0.79, 1.24],
+  [0.96, 1.2],
+  [1.13, 1.11],
+  [1.25, 1.0],
+  [1.335, 0.865],
+  [1.376, 0.81],
+  [1.418, 0.735],
+  [1.46, 0.41],
+];
+
+// The second drop, in wordmark half-widths (W) from the reference: its radius, the
+// radius of its magnifying core, how slowly its rim stretches the image (1 = not at
+// all), the core's center factor (negative inverts) and its edge magnification.
+const dropRadius: Keys = [
+  [1.46, 0.32],
+  [1.55, 0.36],
+  [1.67, 0.49],
+  [1.75, 0.52],
+  [1.84, 0.56],
+  [1.92, 0.68],
+  [2.0, 0.88],
+  [2.15, 0.95],
+  [2.4, 1.06],
+  [2.95, 1.3],
+];
+const dropCore: Keys = [
+  [1.46, 1.5],
+  [1.84, 1.5],
+  [1.92, 0.55],
+  [2.0, 0.6],
+  [2.09, 0.68],
+  [2.17, 0.78],
+  [2.3, 0.85],
+  [2.5, 0.9],
+  [2.75, 0.93],
+  [2.95, 0.97],
+  [3.02, 1.03],
+];
+const dropStretch: Keys = [
+  [1.46, 0.3],
+  [1.84, 0.3],
+  [2.0, 0.25],
+  [2.1, 0.2],
+  [2.2, 0.2],
+  [2.4, 0.25],
+  [2.7, 0.3],
+  [2.85, 0.45],
+  [2.95, 0.8],
+  [3.02, 1],
+];
+const dropCenter: Keys = [
+  [1.46, -0.6],
+  [1.6, -0.5],
+  [1.75, -0.3],
+  [1.8, 0.4],
+  [1.84, 1],
+];
+const dropMagnify: Keys = [
+  [1.46, 1.5],
+  [1.6, 1.5],
+  [1.75, 2.2],
+  [1.84, 1.4],
+  [1.92, 1.2],
+  [2.0, 1.05],
+  [2.1, 1],
+];
+const smooth = (from: number, to: number, value: number) => {
+  const x = Math.min(1, Math.max(0, (value - from) / (to - from)));
+  return x * x * (3 - 2 * x);
+};
+
+// Colors measured from the light and dark versions of the reference clip: a pale
+// gray page under a slightly cooler frosted plate with near-black ink, and the
+// original white ink on a deep blue-black plate.
+export const liquidGlassLogoThemes = {
+  dark: { logoColor: '#ffffff', textColor: '#e2e6ee', tileColor: '#060c18', background: '#000000' },
+  light: {
+    logoColor: '#09111b',
+    textColor: '#09111b',
+    tileColor: '#e4e6ea',
+    background: '#e2e2e5',
+  },
+} as const satisfies Record<LiquidGlassLogoTuning['theme'], Partial<LiquidGlassLogoTuning>>;
+
+export function normalizeLiquidGlassLogo(value: LiquidGlassLogoTuning): LiquidGlassLogoTuning {
+  const finite = (input: number, fallback: number, min: number, max: number) =>
+    Number.isFinite(input) ? Math.min(max, Math.max(min, input)) : fallback;
+  const d = liquidGlassLogoDefaults;
+  return {
+    ...value,
+    ending: value.ending === 'wordmark' ? 'wordmark' : 'logo',
+    theme: value.theme === 'light' ? 'light' : 'dark',
+    logoSize: finite(value.logoSize, d.logoSize, 24, 1024),
+    logoScale: finite(value.logoScale, d.logoScale, 0.1, 1),
+    finalLogoScale: finite(value.finalLogoScale, d.finalLogoScale, 0.1, 1),
+    fontSize: finite(value.fontSize, d.fontSize, 8, 400),
+    fontWeight: finite(value.fontWeight, d.fontWeight, 100, 1000),
+    letterSpacing: finite(value.letterSpacing, d.letterSpacing, -0.3, 1),
+    markGap: finite(value.markGap, d.markGap, 0, 2),
+    depth: finite(value.depth, d.depth, 0, 6),
+    dispersion: finite(value.dispersion, d.dispersion, 0, 4),
+    relief: finite(value.relief, d.relief, 0, 3),
+    caustics: finite(value.caustics, d.caustics, 0, 4),
+    highlights: finite(value.highlights, d.highlights, 0, 4),
+    bloom: finite(value.bloom, d.bloom, 0, 2),
+    dropSize: finite(value.dropSize, d.dropSize, 0.05, 1.5),
+    dropStrength: finite(value.dropStrength, d.dropStrength, 0, 4),
+    echoTint: finite(value.echoTint, d.echoTint, 0, 1),
+    logoRelief: finite(value.logoRelief, d.logoRelief, 0, 1),
+    innerWallFocus: finite(value.innerWallFocus, d.innerWallFocus, 0, 1),
+    decay: finite(value.decay, d.decay, 0.1, 10),
+    speed: finite(value.speed, d.speed, 0.1, 4),
+    loopDelay: finite(value.loopDelay, d.loopDelay, 0, 30),
+    maxDpr: finite(value.maxDpr, d.maxDpr, 0.5, 4),
+  };
+}
+
+type Raster = { canvas: HTMLCanvasElement; box: [number, number] };
+
+function loadImage(src: string) {
+  return new Promise<HTMLImageElement | null>((resolve) => {
+    if (!src) return resolve(null);
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.decoding = 'async';
+    image.onload = () => resolve(image);
+    image.onerror = () => resolve(null);
+    image.src = src;
+  });
+}
+
+const nextPowerOfTwo = (value: number) => 2 ** Math.ceil(Math.log2(Math.max(2, value)));
+
+function drawTinted(
+  context: CanvasRenderingContext2D,
+  image: CanvasImageSource,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  color: string,
+) {
+  if (color === 'original') {
+    context.drawImage(image, x, y, width, height);
+    return;
+  }
+  const layer = document.createElement('canvas');
+  layer.width = Math.max(1, Math.ceil(width));
+  layer.height = Math.max(1, Math.ceil(height));
+  const ink = layer.getContext('2d')!;
+  ink.drawImage(image, 0, 0, layer.width, layer.height);
+  ink.globalCompositeOperation = 'source-in';
+  ink.fillStyle = color;
+  ink.fillRect(0, 0, layer.width, layer.height);
+  context.drawImage(layer, x, y, width, height);
+}
+
+function imageSize(image: HTMLImageElement) {
+  const width = image.naturalWidth || image.width || 1;
+  const height = image.naturalHeight || image.height || 1;
+  return { width, height };
+}
+
+// A shallow relief follows the uploaded alpha silhouette, rather than any hard-coded
+// glyph. A distance transform supplies a rounded shoulder for the diffuse studio light.
+function shadeLogo(canvas: HTMLCanvasElement, radius: number, strength: number) {
+  if (strength <= 0) return;
+  const context = canvas.getContext('2d')!;
+  const { width, height } = canvas;
+  const image = context.getImageData(0, 0, width, height);
+  const pixels = image.data;
+  const distance = new Float32Array(width * height);
+  for (let i = 0; i < distance.length; i++) distance[i] = pixels[i * 4 + 3] > 127 ? 1e6 : 0;
+  const diagonal = Math.SQRT2;
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      const i = y * width + x;
+      distance[i] = Math.min(
+        distance[i],
+        distance[i - 1] + 1,
+        distance[i - width] + 1,
+        distance[i - width - 1] + diagonal,
+        distance[i - width + 1] + diagonal,
+      );
+    }
+  }
+  for (let y = height - 2; y > 0; y--) {
+    for (let x = width - 2; x > 0; x--) {
+      const i = y * width + x;
+      distance[i] = Math.min(
+        distance[i],
+        distance[i + 1] + 1,
+        distance[i + width] + 1,
+        distance[i + width - 1] + diagonal,
+        distance[i + width + 1] + diagonal,
+      );
+    }
+  }
+  for (let i = 0; i < distance.length; i++) {
+    const q = Math.max(0, 1 - distance[i] / radius);
+    distance[i] = Math.sqrt(Math.max(0, 1 - q * q)) * radius * 0.4;
+  }
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      const i = y * width + x;
+      if (!pixels[i * 4 + 3]) continue;
+      const nx = (distance[i - 1] - distance[i + 1]) * 0.5;
+      const ny = (distance[i - width] - distance[i + width]) * 0.5;
+      const diffuse = Math.max(0, (-nx * 0.45 - ny * 0.6 + 0.8) / Math.hypot(nx, ny, 1));
+      const shaded = (0.74 + diffuse * 0.26) / (0.74 + 0.8 * 0.26);
+      const light = 1 + (shaded - 1) * strength;
+      for (let c = 0; c < 3; c++) pixels[i * 4 + c] *= light;
+    }
+  }
+  context.putImageData(image, 0, 0);
+}
+
+// The logo fills a square box one plate edge wide.
+function rasterLogo(
+  image: HTMLImageElement | null,
+  tuning: LiquidGlassLogoTuning,
+  dpr: number,
+): Raster {
+  const size = Math.min(2048, nextPowerOfTwo(tuning.logoSize * dpr * 2));
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const context = canvas.getContext('2d')!;
+  if (image) {
+    const { width, height } = imageSize(image);
+    const fit = (size * tuning.logoScale) / Math.max(width, height);
+    const w = width * fit;
+    const h = height * fit;
+    drawTinted(context, image, (size - w) / 2, (size - h) / 2, w, h, tuning.logoColor);
+  }
+  if (image && tuning.logoColor !== 'original') {
+    shadeLogo(canvas, canvas.width * 0.03, tuning.logoRelief);
+  }
+  return { canvas, box: [tuning.logoSize, tuning.logoSize] };
+}
+
+function font(tuning: LiquidGlassLogoTuning) {
+  return `${tuning.fontWeight} ${tuning.fontSize}px ${tuning.fontFamily}`;
+}
+
+// The wordmark box is padded so refracted rays sample transparent texels past its edges.
+function rasterText(mark: HTMLImageElement | null, tuning: LiquidGlassLogoTuning, dpr: number) {
+  const probe = document.createElement('canvas').getContext('2d')!;
+  probe.font = font(tuning);
+  probe.fontStretch = tuning.fontStretch as CanvasFontStretch;
+  const spacing = tuning.letterSpacing * tuning.fontSize;
+  probe.letterSpacing = `${spacing}px`;
+  // Shape the whole string: per-character drawing loses kerning, ligatures and Arabic joining.
+  const textWidth = Math.max(0, probe.measureText(tuning.text).width);
+  const metrics = probe.measureText(tuning.text || 'x');
+  const ascent = metrics.actualBoundingBoxAscent || tuning.fontSize * 0.72;
+  const descent = metrics.actualBoundingBoxDescent || tuning.fontSize * 0.2;
+  const xHeight = probe.measureText('x').actualBoundingBoxAscent || tuning.fontSize * 0.52;
+  let markWidth = 0;
+  let markHeight = 0;
+  if (mark) {
+    const { width, height } = imageSize(mark);
+    markHeight = Math.max(ascent, xHeight * 1.3);
+    markWidth = (width / height) * markHeight;
+  }
+  const gap = mark && tuning.text.length ? tuning.markGap * tuning.fontSize : 0;
+  const contentWidth = markWidth + gap + textWidth;
+  const pad = tuning.fontSize * 0.5;
+  const box: [number, number] = [contentWidth + pad * 2, tuning.fontSize * 2];
+  const scale = Math.min(dpr * 2, 4096 / box[0], 4096 / box[1]);
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.min(4096, nextPowerOfTwo(box[0] * scale));
+  canvas.height = Math.min(4096, nextPowerOfTwo(box[1] * scale));
+  const context = canvas.getContext('2d')!;
+  context.scale(canvas.width / box[0], canvas.height / box[1]);
+  // Center the ink box vertically.
+  const baseline = box[1] / 2 + (ascent - descent) / 2;
+  let x = pad;
+  if (mark) {
+    const color = tuning.logoColor === 'original' ? 'original' : tuning.textColor;
+    drawTinted(context, mark, x, baseline - markHeight, markWidth, markHeight, color);
+    x += markWidth + gap;
+  }
+  context.font = font(tuning);
+  context.fontStretch = tuning.fontStretch as CanvasFontStretch;
+  context.fillStyle = tuning.textColor;
+  context.textBaseline = 'alphabetic';
+  context.letterSpacing = `${spacing}px`;
+  context.textAlign = 'left';
+  context.fillText(tuning.text, x, baseline);
+  if (tuning.logoColor !== 'original') {
+    shadeLogo(canvas, (tuning.fontSize * 0.04 * canvas.height) / box[1], tuning.logoRelief);
+  }
+  return { canvas, box, contentWidth };
+}
+
+function parseColor(value: string): [number, number, number] {
+  const probe = document.createElement('canvas').getContext('2d')!;
+  probe.fillStyle = '#000';
+  probe.fillStyle = value;
+  const hex = String(probe.fillStyle);
+  if (hex.startsWith('#')) {
+    const n = parseInt(hex.slice(1, 7), 16);
+    return [(n >> 16) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+  }
+  const parts = hex.match(/[\d.]+/g)?.map(Number) ?? [0, 0, 0];
+  return [parts[0] / 255, parts[1] / 255, parts[2] / 255];
+}
+
+export type LiquidGlassLogoRenderer = {
+  update: (tuning: LiquidGlassLogoTuning) => void;
+  replay: () => void;
+  seek: (seconds: number) => void;
+  pause: () => void;
+  play: () => void;
+  dispose: () => void;
+};
+
+export function createLiquidGlassLogoRenderer(
+  canvas: HTMLCanvasElement,
+  initial: LiquidGlassLogoTuning,
+  onReady?: () => void,
+): LiquidGlassLogoRenderer | null {
+  const gl = canvas.getContext('webgl2', {
+    premultipliedAlpha: true,
+    alpha: true,
+    antialias: false,
+  });
+  if (!gl) return null;
+  const compile = (type: number, source: string) => {
+    const shader = gl.createShader(type)!;
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      const message = gl.getShaderInfoLog(shader);
+      gl.deleteShader(shader);
+      throw new Error(message ?? 'Liquid Glass Logo shader failed to compile.');
+    }
+    return shader;
+  };
+  const link = (fragment: string) => {
+    const result = gl.createProgram()!;
+    const vertex = compile(gl.VERTEX_SHADER, liquidGlassLogoVertex);
+    const pixel = compile(gl.FRAGMENT_SHADER, fragment);
+    gl.attachShader(result, vertex);
+    gl.attachShader(result, pixel);
+    gl.bindAttribLocation(result, 0, 'aPosition');
+    gl.linkProgram(result);
+    gl.deleteShader(vertex);
+    gl.deleteShader(pixel);
+    if (!gl.getProgramParameter(result, gl.LINK_STATUS)) {
+      const message = gl.getProgramInfoLog(result);
+      gl.deleteProgram(result);
+      throw new Error(message ?? 'Liquid Glass Logo program failed to link.');
+    }
+    return result;
+  };
+  const program = link(liquidGlassLogoRender);
+  const composite = link(liquidGlassLogoComposite);
+  const compositeUniform = Object.fromEntries(
+    [
+      'uScene',
+      'uResolution',
+      'uDpr',
+      'uUnit',
+      'uSettle',
+      'uBloom',
+      'uTime',
+      'uFinish',
+      'uPageLight',
+    ].map((name) => [name, gl.getUniformLocation(composite, name)]),
+  );
+  const locations = new Map<string, WebGLUniformLocation | null>();
+  const uniform = (name: string) => {
+    if (!locations.has(name)) locations.set(name, gl.getUniformLocation(program, name));
+    return locations.get(name)!;
+  };
+  const quad = gl.createVertexArray();
+  gl.bindVertexArray(quad);
+  const buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+  const texture = () => {
+    const value = gl.createTexture()!;
+    gl.bindTexture(gl.TEXTURE_2D, value);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    return value;
+  };
+  const logoTexture = texture();
+  const textTexture = texture();
+  const sceneTexture = texture();
+  const sceneFramebuffer = gl.createFramebuffer()!;
+  gl.bindFramebuffer(gl.FRAMEBUFFER, sceneFramebuffer);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, sceneTexture, 0);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  let sceneWidth = 0;
+  let sceneHeight = 0;
+  const resizeScene = () => {
+    if (sceneWidth === canvas.width && sceneHeight === canvas.height) return;
+    sceneWidth = canvas.width;
+    sceneHeight = canvas.height;
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, sceneTexture);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA8,
+      sceneWidth,
+      sceneHeight,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      null,
+    );
+  };
+  const upload = (value: WebGLTexture, source: HTMLCanvasElement) => {
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, value);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    gl.generateMipmap(gl.TEXTURE_2D);
+  };
+
+  let tuning = initial;
+  let dpr = 1;
+  let width = 1;
+  let height = 1;
+  let textBox: [number, number] = [1, 1];
+  let textWidth = 0;
+  let loaded = false;
+  let disposed = false;
+  let rasterKey = '';
+  let rasterVersion = 0;
+  let logoCache: { key: string; raster: Raster } | null = null;
+  let clock = 0;
+  let last = 0;
+  let playing = !initial.paused;
+  let visible = true;
+  let frame = 0;
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+
+  const fit = () =>
+    Math.min(
+      1,
+      // Reserve room for the side reflections as they travel away from the plate.
+      width / Math.max(tuning.logoSize * 1.9, tuning.ending === 'wordmark' ? textWidth * 1.22 : 0),
+      height / (tuning.logoSize * 1.5),
+    );
+  const draw = () => {
+    if (!loaded || disposed) return;
+    const scale = fit();
+    resizeScene();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, sceneFramebuffer);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.useProgram(program);
+    gl.bindVertexArray(quad);
+    [logoTexture, textTexture].forEach((value, index) => {
+      gl.activeTexture(gl.TEXTURE0 + index);
+      gl.bindTexture(gl.TEXTURE_2D, value);
+    });
+    gl.uniform1i(uniform('uLogo'), 0);
+    gl.uniform1i(uniform('uText'), 1);
+    gl.uniform2f(uniform('uResolution'), canvas.width, canvas.height);
+    gl.uniform1f(uniform('uDpr'), canvas.width / width);
+    gl.uniform1f(uniform('uUnit'), tuning.logoSize * scale);
+    // The logo always occupies one plate edge. Its bounds must follow the
+    // current size immediately, even while a sharper texture loads asynchronously.
+    gl.uniform2f(uniform('uLogoBox'), tuning.logoSize * scale, tuning.logoSize * scale);
+    gl.uniform2f(uniform('uTextBox'), textBox[0] * scale, textBox[1] * scale);
+    gl.uniform1f(uniform('uTextWidth'), textWidth * scale);
+    const finishTime = tuning.ending === 'logo' ? logoFinishTime : liquidGlassLogoDuration;
+    const sequenceTime = reduced?.matches ? finishTime : clock;
+    const displayTime =
+      tuning.ending === 'logo' ? Math.min(logoFinishTime, sequenceTime) : sequenceTime;
+    gl.uniform1f(uniform('uTime'), displayTime);
+    gl.uniform1f(uniform('uWordmarkEnabled'), tuning.ending === 'wordmark' ? 1 : 0);
+    const settle =
+      tuning.ending === 'logo' ? Math.max(0, Math.min(1, (sequenceTime - 1.16) / (1.4 - 1.16))) : 0;
+    // The wordmark drop scales with the measured wordmark so any text gets the same optics.
+    const unitPx = tuning.logoSize * scale;
+    const reach = Math.max((textWidth * scale) / 2, unitPx * 0.3);
+    const t = displayTime;
+    const settleWaves = 1 - smooth(2.85, 3.02, t);
+    gl.uniform4f(
+      uniform('uDrop'),
+      reach * track(dropRadius, t),
+      reach * track(dropCore, t),
+      Math.max(0.02, Math.min(1, track(dropStretch, t))),
+      1 + (track(dropCenter, t) - 1) * tuning.dropStrength,
+    );
+    gl.uniform4f(
+      uniform('uDropLens'),
+      1 + (track(dropMagnify, t) - 1) * tuning.dropStrength,
+      2 + 4 * smooth(1.74, 1.84, t),
+      unitPx *
+        (0.009 * Math.exp(-Math.max(t - 1.46, 0) / 0.5) * (1 - smooth(1.85, 1.95, t)) +
+          0.012 * smooth(2.2, 2.4, t)) *
+        settleWaves,
+      unitPx * (0.07 + (0.03 - 0.07) * smooth(1.9, 2.4, t)),
+    );
+    gl.uniform4f(
+      uniform('uDropWave'),
+      (t - 1.45) * 42,
+      1 - smooth(1.85, 2.0, t),
+      2 * (0.12 + 1.6 * smooth(1.86, 2.0, t) - 0.9 * smooth(2.25, 2.5, t)) * settleWaves,
+      0,
+    );
+    const artworkSettle = smooth(1.13, 1.28, sequenceTime);
+    const artScale =
+      tuning.ending === 'logo' && sequenceTime > 1.13
+        ? track(artworkScale, 1.13) * (1 - artworkSettle) + tuning.finalLogoScale * artworkSettle
+        : track(artworkScale, displayTime);
+    gl.uniform1f(uniform('uArtScale'), artScale);
+    // The logo reaches its resting size first, then holds while the glass clears.
+    gl.uniform1f(uniform('uSettle'), settle);
+    gl.uniform3fv(uniform('uTile'), parseColor(tuning.tileColor));
+    const [pageR, pageG, pageB] = parseColor(tuning.background);
+    const pageLuma = 0.299 * pageR + 0.587 * pageG + 0.114 * pageB;
+    const pageLight = Math.min(1, Math.max(0, (pageLuma - 0.35) / 0.4));
+    gl.uniform1f(uniform('uPageLight'), pageLight);
+    gl.uniform1f(uniform('uTileEnabled'), tuning.tile ? 1 : 0);
+    gl.uniform1f(uniform('uDepth'), tuning.depth);
+    gl.uniform1f(uniform('uDispersion'), tuning.dispersion);
+    gl.uniform1f(uniform('uRelief'), tuning.relief);
+    gl.uniform1f(uniform('uCaustics'), tuning.caustics);
+    gl.uniform1f(uniform('uHighlights'), tuning.highlights);
+    gl.uniform1f(uniform('uEchoTint'), tuning.echoTint);
+    gl.uniform1f(uniform('uInnerWallFocus'), tuning.innerWallFocus);
+    gl.uniform1f(uniform('uDropSize'), tuning.dropSize);
+    gl.uniform1f(uniform('uDropStrength'), tuning.dropStrength);
+    gl.uniform1f(uniform('uDecay'), tuning.decay);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    // A mip pyramid supplies soft light at several scales without a costly blur kernel.
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.useProgram(composite);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, sceneTexture);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.uniform1i(compositeUniform.uScene, 0);
+    gl.uniform2f(compositeUniform.uResolution, canvas.width, canvas.height);
+    gl.uniform1f(compositeUniform.uDpr, canvas.width / width);
+    gl.uniform1f(compositeUniform.uUnit, unitPx);
+    gl.uniform1f(compositeUniform.uSettle, settle);
+    gl.uniform1f(compositeUniform.uBloom, tuning.bloom);
+    gl.uniform1f(compositeUniform.uPageLight, pageLight);
+    gl.uniform1f(compositeUniform.uTime, displayTime);
+    gl.uniform1f(
+      compositeUniform.uFinish,
+      tuning.ending === 'logo'
+        ? Math.max(0, Math.min(1, (sequenceTime - 1.05) / (logoFinishTime - 1.05)))
+        : Math.max(0, Math.min(1, (sequenceTime - 2.8) / (liquidGlassLogoDuration - 2.8))),
+    );
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  };
+
+  const raster = async () => {
+    const key = JSON.stringify([
+      tuning.logo,
+      tuning.mark,
+      tuning.text,
+      tuning.logoSize,
+      tuning.logoScale,
+      tuning.fontSize,
+      tuning.fontFamily,
+      tuning.fontWeight,
+      tuning.fontStretch,
+      tuning.letterSpacing,
+      tuning.markGap,
+      tuning.logoColor,
+      tuning.logoRelief,
+      tuning.textColor,
+      dpr,
+    ]);
+    if (key === rasterKey) return;
+    rasterKey = key;
+    const version = ++rasterVersion;
+    // Snapshot the options: a late image or font load must never rasterize newer props.
+    const options = { ...tuning };
+    const markSource = options.mark === 'logo' ? options.logo : options.mark;
+    const [logo, mark] = await Promise.all([
+      loadImage(options.logo),
+      markSource === options.logo ? null : loadImage(markSource),
+      document.fonts?.load(font(options), options.text || 'x').catch(() => undefined),
+    ]);
+    if (disposed || version !== rasterVersion) return;
+    const markImage = markSource === options.logo ? logo : mark;
+    const logoKey = JSON.stringify([
+      options.logo,
+      options.logoSize,
+      options.logoScale,
+      options.logoColor,
+      options.logoRelief,
+      dpr,
+    ]);
+    const logoRaster =
+      logoCache?.key === logoKey ? logoCache.raster : rasterLogo(logo, options, dpr);
+    logoCache = { key: logoKey, raster: logoRaster };
+    const textRaster = rasterText(markSource ? markImage : null, options, dpr);
+    upload(logoTexture, logoRaster.canvas);
+    upload(textTexture, textRaster.canvas);
+    textBox = textRaster.box;
+    textWidth = textRaster.contentWidth;
+    if (!loaded) {
+      loaded = true;
+      last = 0;
+      onReady?.();
+    }
+    draw();
+    request();
+  };
+
+  const tick = (now: number) => {
+    frame = 0;
+    const delta = last ? Math.min(0.05, (now - last) / 1000) : 0;
+    last = now;
+    const moving = playing && visible && !reduced?.matches && loaded;
+    if (moving) {
+      clock += delta * tuning.speed;
+      const cycle =
+        (tuning.ending === 'logo' ? logoFinishTime : liquidGlassLogoDuration) + tuning.loopDelay;
+      if (tuning.loop && clock >= cycle) clock %= cycle;
+    }
+    draw();
+    if (
+      moving &&
+      (tuning.loop || clock < (tuning.ending === 'logo' ? logoFinishTime : liquidGlassLogoDuration))
+    )
+      request();
+    else last = 0;
+  };
+  function request() {
+    if (!frame && !disposed) frame = requestAnimationFrame(tick);
+  }
+
+  const resize = () => {
+    // CSS transforms can move and scale the preview without changing its layout.
+    // Keep WebGL coordinates tied to that layout throughout the animation.
+    const style = getComputedStyle(canvas);
+    width = Math.max(1, Number.parseFloat(style.width) || canvas.clientWidth);
+    height = Math.max(1, Number.parseFloat(style.height) || canvas.clientHeight);
+    const nextDpr = Math.min(window.devicePixelRatio || 1, tuning.maxDpr);
+    canvas.width = Math.max(1, Math.round(width * nextDpr));
+    canvas.height = Math.max(1, Math.round(height * nextDpr));
+    if (nextDpr !== dpr) {
+      dpr = nextDpr;
+      void raster();
+    }
+    draw();
+    request();
+  };
+
+  const resizeObserver = new ResizeObserver(resize);
+  resizeObserver.observe(canvas);
+  const visibility = new IntersectionObserver(([entry]) => {
+    visible = entry?.isIntersecting ?? true;
+    last = 0;
+    if (visible) request();
+  });
+  visibility.observe(canvas);
+  const onMotion = () => {
+    last = 0;
+    request();
+  };
+  reduced?.addEventListener?.('change', onMotion);
+  resize();
+  void raster();
+
+  return {
+    update(next) {
+      const wasPlaying = playing;
+      tuning = next;
+      playing = !next.paused;
+      if (!wasPlaying && playing) last = 0;
+      resize();
+      void raster();
+    },
+    replay() {
+      clock = 0;
+      last = 0;
+      draw();
+      request();
+    },
+    seek(seconds) {
+      clock = Number.isFinite(seconds) ? Math.max(0, Math.min(3600, seconds)) : 0;
+      last = 0;
+      draw();
+    },
+    pause() {
+      playing = false;
+      last = 0;
+    },
+    play() {
+      playing = true;
+      last = 0;
+      request();
+    },
+    dispose() {
+      disposed = true;
+      logoCache = null;
+      cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+      visibility.disconnect();
+      reduced?.removeEventListener?.('change', onMotion);
+      gl.deleteTexture(logoTexture);
+      gl.deleteTexture(textTexture);
+      gl.deleteTexture(sceneTexture);
+      gl.deleteFramebuffer(sceneFramebuffer);
+      gl.deleteBuffer(buffer);
+      gl.deleteVertexArray(quad);
+      gl.deleteProgram(program);
+      gl.deleteProgram(composite);
+    },
+  };
+}
+```
+
+--- components/glass-drop/liquid-glass-logo-shaders.ts ---
+
+```ts
+/*!
+ReactDrops Component License 1.0
+
+Copyright (c) 2026 ReactDrops
+
+1. Scope and definitions
+
+This license applies to ReactDrops software and associated documentation that
+expressly carry this license or are distributed under a LICENSE file containing
+it (the "Software"). "Licensor" means the copyright holder granting rights in
+the Software, and only to the extent that holder has authority to grant them.
+"You" means the individual or entity exercising these rights.
+
+An "End Product" is a website, application, service, or other finished project
+whose primary purpose is something other than providing reusable components,
+source code, templates, or development assets to others.
+
+2. Permitted uses
+
+Subject to this license, Licensor grants You a worldwide, non-exclusive,
+royalty-free license to use, copy, modify, and incorporate the Software into
+unlimited personal, internal, and commercial End Products. You may charge for
+End Products, subscriptions, development services, and work for clients.
+
+You may distribute the Software as an integrated part of an End Product,
+including in browser-delivered JavaScript. You may provide End Product source
+code to a client, and share the Software with employees and contractors who
+need it to develop or maintain End Products. Those recipients may use the
+Software for those purposes subject to this license. This permission does not
+authorize them to redistribute the Software as a reusable development asset.
+
+3. Restricted redistribution
+
+Unless You obtain separate written permission from Licensor, You may not sell,
+sublicense, publish, share, or otherwise redistribute the Software, or a
+substantial portion of it, whether unchanged or modified:
+
+(a) as a standalone component, component library, UI kit, source-code bundle,
+    registry, or other collection of reusable development assets;
+(b) as part of a theme, template, starter project, or similar product offered
+    to multiple recipients for reuse in their own projects; or
+(c) through a builder or generation service that offers the Software as
+    reusable blocks or source-code exports for others' projects.
+
+These restrictions apply to paid and free redistribution. Renaming, restyling,
+repackaging, translating, or modifying the Software does not remove them.
+Building separate finished websites or applications for multiple clients is
+permitted; offering a reusable template or kit containing the Software is not.
+
+Public source-code hosting by Licensor is not permission to republish the
+Software under another license. This license does not override any separate
+rights granted directly by Licensor or applicable code-hosting terms.
+
+4. Notices and ownership
+
+Retain this license and applicable copyright and third-party notices in source
+copies of the Software and permitted source distributions. No visible credit
+or ReactDrops logo is required in an End Product's user interface.
+
+Licensor retains ownership of its Software. You retain rights in Your own
+contributions, subject to the license for any incorporated Software. No rights
+to trademarks, trade names, or logos are granted by this license.
+
+5. Third-party materials and separate grants
+
+Dependencies, fonts, images, videos, and other third-party materials remain
+subject to their respective licenses. Separately identified third-party code
+is licensed under its stated terms, and these restrictions do not limit rights
+granted by its copyright holders. Retain all required third-party notices.
+Demo media are not licensed by this document; obtain Your own permission or
+replace them with media You are entitled to use.
+
+This license does not revoke rights granted under other valid licenses. It does
+not assert ownership of third-party work or grant rights Licensor lacks.
+
+6. Termination
+
+The permissions granted here continue unless terminated for a material breach.
+If You fail to cure a material breach within 30 days after receiving written
+notice from Licensor, Your permissions terminate. On termination, cease uses
+and distributions requiring this license. Rights under independently granted
+licenses and rights that applicable law does not allow to be restricted remain
+unaffected. Sections 3 through 7 survive termination.
+
+7. Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. TO THE MAXIMUM EXTENT
+PERMITTED BY APPLICABLE LAW, LICENSOR AND CONTRIBUTORS SHALL NOT BE LIABLE FOR
+ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT, OR OTHERWISE,
+ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
+
+This license does not limit rights or exceptions that applicable law makes
+non-waivable. No other permissions are granted by implication.
+*/
+
+export const liquidGlassLogoVertex = `#version 300 es
+in vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition, 0.0, 1.0);
+}
+`;
+
+// An optical surface, independent of the artwork beneath it. The first lens morphs
+// from a sphere to a superellipse; the second opens over the measured wordmark.
+// Refraction is integrated over the visible spectrum, rather than RGB offsets.
+// All distances are in CSS pixels, so the optics survive resizing and different DPRs.
+export const liquidGlassLogoRender = `#version 300 es
+precision highp float;
+uniform sampler2D uLogo;
+uniform sampler2D uText;
+uniform vec2 uResolution;
+uniform float uDpr;
+uniform float uUnit;
+uniform vec2 uLogoBox;
+uniform vec2 uTextBox;
+uniform float uTextWidth;
+uniform float uTime;
+uniform float uSettle;
+uniform float uArtScale;
+uniform float uWordmarkEnabled;
+uniform vec3 uTile;
+uniform float uTileEnabled;
+// 0 on a dark page, 1 on a pale one.
+uniform float uPageLight;
+uniform float uDepth;
+uniform float uDispersion;
+uniform float uRelief;
+uniform float uCaustics;
+uniform float uHighlights;
+// How much the faint line outside the rim takes the plate color.
+uniform float uEchoTint;
+// 0 draws the full inner wall; 1 keeps it to the upper-left and lower-right arcs.
+uniform float uInnerWallFocus;
+uniform float uDropSize;
+uniform float uDropStrength;
+uniform float uDecay;
+// Second drop: radius, core radius, rim stretch, center factor (negative inverts).
+uniform vec4 uDrop;
+// Second drop: core edge magnification, profile exponent, ripple amplitude, wavelength.
+uniform vec4 uDropLens;
+// Second drop: ripple phase, share of ripples inside the core, dispersion, unused.
+uniform vec4 uDropWave;
+out vec4 outColor;
+const float PI = 3.14159265359;
+const int BANDS = 32;
+
+float sq(float x) { return x * x; }
+float bell(float x, float width) { return exp(-sq(x / max(width, 0.001))); }
+float ease(float a, float b, float x) { return smoothstep(a, b, x); }
+
+// Smooth overlapping spectral sensitivities, normalized in the integration below.
+vec3 spectrum(float s) {
+  float wavelength = 400.0 + 300.0 * s;
+  vec3 rgb = vec3(0.0);
+  if (wavelength < 440.0) rgb = vec3((440.0 - wavelength) / 120.0, 0.0, 1.0);
+  else if (wavelength < 490.0) rgb = vec3(0.0, (wavelength - 440.0) / 50.0, 1.0);
+  else if (wavelength < 510.0) rgb = vec3(0.0, 1.0, (510.0 - wavelength) / 20.0);
+  else if (wavelength < 580.0) rgb = vec3((wavelength - 510.0) / 70.0, 1.0, 0.0);
+  else if (wavelength < 645.0) rgb = vec3(1.0, (645.0 - wavelength) / 65.0, 0.0);
+  else rgb = vec3(1.0, 0.0, 0.0);
+  return rgb * mix(0.2, 1.0, ease(400.0, 430.0, wavelength)) * mix(1.0, 0.65, ease(650.0, 700.0, wavelength));
+}
+float glassIor(float s, float spread) {
+  float wavelength = 0.4 + 0.3 * s;
+  return 1.38 + (0.04 / (wavelength * wavelength) - 0.12) * spread;
+}
+
+vec4 imageAt(sampler2D image, vec2 p, vec2 box) {
+  vec2 uv = 0.5 + p / box;
+  // Transparent outside the image, including images that touch their texture edges.
+  // Explicit LOD is stable inside the back-face branch; implicit derivatives are
+  // undefined there and can make the same sought frame change after another draw.
+  vec2 footprint = vec2(textureSize(image, 0)) / max(box * uDpr, vec2(1.0));
+  float lod = max(0.0, log2(max(footprint.x, footprint.y)));
+  // The first sphere comes into focus as it flattens into a plate.
+  lod += (1.0 - ease(0.20, 0.36, uTime)) * 2.2;
+  vec4 ink = textureLod(image, uv, lod);
+  return ink * step(0.0, uv.x) * step(0.0, uv.y) * step(uv.x, 1.0) * step(uv.y, 1.0);
+}
+
+float superRadius(vec2 p, float n) {
+  vec2 a = max(abs(p), vec2(0.00001));
+  return pow(pow(a.x, n) + pow(a.y, n), 1.0 / n);
+}
+vec2 superNormal(vec2 p, float n) {
+  return normalize(sign(p) * pow(max(abs(p), vec2(0.00001)), vec2(n - 1.0)) + vec2(0.000001));
+}
+
+float hash1(float n) { return fract(sin(n * 127.1 + 311.7) * 43758.5453); }
+
+// Real glass is not a perfect stroke. Along an edge (u = arc length in pixels) its
+// light varies slowly and breaks into short glints where the surface is uneven.
+float contourNoise(float u) {
+  float i = floor(u);
+  float f = fract(u);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(hash1(i), hash1(i + 1.0), f);
+}
+float specks(float u, float d, float size, float seed) {
+  float spacing = size * 22.0;
+  float cell = floor(u / spacing);
+  float on = step(0.7, hash1(cell + seed));
+  float center = (cell + 0.2 + 0.6 * hash1(cell + seed + 17.0)) * spacing;
+  float offset = (hash1(cell + seed + 31.0) - 0.5) * size * 0.6;
+  // Glints are dashes along the edge, several times longer than they are wide.
+  float dash = size * (2.5 + 4.0 * hash1(cell + seed + 53.0));
+  return on * bell(u - center, dash) * bell(d - offset, size * 0.35);
+}
+// The same glints as particles held by the liquid: each one bobs across the edge
+// on its own period and barely sways along it, so nothing slides sideways.
+// Neighboring cells are included so a moving glint is not clipped at its cell.
+float driftingSpecks(float u, float d, float size, float seed, float t) {
+  float spacing = size * 22.0;
+  float cell = floor(u / spacing);
+  float glints = 0.0;
+  for (int j = -1; j <= 1; j++) {
+    float id = cell + float(j);
+    float on = step(0.7, hash1(id + seed));
+    float rate = 2.5 + 3.0 * hash1(id + seed + 71.0);
+    float phase = 6.2832 * hash1(id + seed + 89.0);
+    float center = (id + 0.2 + 0.6 * hash1(id + seed + 17.0)) * spacing + sin(t * rate * 0.5 + phase) * spacing * 0.05;
+    float offset = (hash1(id + seed + 31.0) - 0.5) * size * 0.6 + sin(t * rate + phase) * size * 1.6;
+    float dash = size * (2.5 + 4.0 * hash1(id + seed + 53.0));
+    glints += on * bell(u - center, dash) * bell(d - offset, size * 0.35);
+  }
+  return min(glints, 1.0);
+}
+
+// Material-space relief: neighboring glass walls share the slow undulation but
+// have different fine thickness variations. It stays attached as the lens grows.
+float edgeWarp(float arc, float seed) {
+  float broad = contourNoise(arc / (uUnit * 0.037) + seed) - 0.5;
+  float fine = contourNoise(arc / (uUnit * 0.008) + seed + 29.0) - 0.5;
+  return uUnit * (broad * 0.0017 + fine * 0.0008);
+}
+
+// Small flattened air pockets in the glass channel. x is the dark cavity;
+// y is its light-catching lip. Three cells avoid popping at cell boundaries.
+vec2 glassPores(float arc, float d, float seed) {
+  if (abs(d) > uUnit * 0.011) return vec2(0.0);
+  float pitch = uUnit * 0.022;
+  float cell = floor(arc / pitch);
+  vec2 pores = vec2(0.0);
+  for (int j = -1; j <= 1; j++) {
+    float id = cell + float(j) + seed;
+    float visible = step(0.63, hash1(id));
+    float center = (cell + float(j) + 0.15 + 0.7 * hash1(id + 17.0)) * pitch;
+    float across = (hash1(id + 31.0) - 0.5) * uUnit * 0.009;
+    float span = uUnit * (0.0022 + 0.0035 * hash1(id + 53.0));
+    float height = max(0.35 / uDpr, uUnit * (0.0007 + 0.0012 * hash1(id + 71.0)));
+    vec2 q = vec2((arc - center) / span, (d - across) / height);
+    // A slight skew keeps the cavities from forming identical ellipses.
+    q.x += q.y * (hash1(id + 89.0) - 0.5) * 0.55;
+    float radius = length(q);
+    float aa = max(0.18, 0.4 / (uDpr * height));
+    float cavity = bell(radius, 0.65);
+    float lip = bell(radius - 1.0, aa);
+    float glint = 0.25 + 0.75 * max(dot(q / max(radius, 0.001), normalize(vec2(-0.4, 0.8))), 0.0);
+    pores += vec2(cavity, lip * glint) * visible;
+  }
+  return min(pores, vec2(1.0));
+}
+
+// Light reflected off the ripples outside the glass is invisible on a pale page.
+// There the same ripples bend the page away and read as cool shadows, as in the
+// light reference. Coverage is unchanged, so a dark page renders as before.
+vec3 exteriorColor(vec3 light, float coverage) {
+  // The shadow leans toward the plate's own tone, a little deeper, so it belongs
+  // to the glass instead of reading as a gray smudge on the page.
+  vec3 shade = mix(vec3(0.40, 0.46, 0.56), uTile * 0.86, uEchoTint);
+  return mix(light, shade * coverage, uPageLight);
+}
+
+// Per-channel coverage of the last refracted image. Each wavelength band lands
+// on the artwork at its own offset, so a dark logo over a light plate blocks red,
+// green and blue at slightly different places and its edges split into color.
+vec3 refractedCoverage;
+
+// A refracted image behind a glass lens, with a little light focused onto its ink.
+vec4 refractedLogo(vec2 p, vec2 normalXY, float lensScale, float glass, float chromaticScale, float surfaceDistance) {
+  vec3 normal = normalize(vec3(normalXY, 1.0));
+  vec3 color = vec3(0.0);
+  vec3 weights = vec3(0.0);
+  float alpha = 0.0;
+  float minCoverage = 1.0;
+  float maxCoverage = 0.0;
+  refractedCoverage = vec3(0.0);
+  float spread = uDispersion * chromaticScale * mix(0.85, mix(2.2, 1.5, ease(0.28, 0.9, uTime)), ease(0.25, 0.33, uTime));
+  vec3 neutralRay = refract(vec3(0.0, 0.0, -1.0), normal, 1.0 / glassIor(0.5, spread));
+  vec2 neutralOffset = neutralRay.xy / max(-neutralRay.z, 0.25) * uUnit * uDepth * 0.80 * lensScale;
+  for (int i = 0; i < BANDS; i++) {
+    float s = float(i) / float(BANDS - 1);
+    // Shorter wavelengths bend more. Dispersion is intentionally visible at the bevel.
+    // The young sphere splits light only at its rim; the settled bevel splits it strongly.
+    float ior = glassIor(s, spread);
+    vec3 ray = refract(vec3(0.0, 0.0, -1.0), normal, 1.0 / ior);
+    vec2 offset = ray.xy / max(-ray.z, 0.25) * uUnit * uDepth * 0.80 * lensScale;
+    // Measured artwork scale over time; see artworkScale in the renderer.
+    float artworkScale = uArtScale;
+    float magnification = 1.0;
+    // The opening focus folds the edge of the image into a partial crescent.
+    // It opens into barrel distortion before the sphere flattens into the plate.
+    float sphereRadius = uUnit * lensScale * 0.5;
+    float sphereFocus = 1.0 - ease(0.225, 0.335, uTime);
+    float bubbleQ = min(length(p) / max(sphereRadius, 1.0), 1.0);
+    float openingFocus = 1.0 - ease(0.19, 0.265, uTime);
+    float focusProfile = mix(0.7 + 0.6 * sq(bubbleQ), 1.0 - 0.9 * sq(bubbleQ), openingFocus);
+    vec2 bubbleSample = p * focusProfile + offset * mix(0.35, 0.12, openingFocus);
+    bubbleSample += vec2(0.025, 0.10) * uUnit * openingFocus;
+    bubbleSample += (offset - neutralOffset) * openingFocus * 1.6;
+    vec2 sourcePoint = mix(p + offset, bubbleSample, sphereFocus);
+    vec4 ink = imageAt(uLogo, sourcePoint, uLogoBox * artworkScale * magnification);
+    // Focus is inside the young dome, leaving clear glass between the enlarged
+    // fragment and the rim. The aperture opens as the rest of the logo appears.
+    ink *= mix(1.0, 1.0 - ease(0.72, 0.86, bubbleQ), openingFocus);
+    // The rim is an optical aperture too. Giving each wavelength its own boundary
+    // creates a red/yellow outer edge and cyan/blue inner edge without tinting the ink.
+    float edgeShift = (s - 0.5) * uUnit * lensScale * 0.018 * uDispersion * chromaticScale;
+    ink *= 1.0 - smoothstep(-0.8 / uDpr, 0.8 / uDpr, surfaceDistance - edgeShift);
+    minCoverage = min(minCoverage, ink.a);
+    maxCoverage = max(maxCoverage, ink.a);
+    vec3 w = spectrum(s);
+    color += ink.rgb * w;
+    alpha += ink.a * (w.r + w.g + w.b);
+    refractedCoverage += ink.a * w;
+    weights += w;
+  }
+  color /= weights;
+  refractedCoverage /= weights;
+  // A coated glass shoulder has a cooler spectral response at a split image edge.
+  // Coverage variance keeps solid areas and original-color artwork free of a tint.
+  float coating = ease(-uUnit * lensScale * 0.022, 0.0, surfaceDistance);
+  color.g *= 1.0 - 0.65 * coating * (maxCoverage - minCoverage);
+  // The young curved face catches a violet interference fringe at internal ink
+  // edges. Its outer lip stays cyan; opaque artwork keeps its original color.
+  float youngFilm = (maxCoverage - minCoverage) * (1.0 - ease(0.19, 0.30, uTime));
+  youngFilm *= 1.0 - ease(-uUnit * lensScale * 0.08, -uUnit * lensScale * 0.025, surfaceDistance);
+  color.r += color.b * youngFilm * 0.80;
+  color.b += color.r * youngFilm * 0.60;
+  color.g *= 1.0 - youngFilm * 0.55;
+  alpha /= weights.r + weights.g + weights.b;
+  // This lift belongs to the image's edges, not a painted rainbow on the lens.
+  float diffuse = max(dot(normal, normalize(vec3(-0.4, 0.6, 1.0))), 0.0);
+  vec3 earlyWhite = mix(vec3(0.90, 0.93, 0.95), vec3(0.84, 0.86, 0.89), ease(0.21, 0.40, uTime));
+  vec3 whiteBalance = mix(earlyWhite, vec3(0.87, 0.88, 0.885), ease(0.75, 1.22, uTime));
+  color *= whiteBalance * ((0.90 + 0.10 * diffuse + glass * uCaustics * 0.04) * ((0.975 + 0.025 * sin(p.y / uUnit * PI)) * (1.0 + 0.09 * ease(0.75, 1.22, uTime) + 0.03 * (1.0 - ease(0.2, 0.5, uTime)))));
+  return vec4(color, alpha);
+}
+
+vec4 iconLens(vec2 p) {
+  float t = uTime;
+  float settle = ease(0.0, 1.0, uSettle);
+  float enter = ease(0.025, 0.16, t);
+  vec4 source = imageAt(uLogo, p, uLogoBox * uArtScale);
+  if (t > 1.58) return source * settle;
+  if (enter < 0.001) return vec4(0.0);
+  float shape = 2.0 + 3.0 * ease(0.29, 0.36, t);
+  // The sphere appears quickly, then the glass continues expanding after the
+  // corners have squared off. Completing both motions at once feels abrupt.
+  float expand = enter * (0.64 + 0.41 * (1.0 - exp(-max(t - 0.16, 0.0) * 5.8)));
+  float collapse = 1.0 - ease(1.33, 1.52, t);
+  float lensScale = max(0.001, mix(expand * mix(0.48, 1.0, collapse), 1.0, settle));
+  float halfSize = uUnit * 0.5 * lensScale;
+  float radius = superRadius(p / halfSize, shape);
+  float sd = (radius - 1.0) * halfSize;
+  float aa = max(fwidth(sd), 0.65);
+  float mask = (1.0 - smoothstep(-aa, aa, sd));
+  float glass = (1.0 - ease(1.05, 1.4, t)) * collapse * (1.0 - settle);
+  float shown = ease(0.12, 0.165, t) * (1.0 - ease(1.39, 1.53, t));
+  // Nothing is drawn beyond the thin echo just outside the rim.
+  if (sd > uUnit * 0.10) return vec4(0.0);
+  vec2 outward = superNormal(p / halfSize, shape);
+  // A flat center rolls into a thick, curved shoulder. The normal continuously bends
+  // source rays into the plate and folds them at its rim, whatever the source image.
+  vec2 radial = normalize(p + vec2(0.001));
+  float diagonal = max(0.0, 2.0 * radial.x * radial.y);
+  float shoulderStart = 0.6 + 0.18 * ease(0.66, 1.15, t) * (1.0 - diagonal) + 0.16 * ease(1.0, 1.22, t) * diagonal;
+  float shoulder = ease(shoulderStart, 1.0, radius);
+  float slope = (0.04 * radius + (0.85 + 0.2 * (1.0 - ease(0.28, 0.75, t))) * shoulder * shoulder) * glass * uDropStrength;
+  // The early sphere is rounder and more strongly magnifying than the settled tile.
+  slope += (1.0 - ease(0.18, 0.42, t)) * radius * 0.32 * uDropStrength;
+  vec2 opticalDirection = normalize(mix(outward, normalize(p + vec2(0.001)), 0.95));
+  // A mild astigmatic shoulder carries the image into opposite corners.
+  float astigmatism = 0.8 + 0.4 * radial.x * radial.y;
+  vec2 n = opticalDirection * slope * astigmatism * (1.0 - settle);
+  vec4 ink = refractedLogo(p, n, lensScale, glass, 1.0, sd);
+  float illumination = 0.5 + 0.5 * dot(outward, normalize(vec2(-0.5, 0.9)));
+  vec3 inkCoverage = refractedCoverage;
+  // A dark plate deepens toward its rim; a pale frosted plate stays nearly even.
+  float plateLight = ease(0.3, 0.8, dot(uTile, vec3(0.299, 0.587, 0.114)));
+  vec3 body = uTile * (mix(0.55, 0.96, plateLight) + mix(0.45, 0.04, plateLight) * (1.0 - min(radius, 1.0)));
+  body += vec3(0.004, 0.007, 0.01) * bell(radius - 0.75, 0.5);
+  vec3 color = ink.rgb + body * (1.0 - inkCoverage) * glass * uTileEnabled;
+  // On a pale page the plate's coverage follows the glass exactly, so its color
+  // keeps the same hue while it melts into the page instead of dipping and
+  // flaring. A dark page keeps its original fade.
+  float plateFade = mix((1.0 - ease(1.08, 1.36, t)) * (1.0 - settle), glass, uPageLight);
+  float alpha = max(ink.a, plateFade * uTileEnabled);
+  // A broad studio light is reflected by the curved front face of the sphere.
+  // It fades as the face flattens, revealing the dark glass beneath the artwork.
+  vec2 spherePoint = p / halfSize;
+  vec3 sphereNormal = normalize(vec3(spherePoint, sqrt(max(0.001, 1.0 - dot(spherePoint, spherePoint)))));
+  vec3 sphereRay = reflect(vec3(0.0, 0.0, -1.0), sphereNormal);
+  float lightTravel = mix(-0.12, 0.20, ease(0.13, 0.30, t));
+  float softbox = bell(sphereRay.x - lightTravel, 1.05) * bell(sphereRay.y - 0.56, 0.52);
+  float sphericalLight = softbox * (1.0 - ease(0.245, 0.36, t)) * glass * uHighlights * 0.70;
+  color += vec3(0.50, 0.61, 0.72) * sphericalLight * (1.0 - ink.a * 0.85);
+  alpha = max(alpha, sphericalLight);
+
+  // Thin nested surface reflections, with asymmetric key light and a dim cool fill.
+  // Material coordinates stay fixed during expansion and deterministic seeking.
+  float arc = atan(p.y, p.x) * uUnit * 0.5;
+  float grainScale = uUnit * 0.03;
+  float developed = ease(0.23, 0.48, t);
+  float cornerExposure = ease(0.12, 0.8, -2.0 * radial.x * radial.y);
+  float reliefScale = lensScale * developed * (0.2 + 0.8 * cornerExposure);
+  float sharedWarp = edgeWarp(arc, 0.0) * reliefScale;
+  float rimSd = sd + sharedWarp;
+  float innerSd = sd + sharedWarp * 0.7 + edgeWarp(arc, 41.0) * reliefScale * 0.4;
+  float inner2Sd = sd + sharedWarp * 0.45 + edgeWarp(arc, 83.0) * reliefScale * 0.6;
+  float thickness = 0.75 + 0.5 * contourNoise(arc / (uUnit * 0.013) + 13.0);
+  // The bright rim line is a liquid edge, not an etched one. Its segments shimmer
+  // in place and it bobs slightly across the edge as standing waves, so nothing
+  // slides along it; its glints move as separate particles.
+  float around = arc / (uUnit * 0.5);
+  float rimBob = uUnit * 0.0025 * developed * (0.6 * sin(7.0 * around + 0.4) * sin(t * 6.3 + 1.0) + 0.4 * sin(3.0 * around + 2.0) * sin(t * 4.1));
+  float rimLineSd = rimSd + rimBob;
+  float shimmer = mix(contourNoise(arc / grainScale), contourNoise(arc / grainScale + 211.0), 0.5 + 0.5 * sin(t * 5.0 + 6.2832 * contourNoise(arc / (grainScale * 3.0) + 7.0)));
+  float rim = bell(rimLineSd + uUnit * 0.002, uUnit * 0.0018 * thickness + aa * 0.3) * (0.6 + 0.8 * shimmer);
+  // The nested lines nearer the center clear first; the outer rim lingers.
+  float centerFade = 1.0 - ease(0.62, 0.92, t);
+  float inner = centerFade * bell(innerSd + uUnit * 0.012, uUnit * 0.0025 / thickness + aa * 0.2) * (0.55 + 0.9 * contourNoise(arc / grainScale + 41.0));
+  float inner2 = centerFade * bell(inner2Sd + uUnit * 0.022, uUnit * 0.0018 * thickness + aa * 0.1) * (0.5 + contourNoise(arc / grainScale + 83.0));
+  float key = pow(illumination, 5.0);
+  float rimVisibility = 1.0 - 0.55 * ease(0.75, 1.22, t);
+  float lowerRight = pow(0.5 + 0.5 * dot(outward, normalize(vec2(0.8, -0.6))), 5.0);
+  lowerRight *= ease(-0.25, -0.05, p.x / uUnit) * (1.0 - ease(-0.22, -0.02, p.y / uUnit));
+  // Two separated walls, not two strokes at the same edge. The back wall is
+  // inset by 7% of a tile edge, leaving a curved transmission channel between them.
+  vec2 insetPoint = p - vec2(0.002, -0.002) * uUnit * lensScale;
+  float wallGap = (0.055 - 0.023 * ease(0.18, 0.34, t)) + 0.050 * ease(0.14, 0.50, t) * (1.0 - 0.5 * ease(0.80, 1.22, t));
+  float insetHalf = halfSize - wallGap * uUnit * lensScale;
+  // The back face rounds off slightly later, giving the sphere and tile two visible
+  // moving boundaries rather than scaling a second outline with the front face.
+  float insetShape = max(2.0, 2.0 + (shape - 2.0) * ease(0.20, 0.55, t) - 0.45);
+  float insetRadius = superRadius(insetPoint / insetHalf, insetShape);
+  float insetSd = (insetRadius - 1.0) * insetHalf + sharedWarp * 0.4 + edgeWarp(arc, 151.0) * reliefScale * 0.7;
+  float channel = ease(-uUnit * 0.008, uUnit * 0.025, insetSd) * mask;
+  float echoMask = channel * lowerRight * glass * (1.0 - settle);
+  vec3 backFace = vec3(0.0);
+  float logoLight = 0.0;
+  if (echoMask * uRelief > 0.002) {
+    vec2 backNormal = normalize(mix(superNormal(insetPoint / insetHalf, insetShape), radial, 0.6));
+    float backSlope = ease(0.90, 1.10, insetRadius) * 1.55 * glass * uDropStrength;
+    // Sample a separate transmitted image across the whole bevel channel. Its
+    // changing normal pulls a second, chromatically split copy of the logo into it.
+    // A thick rim magnifies whatever lies closest behind it. Walk inward from the
+    // wall until the ray meets ink and refract from there, so every logo lights
+    // this corner from its own nearest shape; a logo with ink at the corner (like
+    // X) is found on the first step and keeps its direct image.
+    // The search starts where the wall already sends the ray, not at the wall.
+    vec2 inward = -normalize(insetPoint + vec2(0.001));
+    vec3 backRay = refract(vec3(0.0, 0.0, -1.0), normalize(vec3(backNormal * backSlope, 1.0)), 1.0 / 1.38);
+    vec2 landing = insetPoint + backRay.xy / max(-backRay.z, 0.25) * uUnit * uDepth * 0.80 * lensScale;
+    float reach = 0.0;
+    for (int i = 0; i < 20; i++) {
+      reach = float(i) * uUnit * lensScale * 0.03;
+      if (imageAt(uLogo, landing + inward * reach, uLogoBox * uArtScale).a > 0.2) break;
+    }
+    vec4 backImage = refractedLogo(insetPoint + inward * reach, backNormal * backSlope, lensScale, glass, 1.6, sd);
+    backFace = backImage.rgb * vec3(0.03, 0.65, 1.0) * echoMask * 0.48 * uRelief * (1.0 - 0.70 * ease(0.75, 1.12, t));
+    // The lower-right light is this same refracted image, not a fixed lamp: it
+    // only lights where the back wall bends logo ink into the bevel, and takes
+    // that ink's shape as the logo or the refraction changes.
+    logoLight = ease(0.05, 0.6, backImage.a);
+  }
+  lowerRight *= logoLight;
+  float wallRim = centerFade * bell(insetSd, uUnit * 0.0028 + aa * 0.25);
+  float wallShadow = centerFade * bell(insetSd + uUnit * 0.008, uUnit * 0.005);
+  vec2 pores = vec2(0.0);
+  if (developed * cornerExposure > 0.001) {
+    pores = glassPores(arc, (rimSd + uUnit * 0.003) / lensScale, 313.0);
+    pores += glassPores(arc, insetSd / lensScale, 617.0) * 0.6 * centerFade;
+    pores += glassPores(arc, (inner2Sd + uUnit * 0.027) / lensScale, 919.0) * 0.8 * centerFade;
+    pores *= developed * cornerExposure;
+  }
+  float angle = atan(p.y, p.x);
+  float upperSliver = 0.12 + 1.15 * bell(angle - 2.18, 0.32);
+  float lowerSliver = 0.12 + 1.10 * bell(angle + 0.85, 0.30);
+  // The inner wall holds a brighter line around the upper-left and lower-right
+  // corners, whatever the key light does. Each arc runs farther along the top or
+  // bottom edge than down the side: its window is wider toward the horizontal.
+  float tlOffset = angle - 0.75 * PI;
+  float brOffset = angle + 0.25 * PI;
+  float tlReach = tlOffset < 0.0 ? 0.65 : 0.42;
+  float brReach = brOffset < 0.0 ? 0.65 : 0.42;
+  float wallCorner = max(
+    1.0 - ease(0.6 * tlReach, tlReach, abs(tlOffset)),
+    1.0 - ease(0.6 * brReach, brReach, abs(brOffset))
+  );
+  vec3 insetLight = vec3(0.60, 0.78, 0.91) * wallRim * (key * key * 0.8 * upperSliver + lowerRight * lowerRight * 0.75 * lowerSliver + 0.005 + 0.35 * wallCorner * uInnerWallFocus);
+  // The caustic follows the curved channel: a white-cyan core with blue lips, streaked
+  // by the glass it passes through.
+  // Filaments run parallel to the edge; their brightness drifts slowly along it.
+  float drift = 0.7 + 0.6 * contourNoise(arc / (uUnit * 0.09) + 7.0);
+  float filaments = (bell(innerSd + uUnit * 0.021, uUnit * 0.0035 * thickness) * 0.9 + bell(inner2Sd + uUnit * 0.028, uUnit * 0.004 / thickness) * 0.7) * centerFade + bell(rimSd + uUnit * 0.035, uUnit * 0.003 * thickness) * 0.5;
+  vec3 lowerRelief = (
+    vec3(0.03, 0.32, 1.0) * bell(sd + uUnit * 0.038, uUnit * 0.022 + aa * 0.2) * 0.55 +
+    vec3(0.22, 0.62, 1.0) * bell(sd + uUnit * 0.027, uUnit * 0.012 + aa * 0.1) * 0.7 +
+    vec3(0.75, 0.97, 1.0) * filaments * 1.35
+  ) * drift * lowerRight * glass * uHighlights * uRelief * (1.0 - 0.85 * ease(0.6, 1.0, t)) * (1.0 - settle);
+  lowerRelief *= 1.0 - pores.x * 0.22;
+  lowerRelief += vec3(0.45, 0.85, 1.0) * pores.y * 0.10 * lowerRight * glass * uHighlights * uRelief * (1.0 - settle);
+  // With focus at 0 the inner wall is drawn whole. Raising it keeps the wall on a
+  // pale plate to its strongly lit segments and its upper-left and lower-right
+  // arcs, since there its weak light clips to white and its shadow would
+  // otherwise outline the full contour.
+  float wallLit = clamp(key * key * 0.8 * upperSliver + lowerRight * lowerRight * 0.75 * lowerSliver, 0.0, 1.0);
+  float wallGate = mix(1.0, max(ease(0.2, 0.7, wallLit), wallCorner), uPageLight * uInnerWallFocus);
+  color *= 1.0 - wallShadow * wallGate * uRelief * 0.12 * (1.0 - ink.a);
+  color += backFace + lowerRelief + insetLight * wallGate * glass * uHighlights * uRelief * (1.0 - ink.a) * mix(rimVisibility, 0.9, key);
+  alpha = max(alpha, max(lowerRelief.r, max(lowerRelief.g, lowerRelief.b)));
+  float rimLight = rim * (0.07 + key * 0.55) + inner * (0.025 + key * 0.16) + inner2 * 0.025;
+  // Micro-bubbles along the lit edges, strongest where the key and the lower fill land.
+  float speckSize = max(uUnit * 0.0042, 0.8 / uDpr);
+  float bubbles = driftingSpecks(arc, rimLineSd + uUnit * 0.002, speckSize, 0.0, t) * 0.9;
+  bubbles += specks(arc, innerSd + uUnit * 0.012, speckSize * 0.8, 97.0) * 0.6 * centerFade;
+  bubbles += specks(arc, insetSd, speckSize * 0.9, 191.0) * 0.5 * centerFade;
+  rimLight += bubbles * (0.04 + key * 0.5 + lowerRight * 0.45);
+  rimLight = rimLight * (1.0 - pores.x * 0.35) + pores.y * (key * 0.16 + lowerRight * 0.12);
+  vec3 spectralRim = vec3(0.0);
+  vec3 spectralWeights = vec3(0.0);
+  for (int i = 0; i < BANDS; i++) {
+    float s = float(i) / float(BANDS - 1);
+    vec3 w = spectrum(s);
+    spectralRim += w * bell(rimSd + (s - 0.5) * uUnit * 0.011 * uDispersion + uUnit * 0.003, uUnit * 0.002 * thickness);
+    spectralWeights += w;
+  }
+  spectralRim /= spectralWeights;
+  vec3 reflection = (vec3(0.6, 0.76, 0.9) * rimLight * 1.15 + spectralRim * (0.02 + ink.a * 0.32)) * uHighlights * glass * mix(rimVisibility, 1.2, key);
+  float sphericalRim = (
+    bell(sd + uUnit * lensScale * 0.008, uUnit * lensScale * 0.009) * 0.60 +
+    bell(insetSd, uUnit * lensScale * 0.008) * 0.40
+  ) * (0.25 + 0.75 * abs(outward.y)) * (1.0 - ease(0.235, 0.34, t));
+  reflection += vec3(0.65, 0.80, 0.90) * sphericalRim * 1.4 * uHighlights * glass;
+  float cyanKey = pow(max(0.0, -outward.x), 8.0) * (1.0 - ease(0.235, 0.34, t));
+  float cyanLip = bell(sd + uUnit * lensScale * 0.020, uUnit * lensScale * 0.009);
+  cyanLip += bell(insetSd, uUnit * lensScale * 0.005) * 0.35;
+  reflection += vec3(0.015, 0.68, 1.0) * cyanLip * cyanKey * glass * uHighlights * 0.85;
+  // The young drop is full of scattered light: a milky glow behind the artwork.
+  float youth = 1.0 - ease(0.25, 0.37, t);
+  reflection += vec3(0.78, 0.84, 0.9) * youth * 0.07 * (0.5 + 0.5 * radius) * (1.0 - ink.a) * glass;
+  vec3 film = mix(vec3(0.32, 0.0, 0.20), vec3(0.32, 0.08, 0.02), ease(0.75, 1.12, t)) * bell(sd + uUnit * 0.001, uUnit * 0.002) * ink.a * glass * uHighlights;
+  color += reflection + film;
+  alpha = max(alpha, max(reflection.r, max(reflection.g, reflection.b)));
+  vec4 result = vec4(color * mask, alpha * mask);
+
+  // Reflections outside the body are faint glass echoes, not solid colored outlines.
+  float outer = bell(rimSd - uUnit * 0.012, uUnit * 0.0028 * thickness) * (0.04 + key * 0.2) * (0.5 + contourNoise(arc / grainScale + 131.0));
+  outer += specks(arc, rimSd - uUnit * 0.012, speckSize, 277.0) * (0.03 + key * 0.3 + lowerRight * 0.25);
+  // A single wave leaves the rim as the plate forms, stays close to it and fades.
+  float waveAge = ease(0.36, 1.1, t);
+  float wave = bell(sd - uUnit * (0.014 + 0.03 * waveAge), uUnit * 0.004 + aa * 0.3) * 0.05 * ease(0.34, 0.42, t) * (1.0 - waveAge);
+  // The echo is lit through the plate, so it can carry the plate's hue and, on a
+  // dark page, stay quieter than the rim it echoes.
+  vec3 echoTint = mix(vec3(0.43, 0.62, 0.79), uTile + (1.0 - uTile) * 0.4, 0.5 * uEchoTint);
+  float echoLevel = mix(1.0, mix(0.6, 1.0, uPageLight), uEchoTint);
+  // The echo line runs around all four sides. The wave stays faint on the left
+  // and right, where a full ring would read as streaks beside the glass.
+  float waveSides = mix(1.0, 0.10, ease(0.25, 0.80, abs(outward.x)));
+  vec3 ghost = (echoTint + ink.rgb * 0.6) * (outer + wave * waveSides) * glass * uHighlights * rimVisibility * echoLevel;
+  float exterior = max(ghost.r, max(ghost.g, ghost.b)) * 1.8;
+  result.rgb += exteriorColor(ghost * 1.8, exterior);
+  result.a = max(result.a, exterior);
+  // Resolve directly to the source, retaining its full size after the glass fades.
+  return mix(result * shown, source, settle);
+}
+
+// The second drop is a radial lens with spherical aberration. Its core magnifies the
+// wordmark (inverting it while the drop is tall), so between center and edge the image
+// runs through focus and floods the drop; across its rim a thin ring of the image is
+// stretched outward, and ripples crossing the rim repeat that ring in bands.
+vec4 wordmarkLens(vec2 p) {
+  float t = uTime;
+  if (uWordmarkEnabled < 0.5) return vec4(0.0);
+  if (t < 1.46) return vec4(0.0);
+  if (t >= 3.3) return imageAt(uText, p, uTextBox);
+  float radius = max(uDrop.x, 1.0);
+  float r = length(p);
+  if (r > radius + uUnit * 0.6) return vec4(0.0);
+  vec2 outward = p / max(r, 0.001);
+  float q = r / radius;
+  float aa = 1.0 / uDpr;
+  float edge = radius - r;
+  float mask = ease(-aa, aa, edge);
+  float young = 1.0 - ease(1.72, 2.02, t);
+
+  float core = min(uDrop.y, radius);
+  float coreQ = r / max(core, 1.0);
+  float edgeLanding = core / max(uDropLens.x, 0.01);
+  float center = uDrop.w;
+  float landing = r < core
+    ? edgeLanding * coreQ * (center + (1.0 - center) * pow(coreQ, uDropLens.y))
+    : edgeLanding + (r - core) * uDrop.z;
+  float rimZone = ease(core * 0.9, core, r);
+  float k = 2.0 * PI / max(uDropLens.w, 1.0);
+  landing += uDropLens.z * sin(k * r - uDropWave.x) * ease(0.0, uDropLens.w, r) * mix(uDropWave.y, 1.0, rimZone);
+  vec2 bend = outward * (landing - r);
+  float spread = uDropWave.z * uDispersion * (0.15 + 0.85 * rimZone);
+
+  vec3 color = vec3(0.0);
+  vec3 weights = vec3(0.0);
+  float alpha = 0.0;
+  float opacity = ease(1.46, 1.49, t);
+  for (int i = 0; i < BANDS; i++) {
+    float s = float(i) / float(BANDS - 1);
+    vec2 source = p + bend * (1.0 + spread * (s - 0.5));
+    vec4 ink = imageAt(uText, source, uTextBox);
+    vec3 w = spectrum(s);
+    color += ink.rgb * w;
+    alpha += ink.a * (w.r + w.g + w.b);
+    weights += w;
+  }
+  color /= weights;
+  alpha /= weights.r + weights.g + weights.b;
+  color *= 1.0 + uCaustics * bell(edge, uUnit * 0.06) * 0.15;
+  color *= mask;
+  alpha *= mask;
+  // A fresh drop is full of scattered light: overexposed ink, a milky body and a cool
+  // spill around it, all fading as it flattens.
+  float fresh = 1.0 - ease(1.62, 1.95, t);
+  color = min(color * (1.0 + 0.6 * fresh), vec3(1.0));
+  float milk = mask * fresh * 0.30 * (0.6 + 0.4 * q) * uCaustics;
+  color += vec3(0.75, 0.82, 0.9) * milk * (1.0 - alpha);
+  float spill = exp(-max(r - radius, 0.0) / (uUnit * 0.17)) * (1.0 - mask) * fresh * 0.12;
+  // As it spreads, the drop keeps a faint blue haze that dies with the waves.
+  spill += exp(-max(r - radius, 0.0) / (uUnit * 0.4)) * (1.0 - fresh) * 0.035 * exp(-max(t - 1.95, 0.0) / 0.45) * (1.0 - ease(2.8, 3.1, t));
+  color += vec3(0.32, 0.6, 1.0) * spill;
+  alpha = max(alpha, max(milk, spill));
+  vec3 sphereNormal = normalize(vec3(p / radius, sqrt(max(0.005, 1.0 - q * q))));
+  vec3 reflected = reflect(vec3(0.0, 0.0, -1.0), sphereNormal);
+  float softbox = bell(reflected.x + 0.3, 0.2) * bell(reflected.y - 0.55, 0.15);
+  float smallLight = bell(reflected.x - 0.25, 0.14) * bell(reflected.y - 0.65, 0.08);
+  float broadLight = bell(reflected.x + 0.35, 0.65) * bell(reflected.y - 0.6, 0.45);
+  float surface = (softbox * 0.8 + smallLight * 0.6 + broadLight * 0.22) * young * uHighlights * mask;
+  color += vec3(0.85, 0.95, 1.0) * surface;
+  alpha = max(alpha, surface);
+
+  float key = pow(0.5 + 0.5 * dot(outward, normalize(vec2(-0.6, 0.8))), 7.0);
+  float rings = 0.0;
+  for (int i = 0; i < 4; i++) {
+    float j = float(i);
+    float ringRadius = radius + (j - 1.0) * uUnit * 0.022 * (1.0 + 0.55 * ease(1.8, 3.1, t));
+    rings += bell(r - ringRadius, uUnit * (0.003 + j * 0.001)) * (0.11 / (1.0 + j));
+  }
+  float age = max(0.0, t - 1.46);
+  float fade = exp(-age / max(uDecay, 0.1)) * (1.0 - ease(2.65, 3.3, t));
+  // Only the drop's own nested rims are lit; no broad glow or crest travels out
+  // beyond it.
+  float sideLight = pow(abs(outward.x), 10.0) * mix(1.0, 0.72, step(0.0, p.x));
+  vec3 reflection = vec3(0.4, 0.62, 0.79) * rings * (0.3 + key * 2.0 + sideLight * 1.8) * fade * uHighlights;
+  color += reflection;
+  alpha = max(alpha, max(reflection.r, max(reflection.g, reflection.b)));
+  return vec4(color, alpha) * opacity;
+}
+
+void main() {
+  vec2 p = (gl_FragCoord.xy - uResolution * 0.5) / uDpr;
+  vec4 icon = iconLens(p);
+  vec4 wordmark = wordmarkLens(p);
+  vec4 result = wordmark + icon * (1.0 - wordmark.a);
+  // RGB and alpha use the same coverage; preserve saturated spectral fringes when
+  // compositing onto transparent or colored backgrounds.
+  result.a = clamp(max(result.a, max(result.r, max(result.g, result.b))), 0.0, 1.0);
+  float dither = (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0;
+  outColor = vec4(clamp(result.rgb + dither * result.a, vec3(0.0), vec3(result.a)), result.a);
+}
+`;
+
+// The photographic finish is independent of the logo and uses premultiplied coverage.
+export const liquidGlassLogoComposite = `#version 300 es
+precision highp float;
+uniform sampler2D uScene;
+uniform vec2 uResolution;
+uniform float uDpr;
+uniform float uUnit;
+uniform float uSettle;
+uniform float uBloom;
+uniform float uTime;
+uniform float uFinish;
+uniform float uPageLight;
+out vec4 outColor;
+
+// Filter premultiplied color and coverage together. The footprint is in CSS
+// pixels, so the glass has the same optical softness on normal and retina screens.
+vec4 softenedWaves(vec2 uv, float lod) {
+  vec2 d = vec2(uDpr * 0.90) / uResolution;
+  vec4 blurred = textureLod(uScene, uv, lod) * 0.25;
+  blurred += textureLod(uScene, uv + vec2(d.x, 0.0), lod) * 0.125;
+  blurred += textureLod(uScene, uv - vec2(d.x, 0.0), lod) * 0.125;
+  blurred += textureLod(uScene, uv + vec2(0.0, d.y), lod) * 0.125;
+  blurred += textureLod(uScene, uv - vec2(0.0, d.y), lod) * 0.125;
+  blurred += textureLod(uScene, uv + d, lod) * 0.0625;
+  blurred += textureLod(uScene, uv - d, lod) * 0.0625;
+  blurred += textureLod(uScene, uv + vec2(d.x, -d.y), lod) * 0.0625;
+  blurred += textureLod(uScene, uv + vec2(-d.x, d.y), lod) * 0.0625;
+  return blurred;
+}
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / uResolution;
+  vec4 base = textureLod(uScene, uv, 0.0);
+  float offset = log2(max(uDpr, 0.5));
+  // Only the exterior liquid is softened. The artwork and its final resting
+  // silhouette retain their native sharpness and original coverage.
+  float wavePhase = smoothstep(0.29, 0.41, uTime) * (1.0 - smoothstep(1.25, 1.50, uTime));
+  float waveMask = 0.0;
+  if (wavePhase > 0.001) {
+    float enter = smoothstep(0.025, 0.16, uTime);
+    float expand = enter * (0.64 + 0.41 * (1.0 - exp(-max(uTime - 0.16, 0.0) * 5.8)));
+    float collapse = 1.0 - smoothstep(1.33, 1.52, uTime);
+    float lensScale = mix(expand * mix(0.48, 1.0, collapse), 1.0, smoothstep(0.0, 1.0, uSettle));
+    float halfSize = max(0.001, uUnit * lensScale * 0.5);
+    float shape = 2.0 + 3.0 * smoothstep(0.29, 0.36, uTime);
+    vec2 p = abs((gl_FragCoord.xy - uResolution * 0.5) / uDpr) / halfSize;
+    float radius = pow(pow(p.x, shape) + pow(p.y, shape), 1.0 / shape);
+    float distance = (radius - 1.0) * halfSize;
+    waveMask = smoothstep(0.0, max(0.75, uUnit * 0.004), distance) * wavePhase;
+    if (waveMask > 0.001) {
+      base = mix(base, softenedWaves(uv, max(0.0, offset + 0.15)), waveMask * 0.94);
+    }
+  }
+  vec3 diffused = textureLod(uScene, uv, offset + 2.5).rgb * 0.50;
+  diffused += textureLod(uScene, uv, offset + 4.1).rgb * 0.32;
+  diffused += textureLod(uScene, uv, offset + 5.4).rgb * 0.18;
+  float light = max(base.r, max(base.g, base.b));
+  // Bright ink retains its calibrated color; light diffuses into its surroundings.
+  float effect = 1.0 - smoothstep(0.0, 1.0, uFinish);
+  // Bloom is light spilling onto a dark page. A pale page already holds that
+  // light, and adding it where the plate thins out reads as a flash.
+  vec3 glow = diffused * uBloom * 0.20 * (1.0 - min(1.0, light * 1.2)) * effect * (1.0 - uPageLight);
+  float alpha = clamp(max(base.a, max(glow.r, max(glow.g, glow.b))), 0.0, 1.0);
+  float grain = fract(sin(dot(gl_FragCoord.xy + floor(uTime * 24.0), vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
+  vec3 color = base.rgb + glow + grain * 0.009 * base.a * clamp(light * 3.0 + 0.05, 0.05, 1.0) * effect * (1.0 - waveMask * 0.85);
+  outColor = vec4(clamp(color, vec3(0.0), vec3(alpha)), alpha);
+}
+`;
+```
+
+--- components/glass-drop/liquid-glass-logo.tsx ---
+
+```tsx
+/*!
+ReactDrops Component License 1.0
+
+Copyright (c) 2026 ReactDrops
+
+1. Scope and definitions
+
+This license applies to ReactDrops software and associated documentation that
+expressly carry this license or are distributed under a LICENSE file containing
+it (the "Software"). "Licensor" means the copyright holder granting rights in
+the Software, and only to the extent that holder has authority to grant them.
+"You" means the individual or entity exercising these rights.
+
+An "End Product" is a website, application, service, or other finished project
+whose primary purpose is something other than providing reusable components,
+source code, templates, or development assets to others.
+
+2. Permitted uses
+
+Subject to this license, Licensor grants You a worldwide, non-exclusive,
+royalty-free license to use, copy, modify, and incorporate the Software into
+unlimited personal, internal, and commercial End Products. You may charge for
+End Products, subscriptions, development services, and work for clients.
+
+You may distribute the Software as an integrated part of an End Product,
+including in browser-delivered JavaScript. You may provide End Product source
+code to a client, and share the Software with employees and contractors who
+need it to develop or maintain End Products. Those recipients may use the
+Software for those purposes subject to this license. This permission does not
+authorize them to redistribute the Software as a reusable development asset.
+
+3. Restricted redistribution
+
+Unless You obtain separate written permission from Licensor, You may not sell,
+sublicense, publish, share, or otherwise redistribute the Software, or a
+substantial portion of it, whether unchanged or modified:
+
+(a) as a standalone component, component library, UI kit, source-code bundle,
+    registry, or other collection of reusable development assets;
+(b) as part of a theme, template, starter project, or similar product offered
+    to multiple recipients for reuse in their own projects; or
+(c) through a builder or generation service that offers the Software as
+    reusable blocks or source-code exports for others' projects.
+
+These restrictions apply to paid and free redistribution. Renaming, restyling,
+repackaging, translating, or modifying the Software does not remove them.
+Building separate finished websites or applications for multiple clients is
+permitted; offering a reusable template or kit containing the Software is not.
+
+Public source-code hosting by Licensor is not permission to republish the
+Software under another license. This license does not override any separate
+rights granted directly by Licensor or applicable code-hosting terms.
+
+4. Notices and ownership
+
+Retain this license and applicable copyright and third-party notices in source
+copies of the Software and permitted source distributions. No visible credit
+or ReactDrops logo is required in an End Product's user interface.
+
+Licensor retains ownership of its Software. You retain rights in Your own
+contributions, subject to the license for any incorporated Software. No rights
+to trademarks, trade names, or logos are granted by this license.
+
+5. Third-party materials and separate grants
+
+Dependencies, fonts, images, videos, and other third-party materials remain
+subject to their respective licenses. Separately identified third-party code
+is licensed under its stated terms, and these restrictions do not limit rights
+granted by its copyright holders. Retain all required third-party notices.
+Demo media are not licensed by this document; obtain Your own permission or
+replace them with media You are entitled to use.
+
+This license does not revoke rights granted under other valid licenses. It does
+not assert ownership of third-party work or grant rights Licensor lacks.
+
+6. Termination
+
+The permissions granted here continue unless terminated for a material breach.
+If You fail to cure a material breach within 30 days after receiving written
+notice from Licensor, Your permissions terminate. On termination, cease uses
+and distributions requiring this license. Rights under independently granted
+licenses and rights that applicable law does not allow to be restricted remain
+unaffected. Sections 3 through 7 survive termination.
+
+7. Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. TO THE MAXIMUM EXTENT
+PERMITTED BY APPLICABLE LAW, LICENSOR AND CONTRIBUTORS SHALL NOT BE LIABLE FOR
+ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT, OR OTHERWISE,
+ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
+
+This license does not limit rights or exceptions that applicable law makes
+non-waivable. No other permissions are granted by implication.
+*/
+
+'use client';
+
+import {
+  forwardRef,
+  useEffect,
+  useLayoutEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
+import {
+  createLiquidGlassLogoRenderer,
+  liquidGlassLogoDefaults,
+  liquidGlassLogoThemes,
+  normalizeLiquidGlassLogo,
+  type LiquidGlassLogoTuning,
+} from './liquid-glass-logo-renderer';
+
+// Nexus UI: the stylesheet that shipped beside this component (liquid-glass-logo.css) is inlined
+// below, so the component installs as plain .ts/.tsx files with no CSS import to wire up.
+const layer: CSSProperties = {
+  position: 'absolute',
+  inset: 0,
+  display: 'block',
+  width: '100%',
+  height: '100%',
+  pointerEvents: 'none',
+};
+const fallbackLayer: CSSProperties = {
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  lineHeight: 1,
+  whiteSpace: 'pre',
+};
+
+export type LiquidGlassLogoHandle = {
+  replay: () => void;
+  seek: (seconds: number) => void;
+  pause: () => void;
+  play: () => void;
+};
+export type LiquidGlassLogoProps = Partial<LiquidGlassLogoTuning> & {
+  height?: number | string;
+  /** Image URL drawn behind the animation, covering the container. The plate turns see-through. */
+  backgroundImage?: string;
+  /** Horizontal and vertical offsets as percentages of the frame; 0 centers the image. */
+  backgroundX?: number;
+  backgroundY?: number;
+  /** Scale of the cover image, from 1 to 3. */
+  backgroundScale?: number;
+  /** Color and opacity (0–1) of the overlay between the image and the logo. */
+  backgroundTint?: string;
+  backgroundTintOpacity?: number;
+  className?: string;
+  style?: CSSProperties;
+  /** Accessible name; defaults to "Logo" or the visible wordmark text. */
+  'aria-label'?: string;
+};
+
+export const LiquidGlassLogo = forwardRef<LiquidGlassLogoHandle, LiquidGlassLogoProps>(
+  function LiquidGlassLogo(
+    {
+      height,
+      backgroundImage,
+      backgroundX = 0,
+      backgroundY = 0,
+      backgroundScale = 1,
+      backgroundTint = '#000000',
+      backgroundTintOpacity = 0,
+      className = '',
+      style,
+      'aria-label': label,
+      ...overrides
+    },
+    ref,
+  ) {
+    const canvas = useRef<HTMLCanvasElement>(null);
+    const engine = useRef<ReturnType<typeof createLiquidGlassLogoRenderer>>(null);
+    const [ready, setReady] = useState(false);
+    const [fallback, setFallback] = useState(false);
+    // A theme supplies the colors; any color passed explicitly still wins.
+    const theme = liquidGlassLogoThemes[overrides.theme === 'light' ? 'light' : 'dark'];
+    // Over a background image the plate is see-through: the glass keeps its
+    // optics, but its own color would hide the picture behind it.
+    const tuning = normalizeLiquidGlassLogo({
+      ...liquidGlassLogoDefaults,
+      ...theme,
+      ...overrides,
+      ...(backgroundImage ? { tile: false } : {}),
+    });
+    const key = JSON.stringify(tuning);
+    const latest = useRef(tuning);
+    // Nexus UI: kept current in a layout effect (declared first, so it runs before the effects
+    // below) instead of being written during render.
+    useLayoutEffect(() => {
+      latest.current = tuning;
+    });
+    useImperativeHandle(
+      ref,
+      () => ({
+        replay: () => engine.current?.replay(),
+        seek: (seconds) => engine.current?.seek(seconds),
+        pause: () => engine.current?.pause(),
+        play: () => engine.current?.play(),
+      }),
+      [],
+    );
+    useEffect(() => {
+      if (!canvas.current) return;
+      let renderer: ReturnType<typeof createLiquidGlassLogoRenderer> = null;
+      try {
+        renderer = createLiquidGlassLogoRenderer(canvas.current, latest.current, () =>
+          setReady(true),
+        );
+      } catch {
+        renderer = null;
+      }
+      if (!renderer) setFallback(true);
+      engine.current = renderer;
+      return () => {
+        renderer?.dispose();
+        engine.current = null;
+      };
+    }, []);
+    // Apply size and DPR changes before the resized canvas can be painted.
+    useLayoutEffect(() => engine.current?.update(latest.current), [key]);
+    const markSource = tuning.mark === 'logo' ? tuning.logo : tuning.mark;
+    return (
+      <div
+        className={className || undefined}
+        style={{
+          position: 'relative',
+          isolation: 'isolate',
+          width: '100%',
+          height: height ?? '100%',
+          minHeight: '16rem',
+          overflow: 'hidden',
+          background: tuning.background,
+          ...style,
+        }}
+        role="img"
+        aria-label={label ?? (tuning.ending === 'logo' ? 'Logo' : tuning.text)}
+        data-liquid-glass-ready={ready || undefined}
+      >
+        {backgroundImage && (
+          <>
+            <div
+              aria-hidden="true"
+              style={{
+                ...layer,
+                background: `url(${JSON.stringify(backgroundImage)}) center / cover no-repeat`,
+                transform: `translate(${Math.max(-100, Math.min(100, backgroundX))}%, ${Math.max(-100, Math.min(100, backgroundY))}%) scale(${Math.max(1, Math.min(3, backgroundScale))})`,
+              }}
+            />
+            <div
+              aria-hidden="true"
+              style={{
+                ...layer,
+                backgroundColor: backgroundTint,
+                opacity: Math.max(0, Math.min(1, backgroundTintOpacity)),
+              }}
+            />
+          </>
+        )}
+        <canvas ref={canvas} aria-hidden="true" style={{ ...layer, opacity: ready ? 1 : 0 }} />
+        {fallback && (
+          <span
+            aria-hidden="true"
+            style={{
+              ...fallbackLayer,
+              color: tuning.textColor,
+              fontFamily: tuning.fontFamily,
+              fontWeight: tuning.fontWeight,
+              fontSize: tuning.fontSize,
+              letterSpacing: `${tuning.letterSpacing}em`,
+              gap: `${tuning.markGap}em`,
+            }}
+          >
+            {tuning.ending === 'logo' ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={tuning.logo}
+                alt=""
+                style={{
+                  width: tuning.logoSize * tuning.logoScale * tuning.finalLogoScale,
+                  height: tuning.logoSize * tuning.logoScale * tuning.finalLogoScale,
+                  maxWidth: '80%',
+                  maxHeight: '80%',
+                  objectFit: 'contain',
+                }}
+              />
+            ) : (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                {markSource && <img src={markSource} alt="" style={{ height: '0.8em', width: 'auto' }} />}
+                {tuning.text}
+              </>
+            )}
+          </span>
+        )}
+      </div>
+    );
+  },
+);
 ```
