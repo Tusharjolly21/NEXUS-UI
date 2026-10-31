@@ -8,6 +8,7 @@ import { getAllPosts } from "@/lib/blog";
 import { alternatives } from "@/lib/alternatives";
 import { getCategoryComponents, getPopulatedCategories, isIndexableCategory } from "@/lib/catalog/category-seo";
 import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
+import { ICONS } from "@/lib/icons/catalog";
 
 // Every page's markup changed on this date (component redesign, Pro-only templates, new pricing),
 // so no lastmod is older than it.
@@ -31,6 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: base,                              lastModified: since(latestComponent.createdAt) },
     { url: `${base}/components`,              lastModified: since(latestComponent.createdAt) },
+    { url: `${base}/icons`,                   lastModified: since(ICONS.reduce((a, b) => (a.createdAt > b.createdAt ? a : b)).createdAt) },
     { url: `${base}/blocks`,                  lastModified: since("2026-10-20") },
     { url: `${base}/sounds`,                  lastModified: since("2026-10-20") },
     { url: `${base}/videos`,                  lastModified: since("2026-10-22") },
@@ -56,6 +58,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const componentRoutes: MetadataRoute.Sitemap = libraryComponents.map((c) => ({
     url: `${base}/components/${c.slug}`,
     lastModified: since(c.createdAt),
+  }));
+
+  const iconRoutes: MetadataRoute.Sitemap = ICONS.map((i) => ({
+    url: `${base}/icons/${i.slug}`,
+    lastModified: since(i.createdAt),
   }));
 
   // Category landing pages — lastmod is the newest component in the category.
@@ -86,5 +93,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: since(post.date ?? "2026-01-01"),
   }));
 
-  return [...staticRoutes, ...categoryRoutes, ...componentRoutes, ...templateRoutes, ...blockRoutes, ...videoRoutes, ...blogRoutes];
+  return [...staticRoutes, ...categoryRoutes, ...componentRoutes, ...iconRoutes, ...templateRoutes, ...blockRoutes, ...videoRoutes, ...blogRoutes];
 }
