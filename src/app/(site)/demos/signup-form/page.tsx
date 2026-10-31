@@ -10,9 +10,9 @@ export const metadata: Metadata = createMetadata({
 
 export default function SignupFormDemoPage() {
   return (
-    <main className="min-h-[calc(100dvh-4rem)] bg-gradient-to-b from-background via-muted/15 to-background">
+    <div className="min-h-[calc(100dvh-4rem)] bg-gradient-to-b from-background via-muted/15 to-background">
       <h1 className="sr-only">Signup Form</h1>
       <SignupFormDemo />
-    </main>
+    </div>
   );
 }

@@ -13,12 +13,13 @@ export default function AdminContentPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div>
-            <Label className="text-xs text-muted-foreground">Slug</Label>
-            <Input className="mt-1 bg-background" placeholder="hero-aurora-v2" />
+            <Label htmlFor="cms-slug" className="text-xs text-muted-foreground">Slug</Label>
+            <Input id="cms-slug" className="mt-1 bg-background" placeholder="hero-aurora-v2" />
           </div>
           <div>
-            <Label className="text-xs text-muted-foreground">Markdown / MDX body</Label>
+            <Label htmlFor="cms-body" className="text-xs text-muted-foreground">Markdown / MDX body</Label>
             <textarea
+              id="cms-body"
               className="mt-1 min-h-[160px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
               placeholder="Publishing pipeline can POST to Supabase Storage + table rows."
             />

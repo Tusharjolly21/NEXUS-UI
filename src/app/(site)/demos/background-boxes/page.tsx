@@ -10,9 +10,9 @@ export const metadata: Metadata = createMetadata({
 
 export default function BackgroundBoxesDemoPage() {
   return (
-    <main className="min-h-[calc(100dvh-4rem)] bg-gradient-to-b from-background via-muted/15 to-background">
+    <div className="min-h-[calc(100dvh-4rem)] bg-gradient-to-b from-background via-muted/15 to-background">
       <h1 className="sr-only">Background Boxes</h1>
       <BackgroundBoxesDemo />
-    </main>
+    </div>
   );
 }

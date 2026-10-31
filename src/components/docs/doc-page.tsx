@@ -91,10 +91,13 @@ export function DocPre({ children }: { children: string }) {
   const highlighted = highlight(code);
 
   const copy = useCallback(() => {
-    navigator.clipboard.writeText(code).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    navigator.clipboard.writeText(code).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      },
+      () => {}, // blocked (insecure context / permission denied): leave the button as it was
+    );
   }, [code]);
 
   return (
