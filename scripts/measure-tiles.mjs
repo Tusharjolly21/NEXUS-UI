@@ -39,6 +39,8 @@ const browser = await puppeteer.launch({
 });
 const debugDir = process.env.TILE_LAB_DEBUG_DIR;
 if (debugDir) fs.mkdirSync(debugDir, { recursive: true });
+// Answer the cookie banner up front: it sits over the lower-left of the page and would be measured as content.
+await browser.setCookie({ name: "nx-consent", value: "denied", url: base });
 let page = await browser.newPage();
 
 /**
