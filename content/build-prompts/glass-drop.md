@@ -110,7 +110,7 @@ export function GlassDrop({
   loop?: boolean;
   /** play when it comes into view; otherwise it rests on the finished logo until you replay it */
   autoplay?: boolean;
-  /** show the pickers and the upload button */
+  /** show the pickers, the upload button and the line of help under the stage */
   controls?: boolean;
   /** any other setting of the glass (dispersion, caustics, bloom, speed…), passed straight through */
   tuning?: Partial<LiquidGlassLogoTuning>;
@@ -275,7 +275,7 @@ export function GlassDrop({
           </div>
         )}
       </div>
-      <p className="m-0 px-1 text-[12.5px] text-[#86868b]">Plays when it comes into view. Click to replay, or drop in any SVG or PNG.</p>
+      {controls && <p className="m-0 px-1 text-[12.5px] text-[#86868b]">Plays when it comes into view. Click to replay, or drop in any SVG or PNG.</p>}
     </div>
   );
 }
