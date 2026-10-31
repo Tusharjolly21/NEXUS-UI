@@ -4398,6 +4398,7 @@ export const playgrounds: Record<string, Playground> = {
           tint={v.tint as boolean}
           loop={v.loop as boolean}
           height={420}
+          controls={false}
         />
       </div>
     ),
