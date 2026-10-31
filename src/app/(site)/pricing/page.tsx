@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, Minus, Plus } from "lucide-react";
+import { CommentDeck } from "@/components/pricing/comment-deck";
 import { PlanAction, PlanNotice, PlanTag } from "@/components/pricing/plan-action";
 import { PillLink, RainbowWord } from "@/components/site";
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
@@ -233,6 +234,13 @@ export default function PricingPage() {
               Request a component ›
             </Link>
           </p>
+        </div>
+      </section>
+
+      {/* What people say, as a pull quote and a deck of comments */}
+      <section className="overflow-hidden px-4 pb-28">
+        <div className="mx-auto max-w-[1152px]">
+          <CommentDeck />
         </div>
       </section>
 

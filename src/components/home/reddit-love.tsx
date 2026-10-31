@@ -9,7 +9,7 @@ import Image from "next/image";
  * account that Instagram itself shows as verified.
  */
 
-type Comment = {
+export type Comment = {
   user: string;
   source: string;
   quote: string;
@@ -57,7 +57,8 @@ const TONES: [string, string][] = [
   ["#ff8fa3", "#ff375f"],
 ];
 
-function tone(user: string) {
+/** The avatar's two gradient colours, fixed per username. */
+export function tone(user: string) {
   let h = 0;
   for (const c of user) h = (h * 31 + c.charCodeAt(0)) >>> 0;
   return TONES[h % TONES.length];
@@ -127,6 +128,9 @@ function Row({ items, seconds, reverse }: { items: Comment[]; seconds: number; r
     </div>
   );
 }
+
+/** Every comment, in the homepage's order. The pricing page's deck reads the same list. */
+export const COMMENTS: Comment[] = [...ROW_ONE, ...ROW_TWO];
 
 export function RedditLove() {
   return (
