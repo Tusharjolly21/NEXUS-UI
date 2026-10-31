@@ -13733,6 +13733,7 @@ export default function Page() {
       { name: "onChange", type: "(id: string) => void", description: "Called with the id of the tab that was just chosen." },
       { name: "theme", type: '"dark" | "light"', description: "Control the theme yourself. Leave it out and the sun and moon switch keeps its own." },
       { name: "onThemeChange", type: '(theme: "dark" | "light") => void', description: "Called with the theme the switch is asking for." },
+      { name: "showHeading", type: "boolean", defaultValue: "true", description: "The tab's name and caption above the bar. Turn it off to show the bar alone." },
       { name: "className", type: "string", description: "Extra classes for the outer frame, which is 300px tall and up to 720px wide." },
     ],
     Preview: Previews.PreviewMercuryTabs,

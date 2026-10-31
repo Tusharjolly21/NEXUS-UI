@@ -86,6 +86,8 @@ export interface MercuryTabsProps {
   theme?: "dark" | "light";
   /** Called with the theme the switch is asking for. */
   onThemeChange?: (t: "dark" | "light") => void;
+  /** The tab's name and one-line caption above the bar. Turn it off to show the bar alone. */
+  showHeading?: boolean;
   className?: string;
 }
 
@@ -105,7 +107,7 @@ export interface MercuryTabsProps {
  * `autoplay` tours the tabs and flips the theme until the first real interaction. Reduced motion moves the frame
  * without the flow.
  */
-export function MercuryTabs({ autoplay = false, defaultTab = "overview", onChange, theme: themeProp, onThemeChange, className = "" }: MercuryTabsProps) {
+export function MercuryTabs({ autoplay = false, defaultTab = "overview", onChange, theme: themeProp, onThemeChange, showHeading = true, className = "" }: MercuryTabsProps) {
   const reduce = useReducedMotion();
   const stage = useRef<HTMLDivElement>(null);
   const cvs = useRef<HTMLCanvasElement>(null);
@@ -282,14 +284,16 @@ export function MercuryTabs({ autoplay = false, defaultTab = "overview", onChang
   const face = (look: typeof LOOK.dark, interactive: boolean, layer: number) => (
     <div className="absolute inset-0 grid place-items-center" style={{ background: look.stage }} aria-hidden={!interactive || undefined}>
       <div className="flex w-full max-w-[520px] flex-col items-center gap-7 px-2 sm:px-4">
-        <div className="h-[52px] text-center">
-          <AnimatePresence mode="popLayout" initial={false}>
-            <motion.div key={TABS[active].id} initial={{ opacity: 0, y: 10, filter: "blur(4px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} exit={{ opacity: 0, y: -10, filter: "blur(4px)" }} transition={{ y: { type: "spring", stiffness: 260, damping: 26 }, opacity: { duration: 0.3 }, filter: { duration: 0.3, ease: "easeOut" } }}>
-              <p className="m-0 text-[22px] font-semibold tracking-[-0.02em]" style={{ color: look.text }}>{TABS[active].label}</p>
-              <p className="m-0 mt-1 text-[13px]" style={{ color: look.sub }}>{TABS[active].line}</p>
-            </motion.div>
-          </AnimatePresence>
-        </div>
+        {showHeading && (
+          <div className="h-[52px] text-center">
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.div key={TABS[active].id} initial={{ opacity: 0, y: 10, filter: "blur(4px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} exit={{ opacity: 0, y: -10, filter: "blur(4px)" }} transition={{ y: { type: "spring", stiffness: 260, damping: 26 }, opacity: { duration: 0.3 }, filter: { duration: 0.3, ease: "easeOut" } }}>
+                <p className="m-0 text-[22px] font-semibold tracking-[-0.02em]" style={{ color: look.text }}>{TABS[active].label}</p>
+                <p className="m-0 mt-1 text-[13px]" style={{ color: look.sub }}>{TABS[active].line}</p>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        )}
         <div className="flex items-stretch rounded-[26px] p-[5px] sm:p-[7px]" style={{ background: look.bar, boxShadow: look.barEdge }}>
           <div role={interactive ? "tablist" : undefined} aria-label={interactive ? "Sections" : undefined} onKeyDown={interactive ? keys : undefined} className="flex items-center">
             {TABS.map((t, i) => (
