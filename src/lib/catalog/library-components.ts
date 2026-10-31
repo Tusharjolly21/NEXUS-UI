@@ -13645,6 +13645,74 @@ export default function Page() {
     ],
     tailwindSource: tw,
   },
+  {
+    slug: "status-morph",
+    name: "Status Morph",
+    registryCliName: "status-morph",
+    description:
+      "An iPhone-style status bar (signal, Wi-Fi, battery) that takes itself apart to connect. Tap it and the battery drains, amber then red, before its outline rounds itself into a ring around the Wi-Fi. The signal bars sink into dots, swing under the ring and slide into its gap, and the ring spins while the Wi-Fi arcs ripple outward. When it connects, the spin coasts to rest, the ring closes over the dots with a soft pulse and the arcs fill in one by one. Tap again and it all folds back into the bar, this time charging, with a bolt.",
+    categorySlug: "motion-effects",
+    tags: ["status bar","wifi","battery","signal","ios","apple","morph","loading","connect","svg","autoplay","motion kit"],
+    premium: false,
+    trendingScore: 185,
+    createdAt: "2026-10-31",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Connects and lets go by itself until the visitor taps it. Pauses while it is off screen." },
+      { name: "theme", type: "\"light\" | \"dark\"", defaultValue: "\"light\"", description: "Light (graphite on a white card) or dark (white on a graphite card)." },
+      { name: "size", type: "number", defaultValue: "260", description: "Width of the drawing in pixels. Kept between 160 and 480." },
+      { name: "speed", type: "number", defaultValue: "1", description: "How fast it plays: 1 is the designed pace, 2 is twice as fast. Kept between 0.25 and 4." },
+      { name: "network", type: "string", defaultValue: "\"Nexus\"", description: "The network name shown under the icons while joining and once connected." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Loudness of its sounds, 0 to 1." },
+    ],
+    Preview: Previews.PreviewStatusMorph,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { StatusMorph } from "@/components/status-morph";
+
+// Tap the status bar to connect: the battery becomes a ring, the bars become dots. Tap again to let go.
+export default function Page() {
+  return (
+    <section className="flex justify-center bg-[#f5f5f7] px-4 py-16">
+      <StatusMorph />
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Dark, with your own network name",
+        code: `// src/app/page.tsx
+
+import { StatusMorph } from "@/components/status-morph";
+
+export default function Page() {
+  return (
+    <section className="flex justify-center bg-black px-4 py-16">
+      <StatusMorph theme="dark" network="Studio 5G" />
+    </section>
+  );
+}`,
+      },
+      {
+        title: "Plays by itself until it is tapped",
+        code: `// src/app/page.tsx
+
+import { StatusMorph } from "@/components/status-morph";
+
+// autoplay connects and disconnects on a loop. The first tap takes over.
+export default function Page() {
+  return (
+    <section className="flex justify-center px-4 py-16">
+      <StatusMorph autoplay size={320} />
+    </section>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */
