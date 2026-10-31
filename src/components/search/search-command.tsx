@@ -4,11 +4,12 @@ import * as React from "react";
 import { SearchTrigger } from "./search-trigger";
 
 /*
- * The search button is on every page, but the palette behind it needs the whole catalog and every
- * preview component (hundreds of KB). So the button, the open/closed state and the shortcuts live
- * here, and the palette itself (./search-palette) loads separately: in the background once the page
- * has settled, or immediately on hover, focus or the first keypress of ⌘K, so it is normally
- * ready before anyone asks for it.
+ * The search button is on every page, but the palette behind it is only needed once someone
+ * searches. So the button, the open/closed state and the shortcuts live here, and the palette
+ * itself (./search-palette) loads separately: in the background once the page has settled, or
+ * immediately on hover, focus or the first keypress of ⌘K. Its catalog is a small JSON fetched by
+ * the palette (/api/search-index); the live previews in its side pane are fetched only on that
+ * same intent, so most visitors never download them for search.
  */
 type PaletteModule = typeof import("./search-palette");
 
@@ -31,7 +32,15 @@ export function SearchCommand({ variant = "default" }: { variant?: "default" | "
     void loadPalette().then((m) => setPalette(() => m.SearchPalette));
   }, []);
 
-  /* Load it in the background once the page has finished loading and the browser is idle. */
+  /* The preview pane draws live components, whose code is large. Fetch it only when someone shows
+     intent (hover, focus, open), not for every visitor on every page. The catalog JSON follows the same rule. */
+  const warmWithPreviews = React.useCallback(() => {
+    warm();
+    void loadPalette().then((m) => m.loadCatalog());
+    void import("@/registry/component-previews");
+  }, [warm]);
+
+  /* Load the palette itself (small) in the background once the page has finished loading and the browser is idle. */
   React.useEffect(() => {
     let idleId: number | undefined;
     const onIdle = () => {
@@ -50,11 +59,11 @@ export function SearchCommand({ variant = "default" }: { variant?: "default" | "
 
   /* Opening starts a fresh session, in the event path rather than in an effect. */
   const openPalette = React.useCallback(() => {
-    warm();
+    warmWithPreviews();
     if (openRef.current) return;
     setSession((n) => n + 1);
     setOpen(true);
-  }, [warm]);
+  }, [warmWithPreviews]);
 
   const close = React.useCallback((restoreFocus = true) => {
     setOpen(false);
@@ -85,7 +94,7 @@ export function SearchCommand({ variant = "default" }: { variant?: "default" | "
 
   return (
     <>
-      <SearchTrigger onClick={openPalette} onWarm={warm} variant={variant} buttonRef={triggerRef} />
+      <SearchTrigger onClick={openPalette} onWarm={warmWithPreviews} variant={variant} buttonRef={triggerRef} />
       {Palette ? <Palette key={session} open={open} onClose={close} /> : null}
     </>
   );

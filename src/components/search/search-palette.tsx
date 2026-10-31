@@ -16,31 +16,19 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { libraryComponents } from "@/lib/catalog/library-components";
-import { templates } from "@/lib/catalog/templates";
-import { blocks } from "@/lib/catalog/blocks";
-import { videos } from "@/lib/catalog/videos";
-import { getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
+import type { SearchEntry } from "@/lib/catalog/search-index";
 import { DOCS_PAGES } from "@/components/docs/docs-nav";
+import { DynamicPreview } from "@/components/library/dynamic-preview";
 import { cn } from "@/lib/utils";
 import { useProAccess } from "@/components/pro/pro-access";
 
 /* ── Index ─────────────────────────────────────────────────────────────────── */
 
-type Kind = "component" | "template" | "block" | "video" | "doc";
+type Kind = SearchEntry["kind"] | "doc";
 
-type Entry = {
-  id: string;
+type Entry = Omit<SearchEntry, "kind" | "keywords"> & {
   kind: Kind;
-  title: string;
-  subtitle: string;
-  description: string;
-  href: string;
-  premium: boolean;
-  score: number;
-  tags: string[];
   haystack: string;
-  Preview?: React.ComponentType<{ compact?: boolean }>;
 };
 
 const KIND_ICON: Record<Kind, LucideIcon> = {
@@ -51,62 +39,44 @@ const KIND_ICON: Record<Kind, LucideIcon> = {
   doc: BookOpen,
 };
 
-const COMPONENTS: Entry[] = libraryComponents.map((c) => {
-  const category = getComponentCategoryLabel(c.categorySlug);
-  return {
-    id: `component:${c.slug}`,
-    kind: "component",
-    title: c.name,
-    subtitle: category,
-    description: c.description,
-    href: `/components/${c.slug}`,
-    premium: c.premium,
-    score: c.trendingScore,
-    tags: c.tags,
-    haystack: `${c.name} ${c.slug} ${c.tags.join(" ")} ${c.categorySlug} ${category} ${c.description}`.toLowerCase(),
-    Preview: c.Preview,
-  };
-});
+function toEntry({ keywords, ...e }: SearchEntry): Entry {
+  return { ...e, haystack: `${e.title} ${keywords} ${e.tags.join(" ")} ${e.subtitle} ${e.description}`.toLowerCase() };
+}
 
-const TEMPLATES: Entry[] = templates.map((t) => ({
-  id: `template:${t.slug}`,
-  kind: "template",
-  title: t.title.split(" — ")[0],
-  subtitle: t.category,
-  description: t.description,
-  href: `/templates/${t.slug}`,
-  premium: t.premium,
-  score: t.trendingScore,
-  tags: t.tags,
-  haystack: `${t.title} ${t.description} ${t.category} ${t.tags.join(" ")}`.toLowerCase(),
-}));
+/* The catalog rows are fetched, not bundled: the full catalog (with every component's source and
+   live preview) is over a megabyte. See src/lib/catalog/search-index.ts. */
+type Catalog = Record<"component" | "template" | "block" | "video", Entry[]>;
 
-const BLOCKS: Entry[] = blocks.map((b) => ({
-  id: `block:${b.slug}`,
-  kind: "block",
-  title: b.name,
-  subtitle: b.category,
-  description: b.description,
-  href: `/blocks/${b.slug}`,
-  premium: b.premium,
-  score: b.premium ? 70 : 50,
-  tags: b.tags,
-  haystack: `${b.name} ${b.description} ${b.category} ${b.tags.join(" ")}`.toLowerCase(),
-  Preview: b.Preview,
-}));
+let catalogPromise: Promise<Catalog | null> | null = null;
+export function loadCatalog() {
+  catalogPromise ??= fetch("/api/search-index")
+    .then((res) => (res.ok ? (res.json() as Promise<SearchEntry[]>) : Promise.reject(new Error(String(res.status)))))
+    .then((rows) => {
+      const catalog: Catalog = { component: [], template: [], block: [], video: [] };
+      for (const row of rows) catalog[row.kind].push(toEntry(row));
+      return catalog;
+    })
+    .catch(() => {
+      catalogPromise = null; // let the next open try again
+      return null;
+    });
+  return catalogPromise;
+}
 
-const VIDEOS: Entry[] = videos.map((v, i) => ({
-  id: `video:${v.slug}`,
-  kind: "video",
-  title: v.title,
-  subtitle: v.purpose,
-  description: v.blurb,
-  href: `/videos/${v.slug}`,
-  premium: v.premium,
-  score: 60 - i,
-  tags: [v.app, v.purpose],
-  haystack: `${v.title} ${v.blurb} ${v.purpose} ${v.motion} ${v.app} ${v.platforms.join(" ")} ${v.formats.join(" ")} video reel`.toLowerCase(),
-}));
+function useCatalog(open: boolean) {
+  const [catalog, setCatalog] = React.useState<Catalog | null>(null);
+  React.useEffect(() => {
+    if (!open) return;
+    let alive = true;
+    void loadCatalog().then((c) => {
+      if (alive) setCatalog(c);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [open]);
+  return catalog;
+}
 
 const DOCS: Entry[] = DOCS_PAGES.map((d, i) => ({
   id: `doc:${d.href}`,
@@ -121,14 +91,12 @@ const DOCS: Entry[] = DOCS_PAGES.map((d, i) => ({
   haystack: `${d.label} docs documentation guide ${d.href}`.toLowerCase(),
 }));
 
-const POPULAR = [...COMPONENTS].sort((a, b) => b.score - a.score).slice(0, 5);
-
-const GROUPS: { kind: Kind; label: string; source: Entry[]; limit: number }[] = [
-  { kind: "component", label: "Components", source: COMPONENTS, limit: 8 },
-  { kind: "template", label: "Templates", source: TEMPLATES, limit: 4 },
-  { kind: "block", label: "Blocks", source: BLOCKS, limit: 4 },
-  { kind: "video", label: "Videos", source: VIDEOS, limit: 3 },
-  { kind: "doc", label: "Docs", source: DOCS, limit: 4 },
+const GROUPS: { kind: Kind; label: string; limit: number }[] = [
+  { kind: "component", label: "Components", limit: 8 },
+  { kind: "template", label: "Templates", limit: 4 },
+  { kind: "block", label: "Blocks", limit: 4 },
+  { kind: "video", label: "Videos", limit: 3 },
+  { kind: "doc", label: "Docs", limit: 4 },
 ];
 
 const SUGGESTIONS = ["pricing", "dock", "sidebar", "marquee"];
@@ -143,17 +111,18 @@ function rank(entry: Entry, needle: string) {
 
 type Section = { id: string; label: string; items: Entry[] };
 
-function buildSections(needle: string): Section[] {
+function buildSections(needle: string, catalog: Catalog | null): Section[] {
   if (!needle) {
+    const popular = catalog ? [...catalog.component].sort((a, b) => b.score - a.score).slice(0, 5) : [];
     return [
-      { id: "popular", label: "Popular components", items: POPULAR },
+      { id: "popular", label: "Popular components", items: popular },
       { id: "start", label: "Get started", items: DOCS.slice(0, 3) },
-    ];
+    ].filter((s) => s.items.length > 0);
   }
   return GROUPS.map((g) => ({
     id: g.kind,
     label: g.label,
-    items: g.source
+    items: (g.kind === "doc" ? DOCS : (catalog?.[g.kind] ?? []))
       .map((e) => ({ e, r: rank(e, needle) }))
       .filter((x) => x.r > 0)
       .sort((a, b) => b.r - a.r || b.e.score - a.e.score)
@@ -237,7 +206,8 @@ export function SearchPalette({
   }, [open]);
 
   const needle = query.trim().toLowerCase();
-  const sections = React.useMemo(() => buildSections(needle), [needle]);
+  const catalog = useCatalog(open);
+  const sections = React.useMemo(() => buildSections(needle, catalog), [needle, catalog]);
   const flat = React.useMemo(() => sections.flatMap((s) => s.items), [sections]);
   const active = flat.length ? Math.min(activeIdx, flat.length - 1) : -1;
   const activeItem = active >= 0 ? flat[active] : null;
@@ -549,12 +519,10 @@ export function SearchPalette({
                       className="flex min-h-0 flex-1 flex-col"
                     >
                       <div className="relative h-[188px] shrink-0 overflow-hidden rounded-[14px] bg-background ring-1 ring-border">
-                        {activeItem.Preview ? (
+                        {activeItem.exportName ? (
                           <>
                             <div inert aria-hidden className="pointer-events-none absolute inset-x-0 top-0 w-full">
-                              <React.Suspense fallback={<div className="m-4 h-16 w-32 animate-pulse rounded-[10px] bg-foreground/[0.06]" />}>
-                                <activeItem.Preview compact />
-                              </React.Suspense>
+                              <DynamicPreview exportName={activeItem.exportName} compact />
                             </div>
                             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-background to-transparent" />
                           </>
@@ -639,7 +607,9 @@ export function SearchPalette({
                 </button>
               ) : (
                 <span className="ml-auto tabular-nums">
-                  {COMPONENTS.length} components · {TEMPLATES.length} templates · {BLOCKS.length} blocks · {VIDEOS.length} videos
+                  {catalog
+                    ? `${catalog.component.length} components · ${catalog.template.length} templates · ${catalog.block.length} blocks · ${catalog.video.length} videos`
+                    : null}
                 </span>
               )}
             </div>
