@@ -9,12 +9,16 @@ export type BatteryIconProps = {
   /** Line thickness, in a drawing that is 24 units wide. */
   strokeWidth?: number;
   className?: string;
+  /** Playback speed: 1 is the designed pace, 2 is twice as fast. */
+  speed?: number;
+  /** Colour of the icon's accent details, such as #30d158. Defaults to the icon's own colour. */
+  accent?: string;
   /** Plays (true) or rests (false). Left out, it plays while the pointer is over it. */
   play?: boolean;
 };
 
 /** A battery whose bars fill one by one, as if charging. */
-export function BatteryIcon({ size = 24, strokeWidth = 2, className, play }: BatteryIconProps) {
+export function BatteryIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: BatteryIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
   const on = !reduce && (play ?? hover);
@@ -43,11 +47,11 @@ export function BatteryIcon({ size = 24, strokeWidth = 2, className, play }: Bat
           width="2.6"
           height="4"
           rx="0.6"
-          fill="currentColor"
+          fill={accent}
           stroke="none"
           initial={false}
           animate={on ? { opacity: [0.14, 0.14, 1, 1, 0.14] } : { opacity: i < 2 ? 1 : 0.14 }}
-          transition={on ? { duration: 1.6, times: [0, 0.2 + i * 0.22, 0.22 + i * 0.22, 0.92, 1], ease: "linear", repeat: Infinity } : { duration: 0.2 }}
+          transition={on ? { duration: 1.6 / speed, times: [0, 0.2 + i * 0.22, 0.22 + i * 0.22, 0.92, 1], ease: "linear", repeat: Infinity } : { duration: 0.2 / speed }}
         />
       ))}
     </svg>

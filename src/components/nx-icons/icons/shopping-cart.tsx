@@ -9,12 +9,16 @@ export type ShoppingCartIconProps = {
   /** Line thickness, in a drawing that is 24 units wide. */
   strokeWidth?: number;
   className?: string;
+  /** Playback speed: 1 is the designed pace, 2 is twice as fast. */
+  speed?: number;
+  /** Colour of the icon's accent details, such as #ff9f0a. Defaults to the icon's own colour. */
+  accent?: string;
   /** Plays (true) or rests (false). Left out, it plays while the pointer is over it. */
   play?: boolean;
 };
 
 /** A cart that rolls forward as an item drops in. */
-export function ShoppingCartIcon({ size = 24, strokeWidth = 2, className, play }: ShoppingCartIconProps) {
+export function ShoppingCartIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: ShoppingCartIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
   const on = !reduce && (play ?? hover);
@@ -36,7 +40,7 @@ export function ShoppingCartIcon({ size = 24, strokeWidth = 2, className, play }
       <motion.g
         initial={false}
         animate={on ? { x: [0, 0, 1.4, 0], y: [0, 0, 0.8, 0] } : { x: 0, y: 0 }}
-        transition={{ duration: 0.7, times: [0, 0.4, 0.55, 1], ease: "easeInOut" }}
+        transition={{ duration: 0.7 / speed, times: [0, 0.4, 0.55, 1], ease: "easeInOut" }}
       >
         <path d="M2.5 3.5h2.6l2.1 10.2a1.5 1.5 0 0 0 1.5 1.2h8.4a1.5 1.5 0 0 0 1.5-1.1l1.4-6.2H6" />
         <circle cx="9.5" cy="19.3" r="1.4" />
@@ -47,11 +51,11 @@ export function ShoppingCartIcon({ size = 24, strokeWidth = 2, className, play }
           width="3.6"
           height="3.6"
           rx="0.9"
-          fill="currentColor"
+          fill={accent}
           stroke="none"
           initial={false}
           animate={on ? { y: [-9, 0], opacity: [0, 1] } : { y: -9, opacity: 0 }}
-          transition={{ duration: on ? 0.4 : 0.15, ease: "easeIn" }}
+          transition={on ? { duration: 0.4 / speed, ease: "easeIn" } : { duration: 0.15 / speed }}
         />
       </motion.g>
     </svg>

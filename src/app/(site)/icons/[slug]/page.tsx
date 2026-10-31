@@ -33,9 +33,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 const PROPS: [name: string, type: string, def: string, note: string][] = [
   ["size", "number", "24", "Width and height in pixels."],
   ["strokeWidth", "number", "2", "Line thickness, in a drawing that is 24 units wide."],
+  ["speed", "number", "1", "Playback speed: 1 is the designed pace, 2 is twice as fast, 0.5 is half."],
+  ["accent", "string", "currentColor", "Colour of the icon's small accent details (a badge, a spark, a trail). Left out, they match the icon."],
   ["className", "string", "", "Set a text colour here: the icon draws in currentColor."],
   ["play", "boolean", "", "true plays, false rests. Left out, it follows the pointer (or loops, for loaders)."],
 ];
+const STATE_PROP: [string, string, string, string] = ["state", "\"idle\" | \"loading\" | \"success\" | \"error\"", "", "Which state to show. Left out, it runs loading then success while the pointer is over it."];
 
 export default async function IconPage({ params }: Props) {
   const { slug } = await params;
@@ -43,6 +46,7 @@ export default async function IconPage({ params }: Props) {
   if (!icon) notFound();
   const category = getCategory(icon.category);
   const source = await readFile(path.join(process.cwd(), "src/components/nx-icons/icons", `${icon.slug}.tsx`), "utf8");
+  const material = await readFile(path.join(process.cwd(), "src/components/nx-icons/icon-material.tsx"), "utf8");
   const related = ICONS.filter((i) => i.category === icon.category && i.slug !== icon.slug).slice(0, 6);
   const name = icon.title.toLowerCase();
 
@@ -148,7 +152,7 @@ export default async function IconPage({ params }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {PROPS.map(([n, t, d, note]) => (
+                {(icon.states ? [...PROPS, STATE_PROP] : PROPS).map(([n, t, d, note]) => (
                   <tr key={n} className="border-t border-border">
                     <td className="px-5 py-3.5 font-mono text-[14px] text-foreground">{n}</td>
                     <td className="px-5 py-3.5 font-mono text-[14px] text-muted-foreground">{t}</td>
@@ -158,6 +162,30 @@ export default async function IconPage({ params }: Props) {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="looks" className="px-4 pb-16">
+        <div className="mx-auto max-w-[1152px]">
+          <h2 id="looks" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
+            Looks (optional)
+          </h2>
+          <p className="mt-2 max-w-[680px] text-[16px] text-muted-foreground">
+            Wrap an icon, or a whole grid of them, in <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">IconMaterial</code> to
+            give it a finish: neon glow, an aurora spectrum or polished chrome. Save it as{" "}
+            <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">components/icons/icon-material.tsx</code>. Spark needs no helper:
+            it is just the <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">accent</code> prop.
+          </p>
+          <div className="mt-6">
+            <CodeBlock
+              code={material}
+              language="tsx"
+              theme="dark"
+              header={{ ...DEFAULT_HEADER, title: "icon-material.tsx" }}
+              hoverHighlight={false}
+              enableSound={false}
+            />
           </div>
         </div>
       </section>

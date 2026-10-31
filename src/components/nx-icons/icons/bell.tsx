@@ -9,12 +9,16 @@ export type BellIconProps = {
   /** Line thickness, in a drawing that is 24 units wide. */
   strokeWidth?: number;
   className?: string;
+  /** Playback speed: 1 is the designed pace, 2 is twice as fast. */
+  speed?: number;
+  /** Colour of the icon's accent details, such as #ff3b30. Defaults to the icon's own colour. */
+  accent?: string;
   /** Plays (true) or rests (false). Left out, it plays while the pointer is over it. */
   play?: boolean;
 };
 
-/** A bell that swings back and forth, settling like it just rang. */
-export function BellIcon({ size = 24, strokeWidth = 2, className, play }: BellIconProps) {
+/** A bell that winds up, swings and rings, while a notification badge pops onto it. */
+export function BellIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: BellIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
   const on = !reduce && (play ?? hover);
@@ -36,12 +40,27 @@ export function BellIcon({ size = 24, strokeWidth = 2, className, play }: BellIc
       <motion.g
         style={{ originX: "50%", originY: "12%" }}
         initial={false}
-        animate={on ? { rotate: [0, -18, 14, -9, 5, -2, 0] } : { rotate: 0 }}
-        transition={{ duration: 0.8, ease: "easeInOut" }}
+        animate={on ? { rotate: [0, 9, -20, 15, -10, 5, -2, 0] } : { rotate: 0 }}
+        transition={{ duration: 0.9 / speed, ease: "easeInOut" }}
       >
         <path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 2H5z" />
-        <path d="M10 21.2a2 2 0 0 0 4 0" />
+        <motion.path
+          d="M10 21.2a2 2 0 0 0 4 0"
+          initial={false}
+          animate={on ? { x: [0, -1.4, 1.6, -1, 0.6, 0] } : { x: 0 }}
+          transition={{ duration: 0.9 / speed, ease: "easeInOut", delay: (0.06) / speed }}
+        />
       </motion.g>
+      <motion.circle
+        cx="18.4"
+        cy="5.2"
+        r="2.5"
+        fill={accent}
+        stroke="none"
+        initial={false}
+        animate={on ? { scale: [0, 1.4, 1] } : { scale: 0 }}
+        transition={on ? { duration: 0.45 / speed, delay: (0.12) / speed, ease: "easeOut" } : { duration: 0.15 / speed }}
+      />
     </svg>
   );
 }

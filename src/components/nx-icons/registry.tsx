@@ -27,8 +27,19 @@ import { BatteryIcon } from "./icons/battery";
 import { CameraIcon } from "./icons/camera";
 import { CoinIcon } from "./icons/coin";
 import { TruckIcon } from "./icons/truck";
+import { SendIcon } from "./icons/send";
+import { StatusIcon } from "./icons/status";
 
-export type NxIconProps = { size?: number; strokeWidth?: number; className?: string; play?: boolean };
+export type NxIconProps = {
+  size?: number;
+  strokeWidth?: number;
+  className?: string;
+  speed?: number;
+  accent?: string;
+  play?: boolean;
+  /** Only the Status icon: which state to show. */
+  state?: "idle" | "loading" | "success" | "error";
+};
 
 /** Every icon by slug, for the grid and the icon pages. */
 export const NX_ICONS: Record<string, ComponentType<NxIconProps>> = {
@@ -58,4 +69,6 @@ export const NX_ICONS: Record<string, ComponentType<NxIconProps>> = {
   "camera": CameraIcon,
   "coin": CoinIcon,
   "truck": TruckIcon,
+  "send": SendIcon,
+  "status": StatusIcon,
 };

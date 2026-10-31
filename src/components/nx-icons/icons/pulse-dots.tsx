@@ -8,12 +8,16 @@ export type PulseDotsIconProps = {
   /** Line thickness, in a drawing that is 24 units wide. */
   strokeWidth?: number;
   className?: string;
+  /** Playback speed: 1 is the designed pace, 2 is twice as fast. */
+  speed?: number;
+  /** Colour of the icon's accent details, such as #bf5af2. Defaults to the icon's own colour. */
+  accent?: string;
   /** Plays all the time. Pass false to hold it still. */
   play?: boolean;
 };
 
 /** Three dots that swell and fade in sequence. */
-export function PulseDotsIcon({ size = 24, strokeWidth = 2, className, play }: PulseDotsIconProps) {
+export function PulseDotsIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: PulseDotsIconProps) {
   const reduce = useReducedMotion();
   const on = !reduce && (play ?? true);
   return (
@@ -35,11 +39,11 @@ export function PulseDotsIcon({ size = 24, strokeWidth = 2, className, play }: P
           cx={cx}
           cy="12"
           r="2.1"
-          fill="currentColor"
+          fill={i === 2 ? accent : "currentColor"}
           stroke="none"
           initial={{ scale: 0.55, opacity: 0.3 }}
           animate={on ? { scale: [0.55, 1, 0.55], opacity: [0.3, 1, 0.3] } : { scale: 1, opacity: 1 }}
-          transition={on ? { duration: 1.1, ease: "easeInOut", repeat: Infinity, delay: i * 0.18 } : { duration: 0.2 }}
+          transition={on ? { duration: 1.1 / speed, ease: "easeInOut", repeat: Infinity, delay: (i * 0.18) / speed } : { duration: 0.2 / speed }}
         />
       ))}
     </svg>

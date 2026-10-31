@@ -40,8 +40,8 @@ export default function IconsPage() {
             Animated icons for React that <RainbowWord>move</RainbowWord>.
           </h1>
           <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">
-            Loaders that loop, bells that ring, arrows that drop into trays. Hover any icon to play it, then copy a single file into
-            your project. Each one is one small component built with Framer Motion.
+            Loaders that loop, bells that ring, planes that fly off and come back. Hover any icon to play it, restyle the whole set with the
+            controls below, then open one to hear it, drag it and copy its file.
           </p>
         </div>
       </section>
@@ -52,9 +52,9 @@ export default function IconsPage() {
 
           <div className="mt-20 grid gap-8 sm:grid-cols-3">
             {[
-              ["One file each", "Every icon is a single self-contained component. Copy it, rename it, change it. There is no package to install except Framer Motion."],
-              ["Yours to restyle", "Icons draw in currentColor, so a text colour class is all it takes. Size and line weight are props."],
-              ["Calm when asked", "With reduced motion switched on, every icon holds still. Nothing plays that the visitor said they did not want."],
+              ["A tiny story each", "Not just a wiggle: a bell that pops a badge, a bin that catches a crumpled paper, a house that switches its windows on."],
+              ["Make it yours", "Spark, Neon, Aurora or Chrome, in any colour and at any speed. Try them on the whole set above, or on a single icon on its own page."],
+              ["One file, no lock-in", "Each icon is one self-contained component built with Framer Motion, and it holds still for visitors who have reduced motion switched on."],
             ].map(([title, body]) => (
               <div key={title}>
                 <h2 className="text-[17px] font-semibold text-foreground">{title}</h2>

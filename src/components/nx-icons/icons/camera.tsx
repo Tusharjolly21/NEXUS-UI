@@ -9,12 +9,16 @@ export type CameraIconProps = {
   /** Line thickness, in a drawing that is 24 units wide. */
   strokeWidth?: number;
   className?: string;
+  /** Playback speed: 1 is the designed pace, 2 is twice as fast. */
+  speed?: number;
+  /** Colour of the icon's accent details, such as #ff9f0a. Defaults to the icon's own colour. */
+  accent?: string;
   /** Plays (true) or rests (false). Left out, it plays while the pointer is over it. */
   play?: boolean;
 };
 
-/** A camera whose lens snaps shut and open, with a flash. */
-export function CameraIcon({ size = 24, strokeWidth = 2, className, play }: CameraIconProps) {
+/** A camera whose lens snaps shut and open, followed by a burst of flash. */
+export function CameraIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: CameraIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
   const on = !reduce && (play ?? hover);
@@ -40,17 +44,16 @@ export function CameraIcon({ size = 24, strokeWidth = 2, className, play }: Came
         r="3.5"
         initial={false}
         animate={on ? { scale: [1, 0.5, 1.15, 1] } : { scale: 1 }}
-        transition={{ duration: 0.55, ease: "easeInOut" }}
+        transition={{ duration: 0.55 / speed, ease: "easeInOut" }}
       />
-      <motion.circle
-        cx="17.6"
-        cy="11.4"
-        r="0.9"
-        fill="currentColor"
-        stroke="none"
+      <circle cx="17.6" cy="11.4" r="0.9" fill="currentColor" stroke="none" />
+      <motion.path
+        d="M19.4 2.2v2M22 4l-1.3 1.3M16.8 4l1.3 1.3"
+        stroke={accent}
         initial={false}
-        animate={on ? { opacity: [1, 0, 1, 0, 1], scale: [1, 1.8, 1, 1.8, 1] } : { opacity: 1, scale: 1 }}
-        transition={{ duration: 0.55 }}
+        animate={on ? { opacity: [0, 1, 1, 0], scale: [0.4, 1.1, 1] } : { opacity: 0, scale: 0.4 }}
+        style={{ originX: "50%", originY: "100%" }}
+        transition={on ? { duration: 0.6 / speed, delay: (0.22) / speed, times: [0, 0.2, 0.7, 1] } : { duration: 0.1 / speed }}
       />
     </svg>
   );
