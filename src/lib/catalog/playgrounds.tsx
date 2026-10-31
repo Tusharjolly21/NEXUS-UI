@@ -226,6 +226,7 @@ import { ContextMenu } from "@/components/context-menu";
 import { ConsentDock } from "@/components/consent-dock";
 import { AddToBag } from "@/components/add-to-bag";
 import { LiquidPagination } from "@/components/liquid-pagination";
+import { MercuryTabs } from "@/components/mercury-tabs";
 import { DustSnap } from "@/components/dust-snap";
 import { TetheredSubmit } from "@/components/tethered-submit";
 import { DependentForm } from "@/components/dependent-form";
@@ -4357,6 +4358,21 @@ export const playgrounds: Record<string, Playground> = {
           color={v.color as string}
           autoplay={v.autoplay as boolean}
         />
+      </div>
+    ),
+  },
+  "mercury-tabs": {
+    lightOnly: true,
+    componentName: "MercuryTabs",
+    importPath: "@/components/mercury-tabs",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "defaultTab", label: "Starting tab", options: ["overview", "insights", "layers", "wallet"], defaultValue: "overview" },
+      { kind: "toggle", prop: "autoplay", label: "Tour the tabs by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[720px] justify-center">
+        <MercuryTabs key={`${String(v.autoplay)}-${String(v.defaultTab)}`} defaultTab={v.defaultTab as string} autoplay={v.autoplay as boolean} />
       </div>
     ),
   },

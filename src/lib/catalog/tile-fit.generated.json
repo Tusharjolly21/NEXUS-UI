@@ -2939,6 +2939,26 @@
   "bg": "#ffffff",
   "coverage": 0.12
  },
+ "mercury-tabs": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   120,
+   210,
+   720,
+   300
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "metal-orbs": {
   "canvas": [
    960,

@@ -4350,6 +4350,7 @@ export * from "./signature/motion-kit-batch-15";
 export * from "./signature/motion-kit-batch-16";
 export * from "./signature/motion-kit-batch-17";
 export * from "./signature/motion-kit-batch-18";
+export * from "./signature/motion-kit-batch-19";
 export * from "./signature/nexus-states-c";
 export * from "./signature/nexus-essentials-a";
 export * from "./signature/nexus-essentials-b";

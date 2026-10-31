@@ -13714,6 +13714,60 @@ export default function Page() {
     ],
     tailwindSource: tw,
   },
+  {
+    slug: "mercury-tabs",
+    name: "Mercury Tabs",
+    registryCliName: "mercury-tabs",
+    description:
+      "A tab bar whose selection is a frame of liquid metal, and the frame moves like mercury. The active tab sits in a rounded frame of chrome whose reflection never stops sliding: highlights drift across it, split round its corners and meet again, with short rainbows of blue and gold where a dark band's edge passes. Pick another tab and the frame does not jump: its leading edge flows out toward the new tab first, the rest follows, the metal thinning and flattening as it stretches, and it arrives with a wobble, bulging a little before it settles. Hover a tab and the frame leans toward it; any tab the metal flows across swells beneath it with faint red and blue edges, like a drop of glass. The sun at the end flips the theme: the new look spreads out from the switch in a circle and the chrome starts reflecting a bright room. Arrow keys move between tabs. Until you touch it, it tours the tabs and flips the theme by itself.",
+    categorySlug: "inputs-controls",
+    tags: ["tabs", "tab bar", "navigation", "segmented control", "chrome", "metal", "liquid", "mercury", "webgl", "shader", "theme switch", "dark mode", "autoplay", "motion kit"],
+    premium: true,
+    trendingScore: 187,
+    createdAt: "2026-10-31",
+    animationKinds: ["hover", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Tours the tabs and flips the theme by itself until the first touch. Held still under reduced motion." },
+      { name: "defaultTab", type: "string", defaultValue: '"overview"', description: "The tab that starts selected: overview, insights, layers or wallet." },
+      { name: "onChange", type: "(id: string) => void", description: "Called with the id of the tab that was just chosen." },
+      { name: "theme", type: '"dark" | "light"', description: "Control the theme yourself. Leave it out and the sun and moon switch keeps its own." },
+      { name: "onThemeChange", type: '(theme: "dark" | "light") => void', description: "Called with the theme the switch is asking for." },
+      { name: "className", type: "string", description: "Extra classes for the outer frame, which is 300px tall and up to 720px wide." },
+    ],
+    Preview: Previews.PreviewMercuryTabs,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { MercuryTabs } from "@/components/mercury-tabs";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[720px] justify-center">
+        <MercuryTabs defaultTab="insights" onChange={(id) => console.log(id)} />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Controlled theme, no demo",
+        code: `// src/app/page.tsx
+"use client";
+
+import { useState } from "react";
+import { MercuryTabs } from "@/components/mercury-tabs";
+
+export default function Page() {
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  return <MercuryTabs theme={theme} onThemeChange={setTheme} autoplay={false} />;
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */

@@ -55,6 +55,7 @@ const SELF_DEMO = new Set([
   "glass-drop",
   "status-morph",
   "ai-composer",
+  "mercury-tabs",
   "liquid-send",
   "folder-tree",
   "context-menu",
@@ -396,6 +397,8 @@ const TINT_OF: Record<string, TileTint> = {
  * are all gathered, newest first, under the wall's New tab (see NEW_TAB_DAYS).
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // twenty-second batch (Motion Kit Pro: Mercury Tabs)
+  "mercury-tabs",
   // twenty-first batch (Motion Kit Pro: Liquid Send, Folder Tree, Context Menu, Consent Dock, Add to Bag, Liquid Pagination)
   "liquid-send",
   "folder-tree",
@@ -597,6 +600,7 @@ export const MOTION_KIT_ORDER: string[] = [
 
 /** The homepage set, in order: newest interactions first, then the best of the rest. */
 export const HOME_PICKS: string[] = [
+  "mercury-tabs",
   "liquid-send",
   "folder-tree",
   "context-menu",
