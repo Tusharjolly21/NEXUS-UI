@@ -193,7 +193,7 @@ function SnippetCard({ code }: { code: string }) {
           <span aria-live="polite">{copied ? "Copied" : "Copy"}</span>
         </button>
       </div>
-      <pre className="max-h-[380px] overflow-auto whitespace-pre-wrap break-words p-5 font-mono text-[12.5px] leading-6">{code}</pre>
+      <pre tabIndex={0} className="max-h-[380px] overflow-auto whitespace-pre-wrap break-words p-5 font-mono text-[12.5px] leading-6">{code}</pre>
     </div>
   );
 }

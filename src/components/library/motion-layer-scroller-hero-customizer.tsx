@@ -126,6 +126,7 @@ export function MotionLayerScrollerHeroCustomizer() {
             type="range"
             min={300}
             max={800}
+            aria-label="Scroll height"
             value={scrollHeight}
             onChange={(e) => setScrollHeight(Number(e.target.value))}
             className="w-full accent-cyan-400"

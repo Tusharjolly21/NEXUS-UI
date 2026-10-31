@@ -13264,6 +13264,388 @@ export default function Page() {
     tailwindSource: tw,
   },
   {
+    slug: "liquid-send",
+    name: "Liquid Send",
+    registryCliName: "liquid-send",
+    description:
+      "A message box whose send button is ringed in liquid metal, and it really sends. The ring is a tube of chrome drawn by a WebGL shader: stripes of light drift across it, split into short rainbows of blue, white and gold where a dark band ends, and it stays dull and grey until you type. Send, by click or Enter, and a bead of molten light races round the ring while the arrow lifts away; your message rises into the thread above in a dark bubble edged in the same chrome, and the ring flashes once before the arrow comes back. The sparkle writes a suggestion into the field letter by letter, and the paperclip attaches a real file. If WebGL is unavailable it falls back to a painted chrome ring. Until you touch it, it writes and sends a few messages on its own.",
+    categorySlug: "inputs-controls",
+    tags: ["send", "chat", "composer", "message", "input", "button", "chrome", "metal", "liquid", "webgl", "shader", "attachment", "autoplay", "motion kit"],
+    premium: true,
+    trendingScore: 186,
+    createdAt: "2026-10-31",
+    animationKinds: ["press", "type", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Writes and sends a few messages by itself until the first touch. Held still under reduced motion." },
+      { name: "onSend", type: "(text: string, file?: string) => void", description: "Called with the message text and, if one was attached, the file name." },
+      { name: "placeholder", type: "string", defaultValue: "\"Message\"", description: "Placeholder shown in the empty field." },
+    ],
+    Preview: Previews.PreviewLiquidSend,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { LiquidSend } from "@/components/liquid-send";
+
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[560px]">
+        <LiquidSend onSend={(text, file) => console.log(text, file)} />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Your own placeholder, no demo",
+        code: `// src/app/page.tsx
+"use client";
+
+import { LiquidSend } from "@/components/liquid-send";
+
+export default function Page() {
+  return <LiquidSend placeholder="Reply to Maya" autoplay={false} onSend={(text) => sendToThread(text)} />;
+}
+
+declare function sendToThread(text: string): void;`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "folder-tree",
+    name: "Folder Tree",
+    registryCliName: "folder-tree",
+    description:
+      "A project tree that behaves like the Finder sidebar. Open a folder and its files pour out from underneath it on springs, one after another; close it and they are drawn back in, and Option-click opens everything inside in a wave. Drag a file and it lifts off and leans with your speed, hold it over a closed folder and the folder springs open, drop it and it flies into place, sorted, while the folder bounces. New files and folders slide out of the folder they are made in, named untitled and ready to rename; delete one and it is flung off the list with an Undo. Arrow keys, Option with the arrows, Return to rename, Delete, Cmd-Z and type-to-find all work. Until you touch it, it opens, selects and moves things by itself.",
+    categorySlug: "inputs-controls",
+    tags: ["tree", "files", "folders", "explorer", "sidebar", "finder", "drag and drop", "rename", "undo", "navigation", "autoplay", "motion kit"],
+    premium: true,
+    trendingScore: 185,
+    createdAt: "2026-10-31",
+    animationKinds: ["drag", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "tree", type: "TreeNode[]", defaultValue: "A small app project", description: "The folders and files. A node with children is a folder; give files a size in bytes to show it." },
+      { name: "name", type: "string", defaultValue: "\"my-app\"", description: "The root folder's name in the header." },
+      { name: "defaultOpen", type: "string[]", defaultValue: "[\"app\"]", description: "Ids of the folders that start open." },
+      { name: "draggable", type: "boolean", defaultValue: "true", description: "Lets files and folders be dragged into other folders." },
+      { name: "editable", type: "boolean", defaultValue: "true", description: "Allows new files and folders, renaming and deleting." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens, selects and moves things by itself until the first interaction." },
+      { name: "onSelect", type: "(node: TreeNode) => void", description: "Called when a row is chosen." },
+      { name: "onMove", type: "(node: TreeNode, folderId: string | null, tree: TreeNode[]) => void", description: "Called after a drop, with the updated tree." },
+      { name: "onCreate", type: "(node: TreeNode, folderId: string | null, tree: TreeNode[]) => void", description: "Called when a new file or folder is made." },
+      { name: "onRename", type: "(node: TreeNode, previous: string, tree: TreeNode[]) => void", description: "Called when a name is changed." },
+      { name: "onDelete", type: "(node: TreeNode, tree: TreeNode[]) => void", description: "Called when an item is deleted (an Undo restores it)." },
+      { name: "className", type: "string", description: "Extra classes for the outer wrapper." },
+    ],
+    Preview: Previews.PreviewFolderTree,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { FolderTree } from "@/components/folder-tree";
+
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[420px]">
+        <FolderTree onSelect={(node) => console.log("opened", node.name)} />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Your own files",
+        code: `// src/app/page.tsx
+"use client";
+
+import { FolderTree, type TreeNode } from "@/components/folder-tree";
+
+const tree: TreeNode[] = [
+  {
+    id: "docs",
+    name: "docs",
+    children: [
+      { id: "docs/intro", name: "intro.md", size: 2400 },
+      { id: "docs/api", name: "api.md", size: 9100 },
+    ],
+  },
+  { id: "readme", name: "README.md", size: 1300 },
+];
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[420px]">
+      <FolderTree tree={tree} name="my-docs" defaultOpen={["docs"]} autoplay={false} onMove={(node, folderId) => save(node.id, folderId)} />
+    </div>
+  );
+}
+
+declare function save(id: string, folderId: string | null): void;`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "context-menu",
+    name: "Context Menu",
+    registryCliName: "context-menu",
+    description:
+      "The right-click menu, made of liquid. Right-click a file, or press and hold on a phone, or press Shift+F10, and a drop forms under the pointer and flows out into the menu while the drop is absorbed. The highlight glides from row to row, and Move To buds a submenu off the side that snaps free like a droplet. Every action works: rename in place, duplicate, copy a link, pin to the top, favourite, tag, move into a folder (the file flies in and the folder bounces) or move to Trash with Undo. On close the menu drains back into the point it came from. Arrow keys, Enter and Escape work throughout. Until you touch it, it plays a few right-clicks by itself.",
+    categorySlug: "inputs-controls",
+    tags: ["context menu", "right click", "menu", "files", "finder", "rename", "tags", "submenu", "undo", "liquid", "autoplay", "motion kit"],
+    premium: true,
+    trendingScore: 184,
+    createdAt: "2026-10-31",
+    animationKinds: ["press", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "files", type: "FileItem[]", defaultValue: "Six sample files", description: "The items in the grid. kind is one of pdf, sheet, image, video or folder; a folder can carry a count." },
+      { name: "title", type: "string", defaultValue: "\"Q4 Launch\"", description: "The window title, also used in the grid's accessible label." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a few right-clicks by itself until the first interaction." },
+      { name: "onAction", type: "(action: MenuAction, file: FileItem, detail?: string) => void", description: "Fires for every action, after the grid has updated. detail depends on the action: the previous name for rename, the copy's id for duplicate, the link for link, the tag name for tag and the folder id for move." },
+      { name: "onChange", type: "(files: FileItem[]) => void", description: "Called with the whole list after any change." },
+      { name: "className", type: "string", description: "Extra classes for the outer wrapper." },
+    ],
+    Preview: Previews.PreviewContextMenu,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { ContextMenu } from "@/components/context-menu";
+
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[640px]">
+        <ContextMenu onAction={(action, file) => console.log(action, file.name)} />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Your own files",
+        code: `// src/app/page.tsx
+"use client";
+
+import { ContextMenu, type FileItem } from "@/components/context-menu";
+
+const files: FileItem[] = [
+  { id: "a", name: "Roadmap.pdf", kind: "pdf" },
+  { id: "b", name: "Screens", kind: "folder", count: 8 },
+  { id: "c", name: "Demo.mov", kind: "video", favourite: true },
+];
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[640px]">
+      <ContextMenu files={files} title="Design" autoplay={false} onChange={(next) => persist(next)} />
+    </div>
+  );
+}
+
+declare function persist(files: FileItem[]): void;`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "consent-dock",
+    name: "Consent Dock",
+    registryCliName: "consent-dock",
+    description:
+      "The cookie banner every site needs, without the nag. Choose, and the banner drains into a small button in the corner; customise, and the switches fall in a domino run before it closes. The button is a physical thing: throw it and it flies to whichever corner you aimed at, the way a picture-in-picture video does on iPhone, and it stretches if you pull it off the edge. Tap it to grow the preferences back out of it. Arrow keys move it between corners, and the choice can be saved to localStorage. It records the choice and hands it to onChange; it does not load or block any scripts itself, so wire onChange to your analytics. Until you touch it, it plays through a choice and a few throws on its own.",
+    categorySlug: "inputs-controls",
+    tags: ["cookie", "consent", "banner", "privacy", "gdpr", "preferences", "dock", "draggable", "switches", "autoplay", "motion kit"],
+    premium: true,
+    trendingScore: 183,
+    createdAt: "2026-10-31",
+    animationKinds: ["drag", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "contained", type: "boolean", defaultValue: "false", description: "Sits inside a box of its own, with children as the page behind, instead of over the whole window." },
+      { name: "corner", type: "\"bl\" | \"br\" | \"tl\" | \"tr\"", defaultValue: "\"bl\"", description: "The corner the button docks to." },
+      { name: "storageKey", type: "string", description: "Remembers the choice in localStorage under this key. A remembered choice starts docked." },
+      { name: "title", type: "string", defaultValue: "\"Cookies, your call.\"", description: "The banner heading." },
+      { name: "text", type: "string", description: "The banner text." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays through a choice and a few throws by itself until the first interaction." },
+      { name: "onChange", type: "(consent: Consent) => void", description: "Called with { necessary: true, analytics, marketing, personalisation } when a choice is made." },
+      { name: "children", type: "ReactNode", description: "The page behind the banner, in contained mode." },
+      { name: "className", type: "string", description: "Extra classes for the outer wrapper." },
+    ],
+    Preview: Previews.PreviewConsentDock,
+    previewShell: "plain",
+    reactSource: `// src/app/layout.tsx
+"use client";
+
+import { ConsentDock } from "@/components/consent-dock";
+
+export function Consent() {
+  return (
+    <ConsentDock
+      storageKey="nexus-consent"
+      onChange={(consent) => {
+        if (consent.analytics) startAnalytics();
+      }}
+    />
+  );
+}
+
+declare function startAnalytics(): void;`,
+    reactExamples: [
+      {
+        title: "Inside a box, for a preview or a settings page",
+        code: `// src/app/page.tsx
+"use client";
+
+import { ConsentDock } from "@/components/consent-dock";
+
+export default function Page() {
+  return (
+    <div className="mx-auto h-[460px] w-full max-w-[720px]">
+      <ConsentDock contained corner="br" autoplay={false}>
+        <div className="h-full rounded-[24px] bg-white p-6">Your page</div>
+      </ConsentDock>
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "add-to-bag",
+    name: "Add to Bag",
+    registryCliName: "add-to-bag",
+    description:
+      "The add-to-cart moment, made physical. Press the button and the product lifts off and arcs through the air into the bag, which squashes as it lands while the badge rolls to the new count. The button folds into a quantity stepper, and taking one out hops it back out of the bag. The demo product is a stoneware mug ray-marched live in WebGL that you can drag to turn; give each colourway an image to show your own product photo instead. Point target at your header's bag icon and the product flies there. It handles the motion and the count; adding to a real cart is up to your onChange. Until you touch it, it adds, switches colour and removes by itself.",
+    categorySlug: "cards",
+    tags: ["cart", "bag", "add to cart", "shop", "product", "ecommerce", "stepper", "quantity", "webgl", "3d", "autoplay", "motion kit"],
+    premium: true,
+    trendingScore: 182,
+    createdAt: "2026-10-31",
+    animationKinds: ["press", "spring", "3d"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "product", type: "BagProduct", defaultValue: "A stoneware pour-over mug in three colours", description: "The product: name, detail, price and colourways. Each colourway has a name, a hex colour and an optional image URL." },
+      { name: "max", type: "number", defaultValue: "9", description: "The most that can be added." },
+      { name: "target", type: "RefObject<HTMLElement>", description: "Your own bag icon to fly to. Without it the product flies to the bag in the card." },
+      { name: "currency", type: "string", defaultValue: "\"$\"", description: "The symbol shown before the price." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Adds, switches colour and removes by itself until the first interaction." },
+      { name: "onChange", type: "(quantity: number, color: string) => void", description: "Called with the new quantity and the chosen colour name." },
+      { name: "className", type: "string", description: "Extra classes for the outer wrapper." },
+    ],
+    Preview: Previews.PreviewAddToBag,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { AddToBag } from "@/components/add-to-bag";
+
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[420px]">
+        <AddToBag onChange={(quantity, color) => console.log(quantity, color)} />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Your own product and photos",
+        code: `// src/app/page.tsx
+"use client";
+
+import { AddToBag, type BagProduct } from "@/components/add-to-bag";
+
+const product: BagProduct = {
+  name: "Canvas Tote",
+  detail: "Organic cotton",
+  price: 28,
+  colors: [
+    { name: "Natural", hex: "#e8dfcf", image: "/tote-natural.jpg" },
+    { name: "Black", hex: "#1d1d1f", image: "/tote-black.jpg" },
+  ],
+};
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[420px]">
+      <AddToBag product={product} autoplay={false} onChange={(quantity, color) => updateCart(quantity, color)} />
+    </div>
+  );
+}
+
+declare function updateCart(quantity: number, color: string): void;`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "liquid-pagination",
+    name: "Liquid Pagination",
+    registryCliName: "liquid-pagination",
+    description:
+      "Page controls where the selection is a drop of water. Pick a page and the drop stretches toward it, its front edge racing ahead of its back edge, then pulls itself round; numbers turn white only where the drop covers them, and the row of numbers reflows a beat later, sliding in from the side you are heading. Grab the drop and drag it, fling it and it coasts to a page, pull it past either end and it stretches against the edge. The dots variant is the iPhone page control: tap either side to step, or press and slide along it to scrub. Arrow keys, Home and End work in both. Use it controlled with page and onChange, or uncontrolled with defaultPage. Until you touch it, it moves through the pages by itself.",
+    categorySlug: "inputs-controls",
+    tags: ["pagination", "pager", "pages", "page control", "dots", "numbers", "drag", "liquid", "navigation", "autoplay", "motion kit"],
+    premium: true,
+    trendingScore: 181,
+    createdAt: "2026-10-31",
+    animationKinds: ["drag", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "count", type: "number", description: "The number of pages. Defaults to 24 for numbers and 6 for dots." },
+      { name: "page", type: "number", description: "The current page, 1-based, to control it yourself." },
+      { name: "defaultPage", type: "number", description: "The page to start on when you do not control it. Defaults to 6 for numbers and 1 for dots." },
+      { name: "onChange", type: "(page: number) => void", description: "Called with the new page." },
+      { name: "variant", type: "\"numbers\" | \"dots\"", defaultValue: "\"numbers\"", description: "Numbered pages with arrows, or a row of dots like the iPhone page control." },
+      { name: "siblings", type: "number", defaultValue: "1", description: "Pages shown either side of the current one, for the numbers variant." },
+      { name: "color", type: "string", defaultValue: "\"#1d1d1f\"", description: "The colour of the drop." },
+      { name: "label", type: "string", description: "The accessible label for the control. Defaults to Pagination for numbers and Page for dots." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Moves through the pages by itself until the first interaction." },
+      { name: "className", type: "string", description: "Extra classes for the outer wrapper." },
+    ],
+    Preview: Previews.PreviewLiquidPagination,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { useState } from "react";
+import { LiquidPagination } from "@/components/liquid-pagination";
+
+export default function Page() {
+  const [page, setPage] = useState(1);
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[640px] justify-center">
+        <LiquidPagination count={24} page={page} onChange={setPage} label="Search results" />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "The dots variant, for a carousel",
+        code: `// src/app/page.tsx
+"use client";
+
+import { LiquidPagination } from "@/components/liquid-pagination";
+
+export default function Page() {
+  return <LiquidPagination variant="dots" count={5} defaultPage={1} color="#0071e3" label="Slides" />;
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
     slug: "status-morph",
     name: "Status Morph",
     registryCliName: "status-morph",

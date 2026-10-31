@@ -10,10 +10,10 @@ export const metadata: Metadata = createMetadata({
 
 export default function TerminalDemoPage() {
   return (
-    <main className="min-h-[calc(100dvh-4rem)] bg-gradient-to-b from-background via-muted/15 to-background">
+    <div className="min-h-[calc(100dvh-4rem)] bg-gradient-to-b from-background via-muted/15 to-background">
       <h1 className="sr-only">Terminal</h1>
       <TerminalDemo />
-    </main>
+    </div>
   );
 }
 

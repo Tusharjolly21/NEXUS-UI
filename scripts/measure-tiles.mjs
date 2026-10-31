@@ -39,9 +39,13 @@ const browser = await puppeteer.launch({
 });
 const debugDir = process.env.TILE_LAB_DEBUG_DIR;
 if (debugDir) fs.mkdirSync(debugDir, { recursive: true });
-// Answer the cookie banner up front: it sits over the lower-left of the page and would be measured as content.
-await browser.setCookie({ name: "nx-consent", value: "denied", url: base });
-let page = await browser.newPage();
+// The site's cookie banner is fixed to the bottom left of every page; left up it would be measured as part of the preview.
+const newPage = async () => {
+  const p = await browser.newPage();
+  await p.setCookie({ name: "nx-consent", value: "denied", url: base });
+  return p;
+};
+let page = await newPage();
 
 /**
  * Runs in the page. `shots` holds pairs of screenshots taken over a magenta and then a green
@@ -202,7 +206,7 @@ for (const item of items) {
     // a heavy preview (WebGL, huge canvases) can stall the renderer: skip it, keep going
     console.warn(`${item.slug.padEnd(30)} skipped: ${String(error).split("\n")[0]}`);
     await page.close().catch(() => {});
-    page = await browser.newPage();
+    page = await newPage();
   }
 }
 

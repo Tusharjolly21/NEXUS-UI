@@ -126,10 +126,13 @@ const INTERACTION_OF: Record<string, string> = {
 function CopyBtn({ text, label = "Copy", dark = false }: { text: string; label?: string; dark?: boolean }) {
   const [copied, setCopied] = React.useState(false);
   function copy() {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
-    });
+    navigator.clipboard.writeText(text).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1600);
+      },
+      () => {}, // blocked (insecure context / permission denied): leave the button as it was
+    );
   }
   return (
     <button
@@ -149,7 +152,7 @@ function CopyBtn({ text, label = "Copy", dark = false }: { text: string; label?:
 function CodeSnippet({ code }: { code: string }) {
   return (
     <div className="relative mt-3 rounded-2xl bg-[#1d1d1f]">
-      <pre className="overflow-auto p-4 pr-24 font-mono text-[12.5px] leading-relaxed text-[#e6e6ea]">{code}</pre>
+      <pre tabIndex={0} className="overflow-auto p-4 pr-24 font-mono text-[12.5px] leading-relaxed text-[#e6e6ea]">{code}</pre>
       <div className="absolute right-3 top-3">
         <CopyBtn text={code} dark />
       </div>
@@ -727,7 +730,7 @@ function PropsPlayground({ props, importName }: { props?: PropDoc[]; importName:
             <p className="text-[13px] font-medium text-white">Your JSX</p>
             <CopyBtn text={usageCode} dark />
           </div>
-          <pre className="max-h-[380px] overflow-auto p-5 font-mono text-[12.5px] leading-6">{usageCode}</pre>
+          <pre tabIndex={0} className="max-h-[380px] overflow-auto p-5 font-mono text-[12.5px] leading-6">{usageCode}</pre>
         </div>
       </div>
     </section>

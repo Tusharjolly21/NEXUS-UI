@@ -123,6 +123,7 @@ export function LibraryIndex({ data }: { data: LibraryIndexData }) {
       className="grid gap-5 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-6"
       onPointerEnter={() => setHovering(true)}
       onPointerLeave={() => setHovering(false)}
+      onFocus={() => setTouched(true)}
     >
       <div className="flex min-w-0 flex-col">
         <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">What&apos;s on the shelves</h2>

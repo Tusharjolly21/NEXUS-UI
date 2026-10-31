@@ -208,7 +208,7 @@ function Inspector({ item }: { item: GalleryItem }) {
         setValues(readUrlValues(pg));
         setFill(pg.defaultFill ?? "light");
       }
-    });
+    }).catch(() => {}); // chunk failed to load: the inspector just stays without live controls
     fetch(`/api/usage/${item.slug}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((u: Usage | null) => alive && setUsage(u))
