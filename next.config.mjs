@@ -43,6 +43,20 @@ const securityHeaders = [
   },
 ];
 
+/*
+ * Cookies that mean "this visitor may be signed in": Supabase stores the session in
+ * sb-<project ref>-auth-token, split into .0, .1 … when it is large. The ref is the first label of the
+ * project URL. Without a usable URL there is no rewrite and every visitor gets the regular page.
+ */
+function supabaseSessionCookies() {
+  try {
+    const ref = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").hostname.split(".")[0];
+    return ref ? [`sb-${ref}-auth-token`, `sb-${ref}-auth-token.0`] : [];
+  } catch {
+    return [];
+  }
+}
+
 const nextConfig = {
   // No dev badge: template preview images are captured from the dev server.
   devIndicators: false,
@@ -144,6 +158,29 @@ const nextConfig = {
         permanent: true,
       },
     ];
+  },
+  // The homepage is the same for everyone who is signed out, so serve that visitor a copy built once
+  // and cached (src/app/(static)/home-static) instead of rendering it on a server in one region for
+  // every visit. Skipped, so the regular page is served as before, for anyone with a sign-in cookie
+  // or who has closed the launch banner (the one other thing the regular page reads per visitor).
+  async rewrites() {
+    const session = supabaseSessionCookies();
+    if (!session.length) return [];
+    return {
+      beforeFiles: [
+        {
+          source: "/",
+          missing: [
+            ...session.map((key) => ({ type: "cookie", key })),
+            // any value: the regular page decides whether that banner id is the current one
+            { type: "cookie", key: "nx-banner" },
+          ],
+          destination: "/home-static",
+        },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
   },
   async headers() {
     return [
