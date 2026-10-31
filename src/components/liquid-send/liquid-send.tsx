@@ -99,9 +99,10 @@ const SUGGESTIONS = ["Sounds good, see you at 6.", "Can you send me the final de
  * rises from the field into the thread above in a dark bubble edged in the same chrome; the ring flashes once, a
  * check appears, and the arrow comes back. The sparkle writes a suggestion into the field, letter by letter, and the
  * paperclip attaches a real file. `onSend(text, file)` fires with each message. `autoplay` writes and sends a few
- * messages until the first real interaction. Reduced motion holds the metal still.
+ * messages until the first real interaction. Reduced motion holds the metal still. `size` sets the send button's
+ * diameter (the composer scales with it); left out, it follows the composer's width, from 52 to 68.
  */
-export function LiquidSend({ autoplay = false, onSend, placeholder = "Message" }: { autoplay?: boolean; onSend?: (text: string, file?: string) => void; placeholder?: string }) {
+export function LiquidSend({ autoplay = false, onSend, placeholder = "Message", size }: { autoplay?: boolean; onSend?: (text: string, file?: string) => void; placeholder?: string; size?: number }) {
   const reduce = useReducedMotion();
   const wrap = useRef<HTMLDivElement>(null);
   const cvs = useRef<HTMLCanvasElement>(null);
@@ -110,7 +111,9 @@ export function LiquidSend({ autoplay = false, onSend, placeholder = "Message" }
   const state = useRef({ hover: 0, hoverTo: 0, squeeze: 0, squeezeTo: 0, ready: 0, readyTo: 0, run: 0, runTo: 0, head: 1.6, flash: 0 });
   const touched = useRef(false);
   const typing = useRef(0);
-  const [D, setD] = useState(64);
+  const fixed = size !== undefined && Number.isFinite(size) ? Math.round(Math.max(40, Math.min(240, size))) : undefined;
+  const [fitD, setFitD] = useState(64);
+  const D = fixed ?? fitD;
   const [gl, setGl] = useState(true);
   const [text, setText] = useState("");
   const [file, setFile] = useState<string | undefined>();
@@ -124,12 +127,13 @@ export function LiquidSend({ autoplay = false, onSend, placeholder = "Message" }
   }, [can, phase]);
 
   useEffect(() => {
+    if (fixed !== undefined) return;
     const el = wrap.current; if (!el) return;
-    const fit = () => setD(Math.round(Math.max(52, Math.min(68, el.getBoundingClientRect().width * 0.11))));
+    const fit = () => setFitD(Math.round(Math.max(52, Math.min(68, el.getBoundingClientRect().width * 0.11))));
     fit();
     const ro = new ResizeObserver(fit); ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [fixed]);
 
   useEffect(() => {
     const cv = cvs.current; if (!cv) return;
