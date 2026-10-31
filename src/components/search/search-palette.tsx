@@ -48,7 +48,7 @@ function toEntry({ keywords, ...e }: SearchEntry): Entry {
 type Catalog = Record<"component" | "template" | "block" | "video", Entry[]>;
 
 let catalogPromise: Promise<Catalog | null> | null = null;
-function loadCatalog() {
+export function loadCatalog() {
   catalogPromise ??= fetch("/api/search-index")
     .then((res) => (res.ok ? (res.json() as Promise<SearchEntry[]>) : Promise.reject(new Error(String(res.status)))))
     .then((rows) => {
@@ -63,9 +63,10 @@ function loadCatalog() {
   return catalogPromise;
 }
 
-function useCatalog() {
+function useCatalog(open: boolean) {
   const [catalog, setCatalog] = React.useState<Catalog | null>(null);
   React.useEffect(() => {
+    if (!open) return;
     let alive = true;
     void loadCatalog().then((c) => {
       if (alive) setCatalog(c);
@@ -73,7 +74,7 @@ function useCatalog() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [open]);
   return catalog;
 }
 
@@ -205,7 +206,7 @@ export function SearchPalette({
   }, [open]);
 
   const needle = query.trim().toLowerCase();
-  const catalog = useCatalog();
+  const catalog = useCatalog(open);
   const sections = React.useMemo(() => buildSections(needle, catalog), [needle, catalog]);
   const flat = React.useMemo(() => sections.flatMap((s) => s.items), [sections]);
   const active = flat.length ? Math.min(activeIdx, flat.length - 1) : -1;
