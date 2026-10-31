@@ -29,6 +29,34 @@ import { CoinIcon } from "./icons/coin";
 import { TruckIcon } from "./icons/truck";
 import { SendIcon } from "./icons/send";
 import { StatusIcon } from "./icons/status";
+import { LockIcon } from "./icons/lock";
+import { EyeIcon } from "./icons/eye";
+import { ShieldIcon } from "./icons/shield";
+import { UserIcon } from "./icons/user";
+import { InfoIcon } from "./icons/info";
+import { AlertTriangleIcon } from "./icons/alert-triangle";
+import { CalendarIcon } from "./icons/calendar";
+import { AlarmClockIcon } from "./icons/alarm-clock";
+import { ToggleIcon } from "./icons/toggle";
+import { StarIcon } from "./icons/star";
+import { FolderIcon } from "./icons/folder";
+import { CloudUploadIcon } from "./icons/cloud-upload";
+import { VolumeIcon } from "./icons/volume";
+import { MicIcon } from "./icons/mic";
+import { SunIcon } from "./icons/sun";
+import { MoonIcon } from "./icons/moon";
+import { CloudRainIcon } from "./icons/cloud-rain";
+import { ZapIcon } from "./icons/zap";
+import { CreditCardIcon } from "./icons/credit-card";
+import { GiftIcon } from "./icons/gift";
+import { MessageIcon } from "./icons/message";
+import { PhoneIcon } from "./icons/phone";
+import { ThumbsUpIcon } from "./icons/thumbs-up";
+import { MapPinIcon } from "./icons/map-pin";
+import { CompassIcon } from "./icons/compass";
+import { RocketIcon } from "./icons/rocket";
+import { LightbulbIcon } from "./icons/lightbulb";
+import { CoffeeIcon } from "./icons/coffee";
 
 export type NxIconProps = {
   size?: number;
@@ -71,4 +99,32 @@ export const NX_ICONS: Record<string, ComponentType<NxIconProps>> = {
   "truck": TruckIcon,
   "send": SendIcon,
   "status": StatusIcon,
+  "lock": LockIcon,
+  "eye": EyeIcon,
+  "shield": ShieldIcon,
+  "user": UserIcon,
+  "info": InfoIcon,
+  "alert-triangle": AlertTriangleIcon,
+  "calendar": CalendarIcon,
+  "alarm-clock": AlarmClockIcon,
+  "toggle": ToggleIcon,
+  "star": StarIcon,
+  "folder": FolderIcon,
+  "cloud-upload": CloudUploadIcon,
+  "volume": VolumeIcon,
+  "mic": MicIcon,
+  "sun": SunIcon,
+  "moon": MoonIcon,
+  "cloud-rain": CloudRainIcon,
+  "zap": ZapIcon,
+  "credit-card": CreditCardIcon,
+  "gift": GiftIcon,
+  "message": MessageIcon,
+  "phone": PhoneIcon,
+  "thumbs-up": ThumbsUpIcon,
+  "map-pin": MapPinIcon,
+  "compass": CompassIcon,
+  "rocket": RocketIcon,
+  "lightbulb": LightbulbIcon,
+  "coffee": CoffeeIcon,
 };

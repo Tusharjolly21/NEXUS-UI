@@ -3,11 +3,13 @@
 import * as React from "react";
 import Link from "next/link";
 import { useInView } from "framer-motion";
-import { PartyPopper, Search, Waves } from "lucide-react";
+import { PartyPopper, Search, Volume2, VolumeX, Waves } from "lucide-react";
 import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { ICONS, ICON_CATEGORIES, type IconCategory, type IconMeta } from "@/lib/icons/catalog";
 import { cn } from "@/lib/utils";
 import { IconMaterial, type IconMaterialName } from "./icon-material";
+import { CopyButton } from "./copy-button";
+import { hasIconSound, playIconSound } from "./icon-sounds";
 import { NX_ICONS } from "./registry";
 
 export const MATERIALS: { id: IconMaterialName; label: string; dark?: boolean }[] = [
@@ -37,6 +39,7 @@ export function IconTile({
   dark = false,
   pulse,
   party = false,
+  sound = false,
 }: {
   icon: IconMeta;
   material?: IconMaterialName;
@@ -44,30 +47,52 @@ export function IconTile({
   dark?: boolean;
   pulse?: { id: number; delay: number };
   party?: boolean;
+  sound?: boolean;
 }) {
   const Icon = NX_ICONS[icon.slug];
-  const ref = React.useRef<HTMLAnchorElement>(null);
+  const ref = React.useRef<HTMLDivElement>(null);
   const near = useInView(ref, { margin: "120px" });
   const [active, setActive] = React.useState(false);
   const [burst, setBurst] = React.useState(false);
+  const [bump, setBump] = React.useState(false);
+  const [lap, setLap] = React.useState(0);
+
+  // with the grid's Sound switch on, hovering a tile plays that icon's own score; a loader restarts so its sound and picture begin together
+  const hear = () => {
+    if (!sound || !hasIconSound(icon.slug)) return;
+    if (icon.kind === "loop") setLap((n) => n + 1);
+    playIconSound(icon.slug, { force: true, volume: 0.85 });
+  };
 
   const pulseId = pulse?.id ?? 0;
   const pulseDelay = pulse?.delay ?? 0;
+  // the Wave: this tile plays, lifts and glows in its own colour, and a loader starts its lap over
+  const isLoop = icon.kind === "loop";
   React.useEffect(() => {
     if (!pulseId) return;
-    const on = window.setTimeout(() => setBurst(true), pulseDelay);
+    const on = window.setTimeout(() => {
+      setBurst(true);
+      setBump(true);
+      if (isLoop) setLap((n) => n + 1);
+    }, pulseDelay);
+    const settle = window.setTimeout(() => setBump(false), pulseDelay + 650);
     const off = window.setTimeout(() => setBurst(false), pulseDelay + 1700);
     return () => {
       window.clearTimeout(on);
+      window.clearTimeout(settle);
       window.clearTimeout(off);
     };
-  }, [pulseId, pulseDelay]);
+  }, [pulseId, pulseDelay, isLoop]);
 
   React.useEffect(() => {
     if (!party || !near) return;
     let off: number | undefined;
+    let settle: number | undefined;
     const fire = () => {
       setBurst(true);
+      setBump(true);
+      if (isLoop) setLap((n) => n + 1);
+      settle = window.setTimeout(() => setBump(false), 600);
       off = window.setTimeout(() => setBurst(false), 1500);
     };
     const first = window.setTimeout(fire, Math.random() * 1600);
@@ -76,33 +101,57 @@ export function IconTile({
       window.clearTimeout(first);
       window.clearInterval(id);
       if (off !== undefined) window.clearTimeout(off);
+      if (settle !== undefined) window.clearTimeout(settle);
     };
-  }, [party, near]);
+  }, [party, near, isLoop]);
 
   const play = icon.kind === "loop" ? near : active || burst;
   if (!Icon) return null;
   return (
-    <Link
+    <div
       ref={ref}
-      href={`/icons/${icon.slug}`}
-      onPointerEnter={() => setActive(true)}
+      onPointerEnter={() => {
+        setActive(true);
+        hear();
+      }}
       onPointerLeave={() => setActive(false)}
-      onFocus={() => setActive(true)}
+      onFocus={() => {
+        setActive(true);
+        hear();
+      }}
       onBlur={() => setActive(false)}
+      style={bump ? { boxShadow: `0 0 0 2px ${icon.accent}66, 0 22px 44px -20px ${icon.accent}aa` } : undefined}
       className={cn(
-        "group relative flex aspect-square flex-col items-center justify-center gap-4 rounded-[22px] transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none",
+        "group relative aspect-square rounded-[22px] transition-[transform,box-shadow,background-color] duration-300 hover:-translate-y-0.5 motion-reduce:transition-none",
+        bump ? "-translate-y-2 scale-[1.05]" : "",
         dark
           ? "bg-[#17171a] shadow-[0_0_0_1px_rgba(255,255,255,.08),0_18px_36px_-28px_rgba(0,0,0,.8)] hover:shadow-[0_0_0_1px_rgba(255,255,255,.16),0_24px_44px_-26px_rgba(0,0,0,.9)]"
           : "bg-card shadow-[0_0_0_1px_rgba(0,0,0,.05),0_18px_36px_-28px_rgba(0,0,0,.35)] hover:shadow-[0_0_0_1px_rgba(0,0,0,.07),0_24px_44px_-26px_rgba(0,0,0,.4)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]",
       )}
     >
-      <span className={dark ? "text-[#f5f5f7]" : undefined}>
-        <Icon size={size} play={play} accent={accentFor(icon, material)} />
-      </span>
-      <span className={cn("text-[13px] font-medium transition-colors", dark ? "text-white/50 group-hover:text-white" : "text-muted-foreground group-hover:text-foreground")}>
-        {icon.title}
-      </span>
-    </Link>
+      <Link
+        href={`/icons/${icon.slug}`}
+        className="flex size-full flex-col items-center justify-center gap-4 rounded-[22px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      >
+        <span className={dark ? "text-[#f5f5f7]" : undefined}>
+          <Icon key={lap} size={size} play={play} accent={accentFor(icon, material)} />
+        </span>
+        <span className={cn("text-[13px] font-medium transition-colors", dark ? "text-white/50 group-hover:text-white" : "text-muted-foreground group-hover:text-foreground")}>
+          {icon.title}
+        </span>
+      </Link>
+      {/* one click copies this icon's whole file; always there on touch screens, on hover or focus elsewhere */}
+      <CopyButton
+        slug={icon.slug}
+        name={icon.title}
+        compact
+        label="Copy code"
+        className={cn(
+          "absolute right-2.5 top-2.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100",
+          dark ? "bg-white/10 text-white hover:bg-white/20" : "",
+        )}
+      />
+    </div>
   );
 }
 
@@ -114,6 +163,9 @@ export function IconGrid() {
   const [size, setSize] = React.useState(40);
   const [party, setParty] = React.useState(false);
   const [wave, setWave] = React.useState(0);
+  const [cols, setCols] = React.useState(6);
+  const listRef = React.useRef<HTMLDivElement>(null);
+  const [sound, setSound] = React.useState(false);
 
   const dark = !!MATERIALS.find((m) => m.id === material)?.dark;
 
@@ -189,10 +241,25 @@ export function IconGrid() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setWave((w) => w + 1)}
+            onClick={() => {
+              const ul = listRef.current?.querySelector("ul");
+              if (ul) setCols(Math.max(1, getComputedStyle(ul).gridTemplateColumns.split(" ").length));
+              setWave((w) => w + 1);
+            }}
             className="inline-flex h-10 items-center gap-2 rounded-full bg-foreground px-4 text-[14px] font-medium text-background transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
             <Waves className="size-4" aria-hidden /> Wave
+          </button>
+          <button
+            type="button"
+            aria-pressed={sound}
+            onClick={() => setSound((v) => !v)}
+            className={cn(
+              "inline-flex h-10 items-center gap-2 rounded-full px-4 text-[14px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+              sound ? "bg-[#0a84ff] text-white" : "bg-foreground/[0.06] text-foreground hover:bg-foreground/[0.1]",
+            )}
+          >
+            {sound ? <Volume2 className="size-4" aria-hidden /> : <VolumeX className="size-4" aria-hidden />} Sound
           </button>
           <button
             type="button"
@@ -209,15 +276,15 @@ export function IconGrid() {
       </div>
 
       {shown.length ? (
-        <IconMaterial material={material} color={dark || color === SWATCHES[0] ? undefined : color} className="mt-6">
+        <IconMaterial material={material} color={dark || color === SWATCHES[0] ? undefined : color} className="mt-6"><div ref={listRef}>
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
             {shown.map((i, n) => (
               <li key={i.slug}>
-                <IconTile icon={i} material={material} size={size} dark={dark} party={party} pulse={wave ? { id: wave, delay: (n % 6) * 70 + Math.floor(n / 6) * 70 } : undefined} />
+                <IconTile icon={i} material={material} size={size} dark={dark} party={party} sound={sound} pulse={wave ? { id: wave, delay: Math.round(Math.hypot((n % cols) - (cols - 1) / 2, Math.floor(n / cols) + 0.6) * 120) } : undefined} />
               </li>
             ))}
           </ul>
-        </IconMaterial>
+        </div></IconMaterial>
       ) : (
         <p className="mt-16 text-center text-[16px] text-muted-foreground">
           No icon matches &ldquo;{query}&rdquo;. Try a broader word like &ldquo;arrow&rdquo; or &ldquo;time&rdquo;.

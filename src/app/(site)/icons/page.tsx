@@ -41,7 +41,7 @@ export default function IconsPage() {
           </h1>
           <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">
             Loaders that loop, bells that ring, planes that fly off and come back. Hover any icon to play it, restyle the whole set with the
-            controls below, then open one to hear it, drag it and copy its file.
+            controls below, switch Sound on to hear each one, then open one to drag it and copy its file.
           </p>
         </div>
       </section>
@@ -52,7 +52,7 @@ export default function IconsPage() {
 
           <div className="mt-20 grid gap-8 sm:grid-cols-3">
             {[
-              ["A tiny story each", "Not just a wiggle: a bell that pops a badge, a bin that catches a crumpled paper, a house that switches its windows on."],
+              ["A tiny story and a sound each", "Not just a wiggle: a bell that pops a badge, a bin that catches a crumpled paper, a house that switches its windows on. Every one has its own sound, scored note by note against its animation."],
               ["Make it yours", "Spark, Neon, Aurora or Chrome, in any colour and at any speed. Try them on the whole set above, or on a single icon on its own page."],
               ["One file, no lock-in", "Each icon is one self-contained component built with Framer Motion, and it holds still for visitors who have reduced motion switched on."],
             ].map(([title, body]) => (

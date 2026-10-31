@@ -50,8 +50,8 @@ export function BatteryIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
           fill={accent}
           stroke="none"
           initial={false}
-          animate={on ? { opacity: [0.14, 0.14, 1, 1, 0.14] } : { opacity: i < 2 ? 1 : 0.14 }}
-          transition={on ? { duration: 1.6 / speed, times: [0, 0.2 + i * 0.22, 0.22 + i * 0.22, 0.92, 1], ease: "linear", repeat: Infinity } : { duration: 0.2 / speed }}
+          animate={on ? { opacity: [0.14, 0.14, 1, 1] } : { opacity: i < 2 ? 1 : 0.14 }}
+          transition={on ? { duration: 1.6 / speed, times: [0, 0.2 + i * 0.22, 0.22 + i * 0.22, 1], ease: "linear" } : { duration: 0.2 / speed }}
         />
       ))}
     </svg>

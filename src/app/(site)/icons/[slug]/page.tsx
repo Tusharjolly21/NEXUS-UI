@@ -6,6 +6,7 @@ import path from "node:path";
 import { CodeBlock } from "@/components/code-block";
 import { DEFAULT_HEADER } from "@/components/code-block/code-block";
 import { IconTile } from "@/components/nx-icons/icon-grid";
+import { CopyButton } from "@/components/nx-icons/copy-button";
 import { IconPlayground } from "@/components/nx-icons/icon-playground";
 import { RainbowWord } from "@/components/site";
 import { ICONS, getCategory, getIcon } from "@/lib/icons/catalog";
@@ -46,6 +47,7 @@ export default async function IconPage({ params }: Props) {
   if (!icon) notFound();
   const category = getCategory(icon.category);
   const source = await readFile(path.join(process.cwd(), "src/components/nx-icons/icons", `${icon.slug}.tsx`), "utf8");
+  const scoreSource = await readFile(path.join(process.cwd(), "src/components/nx-icons/sounds", `${icon.slug}.ts`), "utf8");
   const material = await readFile(path.join(process.cwd(), "src/components/nx-icons/icon-material.tsx"), "utf8");
   const related = ICONS.filter((i) => i.category === icon.category && i.slug !== icon.slug).slice(0, 6);
   const name = icon.title.toLowerCase();
@@ -62,6 +64,10 @@ export default async function IconPage({ params }: Props) {
     {
       q: "Can I change the size and colour?",
       a: "Yes. Set size (in pixels) and strokeWidth as props. The icon draws in currentColor, so a text colour class on it, or on a parent, changes its colour.",
+    },
+    {
+      q: `Does the ${name} icon make a sound?`,
+      a: `Yes, optionally: ${icon.heard} The sound is scored against the icon's own animation, so every note lands on a beat of the picture, and it follows the speed prop. It plays only if you call it, and it follows the visitor's sound setting.`,
     },
     {
       q: "What happens with reduced motion?",
@@ -109,15 +115,18 @@ export default async function IconPage({ params }: Props) {
 
       <section aria-label="Preview and usage" className="px-4 pb-16">
         <div className="mx-auto max-w-[1152px]">
-          <IconPlayground icon={icon} />
+          <IconPlayground icon={icon} source={source} />
         </div>
       </section>
 
       <section aria-labelledby="source" className="px-4 pb-16">
         <div className="mx-auto max-w-[1152px]">
-          <h2 id="source" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
-            The code
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 id="source" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
+              The code
+            </h2>
+            <CopyButton text={source} label="Copy the file" />
+          </div>
           <p className="mt-2 max-w-[640px] text-[16px] text-muted-foreground">
             One file. Save it as <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">components/icons/{icon.slug}.tsx</code>, run{" "}
             <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">npm i framer-motion</code>, and import{" "}
@@ -132,6 +141,27 @@ export default async function IconPage({ params }: Props) {
               hoverHighlight={false}
               enableSound={false}
             />
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="sound" className="px-4 pb-16">
+        <div className="mx-auto max-w-[1152px]">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 id="sound" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
+              The sound (optional)
+            </h2>
+            <CopyButton text={scoreSource} label="Copy the sound" />
+          </div>
+          <p className="mt-2 max-w-[700px] text-[16px] text-muted-foreground">
+            {icon.heard} It is written against this icon&apos;s own animation: each line below is a note placed on a beat of the picture, and{" "}
+            <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">t()</code> stretches it with the <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">speed</code>{" "}
+            prop. Save it as <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">components/icons/sounds/{icon.slug}.ts</code> beside{" "}
+            <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">sound-kit.ts</code> and the site&apos;s sound engine, then call{" "}
+            <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">playIconSound(&quot;{icon.slug}&quot;)</code>. There are no audio files: it is all synthesised in the browser.
+          </p>
+          <div className="mt-6">
+            <CodeBlock code={scoreSource} language="ts" theme="dark" header={{ ...DEFAULT_HEADER, title: `${icon.slug}.ts` }} hoverHighlight={false} enableSound={false} />
           </div>
         </div>
       </section>
@@ -168,9 +198,12 @@ export default async function IconPage({ params }: Props) {
 
       <section aria-labelledby="looks" className="px-4 pb-16">
         <div className="mx-auto max-w-[1152px]">
-          <h2 id="looks" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
-            Looks (optional)
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 id="looks" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
+              Looks (optional)
+            </h2>
+            <CopyButton text={material} label="Copy the helper" />
+          </div>
           <p className="mt-2 max-w-[680px] text-[16px] text-muted-foreground">
             Wrap an icon, or a whole grid of them, in <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">IconMaterial</code> to
             give it a finish: neon glow, an aurora spectrum or polished chrome. Save it as{" "}

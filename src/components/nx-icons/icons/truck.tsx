@@ -40,7 +40,7 @@ export function TruckIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
       <motion.g
         initial={false}
         animate={on ? { y: [0, -0.7, 0, -0.5, 0] } : { y: 0 }}
-        transition={on ? { duration: 0.4 / speed, ease: "easeInOut", repeat: Infinity } : { duration: 0.2 / speed }}
+        transition={on ? { duration: 0.4 / speed, ease: "easeInOut", repeat: 4 } : { duration: 0.2 / speed }}
       >
         <path d="M5 7.2A1.2 1.2 0 0 1 6.2 6h7.6A1.2 1.2 0 0 1 15 7.2V16H5z" />
         <path d="M15 9.5h3.2l3 3.2V16H15z" />
@@ -54,7 +54,7 @@ export function TruckIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
           stroke={accent}
           initial={false}
           animate={on ? { x: [0, -2.4], opacity: [0, 1, 0] } : { x: 0, opacity: 0 }}
-          transition={on ? { duration: 0.6 / speed, ease: "easeOut", repeat: Infinity, delay: (i * 0.15) / speed } : { duration: 0.2 / speed }}
+          transition={on ? { duration: 0.6 / speed, ease: "easeOut", repeat: 2, delay: (i * 0.15) / speed } : { duration: 0.2 / speed }}
         />
       ))}
     </svg>

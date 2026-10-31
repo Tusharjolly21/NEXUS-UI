@@ -7,9 +7,10 @@ import { CodeBlock } from "@/components/code-block";
 import { DEFAULT_HEADER } from "@/components/code-block/code-block";
 import { Chip } from "@/components/site/chip-rail";
 import type { IconMeta } from "@/lib/icons/catalog";
-import { playSound } from "@/lib/ui-sounds";
 import { cn } from "@/lib/utils";
+import { CopyButton } from "./copy-button";
 import { MATERIALS, SWATCHES, accentFor } from "./icon-grid";
+import { hasIconSound, iconSoundLength, playIconSound } from "./icon-sounds";
 import { IconMaterial, type IconMaterialName } from "./icon-material";
 import { NX_ICONS } from "./registry";
 
@@ -55,7 +56,7 @@ function Slider({ label, value, min, max, step, onChange }: { label: string; val
  * The toy box on each icon page: pick how it is triggered, how fast and how it feels, restyle it, hear it, drag it, or
  * press Surprise me. The snippet beside it always matches what is on the stage.
  */
-export function IconPlayground({ icon }: { icon: IconMeta }) {
+export function IconPlayground({ icon, source }: { icon: IconMeta; source: string }) {
   const Icon = NX_ICONS[icon.slug];
   const isLoop = icon.kind === "loop";
 
@@ -83,8 +84,8 @@ export function IconPlayground({ icon }: { icon: IconMeta }) {
   const tilt = useSpring(0, { stiffness: 220, damping: 18 });
 
   const ping = React.useCallback(() => {
-    if (sound && icon.sound) playSound(icon.sound, 0.8, true);
-  }, [sound, icon.sound]);
+    if (sound) playIconSound(icon.slug, { speed, force: true });
+  }, [sound, icon.slug, speed]);
   const pingRef = React.useRef(ping);
   React.useEffect(() => {
     pingRef.current = ping;
@@ -107,6 +108,23 @@ export function IconPlayground({ icon }: { icon: IconMeta }) {
       timer.current = window.setTimeout(() => setPreview(false), 2000);
     }, 40);
   }, []);
+
+  // a loader's sound is one lap long: remount the icon so its first lap starts now, then repeat the sound every lap
+  const [epoch, setEpoch] = React.useState(0);
+  React.useEffect(() => {
+    if (!isLoop || !sound || paused) return;
+    const lap = (iconSoundLength(icon.slug) / speed) * 1000;
+    let id = 0;
+    const start = window.setTimeout(() => {
+      setEpoch((e) => e + 1);
+      playIconSound(icon.slug, { speed, force: true });
+      id = window.setInterval(() => playIconSound(icon.slug, { speed, force: true }), lap);
+    }, 0);
+    return () => {
+      window.clearTimeout(start);
+      window.clearInterval(id);
+    };
+  }, [isLoop, sound, paused, speed, icon.slug]);
 
   // loop trigger: play, rest, play again
   React.useEffect(() => {
@@ -171,13 +189,14 @@ export function IconPlayground({ icon }: { icon: IconMeta }) {
     icon.states && state !== "auto" ? `state="${state}"` : "",
   ].filter(Boolean);
   const tag = `<${icon.component}${attrs.length ? " " + attrs.join(" ") : ""} />`;
-  const withSound = sound && icon.sound && !isLoop;
-  const inner = withSound ? `<span onPointerEnter={() => playSound("${icon.sound}")}>\n        ${tag}\n      </span>` : tag;
+  const withSound = sound && !isLoop;
+  const soundArgs = speed !== 1 ? `, { speed: ${speed} }` : "";
+  const inner = withSound ? `<span onPointerEnter={() => playIconSound("${icon.slug}"${soundArgs})}>\n        ${tag}\n      </span>` : tag;
   const body = wrap ? `<IconMaterial material="${material}">\n      ${inner}\n    </IconMaterial>` : inner;
   const usage = [
     `import { ${icon.component} } from "@/components/icons/${icon.slug}";`,
     wrap ? `import { IconMaterial } from "@/components/icons/icon-material";` : "",
-    withSound ? `import { playSound } from "@/lib/ui-sounds";` : "",
+    withSound ? `import { playIconSound } from "@/components/icons/icon-sounds";` : "",
     "",
     "export default function Page() {",
     `  return (\n    ${body}\n  );`,
@@ -216,10 +235,13 @@ export function IconPlayground({ icon }: { icon: IconMeta }) {
           <motion.div style={{ x: mx, y: my, rotate: tilt }}>
             <motion.div drag dragSnapToOrigin dragElastic={0.55} whileDrag={{ scale: 1.14 }} whileTap={{ scale: 0.96 }} className="cursor-grab active:cursor-grabbing">
               <IconMaterial material={material} color={ink} className="grid place-items-center">
-                <Icon size={size} strokeWidth={stroke} speed={speed} accent={accent} play={play} state={icon.states && state !== "auto" ? (state as "idle") : undefined} />
+                <Icon key={epoch} size={size} strokeWidth={stroke} speed={speed} accent={accent} play={play} state={icon.states && state !== "auto" ? (state as "idle") : undefined} />
               </IconMaterial>
             </motion.div>
           </motion.div>
+          <div className="absolute left-3 top-3">
+            <CopyButton text={source} label="Copy code" className={dark ? "bg-white/10 text-white hover:bg-white/15" : "bg-card shadow-[0_0_0_1px_rgba(0,0,0,.06)] hover:bg-card/80"} />
+          </div>
           <div className="absolute right-3 top-3 flex items-center gap-2">
             <button
               type="button"
@@ -316,12 +338,19 @@ export function IconPlayground({ icon }: { icon: IconMeta }) {
             <Chip active={stage === "dark"} onClick={() => setStage("dark")} className="px-3.5 py-1.5 text-[13px]">
               Dark
             </Chip>
-            {isLoop || !icon.sound ? null : (
+            {hasIconSound(icon.slug) ? (
               <Chip active={sound} onClick={() => setSound((s) => !s)} className="ml-auto px-3.5 py-1.5 text-[13px]" icon={sound ? <Volume2 className="size-3.5" aria-hidden /> : <VolumeX className="size-3.5" aria-hidden />}>
-                {sound ? `Sound on · ${icon.sound}` : "Sound off"}
+                {sound ? "Sound on" : "Sound off"}
               </Chip>
-            )}
+            ) : null}
           </Row>
+          <p className="flex gap-2.5 rounded-[14px] bg-foreground/[0.04] px-4 py-3 text-[13.5px] leading-relaxed text-muted-foreground">
+            <Volume2 className="mt-0.5 size-4 shrink-0" aria-hidden />
+            <span>
+              <span className="font-medium text-foreground">What you hear. </span>
+              {icon.heard} {isLoop ? "One lap of sound for every lap of the animation." : "Every note lands on a beat of the animation."}
+            </span>
+          </p>
         </div>
       </div>
 
