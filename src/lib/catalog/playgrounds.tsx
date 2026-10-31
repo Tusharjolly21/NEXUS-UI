@@ -219,6 +219,12 @@ import { Lightfall } from "@/components/lightfall";
 import { PluckFrame } from "@/components/pluck-frame";
 import { GlassDrop } from "@/components/glass-drop";
 import { AIComposer } from "@/components/ai-composer";
+import { LiquidSend } from "@/components/liquid-send";
+import { FolderTree } from "@/components/folder-tree";
+import { ContextMenu } from "@/components/context-menu";
+import { ConsentDock } from "@/components/consent-dock";
+import { AddToBag } from "@/components/add-to-bag";
+import { LiquidPagination } from "@/components/liquid-pagination";
 import { DustSnap } from "@/components/dust-snap";
 import { TetheredSubmit } from "@/components/tethered-submit";
 import { DependentForm } from "@/components/dependent-form";
@@ -4226,6 +4232,110 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => (
       <div className="mx-auto w-full max-w-[560px]">
         <AIComposer key={String(v.autoplay)} greeting={v.greeting as string} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "liquid-send": {
+    lightOnly: true,
+    componentName: "LiquidSend",
+    importPath: "@/components/liquid-send",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "placeholder", label: "Placeholder", options: ["Message", "Reply to Maya", "Ask anything"], defaultValue: "Message" },
+      { kind: "toggle", prop: "autoplay", label: "Write and send by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[720px]">
+        <LiquidSend key={String(v.autoplay)} placeholder={v.placeholder as string} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "folder-tree": {
+    lightOnly: true,
+    componentName: "FolderTree",
+    importPath: "@/components/folder-tree",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "name", label: "Root folder", options: ["my-app", "website", "docs"], defaultValue: "my-app" },
+      { kind: "toggle", prop: "draggable", label: "Drag into folders", defaultValue: true },
+      { kind: "toggle", prop: "editable", label: "New, rename and delete", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[440px]">
+        <FolderTree key={String(v.autoplay)} name={v.name as string} draggable={v.draggable as boolean} editable={v.editable as boolean} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "context-menu": {
+    lightOnly: true,
+    componentName: "ContextMenu",
+    importPath: "@/components/context-menu",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "title", label: "Window title", options: ["Q4 Launch", "Design", "Photos"], defaultValue: "Q4 Launch" },
+      { kind: "toggle", prop: "autoplay", label: "Right-click by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[600px]">
+        <ContextMenu key={String(v.autoplay)} title={v.title as string} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "consent-dock": {
+    lightOnly: true,
+    componentName: "ConsentDock",
+    importPath: "@/components/consent-dock",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "corner", label: "Corner", options: ["bl", "br", "tl", "tr"], defaultValue: "bl" },
+      { kind: "select", prop: "title", label: "Heading", options: ["Cookies, your call.", "Your privacy, your choice.", "A quick word on cookies."], defaultValue: "Cookies, your call." },
+      { kind: "toggle", prop: "autoplay", label: "Choose and throw by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[720px]">
+        <ConsentDock key={`${String(v.autoplay)}-${String(v.corner)}`} contained corner={v.corner as "bl"} title={v.title as string} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "add-to-bag": {
+    lightOnly: true,
+    componentName: "AddToBag",
+    importPath: "@/components/add-to-bag",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "max", label: "Most you can add", min: 1, max: 20, step: 1, unit: "", defaultValue: 9 },
+      { kind: "select", prop: "currency", label: "Currency", options: ["$", "\u20AC", "\u00A3"], defaultValue: "$" },
+      { kind: "toggle", prop: "autoplay", label: "Add and remove by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[380px]">
+        <AddToBag key={String(v.autoplay)} max={v.max as number} currency={v.currency as string} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "liquid-pagination": {
+    lightOnly: true,
+    componentName: "LiquidPagination",
+    importPath: "@/components/liquid-pagination",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "variant", label: "Style", options: ["numbers", "dots"], defaultValue: "numbers" },
+      { kind: "range", prop: "count", label: "Pages", min: 3, max: 60, step: 1, unit: "", defaultValue: 24 },
+      { kind: "range", prop: "siblings", label: "Pages beside the current one", min: 0, max: 3, step: 1, unit: "", defaultValue: 1 },
+      { kind: "color", prop: "color", label: "Drop colour", options: ["#1d1d1f", "#0071e3", "#30d158", "#ff9f0a", "#bf5af2"], defaultValue: "#1d1d1f" },
+      { kind: "toggle", prop: "autoplay", label: "Turn pages by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[640px] justify-center">
+        <LiquidPagination
+          key={`${String(v.autoplay)}-${String(v.variant)}-${String(v.count)}`}
+          variant={v.variant as "numbers"}
+          count={v.variant === "dots" ? Math.min(v.count as number, 12) : (v.count as number)}
+          siblings={v.siblings as number}
+          color={v.color as string}
+          autoplay={v.autoplay as boolean}
+        />
       </div>
     ),
   },

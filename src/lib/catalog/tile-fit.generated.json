@@ -1,4 +1,24 @@
 {
+ "add-to-bag": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   10,
+   54,
+   662,
+   656
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "ai-composer": {
   "canvas": [
    960,
@@ -1179,6 +1199,26 @@
   "bg": null,
   "coverage": 0.06
  },
+ "consent-dock": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   10,
+   160,
+   806,
+   550
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "contact-centered": {
   "canvas": [
    1280,
@@ -1258,6 +1298,26 @@
   ],
   "bg": "#f6f6f6",
   "coverage": 1
+ },
+ "context-menu": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   10,
+   162,
+   772,
+   548
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.94
  },
  "context-meter": {
   "canvas": [
@@ -1919,6 +1979,26 @@
   "bg": null,
   "coverage": 0.08
  },
+ "folder-tree": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   10,
+   126,
+   692,
+   584
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "forge-ai-command-bar": {
   "canvas": [
    960,
@@ -2558,6 +2638,46 @@
   ],
   "bg": null,
   "coverage": 0.01
+ },
+ "liquid-pagination": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   10,
+   300,
+   678,
+   410
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "liquid-send": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   10,
+   208,
+   830,
+   502
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "lit-keyboard": {
   "canvas": [
