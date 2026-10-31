@@ -33,7 +33,9 @@ export function OnThisPage() {
 
   React.useEffect(() => {
     if (!headings.length) return;
-    const onScroll = () => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
       const offset = 140;
       let current = headings[0].id;
       for (const h of headings) {
@@ -45,10 +47,15 @@ export function OnThisPage() {
       fill.set(max > 0 ? Math.min(1, window.scrollY / max) : 1);
       setActive(current);
     };
-    onScroll();
+    /* One layout read per frame, however many scroll events fire. */
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => {
+      cancelAnimationFrame(frame);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
