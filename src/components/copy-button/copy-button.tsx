@@ -93,16 +93,22 @@ export function CopyChip({ value, display, label = "Copy", accent = "#0071e3", a
           {display ?? value}
         </span>
         <span className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-[#f0f0f3] [--cc-icon:#6e6e73] dark:bg-[#3a3a3c] dark:[--cc-icon:#a1a1a6]" style={{ color: copied ? accent : "var(--cc-icon)" }}>
-          <AnimatePresence mode="popLayout" initial={false}>
+          {/* Each icon sits in its own absolutely centred box. A bare <motion.svg> is never taken out of the
+              layout by AnimatePresence, so the old and new icon would share the row and push the tick off centre. */}
+          <AnimatePresence initial={false}>
             {copied ? (
-              <motion.svg key="check" initial={{ scale: 0.4, rotate: -45, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} exit={{ scale: 0.4, opacity: 0 }} transition={{ type: "spring", stiffness: 600, damping: 20 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <motion.path d="M5 12.5l4.5 4.5L19 7.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.25, delay: 0.05 }} />
-              </motion.svg>
+              <motion.span key="check" className="absolute inset-0 flex items-center justify-center" initial={{ scale: 0.4, rotate: -45, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} exit={{ scale: 0.4, opacity: 0 }} transition={{ type: "spring", stiffness: 600, damping: 20 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <motion.path d="M5 12.5l4.5 4.5L19 7.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.25, delay: 0.05 }} />
+                </svg>
+              </motion.span>
             ) : (
-              <motion.svg key="copy" initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.4, rotate: 45, opacity: 0 }} transition={{ type: "spring", stiffness: 600, damping: 22 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="8" y="8" width="12" height="12" rx="2.5" />
-                <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
-              </motion.svg>
+              <motion.span key="copy" className="absolute inset-0 flex items-center justify-center" initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.4, rotate: 45, opacity: 0 }} transition={{ type: "spring", stiffness: 600, damping: 22 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="8" y="8" width="12" height="12" rx="2.5" />
+                  <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+                </svg>
+              </motion.span>
             )}
           </AnimatePresence>
         </span>
