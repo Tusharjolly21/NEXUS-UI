@@ -19,7 +19,7 @@ type Comment = {
 };
 
 const ROW_ONE: Comment[] = [
-  { user: "aspiring_abundance", source: "r/SaaS", quote: "The pumpkin smash component alone deserves $79 dollars" },
+  { user: "aspiring_abundance", source: "r/SaaS", quote: "The pumpkin smash component alone deserves $79 dollars … what a perfect little detail to throw into a UI library" },
   { user: "JOvertron", source: "r/webdesign", quote: "Very cool" },
   { user: "benjaminhu", source: "Reddit", quote: "This is incredibly good! Source code, please! :)" },
   { user: "DarkBlade_12", source: "Reddit", quote: "Woahh this is soo cool!! The effect of the symbiote taking over if you stay close for too long is genuinely awesome" },
