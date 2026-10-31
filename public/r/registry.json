@@ -2128,6 +2128,10 @@
           "type": "registry:lib"
         },
         {
+          "path": "next-ui/status-morph/status-morph-sound.ts",
+          "type": "registry:lib"
+        },
+        {
           "path": "next-ui/status-morph/status-morph.tsx",
           "type": "registry:component"
         }

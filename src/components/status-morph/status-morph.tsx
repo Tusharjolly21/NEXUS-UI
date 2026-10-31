@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, animate, motion, useInView, useMotionValue, useReducedMotion } from "framer-motion";
-import { useSound } from "@/lib/ui-sounds";
+import { audioAwake, playDef, useAutoplaySoundAllowed } from "@/lib/ui-sounds";
+import { statusMorphSounds, type StatusMorphSound } from "./status-morph-sound";
 
 /**
  * Status Morph: an iPhone-style status bar (signal, Wi-Fi, battery) that takes itself apart to connect.
@@ -54,6 +55,7 @@ export function StatusMorph({
   speed = 1,
   network = "Nexus",
   enableSound = true,
+  volume = 0.8,
 }: {
   /** Connects and disconnects by itself until the visitor taps it. Pauses while off screen. */
   autoplay?: boolean;
@@ -65,8 +67,10 @@ export function StatusMorph({
   speed?: number;
   /** The network name shown under the icons while joining and once connected. */
   network?: string;
-  /** Plays interface sounds on each step. They follow the site-wide sound switch. */
+  /** Plays its own soft, glassy sounds, timed to the animation. They follow the site-wide sound switch. */
   enableSound?: boolean;
+  /** Loudness of the sounds, 0 to 1. */
+  volume?: number;
 }) {
   const p = pace(speed);
   const t = (s: number) => s / p;
@@ -77,8 +81,8 @@ export function StatusMorph({
   const reduce = useReducedMotion();
   const root = useRef<HTMLButtonElement>(null);
   const inView = useInView(root, { amount: 0.3 });
-  const play = useSound(enableSound);
-  const playRef = useRef(play);
+  const autoSoundOk = useAutoplaySoundAllowed();
+  const soundCfg = useRef({ enableSound, volume, p, autoSoundOk });
   const touched = useRef(false);
 
   const [phase, setPhase] = useState<Phase>("bar");
@@ -91,8 +95,8 @@ export function StatusMorph({
   const dash = useMotionValue(`${C / 2} 0 ${C / 2} 0`);
 
   useEffect(() => {
-    playRef.current = play;
-  }, [play]);
+    soundCfg.current = { enableSound, volume, p, autoSoundOk };
+  }, [enableSound, volume, p, autoSoundOk]);
 
   // Rotation and the ring's gap are driven by hand: the rotation has to spin forever, then coast to rest exactly
   // where the dots line up, and the dash pattern is written out from the gap so it always centres on the bottom.
@@ -105,9 +109,12 @@ export function StatusMorph({
     };
   }, [rot, gap, dash]);
 
-  const sound = (name: Parameters<typeof play>[0], volume?: number) => {
-    if (touched.current) playRef.current(name, volume);
-    else playRef.current.auto(name, volume);
+  // Autoplay only makes sound where demos may (see AutoplaySound) and once the visitor has used the page.
+  const sound = (name: StatusMorphSound) => {
+    const c = soundCfg.current;
+    if (!c.enableSound) return;
+    if (!touched.current && !(c.autoSoundOk && audioAwake())) return;
+    playDef(`status-morph:${name}`, statusMorphSounds(c.p)[name], Math.min(1, Math.max(0, c.volume)));
   };
 
   // Imperative half of each phase: the spin, the gap, and the hand-off to the next phase.
@@ -115,6 +122,7 @@ export function StatusMorph({
     let live: ReturnType<typeof animate> | null = null;
     let cancelled = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
+    const cleanups: (() => void)[] = [];
     const after = (s: number, fn: () => void) => timers.push(setTimeout(() => !cancelled && fn(), t(s) * 1000));
 
     if (phase === "bar") {
@@ -123,6 +131,16 @@ export function StatusMorph({
     }
 
     if (phase === "search") {
+      // A faint tick climbs with each ripple of the Wi-Fi arcs, landing as each arc peaks.
+      let ripple: ReturnType<typeof setInterval> | undefined;
+      if (!reduce) {
+        after(1.3, () => {
+          sound("ripple");
+          ripple = setInterval(() => sound("ripple"), t(1.05) * 1000);
+        });
+        timers.push(setTimeout(() => clearInterval(ripple), t(3.2) * 1000));
+      }
+      cleanups.push(() => clearInterval(ripple));
       after(0.8, () => {
         live = animate(gap, GAP, { duration: t(0.35), ease: "easeOut" });
         if (reduce) return;
@@ -157,23 +175,24 @@ export function StatusMorph({
 
     if (phase === "connected") {
       live = animate(gap, 0, { duration: t(0.32), ease: [0.4, 0, 0.2, 1] });
-      after(0.28, () => sound("done", 0.8));
+      sound("connected");
     }
 
     return () => {
       cancelled = true;
       live?.stop();
       timers.forEach(clearTimeout);
+      cleanups.forEach((f) => f());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, reduce, p]);
 
   const go = () => {
     if (phase === "bar") {
-      sound("tap", 0.8);
+      sound("connect");
       setPhase("search");
     } else {
-      sound(phase === "connected" ? "charge" : "off", 0.8);
+      sound(phase === "connected" ? "disconnect" : "cancel");
       setCharging(true);
       setPhase("bar");
     }

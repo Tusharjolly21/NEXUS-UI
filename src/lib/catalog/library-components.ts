@@ -13282,6 +13282,7 @@ export default function Page() {
       { name: "size", type: "number", defaultValue: "260", description: "Width of the drawing in pixels. Kept between 160 and 480." },
       { name: "speed", type: "number", defaultValue: "1", description: "How fast it plays: 1 is the designed pace, 2 is twice as fast. Kept between 0.25 and 4." },
       { name: "network", type: "string", defaultValue: "\"Nexus\"", description: "The network name shown under the icons while joining and once connected." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Loudness of its sounds, 0 to 1." },
     ],
     Preview: Previews.PreviewStatusMorph,
     previewShell: "plain",
