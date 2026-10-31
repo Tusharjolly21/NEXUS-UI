@@ -19,7 +19,11 @@ function readJson<T>(key: string, fallback: T): T {
 
 function writeJson(key: string, value: unknown) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(key, JSON.stringify(value));
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* Quota exceeded or storage blocked (private mode): this runs inside a state updater, so a throw would crash the render. */
+  }
 }
 
 export function useCatalogStorage<T>(key: string, initial: T) {

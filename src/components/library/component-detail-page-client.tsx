@@ -126,10 +126,13 @@ const INTERACTION_OF: Record<string, string> = {
 function CopyBtn({ text, label = "Copy", dark = false }: { text: string; label?: string; dark?: boolean }) {
   const [copied, setCopied] = React.useState(false);
   function copy() {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
-    });
+    navigator.clipboard.writeText(text).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1600);
+      },
+      () => {}, // blocked (insecure context / permission denied): leave the button as it was
+    );
   }
   return (
     <button
