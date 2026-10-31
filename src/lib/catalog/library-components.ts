@@ -13280,6 +13280,7 @@ export default function Page() {
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Writes and sends a few messages by itself until the first touch. Held still under reduced motion." },
       { name: "onSend", type: "(text: string, file?: string) => void", description: "Called with the message text and, if one was attached, the file name." },
       { name: "placeholder", type: "string", defaultValue: "\"Message\"", description: "Placeholder shown in the empty field." },
+      { name: "size", type: "number", description: "Diameter of the send button in pixels; the composer scales with it (40 to 240). Left out, it follows the composer's width, from 52 to 68." },
     ],
     Preview: Previews.PreviewLiquidSend,
     previewShell: "plain",
