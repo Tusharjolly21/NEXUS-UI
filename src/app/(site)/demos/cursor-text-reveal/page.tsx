@@ -10,9 +10,9 @@ export const metadata: Metadata = createMetadata({
 
 export default function CursorTextRevealDemoPage() {
   return (
-    <main className="min-h-[calc(100dvh-4rem)]">
+    <div className="min-h-[calc(100dvh-4rem)]">
       <h1 className="sr-only">Cursor Text Reveal</h1>
       <CursorTextRevealDemo />
-    </main>
+    </div>
   );
 }

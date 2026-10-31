@@ -274,7 +274,7 @@ export default async function BlockDetailPage({ params }: Props) {
         </div>
       </section>
 
-      <main className="mx-auto w-full max-w-[1184px] px-4 pb-24">
+      <div className="mx-auto w-full max-w-[1184px] px-4 pb-24">
         <InstallRow
           nav={
             <nav aria-label="Sections in this block" className="flex flex-col rounded-[28px] bg-card p-6 shadow-[0_0_0_0.5px_var(--border)]">
@@ -767,7 +767,7 @@ export default async function BlockDetailPage({ params }: Props) {
               ))}
           </ul>
         </section>
-      </main>
+      </div>
     </>
   );
 }

@@ -12,7 +12,7 @@ export function LegalPage({
   children: ReactNode;
 }) {
   return (
-    <main className="text-foreground">
+    <div className="text-foreground">
       <header className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-12 pt-[136px]">
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
         <div className="relative mx-auto max-w-[760px]">
@@ -29,7 +29,7 @@ export function LegalPage({
           or use the <LegalLink href="/contact">contact form</LegalLink>.
         </footer>
       </article>
-    </main>
+    </div>
   );
 }
 
