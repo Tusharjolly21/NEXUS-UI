@@ -21,7 +21,13 @@ const listeners = new Set<() => void>();
 function readCookie(name: string): string | null {
   for (const part of document.cookie.split("; ")) {
     const eq = part.indexOf("=");
-    if (eq !== -1 && part.slice(0, eq) === name) return decodeURIComponent(part.slice(eq + 1));
+    if (eq !== -1 && part.slice(0, eq) === name) {
+      try {
+        return decodeURIComponent(part.slice(eq + 1));
+      } catch {
+        return null; // malformed value (e.g. a stray "%"): treat as unset instead of crashing the app
+      }
+    }
   }
   return null;
 }

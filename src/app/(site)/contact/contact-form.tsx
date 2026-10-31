@@ -36,7 +36,8 @@ export function ContactForm() {
           website: fields.website,
         }),
       });
-      const data = (await res.json()) as { success?: boolean; error?: string };
+      // A proxy error page (413, 429, 502) is not JSON; still report it as a failed send.
+      const data = (await res.json().catch(() => ({}))) as { success?: boolean; error?: string };
       if (!res.ok) {
         setErrorMsg(data.error ?? "The message didn't send. Try again, or email us directly.");
         setStatus("error");

@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { cache } from "react";
 import path from "node:path";
 import matter from "gray-matter";
 import { compileMDX } from "next-mdx-remote/rsc";
@@ -32,7 +33,10 @@ export async function getAllPosts(): Promise<(BlogFrontmatter & { slug: string }
     .sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
-export async function getPost(slug: string) {
+/* Cached per request: generateMetadata and the page both ask for the same post. */
+export const getPost = cache(async (slug: string) => {
+  // The slug comes from the URL; keep it to a file name inside content/blog.
+  if (!/^[a-z0-9-]+$/.test(slug)) return null;
   const full = path.join(dir, `${slug}.mdx`);
   if (!fs.existsSync(full)) return null;
   const raw = fs.readFileSync(full, "utf8");
@@ -49,7 +53,7 @@ export async function getPost(slug: string) {
     },
   });
   return { frontmatter, content: mdx, slug };
-}
+});
 
 /**
  * Posts that link to a component page, newest first — shown on that component's page so guides
