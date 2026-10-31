@@ -395,6 +395,13 @@ const TINT_OF: Record<string, TileTint> = {
  * are all gathered, newest first, under the wall's New tab (see NEW_TAB_DAYS).
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // twenty-first batch (Motion Kit Pro: Liquid Send, Folder Tree, Context Menu, Consent Dock, Add to Bag, Liquid Pagination)
+  "liquid-send",
+  "folder-tree",
+  "context-menu",
+  "consent-dock",
+  "add-to-bag",
+  "liquid-pagination",
   // twentieth batch (Motion Kit Pro: Ring Gallery)
   "ring-gallery",
   // nineteenth batch (Motion Kit Pro: Global Deploy, Card Reader Verify, Intelligence Glow, Cloud Sync, Smart Light, Range Calendar, Storage Clean)
@@ -408,12 +415,6 @@ export const MOTION_KIT_ORDER: string[] = [
   "dust-snap", // newest batch, placed among the older ones on purpose
   "glass-drop", // newest batch, placed among the older ones on purpose
   "ai-composer",
-  "liquid-send",
-  "folder-tree",
-  "context-menu",
-  "consent-dock",
-  "add-to-bag",
-  "liquid-pagination",
   "range-calendar",
   "storage-clean",
   // eighteenth batch (Dart Rating, Domino Progress, Pumpkin Reveal, Catch Undo)
@@ -594,6 +595,12 @@ export const MOTION_KIT_ORDER: string[] = [
 
 /** The homepage set, in order: newest interactions first, then the best of the rest. */
 export const HOME_PICKS: string[] = [
+  "liquid-send",
+  "folder-tree",
+  "context-menu",
+  "consent-dock",
+  "add-to-bag",
+  "liquid-pagination",
   "glass-bubbles",
   "curved-reel",
   "swipe-stack",
