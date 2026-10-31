@@ -53,6 +53,7 @@ const SELF_DEMO = new Set([
   "pluck-frame",
   "dust-snap",
   "glass-drop",
+  "status-morph",
   "ai-composer",
   "tethered-submit",
   "dependent-form",
@@ -401,6 +402,7 @@ export const MOTION_KIT_ORDER: string[] = [
   "pluck-frame", // newest batch, placed among the older ones on purpose
   "dust-snap", // newest batch, placed among the older ones on purpose
   "glass-drop", // newest batch, placed among the older ones on purpose
+  "status-morph", // newest batch, placed among the older ones on purpose
   "ai-composer",
   "range-calendar",
   "storage-clean",

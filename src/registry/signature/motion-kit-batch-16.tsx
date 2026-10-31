@@ -1,13 +1,14 @@
 "use client";
 
 /**
- * Motion Kit previews (batch 16): Pluck Frame, Dust Snap and Glass Drop.
+ * Motion Kit previews (batch 16): Pluck Frame, Dust Snap, Glass Drop and Status Morph.
  * It plays its own demo (autoplay) until a real pointer arrives, so the preview only adds the light page.
  */
 
 import { PluckFrame } from "@/components/pluck-frame";
 import { DustSnap } from "@/components/dust-snap";
 import { GlassDrop } from "@/components/glass-drop";
+import { StatusMorph } from "@/components/status-morph";
 
 const STAGE = "flex h-full w-full items-center justify-center bg-[#f5f5f7] p-4 sm:p-6 dark:bg-[#f5f5f7]";
 
@@ -46,6 +47,15 @@ export function PreviewGlassDrop({ compact = false }: { compact?: boolean } = {}
       <div className="w-full max-w-[860px]">
         <GlassDrop height={compact ? 300 : 440} />
       </div>
+    </div>
+  );
+}
+
+/** Status Morph connects and lets go by itself (autoplay) until it is tapped; the preview gives it the light page. */
+export function PreviewStatusMorph({ compact = false }: { compact?: boolean } = {}) {
+  return (
+    <div className={`${STAGE} ${compact ? "min-h-[280px]" : "min-h-[380px]"}`}>
+      <StatusMorph autoplay size={compact ? 240 : 300} />
     </div>
   );
 }

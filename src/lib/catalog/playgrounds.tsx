@@ -217,6 +217,7 @@ import { TestimonialWall } from "@/components/testimonial-wall";
 import { ShredderDelete } from "@/components/shredder-delete";
 import { Lightfall } from "@/components/lightfall";
 import { PluckFrame } from "@/components/pluck-frame";
+import { StatusMorph } from "@/components/status-morph";
 import { GlassDrop } from "@/components/glass-drop";
 import { AIComposer } from "@/components/ai-composer";
 import { DustSnap } from "@/components/dust-snap";
@@ -4172,6 +4173,26 @@ export const playgrounds: Record<string, Playground> = {
       <div className="mx-auto w-full max-w-[520px]">
         <SkeletonMorphRows key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
       </div>
+    ),
+  },
+  "status-morph": {
+    componentName: "StatusMorph",
+    importPath: "@/components/status-morph",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "theme", label: "Theme", options: ["light", "dark"], defaultValue: "light" },
+      { kind: "range", prop: "size", label: "Size", min: 180, max: 420, step: 10, unit: "px", defaultValue: 260 },
+      { kind: "range", prop: "speed", label: "Animation speed", min: 0.4, max: 2.5, step: 0.1, unit: "x", defaultValue: 1 },
+    ],
+    render: (v) => (
+      <StatusMorph
+        key={String(v.autoplay)}
+        autoplay={v.autoplay as boolean}
+        theme={v.theme as "light"}
+        size={v.size as number}
+        speed={v.speed as number}
+      />
     ),
   },
   "pluck-frame": {

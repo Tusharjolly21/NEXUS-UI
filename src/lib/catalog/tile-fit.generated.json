@@ -5339,6 +5339,26 @@
   "bg": null,
   "coverage": 0.01
  },
+ "status-morph": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   10,
+   274,
+   616,
+   436
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "step-flow": {
   "canvas": [
    1200,
