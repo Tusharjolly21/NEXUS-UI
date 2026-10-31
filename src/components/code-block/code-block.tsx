@@ -505,26 +505,32 @@ const POP = { type: "spring" as const, stiffness: 600, damping: 22 };
 function CopyGlyph({ copied, still }: { copied: boolean; still: boolean }) {
   return (
     <span className="relative inline-grid h-4 w-4 place-items-center" aria-hidden="true">
-      <AnimatePresence mode="popLayout" initial={false}>
+      {/* Each icon sits in its own absolutely centred box. A bare <motion.svg> is never taken out of the
+          layout by AnimatePresence, so the old and new icon would share the grid and push the tick off centre. */}
+      <AnimatePresence initial={false}>
         {copied ? (
-          <motion.svg key="ok" viewBox="0 0 16 16" width={16} height={16} initial={{ scale: 0.3, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0.3, opacity: 0 }} transition={POP}>
-            <motion.path
-              d="M3.5 8.4l2.9 2.8 6.1-6.4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              initial={{ pathLength: still ? 1 : 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 0.28, ease: "easeOut" }}
-            />
-          </motion.svg>
+          <motion.span key="ok" className="absolute inset-0 grid place-items-center" initial={{ scale: 0.3, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0.3, opacity: 0 }} transition={POP}>
+            <svg viewBox="0 0 16 16" width={16} height={16}>
+              <motion.path
+                d="M3.5 8.4l2.9 2.8 6.1-6.4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                initial={{ pathLength: still ? 1 : 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.28, ease: "easeOut" }}
+              />
+            </svg>
+          </motion.span>
         ) : (
-          <motion.svg key="copy" viewBox="0 0 16 16" width={16} height={16} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={POP}>
-            <rect x="5.5" y="5.5" width="8" height="8" rx="2" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M10.5 3.5v-.2A1.3 1.3 0 0 0 9.2 2H3.8A1.3 1.3 0 0 0 2.5 3.3v5.4A1.3 1.3 0 0 0 3.8 10h.2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </motion.svg>
+          <motion.span key="copy" className="absolute inset-0 grid place-items-center" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={POP}>
+            <svg viewBox="0 0 16 16" width={16} height={16}>
+              <rect x="5.5" y="5.5" width="8" height="8" rx="2" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M10.5 3.5v-.2A1.3 1.3 0 0 0 9.2 2H3.8A1.3 1.3 0 0 0 2.5 3.3v5.4A1.3 1.3 0 0 0 3.8 10h.2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </motion.span>
         )}
       </AnimatePresence>
     </span>
