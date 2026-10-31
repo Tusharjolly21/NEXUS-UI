@@ -10,6 +10,8 @@ const PRIVATE_AND_FACETED = [
   "/template-preview/",
   "/auth/",
   "/login",
+  // The cached copy of the homepage ("/" is rewritten to it for signed-out visitors); not a page of its own.
+  "/home-static",
   "/sounds/",
   "/registry.json",
   "/world-atlas-110m.json",
