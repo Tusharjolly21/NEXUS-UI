@@ -1,4 +1,24 @@
 {
+ "add-to-bag": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   290,
+   84,
+   382,
+   530
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "ai-composer": {
   "canvas": [
    960,
@@ -11,10 +31,10 @@
    720
   ],
   "content": [
-   10,
+   200,
    184,
-   752,
-   526
+   562,
+   394
   ],
   "bg": "#f6f6f6",
   "coverage": 1
@@ -1179,6 +1199,26 @@
   "bg": null,
   "coverage": 0.06
  },
+ "consent-dock": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   128,
+   160,
+   688,
+   420
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "contact-centered": {
   "canvas": [
    1280,
@@ -1258,6 +1298,26 @@
   ],
   "bg": "#f6f6f6",
   "coverage": 1
+ },
+ "context-menu": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   180,
+   162,
+   602,
+   416
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.94
  },
  "context-meter": {
   "canvas": [
@@ -1531,10 +1591,10 @@
    500
   ],
   "content": [
-   10,
+   80,
    106,
-   710,
-   384
+   640,
+   328
   ],
   "bg": "#f6f6f6",
   "coverage": 0.92
@@ -1919,6 +1979,26 @@
   "bg": null,
   "coverage": 0.08
  },
+ "folder-tree": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   260,
+   126,
+   442,
+   488
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "forge-ai-command-bar": {
   "canvas": [
    960,
@@ -1991,10 +2071,10 @@
    720
   ],
   "content": [
-   10,
+   50,
    194,
-   902,
-   516
+   862,
+   330
   ],
   "bg": "#f6f6f6",
   "coverage": 1
@@ -2559,6 +2639,46 @@
   "bg": null,
   "coverage": 0.01
  },
+ "liquid-pagination": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   274,
+   300,
+   414,
+   110
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "liquid-send": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   120,
+   208,
+   720,
+   306
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "lit-keyboard": {
   "canvas": [
    960,
@@ -2951,9 +3071,9 @@
    860
   ],
   "content": [
-   10,
+   126,
    40,
-   1146,
+   1030,
    810
   ],
   "bg": "#f6f6f6",
@@ -4211,10 +4331,10 @@
    720
   ],
   "content": [
-   10,
+   244,
    140,
-   706,
-   570
+   472,
+   486
   ],
   "bg": "#f6f6f6",
   "coverage": 0.99
@@ -5091,13 +5211,13 @@
    820
   ],
   "content": [
-   10,
-   174,
-   912,
-   636
+   280,
+   172,
+   642,
+   494
   ],
   "bg": "#f6f6f6",
-  "coverage": 1
+  "coverage": 0.98
  },
  "sparkles": {
   "canvas": [
@@ -5338,6 +5458,26 @@
   ],
   "bg": null,
   "coverage": 0.01
+ },
+ "status-morph": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   336,
+   274,
+   290,
+   190
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "step-flow": {
   "canvas": [

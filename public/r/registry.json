@@ -2110,6 +2110,34 @@
       ]
     },
     {
+      "name": "status-morph",
+      "type": "registry:component",
+      "title": "Status Morph",
+      "description": "An iPhone-style status bar (signal, Wi-Fi, battery) that takes itself apart to connect. Tap it and the battery drains, amber then red, before its outline rounds itself into a ring around the Wi-Fi. The signal bars sink into dots, swing under the ring and slide into its gap, and the ring spins while the Wi-Fi arcs ripple outward. When it connects, the spin coasts to rest, the ring closes over the dots with a soft pulse and the arcs fill in one by one. Tap again and it all folds back into the bar, this time charging, with a bolt.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
+      ],
+      "files": [
+        {
+          "path": "next-ui/status-morph/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/status-morph/status-morph-sound.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/status-morph/status-morph.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "cinematic-logo-cloud",
       "type": "registry:component",
       "title": "Cinematic Logo Cloud",

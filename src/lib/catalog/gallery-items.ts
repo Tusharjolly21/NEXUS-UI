@@ -53,7 +53,14 @@ const SELF_DEMO = new Set([
   "pluck-frame",
   "dust-snap",
   "glass-drop",
+  "status-morph",
   "ai-composer",
+  "liquid-send",
+  "folder-tree",
+  "context-menu",
+  "consent-dock",
+  "add-to-bag",
+  "liquid-pagination",
   "tethered-submit",
   "dependent-form",
   "glass-edit",
@@ -389,6 +396,13 @@ const TINT_OF: Record<string, TileTint> = {
  * are all gathered, newest first, under the wall's New tab (see NEW_TAB_DAYS).
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // twenty-first batch (Motion Kit Pro: Liquid Send, Folder Tree, Context Menu, Consent Dock, Add to Bag, Liquid Pagination)
+  "liquid-send",
+  "folder-tree",
+  "context-menu",
+  "consent-dock",
+  "add-to-bag",
+  "liquid-pagination",
   // twentieth batch (Motion Kit Pro: Ring Gallery)
   "ring-gallery",
   // nineteenth batch (Motion Kit Pro: Global Deploy, Card Reader Verify, Intelligence Glow, Cloud Sync, Smart Light, Range Calendar, Storage Clean)
@@ -401,6 +415,7 @@ export const MOTION_KIT_ORDER: string[] = [
   "pluck-frame", // newest batch, placed among the older ones on purpose
   "dust-snap", // newest batch, placed among the older ones on purpose
   "glass-drop", // newest batch, placed among the older ones on purpose
+  "status-morph", // newest batch, placed among the older ones on purpose
   "ai-composer",
   "range-calendar",
   "storage-clean",
@@ -582,6 +597,12 @@ export const MOTION_KIT_ORDER: string[] = [
 
 /** The homepage set, in order: newest interactions first, then the best of the rest. */
 export const HOME_PICKS: string[] = [
+  "liquid-send",
+  "folder-tree",
+  "context-menu",
+  "consent-dock",
+  "add-to-bag",
+  "liquid-pagination",
   "glass-bubbles",
   "curved-reel",
   "swipe-stack",
