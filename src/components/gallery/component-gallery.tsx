@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { Lock, LockOpen, Search, Sparkles, X } from "lucide-react";
 import { ProBadge, useProAccess } from "@/components/pro/pro-access";
@@ -113,6 +114,9 @@ export function ComponentGallery({
   aside,
   pageSize = 24,
   playOnClick = false,
+  plansLine = false,
+  interlude,
+  interludeAfter = 20,
 }: {
   items: GalleryItem[];
   /** Category chips; omit to hide them. */
@@ -128,6 +132,12 @@ export function ComponentGallery({
   pageSize?: number;
   /** Tiles show a poster with a Play button and only run the live component once pressed. For heavy components (canvas, WebGL). */
   playOnClick?: boolean;
+  /** For visitors without Pro: one quiet line under the filters saying what is free, what is Pro and what it costs. */
+  plansLine?: boolean;
+  /** A full-width, two-row cell shown once in the wall, for visitors without Pro. Rendered on the server, so it adds no client code. */
+  interlude?: React.ReactNode;
+  /** How many tiles come before the interlude. */
+  interludeAfter?: number;
 }) {
   const [interaction, setInteraction] = React.useState<Interaction | "all">("all");
   const [category, setCategory] = React.useState("all");
@@ -179,6 +189,19 @@ export function ComponentGallery({
     setQuery("");
     setAccessParam(null);
   };
+
+  const renderTile = (item: GalleryItem, i: number) => (
+    <React.Fragment key={item.slug}>
+      <TileCell item={item} className={cn(!filtering && mobileLimit && i >= mobileLimit && "max-sm:hidden")}>
+        <GalleryTile item={item} onOpen={setOpenSlug} playOnClick={playOnClick} />
+      </TileCell>
+      {paged && !isPro && !needle && access !== "pro" && i === PLANS_CARD_AFTER ? <PlansCard proCount={proCount} /> : null}
+      {interlude && paged && !isPro && !needle && i === interludeAfter - 1 ? (
+        // a full-width cell (three rows on a phone, two above); the grid packs densely, so the tiles after it fill any gap above it
+        <li className="col-span-full [grid-row-end:span_3] sm:[grid-row-end:span_2]">{interlude}</li>
+      ) : null}
+    </React.Fragment>
+  );
 
   return (
     <>
@@ -281,19 +304,20 @@ export function ComponentGallery({
             ))}
           </ChipRail>
         ) : null}
+
+        {plansLine && !isPro ? (
+          <p className="text-[14px] leading-[1.5] text-muted-foreground">
+            {accessCounts.free} are free, with full source. {accessCounts.pro} more come with Pro: {formatPrice(PRICES.pro)} a year,
+            or {formatPrice(PRICES.allAccess)} once.{" "}
+            <Link href="/pricing" className="text-link hover:underline hover:underline-offset-4">
+              See plans
+            </Link>
+          </p>
+        ) : null}
       </div>
 
       {shown.length ? (
-        <TileGrid className="mt-6">
-          {shown.map((item, i) => (
-            <React.Fragment key={item.slug}>
-              <TileCell item={item} className={cn(!filtering && mobileLimit && i >= mobileLimit && "max-sm:hidden")}>
-                <GalleryTile item={item} onOpen={setOpenSlug} playOnClick={playOnClick} />
-              </TileCell>
-              {paged && !isPro && !needle && access !== "pro" && i === PLANS_CARD_AFTER ? <PlansCard proCount={proCount} /> : null}
-            </React.Fragment>
-          ))}
-        </TileGrid>
+        <TileGrid className="mt-6">{shown.map((item, i) => renderTile(item, i))}</TileGrid>
       ) : null}
       {shown.length && paged && !infinite.done ? (
         <InfiniteSentinel onMore={infinite.more} shown={shown.length} total={matches.length} noun="components" className="mt-12" />

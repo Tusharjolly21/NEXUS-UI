@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ComponentGallery } from "@/components/gallery/component-gallery";
+import { ComponentsProofRow } from "@/components/gallery/components-proof-row";
 import { Band, PillLink, RainbowWord } from "@/components/site";
 import { getPopulatedCategories, isIndexableCategory } from "@/lib/catalog/category-seo";
 import { allGalleryItems, galleryCategories } from "@/lib/catalog/gallery-items";
@@ -43,6 +44,8 @@ export default function ComponentsPage() {
             items={items}
             categories={galleryCategories(items)}
             searchable
+            plansLine
+            interlude={<ComponentsProofRow />}
             aside={
               funCount ? (
                 <Link
