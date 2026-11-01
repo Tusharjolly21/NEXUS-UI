@@ -4,7 +4,7 @@ import { ding, blip, tick, N, type Time } from "../sound-kit";
 export const length = 2.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.33;
+export const level = 1.27;
 
 /** A music-box lullaby, four notes of Twinkle Twinkle, as the moon rocks and the stars come out. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

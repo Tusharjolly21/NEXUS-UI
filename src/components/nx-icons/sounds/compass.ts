@@ -4,7 +4,7 @@ import { ding, blip, swish, tick, N, type Time } from "../sound-kit";
 export const length = 1.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.93;
+export const level = 0.76;
 
 /** A whirl of air as the needle spins, then ticks that get softer with each overshoot, and a settling note. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

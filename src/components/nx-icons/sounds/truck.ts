@@ -4,7 +4,7 @@ import { blip, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 2.3;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.65;
+export const level = 1.1;
 
 /** A two-tone horn, then a diesel chug with the cab rattling and air rushing by. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

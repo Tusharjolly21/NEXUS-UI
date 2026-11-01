@@ -4,7 +4,7 @@ import { ding, blip, N, type Time } from "../sound-kit";
 export const length = 1.3;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.97;
+export const level = 1.29;
 
 /** A confident tap, three notes climbing along the contactless waves, and an approved ding. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

@@ -4,7 +4,7 @@ import { blip, thud, N, type Time } from "../sound-kit";
 export const length = 1.6;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.96;
+export const level = 1.17;
 
 /** Deep speaker thumps as the cone pumps, a swelling hum, and a pair of bright notes with every wave. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

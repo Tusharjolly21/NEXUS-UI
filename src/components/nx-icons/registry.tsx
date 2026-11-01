@@ -57,6 +57,30 @@ import { CompassIcon } from "./icons/compass";
 import { RocketIcon } from "./icons/rocket";
 import { LightbulbIcon } from "./icons/lightbulb";
 import { CoffeeIcon } from "./icons/coffee";
+import { ArrowRightIcon } from "./icons/arrow-right";
+import { RefreshIcon } from "./icons/refresh";
+import { UndoIcon } from "./icons/undo";
+import { PencilIcon } from "./icons/pencil";
+import { ScissorsIcon } from "./icons/scissors";
+import { LinkIcon } from "./icons/link";
+import { PaperclipIcon } from "./icons/paperclip";
+import { SlidersIcon } from "./icons/sliders";
+import { CodeIcon } from "./icons/code";
+import { PlusIcon } from "./icons/plus";
+import { CloseIcon } from "./icons/close";
+import { MenuIcon } from "./icons/menu";
+import { BarChartIcon } from "./icons/bar-chart";
+import { PlayPauseIcon } from "./icons/play-pause";
+import { SkipForwardIcon } from "./icons/skip-forward";
+import { ShuffleIcon } from "./icons/shuffle";
+import { RepeatIcon } from "./icons/repeat";
+import { HeadphonesIcon } from "./icons/headphones";
+import { MusicIcon } from "./icons/music";
+import { ImageIcon } from "./icons/image";
+import { ShoppingBagIcon } from "./icons/shopping-bag";
+import { TagIcon } from "./icons/tag";
+import { WalletIcon } from "./icons/wallet";
+import { PackageIcon } from "./icons/package";
 
 export type NxIconProps = {
   size?: number;
@@ -127,4 +151,28 @@ export const NX_ICONS: Record<string, ComponentType<NxIconProps>> = {
   "rocket": RocketIcon,
   "lightbulb": LightbulbIcon,
   "coffee": CoffeeIcon,
+  "arrow-right": ArrowRightIcon,
+  "refresh": RefreshIcon,
+  "undo": UndoIcon,
+  "pencil": PencilIcon,
+  "scissors": ScissorsIcon,
+  "link": LinkIcon,
+  "paperclip": PaperclipIcon,
+  "sliders": SlidersIcon,
+  "code": CodeIcon,
+  "plus": PlusIcon,
+  "close": CloseIcon,
+  "menu": MenuIcon,
+  "bar-chart": BarChartIcon,
+  "play-pause": PlayPauseIcon,
+  "skip-forward": SkipForwardIcon,
+  "shuffle": ShuffleIcon,
+  "repeat": RepeatIcon,
+  "headphones": HeadphonesIcon,
+  "music": MusicIcon,
+  "image": ImageIcon,
+  "shopping-bag": ShoppingBagIcon,
+  "tag": TagIcon,
+  "wallet": WalletIcon,
+  "package": PackageIcon,
 };

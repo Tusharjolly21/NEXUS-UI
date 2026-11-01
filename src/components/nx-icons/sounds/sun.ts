@@ -4,7 +4,7 @@ import { ding, blip, swish, N, type Time } from "../sound-kit";
 export const length = 1.6;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.17;
+export const level = 0.94;
 
 /** A warm rising swell, three glowing notes climbing as the sun fills with gold, and a handful of sparkles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

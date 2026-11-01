@@ -4,7 +4,7 @@ import { ding, blip, swish, puff, N, type Time } from "../sound-kit";
 export const length = 1.4;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.29;
+export const level = 1.11;
 
 /** A ribbon being pulled, a cork-pop as the lid flies off, and a shower of glittering confetti. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

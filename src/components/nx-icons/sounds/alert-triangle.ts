@@ -4,7 +4,7 @@ import { blip, tick, thud, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.65;
+export const level = 0.98;
 
 /** Two descending warning beeps timed to the amber flashes, with a rattle as the sign shakes. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

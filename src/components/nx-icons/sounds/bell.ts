@@ -4,7 +4,7 @@ import { ding, plink, N, type Time } from "../sound-kit";
 export const length = 1.5;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.6;
+export const level = 0.64;
 
 /** A glassy ding on every swing, fading as the bell settles, and a pop when the red badge lands. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

@@ -4,7 +4,7 @@ import { ding, swish, tick, N, type Time } from "../sound-kit";
 export const length = 1.6;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.76;
+export const level = 1.06;
 
 /** A whoosh as the plane takes off, a two-note sent chime, and a soft swoop as it flies back in. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

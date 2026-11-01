@@ -4,7 +4,7 @@ import { ding, swish, thud, N, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.73;
+export const level = 0.94;
 
 /** A whoosh as the arrow drops, a thud and a bright two-note chime as the tray lights, and a soft rise as it returns. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

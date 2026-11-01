@@ -223,6 +223,27 @@ export default async function IconPage({ params }: Props) {
         </div>
       </section>
 
+      {icon.uses.length ? (
+        <section aria-labelledby="fits" className="px-4 pb-16">
+          <div className="mx-auto max-w-[1152px]">
+            <h2 id="fits" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
+              Where the {icon.title.toLowerCase()} icon fits
+            </h2>
+            <ul className="mt-5 flex flex-wrap gap-2.5">
+              {icon.uses.map((u) => (
+                <li key={u} className="rounded-full bg-card px-4 py-2 text-[15px] text-foreground shadow-[0_0_0_1px_rgba(0,0,0,.06)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)]">
+                  {u}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 max-w-[680px] text-[15.5px] text-muted-foreground">
+              See it in context with a player, a cart, a toolbar and more on the{" "}
+              <Link href="/icons#real-interfaces" className="text-foreground underline underline-offset-4">Made for real interfaces</Link> demos.
+            </p>
+          </div>
+        </section>
+      ) : null}
+
       {related.length ? (
         <section aria-labelledby="more" className="px-4 pb-16">
           <div className="mx-auto max-w-[1152px]">

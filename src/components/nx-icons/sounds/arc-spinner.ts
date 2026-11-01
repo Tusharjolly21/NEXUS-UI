@@ -4,7 +4,7 @@ import { swish, tick, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 3.0;
+export const level = 2.16;
 
 /** A soft breath of air for each lap, with a tiny tick as the arc sets off. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

@@ -4,7 +4,7 @@ import { blip, tick, thud, N, type Time } from "../sound-kit";
 export const length = 0.7;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.77;
+export const level = 1.2;
 
 /** A crisp switch click, a slide, and a bright blip as it lands on. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

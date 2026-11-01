@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, useSpring } from "framer-motion";
-import { Pause, Play, RotateCcw, Shuffle, Volume2, VolumeX } from "lucide-react";
+import { Pause, Play, RotateCcw, Shuffle, Undo2, Volume2, VolumeX } from "lucide-react";
 import { CodeBlock } from "@/components/code-block";
 import { DEFAULT_HEADER } from "@/components/code-block/code-block";
 import { Chip } from "@/components/site/chip-rail";
@@ -97,6 +97,18 @@ export function IconPlayground({ icon, source }: { icon: IconMeta; source: strin
     },
     [],
   );
+
+  const reset = () => {
+    setTrigger("hover");
+    setSpeed(1);
+    setMaterial("spark");
+    setColor(SWATCHES[0]);
+    setStage("light");
+    setSize(104);
+    setStroke(2);
+    setState("auto");
+    setPaused(false);
+  };
 
   const replay = React.useCallback(() => {
     if (timer.current !== null) window.clearTimeout(timer.current);
@@ -252,6 +264,18 @@ export function IconPlayground({ icon, source }: { icon: IconMeta; source: strin
               )}
             >
               <Shuffle className="size-3.5" aria-hidden /> Surprise me
+            </button>
+            <button
+              type="button"
+              aria-label="Reset all settings"
+              title="Reset all settings"
+              onClick={reset}
+              className={cn(
+                "inline-flex size-9 items-center justify-center rounded-full shadow-[0_0_0_1px_rgba(0,0,0,.06)] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                dark ? "bg-white/10 text-white hover:bg-white/15" : "bg-card text-foreground hover:bg-card/80",
+              )}
+            >
+              <Undo2 className="size-3.5" aria-hidden />
             </button>
             <button
               type="button"

@@ -4,7 +4,7 @@ import { ding, plink, swish, N, type Time } from "../sound-kit";
 export const length = 1.4;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.22;
+export const level = 1.59;
 
 /** Two rising plinks as the tick is drawn, then a shimmering ring. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

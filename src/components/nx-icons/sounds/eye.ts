@@ -4,7 +4,7 @@ import { ding, blip, tick, puff, N, type Time } from "../sound-kit";
 export const length = 1.4;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.68;
+export const level = 2.36;
 
 /** A breath as the lid sweeps shut and open, two little glides as it looks left and right, and a glint. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

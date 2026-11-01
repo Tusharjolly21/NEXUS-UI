@@ -4,7 +4,7 @@ import { ding, swish, thud, N, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.63;
+export const level = 0.79;
 
 /** A whistle as the pin falls, a thud and a sonar ping as it lands, and a smaller bounce after. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

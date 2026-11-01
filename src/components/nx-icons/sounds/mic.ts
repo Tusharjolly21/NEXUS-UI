@@ -4,7 +4,7 @@ import { blip, N, type Time } from "../sound-kit";
 export const length = 1.6;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.39;
+export const level = 2.02;
 
 /** A beep as recording starts, a few voice-like blips as the bars bounce, and a lower beep as it stops. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

@@ -4,7 +4,7 @@ import { blip, tick, type Time } from "../sound-kit";
 export const length = 1.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.08;
+export const level = 1.17;
 
 /** A steady tick-tock, with the tick a little higher than the tock. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

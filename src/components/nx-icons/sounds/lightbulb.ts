@@ -4,7 +4,7 @@ import { ding, blip, tick, thud, puff, N, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.1;
+export const level = 0.97;
 
 /** A switch click, an electric hum, two flickers as the bulb catches, and a bright ting when it glows. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

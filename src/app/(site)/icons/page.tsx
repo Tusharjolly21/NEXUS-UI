@@ -1,8 +1,21 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IconGrid } from "@/components/nx-icons/icon-grid";
+import { RealInterfaces } from "@/components/nx-icons/real-interfaces";
 import { RainbowWord } from "@/components/site";
 import { ICONS } from "@/lib/icons/catalog";
 import { createMetadata, siteConfig } from "@/lib/seo";
+
+const FITS: { title: string; body: string; icons: string[] }[] = [
+  { title: "Toolbars and editors", body: "Undo, edit, link, attach, crop and code buttons for rich-text editors, note apps and CMS screens.", icons: ["undo", "pencil", "link", "paperclip", "scissors", "code"] },
+  { title: "Players", body: "Play and pause that morphs, skip, shuffle, repeat, volume and like buttons for music, video and podcast apps.", icons: ["play-pause", "skip-forward", "shuffle", "repeat", "volume", "headphones"] },
+  { title: "Carts and checkout", body: "Add-to-bag, price tags, delivery, wallet and card icons for stores, marketplaces and payment steps.", icons: ["shopping-bag", "shopping-cart", "tag", "package", "wallet", "credit-card"] },
+  { title: "Forms and inputs", body: "Show-password eyes, locks, calendars, toggles and send buttons that confirm every action.", icons: ["eye", "lock", "calendar", "toggle", "send", "status"] },
+  { title: "Toasts and alerts", body: "Success, warning and info messages with a dismiss button, plus bells for notifications.", icons: ["check-circle", "alert-triangle", "info", "close", "bell", "alarm-clock"] },
+  { title: "Navigation", body: "Hamburger menus, tab bars, next arrows and search for headers, sidebars and mobile apps.", icons: ["menu", "home", "search", "arrow-right", "compass", "plus"] },
+  { title: "Dashboards", body: "Charts, settings, sliders and refresh controls for admin panels and analytics screens.", icons: ["bar-chart", "settings", "sliders", "refresh", "battery", "zap"] },
+  { title: "Loading states", body: "Spinners, dots and ripples that loop on their own, for buttons, cards and whole pages.", icons: ["arc-spinner", "wave-dots", "pulse-dots", "tick-spinner", "ripple", "orbit"] },
+];
 
 export const metadata: Metadata = createMetadata({
   title: "Animated Icons for React",
@@ -49,6 +62,33 @@ export default function IconsPage() {
       <section aria-label="Icon library" className="px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
           <IconGrid />
+
+          <section aria-labelledby="real-interfaces" className="mt-24">
+            <h2 id="real-interfaces" className="pg-display text-[clamp(30px,4.4vw,48px)] leading-[1.05] text-foreground">Made for real interfaces</h2>
+            <p className="mt-4 max-w-[680px] text-[18px] leading-[1.55] text-muted-foreground">
+              Drop them into the toolbars, players and carts you already build. Here is each one in a small working mock-up: click, hover and type to see where an icon fits, then open it to copy the file.
+            </p>
+            <div className="mt-8">
+              <RealInterfaces />
+            </div>
+
+            <h3 className="mt-16 text-[22px] font-semibold text-foreground">Where animated icons fit</h3>
+            <ul className="mt-5 grid gap-x-8 gap-y-7 sm:grid-cols-2 lg:grid-cols-4">
+              {FITS.map((f) => (
+                <li key={f.title}>
+                  <p className="text-[16px] font-semibold text-foreground">{f.title}</p>
+                  <p className="mt-1.5 text-[14.5px] leading-relaxed text-muted-foreground">{f.body}</p>
+                  <p className="mt-2.5 flex flex-wrap gap-1.5">
+                    {f.icons.map((i) => (
+                      <Link key={i} href={`/icons/${i}`} className="rounded-full bg-secondary px-2.5 py-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground">
+                        {i}
+                      </Link>
+                    ))}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
 
           <div className="mt-20 grid gap-8 sm:grid-cols-3">
             {[

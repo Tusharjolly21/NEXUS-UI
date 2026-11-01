@@ -4,7 +4,7 @@ import { ding, blip, N, type Time } from "../sound-kit";
 export const length = 1.4;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.24;
+export const level = 0.98;
 
 /** A buzz-buzz vibration with a three-note ringtone played twice as the screen lights. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

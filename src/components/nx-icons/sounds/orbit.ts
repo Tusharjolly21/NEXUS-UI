@@ -4,7 +4,7 @@ import { ding, thud, N, type Time } from "../sound-kit";
 export const length = 1.5;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.34;
+export const level = 1.9;
 
 /** A sonar ping each time the dot comes round, and a soft heartbeat from the centre. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

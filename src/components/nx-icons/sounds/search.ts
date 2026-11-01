@@ -4,7 +4,7 @@ import { ding, swish, tick, N, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.45;
+export const level = 1.81;
 
 /** A whoosh as the glass swings, a tap, and a bright glint on the lens. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

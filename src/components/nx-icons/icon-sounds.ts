@@ -56,6 +56,30 @@ import * as s_compass from "./sounds/compass";
 import * as s_rocket from "./sounds/rocket";
 import * as s_lightbulb from "./sounds/lightbulb";
 import * as s_coffee from "./sounds/coffee";
+import * as s_arrow_right from "./sounds/arrow-right";
+import * as s_refresh from "./sounds/refresh";
+import * as s_undo from "./sounds/undo";
+import * as s_pencil from "./sounds/pencil";
+import * as s_scissors from "./sounds/scissors";
+import * as s_link from "./sounds/link";
+import * as s_paperclip from "./sounds/paperclip";
+import * as s_sliders from "./sounds/sliders";
+import * as s_code from "./sounds/code";
+import * as s_plus from "./sounds/plus";
+import * as s_close from "./sounds/close";
+import * as s_menu from "./sounds/menu";
+import * as s_bar_chart from "./sounds/bar-chart";
+import * as s_play_pause from "./sounds/play-pause";
+import * as s_skip_forward from "./sounds/skip-forward";
+import * as s_shuffle from "./sounds/shuffle";
+import * as s_repeat from "./sounds/repeat";
+import * as s_headphones from "./sounds/headphones";
+import * as s_music from "./sounds/music";
+import * as s_image from "./sounds/image";
+import * as s_shopping_bag from "./sounds/shopping-bag";
+import * as s_tag from "./sounds/tag";
+import * as s_wallet from "./sounds/wallet";
+import * as s_package from "./sounds/package";
 
 type Score = { length: number; level: number; play: (c: AudioContext, o: AudioNode, t: Time) => void };
 
@@ -117,6 +141,30 @@ const SCORES: Record<string, Score> = {
   "rocket": s_rocket,
   "lightbulb": s_lightbulb,
   "coffee": s_coffee,
+  "arrow-right": s_arrow_right,
+  "refresh": s_refresh,
+  "undo": s_undo,
+  "pencil": s_pencil,
+  "scissors": s_scissors,
+  "link": s_link,
+  "paperclip": s_paperclip,
+  "sliders": s_sliders,
+  "code": s_code,
+  "plus": s_plus,
+  "close": s_close,
+  "menu": s_menu,
+  "bar-chart": s_bar_chart,
+  "play-pause": s_play_pause,
+  "skip-forward": s_skip_forward,
+  "shuffle": s_shuffle,
+  "repeat": s_repeat,
+  "headphones": s_headphones,
+  "music": s_music,
+  "image": s_image,
+  "shopping-bag": s_shopping_bag,
+  "tag": s_tag,
+  "wallet": s_wallet,
+  "package": s_package,
 };
 
 export function hasIconSound(slug: string) {

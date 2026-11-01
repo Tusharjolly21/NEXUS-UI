@@ -4,7 +4,7 @@ import { ding, blip, thud, puff, N, type Time } from "../sound-kit";
 export const length = 1.3;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.7;
+export const level = 0.77;
 
 /** A heavy thud and a metallic shing as it takes the hit, then two rising notes to say you are safe. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

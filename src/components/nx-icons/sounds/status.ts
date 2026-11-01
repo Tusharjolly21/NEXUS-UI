@@ -4,7 +4,7 @@ import { ding, plink, blip, swish, N, type Time } from "../sound-kit";
 export const length = 2.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.21;
+export const level = 1.56;
 
 /** Soft working blips while it spins, a rising whoosh as the ring closes, then a three-note success arpeggio. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

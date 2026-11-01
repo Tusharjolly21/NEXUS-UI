@@ -4,7 +4,7 @@ import { blip, N, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.11;
+export const level = 1.76;
 
 /** Three soft notes climbing C, E, G as each dot hops in the wave. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

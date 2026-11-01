@@ -4,7 +4,7 @@ import { ding, blip, N, type Time } from "../sound-kit";
 export const length = 1.3;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.35;
+export const level = 1.65;
 
 /** A pop as the bubble opens, three rising blips for the typing dots, a second round as they bounce, and a received ding. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

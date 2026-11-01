@@ -4,7 +4,7 @@ import { blip, swish, type Time } from "../sound-kit";
 export const length = 1.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.14;
+export const level = 2.0;
 
 /** A water-drop plip for each ring, with a faint shimmer as it spreads out. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

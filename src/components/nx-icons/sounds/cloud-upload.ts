@@ -4,7 +4,7 @@ import { ding, blip, swish, N, type Time } from "../sound-kit";
 export const length = 1.5;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.92;
+export const level = 1.16;
 
 /** A rising whoosh as the arrow leaves, a two-note chime as the cloud takes it, and a soft bloop as the next one rises. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

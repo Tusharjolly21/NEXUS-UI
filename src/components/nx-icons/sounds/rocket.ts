@@ -4,7 +4,7 @@ import { swish, tick, puff, type Time } from "../sound-kit";
 export const length = 2.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.52;
+export const level = 1.54;
 
 /** Ignition crackle and a building rumble, a roaring lift-off, a soft return, and a puff as it touches down. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

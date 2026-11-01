@@ -4,7 +4,7 @@ import { ding, blip, swish, puff, N, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.79;
+export const level = 0.86;
 
 /** Paper whooshing as the flap lifts, a pop, and a two-note you've-got-mail chime. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

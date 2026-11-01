@@ -4,7 +4,7 @@ import { ding, blip, N, type Time } from "../sound-kit";
 export const length = 1.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.1;
+export const level = 1.15;
 
 /** A charging whine that climbs as each bar fills with a rising note, then a bright full-charge chime. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
