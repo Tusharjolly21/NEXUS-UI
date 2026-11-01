@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import type { CSSProperties } from "react";
 import { Frame, SectionHeading } from "./ui";
 

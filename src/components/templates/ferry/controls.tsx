@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { formatAmount, getCurrency } from "./data";
@@ -142,10 +142,15 @@ export function Controls() {
     currency = getCurrency(PENDING_PAYMENT.code),
     usdAmount = PENDING_PAYMENT.amount / currency.perUsd,
     needsSecondApproval = secondApprover && usdAmount > limit;
-  useEffect(() => {
-    setDanApproved(false);
-    setReleased(false);
-  }, [secondApprover, limit, holdNewRecipients, invoiceRequired]);
+  // changing any rule sends the payment back to the start
+  const changeRule =
+    <T,>(current: T, set: (next: T) => void) =>
+    (next: T) => {
+      if (next === current) return;
+      set(next);
+      setDanApproved(false);
+      setReleased(false);
+    };
   const buttonLabel = needsSecondApproval && !danApproved ? "Approve as Daniel" : "Release payment",
     // s = scheduled, r = released, w = waiting for approval, a = ready
     badgeState = released ? (holdNewRecipients ? "s" : "r") : needsSecondApproval && !danApproved ? "w" : "a";
@@ -174,7 +179,7 @@ export function Controls() {
                 title="Second approver"
                 text="For payments above a limit you choose"
                 on={secondApprover}
-                onChange={setSecondApprover}
+                onChange={changeRule(secondApprover, setSecondApprover)}
               >
                 <AnimatePresence initial={false}>
                   {secondApprover && (
@@ -205,7 +210,7 @@ export function Controls() {
                             type="button"
                             role="radio"
                             aria-checked={option === limit}
-                            onClick={() => setLimit(option)}
+                            onClick={() => changeRule(limit, setLimit)(option)}
                             className={`relative h-8 flex-1 rounded-[7px] text-[13px] font-medium transition-colors ${option === limit ? "text-[rgb(var(--ferry-ink))]" : "text-[rgb(var(--ferry-mute))] hover:text-[rgb(var(--ferry-ink))]"}`}
                           >
                             {option === limit && (
@@ -228,14 +233,14 @@ export function Controls() {
                 title="Hold new recipients"
                 text="A first payment to anyone waits 24 hours"
                 on={holdNewRecipients}
-                onChange={setHoldNewRecipients}
+                onChange={changeRule(holdNewRecipients, setHoldNewRecipients)}
               />
               <RuleRow
                 icon="doc_on_doc"
                 title="Invoice required"
                 text="No payment leaves without one attached"
                 on={invoiceRequired}
-                onChange={setInvoiceRequired}
+                onChange={changeRule(invoiceRequired, setInvoiceRequired)}
               />
             </ul>
           </Panel>

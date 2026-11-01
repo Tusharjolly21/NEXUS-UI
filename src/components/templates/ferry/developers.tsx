@@ -136,25 +136,28 @@ type HighlightedProps = {
 };
 
 export function Highlighted({ src, json, upto }: HighlightedProps) {
-  const tokens = useMemo(() => tokenize(src, json), [src, json]);
-  let remaining = upto ?? Infinity;
+  const visible = useMemo(() => {
+    const segments: Token[] = [];
+    let remaining = upto ?? Infinity;
+    for (const token of tokenize(src, json)) {
+      if (remaining <= 0) break;
+      segments.push({ ...token, t: token.t.length > remaining ? token.t.slice(0, remaining) : token.t });
+      remaining -= token.t.length;
+    }
+    return segments;
+  }, [src, json, upto]);
   return (
     <>
-      {tokens.map((token, index) => {
-        if (remaining <= 0) return null;
-        const text = token.t.length > remaining ? token.t.slice(0, remaining) : token.t;
-        remaining -= token.t.length;
-        return (
-          <span
-            key={index}
-            style={{
-              color: token.c,
-            }}
-          >
-            {text}
-          </span>
-        );
-      })}
+      {visible.map((token, index) => (
+        <span
+          key={index}
+          style={{
+            color: token.c,
+          }}
+        >
+          {token.t}
+        </span>
+      ))}
     </>
   );
 }
@@ -177,6 +180,30 @@ export const DEV_FEATURES: readonly DevFeature[] = [
 
 type RunState = "idle" | "running" | "done";
 
+function buildResponseJson(now: number): string {
+  const gbp = getCurrency("GBP"),
+    inr = getCurrency("INR"),
+    fee = feeFor(12400),
+    arrival = new Date(now + inr.minutes * 6e4);
+  arrival.setSeconds(0, 0);
+  return JSON.stringify(
+    {
+      id: "po_3NcV7qK2",
+      status: "in_transit",
+      amount: 12400,
+      currency: "GBP",
+      rate: +rateBetween(gbp, inr).toFixed(4),
+      fee: +fee.toFixed(2),
+      target_amount: +((12400 - fee) * rateBetween(gbp, inr)).toFixed(2),
+      target_currency: "INR",
+      rail: inr.rail,
+      estimated_arrival: arrival.toISOString().replace(".000", ""),
+    },
+    null,
+    2,
+  );
+}
+
 export function Developers() {
   const reducedMotion = useReducedMotion(),
     [tab, setTab] = useState<CodeTab>("Node"),
@@ -185,29 +212,7 @@ export function Developers() {
     [typedChars, setTypedChars] = useState(0),
     [showWebhook, setShowWebhook] = useState(false),
     timers = useRef<number[]>([]),
-    responseJson = useMemo(() => {
-      const gbp = getCurrency("GBP"),
-        inr = getCurrency("INR"),
-        fee = feeFor(12400),
-        arrival = new Date(Date.now() + inr.minutes * 6e4);
-      arrival.setSeconds(0, 0);
-      return JSON.stringify(
-        {
-          id: "po_3NcV7qK2",
-          status: "in_transit",
-          amount: 12400,
-          currency: "GBP",
-          rate: +rateBetween(gbp, inr).toFixed(4),
-          fee: +fee.toFixed(2),
-          target_amount: +((12400 - fee) * rateBetween(gbp, inr)).toFixed(2),
-          target_currency: "INR",
-          rail: inr.rail,
-          estimated_arrival: arrival.toISOString().replace(".000", ""),
-        },
-        null,
-        2,
-      );
-    }, []),
+    [responseJson, setResponseJson] = useState(""),
     clearTimers = () => {
       timers.current.forEach((timerId) => window.clearTimeout(timerId));
       timers.current = [];
@@ -215,6 +220,8 @@ export function Developers() {
   useEffect(() => clearTimers, []);
   const runRequest = () => {
       clearTimers();
+      const json = buildResponseJson(Date.now());
+      setResponseJson(json);
       setRunState("running");
       setTypedChars(0);
       setShowWebhook(false);
@@ -222,18 +229,18 @@ export function Developers() {
         window.setTimeout(() => {
           setRunState("done");
           if (reducedMotion) {
-            setTypedChars(responseJson.length);
+            setTypedChars(json.length);
             setShowWebhook(true);
             return;
           }
           const startedAt = performance.now(),
             tick = () => {
               const chars = Math.min(
-                responseJson.length,
-                Math.round(((performance.now() - startedAt) / 900) * responseJson.length),
+                json.length,
+                Math.round(((performance.now() - startedAt) / 900) * json.length),
               );
               setTypedChars(chars);
-              if (chars < responseJson.length) {
+              if (chars < json.length) {
                 timers.current.push(window.setTimeout(tick, 16));
               } else {
                 timers.current.push(window.setTimeout(() => setShowWebhook(true), 900));

@@ -161,10 +161,10 @@ export function Payouts() {
   useEffect(() => {
     if (!inView) return;
     if (reduceMotion) {
-      setVisibleCount(totalTicks);
-      return;
+      const showAll = window.setTimeout(() => setVisibleCount(totalTicks), 0);
+      return () => window.clearTimeout(showAll);
     }
-    setVisibleCount(0);
+    const reset = window.setTimeout(() => setVisibleCount(0), 0);
     const timers = Array.from(
       {
         length: totalTicks,
@@ -175,7 +175,10 @@ export function Payouts() {
           420 + tick * 640 + (tick === totalTicks - 1 ? 500 : 0),
         ),
     );
-    return () => timers.forEach(window.clearTimeout);
+    return () => {
+      window.clearTimeout(reset);
+      timers.forEach(window.clearTimeout);
+    };
   }, [inView, sampleIndex, replayCount, reduceMotion, totalTicks]);
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const step =
