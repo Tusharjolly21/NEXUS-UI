@@ -101,6 +101,31 @@ import { TrophyIcon } from "./icons/trophy";
 import { KeyIcon } from "./icons/key";
 import { UmbrellaIcon } from "./icons/umbrella";
 import { FlameIcon } from "./icons/flame";
+import { PillIcon } from "./icons/pill";
+import { HeartPulseIcon } from "./icons/heart-pulse";
+import { DumbbellIcon } from "./icons/dumbbell";
+import { ThermometerIcon } from "./icons/thermometer";
+import { PizzaIcon } from "./icons/pizza";
+import { IceCreamIcon } from "./icons/ice-cream";
+import { CakeIcon } from "./icons/cake";
+import { GamepadIcon } from "./icons/gamepad";
+import { DiceIcon } from "./icons/dice";
+import { PuzzleIcon } from "./icons/puzzle";
+import { AtomIcon } from "./icons/atom";
+import { FlaskIcon } from "./icons/flask";
+import { MagnetIcon } from "./icons/magnet";
+import { GlobeIcon } from "./icons/globe";
+import { BusIcon } from "./icons/bus";
+import { PlaneIcon } from "./icons/plane";
+import { BuildingIcon } from "./icons/building";
+import { GraduationCapIcon } from "./icons/graduation-cap";
+import { BookIcon } from "./icons/book";
+import { CalculatorIcon } from "./icons/calculator";
+import { WrenchIcon } from "./icons/wrench";
+import { PaletteIcon } from "./icons/palette";
+import { TerminalIcon } from "./icons/terminal";
+import { GitBranchIcon } from "./icons/git-branch";
+import { SnowflakeIcon } from "./icons/snowflake";
 
 export type NxIconProps = {
   size?: number;
@@ -215,4 +240,29 @@ export const NX_ICONS: Record<string, ComponentType<NxIconProps>> = {
   "key": KeyIcon,
   "umbrella": UmbrellaIcon,
   "flame": FlameIcon,
+  "pill": PillIcon,
+  "heart-pulse": HeartPulseIcon,
+  "dumbbell": DumbbellIcon,
+  "thermometer": ThermometerIcon,
+  "pizza": PizzaIcon,
+  "ice-cream": IceCreamIcon,
+  "cake": CakeIcon,
+  "gamepad": GamepadIcon,
+  "dice": DiceIcon,
+  "puzzle": PuzzleIcon,
+  "atom": AtomIcon,
+  "flask": FlaskIcon,
+  "magnet": MagnetIcon,
+  "globe": GlobeIcon,
+  "bus": BusIcon,
+  "plane": PlaneIcon,
+  "building": BuildingIcon,
+  "graduation-cap": GraduationCapIcon,
+  "book": BookIcon,
+  "calculator": CalculatorIcon,
+  "wrench": WrenchIcon,
+  "palette": PaletteIcon,
+  "terminal": TerminalIcon,
+  "git-branch": GitBranchIcon,
+  "snowflake": SnowflakeIcon,
 };

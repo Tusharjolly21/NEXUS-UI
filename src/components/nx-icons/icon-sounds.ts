@@ -100,6 +100,31 @@ import * as s_trophy from "./sounds/trophy";
 import * as s_key from "./sounds/key";
 import * as s_umbrella from "./sounds/umbrella";
 import * as s_flame from "./sounds/flame";
+import * as s_pill from "./sounds/pill";
+import * as s_heart_pulse from "./sounds/heart-pulse";
+import * as s_dumbbell from "./sounds/dumbbell";
+import * as s_thermometer from "./sounds/thermometer";
+import * as s_pizza from "./sounds/pizza";
+import * as s_ice_cream from "./sounds/ice-cream";
+import * as s_cake from "./sounds/cake";
+import * as s_gamepad from "./sounds/gamepad";
+import * as s_dice from "./sounds/dice";
+import * as s_puzzle from "./sounds/puzzle";
+import * as s_atom from "./sounds/atom";
+import * as s_flask from "./sounds/flask";
+import * as s_magnet from "./sounds/magnet";
+import * as s_globe from "./sounds/globe";
+import * as s_bus from "./sounds/bus";
+import * as s_plane from "./sounds/plane";
+import * as s_building from "./sounds/building";
+import * as s_graduation_cap from "./sounds/graduation-cap";
+import * as s_book from "./sounds/book";
+import * as s_calculator from "./sounds/calculator";
+import * as s_wrench from "./sounds/wrench";
+import * as s_palette from "./sounds/palette";
+import * as s_terminal from "./sounds/terminal";
+import * as s_git_branch from "./sounds/git-branch";
+import * as s_snowflake from "./sounds/snowflake";
 
 type Score = { length: number; level: number; play: (c: AudioContext, o: AudioNode, t: Time) => void };
 
@@ -205,6 +230,31 @@ const SCORES: Record<string, Score> = {
   "key": s_key,
   "umbrella": s_umbrella,
   "flame": s_flame,
+  "pill": s_pill,
+  "heart-pulse": s_heart_pulse,
+  "dumbbell": s_dumbbell,
+  "thermometer": s_thermometer,
+  "pizza": s_pizza,
+  "ice-cream": s_ice_cream,
+  "cake": s_cake,
+  "gamepad": s_gamepad,
+  "dice": s_dice,
+  "puzzle": s_puzzle,
+  "atom": s_atom,
+  "flask": s_flask,
+  "magnet": s_magnet,
+  "globe": s_globe,
+  "bus": s_bus,
+  "plane": s_plane,
+  "building": s_building,
+  "graduation-cap": s_graduation_cap,
+  "book": s_book,
+  "calculator": s_calculator,
+  "wrench": s_wrench,
+  "palette": s_palette,
+  "terminal": s_terminal,
+  "git-branch": s_git_branch,
+  "snowflake": s_snowflake,
 };
 
 export function hasIconSound(slug: string) {
