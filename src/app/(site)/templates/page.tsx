@@ -36,7 +36,7 @@ export default async function TemplatesPage() {
     <>
       <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-6 pt-[136px]">
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1152px]">
+        <div className="relative mx-auto max-w-[1280px]">
           <h1 className="pg-display max-w-[900px] text-[clamp(48px,8vw,80px)] text-foreground">
             Whole pages, ready to make <RainbowWord>yours</RainbowWord>
           </h1>
@@ -48,7 +48,7 @@ export default async function TemplatesPage() {
       </section>
 
       <section aria-label="Templates" className="px-4 pb-24">
-        <div className="mx-auto max-w-[1152px]">
+        <div className="mx-auto max-w-[1280px]">
           <TemplatesGallery isPremium={isPremium} />
         </div>
       </section>

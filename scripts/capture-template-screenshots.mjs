@@ -44,6 +44,7 @@ const TEMPLATE_SLUGS = [
   "cairn",
   "strata",
   "afterglow",
+  "ferry",
   "launchfolio-portfolio",
   "noir-studio",
   "nexus-ai-launch",
