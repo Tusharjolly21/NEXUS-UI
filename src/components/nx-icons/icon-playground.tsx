@@ -10,7 +10,7 @@ import type { IconMeta } from "@/lib/icons/catalog";
 import { cn } from "@/lib/utils";
 import { CopyButton } from "./copy-button";
 import { MATERIALS, SWATCHES, accentFor } from "./icon-grid";
-import { hasIconSound, iconSoundLength, playIconSound } from "./icon-sounds";
+import { hasIconSound, iconSoundLength, isLiquidLook, playIconSound, playMaterialSound } from "./icon-sounds";
 import { IconMaterial, type IconMaterialName } from "./icon-material";
 import { NX_ICONS } from "./registry";
 
@@ -84,8 +84,11 @@ export function IconPlayground({ icon, source, locked = false }: { icon: IconMet
   const tilt = useSpring(0, { stiffness: 220, damping: 18 });
 
   const ping = React.useCallback(() => {
-    if (sound) playIconSound(icon.slug, { speed, force: true });
-  }, [sound, icon.slug, speed]);
+    if (!sound) return;
+    playIconSound(icon.slug, { speed, force: true });
+    // wearing Mercury, Liquid or Glass, the icon adds that look's own sound on top of its score
+    if (isLiquidLook(material)) playMaterialSound(material, "hover", { force: true });
+  }, [sound, icon.slug, speed, material]);
   const pingRef = React.useRef(ping);
   React.useEffect(() => {
     pingRef.current = ping;
@@ -165,6 +168,7 @@ export function IconPlayground({ icon, source, locked = false }: { icon: IconMet
   const surprise = () => {
     const m = pick(MATERIALS);
     setMaterial(m.id);
+    if (isLiquidLook(m.id)) playMaterialSound(m.id, "switch", { force: true });
     setStage(m.dark ? "dark" : pick<Stage>(["light", "light", "dark"]));
     setColor(pick(SWATCHES));
     setSpeed(pick(MOODS).speed);
@@ -329,6 +333,10 @@ export function IconPlayground({ icon, source, locked = false }: { icon: IconMet
                 onClick={() => {
                   setMaterial(m.id);
                   if (m.dark) setStage("dark");
+                  if (isLiquidLook(m.id)) {
+                    setSound(true);
+                    playMaterialSound(m.id, "switch", { force: true });
+                  }
                 }}
                 className="px-3.5 py-1.5 text-[13px]"
               >

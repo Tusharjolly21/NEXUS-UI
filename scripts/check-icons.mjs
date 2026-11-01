@@ -45,6 +45,11 @@ const soundFiles = new Set(dirFiles("src/components/nx-icons/sounds", ".ts"));
 for (const s of iconFiles) if (!slugs.includes(s)) fail(`icons/${s}.tsx has no catalog entry`);
 for (const s of soundFiles) if (!slugs.includes(s)) fail(`sounds/${s}.ts has no catalog entry`);
 
+const looksSource = read("src/components/nx-icons/material-sounds.ts");
+for (const look of ["mercury", "liquid", "glass"]) {
+  if (!new RegExp(`export const ${look}: \\{ hover: MaterialScore; switch: MaterialScore \\}`).test(looksSource)) fail(`material-sounds.ts must export ${look} with a hover and a switch sound`);
+}
+
 const noteSeqs = new Map();
 for (const [, slug, component, title, category, kind, accent, heard, tags, description, premium] of entries) {
   const where = `${slug}:`;

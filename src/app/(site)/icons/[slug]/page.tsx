@@ -330,7 +330,7 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
           </div>
           <p className="mt-2 max-w-[680px] text-[16px] text-muted-foreground">
             Wrap an icon, or a whole grid of them, in <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">IconMaterial</code> to
-            give it a finish: neon glow, an aurora spectrum, polished chrome, or one of the liquid looks (Mercury, Liquid and Glass), which are pure SVG with no canvas or WebGL. Save it as{" "}
+            give it a finish: neon glow, an aurora spectrum, polished chrome, or one of the liquid looks (Mercury, Liquid and Glass), which are pure SVG with no canvas or WebGL and each make a sound of their own. Save it as{" "}
             <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">components/icons/icon-material.tsx</code>. Spark needs no helper:
             it is just the <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">accent</code> prop.
           </p>

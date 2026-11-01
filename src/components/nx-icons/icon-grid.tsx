@@ -10,7 +10,7 @@ import { useLocked, useProAccess } from "@/components/pro/pro-access";
 import { cn } from "@/lib/utils";
 import { IconMaterial, type IconMaterialName } from "./icon-material";
 import { CopyButton } from "./copy-button";
-import { hasIconSound, playIconSound } from "./icon-sounds";
+import { hasIconSound, isLiquidLook, playIconSound, playMaterialSound } from "./icon-sounds";
 import { NX_ICONS } from "./registry";
 
 export const MATERIALS: { id: IconMaterialName; label: string; dark?: boolean }[] = [
@@ -97,7 +97,10 @@ export function IconTile({
 
   // with the grid's Sound switch on, hovering a tile plays that icon's own score; a loader restarts so its sound and picture begin together
   const hear = () => {
-    if (!sound || !hasIconSound(icon.slug)) return;
+    if (!sound) return;
+    // an icon wearing Mercury, Liquid or Glass adds that look's own sound on top of its score
+    if (isLiquidLook(material)) playMaterialSound(material, "hover", { force: true });
+    if (!hasIconSound(icon.slug)) return;
     if (icon.kind === "loop") setLap((n) => n + 1);
     playIconSound(icon.slug, { force: true, volume: 0.85 });
   };
@@ -217,6 +220,14 @@ export function IconGrid() {
   const listRef = React.useRef<HTMLDivElement>(null);
   const [sound, setSound] = React.useState(false);
   const [access, setAccess] = React.useState<Access>("all");
+  // Picking Mercury, Liquid or Glass plays that look's sound (and switches the grid's Sound on, so hovering keeps it going)
+  const pickLook = (id: IconMaterialName) => {
+    setMaterial(id);
+    if (isLiquidLook(id)) {
+      setSound(true);
+      playMaterialSound(id, "switch", { force: true });
+    }
+  };
 
   const dark = !!MATERIALS.find((m) => m.id === material)?.dark;
 
@@ -270,7 +281,7 @@ export function IconGrid() {
           <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Look">
             <span className="mr-1 text-[13px] text-muted-foreground">Look</span>
             {MATERIALS.map((m) => (
-              <Chip key={m.id} active={material === m.id} onClick={() => setMaterial(m.id)} className="px-3.5 py-1.5 text-[13px]">
+              <Chip key={m.id} active={material === m.id} onClick={() => pickLook(m.id)} className="px-3.5 py-1.5 text-[13px]">
                 {m.label}
               </Chip>
             ))}

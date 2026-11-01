@@ -66,6 +66,17 @@ import { playIconScore } from "./sound-engine";
 
 document.querySelector("#pay")?.addEventListener("click", () => playIconScore(coin));`;
 
+const LOOKS_EXAMPLE = `import { mercury } from "@/components/icons/material-sounds";
+import { playIconScore } from "@/components/icons/sound-engine";
+
+// when the visitor picks the look: pouring metal, the blob landing, a ring as it sets
+playIconScore(mercury.switch);
+
+// while an icon wearing the look is hovered, on top of the icon's own sound
+playIconScore(mercury.hover);
+
+// liquid and glass work the same way: liquid.switch, liquid.hover, glass.switch, glass.hover`;
+
 const REDUCED_EXAMPLE = `// Optional: stay quiet for visitors who asked the system for less.
 const quiet = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 if (!quiet) playIconScore(bell);`;
@@ -80,6 +91,7 @@ export default async function SoundsGuidePage() {
   const dir = path.join(process.cwd(), "src/components/nx-icons");
   const engine = await readFile(path.join(dir, "sound-engine.ts"), "utf8");
   const kit = await readFile(path.join(dir, "sound-kit.ts"), "utf8");
+  const looks = await readFile(path.join(dir, "material-sounds.ts"), "utf8");
 
   const faq: { q: string; a: string }[] = [
     { q: "Are the sounds free?", a: `The sound engine, the note helpers and this guide are free. An icon's sound score comes with the icon: free for the ${FREE_ICON_COUNT} free icons, and part of Pro for the other ${PRO_ICON_COUNT}. You can hear every icon's sound on its page and on the icons page first.` },
@@ -199,6 +211,24 @@ export default async function SoundsGuidePage() {
           </p>
           <div className="mt-6">
             <CodeBlock code={HOVER_EXAMPLE} language="tsx" theme="dark" header={{ ...DEFAULT_HEADER, title: "notifications-button.tsx" }} hoverHighlight={false} enableSound={false} />
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="looks" className="px-4 pb-16">
+        <div className="mx-auto max-w-[1152px]">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 id="looks" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">The liquid looks have a sound too</h2>
+            <CopyButton text={looks} label="Copy material-sounds.ts" />
+          </div>
+          <p className="mt-2 max-w-[700px] text-[16px] text-muted-foreground">
+            Mercury, Liquid and Glass each have two sounds in the same format as an icon&apos;s: a short layer for hovering an icon that wears the look, and a
+            longer one for the moment it is picked. Mercury is a bead of metal rolling and ringing, Liquid is bloops and drips, Glass is a clink and a thin
+            ring. Save the file beside {code("sound-kit.ts")}. On the icons page, picking a liquid look plays its sound and turns Sound on.
+          </p>
+          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+            <CodeBlock code={LOOKS_EXAMPLE} language="ts" theme="dark" header={{ ...DEFAULT_HEADER, title: "looks.ts" }} hoverHighlight={false} enableSound={false} />
+            <CodeBlock code={looks} language="ts" theme="dark" header={{ ...DEFAULT_HEADER, title: "material-sounds.ts" }} hoverHighlight={false} enableSound={false} />
           </div>
         </div>
       </section>

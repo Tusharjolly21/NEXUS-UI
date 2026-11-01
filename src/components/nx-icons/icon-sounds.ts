@@ -1,5 +1,6 @@
 import { playDef, type SoundDef } from "@/lib/ui-sounds";
 import type { Time } from "./sound-kit";
+import { MATERIAL_SOUNDS, type MaterialSoundName } from "./material-sounds";
 import * as s_arc_spinner from "./sounds/arc-spinner";
 import * as s_tick_spinner from "./sounds/tick-spinner";
 import * as s_wave_dots from "./sounds/wave-dots";
@@ -434,4 +435,20 @@ export function playIconSound(slug: string, opts: { speed?: number; volume?: num
   const speed = Math.min(4, Math.max(0.25, opts.speed ?? 1));
   const def: SoundDef = { category: "Icons", label: slug, length: score.length / speed + 0.5, play: (c, o) => scoreIconSound(slug, c, o, speed) };
   playDef(`nx-icon:${slug}`, def, Math.min(1, (opts.volume ?? 0.9) * score.level), opts.force ?? false);
+}
+
+/** The three liquid looks have a sound of their own. */
+export function isLiquidLook(material: string): material is MaterialSoundName {
+  return material === "mercury" || material === "liquid" || material === "glass";
+}
+
+/**
+ * Plays the sound of a liquid look: `hover` is a short layer for an icon wearing it (play it with the icon's own
+ * sound), `switch` is the longer one for the moment the look is picked. Silent while sounds are off unless `force` is set.
+ */
+export function playMaterialSound(material: string, kind: "hover" | "switch" = "hover", opts: { volume?: number; force?: boolean } = {}) {
+  if (!isLiquidLook(material)) return;
+  const score = MATERIAL_SOUNDS[material][kind];
+  const def: SoundDef = { category: "Icons", label: `${material} ${kind}`, length: score.length + 0.5, play: (c, o) => score.play(c, o, (x) => x) };
+  playDef(`nx-material:${material}:${kind}`, def, Math.min(1, (opts.volume ?? (kind === "hover" ? 0.8 : 0.9)) * score.level), opts.force ?? false);
 }
