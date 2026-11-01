@@ -8,8 +8,10 @@ import { DEFAULT_HEADER } from "@/components/code-block/code-block";
 import { IconTile } from "@/components/nx-icons/icon-grid";
 import { CopyButton } from "@/components/nx-icons/copy-button";
 import { IconPlayground } from "@/components/nx-icons/icon-playground";
+import { UseScene } from "@/components/nx-icons/use-scenes";
 import { RainbowWord } from "@/components/site";
 import { ICONS, getCategory, getIcon } from "@/lib/icons/catalog";
+import { ICON_USES } from "@/lib/icons/uses";
 import { createMetadata, siteConfig } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -51,11 +53,16 @@ export default async function IconPage({ params }: Props) {
   const material = await readFile(path.join(process.cwd(), "src/components/nx-icons/icon-material.tsx"), "utf8");
   const related = ICONS.filter((i) => i.category === icon.category && i.slug !== icon.slug).slice(0, 6);
   const name = icon.title.toLowerCase();
+  const uses = ICON_USES[icon.slug] ?? [];
 
   const faq: { q: string; a: string }[] = [
     {
       q: `How do I use the ${icon.title.toLowerCase()} icon in React?`,
       a: `Copy ${icon.slug}.tsx into your project, install framer-motion, and import ${icon.component}. Render it like any component: <${icon.component} size={32} />.`,
+    },
+    {
+      q: `Where can I use the ${name} icon?`,
+      a: `${uses.map((u) => u.title.toLowerCase()).join(", ")}. Each one is shown live on this page.`,
     },
     {
       q: "Does it need a library?",
@@ -110,6 +117,16 @@ export default async function IconPage({ params }: Props) {
             Animated <RainbowWord>{icon.title}</RainbowWord> icon for React.
           </h1>
           <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">{icon.description}</p>
+          {uses.length ? (
+            <p className="mt-5 flex max-w-[760px] flex-wrap items-center gap-2 text-[14px] text-muted-foreground">
+              <span className="mr-1">Use it for</span>
+              {uses.map((u) => (
+                <a key={u.title} href="#where-to-use" className="rounded-full bg-card px-3 py-1.5 text-foreground shadow-[0_0_0_1px_rgba(0,0,0,.06)] transition-colors hover:bg-secondary dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)]">
+                  {u.title}
+                </a>
+              ))}
+            </p>
+          ) : null}
         </div>
       </section>
 
@@ -118,6 +135,36 @@ export default async function IconPage({ params }: Props) {
           <IconPlayground icon={icon} source={source} />
         </div>
       </section>
+
+      {uses.length ? (
+        <section id="where-to-use" aria-labelledby="where" className="scroll-mt-24 px-4 pb-16">
+          <div className="mx-auto max-w-[1152px]">
+            <h2 id="where" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
+              Where to use the {name} icon
+            </h2>
+            <p className="mt-2 max-w-[680px] text-[16px] text-muted-foreground">
+              {uses.length} real places it fits, each one live. Hover, tap or press a key on a mock-up to see the icon move in context, then copy the
+              file above and drop it in.
+            </p>
+            <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {uses.map((u) => (
+                <li key={u.title} className="flex flex-col overflow-hidden rounded-[22px] bg-card shadow-[0_0_0_1px_rgba(0,0,0,.05)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]">
+                  <div className="flex h-[184px] shrink-0 items-center justify-center bg-secondary/60 p-4">
+                    <UseScene slug={icon.slug} accent={icon.accent} scene={u.scene} label={u.label} sub={u.sub} />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-[15.5px] font-semibold text-foreground">{u.title}</h3>
+                    <p className="mt-1 text-[14px] leading-relaxed text-muted-foreground">{u.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-5 text-[14.5px] text-muted-foreground">
+              More in context on the <Link href="/icons#real-interfaces" className="text-foreground underline underline-offset-4">Made for real interfaces</Link> page: a player, a cart, a toolbar, a chat box and a tab bar.
+            </p>
+          </div>
+        </section>
+      ) : null}
 
       <section aria-labelledby="source" className="px-4 pb-16">
         <div className="mx-auto max-w-[1152px]">
@@ -222,27 +269,6 @@ export default async function IconPage({ params }: Props) {
           </div>
         </div>
       </section>
-
-      {icon.uses.length ? (
-        <section aria-labelledby="fits" className="px-4 pb-16">
-          <div className="mx-auto max-w-[1152px]">
-            <h2 id="fits" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
-              Where the {icon.title.toLowerCase()} icon fits
-            </h2>
-            <ul className="mt-5 flex flex-wrap gap-2.5">
-              {icon.uses.map((u) => (
-                <li key={u} className="rounded-full bg-card px-4 py-2 text-[15px] text-foreground shadow-[0_0_0_1px_rgba(0,0,0,.06)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)]">
-                  {u}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-4 max-w-[680px] text-[15.5px] text-muted-foreground">
-              See it in context with a player, a cart, a toolbar and more on the{" "}
-              <Link href="/icons#real-interfaces" className="text-foreground underline underline-offset-4">Made for real interfaces</Link> demos.
-            </p>
-          </div>
-        </section>
-      ) : null}
 
       {related.length ? (
         <section aria-labelledby="more" className="px-4 pb-16">
