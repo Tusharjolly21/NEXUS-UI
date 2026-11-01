@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/client";
 import { pillClassName } from "@/components/site/pill-link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { trackEvent } from "@/lib/track";
 import { cn } from "@/lib/utils";
 
 const RESEND_SECONDS = 60;
@@ -106,6 +107,7 @@ export function LoginForm() {
       if (stopped) return;
 
       if (status === "signed_in") {
+        trackEvent("login_completed", { source: "other-device" });
         setSignedIn(true);
         window.location.replace(next);
         return;

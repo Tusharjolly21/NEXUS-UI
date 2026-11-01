@@ -4,6 +4,7 @@ import * as React from "react";
 import Script from "next/script";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { FunnelListeners } from "@/components/providers/funnel-listeners";
 import { getConsentSnapshot, getServerConsentSnapshot, subscribeConsent } from "@/lib/consent";
 
 const GOOGLE_TAG_ID = "G-LNN2CTHENQ";
@@ -105,6 +106,7 @@ export function SiteAnalytics() {
         data-cf-beacon={JSON.stringify({ token: CLOUDFLARE_TOKEN })}
       />
       <VercelAnalytics />
+      <FunnelListeners />
       <SpeedInsights />
     </>
   );

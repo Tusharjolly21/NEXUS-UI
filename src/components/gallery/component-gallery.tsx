@@ -43,7 +43,7 @@ function PlansCard({ proCount }: { proCount: number }) {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <PillLink href="/pricing" size="sm">
+          <PillLink href="/pricing" size="sm" plansSource="plans_card">
             See plans
           </PillLink>
           <span className="text-[13px] text-muted-foreground">
@@ -309,7 +309,7 @@ export function ComponentGallery({
           <p className="text-[14px] leading-[1.5] text-muted-foreground">
             {accessCounts.free} are free, with full source. {accessCounts.pro} more come with Pro: {formatPrice(PRICES.pro)} a year,
             or {formatPrice(PRICES.allAccess)} once.{" "}
-            <Link href="/pricing" className="text-link hover:underline hover:underline-offset-4">
+            <Link href="/pricing" data-plans-source="plans_line" className="text-link hover:underline hover:underline-offset-4">
               See plans
             </Link>
           </p>

@@ -38,7 +38,7 @@ export function LockedCode({ name, what }: { name: string; what: "code" | "sound
             >
               Unlock with Pro
             </button>
-            <Link href="/pricing" className="inline-flex h-11 items-center rounded-full px-4 text-[15px] font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
+            <Link href="/pricing" data-plans-source="locked_code" className="inline-flex h-11 items-center rounded-full px-4 text-[15px] font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
               See plans
             </Link>
           </div>

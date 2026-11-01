@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/lib/supabase/database.types";
 import { safeNextPath } from "@/lib/safe-redirect";
+import { LOGIN_MARKER, loginSource } from "@/lib/login-marker";
 import { authErrorCode, getPendingHandoff, isHandoffId, isOtpType } from "@/lib/login-handoff";
 
 export async function GET(request: Request) {
@@ -65,5 +66,8 @@ export async function GET(request: Request) {
     return login(authErrorCode(error));
   }
 
-  return NextResponse.redirect(`${origin}${next}`);
+  // The page you land on counts this sign-in once (login_completed) and removes the marker from the address.
+  const destination = new URL(next, origin);
+  destination.searchParams.set(LOGIN_MARKER, loginSource(next));
+  return NextResponse.redirect(destination);
 }
