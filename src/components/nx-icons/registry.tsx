@@ -126,6 +126,81 @@ import { PaletteIcon } from "./icons/palette";
 import { TerminalIcon } from "./icons/terminal";
 import { GitBranchIcon } from "./icons/git-branch";
 import { SnowflakeIcon } from "./icons/snowflake";
+import { ArrowDownIcon } from "./icons/arrow-down";
+import { ArrowLeftIcon } from "./icons/arrow-left";
+import { ChevronDownIcon } from "./icons/chevron-down";
+import { ChevronRightIcon } from "./icons/chevron-right";
+import { CheckIcon } from "./icons/check";
+import { MinusIcon } from "./icons/minus";
+import { MaximizeIcon } from "./icons/maximize";
+import { MinimizeIcon } from "./icons/minimize";
+import { HelpCircleIcon } from "./icons/help-circle";
+import { EyeOffIcon } from "./icons/eye-off";
+import { UnlockIcon } from "./icons/unlock";
+import { LogInIcon } from "./icons/log-in";
+import { LogOutIcon } from "./icons/log-out";
+import { UserPlusIcon } from "./icons/user-plus";
+import { UsersIcon } from "./icons/users";
+import { InboxIcon } from "./icons/inbox";
+import { ReplyIcon } from "./icons/reply";
+import { SmileIcon } from "./icons/smile";
+import { ThumbsDownIcon } from "./icons/thumbs-down";
+import { AtSignIcon } from "./icons/at-sign";
+import { HashIcon } from "./icons/hash";
+import { FingerprintIcon } from "./icons/fingerprint";
+import { QrCodeIcon } from "./icons/qr-code";
+import { BugIcon } from "./icons/bug";
+import { FlagIcon } from "./icons/flag";
+import { VideoIcon } from "./icons/video";
+import { TvIcon } from "./icons/tv";
+import { MonitorIcon } from "./icons/monitor";
+import { KeyboardIcon } from "./icons/keyboard";
+import { MouseIcon } from "./icons/mouse";
+import { SpeakerIcon } from "./icons/speaker";
+import { BluetoothIcon } from "./icons/bluetooth";
+import { CpuIcon } from "./icons/cpu";
+import { DatabaseIcon } from "./icons/database";
+import { ServerIcon } from "./icons/server";
+import { CloudIcon } from "./icons/cloud";
+import { HardDriveIcon } from "./icons/hard-drive";
+import { PlugIcon } from "./icons/plug";
+import { PiggyBankIcon } from "./icons/piggy-bank";
+import { ReceiptIcon } from "./icons/receipt";
+import { BriefcaseIcon } from "./icons/briefcase";
+import { PieChartIcon } from "./icons/pie-chart";
+import { TargetIcon } from "./icons/target";
+import { MedalIcon } from "./icons/medal";
+import { CrownIcon } from "./icons/crown";
+import { GemIcon } from "./icons/gem";
+import { StoreIcon } from "./icons/store";
+import { PercentIcon } from "./icons/percent";
+import { RadioIcon } from "./icons/radio";
+import { WatchIcon } from "./icons/watch";
+import { LeafIcon } from "./icons/leaf";
+import { TreeIcon } from "./icons/tree";
+import { FlowerIcon } from "./icons/flower";
+import { DropletIcon } from "./icons/droplet";
+import { WindIcon } from "./icons/wind";
+import { RainbowIcon } from "./icons/rainbow";
+import { SunriseIcon } from "./icons/sunrise";
+import { MountainIcon } from "./icons/mountain";
+import { AnchorIcon } from "./icons/anchor";
+import { CarIcon } from "./icons/car";
+import { BicycleIcon } from "./icons/bicycle";
+import { TrainIcon } from "./icons/train";
+import { TentIcon } from "./icons/tent";
+import { BedIcon } from "./icons/bed";
+import { LampIcon } from "./icons/lamp";
+import { UtensilsIcon } from "./icons/utensils";
+import { AppleIcon } from "./icons/apple";
+import { WineIcon } from "./icons/wine";
+import { SoccerBallIcon } from "./icons/soccer-ball";
+import { PawPrintIcon } from "./icons/paw-print";
+import { FeatherIcon } from "./icons/feather";
+import { HammerIcon } from "./icons/hammer";
+import { ShirtIcon } from "./icons/shirt";
+import { GlassesIcon } from "./icons/glasses";
+import { BalloonIcon } from "./icons/balloon";
 
 export type NxIconProps = {
   size?: number;
@@ -265,4 +340,79 @@ export const NX_ICONS: Record<string, ComponentType<NxIconProps>> = {
   "terminal": TerminalIcon,
   "git-branch": GitBranchIcon,
   "snowflake": SnowflakeIcon,
+  "arrow-down": ArrowDownIcon,
+  "arrow-left": ArrowLeftIcon,
+  "chevron-down": ChevronDownIcon,
+  "chevron-right": ChevronRightIcon,
+  "check": CheckIcon,
+  "minus": MinusIcon,
+  "maximize": MaximizeIcon,
+  "minimize": MinimizeIcon,
+  "help-circle": HelpCircleIcon,
+  "eye-off": EyeOffIcon,
+  "unlock": UnlockIcon,
+  "log-in": LogInIcon,
+  "log-out": LogOutIcon,
+  "user-plus": UserPlusIcon,
+  "users": UsersIcon,
+  "inbox": InboxIcon,
+  "reply": ReplyIcon,
+  "smile": SmileIcon,
+  "thumbs-down": ThumbsDownIcon,
+  "at-sign": AtSignIcon,
+  "hash": HashIcon,
+  "fingerprint": FingerprintIcon,
+  "qr-code": QrCodeIcon,
+  "bug": BugIcon,
+  "flag": FlagIcon,
+  "video": VideoIcon,
+  "tv": TvIcon,
+  "monitor": MonitorIcon,
+  "keyboard": KeyboardIcon,
+  "mouse": MouseIcon,
+  "speaker": SpeakerIcon,
+  "bluetooth": BluetoothIcon,
+  "cpu": CpuIcon,
+  "database": DatabaseIcon,
+  "server": ServerIcon,
+  "cloud": CloudIcon,
+  "hard-drive": HardDriveIcon,
+  "plug": PlugIcon,
+  "piggy-bank": PiggyBankIcon,
+  "receipt": ReceiptIcon,
+  "briefcase": BriefcaseIcon,
+  "pie-chart": PieChartIcon,
+  "target": TargetIcon,
+  "medal": MedalIcon,
+  "crown": CrownIcon,
+  "gem": GemIcon,
+  "store": StoreIcon,
+  "percent": PercentIcon,
+  "radio": RadioIcon,
+  "watch": WatchIcon,
+  "leaf": LeafIcon,
+  "tree": TreeIcon,
+  "flower": FlowerIcon,
+  "droplet": DropletIcon,
+  "wind": WindIcon,
+  "rainbow": RainbowIcon,
+  "sunrise": SunriseIcon,
+  "mountain": MountainIcon,
+  "anchor": AnchorIcon,
+  "car": CarIcon,
+  "bicycle": BicycleIcon,
+  "train": TrainIcon,
+  "tent": TentIcon,
+  "bed": BedIcon,
+  "lamp": LampIcon,
+  "utensils": UtensilsIcon,
+  "apple": AppleIcon,
+  "wine": WineIcon,
+  "soccer-ball": SoccerBallIcon,
+  "paw-print": PawPrintIcon,
+  "feather": FeatherIcon,
+  "hammer": HammerIcon,
+  "shirt": ShirtIcon,
+  "glasses": GlassesIcon,
+  "balloon": BalloonIcon,
 };

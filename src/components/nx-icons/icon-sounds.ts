@@ -125,6 +125,81 @@ import * as s_palette from "./sounds/palette";
 import * as s_terminal from "./sounds/terminal";
 import * as s_git_branch from "./sounds/git-branch";
 import * as s_snowflake from "./sounds/snowflake";
+import * as s_arrow_down from "./sounds/arrow-down";
+import * as s_arrow_left from "./sounds/arrow-left";
+import * as s_chevron_down from "./sounds/chevron-down";
+import * as s_chevron_right from "./sounds/chevron-right";
+import * as s_check from "./sounds/check";
+import * as s_minus from "./sounds/minus";
+import * as s_maximize from "./sounds/maximize";
+import * as s_minimize from "./sounds/minimize";
+import * as s_help_circle from "./sounds/help-circle";
+import * as s_eye_off from "./sounds/eye-off";
+import * as s_unlock from "./sounds/unlock";
+import * as s_log_in from "./sounds/log-in";
+import * as s_log_out from "./sounds/log-out";
+import * as s_user_plus from "./sounds/user-plus";
+import * as s_users from "./sounds/users";
+import * as s_inbox from "./sounds/inbox";
+import * as s_reply from "./sounds/reply";
+import * as s_smile from "./sounds/smile";
+import * as s_thumbs_down from "./sounds/thumbs-down";
+import * as s_at_sign from "./sounds/at-sign";
+import * as s_hash from "./sounds/hash";
+import * as s_fingerprint from "./sounds/fingerprint";
+import * as s_qr_code from "./sounds/qr-code";
+import * as s_bug from "./sounds/bug";
+import * as s_flag from "./sounds/flag";
+import * as s_video from "./sounds/video";
+import * as s_tv from "./sounds/tv";
+import * as s_monitor from "./sounds/monitor";
+import * as s_keyboard from "./sounds/keyboard";
+import * as s_mouse from "./sounds/mouse";
+import * as s_speaker from "./sounds/speaker";
+import * as s_bluetooth from "./sounds/bluetooth";
+import * as s_cpu from "./sounds/cpu";
+import * as s_database from "./sounds/database";
+import * as s_server from "./sounds/server";
+import * as s_cloud from "./sounds/cloud";
+import * as s_hard_drive from "./sounds/hard-drive";
+import * as s_plug from "./sounds/plug";
+import * as s_piggy_bank from "./sounds/piggy-bank";
+import * as s_receipt from "./sounds/receipt";
+import * as s_briefcase from "./sounds/briefcase";
+import * as s_pie_chart from "./sounds/pie-chart";
+import * as s_target from "./sounds/target";
+import * as s_medal from "./sounds/medal";
+import * as s_crown from "./sounds/crown";
+import * as s_gem from "./sounds/gem";
+import * as s_store from "./sounds/store";
+import * as s_percent from "./sounds/percent";
+import * as s_radio from "./sounds/radio";
+import * as s_watch from "./sounds/watch";
+import * as s_leaf from "./sounds/leaf";
+import * as s_tree from "./sounds/tree";
+import * as s_flower from "./sounds/flower";
+import * as s_droplet from "./sounds/droplet";
+import * as s_wind from "./sounds/wind";
+import * as s_rainbow from "./sounds/rainbow";
+import * as s_sunrise from "./sounds/sunrise";
+import * as s_mountain from "./sounds/mountain";
+import * as s_anchor from "./sounds/anchor";
+import * as s_car from "./sounds/car";
+import * as s_bicycle from "./sounds/bicycle";
+import * as s_train from "./sounds/train";
+import * as s_tent from "./sounds/tent";
+import * as s_bed from "./sounds/bed";
+import * as s_lamp from "./sounds/lamp";
+import * as s_utensils from "./sounds/utensils";
+import * as s_apple from "./sounds/apple";
+import * as s_wine from "./sounds/wine";
+import * as s_soccer_ball from "./sounds/soccer-ball";
+import * as s_paw_print from "./sounds/paw-print";
+import * as s_feather from "./sounds/feather";
+import * as s_hammer from "./sounds/hammer";
+import * as s_shirt from "./sounds/shirt";
+import * as s_glasses from "./sounds/glasses";
+import * as s_balloon from "./sounds/balloon";
 
 type Score = { length: number; level: number; play: (c: AudioContext, o: AudioNode, t: Time) => void };
 
@@ -255,6 +330,81 @@ const SCORES: Record<string, Score> = {
   "terminal": s_terminal,
   "git-branch": s_git_branch,
   "snowflake": s_snowflake,
+  "arrow-down": s_arrow_down,
+  "arrow-left": s_arrow_left,
+  "chevron-down": s_chevron_down,
+  "chevron-right": s_chevron_right,
+  "check": s_check,
+  "minus": s_minus,
+  "maximize": s_maximize,
+  "minimize": s_minimize,
+  "help-circle": s_help_circle,
+  "eye-off": s_eye_off,
+  "unlock": s_unlock,
+  "log-in": s_log_in,
+  "log-out": s_log_out,
+  "user-plus": s_user_plus,
+  "users": s_users,
+  "inbox": s_inbox,
+  "reply": s_reply,
+  "smile": s_smile,
+  "thumbs-down": s_thumbs_down,
+  "at-sign": s_at_sign,
+  "hash": s_hash,
+  "fingerprint": s_fingerprint,
+  "qr-code": s_qr_code,
+  "bug": s_bug,
+  "flag": s_flag,
+  "video": s_video,
+  "tv": s_tv,
+  "monitor": s_monitor,
+  "keyboard": s_keyboard,
+  "mouse": s_mouse,
+  "speaker": s_speaker,
+  "bluetooth": s_bluetooth,
+  "cpu": s_cpu,
+  "database": s_database,
+  "server": s_server,
+  "cloud": s_cloud,
+  "hard-drive": s_hard_drive,
+  "plug": s_plug,
+  "piggy-bank": s_piggy_bank,
+  "receipt": s_receipt,
+  "briefcase": s_briefcase,
+  "pie-chart": s_pie_chart,
+  "target": s_target,
+  "medal": s_medal,
+  "crown": s_crown,
+  "gem": s_gem,
+  "store": s_store,
+  "percent": s_percent,
+  "radio": s_radio,
+  "watch": s_watch,
+  "leaf": s_leaf,
+  "tree": s_tree,
+  "flower": s_flower,
+  "droplet": s_droplet,
+  "wind": s_wind,
+  "rainbow": s_rainbow,
+  "sunrise": s_sunrise,
+  "mountain": s_mountain,
+  "anchor": s_anchor,
+  "car": s_car,
+  "bicycle": s_bicycle,
+  "train": s_train,
+  "tent": s_tent,
+  "bed": s_bed,
+  "lamp": s_lamp,
+  "utensils": s_utensils,
+  "apple": s_apple,
+  "wine": s_wine,
+  "soccer-ball": s_soccer_ball,
+  "paw-print": s_paw_print,
+  "feather": s_feather,
+  "hammer": s_hammer,
+  "shirt": s_shirt,
+  "glasses": s_glasses,
+  "balloon": s_balloon,
 };
 
 export function hasIconSound(slug: string) {

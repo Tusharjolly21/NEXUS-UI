@@ -9,7 +9,7 @@ export const level = 1.85;
 /** Three bubbly hops that climb in pitch, each with a tiny tick as the dot lands. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
   [0, 0.1, 0.2].forEach((at, i) => {
-    plink(c, o, [N.C6, N.E6, N.G6][i], t(at + 0.04), 0.08, 0.13);
+    plink(c, o, [N.D6, N.A5, N.E6][i], t(at + 0.04), 0.08, 0.13);
     tick(c, o, t(at + 0.34), 0.06, 3400);
   });
 }
