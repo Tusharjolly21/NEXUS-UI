@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 /**
  * Real comments from Reddit threads and Instagram about Nexus UI components, quoted as written (an
@@ -64,11 +65,17 @@ export function tone(user: string) {
   return TONES[h % TONES.length];
 }
 
-function Card({ c }: { c: Comment }) {
+/** One comment card. `className` can override the width (the marquee rows use the default). */
+export function Card({ c, className }: { c: Comment; className?: string }) {
   const [from, to] = tone(c.user);
   const insta = c.platform === "instagram";
   return (
-    <figure className="flex w-[300px] shrink-0 flex-col justify-between gap-5 rounded-[22px] bg-card p-6 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)] sm:w-[340px]">
+    <figure
+      className={cn(
+        "flex w-[300px] shrink-0 flex-col justify-between gap-5 rounded-[22px] bg-card p-6 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)] sm:w-[340px]",
+        className,
+      )}
+    >
       <blockquote className="text-[16px] leading-[1.5] tracking-[-0.2px] text-foreground">
         &ldquo;{c.quote}&rdquo;
       </blockquote>
