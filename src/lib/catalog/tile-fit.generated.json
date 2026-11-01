@@ -2939,6 +2939,26 @@
   "bg": "#ffffff",
   "coverage": 0.12
  },
+ "mercury-switch": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   218,
+   222,
+   524,
+   332
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "mercury-tabs": {
   "canvas": [
    960,
@@ -2955,6 +2975,26 @@
    274,
    546,
    172
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "mercury-upload": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   238,
+   214,
+   484,
+   290
   ],
   "bg": "#f6f6f6",
   "coverage": 1
@@ -3958,6 +3998,26 @@
   ],
   "bg": "#ffffff",
   "coverage": 0.31
+ },
+ "molten-hold": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   240,
+   240,
+   480,
+   240
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "money-goo": {
   "canvas": [
