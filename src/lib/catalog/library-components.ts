@@ -4704,6 +4704,7 @@ import { UploadDropzone } from "@/components/upload-dropzone";
 
 function upload(file: File, setProgress: (p: number) => void) {
   return new Promise<void>((resolve, reject) => {
+    setProgress(0);
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "/api/upload");
     xhr.upload.onprogress = (e) => setProgress(e.loaded / e.total);
@@ -13764,6 +13765,188 @@ import { MercuryTabs } from "@/components/mercury-tabs";
 export default function Page() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   return <MercuryTabs theme={theme} onThemeChange={setTheme} autoplay={false} />;
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "molten-hold",
+    name: "Molten Hold",
+    registryCliName: "molten-hold",
+    description:
+      "Hold to confirm by pouring molten metal. Press and hold and metal pours into the channel: the front is a glowing meniscus, white-orange at the lip, that shivers as it runs and throws heat onto the groove ahead, while behind it the metal cools through orange and red into chrome, its skin breaking into slow cells. Let go early and it drains back. Hold to the end and the glow fades, one ripple runs the length of the set bar, and the label is pressed into the metal. Space or Enter hold it from the keyboard. Until you touch it, it holds and lets go by itself.",
+    categorySlug: "inputs-controls",
+    tags: ["hold to confirm", "press and hold", "confirm", "button", "publish", "metal", "molten", "chrome", "webgl", "shader", "sound", "web audio", "autoplay", "motion kit"],
+    premium: true,
+    trendingScore: 190,
+    createdAt: "2026-11-01",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Holds and lets go by itself until the first touch. Held still under reduced motion." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Loudness of the sounds, 0 to 1." },
+      { name: "label", type: "string", defaultValue: "Hold to publish", description: "The words on the bar before it is held." },
+      { name: "doneLabel", type: "string", defaultValue: "Published", description: "The words pressed into the metal once the hold is complete." },
+      { name: "duration", type: "number", defaultValue: "1.8", description: "Seconds of holding it takes to fill the channel." },
+      { name: "onConfirm", type: "() => void", description: "Called once, when the channel is full." },
+    ],
+    Preview: Previews.PreviewMoltenHold,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { MoltenHold } from "@/components/molten-hold";
+
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[560px] justify-center">
+        <MoltenHold label="Hold to publish" onConfirm={() => console.log("published")} />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Longer hold, your own words",
+        code: `// src/app/page.tsx
+"use client";
+
+import { MoltenHold } from "@/components/molten-hold";
+
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[560px] justify-center">
+        <MoltenHold label="Hold to delete" doneLabel="Deleted" duration={2.6} onConfirm={() => console.log("deleted")} />
+      </div>
+    </section>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "mercury-switch",
+    name: "Mercury Switch",
+    registryCliName: "mercury-switch",
+    description:
+      "Settings toggles whose knob is a bead of mercury, shaded per pixel like a real chrome drop: a bright softbox up top, a dark horizon line, a warm floor, a fine rainbow at the rim. Flip one and the bead does not slide, it reaches: the leading side pulls ahead on a neck that thins as it parts, the rest lets go and catches up, and it lands with a squash and a wobble. Drag it and it stretches after your finger. Switched on, the groove glows and the mercury picks up that colour underneath. Space or Enter flips the focused switch. Until you touch it, it flips them by itself.",
+    categorySlug: "inputs-controls",
+    tags: ["switch", "toggle", "settings", "on off", "control", "chrome", "metal", "mercury", "liquid", "metaball", "webgl", "shader", "sound", "web audio", "autoplay", "motion kit"],
+    premium: true,
+    trendingScore: 189,
+    createdAt: "2026-11-01",
+    animationKinds: ["press", "drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flips the switches by itself until the first touch. Held still under reduced motion." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Loudness of the sounds, 0 to 1." },
+      { name: "onChange", type: "(id: string, on: boolean) => void", description: "Called with the id of the switch (wifi, focus or power) and its new state." },
+    ],
+    Preview: Previews.PreviewMercurySwitch,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { MercurySwitch } from "@/components/mercury-switch";
+
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <MercurySwitch onChange={(id, on) => console.log(id, on)} />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Listening for changes",
+        code: `// src/app/page.tsx
+"use client";
+
+import { useState } from "react";
+import { MercurySwitch } from "@/components/mercury-switch";
+
+export default function Page() {
+  const [state, setState] = useState<Record<string, boolean>>({});
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[460px] flex-col items-center gap-3">
+        <MercurySwitch onChange={(id, on) => setState((s) => ({ ...s, [id]: on }))} />
+        <p className="m-0 text-[13px] text-[#6e6e73]">{JSON.stringify(state)}</p>
+      </div>
+    </section>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "mercury-upload",
+    name: "Mercury Upload",
+    registryCliName: "mercury-upload",
+    description:
+      "A file upload that pours the file in as mercury. A bead swells under the file's chip, stretches on a thinning neck and falls, lengthening as it speeds up, then merges into the pool below with ripples running off both ways. Drop by drop the pool spreads from the middle of the channel, which is the progress. When the last drop is in, the whole pool pulls itself together into a single bead and a check is pressed into it. Real file picker and drag and drop; wire progress to your upload. Until you touch it, it uploads a sample file by itself.",
+    categorySlug: "inputs-controls",
+    tags: ["upload", "file upload", "dropzone", "progress", "file picker", "drag and drop", "chrome", "metal", "mercury", "liquid", "webgl", "shader", "sound", "web audio", "autoplay", "motion kit"],
+    premium: true,
+    trendingScore: 188,
+    createdAt: "2026-11-01",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Uploads a sample file by itself until the first touch. Held still under reduced motion." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Loudness of the sounds, 0 to 1." },
+      { name: "onUpload", type: "(file: File) => void", description: "Called with the file the moment one is chosen or dropped." },
+      { name: "progress", type: "number", description: "Real progress from 0 to 1. Leave it out and the pour runs on its own timing." },
+    ],
+    Preview: Previews.PreviewMercuryUpload,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { MercuryUpload } from "@/components/mercury-upload";
+
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <MercuryUpload onUpload={(file) => console.log(file.name)} />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Driven by real progress",
+        code: `// src/app/page.tsx
+"use client";
+
+import { useState } from "react";
+import { MercuryUpload } from "@/components/mercury-upload";
+
+export default function Page() {
+  const [progress, setProgress] = useState<number | undefined>(undefined);
+  const send = (file: File) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/upload");
+    xhr.upload.onprogress = (e) => e.lengthComputable && setProgress(e.loaded / e.total);
+    const body = new FormData();
+    body.append("file", file);
+    xhr.send(body);
+  };
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <MercuryUpload progress={progress} onUpload={send} />
+      </div>
+    </section>
+  );
 }`,
       },
     ],

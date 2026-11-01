@@ -4357,3 +4357,4 @@ export * from "./signature/nexus-essentials-b";
 export * from "./blocks/nexus-essentials-blocks-a";
 export * from "./blocks/nexus-essentials-blocks-b";
 export * from "./blocks/nexus-essentials-blocks-c";
+export * from "./signature/motion-kit-batch-20";
