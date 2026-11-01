@@ -559,6 +559,7 @@ export function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
   osc.frequency.setValueAtTime(o.freq, t0);
   if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.glide ?? o.decay ?? 0.1));
   const a = o.attack ?? 0.004, d = o.decay ?? 0.12, peak = o.gain ?? 0.3;
+  g.gain.value = 0.0001; // a gain node starts at 1: without this the very first sample of a note can click
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.exponentialRampToValueAtTime(peak, t0 + a);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
@@ -578,6 +579,7 @@ export function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
   if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.attack ?? 0.01) + (o.decay ?? 0.1));
   f.Q.value = o.q ?? 1;
   const a = o.attack ?? 0.003, d = o.decay ?? 0.08, peak = o.gain ?? 0.3;
+  g.gain.value = 0.0001; // a gain node starts at 1: without this the very first sample of a note can click
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.exponentialRampToValueAtTime(peak, t0 + a);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
@@ -1233,6 +1235,7 @@ export function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
   osc.frequency.setValueAtTime(o.freq, t0);
   if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.glide ?? o.decay ?? 0.1));
   const a = o.attack ?? 0.004, d = o.decay ?? 0.12, peak = o.gain ?? 0.3;
+  g.gain.value = 0.0001; // a gain node starts at 1: without this the very first sample of a note can click
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.exponentialRampToValueAtTime(peak, t0 + a);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
@@ -1252,6 +1255,7 @@ export function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
   if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.attack ?? 0.01) + (o.decay ?? 0.1));
   f.Q.value = o.q ?? 1;
   const a = o.attack ?? 0.003, d = o.decay ?? 0.08, peak = o.gain ?? 0.3;
+  g.gain.value = 0.0001; // a gain node starts at 1: without this the very first sample of a note can click
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.exponentialRampToValueAtTime(peak, t0 + a);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
@@ -1985,6 +1989,7 @@ export function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
   osc.frequency.setValueAtTime(o.freq, t0);
   if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.glide ?? o.decay ?? 0.1));
   const a = o.attack ?? 0.004, d = o.decay ?? 0.12, peak = o.gain ?? 0.3;
+  g.gain.value = 0.0001; // a gain node starts at 1: without this the very first sample of a note can click
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.exponentialRampToValueAtTime(peak, t0 + a);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
@@ -2004,6 +2009,7 @@ export function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
   if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.attack ?? 0.01) + (o.decay ?? 0.1));
   f.Q.value = o.q ?? 1;
   const a = o.attack ?? 0.003, d = o.decay ?? 0.08, peak = o.gain ?? 0.3;
+  g.gain.value = 0.0001; // a gain node starts at 1: without this the very first sample of a note can click
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.exponentialRampToValueAtTime(peak, t0 + a);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
