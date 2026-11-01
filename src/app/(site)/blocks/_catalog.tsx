@@ -6,6 +6,7 @@ import { FitPreview } from "@/components/gallery/fit-preview";
 import { TileCell, TileGrid } from "@/components/gallery/gallery-tile";
 import type { GalleryItem } from "@/components/gallery/types";
 import * as React from "react";
+import { GallerySearch, matchesWords, searchWords } from "@/components/gallery/gallery-search";
 import { useUrlParam } from "@/components/gallery/use-url-param";
 import { InfiniteSentinel, useInfiniteCount } from "@/components/gallery/infinite-scroll";
 import { Chip, ChipRail } from "@/components/site/chip-rail";
@@ -84,8 +85,12 @@ function BlockTile({ item, eager }: { item: BlockTileItem; eager: boolean }) {
 export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filters: BlockFilter[] }) {
   const [param, setParam] = useUrlParam("block");
   const active = filters.find((f) => f.slug === param) ?? null;
-  const matches = active ? items.filter((i) => i.block === active.slug) : items;
-  const infinite = useInfiniteCount({ total: matches.length, batch: PAGE_SIZE, storeKey: `blocks|${active?.slug ?? ""}` });
+  const [query, setQuery] = React.useState("");
+  const words = searchWords(query);
+  const matches = items.filter(
+    (i) => (!active || i.block === active.slug) && (!words.length || matchesWords(`${i.name} ${i.blockName} ${i.description} ${i.categoryLabel}`, words)),
+  );
+  const infinite = useInfiniteCount({ total: matches.length, batch: PAGE_SIZE, storeKey: `blocks|${active?.slug ?? ""}|${words.join(" ")}` });
   const shown = matches.slice(0, infinite.count);
 
   // The chosen filter always stays visible, even when it is past the phone's short list.
@@ -95,6 +100,7 @@ export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filt
 
   return (
     <div className="scroll-mt-28">
+      <GallerySearch value={query} onChange={setQuery} label="Search blocks" placeholder="Search sections: hero, pricing, FAQ…" className="mb-4 sm:max-w-[360px]" />
       <ChipRail wrap>
         <Chip active={!active} onClick={() => setParam(null)}>
           All
@@ -122,8 +128,27 @@ export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filt
       </ChipRail>
 
       <p className="mt-3 text-[13px] text-muted-foreground" aria-live="polite">
-        {active ? `${matches.length} sections in ${active.name}` : `${matches.length} sections across ${filters.length} blocks`}
+        {words.length
+          ? `${matches.length} ${matches.length === 1 ? "section" : "sections"} matching "${query.trim()}"${active ? ` in ${active.name}` : ""}`
+          : active
+            ? `${matches.length} sections in ${active.name}`
+            : `${matches.length} sections across ${filters.length} blocks`}
       </p>
+
+      {matches.length === 0 ? (
+        <p className="mt-8 rounded-[28px] bg-card px-6 py-14 text-center text-[16px] text-muted-foreground pg-glass">
+          No sections match that. Try a shorter search
+          {active ? (
+            <>
+              , or{" "}
+              <button type="button" onClick={() => setParam(null)} className="font-medium text-foreground underline underline-offset-4">
+                look in every block
+              </button>
+            </>
+          ) : null}
+          .
+        </p>
+      ) : null}
 
       <TileGrid className="mt-5">
         {shown.map((item, i) => (
