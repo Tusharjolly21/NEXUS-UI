@@ -151,9 +151,14 @@ export function IconTile({
   return (
     <div
       ref={ref}
-      onPointerEnter={() => {
+      onPointerEnter={(e) => {
         setActive(true);
-        hear();
+        // a finger landing can't start audio on iOS; a touch plays on the tap itself (onClickCapture below)
+        if (e.pointerType !== "touch") hear();
+      }}
+      onClickCapture={(e) => {
+        const native = e.nativeEvent as PointerEvent;
+        if (native.pointerType === "touch" || native.pointerType === "") hear();
       }}
       onPointerLeave={() => setActive(false)}
       onFocus={() => {

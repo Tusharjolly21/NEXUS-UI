@@ -89,6 +89,7 @@ export function IconPlayground({ icon, source, locked = false }: { icon: IconMet
     // wearing Mercury, Liquid or Glass, the icon adds that look's own sound on top of its score
     if (isLiquidLook(material)) playMaterialSound(material, "hover", { force: true });
   }, [sound, icon.slug, speed, material]);
+  const touched = React.useRef(false);
   const pingRef = React.useRef(ping);
   React.useEffect(() => {
     pingRef.current = ping;
@@ -229,18 +230,21 @@ export function IconPlayground({ icon, source, locked = false }: { icon: IconMet
         <div
           ref={area}
           onPointerMove={onMove}
-          onPointerEnter={() => {
+          onPointerEnter={(e) => {
             setHover(true);
-            if (trigger === "hover") ping();
+            // a finger landing is not a gesture iOS lets audio start from: touch plays on the tap (onClick) instead
+            if (trigger === "hover" && e.pointerType !== "touch") ping();
           }}
           onPointerLeave={onLeave}
-          onPointerDown={() => {
+          onPointerDown={(e) => {
+            touched.current = e.pointerType === "touch";
             setPressed(true);
             if (trigger === "hold") ping();
           }}
           onPointerUp={() => setPressed(false)}
           onClick={() => {
             if (trigger === "click" && !isLoop) replay();
+            else if (trigger === "hover" && touched.current && !isLoop) replay();
           }}
           className={cn(
             "relative grid h-[300px] touch-pan-y select-none place-items-center overflow-hidden rounded-[20px] transition-colors duration-300",
@@ -371,7 +375,17 @@ export function IconPlayground({ icon, source, locked = false }: { icon: IconMet
               Dark
             </Chip>
             {hasIconSound(icon.slug) ? (
-              <Chip active={sound} onClick={() => setSound((s) => !s)} className="ml-auto px-3.5 py-1.5 text-[13px]" icon={sound ? <Volume2 className="size-3.5" aria-hidden /> : <VolumeX className="size-3.5" aria-hidden />}>
+              <Chip
+                active={sound}
+                onClick={() => {
+                  // switching it on plays the icon right away: the tap that wakes audio on a phone, and proof it works
+                  if (!sound) {
+                    playIconSound(icon.slug, { speed, force: true });
+                    if (isLiquidLook(material)) playMaterialSound(material, "hover", { force: true });
+                  }
+                  setSound(!sound);
+                }}
+                className="ml-auto px-3.5 py-1.5 text-[13px]" icon={sound ? <Volume2 className="size-3.5" aria-hidden /> : <VolumeX className="size-3.5" aria-hidden />}>
                 {sound ? "Sound on" : "Sound off"}
               </Chip>
             ) : null}

@@ -39,7 +39,7 @@ export function UseScene({ slug, accent, scene, label, sub }: { slug: string; ac
     onMouseLeave: () => setHover(false),
     onFocus: () => setHover(true),
     onBlur: () => setHover(false),
-    onClick: () => playIconSound(slug),
+    onClick: () => playIconSound(slug, { force: true }),
   };
   const tint = { backgroundColor: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent } as React.CSSProperties;
 
