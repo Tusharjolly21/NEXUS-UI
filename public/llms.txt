@@ -1,11 +1,11 @@
 # Nexus UI
 > Animated React Components & Next.js Templates
 
-Nexus UI is a premium UI component library offering 100+ animated React components, production-ready Next.js templates, and copy-paste UI blocks built with Tailwind CSS, Framer Motion, and TypeScript. Designed for developers shipping SaaS products, landing pages, and marketing sites faster.
+Nexus UI is a premium UI component library offering 200+ animated React components, 200 animated icons, production-ready Next.js templates, and copy-paste UI blocks built with Tailwind CSS, Framer Motion, and TypeScript. Designed for developers shipping SaaS products, landing pages, and marketing sites faster.
 
 ## Product
 
-- [Components](/components): 100+ animated React components including motion effects, 3D, backgrounds, cards, forms, and navigation
+- [Components](/components): 200+ animated React components including motion effects, 3D, backgrounds, cards, forms, and navigation
 - [Blocks](/blocks): Production-ready UI blocks for Next.js landing pages — hero sections, pricing grids, testimonials, CTAs
 - [Templates](/templates): Full-page Next.js templates for SaaS — animated landing pages, pricing flows, and dashboards
 - [Icons](/icons): 200 animated React icons (75 free, the rest Pro: every icon can be previewed and played, Pro unlocks code and sound), each one self-contained file built with Framer Motion, with its own synthesised sound, a live playground and four real-interface examples of where it fits; copy one file, no dependencies beyond Framer Motion

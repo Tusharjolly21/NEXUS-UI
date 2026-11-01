@@ -13,7 +13,7 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
   title: "Add Sound to Animated Icons in React",
-  description: `How to add a synthesised sound to any of the ${ICONS.length} animated React icons: copy the sound engine and an icon's score, call one function. No audio files, no dependencies.`,
+  description: `Add a synthesised sound to any of the ${ICONS.length} animated React icons: copy the sound engine and an icon's score, then call one function. No audio files.`,
   alternates: { canonical: "/icons/sounds" },
 });
 

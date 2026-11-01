@@ -13,6 +13,7 @@ import { IconPlayground } from "@/components/nx-icons/icon-playground";
 import { UseScene } from "@/components/nx-icons/use-scenes";
 import { RainbowWord } from "@/components/site";
 import { ICONS, getCategory, getIcon } from "@/lib/icons/catalog";
+import { iconMetaDescription } from "@/lib/icons/seo";
 import { ICON_USES } from "@/lib/icons/uses";
 import { FREE_ICON_COUNT, PRO_ICON_COUNT } from "@/lib/icons/count";
 import { createMetadata, siteConfig } from "@/lib/seo";
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!icon) return {};
   return createMetadata({
     title: `Animated ${icon.title} Icon for React`,
-    description: `${icon.description} A free animated ${icon.title.toLowerCase()} icon for React, built with Framer Motion. Copy the code.`,
+    description: iconMetaDescription(icon),
     alternates: { canonical: `/icons/${icon.slug}` },
   });
 }
@@ -128,6 +129,8 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
       description: icon.description,
       programmingLanguage: "TypeScript",
       runtimePlatform: "React",
+      keywords: icon.tags.join(", "),
+      creator: { "@type": "Organization", name: siteConfig.siteName, url: siteConfig.url },
       isAccessibleForFree: !icon.premium,
       url: `${siteConfig.url}/icons/${icon.slug}`,
     },
