@@ -1,9 +1,18 @@
-// @ts-nocheck -- temporary during decompile cleanup
-
 import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { Frame, SectionHeading } from "./ui";
 
-export const CUSTOMERS = [
+type Customer = {
+  company: string;
+  sector: string;
+  where: string;
+  metric: string;
+  text: string;
+  rails: string[];
+  tint: string;
+};
+
+export const CUSTOMERS: Customer[] = [
   {
     company: "Northwind",
     sector: "Software",
@@ -60,59 +69,65 @@ export const CUSTOMERS = [
   },
 ];
 
-export function CustomerCard({ c: e, i: t, copy: n }) {
+type CustomerCardProps = {
+  c: Customer;
+  i: number;
+  copy?: boolean;
+};
+
+export function CustomerCard({ c: customer, i: index, copy }: CustomerCardProps) {
   return (
     <li
-      aria-hidden={n || void 0}
-      className={`${n ? "motion-reduce:hidden " : ""}flex w-[300px] shrink-0 flex-col overflow-hidden rounded-[22px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-surface))] sm:w-[320px]`}
+      aria-hidden={copy || undefined}
+      className={`${copy ? "motion-reduce:hidden " : ""}flex w-[300px] shrink-0 flex-col overflow-hidden rounded-[22px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-surface))] sm:w-[320px]`}
     >
       <div
         className="relative flex h-[112px] items-end justify-between overflow-hidden border-b border-solid border-[rgb(var(--ferry-line)/.06)] p-5"
         style={{
-          background: `radial-gradient(120% 140% at 100% 0%, ${e.tint}33, transparent 60%)`,
+          background: `radial-gradient(120% 140% at 100% 0%, ${customer.tint}33, transparent 60%)`,
         }}
       >
         <div>
           <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-[rgb(var(--ferry-faint))]">
-            {e.sector}
+            {customer.sector}
           </div>
           <div className="mt-1 text-[19px] font-medium tracking-[-0.02em] text-[rgb(var(--ferry-ink))]">
-            {e.company}
+            {customer.company}
           </div>
-          <div className="text-[12px] text-[rgb(var(--ferry-mute))]">{e.where}</div>
+          <div className="text-[12px] text-[rgb(var(--ferry-mute))]">{customer.where}</div>
         </div>
         <span
           className="grid h-11 w-11 place-items-center rounded-[12px] text-[15px] font-medium text-white"
           style={{
-            background: e.tint,
+            background: customer.tint,
           }}
           aria-hidden="true"
         >
-          {e.company
+          {customer.company
             .split(" ")
-            .map((r) => r[0])
+            .map((word) => word[0])
             .join("")
             .slice(0, 2)}
         </span>
       </div>
       <div className="flex flex-1 flex-col p-5">
         <div className="text-[30px] font-medium leading-none tracking-[-0.03em] text-[rgb(var(--ferry-ink))]">
-          {e.metric}
+          {customer.metric}
         </div>
-        <p className="m-0 mt-3 text-[14px] leading-[1.55] text-[rgb(var(--ferry-mute))]">{e.text}</p>
+        <p className="m-0 mt-3 text-[14px] leading-[1.55] text-[rgb(var(--ferry-mute))]">{customer.text}</p>
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-solid border-[rgb(var(--ferry-line)/.06)] pt-4">
           <span className="flex flex-wrap gap-1">
-            {e.rails.map((r) => (
+            {customer.rails.map((rail) => (
               <span
-                key={r}
+                key={rail}
                 className="rounded-full border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-raised))] px-2 py-0.5 text-[11px] text-[rgb(var(--ferry-mute))]"
               >
-                {r}
+                {rail}
               </span>
             ))}
           </span>
           <span className="ferry-tnum text-[11px] text-[rgb(var(--ferry-faint))]">
-            {String(t + 1).padStart(2, "0")}
+            {String(index + 1).padStart(2, "0")}
           </span>
         </div>
       </div>
@@ -123,7 +138,7 @@ export function CustomerCard({ c: e, i: t, copy: n }) {
 export function Customers() {
   return (
     <section id="proof" className="scroll-mt-24 px-3 sm:px-6">
-      <Frame glow={!0} className="mx-auto max-w-[1160px]">
+      <Frame glow={true} className="mx-auto max-w-[1160px]">
         <div className="relative rounded-[22px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-surface)/.6)] px-2 pb-8 pt-14 sm:pt-16">
           <SectionHeading
             label="In production"
@@ -138,16 +153,18 @@ export function Customers() {
           <div className="relative mt-12 overflow-x-auto [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)] [scrollbar-width:none] motion-safe:overflow-hidden">
             <ul
               className="ferry-marquee m-0 flex w-max list-none gap-4 p-0 px-2"
-              style={{
-                "--marquee-duration": "70s",
-              }}
+              style={
+                {
+                  "--marquee-duration": "70s",
+                } as CSSProperties
+              }
             >
-              {[...CUSTOMERS, ...CUSTOMERS].map((e, t) => (
+              {[...CUSTOMERS, ...CUSTOMERS].map((customer, position) => (
                 <CustomerCard
-                  key={`${e.company}-${t}`}
-                  c={e}
-                  i={t % CUSTOMERS.length}
-                  copy={t >= CUSTOMERS.length}
+                  key={`${customer.company}-${position}`}
+                  c={customer}
+                  i={position % CUSTOMERS.length}
+                  copy={position >= CUSTOMERS.length}
                 />
               ))}
             </ul>

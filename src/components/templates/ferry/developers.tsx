@@ -1,14 +1,16 @@
-// @ts-nocheck -- temporary during decompile cleanup
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { feeFor, getCurrency, rateBetween } from "./data";
+import type { IconName } from "./icons";
 import { ButtonLink, Frame, Icon, Panel, PulseGrid, SectionHeading } from "./ui";
 
-export const CODE_TABS = ["cURL", "Node", "Python"];
+export const CODE_TABS = ["cURL", "Node", "Python"] as const;
 
-export const CODE_SAMPLES = {
+type CodeTab = (typeof CODE_TABS)[number];
+
+export const CODE_SAMPLES: Record<CodeTab, string> = {
   cURL: `curl https://api.ferry.example/v1/payouts \\
   -H "Authorization: Bearer $FERRY_KEY" \\
   -H "Idempotency-Key: 7f9c2e1a" \\
@@ -52,94 +54,114 @@ export const SYNTAX_COLORS = {
 
 export const KEYWORDS = new Set(["import", "from", "const", "await", "new", "curl", "true", "false", "null"]);
 
-export function tokenize(e, t = !1) {
-  const n =
+/** One highlighted run of source text. */
+type Token = {
+  /** The text of the run. */
+  t: string;
+  /** The CSS colour the run is drawn in. */
+  c: string;
+};
+
+export function tokenize(source: string, json = false): Token[] {
+  const pattern =
       /("(?:[^"\\]|\\.)*")(\s*:)?|(-[A-Za-z]\b)|(\$[A-Z_]+)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_][\w]*)(?=\()|([A-Za-z_][\w]*)|(\\)/g,
-    r = [];
-  let i = 0;
-  for (let s; (s = n.exec(e));)
-    (s.index > i &&
-      r.push({
-        t: e.slice(i, s.index),
+    tokens: Token[] = [];
+  let lastIndex = 0;
+  for (let match: RegExpExecArray | null; (match = pattern.exec(source));) {
+    if (match.index > lastIndex) {
+      tokens.push({
+        t: source.slice(lastIndex, match.index),
         c: SYNTAX_COLORS.plain,
-      }),
-      s[1]
-        ? (r.push({
-            t: s[1],
-            c: t && s[2] ? SYNTAX_COLORS.key : SYNTAX_COLORS.str,
-          }),
-          s[2] &&
-            r.push({
-              t: s[2],
-              c: SYNTAX_COLORS.plain,
-            }))
-        : s[3]
-          ? r.push({
-              t: s[3],
-              c: SYNTAX_COLORS.flag,
-            })
-          : s[4]
-            ? r.push({
-                t: s[4],
-                c: SYNTAX_COLORS.env,
-              })
-            : s[5]
-              ? r.push({
-                  t: s[5],
-                  c: SYNTAX_COLORS.num,
-                })
-              : s[6]
-                ? r.push({
-                    t: s[6],
-                    c: SYNTAX_COLORS.fn,
-                  })
-                : s[7]
-                  ? r.push({
-                      t: s[7],
-                      c: KEYWORDS.has(s[7]) ? SYNTAX_COLORS.kw : SYNTAX_COLORS.plain,
-                    })
-                  : r.push({
-                      t: s[0],
-                      c: SYNTAX_COLORS.dim,
-                    }),
-      (i = n.lastIndex));
-  return (
-    i < e.length &&
-      r.push({
-        t: e.slice(i),
-        c: SYNTAX_COLORS.plain,
-      }),
-    r
-  );
+      });
+    }
+    if (match[1]) {
+      tokens.push({
+        t: match[1],
+        c: json && match[2] ? SYNTAX_COLORS.key : SYNTAX_COLORS.str,
+      });
+      if (match[2]) {
+        tokens.push({
+          t: match[2],
+          c: SYNTAX_COLORS.plain,
+        });
+      }
+    } else if (match[3]) {
+      tokens.push({
+        t: match[3],
+        c: SYNTAX_COLORS.flag,
+      });
+    } else if (match[4]) {
+      tokens.push({
+        t: match[4],
+        c: SYNTAX_COLORS.env,
+      });
+    } else if (match[5]) {
+      tokens.push({
+        t: match[5],
+        c: SYNTAX_COLORS.num,
+      });
+    } else if (match[6]) {
+      tokens.push({
+        t: match[6],
+        c: SYNTAX_COLORS.fn,
+      });
+    } else if (match[7]) {
+      tokens.push({
+        t: match[7],
+        c: KEYWORDS.has(match[7]) ? SYNTAX_COLORS.kw : SYNTAX_COLORS.plain,
+      });
+    } else {
+      tokens.push({
+        t: match[0],
+        c: SYNTAX_COLORS.dim,
+      });
+    }
+    lastIndex = pattern.lastIndex;
+  }
+  if (lastIndex < source.length) {
+    tokens.push({
+      t: source.slice(lastIndex),
+      c: SYNTAX_COLORS.plain,
+    });
+  }
+  return tokens;
 }
 
-export function Highlighted({ src: e, json: t, upto: n }) {
-  const r = useMemo(() => tokenize(e, t), [e, t]);
-  let i = n ?? 1 / 0;
+type HighlightedProps = {
+  src: string;
+  /** Colour object keys differently from string values. */
+  json?: boolean;
+  /** Only draw this many leading characters (typewriter effect). */
+  upto?: number;
+};
+
+export function Highlighted({ src, json, upto }: HighlightedProps) {
+  const tokens = useMemo(() => tokenize(src, json), [src, json]);
+  let remaining = upto ?? Infinity;
   return (
     <>
-      {r.map((s, o) => {
-        if (i <= 0) return null;
-        const l = s.t.length > i ? s.t.slice(0, i) : s.t;
+      {tokens.map((token, index) => {
+        if (remaining <= 0) return null;
+        const text = token.t.length > remaining ? token.t.slice(0, remaining) : token.t;
+        remaining -= token.t.length;
         return (
-          (i -= s.t.length),
-          (
-            <span
-              key={o}
-              style={{
-                color: s.c,
-              }}
-            >
-              {l}
-            </span>
-          )
+          <span
+            key={index}
+            style={{
+              color: token.c,
+            }}
+          >
+            {text}
+          </span>
         );
       })}
     </>
   );
 }
 
-export const DEV_FEATURES = [
+type DevFeature = readonly [icon: IconName, title: string, body: string];
+
+export const DEV_FEATURES: readonly DevFeature[] = [
   [
     "bolt_fill",
     "Webhooks for every status change",
@@ -153,71 +175,80 @@ export const DEV_FEATURES = [
   ["cube_box_fill", "A sandbox with test money", "Every account, rate and rail, with nothing real at stake."],
 ];
 
+type RunState = "idle" | "running" | "done";
+
 export function Developers() {
-  const e = useReducedMotion(),
-    [t, n] = useState("Node"),
-    [r, i] = useState(!1),
-    [s, o] = useState("idle"),
-    [l, c] = useState(0),
-    [u, d] = useState(!1),
-    f = useRef([]),
-    h = useMemo(() => {
-      const v = getCurrency("GBP"),
-        p = getCurrency("INR"),
-        m = feeFor(12400),
-        g = new Date(Date.now() + p.minutes * 6e4);
-      return (
-        g.setSeconds(0, 0),
-        JSON.stringify(
-          {
-            id: "po_3NcV7qK2",
-            status: "in_transit",
-            amount: 12400,
-            currency: "GBP",
-            rate: +rateBetween(v, p).toFixed(4),
-            fee: +m.toFixed(2),
-            target_amount: +((12400 - m) * rateBetween(v, p)).toFixed(2),
-            target_currency: "INR",
-            rail: p.rail,
-            estimated_arrival: g.toISOString().replace(".000", ""),
-          },
-          null,
-          2,
-        )
+  const reducedMotion = useReducedMotion(),
+    [tab, setTab] = useState<CodeTab>("Node"),
+    [copied, setCopied] = useState(false),
+    [runState, setRunState] = useState<RunState>("idle"),
+    [typedChars, setTypedChars] = useState(0),
+    [showWebhook, setShowWebhook] = useState(false),
+    timers = useRef<number[]>([]),
+    responseJson = useMemo(() => {
+      const gbp = getCurrency("GBP"),
+        inr = getCurrency("INR"),
+        fee = feeFor(12400),
+        arrival = new Date(Date.now() + inr.minutes * 6e4);
+      arrival.setSeconds(0, 0);
+      return JSON.stringify(
+        {
+          id: "po_3NcV7qK2",
+          status: "in_transit",
+          amount: 12400,
+          currency: "GBP",
+          rate: +rateBetween(gbp, inr).toFixed(4),
+          fee: +fee.toFixed(2),
+          target_amount: +((12400 - fee) * rateBetween(gbp, inr)).toFixed(2),
+          target_currency: "INR",
+          rail: inr.rail,
+          estimated_arrival: arrival.toISOString().replace(".000", ""),
+        },
+        null,
+        2,
       );
     }, []),
-    x = () => {
-      (f.current.forEach((v) => window.clearTimeout(v)), (f.current = []));
+    clearTimers = () => {
+      timers.current.forEach((timerId) => window.clearTimeout(timerId));
+      timers.current = [];
     };
-  useEffect(() => x, []);
-  const w = () => {
-      (x(),
-        o("running"),
-        c(0),
-        d(!1),
-        f.current.push(
-          window.setTimeout(() => {
-            if ((o("done"), e)) {
-              (c(h.length), d(!0));
-              return;
-            }
-            const v = performance.now(),
-              p = () => {
-                const m = Math.min(h.length, Math.round(((performance.now() - v) / 900) * h.length));
-                (c(m),
-                  m < h.length
-                    ? f.current.push(window.setTimeout(p, 16))
-                    : f.current.push(window.setTimeout(() => d(!0), 900)));
-              };
-            p();
-          }, 420),
-        ));
+  useEffect(() => clearTimers, []);
+  const runRequest = () => {
+      clearTimers();
+      setRunState("running");
+      setTypedChars(0);
+      setShowWebhook(false);
+      timers.current.push(
+        window.setTimeout(() => {
+          setRunState("done");
+          if (reducedMotion) {
+            setTypedChars(responseJson.length);
+            setShowWebhook(true);
+            return;
+          }
+          const startedAt = performance.now(),
+            tick = () => {
+              const chars = Math.min(
+                responseJson.length,
+                Math.round(((performance.now() - startedAt) / 900) * responseJson.length),
+              );
+              setTypedChars(chars);
+              if (chars < responseJson.length) {
+                timers.current.push(window.setTimeout(tick, 16));
+              } else {
+                timers.current.push(window.setTimeout(() => setShowWebhook(true), 900));
+              }
+            };
+          tick();
+        }, 420),
+      );
     },
-    y = async () => {
+    copyCode = async () => {
       try {
-        await navigator.clipboard.writeText(CODE_SAMPLES[t]);
+        await navigator.clipboard.writeText(CODE_SAMPLES[tab]);
       } catch {}
-      (i(!0), window.setTimeout(() => i(!1), 1600));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
     };
   return (
     <section id="developers" className="scroll-mt-24 px-3 py-24 sm:px-6 sm:py-32">
@@ -239,20 +270,20 @@ export function Developers() {
       </div>
       <Frame className="mx-auto mt-12 max-w-[1160px]">
         <div className="grid grid-cols-1 gap-2 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-          <Panel edge={!0} className="flex flex-col p-4 sm:p-6">
+          <Panel edge={true} className="flex flex-col p-4 sm:p-6">
             <ul className="m-0 grid list-none gap-2 p-0">
-              {DEV_FEATURES.map(([v, p, m]) => (
+              {DEV_FEATURES.map(([icon, title, body]) => (
                 <li
-                  key={p}
+                  key={title}
                   className="flex gap-3 rounded-[16px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-surface))] p-4"
                 >
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] border border-solid border-[rgb(var(--ferry-accent)/.25)] bg-[rgb(var(--ferry-accent)/.1)] text-[rgb(var(--ferry-accent-ink))]">
-                    <Icon name={v} size={15} />
+                    <Icon name={icon} size={15} />
                   </span>
                   <span>
-                    <span className="block text-[15px] font-medium text-[rgb(var(--ferry-ink))]">{p}</span>
+                    <span className="block text-[15px] font-medium text-[rgb(var(--ferry-ink))]">{title}</span>
                     <span className="mt-0.5 block text-[13px] leading-[1.5] text-[rgb(var(--ferry-mute))]">
-                      {m}
+                      {body}
                     </span>
                   </span>
                 </li>
@@ -265,20 +296,20 @@ export function Developers() {
               </span>
             </div>
           </Panel>
-          <Panel glow={!0} className="p-2">
+          <Panel glow={true} className="p-2">
             <div className="relative overflow-hidden rounded-[16px] border border-solid border-white/10 bg-[#0b0b0f]">
               <div className="flex items-center justify-between gap-3 border-b border-solid border-white/[.08] px-3 py-2.5">
                 <div role="tablist" aria-label="Language" className="flex gap-1">
-                  {CODE_TABS.map((v) => (
+                  {CODE_TABS.map((codeTab) => (
                     <button
-                      key={v}
+                      key={codeTab}
                       type="button"
                       role="tab"
-                      aria-selected={v === t}
-                      onClick={() => n(v)}
-                      className={`relative h-8 rounded-[8px] px-3.5 text-[13px] font-medium transition-colors ${v === t ? "text-white" : "text-white/55 hover:text-white/85"}`}
+                      aria-selected={codeTab === tab}
+                      onClick={() => setTab(codeTab)}
+                      className={`relative h-8 rounded-[8px] px-3.5 text-[13px] font-medium transition-colors ${codeTab === tab ? "text-white" : "text-white/55 hover:text-white/85"}`}
                     >
-                      {v === t && (
+                      {codeTab === tab && (
                         <motion.span
                           layoutId="lang-pill"
                           className="absolute inset-0 rounded-[8px] border border-solid border-white/10 bg-white/[.08]"
@@ -289,19 +320,19 @@ export function Developers() {
                           }}
                         />
                       )}
-                      <span className="relative">{v}</span>
+                      <span className="relative">{codeTab}</span>
                     </button>
                   ))}
                 </div>
                 <button
                   type="button"
-                  onClick={y}
+                  onClick={copyCode}
                   className="flex h-8 items-center gap-1.5 rounded-[8px] px-3 text-[13px] text-white/70 transition-colors hover:bg-white/[.08] hover:text-white"
                   aria-live="polite"
                 >
-                  <AnimatePresence mode="popLayout" initial={!1}>
+                  <AnimatePresence mode="popLayout" initial={false}>
                     <motion.span
-                      key={r ? "y" : "n"}
+                      key={copied ? "y" : "n"}
                       initial={{
                         opacity: 0,
                         scale: 0.6,
@@ -321,16 +352,16 @@ export function Developers() {
                       }}
                       className="flex"
                     >
-                      <Icon name={r ? "checkmark" : "doc_on_doc"} size={13} />
+                      <Icon name={copied ? "checkmark" : "doc_on_doc"} size={13} />
                     </motion.span>
                   </AnimatePresence>
-                  {r ? "Copied" : "Copy"}
+                  {copied ? "Copied" : "Copy"}
                 </button>
               </div>
               <div className="relative">
-                <AnimatePresence mode="popLayout" initial={!1}>
+                <AnimatePresence mode="popLayout" initial={false}>
                   <motion.pre
-                    key={t}
+                    key={tab}
                     initial={{
                       opacity: 0,
                       filter: "blur(4px)",
@@ -349,15 +380,15 @@ export function Developers() {
                     className="m-0 overflow-x-auto px-5 py-5 font-mono text-[13px] leading-[1.7]"
                   >
                     <code>
-                      <Highlighted src={CODE_SAMPLES[t]} />
+                      <Highlighted src={CODE_SAMPLES[tab]} />
                     </code>
                   </motion.pre>
                 </AnimatePresence>
               </div>
               <div className="flex items-center justify-between gap-3 border-t border-solid border-white/[.08] px-4 py-3">
                 <div className="flex items-center gap-2 text-[13px]" aria-live="polite">
-                  <AnimatePresence mode="popLayout" initial={!1}>
-                    {s === "idle" && (
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    {runState === "idle" && (
                       <motion.span
                         key={"i"}
                         initial={{
@@ -374,7 +405,7 @@ export function Developers() {
                         Sandbox, no real money
                       </motion.span>
                     )}
-                    {s === "running" && (
+                    {runState === "running" && (
                       <motion.span
                         key={"r"}
                         initial={{
@@ -392,7 +423,7 @@ export function Developers() {
                         Sending request
                       </motion.span>
                     )}
-                    {s === "done" && (
+                    {runState === "done" && (
                       <motion.span
                         key={"d"}
                         initial={{
@@ -418,16 +449,16 @@ export function Developers() {
                 </div>
                 <button
                   type="button"
-                  onClick={w}
-                  disabled={s === "running"}
+                  onClick={runRequest}
+                  disabled={runState === "running"}
                   className="flex h-9 items-center gap-2 rounded-[9px] bg-[rgb(var(--ferry-accent))] px-3.5 text-[13px] font-medium text-white transition-[filter,opacity] hover:brightness-110 disabled:opacity-60"
                 >
-                  <Icon name={s === "done" ? "arrow_clockwise" : "play_fill"} size={11} />
-                  {s === "done" ? "Run again" : "Run request"}
+                  <Icon name={runState === "done" ? "arrow_clockwise" : "play_fill"} size={11} />
+                  {runState === "done" ? "Run again" : "Run request"}
                 </button>
               </div>
-              <AnimatePresence initial={!1}>
-                {s === "done" && (
+              <AnimatePresence initial={false}>
+                {runState === "done" && (
                   <motion.div
                     initial={{
                       height: 0,
@@ -447,14 +478,14 @@ export function Developers() {
                   >
                     <pre className="m-0 overflow-x-auto px-5 py-4 font-mono text-[13px] leading-[1.7]">
                       <code>
-                        <Highlighted src={h} json={!0} upto={l} />
-                        {l < h.length && (
+                        <Highlighted src={responseJson} json={true} upto={typedChars} />
+                        {typedChars < responseJson.length && (
                           <span className="ml-px inline-block h-[1.1em] w-[7px] translate-y-[3px] bg-white/70" />
                         )}
                       </code>
                     </pre>
                     <AnimatePresence>
-                      {u && (
+                      {showWebhook && (
                         <motion.div
                           initial={{
                             opacity: 0,

@@ -1,72 +1,75 @@
-// @ts-nocheck -- temporary during decompile cleanup
 "use client";
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useReducedMotion, useInView } from "framer-motion";
 import { getCurrency } from "./data";
 import { Globe } from "./globe";
+import type { IconName } from "./icons";
 import { Frame, Icon, Panel, RollingNumber, SectionHeading } from "./ui";
 
 export const LOCK_SPRING = {
   type: "spring",
   stiffness: 260,
   damping: 26,
-};
+} as const;
 
 export const LOCK_SECONDS = 24 * 3600;
 
 export const DIAL_TICKS = 30;
 
 export function RateLock() {
-  const e = useRef(null),
-    t = useInView(e, {
-      once: !0,
+  const rootRef = useRef<HTMLDivElement>(null),
+    hasEntered = useInView(rootRef, {
+      once: true,
       margin: "-15% 0px",
     }),
-    n = useInView(e),
-    [r, i] = useState(17 * 3600 + 42 * 60 + 9);
+    isInView = useInView(rootRef),
+    [secondsLeft, setSecondsLeft] = useState(17 * 3600 + 42 * 60 + 9);
   useEffect(() => {
-    if (!n) return;
-    const u = window.setInterval(() => i((d) => (d > 1 ? d - 1 : LOCK_SECONDS)), 1e3);
-    return () => window.clearInterval(u);
-  }, [n]);
-  const s = Math.ceil((r / LOCK_SECONDS) * DIAL_TICKS),
-    o = String(Math.floor(r / 3600)).padStart(2, "0"),
-    l = String(Math.floor((r % 3600) / 60)).padStart(2, "0"),
-    c = String(r % 60).padStart(2, "0");
+    if (!isInView) return;
+    const intervalId = window.setInterval(
+      () => setSecondsLeft((seconds) => (seconds > 1 ? seconds - 1 : LOCK_SECONDS)),
+      1e3,
+    );
+    return () => window.clearInterval(intervalId);
+  }, [isInView]);
+  const litTicks = Math.ceil((secondsLeft / LOCK_SECONDS) * DIAL_TICKS),
+    hours = String(Math.floor(secondsLeft / 3600)).padStart(2, "0"),
+    minutes = String(Math.floor((secondsLeft % 3600) / 60)).padStart(2, "0"),
+    seconds = String(secondsLeft % 60).padStart(2, "0");
   return (
     <div
-      ref={e}
+      ref={rootRef}
       className="relative mx-auto mt-4 h-[180px] w-[180px]"
       role="img"
-      aria-label={`Rate held for another ${o} hours ${l} minutes`}
+      aria-label={`Rate held for another ${hours} hours ${minutes} minutes`}
     >
       <svg viewBox="0 0 180 180" className="absolute inset-0 h-full w-full">
         {Array.from(
           {
             length: DIAL_TICKS,
           },
-          (u, d) => {
-            const f = ((-225 + (d * 270) / (DIAL_TICKS - 1)) * Math.PI) / 180,
-              h = d < s;
+          (_, tickIndex) => {
+            const angle = ((-225 + (tickIndex * 270) / (DIAL_TICKS - 1)) * Math.PI) / 180,
+              isLit = tickIndex < litTicks;
             return (
               <motion.line
-                key={d}
-                x1={(90 + Math.cos(f) * 56).toFixed(2)}
-                y1={(90 + Math.sin(f) * 56).toFixed(2)}
-                x2={(90 + Math.cos(f) * 76).toFixed(2)}
-                y2={(90 + Math.sin(f) * 76).toFixed(2)}
+                key={tickIndex}
+                x1={(90 + Math.cos(angle) * 56).toFixed(2)}
+                y1={(90 + Math.sin(angle) * 56).toFixed(2)}
+                x2={(90 + Math.cos(angle) * 76).toFixed(2)}
+                y2={(90 + Math.sin(angle) * 76).toFixed(2)}
                 strokeWidth={6}
                 strokeLinecap="round"
-                stroke={h ? "rgb(var(--ferry-accent))" : "rgb(var(--ferry-line) / 0.1)"}
+                stroke={isLit ? "rgb(var(--ferry-accent))" : "rgb(var(--ferry-line) / 0.1)"}
                 initial={{
                   opacity: 0,
                 }}
                 animate={{
-                  opacity: t ? (h ? 0.45 + 0.55 * (d / DIAL_TICKS) : 1) : 0,
+                  opacity: hasEntered ? (isLit ? 0.45 + 0.55 * (tickIndex / DIAL_TICKS) : 1) : 0,
                 }}
                 transition={{
-                  delay: t ? d * 0.03 : 0,
+                  delay: hasEntered ? tickIndex * 0.03 : 0,
                   duration: 0.3,
                 }}
               />
@@ -77,7 +80,7 @@ export function RateLock() {
       <div className="absolute inset-0 grid place-items-center text-center">
         <div>
           <div className="ferry-tnum text-[20px] font-medium tracking-[-0.02em] text-[rgb(var(--ferry-ink))]">
-            {o}:{l}:{c}
+            {hours}:{minutes}:{seconds}
           </div>
           <div className="mt-0.5 text-[11px] text-[rgb(var(--ferry-faint))]">left on this rate</div>
         </div>
@@ -86,7 +89,13 @@ export function RateLock() {
   );
 }
 
-export const SPEED_SAMPLES = [
+type SpeedSample = {
+  where: string;
+  ferry: number;
+  swift: number;
+};
+
+export const SPEED_SAMPLES: SpeedSample[] = [
   {
     where: "US",
     ferry: 98,
@@ -115,15 +124,15 @@ export const SPEED_SAMPLES = [
 ];
 
 export function SpeedCompare() {
-  const e = useRef(null),
-    t = useInView(e, {
-      once: !0,
+  const rootRef = useRef<HTMLDivElement>(null),
+    hasEntered = useInView(rootRef, {
+      once: true,
       margin: "-15% 0px",
     }),
-    [n, r] = useState(null);
+    [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   return (
     <div
-      ref={e}
+      ref={rootRef}
       className="relative mt-4 flex flex-1 flex-col rounded-[16px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-surface))] p-4"
     >
       <div className="flex items-start justify-between gap-4">
@@ -141,26 +150,26 @@ export function SpeedCompare() {
         </div>
       </div>
       <div className="relative mt-4 min-h-[150px] flex-1">
-        {[0, 1, 2, 3].map((i) => (
+        {[0, 1, 2, 3].map((line) => (
           <span
-            key={i}
+            key={line}
             aria-hidden="true"
             className="absolute inset-x-0 h-px bg-[rgb(var(--ferry-line)/.06)]"
             style={{
-              top: `${(i / 4) * 100}%`,
+              top: `${(line / 4) * 100}%`,
             }}
           />
         ))}
         <ul className="relative m-0 flex h-full list-none items-end justify-around p-0">
-          {SPEED_SAMPLES.map((i, s) => (
+          {SPEED_SAMPLES.map((sample, index) => (
             <li
-              key={i.where}
+              key={sample.where}
               className="relative flex h-full flex-col items-center justify-end"
-              onPointerEnter={() => r(s)}
-              onPointerLeave={() => r(null)}
+              onPointerEnter={() => setHoveredIndex(index)}
+              onPointerLeave={() => setHoveredIndex(null)}
             >
               <AnimatePresence>
-                {n === s && (
+                {hoveredIndex === index && (
                   <motion.span
                     initial={{
                       opacity: 0,
@@ -183,15 +192,15 @@ export function SpeedCompare() {
                       left: "50%",
                     }}
                   >
-                    {i.ferry}
+                    {sample.ferry}
                     {"% "}
-                    <span className="text-[rgb(var(--ferry-faint))]">vs</span> {i.swift}%
+                    <span className="text-[rgb(var(--ferry-faint))]">vs</span> {sample.swift}%
                   </motion.span>
                 )}
               </AnimatePresence>
               <div
                 className="flex h-full items-end gap-1.5"
-                aria-label={`${i.where}: ${i.ferry}% with Ferry, ${i.swift}% by SWIFT`}
+                aria-label={`${sample.where}: ${sample.ferry}% with Ferry, ${sample.swift}% by SWIFT`}
                 role="img"
               >
                 <motion.span
@@ -200,14 +209,14 @@ export function SpeedCompare() {
                     height: 0,
                   }}
                   animate={{
-                    height: t ? `${i.ferry * 0.92}%` : 0,
+                    height: hasEntered ? `${sample.ferry * 0.92}%` : 0,
                   }}
                   transition={{
                     ...LOCK_SPRING,
-                    delay: s * 0.07,
+                    delay: index * 0.07,
                   }}
                   style={{
-                    opacity: n === null || n === s ? 1 : 0.45,
+                    opacity: hoveredIndex === null || hoveredIndex === index ? 1 : 0.45,
                   }}
                 />
                 <motion.span
@@ -216,11 +225,11 @@ export function SpeedCompare() {
                     height: 0,
                   }}
                   animate={{
-                    height: t ? `${Math.max(4, i.swift * 0.92)}%` : 0,
+                    height: hasEntered ? `${Math.max(4, sample.swift * 0.92)}%` : 0,
                   }}
                   transition={{
                     ...LOCK_SPRING,
-                    delay: 0.2 + s * 0.07,
+                    delay: 0.2 + index * 0.07,
                   }}
                 />
               </div>
@@ -229,9 +238,9 @@ export function SpeedCompare() {
         </ul>
       </div>
       <ul className="m-0 mt-2 flex list-none justify-around p-0 text-[11px] text-[rgb(var(--ferry-mute))]">
-        {SPEED_SAMPLES.map((i) => (
-          <li key={i.where} className="w-[50px] text-center">
-            {i.where}
+        {SPEED_SAMPLES.map((sample) => (
+          <li key={sample.where} className="w-[50px] text-center">
+            {sample.where}
           </li>
         ))}
       </ul>
@@ -250,27 +259,35 @@ export function SpeedCompare() {
 }
 
 export function ReconciledTile() {
-  const e = useRef(null),
-    t = useInView(e),
-    [n, r] = useState(842930);
+  const rootRef = useRef<HTMLDivElement>(null),
+    isInView = useInView(rootRef),
+    [total, setTotal] = useState(842930);
+  useEffect(() => {
+    if (!isInView) return;
+    const intervalId = window.setInterval(
+      () => setTotal((current) => current + Math.round(180 + Math.random() * 1900)),
+      2600,
+    );
+    return () => window.clearInterval(intervalId);
+  }, [isInView]);
   return (
-    useEffect(() => {
-      if (!t) return;
-      const i = window.setInterval(() => r((s) => s + Math.round(180 + Math.random() * 1900)), 2600);
-      return () => window.clearInterval(i);
-    }, [t]),
-    (
-      <div ref={e} className="mt-auto border-t border-solid border-[rgb(var(--ferry-line)/.08)] pt-4">
-        <div className="text-[34px] font-medium leading-none tracking-[-0.03em] text-[rgb(var(--ferry-ink))]">
-          $<RollingNumber text={n.toLocaleString("en-US")} />
-        </div>
-        <div className="mt-2 text-[12px] text-[rgb(var(--ferry-faint))]">reconciled today</div>
+    <div ref={rootRef} className="mt-auto border-t border-solid border-[rgb(var(--ferry-line)/.08)] pt-4">
+      <div className="text-[34px] font-medium leading-none tracking-[-0.03em] text-[rgb(var(--ferry-ink))]">
+        $<RollingNumber text={total.toLocaleString("en-US")} />
       </div>
-    )
+      <div className="mt-2 text-[12px] text-[rgb(var(--ferry-faint))]">reconciled today</div>
+    </div>
   );
 }
 
-export const CUTOFFS = [
+type Cutoff = {
+  where: string;
+  local: string;
+  utc: number;
+  queued: string;
+};
+
+export const CUTOFFS: Cutoff[] = [
   {
     where: "US",
     local: "14:00 ET",
@@ -297,13 +314,15 @@ export const CUTOFFS = [
   },
 ];
 
-export const timeLeft = (e, t) => {
-  const n = t.getUTCHours() * 60 + t.getUTCMinutes(),
-    r = (e - n + 1440) % 1440 || 1440;
-  return r >= 60 ? `${Math.floor(r / 60)}h ${String(r % 60).padStart(2, "0")}m` : `${r}m`;
+export const timeLeft = (cutoffUtcMinutes: number, now: Date): string => {
+  const nowUtcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes(),
+    minutesLeft = (cutoffUtcMinutes - nowUtcMinutes + 1440) % 1440 || 1440;
+  return minutesLeft >= 60
+    ? `${Math.floor(minutesLeft / 60)}h ${String(minutesLeft % 60).padStart(2, "0")}m`
+    : `${minutesLeft}m`;
 };
 
-export const LOCK_PAIRS = [
+export const LOCK_PAIRS: readonly (readonly [string, string])[] = [
   ["GBP", "INR"],
   ["EUR", "BRL"],
   ["SGD", "AUD"],
@@ -312,34 +331,35 @@ export const LOCK_PAIRS = [
 ];
 
 export function RailGlobe() {
-  const e = useRef(null),
-    t = useInView(e),
-    n = useReducedMotion(),
-    [r, i] = useState(0),
-    [s, o] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null),
+    isInView = useInView(rootRef),
+    reducedMotion = useReducedMotion(),
+    [pairIndex, setPairIndex] = useState(0),
+    [launch, setLaunch] = useState(0);
   useEffect(() => {
-    if (!t || n) return;
-    const u = window.setTimeout(() => o((f) => f + 1), 1300),
-      d = window.setTimeout(() => i((f) => (f + 1) % LOCK_PAIRS.length), 4800);
+    if (!isInView || reducedMotion) return;
+    const launchTimer = window.setTimeout(() => setLaunch((count) => count + 1), 1300),
+      nextPairTimer = window.setTimeout(() => setPairIndex((index) => (index + 1) % LOCK_PAIRS.length), 4800);
     return () => {
-      (window.clearTimeout(u), window.clearTimeout(d));
+      window.clearTimeout(launchTimer);
+      window.clearTimeout(nextPairTimer);
     };
-  }, [r, t, n]);
-  const [l, c] = LOCK_PAIRS[r];
+  }, [pairIndex, isInView, reducedMotion]);
+  const [fromCode, toCode] = LOCK_PAIRS[pairIndex];
   return (
-    <div ref={e} className="pointer-events-auto absolute -bottom-[170px] -right-[190px] h-[540px] w-[540px]">
-      <Globe from={getCurrency(l)} to={getCurrency(c)} launch={s} tone="accent" frameX={-0.3} frameY={0.42} />
+    <div ref={rootRef} className="pointer-events-auto absolute -bottom-[170px] -right-[190px] h-[540px] w-[540px]">
+      <Globe from={getCurrency(fromCode)} to={getCurrency(toCode)} launch={launch} tone="accent" frameX={-0.3} frameY={0.42} />
     </div>
   );
 }
 
 export function CutoffMap() {
-  const [e, t] = useState(() => new Date());
+  const [now, setNow] = useState(() => new Date());
   useEffect(() => {
-    const r = window.setInterval(() => t(new Date()), 2e4);
-    return () => window.clearInterval(r);
+    const intervalId = window.setInterval(() => setNow(new Date()), 2e4);
+    return () => window.clearInterval(intervalId);
   }, []);
-  const n = [
+  const highlights: readonly (readonly [IconName, string])[] = [
     ["checkmark_seal_fill", "Same-day review of large payouts"],
     ["map_fill", "Cut-off map for every region"],
     ["tray_full_fill", "A release queue finance can see"],
@@ -350,41 +370,41 @@ export function CutoffMap() {
       <table className="relative mt-5 w-full border-collapse overflow-hidden rounded-[12px] text-[11px] sm:text-[12px]">
         <caption className="sr-only">Same-day cut-off by region, time left and amount queued</caption>
         <tbody>
-          {CUTOFFS.map((r) => (
+          {CUTOFFS.map((cutoff) => (
             <tr
-              key={r.where}
+              key={cutoff.where}
               className="border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-surface))]"
             >
               <th
                 scope="row"
                 className="whitespace-nowrap px-2 py-2.5 text-left font-medium text-[rgb(var(--ferry-ink))] sm:px-3"
               >
-                {r.where}
+                {cutoff.where}
               </th>
               <td className="ferry-tnum whitespace-nowrap border-l border-solid border-[rgb(var(--ferry-line)/.08)] px-2 py-2.5 text-[rgb(var(--ferry-mute))] sm:px-3">
-                {r.local}
+                {cutoff.local}
               </td>
               <td className="ferry-tnum whitespace-nowrap border-l border-solid border-[rgb(var(--ferry-line)/.08)] px-2 py-2.5 text-[rgb(var(--ferry-accent-ink))] sm:px-3">
                 {"in "}
-                {timeLeft(r.utc, e)}
+                {timeLeft(cutoff.utc, now)}
               </td>
               <td className="ferry-tnum whitespace-nowrap border-l border-solid border-[rgb(var(--ferry-line)/.08)] px-2 py-2.5 text-right font-medium text-[rgb(var(--ferry-ink))] sm:px-3">
-                {r.queued}
+                {cutoff.queued}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
       <ul className="relative m-0 mt-5 grid list-none gap-1 p-0">
-        {n.map(([r, i]) => (
+        {highlights.map(([iconName, text]) => (
           <li
-            key={i}
+            key={text}
             className="flex items-center gap-3 rounded-[10px] px-1 py-1.5 text-[13px] text-[rgb(var(--ferry-ink))]"
           >
             <span className="grid h-7 w-7 shrink-0 place-items-center rounded-[8px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-surface))] text-[rgb(var(--ferry-accent-ink))]">
-              <Icon name={r} size={13} />
+              <Icon name={iconName} size={13} />
             </span>
-            {i}
+            {text}
           </li>
         ))}
       </ul>
@@ -437,27 +457,29 @@ export function WebhookFlow() {
             animationDelay: "1.3s",
           }}
         />
-        {[
-          {
-            y: 14,
-            label: "payout.created",
-            icon: "bolt_fill",
-          },
-          {
-            y: 102,
-            label: "payout.arrived",
-            icon: "checkmark",
-          },
-        ].map((e) => (
+        {(
+          [
+            {
+              y: 14,
+              label: "payout.created",
+              icon: "bolt_fill",
+            },
+            {
+              y: 102,
+              label: "payout.arrived",
+              icon: "checkmark",
+            },
+          ] as const
+        ).map((event) => (
           <span
-            key={e.label}
+            key={event.label}
             className="absolute left-[10px] flex h-[34px] w-[118px] items-center gap-1.5 rounded-[9px] border border-solid border-[rgb(var(--ferry-line)/.1)] bg-[rgb(var(--ferry-surface))] px-2 text-[10px] text-[rgb(var(--ferry-ink))] shadow-[0_6px_14px_-8px_rgb(0_0_0/.3)]"
             style={{
-              top: e.y,
+              top: event.y,
             }}
           >
-            <Icon name={e.icon} size={10} className="shrink-0 text-[rgb(var(--ferry-accent-ink))]" />
-            <span className="font-mono">{e.label}</span>
+            <Icon name={event.icon} size={10} className="shrink-0 text-[rgb(var(--ferry-accent-ink))]" />
+            <span className="font-mono">{event.label}</span>
           </span>
         ))}
         <span className="absolute left-[192px] top-[56px] flex h-[38px] w-[98px] items-center gap-1.5 rounded-[9px] border border-solid border-[rgb(var(--ferry-accent)/.4)] bg-[rgb(var(--ferry-surface))] px-2 text-[11px] font-medium text-[rgb(var(--ferry-ink))] shadow-[0_6px_14px_-8px_rgb(0_0_0/.3)]">
@@ -479,7 +501,7 @@ export function Product() {
       />
       <Frame className="mx-auto mt-12 max-w-[1160px]">
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-[280px_minmax(0,1fr)_minmax(380px,1.08fr)] lg:grid-rows-[360px_360px_290px]">
-          <Panel as="article" edge={!0} className="p-5 sm:p-6 lg:col-start-1 lg:row-start-1">
+          <Panel as="article" edge={true} className="p-5 sm:p-6 lg:col-start-1 lg:row-start-1">
             <h3 className="m-0 text-[22px] font-medium leading-[1.1] tracking-[-0.02em] text-[rgb(var(--ferry-ink))]">
               Lock a rate for 24 hours.
             </h3>
@@ -488,7 +510,7 @@ export function Product() {
               1 USD = 0.9233 EUR, held
             </p>
           </Panel>
-          <Panel as="article" edge={!0} className="flex flex-col p-5 sm:p-6 lg:col-start-1 lg:row-start-2">
+          <Panel as="article" edge={true} className="flex flex-col p-5 sm:p-6 lg:col-start-1 lg:row-start-2">
             <h3 className="m-0 text-[22px] font-medium leading-[1.1] tracking-[-0.02em] text-[rgb(var(--ferry-ink))]">
               Every transaction reconciled as it lands.
             </h3>
@@ -500,7 +522,7 @@ export function Product() {
           </Panel>
           <Panel
             as="article"
-            edge={!0}
+            edge={true}
             className="flex flex-col p-5 sm:p-6 lg:col-start-2 lg:row-span-2 lg:row-start-1"
           >
             <h3 className="m-0 max-w-[13em] text-[26px] font-medium leading-[1.08] tracking-[-0.02em] text-[rgb(var(--ferry-ink))]">
@@ -523,8 +545,8 @@ export function Product() {
           </Panel>
           <Panel
             as="article"
-            edge={!0}
-            glow={!0}
+            edge={true}
+            glow={true}
             className="relative p-5 pb-[330px] sm:p-6 sm:pb-[340px] md:col-span-2 lg:col-span-1 lg:col-start-3 lg:row-span-3 lg:row-start-1 lg:pb-6"
           >
             <h3 className="relative m-0 max-w-[13em] text-[26px] font-medium leading-[1.08] tracking-[-0.02em] text-[rgb(var(--ferry-ink))]">
@@ -546,7 +568,7 @@ export function Product() {
           </Panel>
           <Panel
             as="article"
-            edge={!0}
+            edge={true}
             className="flex flex-col gap-6 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6 md:col-span-2 lg:col-span-2 lg:col-start-1 lg:row-start-3"
           >
             <div className="min-w-0">
@@ -557,13 +579,13 @@ export function Product() {
                 A signed event for every status change.
               </p>
               <ul className="m-0 mt-5 grid max-w-[260px] list-none gap-2 p-0">
-                {["Signed payloads", "Replay any event for 30 days"].map((e) => (
+                {["Signed payloads", "Replay any event for 30 days"].map((feature) => (
                   <li
-                    key={e}
+                    key={feature}
                     className="flex items-center gap-2 rounded-[8px] border border-solid border-[rgb(var(--ferry-line)/.1)] bg-[rgb(var(--ferry-surface))] px-3 py-2 text-[13px] text-[rgb(var(--ferry-ink))]"
                   >
                     <Icon name="checkmark" size={11} className="text-[rgb(var(--ferry-accent-ink))]" />
-                    {e}
+                    {feature}
                   </li>
                 ))}
               </ul>

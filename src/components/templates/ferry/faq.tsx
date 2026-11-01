@@ -1,11 +1,10 @@
-// @ts-nocheck -- temporary during decompile cleanup
 "use client";
 
 import { useState, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ButtonLink, Frame, Icon, SectionHeading } from "./ui";
 
-export const FAQS = [
+export const FAQS: (readonly [question: string, answer: string])[] = [
   [
     "What does Ferry cost?",
     "A monthly price for your plan, from $0, and a flat fee on conversions: 0.6%, 0.4% or 0.25% depending on the plan. Payouts in the same currency are free. There is no setup fee and no minimum.",
@@ -33,8 +32,8 @@ export const FAQS = [
 ];
 
 export function Faq() {
-  const [e, t] = useState(0),
-    n = useId();
+  const [openIndex, setOpenIndex] = useState(0),
+    baseId = useId();
   return (
     <section id="faq" className="scroll-mt-24 px-3 py-24 sm:px-6 sm:py-32">
       <SectionHeading
@@ -44,38 +43,38 @@ export function Faq() {
       />
       <Frame className="mx-auto mt-12 max-w-[760px]">
         <ul className="m-0 list-none overflow-hidden rounded-[22px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-surface)/.82)] p-0">
-          {FAQS.map(([r, i], s) => {
-            const o = e === s;
+          {FAQS.map(([question, answer], index) => {
+            const isOpen = openIndex === index;
             return (
-              <li key={r} className="border-b border-solid border-[rgb(var(--ferry-line)/.07)] last:border-0">
+              <li key={question} className="border-b border-solid border-[rgb(var(--ferry-line)/.07)] last:border-0">
                 <h3 className="m-0">
                   <button
                     type="button"
-                    aria-expanded={o}
-                    aria-controls={`${n}-${s}`}
-                    onClick={() => t(o ? -1 : s)}
+                    aria-expanded={isOpen}
+                    aria-controls={`${baseId}-${index}`}
+                    onClick={() => setOpenIndex(isOpen ? -1 : index)}
                     className="flex w-full items-center justify-between gap-6 px-5 py-5 text-left text-[16px] font-medium tracking-[-0.01em] text-[rgb(var(--ferry-ink))] sm:px-6"
                   >
-                    {r}
+                    {question}
                     <motion.span
                       animate={{
-                        rotate: o ? 180 : 0,
+                        rotate: isOpen ? 180 : 0,
                       }}
                       transition={{
                         type: "spring",
                         stiffness: 500,
                         damping: 30,
                       }}
-                      className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border border-solid transition-colors ${o ? "border-[rgb(var(--ferry-accent)/.4)] bg-[rgb(var(--ferry-accent)/.1)] text-[rgb(var(--ferry-accent-ink))]" : "border-[rgb(var(--ferry-line)/.1)] bg-[rgb(var(--ferry-surface))] text-[rgb(var(--ferry-mute))]"}`}
+                      className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border border-solid transition-colors ${isOpen ? "border-[rgb(var(--ferry-accent)/.4)] bg-[rgb(var(--ferry-accent)/.1)] text-[rgb(var(--ferry-accent-ink))]" : "border-[rgb(var(--ferry-line)/.1)] bg-[rgb(var(--ferry-surface))] text-[rgb(var(--ferry-mute))]"}`}
                     >
                       <Icon name="chevron_down" size={10} />
                     </motion.span>
                   </button>
                 </h3>
-                <AnimatePresence initial={!1}>
-                  {o && (
+                <AnimatePresence initial={false}>
+                  {isOpen && (
                     <motion.div
-                      id={`${n}-${s}`}
+                      id={`${baseId}-${index}`}
                       role="region"
                       initial={{
                         height: 0,
@@ -100,7 +99,7 @@ export function Faq() {
                       className="overflow-hidden"
                     >
                       <p className="m-0 max-w-[36em] px-5 pb-6 text-[14px] leading-[1.65] text-[rgb(var(--ferry-mute))] sm:px-6">
-                        {i}
+                        {answer}
                       </p>
                     </motion.div>
                   )}
@@ -111,7 +110,7 @@ export function Faq() {
         </ul>
       </Frame>
       <div className="mt-8 flex justify-center">
-        <ButtonLink href="#open" kind="ghost" arrow={!0}>
+        <ButtonLink href="#open" kind="ghost" arrow={true}>
           Talk to us
         </ButtonLink>
       </div>

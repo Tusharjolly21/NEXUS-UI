@@ -1,11 +1,16 @@
-// @ts-nocheck -- temporary during decompile cleanup
 "use client";
 
 import { useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BrandIcon, Icon, buttonClass } from "./ui";
+import type { BrandIconName } from "./icons";
 
-export const FOOTER_COLUMNS = [
+type FooterLink = readonly [label: string, href: string];
+
+type FooterColumn = readonly [title: string, links: readonly FooterLink[]];
+
+export const FOOTER_COLUMNS: readonly FooterColumn[] = [
   [
     "Product",
     [
@@ -53,18 +58,21 @@ export const FOOTER_COLUMNS = [
   ],
 ];
 
-export const SOCIAL_LINKS = [
+export const SOCIAL_LINKS: readonly (readonly [icon: BrandIconName, label: string])[] = [
   ["x", "X"],
   ["linkedin", "LinkedIn"],
   ["github", "GitHub"],
   ["youtube", "YouTube"],
 ];
 
+type SignupStatus = "idle" | "sent" | "error";
+
 export function Footer() {
-  const [e, t] = useState(""),
-    [n, r] = useState("idle"),
-    i = (s) => {
-      (s.preventDefault(), r(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e) ? "sent" : "error"));
+  const [email, setEmail] = useState(""),
+    [status, setStatus] = useState<SignupStatus>("idle"),
+    handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      setStatus(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) ? "sent" : "error");
     };
   return (
     <footer className="px-3 pb-6 sm:px-6">
@@ -87,14 +95,14 @@ export function Footer() {
                 and payouts that land in minutes.
               </p>
               <ul className="m-0 mt-6 flex list-none gap-2 p-0">
-                {SOCIAL_LINKS.map(([s, o]) => (
-                  <li key={s}>
+                {SOCIAL_LINKS.map(([icon, label]) => (
+                  <li key={icon}>
                     <a
                       href="#top"
-                      aria-label={`Ferry on ${o}`}
+                      aria-label={`Ferry on ${label}`}
                       className="grid h-9 w-9 place-items-center rounded-[9px] border border-solid border-[rgb(var(--ferry-line)/.1)] bg-[rgb(var(--ferry-surface))] text-[rgb(var(--ferry-mute))] transition-colors hover:border-[rgb(var(--ferry-line)/.2)] hover:text-[rgb(var(--ferry-ink))]"
                     >
-                      <BrandIcon name={s} size={14} />
+                      <BrandIcon name={icon} size={14} />
                     </a>
                   </li>
                 ))}
@@ -116,12 +124,12 @@ export function Footer() {
                 }
               </p>
               <div className="relative mt-4 min-h-[72px]">
-                <AnimatePresence mode="popLayout" initial={!1}>
-                  {n !== "sent" ? (
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {status !== "sent" ? (
                     <motion.form
                       key={"form"}
-                      onSubmit={i}
-                      noValidate={!0}
+                      onSubmit={handleSubmit}
+                      noValidate={true}
                       exit={{
                         opacity: 0,
                         y: -8,
@@ -140,13 +148,14 @@ export function Footer() {
                           type="email"
                           autoComplete="email"
                           placeholder="you@company.com"
-                          value={e}
-                          onChange={(s) => {
-                            (t(s.target.value), n === "error" && r("idle"));
+                          value={email}
+                          onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                            setEmail(event.target.value);
+                            if (status === "error") setStatus("idle");
                           }}
-                          aria-invalid={n === "error"}
+                          aria-invalid={status === "error"}
                           aria-describedby="cta-hint"
-                          className={`h-10 w-full min-w-0 rounded-[10px] border border-solid bg-[rgb(var(--ferry-raised))] px-3 text-[14px] text-[rgb(var(--ferry-ink))] outline-hidden transition-colors placeholder:text-[rgb(var(--ferry-faint))] focus:border-[rgb(var(--ferry-accent)/.6)] sm:flex-1 ${n === "error" ? "border-[rgb(var(--ferry-loss)/.6)]" : "border-[rgb(var(--ferry-line)/.1)]"}`}
+                          className={`h-10 w-full min-w-0 rounded-[10px] border border-solid bg-[rgb(var(--ferry-raised))] px-3 text-[14px] text-[rgb(var(--ferry-ink))] outline-hidden transition-colors placeholder:text-[rgb(var(--ferry-faint))] focus:border-[rgb(var(--ferry-accent)/.6)] sm:flex-1 ${status === "error" ? "border-[rgb(var(--ferry-loss)/.6)]" : "border-[rgb(var(--ferry-line)/.1)]"}`}
                         />
                         <button type="submit" className={`${buttonClass("primary")} shrink-0`}>
                           Open account
@@ -154,11 +163,11 @@ export function Footer() {
                         </button>
                       </div>
                       <motion.p
-                        key={n}
+                        key={status}
                         id="cta-hint"
                         initial={{
                           opacity: 0,
-                          x: n === "error" ? -6 : 0,
+                          x: status === "error" ? -6 : 0,
                         }}
                         animate={{
                           opacity: 1,
@@ -169,10 +178,10 @@ export function Footer() {
                           stiffness: 600,
                           damping: 18,
                         }}
-                        className={`m-0 mt-2.5 text-[12px] ${n === "error" ? "text-[rgb(var(--ferry-loss))]" : "text-[rgb(var(--ferry-faint))]"}`}
-                        role={n === "error" ? "alert" : void 0}
+                        className={`m-0 mt-2.5 text-[12px] ${status === "error" ? "text-[rgb(var(--ferry-loss))]" : "text-[rgb(var(--ferry-faint))]"}`}
+                        role={status === "error" ? "alert" : undefined}
                       >
-                        {n === "error"
+                        {status === "error"
                           ? "Enter a work email, like maya@northwind.com."
                           : "No card needed. Starter is free."}
                       </motion.p>
@@ -207,10 +216,10 @@ export function Footer() {
                         </span>
                         <span className="mt-0.5 block break-words text-[13px] text-[rgb(var(--ferry-mute))]">
                           {"We sent a sign-up link to "}
-                          {e}.{" "}
+                          {email}.{" "}
                           <button
                             type="button"
-                            onClick={() => r("idle")}
+                            onClick={() => setStatus("idle")}
                             className="text-[rgb(var(--ferry-accent-ink))] underline underline-offset-2"
                           >
                             Use a different email
@@ -233,19 +242,19 @@ export function Footer() {
             </section>
           </div>
           <div className="relative mt-10 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-solid border-[rgb(var(--ferry-line)/.08)] pt-10 sm:grid-cols-3 lg:grid-cols-5">
-            {FOOTER_COLUMNS.map(([s, o]) => (
-              <nav key={s} aria-label={s}>
+            {FOOTER_COLUMNS.map(([title, links]) => (
+              <nav key={title} aria-label={title}>
                 <h3 className="m-0 text-[11px] font-medium uppercase tracking-[0.18em] text-[rgb(var(--ferry-ink))]">
-                  {s}
+                  {title}
                 </h3>
                 <ul className="m-0 mt-4 grid list-none gap-2.5 p-0">
-                  {o.map(([l, c]) => (
-                    <li key={l}>
+                  {links.map(([label, href]) => (
+                    <li key={label}>
                       <a
-                        href={c}
+                        href={href}
                         className="text-[14px] text-[rgb(var(--ferry-mute))] no-underline transition-colors hover:text-[rgb(var(--ferry-ink))]"
                       >
-                        {l}
+                        {label}
                       </a>
                     </li>
                   ))}
@@ -261,13 +270,13 @@ export function Footer() {
             {" Ferry. A template: the company, people, rates and accounts shown are sample content."}
           </p>
           <ul className="m-0 flex list-none flex-wrap gap-4 p-0">
-            {["Privacy", "Terms", "Security", "Cookie settings"].map((s) => (
-              <li key={s}>
+            {["Privacy", "Terms", "Security", "Cookie settings"].map((label) => (
+              <li key={label}>
                 <a
                   href="#top"
                   className="text-[rgb(var(--ferry-faint))] no-underline hover:text-[rgb(var(--ferry-ink))]"
                 >
-                  {s}
+                  {label}
                 </a>
               </li>
             ))}

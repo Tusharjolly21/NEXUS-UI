@@ -1,43 +1,48 @@
-// @ts-nocheck -- temporary during decompile cleanup
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "./ui";
+import type { IconName } from "./icons";
 
 export function useTheme() {
-  const [e, t] = useState(() => typeof document < "u" && document.documentElement.classList.contains("dark"));
+  const [dark, setDark] = useState(() => typeof document < "u" && document.documentElement.classList.contains("dark"));
   useEffect(() => {
-    const r = document.documentElement,
-      i = new MutationObserver(() => t(r.classList.contains("dark")));
-    return (
-      i.observe(r, {
-        attributes: !0,
-        attributeFilter: ["class"],
-      }),
-      () => i.disconnect()
-    );
+    const root = document.documentElement,
+      observer = new MutationObserver(() => setDark(root.classList.contains("dark")));
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => observer.disconnect();
   }, []);
-  const n = useCallback(() => {
-    const r = () => {
-        const s = !document.documentElement.classList.contains("dark");
-        document.documentElement.classList.toggle("dark", s);
+  const toggle = useCallback(() => {
+    const applyTheme = () => {
+        const nextDark = !document.documentElement.classList.contains("dark");
+        document.documentElement.classList.toggle("dark", nextDark);
         try {
-          localStorage.setItem("ferry-theme", s ? "dark" : "light");
+          localStorage.setItem("ferry-theme", nextDark ? "dark" : "light");
         } catch {}
       },
-      i = document;
-    i.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches
-      ? i.startViewTransition(r)
-      : r();
+      doc = document;
+    if (doc.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      doc.startViewTransition(applyTheme);
+    } else {
+      applyTheme();
+    }
   }, []);
   return {
-    dark: e,
-    toggle: n,
+    dark,
+    toggle,
   };
 }
 
-export const NAV_LINKS = [
+type NavLink = {
+  id: string;
+  label: string;
+};
+
+export const NAV_LINKS: NavLink[] = [
   {
     id: "payouts",
     label: "Payouts",
@@ -56,7 +61,16 @@ export const NAV_LINKS = [
   },
 ];
 
-export const PRODUCT_MENU = [
+type ProductMenuItem = {
+  icon: IconName;
+  title: string;
+  text: string;
+  stat: string;
+  statLabel: string;
+  href: string;
+};
+
+export const PRODUCT_MENU: ProductMenuItem[] = [
   {
     icon: "building_2_fill",
     title: "Treasury",
@@ -92,39 +106,43 @@ export const PRODUCT_MENU = [
 ];
 
 export function Nav() {
-  const { dark: e, toggle: t } = useTheme(),
-    [n, r] = useState(null),
-    [i, s] = useState(!1),
-    [o, l] = useState(0),
-    [c, u] = useState(!1),
-    d = useRef(0);
+  const { dark, toggle } = useTheme(),
+    [activeId, setActiveId] = useState<string | null>(null),
+    [productOpen, setProductOpen] = useState(false),
+    [productIndex, setProductIndex] = useState(0),
+    [mobileOpen, setMobileOpen] = useState(false),
+    closeTimer = useRef(0);
   useEffect(() => {
-    const x = NAV_LINKS.map((v) => document.getElementById(v.id)).filter(Boolean),
-      w = new Set(),
-      y = new IntersectionObserver(
-        (v) => {
-          var p;
-          (v.forEach((m) => (m.isIntersecting ? w.add(m.target.id) : w.delete(m.target.id))),
-            r(((p = NAV_LINKS.find((m) => w.has(m.id))) == null ? void 0 : p.id) ?? null));
+    const sections = NAV_LINKS.map((link) => document.getElementById(link.id)).filter(Boolean) as HTMLElement[],
+      visibleIds = new Set<string>(),
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) =>
+            entry.isIntersecting ? visibleIds.add(entry.target.id) : visibleIds.delete(entry.target.id),
+          );
+          setActiveId(NAV_LINKS.find((link) => visibleIds.has(link.id))?.id ?? null);
         },
         {
           rootMargin: "-45% 0px -45% 0px",
         },
       );
-    return (x.forEach((v) => y.observe(v)), () => y.disconnect());
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
   }, []);
-  const f = () => {
-      (window.clearTimeout(d.current), s(!0));
+  const openProduct = () => {
+      window.clearTimeout(closeTimer.current);
+      setProductOpen(true);
     },
-    h = () => {
-      (window.clearTimeout(d.current), (d.current = window.setTimeout(() => s(!1), 160)));
+    closeProductSoon = () => {
+      window.clearTimeout(closeTimer.current);
+      closeTimer.current = window.setTimeout(() => setProductOpen(false), 160);
     };
   return (
     <header className="pointer-events-none fixed inset-x-0 top-[calc(12px+env(safe-area-inset-top,0px))] z-50 px-3 sm:top-[calc(16px+env(safe-area-inset-top,0px))] sm:px-6">
       <nav
         aria-label="Main"
         className="pointer-events-auto relative mx-auto flex h-[60px] max-w-[1160px] items-center justify-between rounded-[18px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-surface)/.75)] pl-5 pr-2.5 shadow-[0_12px_32px_-24px_rgb(0_0_0/.4)] backdrop-blur-xl backdrop-saturate-150"
-        onKeyDown={(x) => x.key === "Escape" && (s(!1), u(!1))}
+        onKeyDown={(event) => event.key === "Escape" && (setProductOpen(false), setMobileOpen(false))}
       >
         <a
           href="#top"
@@ -136,19 +154,19 @@ export function Nav() {
           Ferry
         </a>
         <div className="hidden items-center gap-1 lg:flex">
-          <div className="relative" onMouseEnter={f} onMouseLeave={h}>
+          <div className="relative" onMouseEnter={openProduct} onMouseLeave={closeProductSoon}>
             <button
               type="button"
-              aria-expanded={i}
+              aria-expanded={productOpen}
               aria-haspopup="true"
-              onClick={() => s((x) => !x)}
-              onFocus={f}
+              onClick={() => setProductOpen((open) => !open)}
+              onFocus={openProduct}
               className="flex h-9 items-center gap-1 rounded-[9px] px-3 text-[14px] text-[rgb(var(--ferry-ink)/.8)] transition-colors hover:text-[rgb(var(--ferry-ink))]"
             >
               Product
               <motion.span
                 animate={{
-                  rotate: i ? 180 : 0,
+                  rotate: productOpen ? 180 : 0,
                 }}
                 transition={{
                   type: "spring",
@@ -161,7 +179,7 @@ export function Nav() {
               </motion.span>
             </button>
             <AnimatePresence>
-              {i && (
+              {productOpen && (
                 <motion.div
                   initial={{
                     opacity: 0,
@@ -191,21 +209,21 @@ export function Nav() {
                     x: "-50%",
                   }}
                   className="absolute left-1/2 top-[calc(100%+12px)] w-[600px]"
-                  onMouseEnter={f}
-                  onMouseLeave={h}
+                  onMouseEnter={openProduct}
+                  onMouseLeave={closeProductSoon}
                 >
                   <div className="grid grid-cols-[1fr_200px] gap-2 rounded-[20px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-surface))] p-2 ferry-shadow-lift">
                     <ul className="m-0 list-none p-0">
-                      {PRODUCT_MENU.map((x, w) => (
-                        <li key={x.title}>
+                      {PRODUCT_MENU.map((item, index) => (
+                        <li key={item.title}>
                           <a
-                            href={x.href}
-                            onMouseEnter={() => l(w)}
-                            onFocus={() => l(w)}
-                            onClick={() => s(!1)}
+                            href={item.href}
+                            onMouseEnter={() => setProductIndex(index)}
+                            onFocus={() => setProductIndex(index)}
+                            onClick={() => setProductOpen(false)}
                             className="relative flex items-start gap-3 rounded-[14px] p-3 no-underline"
                           >
-                            {o === w && (
+                            {productIndex === index && (
                               <motion.span
                                 layoutId="nav-hl"
                                 className="absolute inset-0 rounded-[14px] bg-[rgb(var(--ferry-raised))]"
@@ -217,14 +235,14 @@ export function Nav() {
                               />
                             )}
                             <span className="relative grid h-9 w-9 place-items-center rounded-[10px] border border-solid border-[rgb(var(--ferry-accent)/.25)] bg-[rgb(var(--ferry-accent)/.1)] text-[rgb(var(--ferry-accent-ink))]">
-                              <Icon name={x.icon} size={17} />
+                              <Icon name={item.icon} size={17} />
                             </span>
                             <span className="relative">
                               <span className="block text-[14px] font-medium text-[rgb(var(--ferry-ink))]">
-                                {x.title}
+                                {item.title}
                               </span>
                               <span className="block text-[13px] text-[rgb(var(--ferry-mute))]">
-                                {x.text}
+                                {item.text}
                               </span>
                             </span>
                           </a>
@@ -233,9 +251,9 @@ export function Nav() {
                     </ul>
                     <div className="relative flex flex-col justify-end overflow-hidden rounded-[14px] border border-solid border-[rgb(var(--ferry-line)/.06)] bg-[rgb(var(--ferry-frame))] p-4">
                       <span aria-hidden="true" className="ferry-glow !right-[-260px] !top-[-260px]" />
-                      <AnimatePresence mode="popLayout" initial={!1}>
+                      <AnimatePresence mode="popLayout" initial={false}>
                         <motion.div
-                          key={o}
+                          key={productIndex}
                           initial={{
                             opacity: 0,
                             y: 10,
@@ -261,10 +279,10 @@ export function Nav() {
                           }}
                         >
                           <div className="ferry-tnum text-[44px] font-medium leading-none tracking-[-0.035em] text-[rgb(var(--ferry-ink))]">
-                            {PRODUCT_MENU[o].stat}
+                            {PRODUCT_MENU[productIndex].stat}
                           </div>
                           <div className="mt-2 text-[13px] text-[rgb(var(--ferry-mute))]">
-                            {PRODUCT_MENU[o].statLabel}
+                            {PRODUCT_MENU[productIndex].statLabel}
                           </div>
                         </motion.div>
                       </AnimatePresence>
@@ -274,13 +292,13 @@ export function Nav() {
               )}
             </AnimatePresence>
           </div>
-          {NAV_LINKS.map((x) => (
+          {NAV_LINKS.map((link) => (
             <a
-              key={x.id}
-              href={`#${x.id}`}
+              key={link.id}
+              href={`#${link.id}`}
               className="relative flex h-9 items-center rounded-[9px] px-3 text-[14px] text-[rgb(var(--ferry-ink)/.8)] no-underline transition-colors hover:text-[rgb(var(--ferry-ink))]"
             >
-              {n === x.id && (
+              {activeId === link.id && (
                 <motion.span
                   layoutId="nav-active"
                   className="absolute inset-0 rounded-[9px] bg-[rgb(var(--ferry-ink)/.06)]"
@@ -291,20 +309,20 @@ export function Nav() {
                   }}
                 />
               )}
-              <span className="relative">{x.label}</span>
+              <span className="relative">{link.label}</span>
             </a>
           ))}
         </div>
         <div className="flex items-center gap-1">
           <button
             type="button"
-            onClick={t}
-            aria-label={e ? "Switch to light mode" : "Switch to dark mode"}
+            onClick={toggle}
+            aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
             className="grid h-9 w-9 place-items-center rounded-[9px] border border-solid border-[rgb(var(--ferry-line)/.1)] bg-[rgb(var(--ferry-surface))] text-[rgb(var(--ferry-ink)/.8)] transition-colors hover:border-[rgb(var(--ferry-line)/.2)] hover:text-[rgb(var(--ferry-ink))]"
           >
-            <AnimatePresence mode="popLayout" initial={!1}>
+            <AnimatePresence mode="popLayout" initial={false}>
               <motion.span
-                key={e ? "moon" : "sun"}
+                key={dark ? "moon" : "sun"}
                 initial={{
                   rotate: -90,
                   opacity: 0,
@@ -327,7 +345,7 @@ export function Nav() {
                 }}
                 className="flex"
               >
-                <Icon name={e ? "moon_fill" : "sun_max_fill"} size={16} />
+                <Icon name={dark ? "moon_fill" : "sun_max_fill"} size={16} />
               </motion.span>
             </AnimatePresence>
           </button>
@@ -347,15 +365,15 @@ export function Nav() {
           <button
             type="button"
             aria-label="Menu"
-            aria-expanded={c}
-            onClick={() => u((x) => !x)}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((open) => !open)}
             className="grid h-9 w-9 place-items-center rounded-[9px] text-[rgb(var(--ferry-ink))] lg:hidden"
           >
-            <Icon name={c ? "xmark" : "line_horizontal_3"} size={18} />
+            <Icon name={mobileOpen ? "xmark" : "line_horizontal_3"} size={18} />
           </button>
         </div>
         <AnimatePresence>
-          {c && (
+          {mobileOpen && (
             <motion.div
               initial={{
                 opacity: 0,
@@ -379,19 +397,19 @@ export function Nav() {
               }}
               className="absolute inset-x-0 top-[calc(100%+10px)] rounded-[20px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-surface))] p-2 ferry-shadow-lift lg:hidden"
             >
-              {NAV_LINKS.map((x) => (
+              {NAV_LINKS.map((link) => (
                 <a
-                  key={x.id}
-                  href={`#${x.id}`}
-                  onClick={() => u(!1)}
+                  key={link.id}
+                  href={`#${link.id}`}
+                  onClick={() => setMobileOpen(false)}
                   className="flex h-12 items-center rounded-[12px] px-4 text-[16px] text-[rgb(var(--ferry-ink))] no-underline active:bg-[rgb(var(--ferry-raised))]"
                 >
-                  {x.label}
+                  {link.label}
                 </a>
               ))}
               <a
                 href="#open"
-                onClick={() => u(!1)}
+                onClick={() => setMobileOpen(false)}
                 className="mt-1 flex h-12 items-center justify-center rounded-[12px] bg-[rgb(var(--ferry-accent))] text-[16px] font-medium text-white no-underline"
               >
                 Open an account

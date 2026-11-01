@@ -1,18 +1,19 @@
-// @ts-nocheck -- temporary during decompile cleanup
 "use client";
 
 import { useState, useEffect } from "react";
+import type { ReactNode } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { formatAmount, getCurrency } from "./data";
+import type { IconName } from "./icons";
 import { Badge, CurrencyDot, Frame, Icon, Panel, SectionHeading, buttonClass } from "./ui";
 
 export const ROW_SPRING = {
   type: "spring",
   stiffness: 500,
   damping: 34,
-};
+} as const;
 
-export const APPROVAL_LIMITS = [1e4, 5e4, 1e5];
+export const APPROVAL_LIMITS: number[] = [1e4, 5e4, 1e5];
 
 export const PENDING_PAYMENT = {
   code: "EUR",
@@ -21,21 +22,27 @@ export const PENDING_PAYMENT = {
   invoice: "INV-2214",
 };
 
-export function Toggle({ on: e, onChange: t, label: n }) {
+type ToggleProps = {
+  on: boolean;
+  onChange: (on: boolean) => void;
+  label: string;
+};
+
+export function Toggle({ on, onChange, label }: ToggleProps) {
   return (
     <button
       type="button"
       role="switch"
-      aria-checked={e}
-      aria-label={n}
-      onClick={() => t(!e)}
-      className={`relative h-[26px] w-[44px] shrink-0 rounded-full transition-colors duration-200 ${e ? "bg-[rgb(var(--ferry-accent))]" : "bg-[rgb(var(--ferry-line)/.14)]"}`}
+      aria-checked={on}
+      aria-label={label}
+      onClick={() => onChange(!on)}
+      className={`relative h-[26px] w-[44px] shrink-0 rounded-full transition-colors duration-200 ${on ? "bg-[rgb(var(--ferry-accent))]" : "bg-[rgb(var(--ferry-line)/.14)]"}`}
     >
       <motion.span
         className="absolute left-[3px] top-[3px] h-5 w-5 rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,.2)]"
-        initial={!1}
+        initial={false}
         animate={{
-          x: e ? 18 : 0,
+          x: on ? 18 : 0,
         }}
         whileTap={{
           width: 24,
@@ -46,21 +53,30 @@ export function Toggle({ on: e, onChange: t, label: n }) {
   );
 }
 
-export function Avatar({ initials: e, tint: t }) {
+type AvatarProps = {
+  initials: string;
+  tint: string;
+};
+
+export function Avatar({ initials, tint }: AvatarProps) {
   return (
     <span
       className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-medium text-white"
       style={{
-        background: t,
+        background: tint,
       }}
       aria-hidden="true"
     >
-      {e}
+      {initials}
     </span>
   );
 }
 
-export function AnimatedRow({ children: e }) {
+type AnimatedRowProps = {
+  children?: ReactNode;
+};
+
+export function AnimatedRow({ children }: AnimatedRowProps) {
   return (
     <motion.li
       layout="position"
@@ -80,48 +96,59 @@ export function AnimatedRow({ children: e }) {
       className="overflow-hidden"
     >
       <div className="flex items-center gap-3 border-b border-solid border-[rgb(var(--ferry-line)/.06)] py-3">
-        {e}
+        {children}
       </div>
     </motion.li>
   );
 }
 
-export function RuleRow({ icon: e, title: t, text: n, on: r, onChange: i, children: s }) {
+type RuleRowProps = {
+  icon: IconName;
+  title: string;
+  text: string;
+  on: boolean;
+  onChange: (on: boolean) => void;
+  children?: ReactNode;
+};
+
+export function RuleRow({ icon, title, text, on, onChange, children }: RuleRowProps) {
   return (
     <li className="rounded-[16px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-surface))] p-4">
       <div className="flex items-center gap-3">
         <span
-          className={`grid h-9 w-9 shrink-0 place-items-center rounded-[10px] border border-solid transition-colors ${r ? "border-[rgb(var(--ferry-accent)/.3)] bg-[rgb(var(--ferry-accent)/.1)] text-[rgb(var(--ferry-accent-ink))]" : "border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-raised))] text-[rgb(var(--ferry-faint))]"}`}
+          className={`grid h-9 w-9 shrink-0 place-items-center rounded-[10px] border border-solid transition-colors ${on ? "border-[rgb(var(--ferry-accent)/.3)] bg-[rgb(var(--ferry-accent)/.1)] text-[rgb(var(--ferry-accent-ink))]" : "border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-raised))] text-[rgb(var(--ferry-faint))]"}`}
         >
-          <Icon name={e} size={15} />
+          <Icon name={icon} size={15} />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-[15px] font-medium text-[rgb(var(--ferry-ink))]">{t}</div>
-          <div className="mt-0.5 text-[13px] text-[rgb(var(--ferry-mute))]">{n}</div>
+          <div className="text-[15px] font-medium text-[rgb(var(--ferry-ink))]">{title}</div>
+          <div className="mt-0.5 text-[13px] text-[rgb(var(--ferry-mute))]">{text}</div>
         </div>
-        <Toggle on={r} onChange={i} label={t} />
+        <Toggle on={on} onChange={onChange} label={title} />
       </div>
-      {s}
+      {children}
     </li>
   );
 }
 
 export function Controls() {
-  const e = useReducedMotion(),
-    [t, n] = useState(!0),
-    [r, i] = useState(APPROVAL_LIMITS[0]),
-    [s, o] = useState(!1),
-    [l, c] = useState(!0),
-    [u, d] = useState(!1),
-    [f, h] = useState(!1),
-    x = getCurrency(PENDING_PAYMENT.code),
-    w = PENDING_PAYMENT.amount / x.perUsd,
-    y = t && w > r;
+  const reduceMotion = useReducedMotion(),
+    [secondApprover, setSecondApprover] = useState(true),
+    [limit, setLimit] = useState(APPROVAL_LIMITS[0]),
+    [holdNewRecipients, setHoldNewRecipients] = useState(false),
+    [invoiceRequired, setInvoiceRequired] = useState(true),
+    [danApproved, setDanApproved] = useState(false),
+    [released, setReleased] = useState(false),
+    currency = getCurrency(PENDING_PAYMENT.code),
+    usdAmount = PENDING_PAYMENT.amount / currency.perUsd,
+    needsSecondApproval = secondApprover && usdAmount > limit;
   useEffect(() => {
-    (d(!1), h(!1));
-  }, [t, r, s, l]);
-  const v = y && !u ? "Approve as Daniel" : "Release payment",
-    p = f ? (s ? "s" : "r") : y && !u ? "w" : "a";
+    setDanApproved(false);
+    setReleased(false);
+  }, [secondApprover, limit, holdNewRecipients, invoiceRequired]);
+  const buttonLabel = needsSecondApproval && !danApproved ? "Approve as Daniel" : "Release payment",
+    // s = scheduled, r = released, w = waiting for approval, a = ready
+    badgeState = released ? (holdNewRecipients ? "s" : "r") : needsSecondApproval && !danApproved ? "w" : "a";
   return (
     <section id="controls" className="scroll-mt-24 px-3 py-24 sm:px-6 sm:py-32">
       <SectionHeading
@@ -131,13 +158,13 @@ export function Controls() {
       />
       <Frame className="mx-auto mt-12 max-w-[1160px]">
         <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
-          <Panel edge={!0} className="p-4 sm:p-6">
+          <Panel edge={true} className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <h3 className="m-0 text-[20px] font-medium tracking-[-0.02em] text-[rgb(var(--ferry-ink))]">
                 Payment rules
               </h3>
               <Badge tone="accent">
-                {[t, s, l].filter(Boolean).length}
+                {[secondApprover, holdNewRecipients, invoiceRequired].filter(Boolean).length}
                 {" on"}
               </Badge>
             </div>
@@ -146,11 +173,11 @@ export function Controls() {
                 icon="person_2_fill"
                 title="Second approver"
                 text="For payments above a limit you choose"
-                on={t}
-                onChange={n}
+                on={secondApprover}
+                onChange={setSecondApprover}
               >
-                <AnimatePresence initial={!1}>
-                  {t && (
+                <AnimatePresence initial={false}>
+                  {secondApprover && (
                     <motion.div
                       initial={{
                         height: 0,
@@ -172,23 +199,23 @@ export function Controls() {
                         aria-label="Approval limit"
                         className="mt-4 flex gap-1 rounded-[10px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-raised))] p-1"
                       >
-                        {APPROVAL_LIMITS.map((m) => (
+                        {APPROVAL_LIMITS.map((option) => (
                           <button
-                            key={m}
+                            key={option}
                             type="button"
                             role="radio"
-                            aria-checked={m === r}
-                            onClick={() => i(m)}
-                            className={`relative h-8 flex-1 rounded-[7px] text-[13px] font-medium transition-colors ${m === r ? "text-[rgb(var(--ferry-ink))]" : "text-[rgb(var(--ferry-mute))] hover:text-[rgb(var(--ferry-ink))]"}`}
+                            aria-checked={option === limit}
+                            onClick={() => setLimit(option)}
+                            className={`relative h-8 flex-1 rounded-[7px] text-[13px] font-medium transition-colors ${option === limit ? "text-[rgb(var(--ferry-ink))]" : "text-[rgb(var(--ferry-mute))] hover:text-[rgb(var(--ferry-ink))]"}`}
                           >
-                            {m === r && (
+                            {option === limit && (
                               <motion.span
                                 layoutId="limit-pill"
                                 className="absolute inset-0 rounded-[7px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-surface))] shadow-[0_1px_3px_rgba(0,0,0,.1)]"
                                 transition={ROW_SPRING}
                               />
                             )}
-                            <span className="ferry-tnum relative">Above ${m / 1e3}k</span>
+                            <span className="ferry-tnum relative">Above ${option / 1e3}k</span>
                           </button>
                         ))}
                       </div>
@@ -200,26 +227,26 @@ export function Controls() {
                 icon="hand_raised_fill"
                 title="Hold new recipients"
                 text="A first payment to anyone waits 24 hours"
-                on={s}
-                onChange={o}
+                on={holdNewRecipients}
+                onChange={setHoldNewRecipients}
               />
               <RuleRow
                 icon="doc_on_doc"
                 title="Invoice required"
                 text="No payment leaves without one attached"
-                on={l}
-                onChange={c}
+                on={invoiceRequired}
+                onChange={setInvoiceRequired}
               />
             </ul>
           </Panel>
-          <Panel glow={!0} edge={!0} className="flex flex-col p-4 sm:p-6">
+          <Panel glow={true} edge={true} className="flex flex-col p-4 sm:p-6">
             <div className="relative flex items-center justify-between gap-3">
               <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-[rgb(var(--ferry-faint))]">
                 Payment PAY-0412
               </span>
-              <AnimatePresence mode="popLayout" initial={!1}>
+              <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
-                  key={p}
+                  key={badgeState}
                   initial={{
                     opacity: 0,
                     scale: 0.9,
@@ -236,13 +263,13 @@ export function Controls() {
                     duration: 0.18,
                   }}
                 >
-                  {p === "s" ? (
+                  {badgeState === "s" ? (
                     <Badge tone="amber">Scheduled</Badge>
-                  ) : p === "r" ? (
-                    <Badge tone="gain" dot={!0}>
+                  ) : badgeState === "r" ? (
+                    <Badge tone="gain" dot={true}>
                       Released
                     </Badge>
-                  ) : p === "w" ? (
+                  ) : badgeState === "w" ? (
                     <Badge tone="amber">Waiting for approval</Badge>
                   ) : (
                     <Badge tone="accent">Ready to release</Badge>
@@ -251,7 +278,7 @@ export function Controls() {
               </AnimatePresence>
             </div>
             <div className="relative mt-5 flex items-center gap-3 rounded-[16px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-surface))] p-4">
-              <CurrencyDot c={x} size={40} />
+              <CurrencyDot c={currency} size={40} />
               <div className="min-w-0 flex-1">
                 <div className="text-[16px] font-medium text-[rgb(var(--ferry-ink))]">
                   {PENDING_PAYMENT.to}
@@ -262,17 +289,17 @@ export function Controls() {
               </div>
               <div className="text-right">
                 <div className="ferry-tnum text-[22px] font-medium tracking-[-0.02em] text-[rgb(var(--ferry-ink))]">
-                  {x.symbol}
-                  {formatAmount(PENDING_PAYMENT.amount, x)}
+                  {currency.symbol}
+                  {formatAmount(PENDING_PAYMENT.amount, currency)}
                 </div>
                 <div className="ferry-tnum text-[12px] text-[rgb(var(--ferry-faint))]">
-                  about ${formatAmount(w, getCurrency("USD"), 0)}
+                  about ${formatAmount(usdAmount, getCurrency("USD"), 0)}
                 </div>
               </div>
             </div>
             <ul className="relative m-0 mt-3 list-none p-0 text-[14px]">
-              <AnimatePresence initial={!1}>
-                {l && (
+              <AnimatePresence initial={false}>
+                {invoiceRequired && (
                   <AnimatedRow key={"inv"}>
                     <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-raised))] text-[rgb(var(--ferry-mute))]">
                       <Icon name="doc_on_doc" size={12} />
@@ -293,17 +320,17 @@ export function Controls() {
                   </span>
                   <Icon name="checkmark" size={12} className="text-[rgb(var(--ferry-gain))]" />
                 </AnimatedRow>
-                {y && (
+                {needsSecondApproval && (
                   <AnimatedRow key={"dan"}>
                     <Avatar initials="DO" tint="#3f3f46" />
                     <span className="flex-1 text-[rgb(var(--ferry-ink))]">
                       {"Daniel Ortiz "}
                       <span className="text-[rgb(var(--ferry-mute))]">
-                        {u ? "approved" : "needs to approve"}
+                        {danApproved ? "approved" : "needs to approve"}
                       </span>
                     </span>
-                    <AnimatePresence mode="popLayout" initial={!1}>
-                      {u ? (
+                    <AnimatePresence mode="popLayout" initial={false}>
+                      {danApproved ? (
                         <motion.span
                           key={"y"}
                           initial={{
@@ -335,7 +362,7 @@ export function Controls() {
                     </AnimatePresence>
                   </AnimatedRow>
                 )}
-                {s && (
+                {holdNewRecipients && (
                   <AnimatedRow key={"hold"}>
                     <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-raised))] text-[rgb(var(--ferry-mute))]">
                       <Icon name="hand_raised_fill" size={12} />
@@ -350,8 +377,8 @@ export function Controls() {
             </ul>
             <div className="relative mt-auto pt-5">
               <div className="relative h-11">
-                <AnimatePresence mode="popLayout" initial={!1}>
-                  {f ? (
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {released ? (
                     <motion.div
                       key={"done"}
                       initial={{
@@ -369,8 +396,8 @@ export function Controls() {
                       <span className="flex min-w-0 items-center gap-2.5 text-[14px] font-medium text-[rgb(var(--ferry-ink))]">
                         <motion.span
                           initial={
-                            e
-                              ? !1
+                            reduceMotion
+                              ? false
                               : {
                                   scale: 1.8,
                                   rotate: -25,
@@ -387,15 +414,18 @@ export function Controls() {
                             stiffness: 420,
                             damping: 14,
                           }}
-                          className={`flex shrink-0 ${s ? "text-[rgb(var(--ferry-amber))]" : "text-[rgb(var(--ferry-gain))]"}`}
+                          className={`flex shrink-0 ${holdNewRecipients ? "text-[rgb(var(--ferry-amber))]" : "text-[rgb(var(--ferry-gain))]"}`}
                         >
-                          <Icon name={s ? "clock_fill" : "checkmark_seal_fill"} size={26} />
+                          <Icon name={holdNewRecipients ? "clock_fill" : "checkmark_seal_fill"} size={26} />
                         </motion.span>
-                        {s ? "Scheduled for tomorrow, 9:41 AM" : "Released. It lands in about 3 minutes."}
+                        {holdNewRecipients ? "Scheduled for tomorrow, 9:41 AM" : "Released. It lands in about 3 minutes."}
                       </span>
                       <button
                         type="button"
-                        onClick={() => (d(!1), h(!1))}
+                        onClick={() => {
+                          setDanApproved(false);
+                          setReleased(false);
+                        }}
                         className={`${buttonClass("ghost")} shrink-0`}
                       >
                         Start over
@@ -403,7 +433,7 @@ export function Controls() {
                     </motion.div>
                   ) : (
                     <motion.button
-                      key={v}
+                      key={buttonLabel}
                       type="button"
                       initial={{
                         opacity: 0,
@@ -418,19 +448,19 @@ export function Controls() {
                         y: -8,
                       }}
                       transition={ROW_SPRING}
-                      onClick={() => (y && !u ? d(!0) : h(!0))}
+                      onClick={() => (needsSecondApproval && !danApproved ? setDanApproved(true) : setReleased(true))}
                       className={`${buttonClass("primary")} absolute inset-0 h-11 w-full text-[15px]`}
                     >
-                      {v}
+                      {buttonLabel}
                     </motion.button>
                   )}
                 </AnimatePresence>
               </div>
               <p className="m-0 mt-3 text-[12px] text-[rgb(var(--ferry-faint))]">
-                {y
-                  ? `Above $${r / 1e3}k, so it needs two people.`
-                  : t
-                    ? `Under $${r / 1e3}k, so one approval is enough.`
+                {needsSecondApproval
+                  ? `Above $${limit / 1e3}k, so it needs two people.`
+                  : secondApprover
+                    ? `Under $${limit / 1e3}k, so one approval is enough.`
                     : "One approval is enough with the rule off."}
               </p>
             </div>

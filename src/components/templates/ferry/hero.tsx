@@ -1,4 +1,3 @@
-// @ts-nocheck -- temporary during decompile cleanup
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useId } from "react";
@@ -13,52 +12,54 @@ import {
   getCurrency,
   rateBetween,
 } from "./data";
+import type { Currency } from "./data";
 import { Globe } from "./globe";
 import { CurrencyDot, Icon, MENU_SPRING, RollingNumber, SwapText } from "./ui";
 
-export function CurrencyPicker({ value: e, other: t, onPick: n, label: r }) {
-  const [i, s] = useState(!1),
-    o = useId(),
-    l = useRef(null);
+type CurrencyPickerProps = {
+  value: Currency;
+  other: Currency;
+  onPick: (currency: Currency) => void;
+  label: string;
+};
+
+export function CurrencyPicker({ value, other, onPick, label }: CurrencyPickerProps) {
+  const [open, setOpen] = useState(false),
+    listId = useId(),
+    containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (!i) return;
-    const u = (d) => {
-      var f;
-      return !((f = l.current) != null && f.contains(d.target)) && s(!1);
+    if (!open) return;
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
     };
-    return (
-      document.addEventListener("pointerdown", u),
-      window.setTimeout(() => {
-        var d, f;
-        return (f = (d = l.current) == null ? void 0 : d.querySelector("[aria-selected=true]")) == null
-          ? void 0
-          : f.focus();
-      }, 0),
-      () => document.removeEventListener("pointerdown", u)
-    );
-  }, [i]);
-  const c = CURRENCIES.filter((u) => u.code !== t.code);
+    document.addEventListener("pointerdown", handlePointerDown);
+    window.setTimeout(() => {
+      containerRef.current?.querySelector<HTMLElement>("[aria-selected=true]")?.focus();
+    }, 0);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [open]);
+  const options = CURRENCIES.filter((currency) => currency.code !== other.code);
   return (
-    <div ref={l} className="relative">
+    <div ref={containerRef} className="relative">
       <button
         type="button"
         aria-haspopup="listbox"
-        aria-expanded={i}
-        aria-controls={o}
-        aria-label={`${r}: ${e.name}`}
-        onClick={() => s((u) => !u)}
+        aria-expanded={open}
+        aria-controls={listId}
+        aria-label={`${label}: ${value.name}`}
+        onClick={() => setOpen((isOpen) => !isOpen)}
         className="flex h-10 items-center gap-2 rounded-full bg-[rgb(var(--ferry-raised))] pl-1.5 pr-3 text-[15px] font-medium text-[rgb(var(--ferry-ink))] transition-colors hover:bg-[rgb(var(--ferry-ink)/.07)]"
       >
-        <CurrencyDot c={e} size={28} />
-        {e.code}
+        <CurrencyDot c={value} size={28} />
+        {value.code}
         <Icon name="chevron_down" size={10} className="text-[rgb(var(--ferry-faint))]" />
       </button>
       <AnimatePresence>
-        {i && (
+        {open && (
           <motion.ul
-            id={o}
+            id={listId}
             role="listbox"
-            aria-label={r}
+            aria-label={label}
             initial={{
               opacity: 0,
               y: -6,
@@ -83,40 +84,40 @@ export function CurrencyPicker({ value: e, other: t, onPick: n, label: r }) {
               originX: 1,
             }}
             className="absolute right-0 top-[calc(100%+6px)] z-30 m-0 max-h-[280px] w-[240px] list-none overflow-y-auto rounded-[18px] bg-[rgb(var(--ferry-surface))] p-1.5 ferry-shadow-lift"
-            onKeyDown={(u) => {
-              var h, x;
-              const d = [...(u.currentTarget.querySelectorAll("[role=option]") ?? [])],
-                f = d.indexOf(document.activeElement);
-              if (u.key === "ArrowDown") (h = d[Math.min(d.length - 1, f + 1)]) == null || h.focus();
-              else if (u.key === "ArrowUp") (x = d[Math.max(0, f - 1)]) == null || x.focus();
-              else if (u.key === "Escape") s(!1);
+            onKeyDown={(event) => {
+              const items = [...(event.currentTarget.querySelectorAll<HTMLElement>("[role=option]") ?? [])],
+                activeIndex = items.indexOf(document.activeElement as HTMLElement);
+              if (event.key === "ArrowDown") items[Math.min(items.length - 1, activeIndex + 1)]?.focus();
+              else if (event.key === "ArrowUp") items[Math.max(0, activeIndex - 1)]?.focus();
+              else if (event.key === "Escape") setOpen(false);
               else return;
-              u.preventDefault();
+              event.preventDefault();
             }}
           >
-            {c.map((u) => (
-              <li key={u.code}>
+            {options.map((currency) => (
+              <li key={currency.code}>
                 <button
                   type="button"
                   role="option"
-                  aria-selected={u.code === e.code}
+                  aria-selected={currency.code === value.code}
                   onClick={() => {
-                    (n(u), s(!1));
+                    onPick(currency);
+                    setOpen(false);
                   }}
-                  className={`flex w-full items-center gap-3 rounded-[12px] px-2.5 py-2 text-left transition-colors hover:bg-[rgb(var(--ferry-raised))] focus-visible:bg-[rgb(var(--ferry-raised))] ${u.code === e.code ? "bg-[rgb(var(--ferry-raised))]" : ""}`}
+                  className={`flex w-full items-center gap-3 rounded-[12px] px-2.5 py-2 text-left transition-colors hover:bg-[rgb(var(--ferry-raised))] focus-visible:bg-[rgb(var(--ferry-raised))] ${currency.code === value.code ? "bg-[rgb(var(--ferry-raised))]" : ""}`}
                 >
-                  <CurrencyDot c={u} size={26} />
+                  <CurrencyDot c={currency} size={26} />
                   <span className="min-w-0 flex-1">
                     <span className="block text-[14px] font-medium text-[rgb(var(--ferry-ink))]">
-                      {u.code}
+                      {currency.code}
                     </span>
                     <span className="block truncate text-[12px] text-[rgb(var(--ferry-mute))]">
-                      {u.name}
+                      {currency.name}
                       {", "}
-                      {u.city}
+                      {currency.city}
                     </span>
                   </span>
-                  {u.code === e.code && (
+                  {currency.code === value.code && (
                     <Icon name="checkmark" size={13} className="text-[rgb(var(--ferry-accent))]" />
                   )}
                 </button>
@@ -129,47 +130,58 @@ export function CurrencyPicker({ value: e, other: t, onPick: n, label: r }) {
   );
 }
 
+type SendStatus = "idle" | "sending" | "arrived";
+
 export function Hero() {
-  const e = useReducedMotion(),
-    [t, n] = useState(getCurrency("USD")),
-    [r, i] = useState(getCurrency("EUR")),
-    [s, o] = useState("10,000"),
-    [l, c] = useState(0),
-    [u, d] = useState("idle"),
-    [f, h] = useState(0),
-    x = useRef(0),
-    w = Number(s.replace(/[^0-9.]/g, "")) || 0,
-    y = rateBetween(t, r),
-    v = feeFor(w),
-    p = Math.max(0, (w - v) * y),
-    m = arrivalPhrase(r.minutes),
-    g = useMemo(() => `${r.symbol.trim()}${formatAmount(p, r, 0)}`, [p, r]),
-    A = () => {
-      u === "sending" || w <= 0 || (d("sending"), c((k) => k + 1));
-    },
-    E = () => {
-      (d("arrived"), window.clearTimeout(x.current), (x.current = window.setTimeout(() => d("idle"), 2600)));
-    };
-  useEffect(() => () => window.clearTimeout(x.current), []);
-  const S = (k) => {
-      (i(k), d("idle"));
-    },
-    M = (k) => {
-      (n(k), d("idle"));
-    };
+  const reduceMotion = useReducedMotion();
+  const [sendCurrency, setSendCurrency] = useState(getCurrency("USD"));
+  const [receiveCurrency, setReceiveCurrency] = useState(getCurrency("EUR"));
+  const [amountText, setAmountText] = useState("10,000");
+  const [launch, setLaunch] = useState(0);
+  const [status, setStatus] = useState<SendStatus>("idle");
+  const [rotation, setRotation] = useState(0);
+  const resetTimerRef = useRef(0);
+  const amount = Number(amountText.replace(/[^0-9.]/g, "")) || 0;
+  const rate = rateBetween(sendCurrency, receiveCurrency);
+  const fee = feeFor(amount);
+  const received = Math.max(0, (amount - fee) * rate);
+  const arrival = arrivalPhrase(receiveCurrency.minutes);
+  const globeLabel = useMemo(
+    () => `${receiveCurrency.symbol.trim()}${formatAmount(received, receiveCurrency, 0)}`,
+    [received, receiveCurrency],
+  );
+  const handleSend = () => {
+    if (status === "sending" || amount <= 0) return;
+    setStatus("sending");
+    setLaunch((count) => count + 1);
+  };
+  const handleArrive = () => {
+    setStatus("arrived");
+    window.clearTimeout(resetTimerRef.current);
+    resetTimerRef.current = window.setTimeout(() => setStatus("idle"), 2600);
+  };
+  useEffect(() => () => window.clearTimeout(resetTimerRef.current), []);
+  const pickReceive = (currency: Currency) => {
+    setReceiveCurrency(currency);
+    setStatus("idle");
+  };
+  const pickSend = (currency: Currency) => {
+    setSendCurrency(currency);
+    setStatus("idle");
+  };
   return (
     <section id="top" className="relative overflow-hidden pt-28 sm:pt-32">
       <div className="mx-auto grid grid-cols-1 max-w-[1160px] gap-10 px-5 sm:px-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-4">
         <div className="relative z-10 flex flex-col justify-center lg:pb-24">
           <h1 className="m-0 text-[clamp(42px,5.6vw,72px)] font-medium leading-[1] tracking-[-0.035em] text-[rgb(var(--ferry-ink))]">
             <span className="block">
-              <SwapText text={`${t.city} to`} />
+              <SwapText text={`${sendCurrency.city} to`} />
             </span>
             <span className="block">
-              <SwapText text={r.city} />
+              <SwapText text={receiveCurrency.city} />
             </span>
             <span className="block text-[rgb(var(--ferry-mute))]">
-              <SwapText text={`${arrivalShort(r.minutes)}.`} />
+              <SwapText text={`${arrivalShort(receiveCurrency.minutes)}.`} />
             </span>
           </h1>
           <p className="m-0 mt-6 max-w-[30em] text-[19px] leading-[1.5] text-[rgb(var(--ferry-mute))]">
@@ -198,12 +210,20 @@ export function Hero() {
         </div>
         <div className="relative min-h-[700px] sm:min-h-[620px] lg:min-h-[680px]">
           <div className="absolute -right-[18%] -top-[6%] bottom-[30%] left-[-6%] sm:-right-[12%] sm:bottom-[16%] lg:-right-[30%] lg:-top-[12%] lg:bottom-[20%] lg:left-[-6%]">
-            <Globe from={t} to={r} launch={l} label={g} onArrive={E} frameX={0.06} frameY={0.3} />
+            <Globe
+              from={sendCurrency}
+              to={receiveCurrency}
+              launch={launch}
+              label={globeLabel}
+              onArrive={handleArrive}
+              frameX={0.06}
+              frameY={0.3}
+            />
           </div>
           <motion.div
             initial={
-              e
-                ? !1
+              reduceMotion
+                ? false
                 : {
                     opacity: 0,
                     y: 24,
@@ -228,19 +248,19 @@ export function Hero() {
               <input
                 id="send-amount"
                 inputMode="decimal"
-                value={s}
-                onChange={(k) => {
-                  const F = k.target.value.replace(/[^0-9.]/g, ""),
-                    [R, q] = F.split("."),
-                    De = Number(R || 0);
-                  (o(
-                    `${De ? De.toLocaleString("en-US") : R === "" ? "" : "0"}${q !== void 0 ? `.${q.slice(0, 2)}` : ""}`,
-                  ),
-                    d("idle"));
+                value={amountText}
+                onChange={(event) => {
+                  const cleaned = event.target.value.replace(/[^0-9.]/g, ""),
+                    [whole, fraction] = cleaned.split("."),
+                    wholeNumber = Number(whole || 0);
+                  setAmountText(
+                    `${wholeNumber ? wholeNumber.toLocaleString("en-US") : whole === "" ? "" : "0"}${fraction !== undefined ? `.${fraction.slice(0, 2)}` : ""}`,
+                  );
+                  setStatus("idle");
                 }}
                 className="ferry-tnum w-full min-w-0 border-0 bg-transparent p-0 text-[32px] font-medium tracking-[-0.03em] text-[rgb(var(--ferry-ink))] outline-hidden"
               />
-              <CurrencyPicker value={t} other={r} onPick={M} label="Currency you send" />
+              <CurrencyPicker value={sendCurrency} other={receiveCurrency} onPick={pickSend} label="Currency you send" />
             </div>
             <div className="relative my-3 flex items-center">
               <span className="h-px flex-1 bg-[rgb(var(--ferry-line)/.1)]" />
@@ -248,10 +268,13 @@ export function Hero() {
                 type="button"
                 aria-label="Swap currencies"
                 onClick={() => {
-                  (h((k) => k + 180), n(r), i(t), d("idle"));
+                  setRotation((degrees) => degrees + 180);
+                  setSendCurrency(receiveCurrency);
+                  setReceiveCurrency(sendCurrency);
+                  setStatus("idle");
                 }}
                 animate={{
-                  rotate: f,
+                  rotate: rotation,
                 }}
                 transition={{
                   type: "spring",
@@ -270,37 +293,37 @@ export function Hero() {
             <div className="text-[13px] text-[rgb(var(--ferry-mute))]">They receive</div>
             <div className="mt-1 flex items-center justify-between gap-3">
               <div className="min-w-0 truncate text-[32px] font-medium tracking-[-0.03em] text-[rgb(var(--ferry-ink))]">
-                <RollingNumber text={formatAmount(p, r)} />
+                <RollingNumber text={formatAmount(received, receiveCurrency)} />
               </div>
-              <CurrencyPicker value={r} other={t} onPick={S} label="Currency they receive" />
+              <CurrencyPicker value={receiveCurrency} other={sendCurrency} onPick={pickReceive} label="Currency they receive" />
             </div>
             <dl className="m-0 mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 border-t border-[rgb(var(--ferry-line)/.1)] pt-4 text-[13px]">
               <dt className="text-[rgb(var(--ferry-mute))]">Rate</dt>
               <dd className="ferry-tnum m-0 text-right text-[rgb(var(--ferry-ink))]">
                 {"1 "}
-                {t.code}
+                {sendCurrency.code}
                 {" = "}
-                {formatRate(y)} {r.code}
+                {formatRate(rate)} {receiveCurrency.code}
               </dd>
               <dt className="text-[rgb(var(--ferry-mute))]">Our fee</dt>
               <dd className="ferry-tnum m-0 text-right text-[rgb(var(--ferry-ink))]">
-                {t.symbol.trim()}
-                {formatAmount(v, t)}
+                {sendCurrency.symbol.trim()}
+                {formatAmount(fee, sendCurrency)}
               </dd>
               <dt className="text-[rgb(var(--ferry-mute))]">Arrives</dt>
               <dd className="m-0 text-right text-[rgb(var(--ferry-ink))]">
-                {m}
+                {arrival}
                 {", over "}
-                {r.rail}
+                {receiveCurrency.rail}
               </dd>
             </dl>
             <button
               type="button"
-              onClick={A}
-              disabled={w <= 0}
-              className={`relative mt-5 flex h-12 w-full items-center justify-center overflow-hidden rounded-[12px] text-[16px] font-medium text-white transition-[background-color,filter] disabled:opacity-40 ${u === "arrived" ? "bg-[rgb(var(--ferry-gain))]" : "bg-[rgb(var(--ferry-accent))] hover:brightness-110"}`}
+              onClick={handleSend}
+              disabled={amount <= 0}
+              className={`relative mt-5 flex h-12 w-full items-center justify-center overflow-hidden rounded-[12px] text-[16px] font-medium text-white transition-[background-color,filter] disabled:opacity-40 ${status === "arrived" ? "bg-[rgb(var(--ferry-gain))]" : "bg-[rgb(var(--ferry-accent))] hover:brightness-110"}`}
             >
-              {u === "sending" && (
+              {status === "sending" && (
                 <motion.span
                   className="absolute inset-y-0 left-0 bg-white/20"
                   initial={{
@@ -310,14 +333,14 @@ export function Hero() {
                     width: "100%",
                   }}
                   transition={{
-                    duration: e ? 0.5 : 1.8,
+                    duration: reduceMotion ? 0.5 : 1.8,
                     ease: [0.45, 0, 0.55, 1],
                   }}
                 />
               )}
-              <AnimatePresence mode="popLayout" initial={!1}>
+              <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
-                  key={u}
+                  key={status}
                   initial={{
                     y: 14,
                     opacity: 0,
@@ -333,12 +356,12 @@ export function Hero() {
                   transition={MENU_SPRING}
                   className="relative flex items-center gap-2"
                 >
-                  {u === "arrived" && <Icon name="checkmark" size={15} />}
-                  {u === "idle"
-                    ? `Send to ${r.city}`
-                    : u === "sending"
-                      ? `Sending to ${r.city}`
-                      : `Arrived in ${r.city}`}
+                  {status === "arrived" && <Icon name="checkmark" size={15} />}
+                  {status === "idle"
+                    ? `Send to ${receiveCurrency.city}`
+                    : status === "sending"
+                      ? `Sending to ${receiveCurrency.city}`
+                      : `Arrived in ${receiveCurrency.city}`}
                 </motion.span>
               </AnimatePresence>
             </button>

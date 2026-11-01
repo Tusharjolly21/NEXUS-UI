@@ -1,12 +1,23 @@
-// @ts-nocheck -- temporary during decompile cleanup
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import { motion, AnimatePresence, useReducedMotion, useInView } from "framer-motion";
 import { feeFor, formatAmount, formatRate, getCurrency, rateBetween } from "./data";
+import type { Currency } from "./data";
 import { Badge, CurrencyDot, Frame, Icon, Panel, PulseGrid, SectionHeading } from "./ui";
 
-export const PAYOUT_SAMPLES = [
+type PayoutSample = {
+  from: string;
+  to: string;
+  amount: number;
+  who: string;
+  country: string;
+  acct: string;
+  id: string;
+};
+
+export const PAYOUT_SAMPLES: PayoutSample[] = [
   {
     from: "GBP",
     to: "INR",
@@ -54,34 +65,44 @@ export const PAYOUT_SAMPLES = [
   },
 ];
 
-export const durationText = (e) =>
-  e <= 1 ? "under a minute" : e < 60 ? `${e} minutes` : `${Math.round(e / 60)} hours`;
+export const durationText = (minutes: number): string =>
+  minutes <= 1 ? "under a minute" : minutes < 60 ? `${minutes} minutes` : `${Math.round(minutes / 60)} hours`;
 
-export function InlineChip({ children: e }) {
+type InlineChipProps = {
+  children?: ReactNode;
+};
+
+export function InlineChip({ children }: InlineChipProps) {
   return (
     <span className="mx-0.5 rounded-[6px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-raised))] px-1.5 py-0.5 text-[0.92em] text-[rgb(var(--ferry-mute))]">
-      {e}
+      {children}
     </span>
   );
 }
 
+type PayoutStep = {
+  node: ReactNode;
+  mono?: boolean;
+  dim?: boolean;
+};
+
 export function Payouts() {
-  const e = useReducedMotion(),
-    [t, n] = useState(0),
-    [r, i] = useState(0),
-    [s, o] = useState(0),
-    l = useRef(null),
-    c = useInView(l, {
-      once: !0,
+  const reduceMotion = useReducedMotion(),
+    [sampleIndex, setSampleIndex] = useState(0),
+    [replayCount, setReplayCount] = useState(0),
+    [visibleCount, setVisibleCount] = useState(0),
+    sectionRef = useRef<HTMLDivElement>(null),
+    inView = useInView(sectionRef, {
+      once: true,
       margin: "-20% 0px",
     }),
-    u = PAYOUT_SAMPLES[t],
-    d = getCurrency(u.from),
-    f = getCurrency(u.to),
-    h = rateBetween(d, f),
-    x = (u.amount - feeFor(u.amount)) * h,
-    w = (g) => g.symbol.trim(),
-    y = [
+    sample = PAYOUT_SAMPLES[sampleIndex],
+    fromCurrency = getCurrency(sample.from),
+    toCurrency = getCurrency(sample.to),
+    rate = rateBetween(fromCurrency, toCurrency),
+    received = (sample.amount - feeFor(sample.amount)) * rate,
+    symbolOf = (currency: Currency) => currency.symbol.trim(),
+    steps: PayoutStep[] = [
       {
         node: <>Payment approved by Maya Chen and Daniel Ortiz.</>,
       },
@@ -89,13 +110,13 @@ export function Payouts() {
         node: (
           <>
             {"Converting "}
-            <InlineChip>{`${w(d)}${formatAmount(u.amount, d)}`}</InlineChip>
+            <InlineChip>{`${symbolOf(fromCurrency)}${formatAmount(sample.amount, fromCurrency)}`}</InlineChip>
             {" to "}
-            {f.code}
+            {toCurrency.code}
             {" at "}
-            <InlineChip>{formatRate(h)}</InlineChip>
+            <InlineChip>{formatRate(rate)}</InlineChip>
             {", fee "}
-            <InlineChip>{`${w(d)}${formatAmount(feeFor(u.amount), d)}`}</InlineChip>.
+            <InlineChip>{`${symbolOf(fromCurrency)}${formatAmount(feeFor(sample.amount), fromCurrency)}`}</InlineChip>.
           </>
         ),
       },
@@ -103,63 +124,71 @@ export function Payouts() {
         node: (
           <>
             {"Routing over "}
-            <InlineChip>{f.rail}</InlineChip>
+            <InlineChip>{toCurrency.rail}</InlineChip>
             {", the local instant network in "}
-            {u.country}.
+            {sample.country}.
           </>
         ),
       },
       {
-        mono: !0,
+        mono: true,
         node: (
           <>
             {"ferry payouts track "}
-            {u.id}
+            {sample.id}
             {" --rail "}
-            {f.rail.toLowerCase().replace(/\s+/g, "-")}
+            {toCurrency.rail.toLowerCase().replace(/\s+/g, "-")}
           </>
         ),
       },
       {
-        mono: !0,
-        dim: !0,
+        mono: true,
+        dim: true,
         node: (
           <>
             {"status in_transit, eta "}
-            {f.minutes <= 1 ? "<1m" : f.minutes < 60 ? `${f.minutes}m` : `${Math.round(f.minutes / 60)}h`}
+            {toCurrency.minutes <= 1
+              ? "<1m"
+              : toCurrency.minutes < 60
+                ? `${toCurrency.minutes}m`
+                : `${Math.round(toCurrency.minutes / 60)}h`}
           </>
         ),
       },
     ],
-    v = y.length + 1,
-    p = s >= v;
+    totalTicks = steps.length + 1,
+    arrived = visibleCount >= totalTicks;
   useEffect(() => {
-    if (!c) return;
-    if (e) {
-      o(v);
+    if (!inView) return;
+    if (reduceMotion) {
+      setVisibleCount(totalTicks);
       return;
     }
-    o(0);
-    const g = Array.from(
+    setVisibleCount(0);
+    const timers = Array.from(
       {
-        length: v,
+        length: totalTicks,
       },
-      (A, E) => window.setTimeout(() => o(E + 1), 420 + E * 640 + (E === v - 1 ? 500 : 0)),
+      (_, tick) =>
+        window.setTimeout(
+          () => setVisibleCount(tick + 1),
+          420 + tick * 640 + (tick === totalTicks - 1 ? 500 : 0),
+        ),
     );
-    return () => g.forEach(window.clearTimeout);
-  }, [c, t, r, e, v]);
-  const m = (g) => {
-    var S;
-    const A =
-      g.key === "ArrowDown" || g.key === "ArrowRight"
+    return () => timers.forEach(window.clearTimeout);
+  }, [inView, sampleIndex, replayCount, reduceMotion, totalTicks]);
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const step =
+      event.key === "ArrowDown" || event.key === "ArrowRight"
         ? 1
-        : g.key === "ArrowUp" || g.key === "ArrowLeft"
+        : event.key === "ArrowUp" || event.key === "ArrowLeft"
           ? -1
           : 0;
-    if (!A) return;
-    g.preventDefault();
-    const E = (t + A + PAYOUT_SAMPLES.length) % PAYOUT_SAMPLES.length;
-    (n(E), (S = g.currentTarget.querySelectorAll("[role=radio]")[E]) == null || S.focus());
+    if (!step) return;
+    event.preventDefault();
+    const nextIndex = (sampleIndex + step + PAYOUT_SAMPLES.length) % PAYOUT_SAMPLES.length;
+    setSampleIndex(nextIndex);
+    event.currentTarget.querySelectorAll<HTMLElement>("[role=radio]")[nextIndex]?.focus();
   };
   return (
     <section id="payouts" className="scroll-mt-24 px-3 py-24 sm:px-6 sm:py-32">
@@ -168,7 +197,7 @@ export function Payouts() {
         title="Send every payout over the right local rail."
         sub="Pick a corridor and watch Ferry route it. Each payout is converted at the real rate, sent on the country's own instant network and confirmed when it lands."
       />
-      <div ref={l}>
+      <div ref={sectionRef}>
         <Frame className="mx-auto mt-12 max-w-[1160px]">
           <Panel className="p-0">
             <div className="flex items-center justify-between gap-3 border-b border-solid border-[rgb(var(--ferry-line)/.08)] px-4 py-3.5 sm:px-6">
@@ -178,11 +207,11 @@ export function Payouts() {
                 </span>
                 <span className="truncate text-[15px] font-medium text-[rgb(var(--ferry-ink))]">
                   {"Payout to "}
-                  {u.who}
+                  {sample.who}
                 </span>
-                <AnimatePresence mode="popLayout" initial={!1}>
+                <AnimatePresence mode="popLayout" initial={false}>
                   <motion.span
-                    key={p ? "done" : "run"}
+                    key={arrived ? "done" : "run"}
                     initial={{
                       opacity: 0,
                       scale: 0.9,
@@ -200,8 +229,8 @@ export function Payouts() {
                     }}
                     className="hidden sm:inline-flex"
                   >
-                    {p ? (
-                      <Badge tone="gain" dot={!0}>
+                    {arrived ? (
+                      <Badge tone="gain" dot={true}>
                         Arrived
                       </Badge>
                     ) : (
@@ -215,7 +244,7 @@ export function Payouts() {
               </div>
               <button
                 type="button"
-                onClick={() => i((g) => g + 1)}
+                onClick={() => setReplayCount((count) => count + 1)}
                 aria-label="Replay this payout"
                 className="grid h-8 w-8 place-items-center rounded-[8px] text-[rgb(var(--ferry-mute))] transition-colors hover:bg-[rgb(var(--ferry-raised))] hover:text-[rgb(var(--ferry-ink))]"
               >
@@ -226,13 +255,13 @@ export function Payouts() {
               <span aria-hidden="true" className="ferry-glow !right-[-60px] !top-[-120px] hidden lg:block" />
               <div className="min-h-[400px] px-4 py-6 sm:px-6" aria-live="polite">
                 <ul className="m-0 grid list-none gap-4 p-0">
-                  <AnimatePresence initial={!1}>
-                    {y.slice(0, Math.min(s, y.length)).map((g, A) => (
+                  <AnimatePresence initial={false}>
+                    {steps.slice(0, Math.min(visibleCount, steps.length)).map((step, stepIndex) => (
                       <motion.li
-                        key={`${t}-${r}-${A}`}
+                        key={`${sampleIndex}-${replayCount}-${stepIndex}`}
                         initial={
-                          e
-                            ? !1
+                          reduceMotion
+                            ? false
                             : {
                                 opacity: 0,
                                 y: 6,
@@ -248,24 +277,24 @@ export function Payouts() {
                           duration: 0.35,
                         }}
                         className={
-                          g.mono
-                            ? `font-mono text-[13px] ${g.dim ? "text-[rgb(var(--ferry-faint))]" : "text-[rgb(var(--ferry-mute))]"}`
+                          step.mono
+                            ? `font-mono text-[13px] ${step.dim ? "text-[rgb(var(--ferry-faint))]" : "text-[rgb(var(--ferry-mute))]"}`
                             : "text-[15px] leading-[1.6] text-[rgb(var(--ferry-ink)/.9)]"
                         }
                       >
-                        {g.mono && <span className="text-[rgb(var(--ferry-accent-ink))]">{"$ "}</span>}
-                        {g.node}
+                        {step.mono && <span className="text-[rgb(var(--ferry-accent-ink))]">{"$ "}</span>}
+                        {step.node}
                       </motion.li>
                     ))}
                   </AnimatePresence>
                 </ul>
                 <AnimatePresence mode="wait">
-                  {p ? (
+                  {arrived ? (
                     <motion.div
-                      key={`n-${t}-${r}`}
+                      key={`n-${sampleIndex}-${replayCount}`}
                       initial={
-                        e
-                          ? !1
+                        reduceMotion
+                          ? false
                           : {
                               opacity: 0,
                               y: -10,
@@ -297,25 +326,25 @@ export function Payouts() {
                             <span className="text-[11px] text-[rgb(var(--ferry-faint))]">now</span>
                           </span>
                           <span className="mt-0.5 block text-[13px] leading-[1.45] text-[rgb(var(--ferry-mute))]">
-                            {w(f)}
-                            {formatAmount(x, f)}
+                            {symbolOf(toCurrency)}
+                            {formatAmount(received, toCurrency)}
                             {" from Northwind Ltd landed in the account ending "}
-                            {u.acct}.
+                            {sample.acct}.
                           </span>
                         </span>
                       </div>
                       <p className="m-0 mt-3 flex items-center gap-2 text-[13px] text-[rgb(var(--ferry-gain))]">
                         <Icon name="checkmark_seal_fill" size={15} />
                         {"Arrived in "}
-                        {durationText(f.minutes)}
+                        {durationText(toCurrency.minutes)}
                         {", seen by "}
-                        {u.who}
+                        {sample.who}
                         {" in "}
-                        {f.city}.
+                        {toCurrency.city}.
                       </p>
                     </motion.div>
                   ) : (
-                    s > 0 && (
+                    visibleCount > 0 && (
                       <motion.p
                         key={"wait"}
                         initial={{
@@ -344,22 +373,22 @@ export function Payouts() {
                   <p className="m-0 mt-1 px-1 text-[14px] font-medium text-[rgb(var(--ferry-ink))]">
                     Choose a corridor
                   </p>
-                  <div role="radiogroup" aria-label="Corridor" className="mt-3 grid gap-1" onKeyDown={m}>
-                    {PAYOUT_SAMPLES.map((g, A) => {
-                      const E = getCurrency(g.from),
-                        S = getCurrency(g.to),
-                        M = A === t;
+                  <div role="radiogroup" aria-label="Corridor" className="mt-3 grid gap-1" onKeyDown={handleKeyDown}>
+                    {PAYOUT_SAMPLES.map((option, optionIndex) => {
+                      const optionFrom = getCurrency(option.from),
+                        optionTo = getCurrency(option.to),
+                        isSelected = optionIndex === sampleIndex;
                       return (
                         <button
-                          key={g.id}
+                          key={option.id}
                           type="button"
                           role="radio"
-                          aria-checked={M}
-                          tabIndex={M ? 0 : -1}
-                          onClick={() => n(A)}
+                          aria-checked={isSelected}
+                          tabIndex={isSelected ? 0 : -1}
+                          onClick={() => setSampleIndex(optionIndex)}
                           className="relative flex items-center gap-3 rounded-[12px] px-2.5 py-2 text-left transition-colors hover:bg-[rgb(var(--ferry-raised))]"
                         >
-                          {M && (
+                          {isSelected && (
                             <motion.span
                               layoutId="route-sel"
                               className="absolute inset-0 rounded-[12px] border border-solid border-[rgb(var(--ferry-accent)/.6)] bg-[rgb(var(--ferry-accent)/.06)] shadow-[0_0_0_3px_rgb(var(--ferry-accent)/.1),0_0_24px_-6px_rgb(var(--ferry-accent)/.5)]"
@@ -371,18 +400,18 @@ export function Payouts() {
                             />
                           )}
                           <span className="relative">
-                            <CurrencyDot c={S} size={30} />
+                            <CurrencyDot c={optionTo} size={30} />
                           </span>
                           <span className="relative min-w-0">
                             <span className="block truncate text-[14px] font-medium text-[rgb(var(--ferry-ink))]">
-                              {E.city}
+                              {optionFrom.city}
                               {" to "}
-                              {S.city}
+                              {optionTo.city}
                             </span>
                             <span className="block text-[11px] text-[rgb(var(--ferry-faint))]">
-                              {S.rail}
+                              {optionTo.rail}
                               {", about "}
-                              {durationText(S.minutes)}
+                              {durationText(optionTo.minutes)}
                             </span>
                           </span>
                         </button>

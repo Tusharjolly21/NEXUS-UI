@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
-import { motion } from "framer-motion";
 import { CURRENCIES } from "./data";
 import type { Currency } from "./data";
 import { LAND_POINTS } from "./globe-data";
@@ -217,8 +216,12 @@ export function Globe({
       label: label ?? "",
       arrive: onArrive,
     });
-  stateRef.current.label = label ?? "";
-  stateRef.current.arrive = onArrive;
+  const toneRef = useRef(tone);
+  useLayoutEffect(() => {
+    stateRef.current.label = label ?? "";
+    stateRef.current.arrive = onArrive;
+    toneRef.current = tone;
+  });
   useEffect(() => {
     const state = stateRef.current,
       fromVec = toUnitVector(from.lat, from.lng),
@@ -257,8 +260,8 @@ export function Globe({
       land = getLandPoints(),
       landCount = land.length / 3,
       reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let palette = globePalette(tone);
-    const themeObserver = new MutationObserver(() => (palette = globePalette(tone)));
+    let palette = globePalette(toneRef.current);
+    const themeObserver = new MutationObserver(() => (palette = globePalette(toneRef.current)));
     themeObserver.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"],

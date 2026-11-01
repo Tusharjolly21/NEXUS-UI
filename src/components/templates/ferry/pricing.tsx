@@ -1,12 +1,21 @@
-// @ts-nocheck -- temporary during decompile cleanup
 "use client";
 
 import { useState } from "react";
+import type { CSSProperties } from "react";
 import { motion } from "framer-motion";
 import { formatAmount, getCurrency } from "./data";
 import { Icon, RollingNumber, SectionHeading, buttonClass } from "./ui";
 
-export const PLANS = [
+type Plan = {
+  name: string;
+  base: number;
+  rate: number;
+  blurb: string;
+  cta: string;
+  has: string[];
+};
+
+export const PLANS: Plan[] = [
   {
     name: "Starter",
     base: 0,
@@ -51,24 +60,24 @@ export const MIN_VOLUME = 1e4;
 
 export const MAX_VOLUME = 1e7;
 
-export const volumeFromSlider = (e) => {
-  const t = MIN_VOLUME * Math.pow(MAX_VOLUME / MIN_VOLUME, e),
-    n = Math.pow(10, Math.floor(Math.log10(t)) - 1);
-  return Math.round(t / n) * n;
+export const volumeFromSlider = (position: number): number => {
+  const raw = MIN_VOLUME * Math.pow(MAX_VOLUME / MIN_VOLUME, position),
+    step = Math.pow(10, Math.floor(Math.log10(raw)) - 1);
+  return Math.round(raw / step) * step;
 };
 
-export const sliderFromVolume = (e) => Math.log(e / MIN_VOLUME) / Math.log(MAX_VOLUME / MIN_VOLUME);
+export const sliderFromVolume = (volume: number): number => Math.log(volume / MIN_VOLUME) / Math.log(MAX_VOLUME / MIN_VOLUME);
 
 export const USD = getCurrency("USD");
 
-export const formatPercent = (e) => `${+(e * 100).toFixed(2)}%`;
+export const formatPercent = (fraction: number): string => `${+(fraction * 100).toFixed(2)}%`;
 
 export function Pricing() {
-  const [e, t] = useState(sliderFromVolume(12e4)),
-    n = volumeFromSlider(e),
-    r = PLANS.map((o) => o.base + n * o.rate),
-    i = r.indexOf(Math.min(...r)),
-    s = n * BANK_MARKUP;
+  const [sliderPosition, setSliderPosition] = useState(sliderFromVolume(12e4)),
+    volume = volumeFromSlider(sliderPosition),
+    costs = PLANS.map((plan) => plan.base + volume * plan.rate),
+    bestIndex = costs.indexOf(Math.min(...costs)),
+    bankCost = volume * BANK_MARKUP;
   return (
     <section id="pricing" className="scroll-mt-24 px-3 py-24 sm:px-6 sm:py-32">
       <div className="mx-auto grid max-w-[1160px] grid-cols-1 items-end gap-6 px-2 lg:grid-cols-2">
@@ -88,11 +97,11 @@ export function Pricing() {
         </p>
       </div>
       <ul className="mx-auto mt-14 grid max-w-[1160px] list-none grid-cols-1 gap-4 p-0 md:grid-cols-3">
-        {PLANS.map((o, l) => {
-          const c = l === i;
+        {PLANS.map((plan, index) => {
+          const isBest = index === bestIndex;
           return (
-            <li key={o.name} className="relative">
-              {c && (
+            <li key={plan.name} className="relative">
+              {isBest && (
                 <motion.span
                   layoutId="best-tag"
                   className="absolute -top-3 left-1/2 z-10 whitespace-nowrap rounded-[8px] border border-solid border-[rgb(var(--ferry-accent)/.4)] bg-[rgb(var(--ferry-surface))] px-3 py-1 text-[12px] font-medium text-[rgb(var(--ferry-ink))] shadow-[0_0_0_3px_rgb(var(--ferry-accent)/.08),0_8px_20px_-10px_rgb(var(--ferry-accent)/.6)]"
@@ -110,52 +119,52 @@ export function Pricing() {
               )}
               <div className="h-full rounded-[28px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-frame))] p-2">
                 <div
-                  className={`relative flex h-full flex-col overflow-hidden rounded-[22px] border border-solid bg-[rgb(var(--ferry-surface)/.82)] p-6 ferry-shadow-panel transition-colors duration-300 ${c ? "border-[rgb(var(--ferry-accent)/.35)]" : "border-[rgb(var(--ferry-line)/.08)]"}`}
+                  className={`relative flex h-full flex-col overflow-hidden rounded-[22px] border border-solid bg-[rgb(var(--ferry-surface)/.82)] p-6 ferry-shadow-panel transition-colors duration-300 ${isBest ? "border-[rgb(var(--ferry-accent)/.35)]" : "border-[rgb(var(--ferry-line)/.08)]"}`}
                 >
                   <span aria-hidden="true" className="ferry-glow" />
                   <div className="relative">
                     <h3 className="m-0 text-[22px] font-medium tracking-[-0.02em] text-[rgb(var(--ferry-ink))]">
-                      {o.name}
+                      {plan.name}
                     </h3>
-                    <p className="m-0 mt-1.5 text-[13px] text-[rgb(var(--ferry-mute))]">{o.blurb}</p>
+                    <p className="m-0 mt-1.5 text-[13px] text-[rgb(var(--ferry-mute))]">{plan.blurb}</p>
                     <div className="mt-6 flex items-baseline gap-1.5">
                       <span className="ferry-tnum text-[48px] font-medium leading-none tracking-[-0.035em] text-[rgb(var(--ferry-ink))]">
-                        ${o.base}
+                        ${plan.base}
                       </span>
                       <span className="text-[14px] text-[rgb(var(--ferry-mute))]">a month</span>
                     </div>
                     <div className="mt-2 text-[12px] text-[rgb(var(--ferry-faint))]">
                       {"plus "}
-                      {formatPercent(o.rate)}
+                      {formatPercent(plan.rate)}
                       {" on conversions"}
                     </div>
                     <div className="mt-6">
-                      <a href="#open" className={`${buttonClass(c ? "primary" : "ghost")} no-underline`}>
-                        {o.cta}
-                        {c && <Icon name="arrow_up_right" size={11} />}
+                      <a href="#open" className={`${buttonClass(isBest ? "primary" : "ghost")} no-underline`}>
+                        {plan.cta}
+                        {isBest && <Icon name="arrow_up_right" size={11} />}
                       </a>
                     </div>
                   </div>
                   <div className="relative mt-6 rounded-[14px] border border-solid border-[rgb(var(--ferry-line)/.08)] bg-[rgb(var(--ferry-raised)/.7)] px-4 py-3">
                     <div className="text-[11px] text-[rgb(var(--ferry-faint))]">
-                      At ${formatAmount(n, USD, 0)}
+                      At ${formatAmount(volume, USD, 0)}
                       {" a month"}
                     </div>
                     <div
-                      className={`mt-0.5 text-[20px] font-medium tracking-[-0.02em] ${c ? "text-[rgb(var(--ferry-accent-ink))]" : "text-[rgb(var(--ferry-ink))]"}`}
+                      className={`mt-0.5 text-[20px] font-medium tracking-[-0.02em] ${isBest ? "text-[rgb(var(--ferry-accent-ink))]" : "text-[rgb(var(--ferry-ink))]"}`}
                     >
-                      $<RollingNumber text={formatAmount(r[l], USD, 0)} />
+                      $<RollingNumber text={formatAmount(costs[index], USD, 0)} />
                     </div>
                   </div>
                   <ul className="relative m-0 mt-6 grid list-none gap-2.5 border-t border-solid border-[rgb(var(--ferry-line)/.08)] p-0 pt-6 text-[13px] text-[rgb(var(--ferry-ink))]">
-                    {o.has.map((u) => (
-                      <li key={u} className="flex items-center gap-2.5">
+                    {plan.has.map((feature) => (
+                      <li key={feature} className="flex items-center gap-2.5">
                         <Icon
                           name="checkmark"
                           size={11}
                           className="shrink-0 text-[rgb(var(--ferry-accent-ink))]"
                         />
-                        {u}
+                        {feature}
                       </li>
                     ))}
                   </ul>
@@ -172,7 +181,7 @@ export function Pricing() {
               You convert each month
             </label>
             <div className="mt-0.5 text-[22px] font-medium tracking-[-0.02em] text-[rgb(var(--ferry-ink))]">
-              $<RollingNumber text={formatAmount(n, USD, 0)} />
+              $<RollingNumber text={formatAmount(volume, USD, 0)} />
             </div>
           </div>
           <div>
@@ -182,13 +191,15 @@ export function Pricing() {
               min={0}
               max={1}
               step={0.001}
-              value={e}
-              onChange={(o) => t(+o.target.value)}
-              aria-valuetext={`$${formatAmount(n, USD, 0)} a month`}
+              value={sliderPosition}
+              onChange={(event) => setSliderPosition(+event.target.value)}
+              aria-valuetext={`$${formatAmount(volume, USD, 0)} a month`}
               className="ferry-range w-full"
-              style={{
-                "--fill": `${e * 100}%`,
-              }}
+              style={
+                {
+                  "--fill": `${sliderPosition * 100}%`,
+                } as CSSProperties
+              }
             />
             <div className="mt-0.5 flex justify-between text-[11px] text-[rgb(var(--ferry-faint))]">
               <span>$10k</span>
@@ -199,12 +210,12 @@ export function Pricing() {
             {"A typical bank's "}
             {formatPercent(BANK_MARKUP)}
             {" markup would cost "}
-            <span className="ferry-tnum text-[rgb(var(--ferry-ink))]">${formatAmount(s, USD, 0)}</span>
+            <span className="ferry-tnum text-[rgb(var(--ferry-ink))]">${formatAmount(bankCost, USD, 0)}</span>
             {". On "}
-            {PLANS[i].name}
+            {PLANS[bestIndex].name}
             {" you keep"}{" "}
             <span className="ferry-tnum font-medium text-[rgb(var(--ferry-gain))]">
-              ${formatAmount(Math.max(0, s - r[i]), USD, 0)}
+              ${formatAmount(Math.max(0, bankCost - costs[bestIndex]), USD, 0)}
             </span>
             .
           </p>
