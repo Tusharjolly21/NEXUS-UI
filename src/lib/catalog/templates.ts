@@ -817,6 +817,46 @@ export const templates: MarketplaceTemplate[] = [
       "Respects reduced motion and has no horizontal scroll at 390px",
     ],
   },
+  {
+    slug: "ferry",
+    title: "Ferry — multi-currency payments landing page",
+    description:
+      "A light and dark landing page for a business that holds, converts and sends money in many currencies: a hero converter with rolling digits and a globe that routes each corridor, a live treasury view, rate locks, payout routing, approval rules, a developer section with real code samples, and a pricing calculator.",
+    category: "Fintech",
+    tags: ["fintech", "payments", "saas", "dashboard", "dark mode", "light mode", "canvas", "motion-kit"],
+    difficulty: "Advanced",
+    premium: true,
+    trendingScore: 312,
+    createdAt: "2026-11-01",
+    techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
+    pages: ["/"],
+    sections: [
+      "Nav with Product Menu and Theme Toggle",
+      "Hero with Currency Converter and Globe",
+      "Live Treasury",
+      "Product Bento",
+      "Payout Routing",
+      "Approval Rules",
+      "Developer API",
+      "Customer Cards",
+      "Pricing Calculator",
+      "FAQ",
+      "Closing Call to Action and Footer",
+    ],
+    pageLabels: ["Treasury", "Payouts", "Developers", "Pricing"],
+    previewImages: {
+      hero: "/templates/ferry/hero.webp",
+      sections: [
+        "/templates/ferry/section-1.webp",
+        "/templates/ferry/section-2.webp",
+        "/templates/ferry/section-3.webp",
+        "/templates/ferry/section-4.webp",
+      ],
+    },
+    features: [
+      "FEATURES_PLACEHOLDER",
+    ],
+  },
 ];
 
 /**
