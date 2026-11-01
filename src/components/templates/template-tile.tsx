@@ -34,11 +34,14 @@ export function TemplateTile({
   tmpl,
   isPro = false,
   priority = false,
+  featured = false,
 }: {
   tmpl: MarketplaceTemplate;
   /** The visitor has Pro or All-Access. */
   isPro?: boolean;
   priority?: boolean;
+  /** The big tile that opens the wall: two columns wide, with a line about the template. */
+  featured?: boolean;
 }) {
   const name = templateName(tmpl);
   const tagline = templateTagline(tmpl);
@@ -52,7 +55,13 @@ export function TemplateTile({
   const tint = CATEGORY_TINT[tmpl.category] ?? "bg-tint-sky";
 
   return (
-    <article className={cn("group relative isolate flex h-full flex-col overflow-hidden rounded-[28px] p-2.5", tint)}>
+    <article
+      className={cn(
+        "group relative isolate flex h-full flex-col overflow-hidden rounded-[28px] p-2.5",
+        featured && "lg:col-span-2 lg:row-span-2 lg:p-3.5",
+        tint,
+      )}
+    >
       {/* window */}
       <div
         aria-hidden
@@ -87,7 +96,7 @@ export function TemplateTile({
                   fill
                   priority={priority && i === 0}
                   loading={i === 0 ? undefined : "lazy"}
-                  sizes="(max-width: 767px) 94vw, 560px"
+                  sizes={featured ? "(max-width: 1023px) 94vw, 820px" : "(max-width: 767px) 94vw, (max-width: 1279px) 48vw, 400px"}
                   className="object-cover object-top"
                 />
               </div>
@@ -108,9 +117,9 @@ export function TemplateTile({
       </div>
 
       {/* caption */}
-      <div className="flex items-center justify-between gap-3 px-2.5 pb-1 pt-3.5">
+      <div className={cn("flex items-center justify-between gap-3 px-2.5 pb-1 pt-3.5", featured && "lg:pt-5")}>
         <div className="min-w-0">
-          <h2 className="truncate text-[18px] font-semibold tracking-[-0.025em] text-foreground">
+          <h2 className={cn("truncate text-[18px] font-semibold tracking-[-0.025em] text-foreground", featured && "lg:text-[26px]")}>
             {/* the whole tile is clickable through this link's ::after */}
             <Link
               href={href}
@@ -168,6 +177,19 @@ export function TemplateTile({
           </div>
         </div>
       </div>
+
+      {featured ? (
+        <div className="hidden px-2.5 pb-2 pt-3 lg:block">
+          <p className="line-clamp-3 max-w-[640px] text-[15px] leading-[1.55] text-foreground/75">{tmpl.description}</p>
+          <ul className="mt-4 flex flex-wrap gap-1.5">
+            {tmpl.tags.slice(0, 6).map((tag) => (
+              <li key={tag} className="rounded-full bg-white/70 px-3 py-1 text-[12.5px] font-medium text-foreground/80 dark:bg-black/25">
+                {tag}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </article>
   );
 }
