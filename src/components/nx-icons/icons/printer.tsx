@@ -27,6 +27,7 @@ export function PrinterIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
       width={size}
       height={size}
       viewBox="0 0 24 24"
+      overflow="visible"
       fill="none"
       stroke="currentColor"
       strokeWidth={strokeWidth}
@@ -46,7 +47,7 @@ export function PrinterIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
         <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
       </motion.g>
       <motion.path
-        d="M6 14h12v8H6z"
+        d="M7.6 14h8.8v7.4H7.6z"
         stroke={accent}
         initial={false}
         animate={on ? { y: [-5, 0], opacity: [0, 1] } : { y: 0, opacity: 1 }}

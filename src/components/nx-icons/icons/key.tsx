@@ -27,6 +27,7 @@ export function KeyIcon({ size = 24, strokeWidth = 2, className, speed = 1, acce
       width={size}
       height={size}
       viewBox="0 0 24 24"
+      overflow="visible"
       fill="none"
       stroke="currentColor"
       strokeWidth={strokeWidth}
@@ -40,12 +41,12 @@ export function KeyIcon({ size = 24, strokeWidth = 2, className, speed = 1, acce
       <motion.g
         style={{ originX: "31%", originY: "65%" }}
         initial={false}
-        animate={on ? { rotate: [0, -38, -38, 0] } : { rotate: 0 }}
+        animate={on ? { rotate: [0, -26, -26, 0] } : { rotate: 0 }}
         transition={{ duration: 0.8 / speed, times: [0, 0.4, 0.6, 1], ease: "easeInOut" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="m21 2-9.6 9.6" />
         <path d="m15.5 7.5 3 3L22 7l-3-3" stroke={accent} />
+        <path d="m21 2-9.6 9.6" />
         <circle cx="7.5" cy="15.5" r="5.5" />
       </motion.g>
     </svg>

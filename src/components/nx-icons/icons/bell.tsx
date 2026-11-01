@@ -27,6 +27,7 @@ export function BellIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
       width={size}
       height={size}
       viewBox="0 0 24 24"
+      overflow="visible"
       fill="none"
       stroke="currentColor"
       strokeWidth={strokeWidth}
@@ -45,7 +46,7 @@ export function BellIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
       >
         <path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 2H5z" />
         <motion.path
-          d="M10 21.2a2 2 0 0 0 4 0"
+          d="M10.2 20.4a1.8 1.8 0 0 0 3.6 0"
           initial={false}
           animate={on ? { x: [0, -1.4, 1.6, -1, 0.6, 0] } : { x: 0 }}
           transition={{ duration: 0.9 / speed, ease: "easeInOut", delay: (0.06) / speed }}

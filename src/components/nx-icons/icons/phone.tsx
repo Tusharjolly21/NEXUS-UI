@@ -27,6 +27,7 @@ export function PhoneIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
       width={size}
       height={size}
       viewBox="0 0 24 24"
+      overflow="visible"
       fill="none"
       stroke="currentColor"
       strokeWidth={strokeWidth}

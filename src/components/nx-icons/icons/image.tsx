@@ -27,6 +27,7 @@ export function ImageIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
       width={size}
       height={size}
       viewBox="0 0 24 24"
+      overflow="visible"
       fill="none"
       stroke="currentColor"
       strokeWidth={strokeWidth}
@@ -48,7 +49,7 @@ export function ImageIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
         transition={{ duration: 0.4 / speed, ease: "easeOut" }}
       />
       <motion.path
-        d="M3.8 17.5l4.7-4.7 3.8 3.8 3-3 4.9 4.9"
+        d="M4.5 16.8l4-4 3.8 3.8 3-3 3.9 3.9"
         initial={false}
         animate={on ? { pathLength: [0, 1] } : { pathLength: 1 }}
         transition={{ duration: 0.4 / speed, delay: (0.1) / speed, ease: "easeOut" }}

@@ -27,6 +27,7 @@ export function HomeIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
       width={size}
       height={size}
       viewBox="0 0 24 24"
+      overflow="visible"
       fill="none"
       stroke="currentColor"
       strokeWidth={strokeWidth}
@@ -44,15 +45,15 @@ export function HomeIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
       >
         <path d="M3 11.5 12 4l9 7.5" />
         <path d="M5.5 10.2v9.3a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-9.3" />
-        {[6.9, 14.5].map((x, i) => (
+        {[7.5, 15.5].map((x, i) => (
           <motion.rect
             key={x}
             x={x}
             y="12.6"
-            width="2.6"
-            height="2.6"
-            rx="0.5"
-            strokeWidth={1.5}
+            width="1"
+            height="1"
+            rx="0.3"
+            strokeWidth={1.2}
             fill={accent}
             stroke={accent}
             initial={false}
@@ -61,9 +62,9 @@ export function HomeIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
           />
         ))}
         <motion.rect
-          x="10"
+          x="10.5"
           y="14.5"
-          width="4"
+          width="3"
           height="6"
           rx="0.8"
           style={{ originX: "0%", originY: "50%" }}

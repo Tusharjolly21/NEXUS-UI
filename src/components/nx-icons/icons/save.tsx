@@ -27,6 +27,7 @@ export function SaveIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
       width={size}
       height={size}
       viewBox="0 0 24 24"
+      overflow="visible"
       fill="none"
       stroke="currentColor"
       strokeWidth={strokeWidth}
@@ -37,7 +38,6 @@ export function SaveIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
       <motion.path
         d="M7 3v5h8"
         initial={false}
@@ -51,6 +51,7 @@ export function SaveIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
         animate={on ? { y: [0, -2, 0] } : { y: 0 }}
         transition={{ duration: 0.5 / speed, ease: "easeInOut" }}
       />
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
     </svg>
   );
 }

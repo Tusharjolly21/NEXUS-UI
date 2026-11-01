@@ -27,6 +27,7 @@ export function PencilIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
       width={size}
       height={size}
       viewBox="0 0 24 24"
+      overflow="visible"
       fill="none"
       stroke="currentColor"
       strokeWidth={strokeWidth}
@@ -51,7 +52,7 @@ export function PencilIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
         transition={{ duration: 0.8 / speed, ease: "easeInOut" }}
       >
         <path d="M16.5 3.8a2.1 2.1 0 0 1 3 3L7.8 18.5l-4.3 1.2 1.2-4.3z" />
-        <path d="M14.8 5.5l3.7 3.7" stroke={accent} />
+        <path d="M15.3 6l2 2" stroke={accent} />
       </motion.g>
     </svg>
   );

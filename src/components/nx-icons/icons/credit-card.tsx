@@ -27,6 +27,7 @@ export function CreditCardIcon({ size = 24, strokeWidth = 2, className, speed = 
       width={size}
       height={size}
       viewBox="0 0 24 24"
+      overflow="visible"
       fill="none"
       stroke="currentColor"
       strokeWidth={strokeWidth}
@@ -58,13 +59,14 @@ export function CreditCardIcon({ size = 24, strokeWidth = 2, className, speed = 
           animate={on ? { fillOpacity: [0, 1, 0.4] } : { fillOpacity: 0 }}
           transition={{ duration: 0.8 / speed }}
         />
-        {["M13.8 13.4a3 3 0 0 1 0 2.8", "M15.9 12.2a5.2 5.2 0 0 1 0 5.2", "M18 11a7.4 7.4 0 0 1 0 7.6"].map((d, i) => (
+        {["M13.2 13.6a1.6 1.6 0 0 1 0 1.6", "M15.8 13.1a2.6 2.6 0 0 1 0 2.6", "M18.4 12.6a3.6 3.6 0 0 1 0 3.6"].map((d, i) => (
           <motion.path
             key={d}
             d={d}
             stroke={accent}
+            strokeWidth={1.5}
             initial={false}
-            animate={on ? { opacity: [0.2, 1, 0.2] } : { opacity: 0.55 }}
+            animate={on ? { opacity: [0.2, 1, 0.2, 1] } : { opacity: 1 }}
             transition={on ? { duration: 0.5 / speed, delay: (0.1 + i * 0.15) / speed } : { duration: 0.2 / speed }}
           />
         ))}
