@@ -4,14 +4,12 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Check, X } from "lucide-react";
-import { BellIcon } from "@/components/nx-icons/icons/bell";
-import { HeartIcon } from "@/components/nx-icons/icons/heart";
-import { RocketIcon } from "@/components/nx-icons/icons/rocket";
+import { X } from "lucide-react";
+import { IconPeek } from "@/components/site/icon-peek";
 import { pillClassName } from "@/components/site/pill-link";
 import { useProAccess } from "@/components/pro/pro-access";
 import { WHATS_NEW_COOKIE, WHATS_NEW_ID } from "@/lib/launch-banner";
-import { FREE_ICON_COUNT, ICON_COUNT, PRO_ICON_COUNT } from "@/lib/icons/count";
+import { FREE_ICON_COUNT, ICON_COUNT } from "@/lib/icons/count";
 import { getConsentSnapshot, getServerConsentSnapshot, subscribeConsent } from "@/lib/consent";
 
 function writeSeen() {
@@ -32,7 +30,6 @@ export function IconsAnnouncement() {
   const reduce = useReducedMotion();
   const [armed, setArmed] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(false);
-  const [tick, setTick] = React.useState(0);
 
   // Wait a beat after load, and only for people who haven't seen this announcement yet.
   React.useEffect(() => {
@@ -45,13 +42,6 @@ export function IconsAnnouncement() {
   const onIcons = pathname === "/icons" || pathname.startsWith("/icons/");
   const visible = armed && !dismissed && !onIcons && (consent === "granted" || consent === "denied");
 
-  // The three icons take turns playing while the card is up.
-  React.useEffect(() => {
-    if (!visible || reduce) return;
-    const t = window.setInterval(() => setTick((n) => n + 1), 1800);
-    return () => window.clearInterval(t);
-  }, [visible, reduce]);
-
   function remember() {
     writeSeen();
     setDismissed(true);
@@ -61,12 +51,6 @@ export function IconsAnnouncement() {
   React.useEffect(() => {
     if (onIcons) writeSeen();
   }, [onIcons]);
-
-  const items = [
-    { Icon: BellIcon, accent: "#ff3b30" },
-    { Icon: RocketIcon, accent: "#ff9f0a" },
-    { Icon: HeartIcon, accent: "#ff375f" },
-  ];
 
   return (
     <AnimatePresence>
@@ -89,52 +73,21 @@ export function IconsAnnouncement() {
           >
             <X className="size-4" aria-hidden />
           </button>
-          <div className="flex items-center gap-2" aria-hidden>
-            {items.map(({ Icon, accent }, i) => (
-              <span key={i} className="grid size-11 place-items-center rounded-2xl bg-secondary text-foreground">
-                <Icon size={24} accent={accent} play={!reduce && tick % items.length === i} />
-              </span>
-            ))}
+          <IconPeek count={6} size={26} className="gap-1.5 pr-9 sm:gap-2 sm:pr-0" tile="size-10 items-center justify-center rounded-xl bg-secondary text-foreground sm:size-12 sm:rounded-2xl" />
+          <h2 id="whats-new-title" className="mt-4 text-[19px] font-semibold tracking-[-0.015em]">
+            {isPro ? `All ${ICON_COUNT} animated icons are yours` : `${ICON_COUNT} animated icons, just landed`}
+          </h2>
+          <p className="mt-1 text-[14px] text-muted-foreground">
+            {isPro ? "Each with its own sound. New ones are included." : `Each with its own sound. ${FREE_ICON_COUNT} are free.`}
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <Link href="/icons" onClick={remember} className={pillClassName("ink", "sm", "w-full")}>
+              {isPro ? "Open the icons" : "See the icons"}
+            </Link>
+            <button type="button" onClick={remember} className={pillClassName("white", "sm", "w-full")}>
+              Not now
+            </button>
           </div>
-          {isPro ? (
-            <>
-              <p className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.06em] text-[#b07400] dark:text-[#ffd60a]">
-                <Check className="size-3.5" aria-hidden /> Included in your plan
-              </p>
-              <h2 id="whats-new-title" className="mt-0.5 text-[17px] font-semibold tracking-[-0.01em]">
-                Your plan includes all {ICON_COUNT} icons
-              </h2>
-              <p className="mt-1.5 text-[13.5px] leading-relaxed text-muted-foreground">
-                That is the {FREE_ICON_COUNT} free icons plus all {PRO_ICON_COUNT} Pro ones, each with its own sound and a copy-paste React file. Every icon we add from here on is included too, at no extra cost.
-              </p>
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <Link href="/icons" onClick={remember} className={pillClassName("ink", "sm", "w-full")}>
-                  Open the library
-                </Link>
-                <button type="button" onClick={remember} className={pillClassName("white", "sm", "w-full")}>
-                  Later
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="mt-3 text-[12px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">New</p>
-              <h2 id="whats-new-title" className="mt-0.5 text-[17px] font-semibold tracking-[-0.01em]">
-                {ICON_COUNT} animated icons, with sound
-              </h2>
-              <p className="mt-1.5 text-[13.5px] leading-relaxed text-muted-foreground">
-                Every one has its own synthesised sound and a copy-paste React file. {FREE_ICON_COUNT} are free; Pro unlocks the other {PRO_ICON_COUNT}.
-              </p>
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <Link href="/icons" onClick={remember} className={pillClassName("white", "sm", "w-full")}>
-                  Try the free icons
-                </Link>
-                <Link href="/pricing" onClick={remember} className={pillClassName("white", "sm", "w-full")}>
-                  See Pro
-                </Link>
-              </div>
-            </>
-          )}
         </motion.section>
       ) : null}
     </AnimatePresence>
