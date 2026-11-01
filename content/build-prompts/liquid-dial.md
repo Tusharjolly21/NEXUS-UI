@@ -287,15 +287,54 @@ function audio() {
     const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!AC) return null;
     ctx = new AC();
+    playbackSession();
     master = ctx.createGain();
     master.gain.value = 0.5;
     const comp = ctx.createDynamicsCompressor();
     master.connect(comp).connect(ctx.destination);
     out = comp;
   }
-  if (ctx.state === "suspended") void ctx.resume();
+  if (ctx.state !== "running") void ctx.resume(); // "suspended" until a tap; "interrupted" after a call or a locked screen on iOS
   return ctx;
 }
+
+/**
+ * Phones. iOS and Android only let a page start audio from a real tap (iOS counts touchend and click, not the
+ * pointerenter that fires when a finger lands), and iOS mutes Web Audio while the ringer switch is on silent
+ * unless the page asks for the "playback" audio session. So on a touch screen the first tap anywhere on the page
+ * wakes the engine, plays one silent sample, and switches the session; after that every sound is audible.
+ */
+function playbackSession() {
+  try {
+    const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
+    if (session && session.type !== "playback") session.type = "playback";
+  } catch {
+    // not supported: the ringer switch still applies
+  }
+}
+
+let unlockArmed = false;
+function armTouchUnlock() {
+  if (unlockArmed || typeof window === "undefined") return;
+  unlockArmed = true;
+  const touch = (navigator.maxTouchPoints ?? 0) > 0 || window.matchMedia?.("(pointer: coarse)").matches;
+  if (!touch) return;
+  const wake = () => {
+    if (ctx && ctx.state === "running") return;
+    const c = audio();
+    if (!c) return;
+    try {
+      const s = c.createBufferSource();
+      s.buffer = c.createBuffer(1, 1, 22050);
+      s.connect(c.destination);
+      s.start(0);
+    } catch {
+      // ignore
+    }
+  };
+  for (const type of ["touchend", "pointerup", "click", "keydown"]) window.addEventListener(type, wake, { capture: true, passive: true });
+}
+armTouchUnlock();
 
 /**
  * A tap on everything the library plays, for drawing it (a level meter, a visualiser). It listens

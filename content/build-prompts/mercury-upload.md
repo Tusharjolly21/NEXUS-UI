@@ -528,15 +528,54 @@ function audio() {
     const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!AC) return null;
     ctx = new AC();
+    playbackSession();
     master = ctx.createGain();
     master.gain.value = 0.5;
     const comp = ctx.createDynamicsCompressor();
     master.connect(comp).connect(ctx.destination);
     out = comp;
   }
-  if (ctx.state === "suspended") void ctx.resume();
+  if (ctx.state !== "running") void ctx.resume(); // "suspended" until a tap; "interrupted" after a call or a locked screen on iOS
   return ctx;
 }
+
+/**
+ * Phones. iOS and Android only let a page start audio from a real tap (iOS counts touchend and click, not the
+ * pointerenter that fires when a finger lands), and iOS mutes Web Audio while the ringer switch is on silent
+ * unless the page asks for the "playback" audio session. So on a touch screen the first tap anywhere on the page
+ * wakes the engine, plays one silent sample, and switches the session; after that every sound is audible.
+ */
+function playbackSession() {
+  try {
+    const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
+    if (session && session.type !== "playback") session.type = "playback";
+  } catch {
+    // not supported: the ringer switch still applies
+  }
+}
+
+let unlockArmed = false;
+function armTouchUnlock() {
+  if (unlockArmed || typeof window === "undefined") return;
+  unlockArmed = true;
+  const touch = (navigator.maxTouchPoints ?? 0) > 0 || window.matchMedia?.("(pointer: coarse)").matches;
+  if (!touch) return;
+  const wake = () => {
+    if (ctx && ctx.state === "running") return;
+    const c = audio();
+    if (!c) return;
+    try {
+      const s = c.createBufferSource();
+      s.buffer = c.createBuffer(1, 1, 22050);
+      s.connect(c.destination);
+      s.start(0);
+    } catch {
+      // ignore
+    }
+  };
+  for (const type of ["touchend", "pointerup", "click", "keydown"]) window.addEventListener(type, wake, { capture: true, passive: true });
+}
+armTouchUnlock();
 
 /**
  * A tap on everything the library plays, for drawing it (a level meter, a visualiser). It listens
@@ -574,6 +613,7 @@ export function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
   osc.frequency.setValueAtTime(o.freq, t0);
   if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.glide ?? o.decay ?? 0.1));
   const a = o.attack ?? 0.004, d = o.decay ?? 0.12, peak = o.gain ?? 0.3;
+  g.gain.value = 0.0001; // a gain node starts at 1: without this the very first sample of a note can click
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.exponentialRampToValueAtTime(peak, t0 + a);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
@@ -593,6 +633,7 @@ export function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
   if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.attack ?? 0.01) + (o.decay ?? 0.1));
   f.Q.value = o.q ?? 1;
   const a = o.attack ?? 0.003, d = o.decay ?? 0.08, peak = o.gain ?? 0.3;
+  g.gain.value = 0.0001; // a gain node starts at 1: without this the very first sample of a note can click
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.exponentialRampToValueAtTime(peak, t0 + a);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
