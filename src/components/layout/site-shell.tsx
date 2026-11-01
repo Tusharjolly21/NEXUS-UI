@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { SiteFooter } from "@/components/site/site-footer";
 import { LaunchBanner } from "@/components/site/launch-banner";
+import { IconsAnnouncement } from "@/components/site/icons-announcement";
 import { LAUNCH_BANNER_COOKIE, LAUNCH_BANNER_ID } from "@/lib/launch-banner";
 import { SiteNav } from "@/components/site/site-nav";
 import { SiteAutoplayQuiet } from "@/components/site/sound-switch";
@@ -24,15 +25,15 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
         >
           Skip to content
         </a>
-        {bannerClosed || isPremium ? null : (
-          <LaunchBanner />
-        )}
+        {/* Everyone sees the announcement until they close it, Pro members included (they get their own words) */}
+        {bannerClosed ? null : <LaunchBanner isPro={isPremium} />}
         <SiteNav isPremium={isPremium} />
         <main id="site-main" tabIndex={-1} className="flex-1 outline-none">
           <SiteAutoplayQuiet>{children}</SiteAutoplayQuiet>
         </main>
         <SiteFooter />
         <ScrollToTop />
+        <IconsAnnouncement />
       </div>
     </ProAccessProvider>
   );

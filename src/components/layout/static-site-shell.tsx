@@ -1,5 +1,6 @@
 import { SiteFooter } from "@/components/site/site-footer";
 import { LaunchBanner } from "@/components/site/launch-banner";
+import { IconsAnnouncement } from "@/components/site/icons-announcement";
 import { SiteNav } from "@/components/site/site-nav";
 import { SiteAutoplayQuiet } from "@/components/site/sound-switch";
 import { ScrollToTop } from "@/components/site/scroll-to-top";
@@ -33,6 +34,7 @@ export function StaticSiteShell({ children }: { children: React.ReactNode }) {
         </main>
         <SiteFooter />
         <ScrollToTop />
+        <IconsAnnouncement />
       </div>
     </ProAccessProvider>
   );

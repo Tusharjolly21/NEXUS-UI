@@ -5,3 +5,7 @@
  */
 export const LAUNCH_BANNER_COOKIE = "nx-banner";
 export const LAUNCH_BANNER_ID = "icons-1";
+
+/** The "what's new" card's dismiss cookie. Bump the id for the next announcement so everyone sees it once. */
+export const WHATS_NEW_COOKIE = "nx-new";
+export const WHATS_NEW_ID = "icons-1";

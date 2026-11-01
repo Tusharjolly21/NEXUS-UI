@@ -15,7 +15,7 @@ import { FREE_ICON_COUNT, ICON_COUNT } from "@/lib/icons/count";
  * strip never flashes back in on the next page. It is one line, never animates and never returns
  * for someone who closed it.
  */
-export function LaunchBanner() {
+export function LaunchBanner({ isPro = false }: { isPro?: boolean }) {
   const [open, setOpen] = React.useState(true);
   if (!open) return null;
 
@@ -31,23 +31,43 @@ export function LaunchBanner() {
       className="relative z-[51] flex min-h-10 items-center justify-center bg-[#1d1d1f] px-12 py-2 text-center text-[13px] leading-snug text-white/85 dark:bg-[#1c1c1e] dark:shadow-[inset_0_-0.5px_0_rgba(255,255,255,0.12)]"
     >
       <p>
-        <span className="mr-1.5 inline-flex rounded-full bg-[conic-gradient(from_210deg,#0a84ff,#bf5af2,#ff375f,#ff9f0a,#0a84ff)] px-2 py-px text-[11px] font-semibold text-white">
-          New
-        </span>
-        <span className="hidden sm:inline">{ICON_COUNT} animated icons with sounds of their own, {FREE_ICON_COUNT} free. </span>
-        <span className="sm:hidden">{ICON_COUNT} icons with sound, {FREE_ICON_COUNT} free. </span>
-        <Link href="/icons" className="whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
-          See the icons ›
-        </Link>
-        <span className="hidden lg:inline">
-          <span aria-hidden className="mx-2 text-white/30">
-            |
+        {isPro ? (
+          <span className="mr-1.5 inline-flex rounded-full bg-[linear-gradient(135deg,#ffd60a,#ff9f0a)] px-2 py-px text-[11px] font-semibold text-black">
+            Pro
           </span>
-          Pro unlocks the rest, from {formatPrice(PRICES.pro)} a year.{" "}
-          <Link href="/pricing" className="whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
-            See plans ›
-          </Link>
-        </span>
+        ) : (
+          <span className="mr-1.5 inline-flex rounded-full bg-[conic-gradient(from_210deg,#0a84ff,#bf5af2,#ff375f,#ff9f0a,#0a84ff)] px-2 py-px text-[11px] font-semibold text-white">
+            New
+          </span>
+        )}
+        {isPro ? (
+          <>
+            <span className="hidden sm:inline">
+              Your plan includes all {ICON_COUNT} animated icons, and every new one we add.{" "}
+            </span>
+            <span className="sm:hidden">All {ICON_COUNT} icons, and every new one. </span>
+            <Link href="/icons" className="whitespace-nowrap font-medium text-[#ffd60a] hover:underline hover:underline-offset-4">
+              Open the icons ›
+            </Link>
+          </>
+        ) : (
+          <>
+            <span className="hidden sm:inline">{ICON_COUNT} animated icons with sounds of their own, {FREE_ICON_COUNT} free. </span>
+            <span className="sm:hidden">{ICON_COUNT} icons with sound, {FREE_ICON_COUNT} free. </span>
+            <Link href="/icons" className="whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
+              See the icons ›
+            </Link>
+            <span className="hidden lg:inline">
+              <span aria-hidden className="mx-2 text-white/30">
+                |
+              </span>
+              Pro unlocks the rest, from {formatPrice(PRICES.pro)} a year.{" "}
+              <Link href="/pricing" className="whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
+                See plans ›
+              </Link>
+            </span>
+          </>
+        )}
       </p>
       <button
         type="button"
