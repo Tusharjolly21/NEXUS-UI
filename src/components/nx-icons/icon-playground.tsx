@@ -259,19 +259,19 @@ export function IconPlayground({ icon, source, locked = false }: { icon: IconMet
               </IconMaterial>
             </motion.div>
           </motion.div>
-          <div className="absolute left-3 top-3">
+          <div className="absolute inset-x-3 top-3 flex flex-wrap items-center justify-between gap-2">
             <CopyButton text={source} locked={locked} name={icon.title} label="Copy code" className={dark ? "bg-white/10 text-white hover:bg-white/15" : "bg-card shadow-[0_0_0_1px_rgba(0,0,0,.06)] hover:bg-card/80"} />
-          </div>
-          <div className="absolute right-3 top-3 flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-2">
             <button
               type="button"
               onClick={surprise}
+              aria-label="Surprise me"
               className={cn(
-                "inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-medium shadow-[0_0_0_1px_rgba(0,0,0,.06)] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                "inline-flex size-9 items-center justify-center gap-1.5 rounded-full text-[13px] font-medium shadow-[0_0_0_1px_rgba(0,0,0,.06)] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring sm:w-auto sm:px-3.5",
                 dark ? "bg-white/10 text-white hover:bg-white/15" : "bg-card text-foreground hover:bg-card/80",
               )}
             >
-              <Shuffle className="size-3.5" aria-hidden /> Surprise me
+              <Shuffle className="size-3.5" aria-hidden /> <span className="hidden sm:inline">Surprise me</span>
             </button>
             <button
               type="button"
@@ -296,6 +296,7 @@ export function IconPlayground({ icon, source, locked = false }: { icon: IconMet
               {isLoop ? paused ? <Play className="size-3.5" aria-hidden /> : <Pause className="size-3.5" aria-hidden /> : <RotateCcw className="size-3.5" aria-hidden />}
               {isLoop ? (paused ? "Play" : "Pause") : "Replay"}
             </button>
+            </div>
           </div>
           <p className={cn("absolute bottom-3 left-0 right-0 px-4 text-center text-[12.5px]", dark ? "text-white/45" : "text-muted-foreground")}>
             {isLoop ? "Loops on its own. " : `${TRIGGERS.find((t) => t.id === trigger)?.hint} `}Drag it and let go.
