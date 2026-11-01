@@ -179,6 +179,15 @@ export default async function ComponentDetailPage({ params }: Props) {
   const self = galleryItems.find((g) => g.slug === slug);
   const related = self ? galleryItems.filter((g) => g.group === self.group && g.slug !== slug).slice(0, 4) : [];
 
+  // Free pages offer a few real Pro components from the same category (or the most popular overall).
+  const popularPro = libraryComponents.filter((c) => c.premium && c.slug !== item.slug).sort((a, b) => b.trendingScore - a.trendingScore);
+  const proPicks = (item.premium
+    ? []
+    : [...popularPro.filter((c) => c.categorySlug === item.categorySlug), ...popularPro]
+        .filter((c, i, all) => all.findIndex((x) => x.slug === c.slug) === i)
+        .slice(0, 3)
+  ).map((c) => ({ slug: c.slug, name: c.name }));
+
   const variantPrompts =
     item.previewSections && item.previewSections.length > 1
       ? await promptIdsFor(item.slug, item.previewSections.map((s, i) => s.title ?? `${item.name}, variant ${i + 1}`))
@@ -229,6 +238,7 @@ export default async function ComponentDetailPage({ params }: Props) {
         related={related}
         faq={faq}
         guides={getGuidesForComponent(item.slug)}
+        proPicks={proPicks}
       />
     </>
   );
