@@ -51,6 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/docs/add-utilities`,      lastModified: since("2026-10-20") },
     { url: `${base}/docs/cli`,                lastModified: since("2026-10-21") },
     { url: `${base}/docs/videos`,             lastModified: since("2026-10-22") },
+    { url: `${base}/docs/icons`,              lastModified: since("2026-11-01") },
     { url: `${base}/claude-code`,             lastModified: since("2026-10-21") },
     { url: `${base}/alternatives`,            lastModified: since("2026-10-21") },
     ...alternatives.map((a) => ({ url: `${base}/alternatives/${a.slug}`, lastModified: since("2026-10-21") })),
