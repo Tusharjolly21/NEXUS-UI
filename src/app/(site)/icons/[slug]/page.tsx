@@ -193,9 +193,9 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
             <CopyButton text={source} label="Copy the file" />
           </div>
           <p className="mt-2 max-w-[640px] text-[16px] text-muted-foreground">
-            One file. Save it as <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">components/icons/{icon.slug}.tsx</code>, run{" "}
-            <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">npm i framer-motion</code>, and import{" "}
-            <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">{icon.component}</code>.
+            One file. Save it as <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">components/icons/{icon.slug}.tsx</code>, run{" "}
+            <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">npm i framer-motion</code>, and import{" "}
+            <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">{icon.component}</code>.
           </p>
           <div className="mt-6">
             <CodeBlock
@@ -220,21 +220,21 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
           </div>
           <p className="mt-2 max-w-[700px] text-[16px] text-muted-foreground">
             {icon.heard} It is written against this icon&apos;s own animation: each line below is a note placed on a beat of the picture, and{" "}
-            <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">t()</code> stretches it with the <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">speed</code>{" "}
+            <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">t()</code> stretches it with the <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">speed</code>{" "}
             prop. There are no audio files: it is synthesised in the browser.
           </p>
           <ol className="mt-5 max-w-[760px] list-decimal space-y-2 pl-5 text-[15.5px] leading-relaxed text-muted-foreground">
             <li>
-              Once per project, copy <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">sound-engine.ts</code> and{" "}
-              <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">sound-kit.ts</code> from the{" "}
+              Once per project, copy <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">sound-engine.ts</code> and{" "}
+              <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">sound-kit.ts</code> from the{" "}
               <Link href="/icons/sounds" className="text-foreground underline underline-offset-4">sound guide</Link> into{" "}
-              <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">components/icons/</code>.
+              <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">components/icons/</code>.
             </li>
             <li>
-              Save the score below as <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">components/icons/sounds/{icon.slug}.ts</code>.
+              Save the score below as <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">components/icons/sounds/{icon.slug}.ts</code>.
             </li>
             <li>
-              Call <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">playIconScore({icon.slug.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())})</code> from a click or hover handler:
+              Call <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">playIconScore({icon.slug.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())})</code> from a click or hover handler:
             </li>
           </ol>
           <div className="mt-5">
@@ -292,10 +292,10 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
             <CopyButton text={material} label="Copy the helper" />
           </div>
           <p className="mt-2 max-w-[680px] text-[16px] text-muted-foreground">
-            Wrap an icon, or a whole grid of them, in <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">IconMaterial</code> to
-            give it a finish: neon glow, an aurora spectrum or polished chrome. Save it as{" "}
-            <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">components/icons/icon-material.tsx</code>. Spark needs no helper:
-            it is just the <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">accent</code> prop.
+            Wrap an icon, or a whole grid of them, in <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">IconMaterial</code> to
+            give it a finish: neon glow, an aurora spectrum, polished chrome, or one of the liquid looks (Mercury, Liquid and Glass), which are pure SVG with no canvas or WebGL. Save it as{" "}
+            <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">components/icons/icon-material.tsx</code>. Spark needs no helper:
+            it is just the <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">accent</code> prop.
           </p>
           <div className="mt-6">
             <CodeBlock

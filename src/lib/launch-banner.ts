@@ -4,4 +4,4 @@
  * Bump the id when the message changes, so people who closed the old one see the new one.
  */
 export const LAUNCH_BANNER_COOKIE = "nx-banner";
-export const LAUNCH_BANNER_ID = "pricing-1";
+export const LAUNCH_BANNER_ID = "icons-1";

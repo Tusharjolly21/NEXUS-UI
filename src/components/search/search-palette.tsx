@@ -13,6 +13,7 @@ import {
   CornerDownLeft,
   LayoutTemplate,
   Search,
+  Shapes,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -21,6 +22,7 @@ import { DOCS_PAGES } from "@/components/docs/docs-nav";
 import { DynamicPreview } from "@/components/library/dynamic-preview";
 import { cn } from "@/lib/utils";
 import { useProAccess } from "@/components/pro/pro-access";
+import { IconSearchPreview } from "@/components/search/icon-search-preview";
 
 /* ── Index ─────────────────────────────────────────────────────────────────── */
 
@@ -36,6 +38,7 @@ const KIND_ICON: Record<Kind, LucideIcon> = {
   template: LayoutTemplate,
   block: Blocks,
   video: Clapperboard,
+  icon: Shapes,
   doc: BookOpen,
 };
 
@@ -45,14 +48,14 @@ function toEntry({ keywords, ...e }: SearchEntry): Entry {
 
 /* The catalog rows are fetched, not bundled: the full catalog (with every component's source and
    live preview) is over a megabyte. See src/lib/catalog/search-index.ts. */
-type Catalog = Record<"component" | "template" | "block" | "video", Entry[]>;
+type Catalog = Record<"component" | "template" | "block" | "video" | "icon", Entry[]>;
 
 let catalogPromise: Promise<Catalog | null> | null = null;
 export function loadCatalog() {
   catalogPromise ??= fetch("/api/search-index")
     .then((res) => (res.ok ? (res.json() as Promise<SearchEntry[]>) : Promise.reject(new Error(String(res.status)))))
     .then((rows) => {
-      const catalog: Catalog = { component: [], template: [], block: [], video: [] };
+      const catalog: Catalog = { component: [], template: [], block: [], video: [], icon: [] };
       for (const row of rows) catalog[row.kind].push(toEntry(row));
       return catalog;
     })
@@ -96,10 +99,12 @@ const GROUPS: { kind: Kind; label: string; limit: number }[] = [
   { kind: "template", label: "Templates", limit: 4 },
   { kind: "block", label: "Blocks", limit: 4 },
   { kind: "video", label: "Videos", limit: 3 },
+  { kind: "icon", label: "Icons", limit: 5 },
   { kind: "doc", label: "Docs", limit: 4 },
 ];
 
-const SUGGESTIONS = ["pricing", "dock", "sidebar", "marquee"];
+const SUGGESTIONS = ["pricing", "dock", "sidebar", "marquee", "bell icon"];
+const ICON_PICKS = ["bell", "heart", "rocket", "play-pause"];
 
 function rank(entry: Entry, needle: string) {
   const title = entry.title.toLowerCase();
@@ -114,8 +119,10 @@ type Section = { id: string; label: string; items: Entry[] };
 function buildSections(needle: string, catalog: Catalog | null): Section[] {
   if (!needle) {
     const popular = catalog ? [...catalog.component].sort((a, b) => b.score - a.score).slice(0, 5) : [];
+    const iconPicks = catalog ? ICON_PICKS.map((s) => catalog.icon.find((e) => e.href === `/icons/${s}`)).filter((e): e is Entry => !!e) : [];
     return [
       { id: "popular", label: "Popular components", items: popular },
+      { id: "icons", label: "Animated icons", items: iconPicks },
       { id: "start", label: "Get started", items: DOCS.slice(0, 3) },
     ].filter((s) => s.items.length > 0);
   }
@@ -319,7 +326,7 @@ export function SearchPalette({
             <div className="flex h-[62px] shrink-0 items-center gap-3 px-5">
               <Search className="size-[22px] shrink-0 text-foreground/45" strokeWidth={1.9} aria-hidden />
               <label htmlFor={`${uid}-input`} className="sr-only">
-                Search components, templates, blocks, videos and docs
+                Search components, templates, blocks, videos, icons and docs
               </label>
               <input
                 id={`${uid}-input`}
@@ -526,6 +533,8 @@ export function SearchPalette({
                             </div>
                             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-background to-transparent" />
                           </>
+                        ) : activeItem.kind === "icon" ? (
+                          <IconSearchPreview slug={activeItem.href.replace("/icons/", "")} />
                         ) : (
                           <div className="grid h-full place-items-center">
                             <span className="grid size-14 place-items-center rounded-[14px] bg-foreground/[0.06] text-foreground/55">
@@ -608,7 +617,7 @@ export function SearchPalette({
               ) : (
                 <span className="ml-auto tabular-nums">
                   {catalog
-                    ? `${catalog.component.length} components · ${catalog.template.length} templates · ${catalog.block.length} blocks · ${catalog.video.length} videos`
+                    ? `${catalog.component.length} components · ${catalog.template.length} templates · ${catalog.block.length} blocks · ${catalog.video.length} videos · ${catalog.icon.length} icons`
                     : null}
                 </span>
               )}

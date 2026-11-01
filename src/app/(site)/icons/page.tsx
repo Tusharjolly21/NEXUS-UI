@@ -80,7 +80,7 @@ export default function IconsPage() {
                   <p className="mt-1.5 text-[14.5px] leading-relaxed text-muted-foreground">{f.body}</p>
                   <p className="mt-2.5 flex flex-wrap gap-1.5">
                     {f.icons.map((i) => (
-                      <Link key={i} href={`/icons/${i}`} className="rounded-full bg-secondary px-2.5 py-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground">
+                      <Link key={i} href={`/icons/${i}`} className="rounded-full bg-secondary px-2.5 py-1 text-[12px] text-foreground/80 transition-colors hover:text-foreground">
                         {i}
                       </Link>
                     ))}
@@ -93,7 +93,7 @@ export default function IconsPage() {
           <div className="mt-20 grid gap-8 sm:grid-cols-3">
             {[
               ["A tiny story and a sound each", "Not just a wiggle: a bell that pops a badge, a bin that catches a crumpled paper, a house that switches its windows on. Every one has its own sound, scored note by note against its animation."],
-              ["Make it yours", "Spark, Neon, Aurora or Chrome, in any colour and at any speed. Try them on the whole set above, or on a single icon on its own page."],
+              ["Make it yours", "Spark, Neon, Aurora or Chrome, or the liquid looks: Mercury (flowing metal), Liquid (a wet, wobbling droplet) and Glass (a lens with a bright rim). Any colour, any speed. Try them on the whole set above, or on a single icon on its own page."],
               ["One file, no lock-in", "Each icon is one self-contained component built with Framer Motion, and it holds still for visitors who have reduced motion switched on."],
             ].map(([title, body]) => (
               <div key={title}>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 import { PRICES, formatPrice } from "@/lib/pricing";
 import { LAUNCH_BANNER_COOKIE, LAUNCH_BANNER_ID } from "@/lib/launch-banner";
+import { ICON_COUNT } from "@/lib/icons/count";
 
 /**
  * The thin strip above the nav: what Pro unlocks and what it costs, with one link to the plans.
@@ -31,16 +32,22 @@ export function LaunchBanner() {
     >
       <p>
         <span className="mr-1.5 inline-flex rounded-full bg-[conic-gradient(from_210deg,#0a84ff,#bf5af2,#ff375f,#ff9f0a,#0a84ff)] px-2 py-px text-[11px] font-semibold text-white">
-          Pro
+          New
         </span>
-        <span className="hidden sm:inline">
-          Unlock 200+ components, templates, blocks, videos and many more to come for{" "}
-        </span>
-        <span className="sm:hidden">Unlock everything for </span>
-        {formatPrice(PRICES.pro)} a year, or {formatPrice(PRICES.allAccess)} once.{" "}
-        <Link href="/pricing" className="whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
-          See plans ›
+        <span className="hidden sm:inline">{ICON_COUNT} animated icons, each with a sound of its own. </span>
+        <span className="sm:hidden">{ICON_COUNT} icons with sound. </span>
+        <Link href="/icons" className="whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
+          See the icons ›
         </Link>
+        <span className="hidden lg:inline">
+          <span aria-hidden className="mx-2 text-white/30">
+            |
+          </span>
+          Pro unlocks the rest from {formatPrice(PRICES.pro)} a year.{" "}
+          <Link href="/pricing" className="whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
+            See plans ›
+          </Link>
+        </span>
       </p>
       <button
         type="button"

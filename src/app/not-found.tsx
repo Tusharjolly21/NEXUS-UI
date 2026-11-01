@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 const ELSEWHERE = [
   { href: "/templates", label: "Templates" },
   { href: "/blocks", label: "Blocks" },
+  { href: "/icons", label: "Icons" },
   { href: "/docs/introduction", label: "Docs" },
   { href: "/pricing", label: "Pricing" },
   { href: "/blog", label: "Guides" },

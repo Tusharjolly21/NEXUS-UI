@@ -18,6 +18,7 @@ import { getVideo, videos } from "@/lib/catalog/videos";
 import { Band, PillLink } from "@/components/site";
 import { legalConfig } from "@/lib/legal";
 import { LibraryIndex, type LibraryIndexData } from "@/components/site/library-index";
+import { HomeIconStrip } from "@/components/nx-icons/home-strip";
 import { blockVariants } from "@/lib/catalog/block-variants";
 import { getCategoryComponents, getPopulatedCategories } from "@/lib/catalog/category-seo";
 import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
@@ -115,6 +116,7 @@ export default function Home() {
       items: HOME_VIDEOS.map((slug) => getVideo(slug)).filter((v): v is NonNullable<typeof v> => !!v).map((v) => ({ slug: v.slug, title: v.title, purpose: v.purpose })),
     },
     sounds: { total: Object.keys(SOUNDS).length },
+    icons: { total: CATALOG_COUNTS.icons, categories: CATALOG_COUNTS.iconCategories },
   };
   const homeVideos = HOME_VIDEOS.map((slug) => getVideo(slug)).filter((v): v is NonNullable<typeof v> => !!v);
 
@@ -292,6 +294,30 @@ export default function Home() {
             </li>
           ))}
         </ul>
+      </Band>
+
+      {/* Icons */}
+      <Band tint="sky" id="icons">
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">Icons that move, and make a sound</h2>
+            <p className="mt-4 max-w-[560px] text-[18px] text-muted-foreground">
+              {CATALOG_COUNTS.icons} animated icons for toolbars, players, carts and tab bars. Each tells a tiny story, has a sound scored to its animation, and
+              is one file you copy.
+            </p>
+          </div>
+          <PillLink href="/icons" variant="white" className="shrink-0 self-start md:self-auto">
+            See all {CATALOG_COUNTS.icons} icons
+          </PillLink>
+        </div>
+        <HomeIconStrip className="mt-12" />
+        <p className="mt-6 text-[14.5px] text-muted-foreground">
+          Want the sounds in your own app? Read the{" "}
+          <Link href="/icons/sounds" className="text-foreground underline underline-offset-4">
+            sound guide
+          </Link>
+          .
+        </p>
       </Band>
 
       {/* Your code: a live component beside its source, then the three steps */}

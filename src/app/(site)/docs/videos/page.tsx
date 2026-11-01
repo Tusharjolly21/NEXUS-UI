@@ -95,7 +95,7 @@ node render.mjs --url http://localhost:3000/video-frame --format 16:9 --duration
         </DocSection>
       </DocPageShell>
 
-      <DocFooterNav prev={{ href: "/docs/cli", label: "CLI" }} />
+      <DocFooterNav prev={{ href: "/docs/cli", label: "CLI" }} next={{ href: "/docs/icons", label: "Icons" }} />
     </>
   );
 }

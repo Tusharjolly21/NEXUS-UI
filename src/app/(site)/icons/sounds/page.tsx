@@ -16,7 +16,7 @@ export const metadata: Metadata = createMetadata({
   alternates: { canonical: "/icons/sounds" },
 });
 
-const code = (s: string) => <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">{s}</code>;
+const code = (s: string) => <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">{s}</code>;
 
 const HOVER_EXAMPLE = `"use client";
 

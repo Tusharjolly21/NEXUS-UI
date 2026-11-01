@@ -14,12 +14,14 @@ export const DOCS_PAGES = [
   { href: "/docs/add-utilities", label: "Add utilities" },
   { href: "/docs/cli", label: "CLI" },
   { href: "/docs/videos", label: "Videos" },
+  { href: "/docs/icons", label: "Icons" },
 ] as const;
 
 const BROWSE = [
   { href: "/components", label: "Components" },
   { href: "/blocks", label: "Blocks" },
   { href: "/templates", label: "Templates" },
+  { href: "/icons", label: "Icons" },
 ] as const;
 
 /** Docs navigation: a sticky list on desktop, a scrolling row of pills on small screens. */

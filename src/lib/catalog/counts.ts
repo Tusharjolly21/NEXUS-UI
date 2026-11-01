@@ -2,6 +2,7 @@ import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { libraryComponents } from "@/lib/catalog/library-components";
 import { templates } from "@/lib/catalog/templates";
 import { videos } from "@/lib/catalog/videos";
+import { ICONS, ICON_CATEGORIES } from "@/lib/icons/catalog";
 
 /**
  * Real catalogue sizes. Marketing copy reads these instead of hard-coding numbers,
@@ -17,4 +18,6 @@ export const CATALOG_COUNTS = {
   blocks: blocksManifest.length,
   videos: videos.length,
   freeVideos: videos.filter((v) => !v.premium).length,
+  icons: ICONS.length,
+  iconCategories: ICON_CATEGORIES.length,
 } as const;

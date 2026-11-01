@@ -8,6 +8,7 @@ import { Check, ChevronRight, Copy, ExternalLink } from "lucide-react";
 import { playSound, type SoundName } from "@/lib/ui-sounds";
 import { videoPosterSrc, videoPreviewSrc } from "@/lib/catalog/videos";
 import { cn } from "@/lib/utils";
+import { HomeIconStrip } from "@/components/nx-icons/home-strip";
 
 export type LibraryIndexData = {
   components: { total: number; free: number; categories: { slug: string; label: string; count: number; href: string }[] };
@@ -15,9 +16,10 @@ export type LibraryIndexData = {
   templates: { total: number; items: { slug: string; title: string; image: string }[] };
   videos: { total: number; items: { slug: string; title: string; purpose: string }[] };
   sounds: { total: number };
+  icons: { total: number; categories: number };
 };
 
-type ShelfId = "components" | "blocks" | "templates" | "videos" | "sounds";
+type ShelfId = "components" | "blocks" | "templates" | "videos" | "sounds" | "icons";
 
 const CYCLE_MS = 6500;
 
@@ -86,6 +88,16 @@ export function LibraryIndex({ data }: { data: LibraryIndexData }) {
       cta: "Hear them all",
       command: "npx shadcn@latest add @nexus-labs/ui-sounds",
     },
+    {
+      id: "icons",
+      name: "Icons",
+      line: "Animated icons that tell a tiny story, each with a sound of its own.",
+      count: String(data.icons.total),
+      note: "free to copy",
+      href: "/icons",
+      cta: "Browse the icons",
+      command: "curl -s https://www.nexus-ui.com/api/icons/bell -o bell.tsx",
+    },
   ];
   const current = shelves.find((s) => s.id === active)!;
 
@@ -128,7 +140,7 @@ export function LibraryIndex({ data }: { data: LibraryIndexData }) {
       <div className="flex min-w-0 flex-col">
         <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">What&apos;s on the shelves</h2>
         <p className="mt-4 max-w-[440px] text-[18px] text-muted-foreground">
-          Five kinds of thing, most with one command to install. Pick a shelf to look inside.
+          Six kinds of thing, most with one command to install. Pick a shelf to look inside.
         </p>
 
         <div role="tablist" aria-orientation="vertical" aria-label="Library" className="mt-8 grid grid-cols-2 gap-2 max-lg:[&>*:last-child:nth-child(odd)]:col-span-2 lg:grid-cols-1 lg:gap-1">
@@ -219,6 +231,7 @@ export function LibraryIndex({ data }: { data: LibraryIndexData }) {
               {active === "templates" ? <TemplatesShelf data={data.templates} /> : null}
               {active === "videos" ? <VideosShelf data={data.videos} /> : null}
               {active === "sounds" ? <SoundsShelf onPlay={() => setTouched(true)} /> : null}
+              {active === "icons" ? <IconsShelf /> : null}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -276,6 +289,16 @@ function CommandLine({ command }: { command: string }) {
 }
 
 // ── shelves ─────────────────────────────────────────────────────────
+
+/** Twelve of the icons, moving: hover one to play it, open one to copy its file. */
+function IconsShelf() {
+  return (
+    <div className="flex h-full flex-col justify-center p-5 sm:p-8">
+      <p className="text-[13px] font-medium text-muted-foreground">Hover to play</p>
+      <HomeIconStrip className="mt-4 lg:grid-cols-4" />
+    </div>
+  );
+}
 
 function ComponentsShelf({ data }: { data: LibraryIndexData["components"] }) {
   const reduce = useReducedMotion();

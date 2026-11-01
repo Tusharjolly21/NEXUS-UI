@@ -12,8 +12,10 @@ import { templates } from "@/lib/catalog/templates";
 import { blocks } from "@/lib/catalog/blocks";
 import { videos } from "@/lib/catalog/videos";
 import { getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
+import { ICONS, getCategory } from "@/lib/icons/catalog";
+import { ICON_USES } from "@/lib/icons/uses";
 
-export type SearchEntryKind = "component" | "template" | "block" | "video";
+export type SearchEntryKind = "component" | "template" | "block" | "video" | "icon";
 
 export type SearchEntry = {
   id: string;
@@ -86,5 +88,19 @@ export function buildSearchIndex(): SearchEntry[] {
     keywords: `${v.motion} ${v.platforms.join(" ")} ${v.formats.join(" ")} video reel`,
   }));
 
-  return [...components, ...templateEntries, ...blockEntries, ...videoEntries];
+  // Every animated icon: matched on its name, tags and the places it is used ("tab bar", "toast", "player").
+  const iconEntries: SearchEntry[] = ICONS.map((i) => ({
+    id: `icon:${i.slug}`,
+    kind: "icon",
+    title: i.title,
+    subtitle: `${getCategory(i.category)?.label ?? "Icon"} icon`,
+    description: i.description,
+    href: `/icons/${i.slug}`,
+    premium: false,
+    score: 40,
+    tags: i.tags.slice(0, 5),
+    keywords: `${i.slug} animated icon react ${(ICON_USES[i.slug] ?? []).map((u) => u.title).join(" ")}`,
+  }));
+
+  return [...components, ...templateEntries, ...blockEntries, ...videoEntries, ...iconEntries];
 }

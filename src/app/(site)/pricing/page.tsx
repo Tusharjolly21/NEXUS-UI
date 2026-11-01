@@ -10,7 +10,7 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 import { PRICES, formatPrice } from "@/lib/pricing";
 
-const { components, freeComponents, proComponents, templates, freeTemplates, blocks, videos, freeVideos } = CATALOG_COUNTS;
+const { components, freeComponents, proComponents, templates, freeTemplates, blocks, videos, freeVideos, icons } = CATALOG_COUNTS;
 const freeBlocks = blocksManifest.filter((b) => !b.premium).length;
 
 const PRO_PRICE = formatPrice(PRICES.pro);
@@ -44,6 +44,7 @@ const PLANS: Plan[] = [
       `${freeBlocks} of the ${blocks} section blocks`,
       `${freeTemplates} full templates, plus a first look at all ${templates}`,
       `${freeVideos} of the ${videos} videos with their prompt and source`,
+      `All ${icons} animated icons, with their sounds`,
       "Commercial and client projects",
       "Install with the shadcn CLI",
     ],
@@ -86,6 +87,7 @@ const COMPARE: [string, Cell, Cell, Cell][] = [
   ["Section blocks", `${freeBlocks} free`, `All ${blocks}`, `All ${blocks}`],
   ["Template source", "Preview only", true, true],
   ["Videos", `${freeVideos} free`, `All ${videos}`, `All ${videos}`],
+  ["Animated icons and sounds", `All ${icons}`, `All ${icons}`, `All ${icons}`],
   ["Commercial and client use", true, true, true],
   ["New templates, blocks and components", "Free items", true, true],
   ["Requests", false, true, true],
@@ -130,6 +132,10 @@ const FAQ = [
   {
     q: "What comes with a video?",
     a: `Every video plays in your browser with its own soundtrack. ${freeVideos} of the ${videos} come with everything: the build prompt, the React source, live editing of every word and colour, and a script that renders your edit to MP4. Pro unlocks the same for the rest.`,
+  },
+  {
+    q: "Are the animated icons free?",
+    a: `Yes. All ${icons} animated icons, with their sounds and the sound guide, are free to copy and use in personal, commercial and client projects, with no sign-in. Each is one file you keep.`,
   },
   {
     q: "How do I get the code after paying?",

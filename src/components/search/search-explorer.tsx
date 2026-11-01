@@ -4,7 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
-import { Blocks, ChevronRight, Component, Heart, LayoutTemplate, Search, X, type LucideIcon } from "lucide-react";
+import { Blocks, ChevronRight, Component, Heart, LayoutTemplate, Search, Shapes, X, type LucideIcon } from "lucide-react";
+import { ICONS, getCategory } from "@/lib/icons/catalog";
 import { libraryComponents } from "@/lib/catalog/library-components";
 import { templates } from "@/lib/catalog/templates";
 import { blocks } from "@/lib/catalog/blocks";
@@ -13,15 +14,16 @@ import { useDiscovery } from "@/hooks/use-discovery";
 import { PlanTag } from "@/components/site/pastel-tile";
 import { cn } from "@/lib/utils";
 
-type ItemKind = "component" | "template" | "block";
+type ItemKind = "component" | "template" | "block" | "icon";
 type Kind = "all" | ItemKind;
 
-const KIND_LABEL: Record<ItemKind, string> = { component: "Component", template: "Template", block: "Block" };
-const KIND_ICON: Record<ItemKind, LucideIcon> = { component: Component, template: LayoutTemplate, block: Blocks };
+const KIND_LABEL: Record<ItemKind, string> = { component: "Component", template: "Template", block: "Block", icon: "Icon" };
+const KIND_ICON: Record<ItemKind, LucideIcon> = { component: Component, template: LayoutTemplate, block: Blocks, icon: Shapes };
 
 function hrefFor(kind: ItemKind, slug: string) {
   if (kind === "component") return `/components/${slug}`;
   if (kind === "template") return `/templates/${slug}`;
+  if (kind === "icon") return `/icons/${slug}`;
   return `/blocks/${slug}`;
 }
 
@@ -55,6 +57,15 @@ const ALL: Result[] = [
     premium: b.premium,
     haystack: `${b.name} ${b.description} ${b.category} ${b.tags.join(" ")}`.toLowerCase(),
   })),
+  ...ICONS.map((i) => ({
+    kind: "icon" as const,
+    slug: i.slug,
+    title: `${i.title} icon`,
+    meta: getCategory(i.category)?.label ?? "Icons",
+    score: 30,
+    premium: false,
+    haystack: `${i.title} icon animated ${i.description} ${i.tags.join(" ")}`.toLowerCase(),
+  })),
 ].sort((a, b) => b.score - a.score);
 
 const TITLES = new Map(ALL.map((r) => [`${r.kind}:${r.slug}`, r.title]));
@@ -63,6 +74,7 @@ const KINDS: { value: Kind; label: string }[] = [
   { value: "component", label: "Components" },
   { value: "template", label: "Templates" },
   { value: "block", label: "Blocks" },
+  { value: "icon", label: "Icons" },
 ];
 
 export function SearchExplorer() {
@@ -102,6 +114,7 @@ export function SearchExplorer() {
     component: matching.filter((r) => r.kind === "component").length,
     template: matching.filter((r) => r.kind === "template").length,
     block: matching.filter((r) => r.kind === "block").length,
+    icon: matching.filter((r) => r.kind === "icon").length,
   };
   const results = kind === "all" ? matching : matching.filter((r) => r.kind === kind);
   const favSet = new Set(favorites.map((f) => `${f.kind}:${f.slug}`));
@@ -115,7 +128,7 @@ export function SearchExplorer() {
         <div className="relative mx-auto max-w-[1152px]">
           <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">Search</h1>
           <p className="mt-4 max-w-[560px] text-[17px] leading-[1.5] text-muted-foreground">
-            Every component, template and block in one place. Search by name, tag or the kind of section you need.
+            Every component, template, block and animated icon in one place. Search by name, tag or the kind of section you need.
           </p>
           <form
             role="search"
@@ -239,11 +252,12 @@ export function SearchExplorer() {
                       <span className="max-[400px]:hidden">
                         <PlanTag pro={r.premium} />
                       </span>
+                      {r.kind !== "icon" && (
                       <button
                         type="button"
                         aria-pressed={saved}
                         aria-label={saved ? `Remove ${r.title} from favourites` : `Save ${r.title} to favourites`}
-                        onClick={() => toggleFavorite(r.kind, r.slug)}
+                        onClick={() => r.kind !== "icon" && toggleFavorite(r.kind, r.slug)}
                         className={cn(
                           "grid size-9 shrink-0 place-items-center rounded-full transition-colors hover:bg-foreground/[0.06] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
                           saved ? "text-[#ff3b30]" : "text-muted-foreground hover:text-foreground",
@@ -251,6 +265,7 @@ export function SearchExplorer() {
                       >
                         <Heart className={cn("size-4", saved && "fill-current")} aria-hidden />
                       </button>
+                      )}
                       <ChevronRight
                         className="hidden size-4 shrink-0 text-foreground/25 transition-transform duration-200 group-hover:translate-x-0.5 sm:block"
                         aria-hidden

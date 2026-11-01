@@ -83,6 +83,14 @@ export default function IntroductionPage() {
               components, each with a live preview.
             </li>
             <li>
+              <strong className="font-medium text-foreground">Icons.</strong> {CATALOG_COUNTS.icons} animated icons, each one
+              file with its own optional sound. See the{" "}
+              <Link href="/docs/icons" className={link}>
+                icons docs
+              </Link>
+              .
+            </li>
+            <li>
               <strong className="font-medium text-foreground">Sounds.</strong> Optional interface sounds that some
               components play. They are off until the visitor turns them on, and{" "}
               <Link href="/sounds" className={link}>
