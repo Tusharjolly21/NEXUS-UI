@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight, Boxes, Check, LayoutTemplate, LockOpen, Receipt, Sparkles, Terminal } from "lucide-react";
 import { Card, DashboardPage, Notice, PageHeader, StatusPill } from "@/components/dashboard/ui";
 import { PlanActivating } from "@/components/dashboard/plan-activating";
+import { PurchaseReturnTracker } from "@/components/dashboard/purchase-return-tracker";
 import { pillClassName } from "@/components/site/pill-link";
 import type { PlanSummary } from "@/lib/plan";
 import { cn } from "@/lib/utils";
@@ -118,6 +119,7 @@ export function OverviewView({
         description={plan.hasAccess ? "Your plan includes every Pro component, template and block." : "You're on the free plan."}
       />
 
+      {activating || justUnlocked ? <PurchaseReturnTracker state={activating ? "activating" : "unlocked"} /> : null}
       {activating ? <PlanActivating contact={contact} /> : null}
       {justUnlocked ? (
         <div className="mb-5">

@@ -1,5 +1,6 @@
 "use client";
 
+import { ProNudge, type ProPick } from "@/components/pro/pro-nudge";
 import { AutoplaySound } from "@/lib/ui-sounds";
 import * as React from "react";
 import Link from "next/link";
@@ -1134,6 +1135,8 @@ type ComponentDetailProps = {
   faq?: { q: string; a: string }[];
   /** Blog guides that use this component. */
   guides?: { slug: string; title: string }[];
+  /** A few Pro components from the same category, named in the upgrade card on free pages. */
+  proPicks?: ProPick[];
 };
 
 /** Anchor id for one variant section, so the jump bar and shared links can land on it. */
@@ -1165,6 +1168,7 @@ export function ComponentDetailPageClient({
   variantPrompts = [],
   faq = [],
   guides = [],
+  proPicks = [],
 }: ComponentDetailProps) {
   const usageSource = serializedPreviewSections?.[0]?.reactSource ?? reactSource;
   const categoryLabel = getComponentCategoryLabel(categorySlug as ComponentCategorySlug);
@@ -1334,6 +1338,7 @@ export function ComponentDetailPageClient({
             premium={premium}
             locked={locked}
           />
+          {!premium ? <ProNudge slug={slug} name={name} picks={proPicks} /> : null}
           <About slug={slug} name={name} />
           <Faq name={name} items={faq} />
           <Guides items={guides} />
