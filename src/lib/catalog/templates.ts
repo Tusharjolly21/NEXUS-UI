@@ -854,7 +854,15 @@ export const templates: MarketplaceTemplate[] = [
       ],
     },
     features: [
-      "FEATURES_PLACEHOLDER",
+      "Light and dark themes with a view-transition toggle that remembers the choice",
+      "Hero currency converter with rolling digits, twelve currencies and live rate, fee and arrival text",
+      "Canvas globe that redraws its arc and sends a dot along the route for each corridor",
+      "Treasury view with a hover line chart, a tap-to-cycle card stack and arrival rates by rail",
+      "Rate-lock dial, Ferry versus SWIFT bar chart, cut-off table and webhook flow diagram",
+      "Payout router and approval rules whose switches and limit change the checklist and button",
+      "Developer section with cURL, Node and Python tabs, copy button and a typed sample response",
+      "Pricing calculator on a logarithmic slider that marks the cheapest plan for your volume",
+      "No remote images, no web fonts to load and no audio; reduced-motion settings respected",
     ],
   },
 ];
