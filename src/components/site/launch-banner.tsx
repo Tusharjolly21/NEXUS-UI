@@ -55,7 +55,7 @@ export function LaunchBanner({ isPro = false }: { isPro?: boolean }) {
           <span className="hidden items-center gap-x-1.5 md:inline-flex">
             <span aria-hidden className="text-white/30">|</span>
             Pro unlocks the rest.
-            <Link href="/pricing" className="whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
+            <Link href="/pricing" data-plans-source="banner" className="whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
               See plans ›
             </Link>
           </span>

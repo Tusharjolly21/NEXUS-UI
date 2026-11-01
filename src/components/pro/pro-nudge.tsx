@@ -45,6 +45,7 @@ export function ProNudge({ slug, name, picks }: { slug: string; name: string; pi
         <div className="mt-6 shrink-0 md:mt-0">
           <Link
             href="/pricing"
+            data-plans-source="pro_card"
             onClick={() => trackEvent("pro_card_click", { slug })}
             className={pillClassName("ink", "md")}
           >

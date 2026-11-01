@@ -31,16 +31,19 @@ export function PillLink({
   variant = "ink",
   size = "md",
   className,
+  plansSource,
   children,
 }: {
   href: string;
   variant?: PillVariant;
   size?: PillSize;
   className?: string;
+  /** For links to /pricing: names where this one sits, for the plans_click count. */
+  plansSource?: string;
   children: React.ReactNode;
 }) {
   return (
-    <Link href={href} className={pillClassName(variant, size, className)}>
+    <Link href={href} data-plans-source={plansSource} className={pillClassName(variant, size, className)}>
       {children}
     </Link>
   );
