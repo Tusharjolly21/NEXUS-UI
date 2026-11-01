@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useProAccess } from "@/components/pro/pro-access";
 import { playIconSound } from "./icon-sounds";
 import { CopyIcon } from "./icons/copy";
 
@@ -39,6 +41,7 @@ export function CopyButton({
   label = "Copy code",
   copiedLabel = "Copied",
   compact = false,
+  locked = false,
   className,
 }: {
   /** The text to copy. */
@@ -51,8 +54,11 @@ export function CopyButton({
   copiedLabel?: string;
   /** An icon-only round button, for a corner of a tile. */
   compact?: boolean;
+  /** A Pro icon the visitor does not have: the button shows a lock and opens the upgrade dialog instead of copying. */
+  locked?: boolean;
   className?: string;
 }) {
+  const { requestUpgrade } = useProAccess();
   const [hover, setHover] = React.useState(false);
   const [state, setState] = React.useState<"idle" | "copied" | "failed">("idle");
   const timer = React.useRef<number | null>(null);
@@ -67,7 +73,19 @@ export function CopyButton({
   const press = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const source = text ?? fetch(`/api/icons/${slug}`).then((r) => (r.ok ? r.text() : Promise.reject(new Error("missing"))));
+    if (locked) {
+      requestUpgrade(name, "icon code");
+      return;
+    }
+    const source =
+      text ??
+      fetch(`/api/icons/${slug}`).then((r) => {
+        if (r.status === 403) {
+          requestUpgrade(name, "icon code"); // the server says this session has no Pro (signed out, or the plan ended)
+          return Promise.reject(new Error("pro"));
+        }
+        return r.ok ? r.text() : Promise.reject(new Error("missing"));
+      });
     const ok = await copy(source);
     setState(ok ? "copied" : "failed");
     if (ok) playIconSound("copy", { volume: 0.7 });
@@ -76,7 +94,7 @@ export function CopyButton({
   };
 
   const copied = state === "copied";
-  const text_ = copied ? copiedLabel : state === "failed" ? "Press Ctrl+C" : label;
+  const text_ = locked ? "Pro" : copied ? copiedLabel : state === "failed" ? "Press Ctrl+C" : label;
   return (
     <button
       type="button"
@@ -85,7 +103,7 @@ export function CopyButton({
       onPointerLeave={() => setHover(false)}
       onFocus={() => setHover(true)}
       onBlur={() => setHover(false)}
-      aria-label={compact ? `${label}${name ? ` for ${name}` : ""}` : undefined}
+      aria-label={locked ? `Unlock the ${name ?? "icon"} code with Pro` : compact ? `${label}${name ? ` for ${name}` : ""}` : undefined}
       title={compact ? text_ : undefined}
       className={cn(
         "inline-flex items-center justify-center gap-2 text-[13px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
@@ -94,8 +112,8 @@ export function CopyButton({
         className,
       )}
     >
-      <CopyIcon size={compact ? 16 : 16} strokeWidth={2} play={hover || copied} accent={copied ? "#ffffff" : "#30d158"} />
-      {compact ? <span className="sr-only" aria-live="polite">{copied ? copiedLabel : ""}</span> : <span aria-live="polite">{text_}</span>}
+      {locked ? <Lock className="size-4" strokeWidth={2.2} aria-hidden /> : <CopyIcon size={16} strokeWidth={2} play={hover || copied} accent={copied ? "#ffffff" : "#30d158"} />}
+      {compact ? <span className="sr-only" aria-live="polite">{copied ? copiedLabel : ""}</span> : <span aria-live="polite">{locked ? `${label} · Pro` : text_}</span>}
     </button>
   );
 }

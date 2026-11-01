@@ -56,7 +56,7 @@ function Slider({ label, value, min, max, step, onChange }: { label: string; val
  * The toy box on each icon page: pick how it is triggered, how fast and how it feels, restyle it, hear it, drag it, or
  * press Surprise me. The snippet beside it always matches what is on the stage.
  */
-export function IconPlayground({ icon, source }: { icon: IconMeta; source: string }) {
+export function IconPlayground({ icon, source, locked = false }: { icon: IconMeta; source: string; locked?: boolean }) {
   const Icon = NX_ICONS[icon.slug];
   const isLoop = icon.kind === "loop";
 
@@ -252,7 +252,7 @@ export function IconPlayground({ icon, source }: { icon: IconMeta; source: strin
             </motion.div>
           </motion.div>
           <div className="absolute left-3 top-3">
-            <CopyButton text={source} label="Copy code" className={dark ? "bg-white/10 text-white hover:bg-white/15" : "bg-card shadow-[0_0_0_1px_rgba(0,0,0,.06)] hover:bg-card/80"} />
+            <CopyButton text={source} locked={locked} name={icon.title} label="Copy code" className={dark ? "bg-white/10 text-white hover:bg-white/15" : "bg-card shadow-[0_0_0_1px_rgba(0,0,0,.06)] hover:bg-card/80"} />
           </div>
           <div className="absolute right-3 top-3 flex items-center gap-2">
             <button
@@ -380,7 +380,7 @@ export function IconPlayground({ icon, source }: { icon: IconMeta; source: strin
 
       <div className="flex min-w-0 flex-col">
         <h2 className="text-[17px] font-semibold text-foreground">Use it</h2>
-        <p className="mt-1 text-[15px] text-muted-foreground">Copy the file below into your project, then import it. This snippet follows everything you change on the stage.</p>
+        <p className="mt-1 text-[15px] text-muted-foreground">{locked ? "This is how you would use it. The file itself comes with Pro; the snippet follows everything you change on the stage." : "Copy the file below into your project, then import it. This snippet follows everything you change on the stage."}</p>
         <div className="mt-4 min-w-0">
           <CodeBlock code={usage} language="tsx" theme="dark" header={{ ...DEFAULT_HEADER, title: "page.tsx" }} hoverHighlight={false} enableSound={false} />
         </div>

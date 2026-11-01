@@ -114,7 +114,7 @@ export function UseScene({ slug, accent, scene, label, sub }: { slug: string; ac
       );
     case "chip":
       return (
-        <button type="button" {...handlers} className={cn("inline-flex h-10 items-center gap-2 rounded-full px-4 text-[14px] font-medium transition-transform active:scale-95", shell)} style={tint}>
+        <button type="button" {...handlers} className={cn("inline-flex h-10 items-center gap-2 rounded-full px-4 text-[14px] font-medium text-foreground transition-transform active:scale-95", shell)} style={{ backgroundColor: tint.backgroundColor }}>
           {ico(17)} {label}
         </button>
       );

@@ -3,9 +3,10 @@
 import * as React from "react";
 import Link from "next/link";
 import { useInView } from "framer-motion";
-import { PartyPopper, Search, Volume2, VolumeX, Waves } from "lucide-react";
+import { Lock, LockOpen, PartyPopper, Search, Volume2, VolumeX, Waves } from "lucide-react";
 import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { ICONS, ICON_CATEGORIES, type IconCategory, type IconMeta } from "@/lib/icons/catalog";
+import { useLocked, useProAccess } from "@/components/pro/pro-access";
 import { cn } from "@/lib/utils";
 import { IconMaterial, type IconMaterialName } from "./icon-material";
 import { CopyButton } from "./copy-button";
@@ -22,6 +23,39 @@ export const MATERIALS: { id: IconMaterialName; label: string; dark?: boolean }[
   { id: "liquid", label: "Liquid" },
   { id: "glass", label: "Glass", dark: true },
 ];
+
+type Access = "all" | "free" | "pro";
+
+/** All / Free / Pro, as a segmented control. */
+function AccessSwitch({ value, onChange }: { value: Access; onChange: (v: Access) => void }) {
+  const { isPro } = useProAccess();
+  const counts: Record<Access, number> = { all: ICONS.length, free: ICONS.filter((i) => !i.premium).length, pro: ICONS.filter((i) => i.premium).length };
+  const label: Record<Access, string> = { all: "All", free: "Free", pro: "Pro" };
+  return (
+    <div role="radiogroup" aria-label="Show free or Pro icons" className="inline-flex h-10 shrink-0 items-center gap-0.5 rounded-full bg-card p-1 shadow-[0_0_0_1px_rgba(0,0,0,.06)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)]">
+      {(["all", "free", "pro"] as const).map((a) => {
+        const on = value === a;
+        return (
+          <button
+            key={a}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            onClick={() => onChange(a)}
+            className={cn(
+              "inline-flex h-full items-center gap-1.5 rounded-full px-3.5 text-[13.5px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+              on ? "bg-foreground text-background" : "text-foreground/70 hover:text-foreground",
+            )}
+          >
+            {a === "pro" ? isPro ? <LockOpen className="size-3.5" strokeWidth={2.4} aria-hidden /> : <Lock className="size-3.5" strokeWidth={2.4} aria-hidden /> : null}
+            {label[a]}
+            <span className={cn("tabular-nums text-[12px]", on ? "text-background/70" : "text-muted-foreground")}>{counts[a]}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 export const SWATCHES = ["#1d1d1f", "#2563eb", "#7c3aed", "#e11d48", "#f59e0b", "#059669"] as const;
 
@@ -53,6 +87,7 @@ export function IconTile({
   sound?: boolean;
 }) {
   const Icon = NX_ICONS[icon.slug];
+  const locked = useLocked(icon.premium);
   const ref = React.useRef<HTMLDivElement>(null);
   const near = useInView(ref, { margin: "120px" });
   const [active, setActive] = React.useState(false);
@@ -143,11 +178,23 @@ export function IconTile({
           {icon.title}
         </span>
       </Link>
-      {/* one click copies this icon's whole file; always there on touch screens, on hover or focus elsewhere */}
+      {icon.premium ? (
+        <span
+          className={cn(
+            "pointer-events-none absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold",
+            dark ? "bg-white/15 text-white" : "bg-foreground text-background",
+          )}
+        >
+          {locked ? <Lock className="size-2.5" strokeWidth={3} aria-hidden /> : null}
+          Pro
+        </span>
+      ) : null}
+      {/* one click copies this icon's whole file (a Pro icon asks to upgrade); always there on touch screens, on hover or focus elsewhere */}
       <CopyButton
         slug={icon.slug}
         name={icon.title}
         compact
+        locked={locked}
         label="Copy code"
         className={cn(
           "absolute right-2.5 top-2.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100",
@@ -169,6 +216,7 @@ export function IconGrid() {
   const [cols, setCols] = React.useState(6);
   const listRef = React.useRef<HTMLDivElement>(null);
   const [sound, setSound] = React.useState(false);
+  const [access, setAccess] = React.useState<Access>("all");
 
   const dark = !!MATERIALS.find((m) => m.id === material)?.dark;
 
@@ -176,10 +224,12 @@ export function IconGrid() {
     const q = query.trim().toLowerCase();
     return ICONS.filter((i) => {
       if (category !== "all" && i.category !== category) return false;
+      if (access === "free" && i.premium) return false;
+      if (access === "pro" && !i.premium) return false;
       if (!q) return true;
       return i.title.toLowerCase().includes(q) || i.slug.includes(q) || i.tags.some((t) => t.toLowerCase().includes(q));
     });
-  }, [query, category]);
+  }, [query, category, access]);
 
   return (
     <div>
@@ -195,17 +245,20 @@ export function IconGrid() {
             className="h-12 w-full rounded-full bg-card pl-11 pr-4 text-[15px] text-foreground shadow-[0_0_0_1px_rgba(0,0,0,.06)] outline-none placeholder:text-muted-foreground focus-visible:shadow-[0_0_0_2px_var(--ring)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)]"
           />
         </label>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+        <AccessSwitch value={access} onChange={setAccess} />
         <p className="text-[14px] text-muted-foreground" aria-live="polite">
           {shown.length} of {ICONS.length} icons
         </p>
+        </div>
       </div>
 
-      <ChipRail className="mt-5">
-        <Chip active={category === "all"} onClick={() => setCategory("all")}>
+      <ChipRail wrap className="mt-5">
+        <Chip active={category === "all"} onClick={() => setCategory("all")} className="py-1.5 text-[13px]">
           All <span className={category === "all" ? "opacity-70" : "text-muted-foreground"}>{ICONS.length}</span>
         </Chip>
         {ICON_CATEGORIES.map((c) => (
-          <Chip key={c.slug} active={category === c.slug} onClick={() => setCategory(c.slug)}>
+          <Chip key={c.slug} active={category === c.slug} onClick={() => setCategory(c.slug)} className="py-1.5 text-[13px]">
             {c.label} <span className={cn(category === c.slug ? "opacity-70" : "text-muted-foreground")}>{ICONS.filter((i) => i.category === c.slug).length}</span>
           </Chip>
         ))}

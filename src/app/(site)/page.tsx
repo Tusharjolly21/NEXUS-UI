@@ -116,7 +116,7 @@ export default function Home() {
       items: HOME_VIDEOS.map((slug) => getVideo(slug)).filter((v): v is NonNullable<typeof v> => !!v).map((v) => ({ slug: v.slug, title: v.title, purpose: v.purpose })),
     },
     sounds: { total: Object.keys(SOUNDS).length },
-    icons: { total: CATALOG_COUNTS.icons, categories: CATALOG_COUNTS.iconCategories },
+    icons: { total: CATALOG_COUNTS.icons, free: CATALOG_COUNTS.freeIcons, categories: CATALOG_COUNTS.iconCategories },
   };
   const homeVideos = HOME_VIDEOS.map((slug) => getVideo(slug)).filter((v): v is NonNullable<typeof v> => !!v);
 
@@ -303,7 +303,7 @@ export default function Home() {
             <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">Icons that move, and make a sound</h2>
             <p className="mt-4 max-w-[560px] text-[18px] text-muted-foreground">
               {CATALOG_COUNTS.icons} animated icons for toolbars, players, carts and tab bars. Each tells a tiny story, has a sound scored to its animation, and
-              is one file you copy.
+              is one file you copy. {CATALOG_COUNTS.freeIcons} are free; Pro unlocks the other {CATALOG_COUNTS.proIcons}.
             </p>
           </div>
           <PillLink href="/icons" variant="white" className="shrink-0 self-start md:self-auto">

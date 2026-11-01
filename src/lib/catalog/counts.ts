@@ -19,5 +19,7 @@ export const CATALOG_COUNTS = {
   videos: videos.length,
   freeVideos: videos.filter((v) => !v.premium).length,
   icons: ICONS.length,
+  freeIcons: ICONS.filter((i) => !i.premium).length,
+  proIcons: ICONS.filter((i) => i.premium).length,
   iconCategories: ICON_CATEGORIES.length,
 } as const;

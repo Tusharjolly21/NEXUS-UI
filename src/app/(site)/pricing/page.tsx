@@ -10,7 +10,7 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 import { PRICES, formatPrice } from "@/lib/pricing";
 
-const { components, freeComponents, proComponents, templates, freeTemplates, blocks, videos, freeVideos, icons } = CATALOG_COUNTS;
+const { components, freeComponents, proComponents, templates, freeTemplates, blocks, videos, freeVideos, icons, freeIcons, proIcons } = CATALOG_COUNTS;
 const freeBlocks = blocksManifest.filter((b) => !b.premium).length;
 
 const PRO_PRICE = formatPrice(PRICES.pro);
@@ -44,7 +44,7 @@ const PLANS: Plan[] = [
       `${freeBlocks} of the ${blocks} section blocks`,
       `${freeTemplates} full templates, plus a first look at all ${templates}`,
       `${freeVideos} of the ${videos} videos with their prompt and source`,
-      `All ${icons} animated icons, with their sounds`,
+      `${freeIcons} animated icons, with their sounds`,
       "Commercial and client projects",
       "Install with the shadcn CLI",
     ],
@@ -61,6 +61,7 @@ const PLANS: Plan[] = [
       `Full source of all ${templates} templates`,
       `All ${blocks} section blocks`,
       `All ${videos} videos: prompt, source, live editing and render script`,
+      `All ${icons} animated icons: ${proIcons} more, with their sounds`,
       "Every new template, block and component as it ships",
       "Request components, blocks and templates",
       "Priority support, 24 to 48 hours",
@@ -87,7 +88,7 @@ const COMPARE: [string, Cell, Cell, Cell][] = [
   ["Section blocks", `${freeBlocks} free`, `All ${blocks}`, `All ${blocks}`],
   ["Template source", "Preview only", true, true],
   ["Videos", `${freeVideos} free`, `All ${videos}`, `All ${videos}`],
-  ["Animated icons and sounds", `All ${icons}`, `All ${icons}`, `All ${icons}`],
+  ["Animated icons and sounds", `${freeIcons} free`, `All ${icons}`, `All ${icons}`],
   ["Commercial and client use", true, true, true],
   ["New templates, blocks and components", "Free items", true, true],
   ["Requests", false, true, true],
@@ -135,7 +136,7 @@ const FAQ = [
   },
   {
     q: "Are the animated icons free?",
-    a: `Yes. All ${icons} animated icons, with their sounds and the sound guide, are free to copy and use in personal, commercial and client projects, with no sign-in. Each is one file you keep.`,
+    a: `${freeIcons} of the ${icons} are free, with their sounds, for personal, commercial and client projects, with no sign-in. The other ${proIcons} are Pro: you can preview and play every one of them, but their code and sound come with Pro. The icon engine, the sound engine and the sound guide are free.`,
   },
   {
     q: "How do I get the code after paying?",

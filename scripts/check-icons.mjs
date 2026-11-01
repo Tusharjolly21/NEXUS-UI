@@ -26,13 +26,18 @@ const sounds = read("src/components/nx-icons/icon-sounds.ts");
 const count = read("src/lib/icons/count.ts");
 
 const categories = new Set([...catalog.matchAll(/\{ slug: "([a-z-]+)", label: "[^"]+", blurb: "[^"]+" \}/g)].map((m) => m[1]));
-const entries = [...catalog.matchAll(/\{ slug: "([a-z0-9-]+)", component: "(\w+)", title: "([^"]+)", category: "([a-z-]+)", kind: "(\w+)", accent: "([^"]+)", heard: "((?:[^"\\]|\\.)*)"(?:, states: \[[^\]]*\])?, tags: \[([^\]]*)\], description: "((?:[^"\\]|\\.)*)"/g)];
+const entries = [...catalog.matchAll(/\{ slug: "([a-z0-9-]+)", component: "(\w+)", title: "([^"]+)", category: "([a-z-]+)", kind: "(\w+)", accent: "([^"]+)", heard: "((?:[^"\\]|\\.)*)"(?:, states: \[[^\]]*\])?, tags: \[([^\]]*)\], description: "((?:[^"\\]|\\.)*)", createdAt: "[^"]*", premium: (true|false) \}/g)];
 const slugs = entries.map((m) => m[1]);
 
 if (entries.length < 100) fail(`catalog parsed ${entries.length} entries (expected 100+): the catalog format may have changed`);
 if (new Set(slugs).size !== slugs.length) fail("duplicate slugs in the catalog");
 const declared = Number(/ICON_COUNT = (\d+)/.exec(count)?.[1]);
 if (declared !== slugs.length) fail(`count.ts says ${declared} icons, the catalog has ${slugs.length}`);
+const freeDeclared = Number(/FREE_ICON_COUNT = (\d+)/.exec(count)?.[1]);
+const proDeclared = Number(/PRO_ICON_COUNT = (\d+)/.exec(count)?.[1]);
+const freeActual = entries.filter((m) => m[10] === "false").length;
+if (freeDeclared !== freeActual) fail(`count.ts says ${freeDeclared} free icons, the catalog has ${freeActual}`);
+if (proDeclared !== slugs.length - freeActual) fail(`count.ts says ${proDeclared} Pro icons, the catalog has ${slugs.length - freeActual}`);
 
 const dirFiles = (d, ext) => fs.readdirSync(path.join(root, d)).filter((f) => f.endsWith(ext)).map((f) => f.slice(0, -ext.length));
 const iconFiles = new Set(dirFiles("src/components/nx-icons/icons", ".tsx"));
@@ -41,8 +46,9 @@ for (const s of iconFiles) if (!slugs.includes(s)) fail(`icons/${s}.tsx has no c
 for (const s of soundFiles) if (!slugs.includes(s)) fail(`sounds/${s}.ts has no catalog entry`);
 
 const noteSeqs = new Map();
-for (const [, slug, component, title, category, kind, accent, heard, tags, description] of entries) {
+for (const [, slug, component, title, category, kind, accent, heard, tags, description, premium] of entries) {
   const where = `${slug}:`;
+  if (premium !== "true" && premium !== "false") fail(`${where} premium must be true or false`);
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) fail(`${where} slug must be kebab-case`);
   if (!categories.has(category)) fail(`${where} unknown category "${category}"`);
   if (!/^#[0-9a-fA-F]{6}$/.test(accent)) fail(`${where} accent must be #rrggbb`);
@@ -103,4 +109,4 @@ if (errors.length) {
   console.error(`\nIcon check failed (${errors.length}):\n` + errors.map((e) => `  - ${e}`).join("\n") + "\n");
   process.exit(1);
 }
-console.log(`Icon check passed: ${slugs.length} icons, ${soundFiles.size} sounds, ${categories.size} categories.`);
+console.log(`Icon check passed: ${slugs.length} icons (${freeActual} free, ${slugs.length - freeActual} Pro), ${soundFiles.size} sounds, ${categories.size} categories.`);

@@ -4,6 +4,7 @@ import { IconGrid } from "@/components/nx-icons/icon-grid";
 import { RealInterfaces } from "@/components/nx-icons/real-interfaces";
 import { RainbowWord } from "@/components/site";
 import { ICONS } from "@/lib/icons/catalog";
+import { FREE_ICON_COUNT, PRO_ICON_COUNT } from "@/lib/icons/count";
 import { createMetadata, siteConfig } from "@/lib/seo";
 
 const FITS: { title: string; body: string; icons: string[] }[] = [
@@ -19,7 +20,7 @@ const FITS: { title: string; body: string; icons: string[] }[] = [
 
 export const metadata: Metadata = createMetadata({
   title: "Animated Icons for React",
-  description: `${ICONS.length} animated React icons: loaders, spinners, bells, hearts, arrows and more. Built with Framer Motion. Hover to play, then copy the code.`,
+  description: `${ICONS.length} animated React icons with a sound each, ${FREE_ICON_COUNT} free: loaders, spinners, bells, hearts, arrows and more. Built with Framer Motion. Hover to play, then copy the code.`,
   alternates: { canonical: "/icons" },
 });
 
@@ -94,7 +95,7 @@ export default function IconsPage() {
             {[
               ["A tiny story and a sound each", "Not just a wiggle: a bell that pops a badge, a bin that catches a crumpled paper, a house that switches its windows on. Every one has its own sound, scored note by note against its animation."],
               ["Make it yours", "Spark, Neon, Aurora or Chrome, or the liquid looks: Mercury (flowing metal), Liquid (a wet, wobbling droplet) and Glass (a lens with a bright rim). Any colour, any speed. Try them on the whole set above, or on a single icon on its own page."],
-              ["One file, no lock-in", "Each icon is one self-contained component built with Framer Motion, and it holds still for visitors who have reduced motion switched on."],
+              ["One file, free or Pro", `Each icon is one self-contained component built with Framer Motion, and it holds still for visitors who have reduced motion switched on. ${FREE_ICON_COUNT} are free to copy; Pro unlocks the other ${PRO_ICON_COUNT}. You can preview, play and hear every one of them first.`],
             ].map(([title, body]) => (
               <div key={title}>
                 <h2 className="text-[17px] font-semibold text-foreground">{title}</h2>

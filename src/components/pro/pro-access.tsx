@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { Check, Lock, LockOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FREE_ICON_COUNT } from "@/lib/icons/count";
 
 type ProAccess = {
   /** The visitor has Pro (an active plan or All-Access). */
@@ -180,8 +181,12 @@ function UpgradeDialog({
             {title}
           </DialogPrimitive.Title>
           <DialogPrimitive.Description className="mx-auto mt-2.5 max-w-[320px] text-[15px] leading-[1.5] text-muted-foreground">
-            {feature === "full-screen preview" ? "You can still try it on the page." : "You can preview every component."} Pro unlocks {proCount ? `all ${proCount} Pro components` : "every Pro component"}, every
-            template and the premium blocks.
+            {feature?.startsWith("icon")
+              ? `You can preview and play every icon, and the ${FREE_ICON_COUNT} free ones are yours to copy. Pro unlocks the code and sound of every Pro icon, every Pro component, every template and the premium blocks.`
+              : feature === "full-screen preview"
+                ? "You can still try it on the page."
+                : "You can preview every component."}
+            {feature?.startsWith("icon") ? null : ` Pro unlocks ${proCount ? `all ${proCount} Pro components` : "every Pro component"}, every template and the premium blocks.`}
           </DialogPrimitive.Description>
 
           <ul className="mx-auto mt-6 grid max-w-[300px] gap-2.5 text-left">

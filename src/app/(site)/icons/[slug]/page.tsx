@@ -7,11 +7,14 @@ import { CodeBlock } from "@/components/code-block";
 import { DEFAULT_HEADER } from "@/components/code-block/code-block";
 import { IconTile } from "@/components/nx-icons/icon-grid";
 import { CopyButton } from "@/components/nx-icons/copy-button";
+import { LockedCode } from "@/components/nx-icons/locked-code";
+import { sessionCanAccessIcon } from "@/lib/icons/access";
 import { IconPlayground } from "@/components/nx-icons/icon-playground";
 import { UseScene } from "@/components/nx-icons/use-scenes";
 import { RainbowWord } from "@/components/site";
 import { ICONS, getCategory, getIcon } from "@/lib/icons/catalog";
 import { ICON_USES } from "@/lib/icons/uses";
+import { FREE_ICON_COUNT, PRO_ICON_COUNT } from "@/lib/icons/count";
 import { createMetadata, siteConfig } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -48,8 +51,12 @@ export default async function IconPage({ params }: Props) {
   const icon = getIcon(slug);
   if (!icon) notFound();
   const category = getCategory(icon.category);
-  const source = await readFile(path.join(process.cwd(), "src/components/nx-icons/icons", `${icon.slug}.tsx`), "utf8");
-  const scoreSource = await readFile(path.join(process.cwd(), "src/components/nx-icons/sounds", `${icon.slug}.ts`), "utf8");
+  // A Pro icon's code and sound reach the browser only if the server has checked this session has Pro: otherwise
+  // they are never even read, so nothing can leak through the page, the props or the HTML.
+  const canSee = await sessionCanAccessIcon(icon.slug);
+  const locked = !canSee;
+  const source = canSee ? await readFile(path.join(process.cwd(), "src/components/nx-icons/icons", `${icon.slug}.tsx`), "utf8") : "";
+  const scoreSource = canSee ? await readFile(path.join(process.cwd(), "src/components/nx-icons/sounds", `${icon.slug}.ts`), "utf8") : "";
   const material = await readFile(path.join(process.cwd(), "src/components/nx-icons/icon-material.tsx"), "utf8");
   const related = ICONS.filter((i) => i.category === icon.category && i.slug !== icon.slug).slice(0, 6);
   const name = icon.title.toLowerCase();
@@ -83,6 +90,12 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
       a: `${uses.map((u) => u.title.toLowerCase()).join(", ")}. Each one is shown live on this page.`,
     },
     {
+      q: `Is the ${name} icon free?`,
+      a: icon.premium
+        ? `You can preview and play the ${name} icon, with its looks and its sound, for free. Its code and sound file are part of Nexus UI Pro, which unlocks all ${PRO_ICON_COUNT} Pro icons. ${FREE_ICON_COUNT} other icons are free to copy.`
+        : `Yes. The ${name} icon is one of the ${FREE_ICON_COUNT} free icons: copy its file and sound and use them in personal, commercial and client projects.`,
+    },
+    {
       q: "Does it need a library?",
       a: "Only Framer Motion, which draws the animation. The icon itself is one file of plain SVG and React, with no other dependencies.",
     },
@@ -110,6 +123,16 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
     },
     {
       "@context": "https://schema.org",
+      "@type": "SoftwareSourceCode",
+      name: `${icon.title} animated icon for React`,
+      description: icon.description,
+      programmingLanguage: "TypeScript",
+      runtimePlatform: "React",
+      isAccessibleForFree: !icon.premium,
+      url: `${siteConfig.url}/icons/${icon.slug}`,
+    },
+    {
+      "@context": "https://schema.org",
       "@type": "FAQPage",
       mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
     },
@@ -131,7 +154,13 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
             <span aria-hidden>›</span>
             <span className="text-foreground">{icon.title}</span>
           </nav>
-          <h1 className="pg-display mt-5 max-w-[900px] text-[clamp(40px,6.6vw,72px)] leading-[1.02] text-foreground">
+          <p className="mt-5 flex items-center gap-2 text-[13.5px] text-muted-foreground">
+            <span className={icon.premium ? "rounded-full bg-foreground px-2.5 py-0.5 text-[12px] font-semibold text-background" : "rounded-full bg-card px-2.5 py-0.5 text-[12px] font-semibold text-foreground shadow-[0_0_0_1px_rgba(0,0,0,.08)]"}>
+              {icon.premium ? "Pro" : "Free"}
+            </span>
+            {icon.premium ? "Preview and play it free. Its code and sound come with Pro." : "Free to copy, with its sound."}
+          </p>
+          <h1 className="pg-display mt-3 max-w-[900px] text-[clamp(40px,6.6vw,72px)] leading-[1.02] text-foreground">
             Animated <RainbowWord>{icon.title}</RainbowWord> icon for React.
           </h1>
           <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">{icon.description}</p>
@@ -150,7 +179,7 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
 
       <section aria-label="Preview and usage" className="px-4 pb-16">
         <div className="mx-auto max-w-[1152px]">
-          <IconPlayground icon={icon} source={source} />
+          <IconPlayground icon={icon} source={source} locked={locked} />
         </div>
       </section>
 
@@ -190,7 +219,7 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
             <h2 id="source" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
               The code
             </h2>
-            <CopyButton text={source} label="Copy the file" />
+            {locked ? <CopyButton locked name={icon.title} label="Copy the file" /> : <CopyButton text={source} label="Copy the file" />}
           </div>
           <p className="mt-2 max-w-[640px] text-[16px] text-muted-foreground">
             One file. Save it as <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">components/icons/{icon.slug}.tsx</code>, run{" "}
@@ -198,14 +227,18 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
             <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px] text-foreground">{icon.component}</code>.
           </p>
           <div className="mt-6">
-            <CodeBlock
-              code={source}
-              language="tsx"
-              theme="dark"
-              header={{ ...DEFAULT_HEADER, title: `${icon.slug}.tsx` }}
-              hoverHighlight={false}
-              enableSound={false}
-            />
+            {locked ? (
+              <LockedCode name={icon.title} what="code" />
+            ) : (
+              <CodeBlock
+                code={source}
+                language="tsx"
+                theme="dark"
+                header={{ ...DEFAULT_HEADER, title: `${icon.slug}.tsx` }}
+                hoverHighlight={false}
+                enableSound={false}
+              />
+            )}
           </div>
         </div>
       </section>
@@ -216,7 +249,7 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
             <h2 id="sound" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
               The sound (optional)
             </h2>
-            <CopyButton text={scoreSource} label="Copy the sound" />
+            {locked ? <CopyButton locked name={icon.title} label="Copy the sound" /> : <CopyButton text={scoreSource} label="Copy the sound" />}
           </div>
           <p className="mt-2 max-w-[700px] text-[16px] text-muted-foreground">
             {icon.heard} It is written against this icon&apos;s own animation: each line below is a note placed on a beat of the picture, and{" "}
@@ -248,7 +281,11 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
             />
           </div>
           <div className="mt-6">
-            <CodeBlock code={scoreSource} language="ts" theme="dark" header={{ ...DEFAULT_HEADER, title: `${icon.slug}.ts` }} hoverHighlight={false} enableSound={false} />
+            {locked ? (
+              <LockedCode name={icon.title} what="sound" />
+            ) : (
+              <CodeBlock code={scoreSource} language="ts" theme="dark" header={{ ...DEFAULT_HEADER, title: `${icon.slug}.ts` }} hoverHighlight={false} enableSound={false} />
+            )}
           </div>
         </div>
       </section>

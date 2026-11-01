@@ -8,6 +8,7 @@ import { CopyButton } from "@/components/nx-icons/copy-button";
 import { SoundDemo } from "@/components/nx-icons/sound-demo";
 import { RainbowWord } from "@/components/site";
 import { ICONS } from "@/lib/icons/catalog";
+import { FREE_ICON_COUNT, PRO_ICON_COUNT } from "@/lib/icons/count";
 import { createMetadata, siteConfig } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
@@ -81,6 +82,7 @@ export default async function SoundsGuidePage() {
   const kit = await readFile(path.join(dir, "sound-kit.ts"), "utf8");
 
   const faq: { q: string; a: string }[] = [
+    { q: "Are the sounds free?", a: `The sound engine, the note helpers and this guide are free. An icon's sound score comes with the icon: free for the ${FREE_ICON_COUNT} free icons, and part of Pro for the other ${PRO_ICON_COUNT}. You can hear every icon's sound on its page and on the icons page first.` },
     { q: "Do the icons need sound to work?", a: "No. Sound is optional and separate: the animated icon is one file, and the sound is a second, optional file per icon. Without it, nothing is loaded or played." },
     { q: "Why do I hear nothing the first time?", a: "Browsers only let a page make sound after the visitor has interacted with it (a click, a tap or a key press). Call playIconScore from an event handler, and the first interaction wakes the audio engine." },
     { q: "Does it work on iPhones and Android?", a: "Yes, after a tap. Hover does not exist on touch screens, so also play the sound on click. On iPhones, sounds follow the ringer volume." },

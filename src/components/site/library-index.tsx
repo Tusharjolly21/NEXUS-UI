@@ -16,7 +16,7 @@ export type LibraryIndexData = {
   templates: { total: number; items: { slug: string; title: string; image: string }[] };
   videos: { total: number; items: { slug: string; title: string; purpose: string }[] };
   sounds: { total: number };
-  icons: { total: number; categories: number };
+  icons: { total: number; free: number; categories: number };
 };
 
 type ShelfId = "components" | "blocks" | "templates" | "videos" | "sounds" | "icons";
@@ -93,7 +93,7 @@ export function LibraryIndex({ data }: { data: LibraryIndexData }) {
       name: "Icons",
       line: "Animated icons that tell a tiny story, each with a sound of its own.",
       count: String(data.icons.total),
-      note: "free to copy",
+      note: `${data.icons.free} free`,
       href: "/icons",
       cta: "Browse the icons",
       command: "curl -s https://www.nexus-ui.com/api/icons/bell -o bell.tsx",

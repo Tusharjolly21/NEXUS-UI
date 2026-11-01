@@ -49,7 +49,7 @@ export default function IconsDocsPage() {
 
         <DocSection title="1. Copy the file">
           <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
-            Open an icon and press <em>Copy the file</em>, or fetch it from the command line. Save it anywhere in your project, for example{" "}
+            Open an icon and press <em>Copy the file</em>, or fetch it from the command line (free icons only; a Pro icon needs a Pro account, so copy it from its page). Save it anywhere in your project, for example{" "}
             {code("components/icons/")}. Then install the one dependency:
           </p>
           <DocPre>{`curl -s https://www.nexus-ui.com/api/icons/bell -o components/icons/bell.tsx
@@ -108,7 +108,7 @@ npm i framer-motion`}</DocPre>
         <DocSection title="Good to know">
           <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
             <li>Need an icon that is not in the set? Say so on the <Link href="/contact" className="font-medium text-link hover:underline">contact page</Link>.</li>
-            <li>The icons are free to copy and use in personal and commercial projects.</li>
+            <li>{CATALOG_COUNTS.freeIcons} icons are free to copy and use in personal, commercial and client projects. The other {CATALOG_COUNTS.proIcons} are Pro: you can preview and play every one, but their code and sound come with Pro (see <Link href="/pricing" className="font-medium text-link hover:underline">pricing</Link>). A Pro member can also fetch a file from the command line when signed in.</li>
             <li>Server Components: the files start with {code('"use client"')}, so import them from either kind of component.</li>
           </ul>
         </DocSection>

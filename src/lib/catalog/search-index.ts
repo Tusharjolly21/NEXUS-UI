@@ -96,7 +96,7 @@ export function buildSearchIndex(): SearchEntry[] {
     subtitle: `${getCategory(i.category)?.label ?? "Icon"} icon`,
     description: i.description,
     href: `/icons/${i.slug}`,
-    premium: false,
+    premium: i.premium,
     score: 40,
     tags: i.tags.slice(0, 5),
     keywords: `${i.slug} animated icon react ${(ICON_USES[i.slug] ?? []).map((u) => u.title).join(" ")}`,
