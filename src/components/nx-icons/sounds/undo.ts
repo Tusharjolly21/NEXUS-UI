@@ -4,7 +4,7 @@ import { blip, swish, tick, N, type Time } from "../sound-kit";
 export const length = 0.7;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.27;
+export const level = 1.13;
 
 /** A quick backwards zip as the arrow winds back, and a click as it snaps home. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

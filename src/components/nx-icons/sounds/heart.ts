@@ -4,7 +4,7 @@ import { plink, thud, N, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.02;
+export const level = 1.04;
 
 /** A deep lub-dub heartbeat, then three tiny bubbly notes as the hearts float away. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

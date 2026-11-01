@@ -4,7 +4,7 @@ import { ding, swish, tick, N, type Time } from "../sound-kit";
 export const length = 0.7;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.9;
+export const level = 0.95;
 
 /** A little scrape as the chain halves pull apart, then a bright metallic clink and a sparkle as they connect. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

@@ -4,7 +4,7 @@ import { swish, tick, type Time } from "../sound-kit";
 export const length = 0.7;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.53;
+export const level = 1.65;
 
 /** A quick forward swish as the triangle lunges, a tick of speed lines, and a click as the bar follows. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

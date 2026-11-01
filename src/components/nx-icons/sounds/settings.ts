@@ -4,7 +4,7 @@ import { blip, tick, thud, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.92;
+export const level = 1.0;
 
 /** A ratchet of clicks as the gears bite, slowing down, with a clunk when they overshoot. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

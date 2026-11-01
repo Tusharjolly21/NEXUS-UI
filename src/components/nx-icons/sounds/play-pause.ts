@@ -4,7 +4,7 @@ import { ding, blip, swish, tick, thud, N, type Time } from "../sound-kit";
 export const length = 0.7;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.0;
+export const level = 0.92;
 
 /** A satisfying click, a springy rising blip as the triangle morphs into bars, and a soft ring pulse. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

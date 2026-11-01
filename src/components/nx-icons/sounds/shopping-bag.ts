@@ -4,7 +4,7 @@ import { ding, plink, tick, puff, N, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.28;
+export const level = 1.27;
 
 /** A paper rustle as the bag sways, a plink as the handle lifts, and a cash-register ding as the smile appears. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

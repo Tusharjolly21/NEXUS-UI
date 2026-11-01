@@ -4,7 +4,7 @@ import { blip, swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 1.5;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.05;
+export const level = 0.91;
 
 /** A clack as the lid opens, paper whistling down and crumpling, and the lid shutting. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

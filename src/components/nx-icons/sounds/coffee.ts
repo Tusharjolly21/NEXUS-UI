@@ -4,7 +4,7 @@ import { ding, blip, tick, puff, N, type Time } from "../sound-kit";
 export const length = 2.4;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.54;
+export const level = 1.41;
 
 /** A cup clinking onto its saucer, a few warm bubbles, and a soft hiss of steam. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

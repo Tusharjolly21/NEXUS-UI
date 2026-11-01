@@ -4,7 +4,7 @@ import { blip, tick, puff, type Time } from "../sound-kit";
 export const length = 2.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 2.01;
+export const level = 1.85;
 
 /** Distant thunder rumbling, with a tiny rain-tap for every drop that falls. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

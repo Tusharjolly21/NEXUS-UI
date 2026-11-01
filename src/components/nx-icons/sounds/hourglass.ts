@@ -4,7 +4,7 @@ import { swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 3.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.17;
+export const level = 1.04;
 
 /** Sand hissing down until the top runs dry, then a whoosh and a clack as it flips. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

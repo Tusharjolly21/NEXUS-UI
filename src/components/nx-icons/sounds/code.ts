@@ -4,7 +4,7 @@ import { ding, swish, tick, thud, N, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.21;
+export const level = 1.26;
 
 /** Keyboard clacks as the brackets spread, a pen-stroke whoosh as the slash writes in, and a ding when it compiles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

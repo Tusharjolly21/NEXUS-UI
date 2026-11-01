@@ -4,7 +4,7 @@ import { plink, swish, thud, puff, N, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 2.02;
+export const level = 2.03;
 
 /** A drawer sliding open with a soft thunk, a sheet of paper rustling up, and a gentle done note. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

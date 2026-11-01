@@ -4,7 +4,7 @@ import { blip, swish, tick, N, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.2;
+export const level = 1.1;
 
 /** Two swishes passing in opposite directions, with a tick as they cross and a click at the end. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

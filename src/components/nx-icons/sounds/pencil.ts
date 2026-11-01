@@ -4,7 +4,7 @@ import { tick, puff, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.89;
+export const level = 1.94;
 
 /** Scratchy graphite strokes as the line is drawn, ending on a tiny tap. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

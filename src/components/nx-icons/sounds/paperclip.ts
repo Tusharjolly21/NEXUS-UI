@@ -4,7 +4,7 @@ import { blip, swish, tick, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.51;
+export const level = 1.33;
 
 /** A springy snap as the clip pops up, then three wobbling boings that settle. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

@@ -4,7 +4,7 @@ import { ding, swish, tick, N, type Time } from "../sound-kit";
 export const length = 1.5;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.72;
+export const level = 0.74;
 
 /** A bright ting as it is tossed, whooshes and edge-on ticks as it spins, a clink on landing and two sparkles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

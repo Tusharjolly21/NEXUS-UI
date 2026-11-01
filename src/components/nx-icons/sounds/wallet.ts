@@ -4,7 +4,7 @@ import { ding, swish, tick, thud, N, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.86;
+export const level = 0.89;
 
 /** A coin whistling down, a bright ting as it lands, and a soft leathery thud as the wallet takes it. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

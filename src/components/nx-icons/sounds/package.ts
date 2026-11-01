@@ -4,7 +4,7 @@ import { ding, swish, thud, puff, N, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.71;
+export const level = 0.7;
 
 /** A tape rip as the lid pops, a puff of air, and a deep cardboard thud as it drops back, ending on a happy ding. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

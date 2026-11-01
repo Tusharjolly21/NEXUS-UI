@@ -4,7 +4,7 @@ import { swish, tick, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.62;
+export const level = 1.49;
 
 /** A swish as the arrow shoots off, a tick of its trail, then a softer swish and a tick as it slides back in. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

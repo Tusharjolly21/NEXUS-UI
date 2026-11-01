@@ -80,6 +80,26 @@ import * as s_shopping_bag from "./sounds/shopping-bag";
 import * as s_tag from "./sounds/tag";
 import * as s_wallet from "./sounds/wallet";
 import * as s_package from "./sounds/package";
+import * as s_file from "./sounds/file";
+import * as s_save from "./sounds/save";
+import * as s_clipboard from "./sounds/clipboard";
+import * as s_printer from "./sounds/printer";
+import * as s_archive from "./sounds/archive";
+import * as s_filter from "./sounds/filter";
+import * as s_grid from "./sounds/grid";
+import * as s_list from "./sounds/list";
+import * as s_more from "./sounds/more";
+import * as s_external_link from "./sounds/external-link";
+import * as s_arrow_up from "./sounds/arrow-up";
+import * as s_trending_up from "./sounds/trending-up";
+import * as s_power from "./sounds/power";
+import * as s_laptop from "./sounds/laptop";
+import * as s_megaphone from "./sounds/megaphone";
+import * as s_bookmark from "./sounds/bookmark";
+import * as s_trophy from "./sounds/trophy";
+import * as s_key from "./sounds/key";
+import * as s_umbrella from "./sounds/umbrella";
+import * as s_flame from "./sounds/flame";
 
 type Score = { length: number; level: number; play: (c: AudioContext, o: AudioNode, t: Time) => void };
 
@@ -165,6 +185,26 @@ const SCORES: Record<string, Score> = {
   "tag": s_tag,
   "wallet": s_wallet,
   "package": s_package,
+  "file": s_file,
+  "save": s_save,
+  "clipboard": s_clipboard,
+  "printer": s_printer,
+  "archive": s_archive,
+  "filter": s_filter,
+  "grid": s_grid,
+  "list": s_list,
+  "more": s_more,
+  "external-link": s_external_link,
+  "arrow-up": s_arrow_up,
+  "trending-up": s_trending_up,
+  "power": s_power,
+  "laptop": s_laptop,
+  "megaphone": s_megaphone,
+  "bookmark": s_bookmark,
+  "trophy": s_trophy,
+  "key": s_key,
+  "umbrella": s_umbrella,
+  "flame": s_flame,
 };
 
 export function hasIconSound(slug: string) {

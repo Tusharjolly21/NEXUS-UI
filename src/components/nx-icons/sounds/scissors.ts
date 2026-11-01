@@ -4,7 +4,7 @@ import { blip, swish, tick, puff, N, type Time } from "../sound-kit";
 export const length = 0.7;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 0.81;
+export const level = 0.76;
 
 /** Two crisp metallic snips, on every close of the blades. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

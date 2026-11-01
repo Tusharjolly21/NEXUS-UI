@@ -81,6 +81,26 @@ import { ShoppingBagIcon } from "./icons/shopping-bag";
 import { TagIcon } from "./icons/tag";
 import { WalletIcon } from "./icons/wallet";
 import { PackageIcon } from "./icons/package";
+import { FileIcon } from "./icons/file";
+import { SaveIcon } from "./icons/save";
+import { ClipboardIcon } from "./icons/clipboard";
+import { PrinterIcon } from "./icons/printer";
+import { ArchiveIcon } from "./icons/archive";
+import { FilterIcon } from "./icons/filter";
+import { GridIcon } from "./icons/grid";
+import { ListIcon } from "./icons/list";
+import { MoreIcon } from "./icons/more";
+import { ExternalLinkIcon } from "./icons/external-link";
+import { ArrowUpIcon } from "./icons/arrow-up";
+import { TrendingUpIcon } from "./icons/trending-up";
+import { PowerIcon } from "./icons/power";
+import { LaptopIcon } from "./icons/laptop";
+import { MegaphoneIcon } from "./icons/megaphone";
+import { BookmarkIcon } from "./icons/bookmark";
+import { TrophyIcon } from "./icons/trophy";
+import { KeyIcon } from "./icons/key";
+import { UmbrellaIcon } from "./icons/umbrella";
+import { FlameIcon } from "./icons/flame";
 
 export type NxIconProps = {
   size?: number;
@@ -175,4 +195,24 @@ export const NX_ICONS: Record<string, ComponentType<NxIconProps>> = {
   "tag": TagIcon,
   "wallet": WalletIcon,
   "package": PackageIcon,
+  "file": FileIcon,
+  "save": SaveIcon,
+  "clipboard": ClipboardIcon,
+  "printer": PrinterIcon,
+  "archive": ArchiveIcon,
+  "filter": FilterIcon,
+  "grid": GridIcon,
+  "list": ListIcon,
+  "more": MoreIcon,
+  "external-link": ExternalLinkIcon,
+  "arrow-up": ArrowUpIcon,
+  "trending-up": TrendingUpIcon,
+  "power": PowerIcon,
+  "laptop": LaptopIcon,
+  "megaphone": MegaphoneIcon,
+  "bookmark": BookmarkIcon,
+  "trophy": TrophyIcon,
+  "key": KeyIcon,
+  "umbrella": UmbrellaIcon,
+  "flame": FlameIcon,
 };

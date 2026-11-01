@@ -4,7 +4,7 @@ import { blip, swish, tick, N, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.37;
+export const level = 1.24;
 
 /** A riffle of card ticks as the two arrows cross, finished with two crisp clicks as the arrowheads land. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
