@@ -45,9 +45,9 @@ export function KeyIcon({ size = 24, strokeWidth = 2, className, speed = 1, acce
         transition={{ duration: 0.8 / speed, times: [0, 0.4, 0.6, 1], ease: "easeInOut" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="m15.5 7.5 3 3L22 7l-3-3" stroke={accent} />
-        <path d="m21 2-9.6 9.6" />
-        <circle cx="7.5" cy="15.5" r="5.5" />
+        <path d="M16.6 7.4l2.2 2.2M19.2 4.8l2 2" stroke={accent} />
+        <path d="M11.2 12.6 20.4 3.4" />
+        <circle cx="7.2" cy="16" r="5" />
       </motion.g>
     </svg>
   );

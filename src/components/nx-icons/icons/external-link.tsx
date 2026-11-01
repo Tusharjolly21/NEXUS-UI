@@ -38,14 +38,14 @@ export function ExternalLinkIcon({ size = 24, strokeWidth = 2, className, speed 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <path d="M17.6 13.6v4.6a2.4 2.4 0 0 1-2.4 2.4H5.8a2.4 2.4 0 0 1-2.4-2.4V8.8a2.4 2.4 0 0 1 2.4-2.4h4.6" />
       <motion.g
         initial={false}
         animate={on ? { x: [0, 1.8, 0], y: [0, -1.8, 0] } : { x: 0, y: 0 }}
         transition={{ duration: 0.5 / speed, ease: "easeInOut" }}
       >
-        <path d="M15 3h6v6" stroke={accent} />
-        <path d="M10 14 21 3" stroke={accent} />
+        <path d="M14.8 3.6h5.6v5.6" stroke={accent} />
+        <path d="M11.4 12.6l9-9" stroke={accent} />
       </motion.g>
     </svg>
   );

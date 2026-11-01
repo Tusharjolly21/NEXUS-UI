@@ -39,13 +39,13 @@ export function TrendingUpIcon({ size = 24, strokeWidth = 2, className, speed = 
       aria-hidden="true"
     >
       <motion.path
-        d="M22 7l-8.5 8.5-5-5L2 17"
+        d="M2.6 16.8l6-6 4.2 4.2 8.2-8.2"
         initial={false}
         animate={on ? { pathLength: [0, 1] } : { pathLength: 1 }}
         transition={{ duration: 0.6 / speed, ease: "easeOut" }}
       />
       <motion.path
-        d="M16 7h6v6"
+        d="M15.8 6.8H21v5.2"
         stroke={accent}
         style={{ originX: "100%", originY: "0%" }}
         initial={false}

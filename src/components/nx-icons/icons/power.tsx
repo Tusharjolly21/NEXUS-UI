@@ -40,16 +40,16 @@ export function PowerIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
     >
       <motion.circle
         cx="12"
-        cy="12"
+        cy="13"
         r="9.5"
         stroke={accent}
         initial={false}
         animate={on ? { scale: [0.7, 1.12], opacity: [0.8, 0] } : { opacity: 0, scale: 0.7 }}
         transition={on ? { duration: 0.5 / speed, delay: (0.1) / speed, ease: "easeOut" } : { duration: 0.1 / speed }}
       />
-      <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+      <path d="M17.14 6.87A8 8 0 1 1 6.86 6.87" />
       <motion.path
-        d="M12 2v10"
+        d="M12 2.8v8.6"
         stroke={accent}
         initial={false}
         animate={on ? { y: [0, -1.6, 0], opacity: [1, 0.5, 1] } : { y: 0, opacity: 1 }}

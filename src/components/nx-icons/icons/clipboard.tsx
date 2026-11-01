@@ -45,8 +45,8 @@ export function ClipboardIcon({ size = 24, strokeWidth = 2, className, speed = 1
         transition={{ duration: 0.3 / speed }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-        <rect x="8" y="2" width="8" height="4" rx="1" />
+        <path d="M15.6 4.4h2.4a2 2 0 0 1 2 2v13.2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6.4a2 2 0 0 1 2-2h2.4" />
+        <rect x="8.4" y="2.4" width="7.2" height="4" rx="1" />
         <motion.path
           d="M9 14l2 2 4-4"
           stroke={accent}

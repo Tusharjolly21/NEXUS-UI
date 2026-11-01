@@ -60,7 +60,7 @@ function Card({ title, where, slugs, children, className }: { title: string; whe
         <p className="mt-1.5 text-[14.5px] leading-relaxed text-muted-foreground">{where}</p>
         <p className="mt-3 flex flex-wrap gap-1.5">
           {slugs.map((s) => (
-            <Link key={s} href={`/icons/${s}`} className="rounded-full bg-secondary px-2.5 py-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground">
+            <Link key={s} href={`/icons/${s}`} className="rounded-full bg-secondary px-2.5 py-1 text-[12px] text-foreground/80 transition-colors hover:text-foreground">
               {s}
             </Link>
           ))}
@@ -192,7 +192,7 @@ function ProductCard() {
     <div className="w-full max-w-[320px] rounded-[26px] bg-background p-3.5 shadow-[0_8px_30px_-12px_rgba(0,0,0,.25)]" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
       <div className="relative grid h-[150px] place-items-center rounded-2xl bg-gradient-to-br from-[#bf5af2]/25 to-[#0a84ff]/20 text-foreground">
         <Headphones size={72} strokeWidth={1.6} play={hover} />
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#ff375f] px-2.5 py-1 text-[12px] font-semibold text-white">
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#e0214b] px-2.5 py-1 text-[12px] font-semibold text-white">
           <NX_ICONS.tag size={14} play={hover} /> 20% off
         </span>
         <IconButton slug="heart" label={saved ? "Remove from wishlist" : "Save to wishlist"} pressed={saved} onClick={() => setSaved((v) => !v)} className={cn("absolute right-2 top-2 size-9 bg-background/70 backdrop-blur", saved ? "text-[#ff375f]" : "text-foreground")} size={18} />

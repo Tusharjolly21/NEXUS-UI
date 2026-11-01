@@ -39,18 +39,18 @@ export function ArchiveIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
       aria-hidden="true"
     >
       <motion.rect
-        x="2"
-        y="3"
-        width="20"
-        height="5"
-        rx="1"
+        x="2.6"
+        y="3.4"
+        width="18.8"
+        height="4.6"
+        rx="1.2"
         initial={false}
         animate={on ? { y: [0, -2.4, 0] } : { y: 0 }}
         transition={{ duration: 0.55 / speed, times: [0, 0.4, 1], ease: ["easeOut", "easeIn"] }}
       />
-      <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" />
+      <path d="M4.6 8v10.4a2.2 2.2 0 0 0 2.2 2.2h10.4a2.2 2.2 0 0 0 2.2-2.2V8" />
       <motion.path
-        d="M10 12h4"
+        d="M9.8 12.2h4.4"
         stroke={accent}
         initial={false}
         animate={on ? { opacity: [1, 0.2, 1] } : { opacity: 1 }}

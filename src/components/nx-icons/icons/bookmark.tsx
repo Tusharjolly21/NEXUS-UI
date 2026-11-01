@@ -45,7 +45,7 @@ export function BookmarkIcon({ size = 24, strokeWidth = 2, className, speed = 1,
         transition={{ duration: 0.5 / speed, times: [0, 0.65, 1], ease: "easeOut" }}
       >
         <motion.path
-          d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+          d="M6.4 3.4h11.2v17.2L12 16.2l-5.6 4.4z"
           fill={accent}
           initial={false}
           animate={on ? { fillOpacity: [0, 0, 0.9] } : { fillOpacity: 0 }}

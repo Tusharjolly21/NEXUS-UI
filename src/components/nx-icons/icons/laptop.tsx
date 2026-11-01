@@ -44,7 +44,7 @@ export function LaptopIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
         animate={on ? { scaleY: [0.2, 1.06, 1] } : { scaleY: 1 }}
         transition={{ duration: 0.5 / speed, times: [0, 0.7, 1], ease: "easeOut" }}
       >
-        <path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9" />
+        <path d="M19.6 15.6V7.4a2 2 0 0 0-2-2H6.4a2 2 0 0 0-2 2v8.2" />
         <motion.rect
           x="7"
           y="8"
@@ -58,7 +58,7 @@ export function LaptopIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
           transition={{ duration: 0.8 / speed, times: [0, 0.4, 0.6, 1] }}
         />
       </motion.g>
-      <path d="M4 16h16l1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45z" />
+      <path d="M3.6 15.8h16.8l1.3 2.6a1 1 0 0 1-.9 1.4H3.2a1 1 0 0 1-.9-1.4z" />
     </svg>
   );
 }

@@ -44,10 +44,10 @@ export function UmbrellaIcon({ size = 24, strokeWidth = 2, className, speed = 1,
         animate={on ? { scaleY: [0.35, 1.1, 1] } : { scaleY: 1 }}
         transition={{ duration: 0.5 / speed, times: [0, 0.7, 1], ease: "easeOut" }}
       >
-        <path d="M22 12a10.06 10.06 0 0 0-20 0Z" />
+        <path d="M3 12.4a9 9 0 0 1 18 0z" />
       </motion.g>
-      <path d="M12 12v8a2 2 0 0 0 4 0" />
-      <path d="M12 2v1" />
+      <path d="M12 12.4v6.2a2 2 0 0 0 4 0" />
+      <path d="M12 2.6v1" />
       {[3.5, 21].map((x, i) => (
         <motion.path
           key={x}

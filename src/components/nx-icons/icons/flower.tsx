@@ -39,7 +39,7 @@ export function FlowerIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
       aria-hidden="true"
     >
       <path d="M12 16.4V21.6" />
-      <path d="M12 20.4c0-1.7 1.4-2.6 3.6-2.6 0 1.8-1.4 2.6-3.6 2.6z" stroke={accent} />
+      <path d="M12 20.6c0-1.3 1-2 2.6-2 0 1.4-1 2-2.6 2z" stroke={accent} strokeWidth={1.6} />
       <motion.g
         style={{ originX: "50%", originY: "46%" }}
         initial={false}

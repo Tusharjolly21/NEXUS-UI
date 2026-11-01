@@ -69,7 +69,7 @@ export function UseScene({ slug, accent, scene, label, sub }: { slug: string; ac
               )
             ) : null}
           </button>
-          <span className="text-[12.5px] text-muted-foreground">{label}</span>
+          <span className="text-[12.5px] text-foreground/75">{label}</span>
         </span>
       );
     case "row":

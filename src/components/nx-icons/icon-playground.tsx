@@ -160,7 +160,7 @@ export function IconPlayground({ icon, source }: { icon: IconMeta; source: strin
   const dark = stage === "dark";
   const ink = dark && color === SWATCHES[0] ? "#f5f5f7" : color === SWATCHES[0] ? undefined : color;
   const accent = accentFor(icon, material);
-  const wrap = material === "neon" || material === "aurora" || material === "chrome";
+  const wrap = material !== "line" && material !== "spark";
 
   const surprise = () => {
     const m = pick(MATERIALS);
@@ -390,7 +390,9 @@ export function IconPlayground({ icon, source }: { icon: IconMeta; source: strin
               ? "Spark just sets the accent prop, so the small details of each icon get their own colour."
               : material === "neon"
                 ? "Neon wraps the icon in the small IconMaterial helper (its code is further down the page) and uses the accent prop."
-                : "This look wraps the icon in the small IconMaterial helper, whose code is further down the page. It paints every stroke with the gradient."}
+                : material === "mercury" || material === "liquid" || material === "glass"
+                  ? "A liquid look: the icon is wrapped in the small IconMaterial helper (its code is further down the page), which paints and lights every stroke with SVG filters. No canvas, no WebGL, and it holds still for reduced motion."
+                  : "This look wraps the icon in the small IconMaterial helper, whose code is further down the page. It paints every stroke with the gradient."}
           </p>
         ) : null}
       </div>

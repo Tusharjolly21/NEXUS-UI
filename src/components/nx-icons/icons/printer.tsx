@@ -43,8 +43,8 @@ export function PrinterIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
         animate={on ? { y: [0, 0.4, 0, 0.4, 0, 0.4, 0] } : { y: 0 }}
         transition={{ duration: 0.6 / speed }}
       >
-        <path d="M6 9V2h12v7" />
-        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+        <path d="M6.6 8.6V3h10.8v5.6" />
+        <path d="M6.6 17.8H4.6a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14.8a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
       </motion.g>
       <motion.path
         d="M7.6 14h8.8v7.4H7.6z"

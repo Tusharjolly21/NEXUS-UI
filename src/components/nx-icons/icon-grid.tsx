@@ -18,6 +18,9 @@ export const MATERIALS: { id: IconMaterialName; label: string; dark?: boolean }[
   { id: "neon", label: "Neon", dark: true },
   { id: "aurora", label: "Aurora" },
   { id: "chrome", label: "Chrome", dark: true },
+  { id: "mercury", label: "Mercury", dark: true },
+  { id: "liquid", label: "Liquid" },
+  { id: "glass", label: "Glass", dark: true },
 ];
 
 export const SWATCHES = ["#1d1d1f", "#2563eb", "#7c3aed", "#e11d48", "#f59e0b", "#059669"] as const;
@@ -199,11 +202,11 @@ export function IconGrid() {
 
       <ChipRail className="mt-5">
         <Chip active={category === "all"} onClick={() => setCategory("all")}>
-          All <span className="text-muted-foreground/80">{ICONS.length}</span>
+          All <span className={category === "all" ? "opacity-70" : "text-muted-foreground"}>{ICONS.length}</span>
         </Chip>
         {ICON_CATEGORIES.map((c) => (
           <Chip key={c.slug} active={category === c.slug} onClick={() => setCategory(c.slug)}>
-            {c.label} <span className={cn(category === c.slug ? "opacity-60" : "text-muted-foreground/80")}>{ICONS.filter((i) => i.category === c.slug).length}</span>
+            {c.label} <span className={cn(category === c.slug ? "opacity-70" : "text-muted-foreground")}>{ICONS.filter((i) => i.category === c.slug).length}</span>
           </Chip>
         ))}
       </ChipRail>

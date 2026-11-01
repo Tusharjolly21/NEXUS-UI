@@ -45,8 +45,8 @@ export function MegaphoneIcon({ size = 24, strokeWidth = 2, className, speed = 1
         transition={{ duration: 0.6 / speed, ease: "easeInOut" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="m3 11 15-5v12L3 14v-3z" />
-        <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
+        <path d="M3.4 10.4 17.4 6v12L3.4 13.6z" />
+        <path d="M10.8 16.4a2.8 2.8 0 1 1-5.4-1" />
       </motion.g>
       <motion.path
         d="M20.6 9.5l1.6-.6M20.6 14.5l1.6.6"

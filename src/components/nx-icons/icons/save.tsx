@@ -39,19 +39,19 @@ export function SaveIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
       aria-hidden="true"
     >
       <motion.path
-        d="M7 3v5h8"
+        d="M7.6 3.4v4.2h6.6"
         initial={false}
         animate={on ? { y: [0, 1.2, 0] } : { y: 0 }}
         transition={{ duration: 0.5 / speed, ease: "easeInOut" }}
       />
       <motion.path
-        d="M17 21v-8H7v8"
+        d="M16.4 20.6v-7H7.6v7"
         stroke={accent}
         initial={false}
         animate={on ? { y: [0, -2, 0] } : { y: 0 }}
         transition={{ duration: 0.5 / speed, ease: "easeInOut" }}
       />
-      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+      <path d="M5.4 3.4h10.2l5 5v10.2a2 2 0 0 1-2 2H5.4a2 2 0 0 1-2-2V5.4a2 2 0 0 1 2-2z" />
     </svg>
   );
 }
