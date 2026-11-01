@@ -96,6 +96,7 @@ const nextConfig = {
     "/api/prompt/[slug]": ["./content/build-prompts/*.md"],
     // Icon pages show each icon's own source, its sound score and the look helper, read at request time.
     "/icons/[slug]": ["./src/components/nx-icons/**/*.{ts,tsx}"],
+    "/icons/sounds": ["./src/components/nx-icons/sound-engine.ts", "./src/components/nx-icons/sound-kit.ts"],
     "/api/icons/[slug]": ["./src/components/nx-icons/icons/*.tsx"],
     // Video prompts, source, kit and render script: same idea, read only by the gated route.
     "/api/videos/[slug]/[part]": ["./content/videos/**/*"],

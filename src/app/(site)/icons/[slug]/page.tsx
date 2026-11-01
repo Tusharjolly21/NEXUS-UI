@@ -54,6 +54,24 @@ export default async function IconPage({ params }: Props) {
   const related = ICONS.filter((i) => i.category === icon.category && i.slug !== icon.slug).slice(0, 6);
   const name = icon.title.toLowerCase();
   const uses = ICON_USES[icon.slug] ?? [];
+  const soundVar = icon.slug.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
+  const usage = `"use client";
+
+import { ${icon.component} } from "@/components/icons/${icon.slug}";
+import * as ${soundVar} from "@/components/icons/sounds/${icon.slug}";
+import { playIconScore } from "@/components/icons/sound-engine";
+
+export function ${icon.component.replace(/Icon$/, "")}Button() {
+  return (
+    <button
+      type="button"
+      onPointerEnter={() => playIconScore(${soundVar})}
+      onClick={() => playIconScore(${soundVar})}
+    >
+      <${icon.component} size={24} />
+    </button>
+  );
+}`;
 
   const faq: { q: string; a: string }[] = [
     {
@@ -203,10 +221,32 @@ export default async function IconPage({ params }: Props) {
           <p className="mt-2 max-w-[700px] text-[16px] text-muted-foreground">
             {icon.heard} It is written against this icon&apos;s own animation: each line below is a note placed on a beat of the picture, and{" "}
             <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">t()</code> stretches it with the <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">speed</code>{" "}
-            prop. Save it as <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">components/icons/sounds/{icon.slug}.ts</code> beside{" "}
-            <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">sound-kit.ts</code> and the site&apos;s sound engine, then call{" "}
-            <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">playIconSound(&quot;{icon.slug}&quot;)</code>. There are no audio files: it is all synthesised in the browser.
+            prop. There are no audio files: it is synthesised in the browser.
           </p>
+          <ol className="mt-5 max-w-[760px] list-decimal space-y-2 pl-5 text-[15.5px] leading-relaxed text-muted-foreground">
+            <li>
+              Once per project, copy <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">sound-engine.ts</code> and{" "}
+              <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">sound-kit.ts</code> from the{" "}
+              <Link href="/icons/sounds" className="text-foreground underline underline-offset-4">sound guide</Link> into{" "}
+              <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">components/icons/</code>.
+            </li>
+            <li>
+              Save the score below as <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">components/icons/sounds/{icon.slug}.ts</code>.
+            </li>
+            <li>
+              Call <code className="rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[14px]">playIconScore({icon.slug.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())})</code> from a click or hover handler:
+            </li>
+          </ol>
+          <div className="mt-5">
+            <CodeBlock
+              code={usage}
+              language="tsx"
+              theme="dark"
+              header={{ ...DEFAULT_HEADER, title: `${icon.slug}-button.tsx` }}
+              hoverHighlight={false}
+              enableSound={false}
+            />
+          </div>
           <div className="mt-6">
             <CodeBlock code={scoreSource} language="ts" theme="dark" header={{ ...DEFAULT_HEADER, title: `${icon.slug}.ts` }} hoverHighlight={false} enableSound={false} />
           </div>

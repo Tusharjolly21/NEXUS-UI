@@ -33,6 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: base,                              lastModified: since(latestComponent.createdAt) },
     { url: `${base}/components`,              lastModified: since(latestComponent.createdAt) },
     { url: `${base}/icons`,                   lastModified: since(ICONS.reduce((a, b) => (a.createdAt > b.createdAt ? a : b)).createdAt) },
+    { url: `${base}/icons/sounds`,            lastModified: since(ICONS.reduce((a, b) => (a.createdAt > b.createdAt ? a : b)).createdAt) },
     { url: `${base}/blocks`,                  lastModified: since("2026-10-20") },
     { url: `${base}/sounds`,                  lastModified: since("2026-10-20") },
     { url: `${base}/videos`,                  lastModified: since("2026-10-22") },

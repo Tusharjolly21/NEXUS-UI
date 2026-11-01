@@ -1,4 +1,4 @@
-import { hiss, tone } from "@/lib/ui-sounds";
+import { hiss, tone } from "./sound-engine";
 
 /**
  * The small building blocks every icon sound is made from, drawn with the Web Audio API (no audio files).

@@ -54,7 +54,7 @@ export default function IconsPage() {
           </h1>
           <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">
             Loaders that loop, bells that ring, planes that fly off and come back. Hover any icon to play it, restyle the whole set with the
-            controls below, switch Sound on to hear each one, then open one to drag it and copy its file.
+            controls below, switch Sound on to hear each one, then open one to drag it and copy its file. Want the sounds in your own app? Read the <Link href="/icons/sounds" className="text-foreground underline underline-offset-4">sound guide</Link>.
           </p>
         </div>
       </section>
