@@ -243,11 +243,12 @@ function audio() {
     ctx = new AC();
     playbackSession();
     master = ctx.createGain();
-    master.gain.value = 0.5;
+    master.gain.value = isTouchDevice() ? 0.9 : 0.5; // phone speakers are small and quiet
     const comp = ctx.createDynamicsCompressor();
     master.connect(comp).connect(ctx.destination);
     out = comp;
   }
+  silentTrack();
   if (ctx.state !== "running") void ctx.resume(); // "suspended" until a tap; "interrupted" after a call or a locked screen on iOS
   return ctx;
 }
@@ -255,7 +256,7 @@ function audio() {
 /**
  * Phones. iOS and Android only let a page start audio from a real tap (iOS counts touchend and click, not the
  * pointerenter that fires when a finger lands), and iOS mutes Web Audio while the ringer switch is on silent
- * unless the page asks for the "playback" audio session. So on a touch screen the first tap anywhere on the page
+ * unless the page asks for the "playback" audio session. So on a touch screen, once a sound has been asked for, the next tap
  * wakes the engine, plays one silent sample, and switches the session; after that every sound is audible.
  */
 function playbackSession() {
@@ -267,14 +268,42 @@ function playbackSession() {
   }
 }
 
+/**
+ * The iOS ringer switch. With it on silent, iOS mutes Web Audio but not a playing <audio> element, and while one is
+ * playing it moves the whole page to the "playback" category. So on a touch device the first sound also starts a
+ * silent loop (a quarter second of silence), which is what makes the sounds heard with the switch on silent. It is
+ * only started once a sound has been asked for, and paused whenever the page is hidden.
+ */
+const SILENT_WAV = "data:audio/wav;base64,UklGRvQHAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YdAHAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==";
+let silentEl: HTMLAudioElement | null = null;
+function isTouchDevice() {
+  return typeof window !== "undefined" && ((navigator.maxTouchPoints ?? 0) > 0 || !!window.matchMedia?.("(pointer: coarse)").matches);
+}
+function silentTrack() {
+  if (typeof document === "undefined" || !isTouchDevice()) return;
+  try {
+    if (!silentEl) {
+      silentEl = new Audio(SILENT_WAV);
+      silentEl.loop = true;
+      silentEl.setAttribute("playsinline", "");
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) silentEl?.pause();
+      });
+    }
+    if (silentEl.paused && !document.hidden) void silentEl.play().catch(() => {});
+  } catch {
+    // no HTMLAudioElement: the ringer switch still applies
+  }
+}
+
 let unlockArmed = false;
 function armTouchUnlock() {
   if (unlockArmed || typeof window === "undefined") return;
   unlockArmed = true;
-  const touch = (navigator.maxTouchPoints ?? 0) > 0 || window.matchMedia?.("(pointer: coarse)").matches;
-  if (!touch) return;
+  if (!isTouchDevice()) return;
   const wake = () => {
-    if (ctx && ctx.state === "running") return;
+    if (!ctx) return; // nothing to wake until a sound has been asked for (and no silent loop for visitors who never use sound)
+    if (ctx.state === "running") return silentTrack();
     const c = audio();
     if (!c) return;
     try {
@@ -636,6 +665,6 @@ export function useSound(enabled = true): SoundPlayer {
 /** Set the overall level for every sound, 0..1. */
 export function setSoundVolume(v: number) {
   audio();
-  if (master) master.gain.value = Math.max(0, Math.min(1, v)) * 0.5;
+  if (master) master.gain.value = Math.max(0, Math.min(1, v)) * (isTouchDevice() ? 0.9 : 0.5);
 }
 ```
