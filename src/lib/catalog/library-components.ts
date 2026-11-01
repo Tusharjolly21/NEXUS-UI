@@ -13777,7 +13777,7 @@ export default function Page() {
     description:
       "Hold to confirm by pouring molten metal. Press and hold and metal pours into the channel: the front is a glowing meniscus, white-orange at the lip, that shivers as it runs and throws heat onto the groove ahead, while behind it the metal cools through orange and red into chrome, its skin breaking into slow cells. Let go early and it drains back. Hold to the end and the glow fades, one ripple runs the length of the set bar, and the label is pressed into the metal. Space or Enter hold it from the keyboard. Until you touch it, it holds and lets go by itself.",
     categorySlug: "inputs-controls",
-    tags: ["hold to confirm", "press and hold", "confirm", "button", "publish", "metal", "molten", "chrome", "webgl", "shader", "autoplay", "motion kit"],
+    tags: ["hold to confirm", "press and hold", "confirm", "button", "publish", "metal", "molten", "chrome", "webgl", "shader", "sound", "web audio", "autoplay", "motion kit"],
     premium: true,
     trendingScore: 190,
     createdAt: "2026-11-01",
@@ -13785,6 +13785,7 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Holds and lets go by itself until the first touch. Held still under reduced motion." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Loudness of the sounds, 0 to 1." },
       { name: "label", type: "string", defaultValue: "Hold to publish", description: "The words on the bar before it is held." },
       { name: "doneLabel", type: "string", defaultValue: "Published", description: "The words pressed into the metal once the hold is complete." },
       { name: "duration", type: "number", defaultValue: "1.8", description: "Seconds of holding it takes to fill the channel." },
@@ -13834,7 +13835,7 @@ export default function Page() {
     description:
       "Settings toggles whose knob is a bead of mercury, shaded per pixel like a real chrome drop: a bright softbox up top, a dark horizon line, a warm floor, a fine rainbow at the rim. Flip one and the bead does not slide, it reaches: the leading side pulls ahead on a neck that thins as it parts, the rest lets go and catches up, and it lands with a squash and a wobble. Drag it and it stretches after your finger. Switched on, the groove glows and the mercury picks up that colour underneath. Space or Enter flips the focused switch. Until you touch it, it flips them by itself.",
     categorySlug: "inputs-controls",
-    tags: ["switch", "toggle", "settings", "on off", "control", "chrome", "metal", "mercury", "liquid", "metaball", "webgl", "shader", "autoplay", "motion kit"],
+    tags: ["switch", "toggle", "settings", "on off", "control", "chrome", "metal", "mercury", "liquid", "metaball", "webgl", "shader", "sound", "web audio", "autoplay", "motion kit"],
     premium: true,
     trendingScore: 189,
     createdAt: "2026-11-01",
@@ -13842,6 +13843,7 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flips the switches by itself until the first touch. Held still under reduced motion." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Loudness of the sounds, 0 to 1." },
       { name: "onChange", type: "(id: string, on: boolean) => void", description: "Called with the id of the switch (wifi, focus or power) and its new state." },
     ],
     Preview: Previews.PreviewMercurySwitch,
@@ -13891,7 +13893,7 @@ export default function Page() {
     description:
       "A file upload that pours the file in as mercury. A bead swells under the file's chip, stretches on a thinning neck and falls, lengthening as it speeds up, then merges into the pool below with ripples running off both ways. Drop by drop the pool spreads from the middle of the channel, which is the progress. When the last drop is in, the whole pool pulls itself together into a single bead and a check is pressed into it. Real file picker and drag and drop; wire progress to your upload. Until you touch it, it uploads a sample file by itself.",
     categorySlug: "inputs-controls",
-    tags: ["upload", "file upload", "dropzone", "progress", "file picker", "drag and drop", "chrome", "metal", "mercury", "liquid", "webgl", "shader", "autoplay", "motion kit"],
+    tags: ["upload", "file upload", "dropzone", "progress", "file picker", "drag and drop", "chrome", "metal", "mercury", "liquid", "webgl", "shader", "sound", "web audio", "autoplay", "motion kit"],
     premium: true,
     trendingScore: 188,
     createdAt: "2026-11-01",
@@ -13899,6 +13901,7 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Uploads a sample file by itself until the first touch. Held still under reduced motion." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Loudness of the sounds, 0 to 1." },
       { name: "onUpload", type: "(file: File) => void", description: "Called with the file the moment one is chosen or dropped." },
       { name: "progress", type: "number", description: "Real progress from 0 to 1. Leave it out and the pour runs on its own timing." },
     ],

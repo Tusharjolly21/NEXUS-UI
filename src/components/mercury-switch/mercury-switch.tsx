@@ -2,6 +2,8 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import { useReducedMotion } from "framer-motion";
+import { audioAwake, playDef, useAutoplaySoundAllowed } from "@/lib/ui-sounds";
+import { mercurySwitchSound, type MercurySwitchSound } from "./mercury-switch-sound";
 
 /* ------------------------------------------------------------------ liquid chrome, shaded per pixel
  * The shape is a signed distance field (`map`, in css px, negative inside). Its depth is a pillow: round at the rim,
@@ -128,6 +130,9 @@ float map(vec2 p){
   }`,
 });
 
+/** each row has its own voice, so three switches flipped in turn make a little run of notes */
+const PITCH = [1, 1.12, 0.92];
+
 const ROWS = [
   { id: "wifi", label: "Wi-Fi", on: "Connected to Studio", off: "Off", accent: [0.2, 0.85, 0.42] as const, css: "48,209,88", start: true, icon: <path d="M4.5 9.5a11 11 0 0 1 15 0M7.3 12.6a7 7 0 0 1 9.4 0M10 15.6a3 3 0 0 1 4 0M12 18.6h.01" /> },
   { id: "focus", label: "Do Not Disturb", on: "Until tomorrow, 7:00", off: "Off", accent: [0.46, 0.42, 1.0] as const, css: "94,92,230", start: false, icon: <path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5Z" /> },
@@ -137,6 +142,10 @@ const ROWS = [
 interface Bead { L: number; vL: number; T: number; vT: number; j: number; vj: number; on: number; drag: number | null; y: number; l: number; r: number }
 
 export interface MercurySwitchProps {
+  /** plays its own sounds (a liquid bloop that rises or falls with each flip, a soft plop and a small chrome ring). They follow the site-wide sound switch */
+  enableSound?: boolean;
+  /** loudness of the sounds, 0 to 1 */
+  volume?: number;
   /** flips the switches by itself until the first touch */
   autoplay?: boolean;
   /** called with the id of the switch (wifi, focus or power) and its new state */
@@ -156,7 +165,7 @@ export interface MercurySwitchProps {
  * `onChange(id, on)` fires on each flip. Space toggles from the keyboard. `autoplay` flips them until the first
  * real interaction. Reduced motion moves the bead without the stretch.
  */
-export function MercurySwitch({ autoplay = false, onChange }: MercurySwitchProps) {
+export function MercurySwitch({ autoplay = false, enableSound = true, volume = 0.8, onChange }: MercurySwitchProps) {
   const reduce = useReducedMotion();
   const card = useRef<HTMLDivElement>(null);
   const cvs = useRef<HTMLCanvasElement>(null);
@@ -167,9 +176,20 @@ export function MercurySwitch({ autoplay = false, onChange }: MercurySwitchProps
   useLayoutEffect(() => { onRef.current = on; }, [on]);
   const beads = useRef<Bead[]>(ROWS.map((r) => ({ L: 0, vL: 0, T: 0, vT: 0, j: 0, vj: 0, on: r.start ? 1 : 0, drag: null, y: 0, l: 0, r: 0 })));
   const [gl, setGl] = useState(true);
+  const autoSoundOk = useAutoplaySoundAllowed();
+  const soundCfg = useRef({ enableSound, volume, autoSoundOk });
+  useLayoutEffect(() => { soundCfg.current = { enableSound, volume, autoSoundOk }; }, [enableSound, volume, autoSoundOk]);
+  // Sound plays when asked for and the site-wide switch is on. A demo playing itself makes sound only where demos may, once the visitor has used the page.
+  const sound = (name: MercurySwitchSound, arg?: number) => {
+    const c = soundCfg.current;
+    if (!c.enableSound) return;
+    if (!touched.current && !(c.autoSoundOk && audioAwake())) return;
+    playDef(`mercury-switch:${name}`, mercurySwitchSound(name, arg), Math.min(1, Math.max(0, c.volume)));
+  };
 
   const set = (i: number, v: boolean) => {
     if (onRef.current[i] === v) return;
+    sound(v ? "on" : "off", PITCH[i]);
     const n = [...onRef.current]; n[i] = v;
     onRef.current = n; setOn(n);
     onChange?.(ROWS[i].id, v);
@@ -265,7 +285,7 @@ export function MercurySwitch({ autoplay = false, onChange }: MercurySwitchProps
   const move = (i: number) => (e: RPointerEvent<HTMLButtonElement>) => {
     if (!start.current) return;
     const x = local(e), b = beads.current[i];
-    if (Math.abs(x - start.current.x) > 4) start.current.moved = true;
+    if (!start.current.moved && Math.abs(x - start.current.x) > 4) { start.current.moved = true; sound("grab", PITCH[i]); }
     if (start.current.moved) b.drag = Math.max(b.l - 6, Math.min(b.r + 6, x));
   };
   const up = (i: number) => () => {

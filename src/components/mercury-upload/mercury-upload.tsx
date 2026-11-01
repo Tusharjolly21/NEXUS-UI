@@ -2,6 +2,8 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type DragEvent as RDragEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { audioAwake, playDef, useAutoplaySoundAllowed } from "@/lib/ui-sounds";
+import { mercuryUploadSound, type MercuryUploadSound } from "./mercury-upload-sound";
 
 /* ------------------------------------------------------------------ liquid chrome, shaded per pixel
  * The shape is a signed distance field (`map`, in css px, negative inside). Its depth is a pillow: round at the rim,
@@ -140,6 +142,10 @@ type Phase = "idle" | "uploading" | "pulling" | "done";
 interface Drop { x: number; y: number; vy: number; r: number; on: boolean }
 
 export interface MercuryUploadProps {
+  /** plays its own sounds (a thock as the file arrives, a tick as each bead lets go, a bubble as it lands that rises in pitch as the pool fills, a swell as the pool pulls together and a ring of chrome when it is done). They follow the site-wide sound switch */
+  enableSound?: boolean;
+  /** loudness of the sounds, 0 to 1 */
+  volume?: number;
   /** uploads a sample file by itself until the first touch */
   autoplay?: boolean;
   /** called with the file the moment one is chosen or dropped */
@@ -161,7 +167,7 @@ export interface MercuryUploadProps {
  * to drive it yourself, 0 to 1). `autoplay` uploads a sample file until the first real interaction. Reduced motion
  * fills the channel without the drops.
  */
-export function MercuryUpload({ autoplay = false, onUpload, progress }: MercuryUploadProps) {
+export function MercuryUpload({ autoplay = false, enableSound = true, volume = 0.8, onUpload, progress }: MercuryUploadProps) {
   const reduce = useReducedMotion();
   const wrap = useRef<HTMLDivElement>(null);
   const chan = useRef<HTMLDivElement>(null);
@@ -179,10 +185,20 @@ export function MercuryUpload({ autoplay = false, onUpload, progress }: MercuryU
   const [pct, setPct] = useState(0);
   const [gl, setGl] = useState(true);
   const [over, setOver] = useState(false);
+  const autoSoundOk = useAutoplaySoundAllowed();
+  const soundCfg = useRef({ enableSound, volume, autoSoundOk });
+  useLayoutEffect(() => { soundCfg.current = { enableSound, volume, autoSoundOk }; }, [enableSound, volume, autoSoundOk]);
+  // Sound plays when asked for and the site-wide switch is on. A demo playing itself makes sound only where demos may, once the visitor has used the page.
+  const sound = (name: MercuryUploadSound, arg?: number) => {
+    const c = soundCfg.current;
+    if (!c.enableSound) return;
+    if (!touched.current && !(c.autoSoundOk && audioAwake())) return;
+    playDef(`mercury-upload:${name}`, mercuryUploadSound(name, arg), Math.min(1, Math.max(0, c.volume)));
+  };
 
   const begin = (name: string, bytes: number) => {
     const size = bytes > 1e6 ? `${(bytes / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1e3))} KB`;
-    setFile({ name, size }); prog.current = 0; setPct(0); phaseRef.current = "uploading"; setPhase("uploading");
+    setFile({ name, size }); prog.current = 0; setPct(0); phaseRef.current = "uploading"; setPhase("uploading"); sound("catch");
   };
   const reset = () => { setFile(null); prog.current = 0; setPct(0); phaseRef.current = "idle"; setPhase("idle"); };
 
@@ -229,6 +245,7 @@ export function MercuryUpload({ autoplay = false, onUpload, progress }: MercuryU
         hang = Math.min(1, hang + dt * (owed > 0.02 ? 3.4 : 0.6));
         if (hang >= 1 && owed > 0.02 && drops.filter((d) => d.on).length < 6) {
           drops.push({ x: sx + (Math.random() - 0.5) * 1.5, y: sy + 9, vy: 20, r: 6, on: true });
+          sound("drip");
           hang = 0.15;
         }
       } else hang = Math.max(0, hang - dt * 3);
@@ -241,13 +258,14 @@ export function MercuryUpload({ autoplay = false, onUpload, progress }: MercuryU
         if (d.y > surf - 2) {
           d.on = false;
           shown = Math.min(prog.current, shown + 0.075 + Math.random() * 0.03);
+          sound("plop", shown);
           rips.push({ x: d.x, age: 0 }); if (rips.length > 4) rips.shift();
         }
       }
       for (let i = drops.length - 1; i >= 0; i--) if (!drops[i].on) drops.splice(i, 1);
       for (const r of rips) r.age += dt / 0.9;
       // when the last drop is in, the pool pulls itself together into one bead
-      if (ph === "uploading" && prog.current >= 1 && (shown >= 0.999 || reduce) && !drops.length) { shown = 1; phaseRef.current = "pulling"; setPhase("pulling"); pulled = now; }
+      if (ph === "uploading" && prog.current >= 1 && (shown >= 0.999 || reduce) && !drops.length) { shown = 1; phaseRef.current = "pulling"; setPhase("pulling"); pulled = now; sound("pull"); }
       // the last sliver is too small to be worth a drop: the pool just takes it, so it can never wait on a bead that has stopped growing
       if (ph === "uploading" && prog.current >= 1 && shown < 1 && !drops.length && prog.current - shown <= 0.02) shown = Math.min(1, shown + 0.08);
       const wantHalf = ph === "pulling" || ph === "done" ? 0 : shown * hw - r0;
@@ -255,7 +273,7 @@ export function MercuryUpload({ autoplay = false, onUpload, progress }: MercuryU
       if (ph === "pulling" || ph === "done") {
         vHalf += ((wantHalf - half) * 60 - vHalf * 9) * dt; half += vHalf * dt;
         vRad += ((wantRad - rad) * 170 - vRad * 11) * dt; rad += vRad * dt;
-        if (ph === "pulling" && now - pulled > 1100) { phaseRef.current = "done"; setPhase("done"); }
+        if (ph === "pulling" && now - pulled > 1100) { phaseRef.current = "done"; setPhase("done"); sound("done"); }
       } else {
         half += (Math.max(0, wantHalf) - half) * Math.min(1, dt * 7); vHalf = 0;
         rad += (wantRad - rad) * Math.min(1, dt * 9); vRad = 0;
@@ -299,6 +317,8 @@ export function MercuryUpload({ autoplay = false, onUpload, progress }: MercuryU
       }
     })();
     return () => { live = false; };
+    // begin and reset only touch refs and state setters, so the demo restarts only when autoplay changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoplay]);
 
   const pick = (f?: File | null) => { if (!f) return; touched.current = true; onUpload?.(f); begin(f.name, f.size); };

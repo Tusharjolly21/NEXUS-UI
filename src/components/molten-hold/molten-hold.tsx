@@ -2,6 +2,8 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { audioAwake, playDef, useAutoplaySoundAllowed } from "@/lib/ui-sounds";
+import { moltenHoldSound, type MoltenHoldSound } from "./molten-hold-sound";
 
 /* ------------------------------------------------------------------ liquid chrome, shaded per pixel
  * The shape is a signed distance field (`map`, in css px, negative inside). Its depth is a pillow: round at the rim,
@@ -148,6 +150,10 @@ float map(vec2 p){
 type Phase = "idle" | "pouring" | "set" | "done" | "draining";
 
 export interface MoltenHoldProps {
+  /** plays its own sounds (a thump as the metal starts to run, a sizzle that follows the front, a drain if you let go early, and a thunk, a hiss of steam and a ring of chrome when it sets). They follow the site-wide sound switch */
+  enableSound?: boolean;
+  /** loudness of the sounds, 0 to 1 */
+  volume?: number;
   /** the words on the bar before it is held */
   label?: string;
   /** the words pressed into the metal once the hold is complete */
@@ -173,7 +179,7 @@ export interface MoltenHoldProps {
  * `label`, `doneLabel`, `duration` (seconds to fill), `onConfirm`. Space or Enter held works the same. `autoplay`
  * shows a short hold and a full one until the first real press. Reduced motion fills without the heat.
  */
-export function MoltenHold({ label = "Hold to publish", doneLabel = "Published", duration = 1.8, autoplay = false, onConfirm }: MoltenHoldProps) {
+export function MoltenHold({ label = "Hold to publish", doneLabel = "Published", duration = 1.8, autoplay = false, enableSound = true, volume = 0.8, onConfirm }: MoltenHoldProps) {
   const reduce = useReducedMotion();
   const wrap = useRef<HTMLDivElement>(null);
   const chan = useRef<HTMLDivElement>(null);
@@ -188,6 +194,16 @@ export function MoltenHold({ label = "Hold to publish", doneLabel = "Published",
   const [gl, setGl] = useState(true);
   const fillRef = useRef(0);
   const [fallback, setFallback] = useState(0);
+  const autoSoundOk = useAutoplaySoundAllowed();
+  const soundCfg = useRef({ enableSound, volume, autoSoundOk });
+  useLayoutEffect(() => { soundCfg.current = { enableSound, volume, autoSoundOk }; }, [enableSound, volume, autoSoundOk]);
+  // Sound plays when asked for and the site-wide switch is on. A demo playing itself makes sound only where demos may, once the visitor has used the page.
+  const sound = (name: MoltenHoldSound, arg?: number) => {
+    const c = soundCfg.current;
+    if (!c.enableSound) return;
+    if (!touched.current && !(c.autoSoundOk && audioAwake())) return;
+    playDef(`molten-hold:${name}`, moltenHoldSound(name, arg), Math.min(1, Math.max(0, c.volume)));
+  };
 
   useEffect(() => {
     const cv = cvs.current, st = wrap.current; if (!cv || !st) return;
@@ -206,20 +222,23 @@ export function MoltenHold({ label = "Hold to publish", doneLabel = "Published",
     };
     size();
     const ro = new ResizeObserver(size); ro.observe(st);
-    let raf = 0, last = performance.now(), time = 1, fill = 0, speed = 0, heat = 0, rip = 1, wave = 0, setAt = 0;
+    let raf = 0, last = performance.now(), time = 1, fill = 0, speed = 0, heat = 0, rip = 1, wave = 0, setAt = 0, grain = 0;
     const set = (p: Phase) => { phaseRef.current = p; setPhase(p); };
     const draw = (now: number) => {
       const dt = Math.min(1 / 30, (now - last) / 1000); last = now;
       const ph = phaseRef.current;
       if (holding.current && (ph === "idle" || ph === "pouring" || ph === "draining")) {
-        if (ph !== "pouring") set("pouring");
+        if (ph !== "pouring") { set("pouring"); sound("ignite"); }
         // the pour gathers pace, like a crucible tipping
         speed += (1 / duration * 1.12 - speed) * Math.min(1, dt * 3.2);
         fill = Math.min(1, fill + speed * dt);
         heat += (1 - heat) * Math.min(1, dt * 6);
-        if (fill >= 1) { set("set"); setAt = now; onConfirm?.(); }
+        // the sizzle follows the front: grains come closer together, and brighter, as the channel fills
+        grain += dt;
+        if (grain > 0.08 - 0.045 * fill) { grain = 0; sound("grain", fill); }
+        if (fill >= 1) { set("set"); sound("set"); setAt = now; onConfirm?.(); }
       } else if (ph === "pouring" || ph === "draining") {
-        if (ph !== "draining") set("draining");
+        if (ph !== "draining") { set("draining"); if (fill > 0.04) sound("drain", fill); }
         speed = 0;
         fill = Math.max(0, fill - dt * (0.9 + fill * 0.8));
         heat *= Math.exp(-dt * 1.2);
@@ -259,7 +278,7 @@ export function MoltenHold({ label = "Hold to publish", doneLabel = "Published",
   const reset = () => { holding.current = false; phaseRef.current = "draining"; setPhase("draining"); };
   const press = (v: boolean, real = true) => {
     if (real) touched.current = true;
-    if (v && phaseRef.current === "done") { reset(); return; }
+    if (v && phaseRef.current === "done") { sound("undo"); reset(); return; }
     holding.current = v;
   };
 

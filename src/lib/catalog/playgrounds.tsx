@@ -4387,10 +4387,12 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "range", prop: "duration", label: "Hold time", min: 0.8, max: 4, step: 0.1, unit: "s", defaultValue: 1.8 },
       { kind: "toggle", prop: "autoplay", label: "Hold by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+      { kind: "range", prop: "volume", label: "Volume", min: 0, max: 1, step: 0.05, unit: "", defaultValue: 0.8 },
     ],
     render: (v) => (
       <div className="mx-auto flex w-full max-w-[560px] justify-center">
-        <MoltenHold key={`${String(v.autoplay)}-${String(v.duration)}`} duration={v.duration as number} autoplay={v.autoplay as boolean} />
+        <MoltenHold key={`${String(v.autoplay)}-${String(v.duration)}`} duration={v.duration as number} autoplay={v.autoplay as boolean} enableSound={v.enableSound as boolean} volume={v.volume as number} />
       </div>
     ),
   },
@@ -4399,10 +4401,14 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "MercurySwitch",
     importPath: "@/components/mercury-switch",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Flip by itself", defaultValue: false, startOn: true }],
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Flip by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+      { kind: "range", prop: "volume", label: "Volume", min: 0, max: 1, step: 0.05, unit: "", defaultValue: 0.8 },
+    ],
     render: (v) => (
       <div className="mx-auto flex w-full max-w-[460px] justify-center">
-        <MercurySwitch key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+        <MercurySwitch key={String(v.autoplay)} autoplay={v.autoplay as boolean} enableSound={v.enableSound as boolean} volume={v.volume as number} />
       </div>
     ),
   },
@@ -4411,10 +4417,14 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "MercuryUpload",
     importPath: "@/components/mercury-upload",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Upload by itself", defaultValue: false, startOn: true }],
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Upload by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+      { kind: "range", prop: "volume", label: "Volume", min: 0, max: 1, step: 0.05, unit: "", defaultValue: 0.8 },
+    ],
     render: (v) => (
       <div className="mx-auto flex w-full max-w-[460px] justify-center">
-        <MercuryUpload key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+        <MercuryUpload key={String(v.autoplay)} autoplay={v.autoplay as boolean} enableSound={v.enableSound as boolean} volume={v.volume as number} />
       </div>
     ),
   },
