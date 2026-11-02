@@ -15,6 +15,7 @@ export const DOCS_PAGES = [
   { href: "/docs/cli", label: "CLI" },
   { href: "/docs/videos", label: "Videos" },
   { href: "/docs/icons", label: "Icons" },
+  { href: "/docs/mcp", label: "MCP server" },
 ] as const;
 
 const BROWSE = [
