@@ -9,12 +9,15 @@ import { SiteAutoplayQuiet } from "@/components/site/sound-switch";
 import { ScrollToTop } from "@/components/site/scroll-to-top";
 import { ProAccessProvider } from "@/components/pro/pro-access";
 import { sessionHasPro, sessionPlanKind } from "@/lib/component-access";
+import { preload } from "react-dom";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 
 export async function SiteShell({ children }: { children: React.ReactNode }) {
   // Only drives what the UI shows; every Pro resource is checked again on the server.
   const isPremium = await sessionHasPro();
   const plan = isPremium ? await sessionPlanKind() : "free";
+  // Start fetching the early-slot numbers with the page, so the banner has them by the time it hydrates.
+  if (!isPremium) preload("/api/slots", { as: "fetch", crossOrigin: "anonymous" });
   const bannerClosed = (await cookies()).get(LAUNCH_BANNER_COOKIE)?.value === LAUNCH_BANNER_ID;
 
   return (

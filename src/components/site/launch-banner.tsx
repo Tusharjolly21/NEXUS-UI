@@ -20,7 +20,9 @@ import { FREE_ICON_COUNT, ICON_COUNT } from "@/lib/icons/count";
 export function LaunchBanner({ isPro = false }: { isPro?: boolean }) {
   const [open, setOpen] = React.useState(true);
   // Free visitors see how many early slots are left (counted from the database) where the plans line used to be.
-  const left = slotsLeft(useSlots(!isPro));
+  const slots = useSlots(!isPro);
+  const left = slotsLeft(slots ?? null);
+  const loading = slots === undefined;
   if (!open) return null;
 
   const close = () => {
@@ -56,16 +58,17 @@ export function LaunchBanner({ isPro = false }: { isPro?: boolean }) {
           {isPro ? "Open the icons ›" : "See the icons ›"}
         </Link>
         {isPro ? null : (
-          <span className="hidden items-center gap-x-1.5 md:inline-flex">
+          // While the numbers load, the line is there but invisible (same width), so nothing jumps or flashes the old text.
+          <span className={`hidden items-center gap-x-1.5 md:inline-flex ${loading ? "invisible" : ""}`} aria-hidden={loading || undefined}>
             <span aria-hidden className="text-white/30">|</span>
-            {left ? (
+            {left || loading ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#ff9f0a]/[0.16] px-2.5 py-0.5 text-[#ffd60a] ring-1 ring-inset ring-[#ff9f0a]/35">
                 <span aria-hidden className="relative flex size-1.5">
                   <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#ff9f0a] opacity-60 motion-reduce:hidden" />
                   <span className="relative inline-flex size-1.5 rounded-full bg-[#ff9f0a]" />
                 </span>
                 <span>
-                  Early prices: <strong className="font-semibold text-white">{left.total}</strong> {left.total === 1 ? "slot" : "slots"} left, then prices go up
+                  Early prices: <strong className="font-semibold text-white">{left ? left.total : 98}</strong> {left && left.total === 1 ? "slot" : "slots"} left, then prices go up
                 </span>
               </span>
             ) : (

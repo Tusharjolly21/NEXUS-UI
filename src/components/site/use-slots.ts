@@ -11,9 +11,9 @@ function load() {
     .catch(() => null));
 }
 
-/** The early-slot numbers from the database, or null until they arrive (or when they can't be read). */
-export function useSlots(active = true): SlotsResponse | null {
-  const [data, setData] = React.useState<SlotsResponse | null>(null);
+/** The early-slot numbers from the database: undefined while loading, null when they can't be read. */
+export function useSlots(active = true): SlotsResponse | null | undefined {
+  const [data, setData] = React.useState<SlotsResponse | null | undefined>(undefined);
   React.useEffect(() => {
     if (!active) return;
     let alive = true;

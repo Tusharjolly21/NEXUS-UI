@@ -63,7 +63,7 @@ export function SlotsNotice() {
   // The numbers are only fetched when the card could actually show.
   const wantsData = ready && asked && !hiddenHere && !isPro && !dismissed;
   const data = useSlots(wantsData);
-  const left = slotsLeft(data);
+  const left = slotsLeft(data ?? null);
   const rows = left ? ROWS.filter((r) => left.open.some((o) => o.plan === r.plan)) : [];
   const visible = wantsData && rows.length > 0;
 

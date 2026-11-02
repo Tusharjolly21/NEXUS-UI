@@ -6,6 +6,7 @@ import { SiteNav } from "@/components/site/site-nav";
 import { SiteAutoplayQuiet } from "@/components/site/sound-switch";
 import { ScrollToTop } from "@/components/site/scroll-to-top";
 import { ProAccessProvider } from "@/components/pro/pro-access";
+import { preload } from "react-dom";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 
 /**
@@ -19,6 +20,7 @@ import { CATALOG_COUNTS } from "@/lib/catalog/counts";
  * with SiteShell (src/components/layout/site-shell.tsx).
  */
 export function StaticSiteShell({ children }: { children: React.ReactNode }) {
+  preload("/api/slots", { as: "fetch", crossOrigin: "anonymous" });
   return (
     <ProAccessProvider isPro={false} plan="free" proCount={CATALOG_COUNTS.proComponents}>
       <div className="flex min-h-dvh flex-col">
