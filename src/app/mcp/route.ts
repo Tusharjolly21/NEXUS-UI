@@ -136,7 +136,7 @@ function item(args: Json) {
 
 const SLUG = /^[a-z0-9-]{1,80}$/;
 
-async function source(origin: string, auth: string | null, args: Json) {
+async function source(origin: string, auth: string | null, ip: string, args: Json) {
   const slug = String(args.slug ?? "");
   if (!SLUG.test(slug)) return text("Give a component or block slug such as \"wheel-selector\".", true);
   const c = getLibraryComponent(slug);
@@ -145,7 +145,7 @@ async function source(origin: string, auth: string | null, args: Json) {
   if (!registryName) return text("No component or block with that slug. Use search_nexus to find one.", true);
 
   const res = await fetch(new URL(`/api/registry/${registryName}`, origin), {
-    headers: auth ? { authorization: auth } : {},
+    headers: { ...(auth ? { authorization: auth } : {}), ...(ip ? { "x-forwarded-for": ip } : {}) },
     cache: "no-store",
   });
   if (res.status === 401 || res.status === 403) {
@@ -170,10 +170,14 @@ async function source(origin: string, auth: string | null, args: Json) {
   return text(`${header}\n\n${files}`);
 }
 
-async function prompt(origin: string, args: Json) {
+async function prompt(origin: string, ip: string, args: Json) {
   const slug = String(args.slug ?? "");
   if (!SLUG.test(slug)) return text("Give a component slug such as \"wheel-selector\".", true);
-  const res = await fetch(new URL(`/api/prompt/${slug}`, origin), { cache: "no-store" });
+  const res = await fetch(new URL(`/api/prompt/${slug}`, origin), {
+    headers: ip ? { "x-forwarded-for": ip } : {},
+    cache: "no-store",
+  });
+  if (res.status === 429) return text("Too many requests. Wait a minute and try again.", true);
   if (res.status === 403) return text(`That build prompt is part of Nexus UI Pro. Signed-in Pro members can copy it from ${SITE}/components/${slug}.`, true);
   if (!res.ok) return text("No build prompt for that slug.", true);
   const data = (await res.json()) as { name?: string; prompt?: string };
@@ -183,15 +187,18 @@ async function prompt(origin: string, args: Json) {
 async function callTool(req: Request, name: string, args: Json) {
   const origin = new URL(req.url).origin;
   const auth = req.headers.get("authorization");
+  // The internal calls below are rate limited per client IP; pass the caller's IP on so every MCP user
+  // does not share the one bucket of this server's own address.
+  const ip = getClientIp(req);
   switch (name) {
     case "search_nexus":
       return search(args);
     case "get_nexus_item":
       return item(args);
     case "get_component_source":
-      return source(origin, auth, args);
+      return source(origin, auth, ip, args);
     case "get_build_prompt":
-      return prompt(origin, args);
+      return prompt(origin, ip, args);
     default:
       return null;
   }
