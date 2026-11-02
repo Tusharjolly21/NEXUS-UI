@@ -1,15 +1,16 @@
 import { getAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/env";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
-import { SLOT_CAPS, SLOTS_ENABLED, type SlotsResponse } from "@/lib/launch-slots";
+import { SLOT_CAPS, SLOTS_ENABLED, SLOTS_IGNORE_USER_IDS, type SlotsResponse } from "@/lib/launch-slots";
 
 /**
  * GET /api/slots: how many early slots each plan has taken, counted from the database. Only two numbers per
  * plan leave the server (taken, cap): no names, no emails. Cached at the edge for five minutes. When the
  * database can't be read the answer is "not enabled", never a guess, so the popup simply stays away.
  *
- * - All-Access: paid lifetime orders with an amount above zero (a refund or a free grant takes no slot).
- * - Pro: subscriptions that are active, or cancelled but still running to the end of what was paid for.
+ * - All-Access: people with a paid lifetime order of more than zero (a refund or a free grant takes no slot).
+ * - Pro: people with an active subscription (a cancelled one frees its slot).
+ * Each person counts once, and the accounts in SLOTS_IGNORE_USER_IDS (test purchases) never count.
  */
 const OFF: SlotsResponse = { enabled: false, plans: {} };
 const CACHE = { "cache-control": "public, s-maxage=300, stale-while-revalidate=900" };
@@ -21,19 +22,21 @@ export async function GET(request: Request) {
 
   try {
     const admin = getAdminClient();
-    const now = new Date().toISOString();
     const [lifetime, yearly] = await Promise.all([
-      admin.from("orders").select("id", { count: "exact", head: true }).eq("product_type", "lifetime").eq("status", "paid").gt("amount_cents", 0),
-      admin.from("subscriptions").select("id", { count: "exact", head: true }).or(`status.eq.active,ends_at.gt.${now}`),
+      admin.from("orders").select("user_id").eq("product_type", "lifetime").eq("status", "paid").gt("amount_cents", 0).limit(1000),
+      admin.from("subscriptions").select("user_id").eq("status", "active").limit(1000),
     ]);
-    if (lifetime.error || yearly.error || lifetime.count === null || yearly.count === null) {
+    if (lifetime.error || yearly.error || !lifetime.data || !yearly.data) {
       return Response.json(OFF, { headers: { "cache-control": "public, s-maxage=60" } });
     }
+    // One slot per person, however many orders or subscription rows they have, and never for the ignored accounts.
+    const people = (rows: { user_id: string }[]) => new Set(rows.map((r) => r.user_id).filter((id) => !SLOTS_IGNORE_USER_IDS.includes(id))).size;
+    const taken = { lifetime: people(lifetime.data), yearly: people(yearly.data) };
     const body: SlotsResponse = {
       enabled: true,
       plans: {
-        lifetime: { taken: Math.min(lifetime.count, SLOT_CAPS.lifetime), cap: SLOT_CAPS.lifetime },
-        yearly: { taken: Math.min(yearly.count, SLOT_CAPS.yearly), cap: SLOT_CAPS.yearly },
+        lifetime: { taken: Math.min(taken.lifetime, SLOT_CAPS.lifetime), cap: SLOT_CAPS.lifetime },
+        yearly: { taken: Math.min(taken.yearly, SLOT_CAPS.yearly), cap: SLOT_CAPS.yearly },
       },
     };
     return Response.json(body, { headers: CACHE });

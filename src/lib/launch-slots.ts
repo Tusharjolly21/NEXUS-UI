@@ -15,6 +15,13 @@ export const SLOT_CAPS = {
   yearly: 50,
 } as const;
 
+/**
+ * Accounts that never count toward a slot, such as your own test purchases. Empty: every paying customer, annual or
+ * lifetime, takes a slot. These are opaque user ids (from the orders and subscriptions tables), not emails; add an id
+ * here and its purchases stop taking a slot.
+ */
+export const SLOTS_IGNORE_USER_IDS: readonly string[] = [];
+
 export type SlotPlan = keyof typeof SLOT_CAPS;
 
 export type SlotsResponse = {
