@@ -121,3 +121,14 @@ export function blobsFor(t: number, w: number, h: number, a = "rgba(10,132,255,.
     { position: "absolute", width: s, height: s, borderRadius: "50%", filter: "blur(60px)", left: w - s * 0.6 + Math.cos(t * 0.45) * s * 0.06, top: h - s * 0.6 + Math.sin(t * 0.5) * s * 0.05, background: `radial-gradient(circle, ${b}, transparent 65%)` },
   ] as CSSProperties[];
 }
+
+/**
+ * The URL of an imported image, font or other file. Bundlers disagree on what `import x from "./a.jpg"`
+ * gives you: Vite and most others give the URL string, Next.js gives an object with a `src` field.
+ * Every video passes its imports through this, so `<img src>` works in either.
+ */
+export function assetUrl(file: unknown): string {
+  if (typeof file === "string") return file;
+  if (file && typeof file === "object" && "src" in file) return String((file as { src: unknown }).src);
+  return String(file);
+}

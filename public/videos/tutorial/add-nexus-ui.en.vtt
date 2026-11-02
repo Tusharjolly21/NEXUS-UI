@@ -1,0 +1,261 @@
+WEBVTT
+
+1
+00:00:02.400 --> 00:00:07.000
+Every step, done for real. Use the chapters to jump to any part.
+
+2
+00:00:07.000 --> 00:00:10.357
+You need two free apps: VS Code and Node.js.
+
+3
+00:00:10.357 --> 00:00:13.884
+In VS Code, open the terminal: View, then Terminal.
+
+4
+00:00:13.884 --> 00:00:18.969
+Type node -v and press Enter. Version 20.9 or newer is fine.
+
+5
+00:00:18.969 --> 00:00:22.475
+Go to the folder where you keep projects and run this command.
+
+6
+00:00:22.475 --> 00:00:27.624
+It makes a new Next.js project called my-app, with Tailwind CSS set up.
+
+7
+00:00:27.624 --> 00:00:33.224
+Installing takes a minute or two. We fast-forward through it.
+
+8
+00:00:33.224 --> 00:00:37.285
+Done. Warnings about vulnerabilities are normal for a new project.
+
+9
+00:00:37.285 --> 00:00:40.428
+Now move into the new folder: type cd my-app.
+
+10
+00:00:40.428 --> 00:00:45.022
+Then open the my-app folder in VS Code: File, then Open Folder.
+
+11
+00:00:45.022 --> 00:00:48.699
+This is your project. Everything you add goes into src.
+
+12
+00:00:48.699 --> 00:00:54.317
+Nexus UI installs with the shadcn CLI. Set it up once per project.
+
+13
+00:00:54.317 --> 00:00:58.117
+-d uses the default settings, so it asks you nothing.
+
+14
+00:00:58.117 --> 00:01:02.796
+It adds components.json, the settings file the CLI reads.
+
+15
+00:01:02.796 --> 00:01:08.371
+And src/lib/utils.ts, the small cn() helper every component uses.
+
+16
+00:01:08.371 --> 00:01:13.392
+Now tell the CLI where Nexus UI lives. Copy this command as it is.
+
+17
+00:01:13.392 --> 00:01:17.666
+Keep {name} exactly like that. The CLI fills it in for you.
+
+18
+00:01:17.666 --> 00:01:24.266
+It adds one entry to components.json. You do this once per project.
+
+19
+00:01:24.266 --> 00:01:28.647
+Every component page has an Install box. Copy the command from it.
+
+20
+00:01:28.647 --> 00:01:33.047
+Paste it in the terminal. Here we add the Glow Button, which is free.
+
+21
+00:01:33.047 --> 00:01:37.449
+It downloads the files and installs what they need, like framer-motion.
+
+22
+00:01:37.449 --> 00:01:42.049
+The new files are in src/components/glow-button.
+
+23
+00:01:42.049 --> 00:01:46.686
+Open src/app/page.tsx. This file is your home page.
+
+24
+00:01:46.686 --> 00:01:52.486
+Replace what's there: import the component, then put it on the page.
+
+25
+00:01:52.486 --> 00:01:56.035
+Save the file, then start the app with npm run dev.
+
+26
+00:01:56.035 --> 00:01:59.477
+Open http://localhost:3000 in your browser.
+
+27
+00:01:59.477 --> 00:02:03.677
+There it is: the Glow Button, running in your own project.
+
+28
+00:02:03.677 --> 00:02:09.477
+Point at it and the light on the rim turns to face you.
+
+29
+00:02:09.477 --> 00:02:13.538
+Prefer not to use the CLI? Copy the code by hand instead.
+
+30
+00:02:13.538 --> 00:02:18.338
+First, install the packages the component needs.
+
+31
+00:02:18.338 --> 00:02:23.738
+Then press Show the source files. Each tab is one file, with its path.
+
+32
+00:02:23.738 --> 00:02:26.538
+Copy the code from each tab.
+
+33
+00:02:26.538 --> 00:02:30.855
+In VS Code, create the file at that exact path and paste the code.
+
+34
+00:02:30.855 --> 00:02:36.110
+Do this for every tab, including ui-sounds.ts. Then use it in a page.
+
+35
+00:02:36.110 --> 00:02:40.710
+Pro components need a Pro plan and an API key from your dashboard.
+
+36
+00:02:40.710 --> 00:02:45.510
+Create a file called .env.local in your project and put your key in it.
+
+37
+00:02:45.510 --> 00:02:51.171
+In components.json, change the registries entry so the CLI sends your key.
+
+38
+00:02:51.171 --> 00:02:54.771
+Then add Pro components the same way as free ones.
+
+39
+00:02:55.371 --> 00:03:00.271
+Each of these starts from a project set up in steps 1 to 4.
+
+40
+00:03:00.271 --> 00:03:05.356
+Blocks install exactly like components. Copy the command from the block's page.
+
+41
+00:03:05.356 --> 00:03:10.556
+Here is the free Pricing Section.
+
+42
+00:03:10.556 --> 00:03:16.515
+The block's Code view has a "2. Use it" snippet. Paste it into src/app/page.tsx.
+
+43
+00:03:16.515 --> 00:03:23.715
+Your pricing section, live. Pick a plan and everything updates.
+
+44
+00:03:23.715 --> 00:03:28.053
+Icons are single files. Free ones can be fetched with one command.
+
+45
+00:03:28.053 --> 00:03:31.495
+Make a folder for them, then download the icon into it.
+
+46
+00:03:31.495 --> 00:03:36.132
+Icons animate with Framer Motion, so install it if you don't have it yet.
+
+47
+00:03:36.132 --> 00:03:39.932
+Import the icon and use it like any component.
+
+48
+00:03:39.932 --> 00:03:46.332
+Point at the bell: it winds up, swings and rings.
+
+49
+00:03:46.332 --> 00:03:50.329
+Sounds are made in the browser, so there are no audio files to add.
+
+50
+00:03:50.329 --> 00:03:55.798
+One command adds src/lib/ui-sounds.ts, the whole free sound library.
+
+51
+00:03:55.798 --> 00:04:01.598
+Call playSound with a name from the Sounds page, here "pop".
+
+52
+00:04:01.598 --> 00:04:08.198
+Click it and you hear the pop. Turn your sound on.
+
+53
+00:04:08.198 --> 00:04:13.752
+Free videos: Launch Reel, Kinetic Manifesto and Will Return. Open the Source tab.
+
+54
+00:04:13.752 --> 00:04:22.719
+Make a folder src/app/video-frame. Save the video, kit.ts and frame.tsx (as page.tsx) in it.
+
+55
+00:04:22.719 --> 00:04:30.449
+Put the images it imports in an assets folder next to them, from nexus-ui.com/videos/assets.
+
+56
+00:04:30.449 --> 00:04:34.936
+Install Playwright once. You also need ffmpeg on your computer.
+
+57
+00:04:34.936 --> 00:04:42.367
+Start the app with npm run dev, then run render.mjs. It draws every frame and adds the music.
+
+58
+00:04:42.367 --> 00:04:49.367
+Your MP4, rendered on your own machine.
+
+59
+00:04:49.367 --> 00:04:53.967
+Sign in (a free account is enough), then press Download source (.zip).
+
+60
+00:04:53.967 --> 00:04:57.985
+Unzip it where you keep projects and open the folder in VS Code.
+
+61
+00:04:57.985 --> 00:05:01.982
+It's a complete Next.js project, so install its packages.
+
+62
+00:05:01.982 --> 00:05:06.149
+Start it with npm run dev. The README has every step too.
+
+63
+00:05:06.149 --> 00:05:15.149
+Launchfolio, running on your machine. Edit the copy and make it yours.
+
+64
+00:05:15.149 --> 00:05:20.149
+That's it. Your project is ready for anything from Nexus UI.
+
+65
+00:05:20.149 --> 00:05:26.535
+The written guide with every command is at nexus-ui.com/docs/installation.

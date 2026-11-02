@@ -65,6 +65,14 @@ export default function InstallationPage() {
         <SetupChecklist steps={STEPS} />
 
         <p className="text-sm leading-relaxed text-muted-foreground">
+          Prefer to watch? The{" "}
+          <Link href="/docs/video-tutorial" className={link}>
+            video tutorial
+          </Link>{" "}
+          shows every step below in VS Code, plus blocks, icons, sounds, videos and templates, in about five minutes.
+        </p>
+
+        <p className="text-sm leading-relaxed text-muted-foreground">
           You need <Strong>Node.js 20.9 or newer</Strong> (check with <code className={code}>node -v</code>) and a
           terminal. Free components work without an account. <Strong>Pro</Strong> components need a Pro plan and an API
           key (step 4); the{" "}
@@ -107,11 +115,13 @@ cd my-app`}</DocPre>
               settings from;
             </li>
             <li>
-              creates <code className={code}>src/lib/utils.ts</code> with the <code className={code}>cn()</code> helper;
+              creates <code className={code}>src/lib/utils.ts</code> with the <code className={code}>cn()</code> helper
+              (today it is one line, <code className={code}>{'export { cn } from "cn"'}</code>, backed by the{" "}
+              <code className={code}>cn</code> package it installs) and a starter{" "}
+              <code className={code}>src/components/ui/button.tsx</code>;
             </li>
             <li>
-              installs <code className={code}>clsx</code> and <code className={code}>tailwind-merge</code> (the two
-              packages <code className={code}>cn()</code> is built from) and adds colour variables to{" "}
+              installs the packages those files use and adds colour variables to{" "}
               <code className={code}>src/app/globals.css</code>.
             </li>
           </ul>
@@ -370,7 +380,7 @@ export default function Page() {
 
         <DocFooterNav
           prev={{ href: "/docs/introduction", label: "Introduction" }}
-          next={{ href: "/docs/install-nextjs", label: "Install Next.js" }}
+          next={{ href: "/docs/video-tutorial", label: "Video tutorial" }}
         />
 
         <p className="text-sm text-muted-foreground">

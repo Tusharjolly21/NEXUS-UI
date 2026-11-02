@@ -1,18 +1,32 @@
 import type { CSSProperties, ReactNode } from "react";
-import { FONT, GRAD, MONO, P, TEXT, blobsFor, clamp, ease, gradText, lerp, rise, spring, type Frame, type VideoMeta } from "./kit";
+import { FONT, GRAD, MONO, P, TEXT, blobsFor, clamp, ease, gradText, lerp, rise, spring, type Frame, type VideoMeta, assetUrl } from "./kit";
 import { Odometer } from "./parts";
-import tPay from "./assets/tile-pay.jpg";
-import tRouter from "./assets/tile-router.jpg";
-import tPend from "./assets/tile-pend.jpg";
-import tReel from "./assets/tile-reel.jpg";
-import tDock from "./assets/tile-dock.jpg";
-import tIsland from "./assets/tile-island.jpg";
-import tFolder from "./assets/tile-folder.jpg";
-import tCopy from "./assets/tile-copy.jpg";
-import tplNova from "./assets/tpl-nova.jpg";
-import tplHelix from "./assets/tpl-helix.jpg";
-import tplLaunch from "./assets/tpl-launch.jpg";
-import tplAether from "./assets/tpl-aether.jpg";
+import tPayFile from "./assets/tile-pay.jpg";
+import tRouterFile from "./assets/tile-router.jpg";
+import tPendFile from "./assets/tile-pend.jpg";
+import tReelFile from "./assets/tile-reel.jpg";
+import tDockFile from "./assets/tile-dock.jpg";
+import tIslandFile from "./assets/tile-island.jpg";
+import tFolderFile from "./assets/tile-folder.jpg";
+import tCopyFile from "./assets/tile-copy.jpg";
+import tplNovaFile from "./assets/tpl-nova.jpg";
+import tplHelixFile from "./assets/tpl-helix.jpg";
+import tplLaunchFile from "./assets/tpl-launch.jpg";
+import tplAetherFile from "./assets/tpl-aether.jpg";
+
+// Imported files as URL strings, whichever bundler you use (see assetUrl in kit.ts).
+const tPay = assetUrl(tPayFile);
+const tRouter = assetUrl(tRouterFile);
+const tPend = assetUrl(tPendFile);
+const tReel = assetUrl(tReelFile);
+const tDock = assetUrl(tDockFile);
+const tIsland = assetUrl(tIslandFile);
+const tFolder = assetUrl(tFolderFile);
+const tCopy = assetUrl(tCopyFile);
+const tplNova = assetUrl(tplNovaFile);
+const tplHelix = assetUrl(tplHelixFile);
+const tplLaunch = assetUrl(tplLaunchFile);
+const tplAether = assetUrl(tplAetherFile);
 
 export interface BentoTourProps {
   intro: string;

@@ -42,27 +42,37 @@ export default function VideosDocsPage() {
             <Link href="/videos" className="font-medium text-link hover:underline">
               videos page
             </Link>{" "}
-            and use the Source tab. Two videos are free; the others need Pro.
+            and use the Source tab. Three videos are free (Launch Reel, Kinetic Manifesto and Will Return); the others need Pro.
           </p>
         </DocSection>
 
-        <DocSection title="1. Put the files in your project">
+        <DocSection title="1. Put the files in one folder">
           <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
-            Copy the video file and <code className={docInlineCodeClass}>kit.ts</code> into one folder, for example{" "}
-            <code className={docInlineCodeClass}>components/videos/</code>, and the images into{" "}
-            <code className={docInlineCodeClass}>public/videos/assets/</code>. Each video draws on a fixed canvas for its shape (1080 by 1920 for 9:16, 1920 by 1080 for 16:9) and takes{" "}
-            <code className={docInlineCodeClass}>t</code> (seconds), the frame size{" "}
-            <code className={docInlineCodeClass}>w</code> and <code className={docInlineCodeClass}>h</code> (for the videos that come in more than one shape) and its copy as props:
+            Make a folder for the frame page, for example <code className={docInlineCodeClass}>src/app/video-frame/</code> (or <code className={docInlineCodeClass}>app/video-frame/</code> without a src
+            folder). Save the video file (<code className={docInlineCodeClass}>launch-reel.tsx</code>), <code className={docInlineCodeClass}>kit.ts</code> and <code className={docInlineCodeClass}>frame.tsx</code> in it, with{" "}
+            <code className={docInlineCodeClass}>frame.tsx</code> renamed to <code className={docInlineCodeClass}>page.tsx</code>: it imports <code className={docInlineCodeClass}>./launch-reel</code> and <code className={docInlineCodeClass}>./kit</code>, so they
+            have to sit next to it. Save <code className={docInlineCodeClass}>render.mjs</code> in the project root.
+          </p>
+          <DocPre>{`src/app/video-frame/
+  assets/            the images the video imports
+  kit.ts
+  launch-reel.tsx
+  page.tsx           frame.tsx, renamed
+render.mjs
+launch-reel.mp3`}</DocPre>
+        </DocSection>
+
+        <DocSection title="2. Add the images and the music">
+          <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
+            The video imports its images from <code className={docInlineCodeClass}>./assets/</code>, so make an <code className={docInlineCodeClass}>assets</code> folder next to it and download each
+            file it names at the top (for example <code className={docInlineCodeClass}>import pageImg from &quot;./assets/nexus-page.jpg&quot;</code>) from{" "}
+            <code className={docInlineCodeClass}>https://www.nexus-ui.com/videos/assets/</code>. The soundtrack is at{" "}
+            <code className={docInlineCodeClass}>https://www.nexus-ui.com/videos/audio/launch-reel.mp3</code>; save it in the project root. Change the words and
+            colours with the video&apos;s props:
           </p>
           <DocPre>{`<LaunchReel t={4.2} words="landing page, dashboard" brand="Your brand" url="yourbrand.com" />`}</DocPre>
-        </DocSection>
-
-        <DocSection title="2. Add the frame page">
-          <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
-            Save <code className={docInlineCodeClass}>frame.tsx</code> as a page, for example{" "}
-            <code className={docInlineCodeClass}>app/video-frame/page.tsx</code>, and swap in the video you want. It draws the video
-            full-window and exposes <code className={docInlineCodeClass}>window.__setT(seconds)</code>, which is how the script moves the
-            clock.
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            The page draws the video full-window and exposes <code className={docInlineCodeClass}>window.__setT(seconds)</code>, which is how the script moves the clock.
           </p>
         </DocSection>
 

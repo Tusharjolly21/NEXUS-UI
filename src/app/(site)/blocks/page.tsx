@@ -29,6 +29,7 @@ const ORDER = [
   "block-faq-folder-card",
   "block-newsletter",
   "block-signup",
+  "block-comparison",
   "block-cta",
   "block-footer",
   "block-404",
@@ -59,12 +60,17 @@ const CHIP_NAME: Record<string, string> = {
   "block-gallery": "Gallery",
   "block-changelog": "Changelog",
   "block-404": "404 pages",
+  "block-comparison": "Comparison",
   "block-cta": "CTA",
   "block-footer": "Footers",
   "block-signup": "Sign-up",
 };
 
 const TINTS: TileTint[] = ["violet", "sky", "peach", "mint", "butter", "pink"];
+
+/** The wall's New tab lists what was added in the last week of additions, counted back from the newest one (the same rule as the components wall). */
+const NEW_TAB_DAYS = 7;
+const day = (iso?: string) => (iso ? Date.parse(iso) || 0 : 0);
 
 export default function BlocksPage() {
   const bySlug = new Map(blocks.map((b) => [b.slug, b]));
@@ -82,6 +88,8 @@ export default function BlocksPage() {
     for (const q of queues) if (q[round]) ordered.push(q[round]);
   }
 
+  const newest = Math.max(...blockVariants.map((v) => day(v.addedAt)));
+
   const items: BlockTileItem[] = ordered.map((v, i) => {
     const block = bySlug.get(v.block)!;
     return {
@@ -96,6 +104,8 @@ export default function BlocksPage() {
       fit: getTileFit(v.id),
       install: block.registryCliName ?? block.slug,
       isNew: Boolean(v.registryCliName) || v.block === "block-checkout-moments",
+      isRecent: day(v.addedAt) > 0 && newest - day(v.addedAt) <= NEW_TAB_DAYS * 24 * 60 * 60 * 1000,
+      addedAt: day(v.addedAt),
       demo: null,
       block: v.block,
       premium: v.premium ?? block.premium,
@@ -109,7 +119,7 @@ export default function BlocksPage() {
     name: CHIP_NAME[q[0].block] ?? bySlug.get(q[0].block)!.name,
     count: q.length,
   }));
-  const free = blocks.filter((b) => !b.premium).length;
+  const free = items.filter((i) => !i.premium).length;
 
   return (
     <>

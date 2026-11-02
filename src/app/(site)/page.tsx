@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Play, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { CodeDemo } from "@/components/home/code-demo";
 import { HeroInstall } from "@/components/home/hero-install";
 import { HeroSpotlight } from "@/components/home/hero-spotlight";
 import { HeroStickers } from "@/components/home/hero-stickers";
+import { HeroTutorial } from "@/components/home/hero-tutorial";
 import { HeroWord } from "@/components/home/hero-word";
 import { PricingTeaser } from "@/components/home/pricing-teaser";
 import { RedditLove } from "@/components/home/reddit-love";
@@ -192,12 +193,7 @@ export default function Home() {
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <PillLink href="/components">Browse components</PillLink>
-            <PillLink href="#gallery" variant="white" className="pl-2.5">
-              <span className="grid size-6 place-items-center rounded-full bg-action text-white" aria-hidden>
-                <Play className="size-3 fill-current" />
-              </span>
-              See it move
-            </PillLink>
+            <HeroTutorial />
           </div>
           <HeroInstall className="mx-auto mt-6 max-w-[520px]" />
         </div>

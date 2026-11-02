@@ -16,6 +16,7 @@ Nexus UI is a premium UI component library offering 200+ animated React componen
 ## Documentation
 
 - [Installation Guide](/docs/installation): How to install and set up Nexus UI in a Next.js project
+- [Video tutorial](/docs/video-tutorial): A captioned video of the whole setup in VS Code, with every command
 - [Install Next.js](/docs/install-nextjs): Step-by-step Next.js setup
 - [Install Tailwind CSS](/docs/install-tailwindcss): Tailwind CSS configuration guide
 - [Add Utilities](/docs/add-utilities): Adding utility functions and helpers

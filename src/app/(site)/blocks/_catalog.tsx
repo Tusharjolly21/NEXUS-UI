@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Sparkles } from "lucide-react";
+import { AccessSwitch, type Access } from "@/components/gallery/component-gallery";
 import { FitPreview } from "@/components/gallery/fit-preview";
 import { TileCell, TileGrid } from "@/components/gallery/gallery-tile";
 import type { GalleryItem } from "@/components/gallery/types";
@@ -78,20 +79,48 @@ function BlockTile({ item, eager }: { item: BlockTileItem; eager: boolean }) {
   );
 }
 
+/** The `?block=` value of the New tab (a block slug otherwise). */
+const NEW_TAB = "new";
+
 /**
  * The blocks wall, built like the components wall: every section of every block is its own live
- * tile sized to the section, with chips to narrow the wall to one block (deep-linked as `?block=`).
+ * tile sized to the section, with a New tab (the latest additions, newest first), chips to narrow
+ * the wall to one block (deep-linked as `?block=`) and an All / Free / Pro switch (`?access=`).
  */
 export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filters: BlockFilter[] }) {
   const [param, setParam] = useUrlParam("block");
-  const active = filters.find((f) => f.slug === param) ?? null;
+  const [accessParam, setAccessParam] = useUrlParam("access");
+  const access: Access = accessParam === "free" || accessParam === "pro" ? accessParam : "all";
+  const recentCount = React.useMemo(() => items.filter((i) => i.isRecent).length, [items]);
+  const newTab = param === NEW_TAB && recentCount > 0;
+  const active = newTab ? null : (filters.find((f) => f.slug === param) ?? null);
   const [query, setQuery] = React.useState("");
   const words = searchWords(query);
-  const matches = items.filter(
-    (i) => (!active || i.block === active.slug) && (!words.length || matchesWords(`${i.name} ${i.blockName} ${i.description} ${i.categoryLabel}`, words)),
+  const accessCounts = React.useMemo(() => {
+    const pro = items.filter((i) => i.premium).length;
+    return { all: items.length, free: items.length - pro, pro };
+  }, [items]);
+  const filtered = items.filter(
+    (i) =>
+      (access === "all" || (access === "pro") === i.premium) &&
+      (newTab ? i.isRecent : !active || i.block === active.slug) &&
+      (!words.length || matchesWords(`${i.name} ${i.blockName} ${i.description} ${i.categoryLabel}`, words)),
   );
-  const infinite = useInfiniteCount({ total: matches.length, batch: PAGE_SIZE, storeKey: `blocks|${active?.slug ?? ""}|${words.join(" ")}` });
+  // the New tab lists the newest first; the sort is stable, so ties keep the wall's order
+  const matches = newTab ? [...filtered].sort((a, b) => (b.addedAt ?? 0) - (a.addedAt ?? 0)) : filtered;
+  const infinite = useInfiniteCount({
+    total: matches.length,
+    batch: PAGE_SIZE,
+    storeKey: `blocks|${newTab ? NEW_TAB : (active?.slug ?? "")}|${access}|${words.join(" ")}`,
+  });
   const shown = matches.slice(0, infinite.count);
+  const scope = newTab ? "New" : active?.name;
+  const kind = access === "free" ? "free " : access === "pro" ? "Pro " : "";
+  const clearAll = () => {
+    setParam(null);
+    setAccessParam(null);
+    setQuery("");
+  };
 
   // The chosen filter always stays visible, even when it is past the phone's short list.
   const [moreOpen, setMoreOpen] = React.useState(false);
@@ -100,12 +129,21 @@ export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filt
 
   return (
     <div className="scroll-mt-28">
-      <GallerySearch value={query} onChange={setQuery} label="Search blocks" placeholder="Search sections: hero, pricing, FAQ…" className="mb-4 sm:max-w-[360px]" />
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <GallerySearch value={query} onChange={setQuery} label="Search blocks" placeholder="Search sections: hero, pricing, FAQ…" className="sm:w-[360px]" />
+        <AccessSwitch value={access} counts={accessCounts} noun="sections" size="md" onChange={(a) => setAccessParam(a === "all" ? null : a)} />
+      </div>
       <ChipRail wrap>
-        <Chip active={!active} onClick={() => setParam(null)}>
+        <Chip active={!active && !newTab} onClick={() => setParam(null)}>
           All
           <span className="text-[12px] opacity-60">{items.length}</span>
         </Chip>
+        {recentCount ? (
+          <Chip active={newTab} icon={<Sparkles className="size-3.5 text-[#ff9f0a]" strokeWidth={2.4} aria-hidden />} onClick={() => setParam(NEW_TAB)}>
+            New
+            <span className="text-[12px] opacity-60">{recentCount}</span>
+          </Chip>
+        ) : null}
         {filters.map((f, i) => (
           // `contents` keeps the wrapper out of the layout; on a phone the folded ones are removed (and cannot be tabbed to).
           <span key={f.slug} className={cn("contents", !moreOpen && i >= PHONE_FILTERS && f !== active && "max-sm:hidden")}>
@@ -129,20 +167,20 @@ export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filt
 
       <p className="mt-3 text-[13px] text-muted-foreground" aria-live="polite">
         {words.length
-          ? `${matches.length} ${matches.length === 1 ? "section" : "sections"} matching "${query.trim()}"${active ? ` in ${active.name}` : ""}`
-          : active
-            ? `${matches.length} sections in ${active.name}`
-            : `${matches.length} sections across ${filters.length} blocks`}
+          ? `${matches.length} ${kind}${matches.length === 1 ? "section" : "sections"} matching "${query.trim()}"${scope ? ` in ${scope}` : ""}`
+          : scope
+            ? `${matches.length} ${kind}${newTab ? "new " : ""}sections${newTab ? "" : ` in ${scope}`}`
+            : `${matches.length} ${kind}sections across ${filters.length} blocks`}
       </p>
 
       {matches.length === 0 ? (
         <p className="mt-8 rounded-[28px] bg-card px-6 py-14 text-center text-[16px] text-muted-foreground pg-glass">
           No sections match that. Try a shorter search
-          {active ? (
+          {scope || access !== "all" ? (
             <>
               , or{" "}
-              <button type="button" onClick={() => setParam(null)} className="font-medium text-foreground underline underline-offset-4">
-                look in every block
+              <button type="button" onClick={clearAll} className="font-medium text-foreground underline underline-offset-4">
+                clear the filters
               </button>
             </>
           ) : null}

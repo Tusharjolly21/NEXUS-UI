@@ -50,9 +50,10 @@ export default function IconsDocsPage() {
         <DocSection title="1. Copy the file">
           <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
             Open an icon and press <em>Copy the file</em>, or fetch it from the command line (free icons only; a Pro icon needs a Pro account, so copy it from its page). Save it anywhere in your project, for example{" "}
-            {code("components/icons/")}. Then install the one dependency:
+            {code("src/components/icons/")} (leave out {code("src/")} if your project has no src folder). Make the folder first, then install the one dependency:
           </p>
-          <DocPre>{`curl -s https://www.nexus-ui.com/api/icons/bell -o components/icons/bell.tsx
+          <DocPre>{`mkdir -p src/components/icons
+curl -s https://www.nexus-ui.com/api/icons/bell -o src/components/icons/bell.tsx
 npm i framer-motion`}</DocPre>
         </DocSection>
 

@@ -1,12 +1,20 @@
 import type { CSSProperties } from "react";
-import { FONT, P, TEXT, blobsFor, clamp, ease, lerp, rand, rise, spring, type Frame, type VideoMeta } from "./kit";
+import { FONT, P, TEXT, blobsFor, clamp, ease, lerp, rand, rise, spring, type Frame, type VideoMeta, assetUrl } from "./kit";
 import { Cursor, Odometer } from "./parts";
-import logoImg from "./assets/nexus-logo.png";
-import tReel from "./assets/tile-reel.jpg";
-import tDock from "./assets/tile-dock.jpg";
-import tRouter from "./assets/tile-router.jpg";
-import tPend from "./assets/tile-pend.jpg";
-import tIsland from "./assets/tile-island.jpg";
+import logoImgFile from "./assets/nexus-logo.png";
+import tReelFile from "./assets/tile-reel.jpg";
+import tDockFile from "./assets/tile-dock.jpg";
+import tRouterFile from "./assets/tile-router.jpg";
+import tPendFile from "./assets/tile-pend.jpg";
+import tIslandFile from "./assets/tile-island.jpg";
+
+// Imported files as URL strings, whichever bundler you use (see assetUrl in kit.ts).
+const logoImg = assetUrl(logoImgFile);
+const tReel = assetUrl(tReelFile);
+const tDock = assetUrl(tDockFile);
+const tRouter = assetUrl(tRouterFile);
+const tPend = assetUrl(tPendFile);
+const tIsland = assetUrl(tIslandFile);
 
 export interface LaunchDayProps {
   where: string;

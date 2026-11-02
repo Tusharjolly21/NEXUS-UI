@@ -31,6 +31,7 @@ export const PLAYGROUND_LOADERS: Record<string, () => Promise<{ default: BlockPl
   "block-gallery": () => import("./gallery"),
   "block-changelog": () => import("./changelog"),
   "block-404": () => import("./not-found"),
+  "block-comparison": () => withMoved("block-comparison"),
   "block-cta": () => withMoved("block-cta"),
   "block-footer": () => withMoved("block-footer"),
   "block-signup": () => withMoved("block-signup"),

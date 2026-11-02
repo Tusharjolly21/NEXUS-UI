@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { FONT, MONO, TEXT, P, clamp, ease, lerp, rand, spring, type Frame, type VideoMeta } from "./kit";
+import { FONT, MONO, TEXT, P, clamp, ease, lerp, rand, spring, type Frame, type VideoMeta, assetUrl } from "./kit";
 import { Cursor, Odometer } from "./parts";
 import { GlassBubbles } from "../components/nexus/glass-bubbles";
 import { CurvedReel } from "../components/nexus/curved-reel";
@@ -12,10 +12,16 @@ import { PriceOdometer } from "../components/nexus/price-odometer";
 import { PacketRouter } from "../components/nexus/packet-router";
 import { DotSphere } from "../components/nexus/dot-sphere";
 import { MacKeyboard } from "../components/keyboard";
-import shotHome from "./assets/site/home.jpg";
-import shotKeyboard from "./assets/site/mac-keyboard.jpg";
-import shotHeroLight from "./assets/site/hero-light.jpg";
-import shotHeroDark from "./assets/site/hero-dark.jpg";
+import shotHomeFile from "./assets/site/home.jpg";
+import shotKeyboardFile from "./assets/site/mac-keyboard.jpg";
+import shotHeroLightFile from "./assets/site/hero-light.jpg";
+import shotHeroDarkFile from "./assets/site/hero-dark.jpg";
+
+// Imported files as URL strings, whichever bundler you use (see assetUrl in kit.ts).
+const shotHome = assetUrl(shotHomeFile);
+const shotKeyboard = assetUrl(shotKeyboardFile);
+const shotHeroLight = assetUrl(shotHeroLightFile);
+const shotHeroDark = assetUrl(shotHeroDarkFile);
 
 export interface LaunchFilmProps {
   brand: string;

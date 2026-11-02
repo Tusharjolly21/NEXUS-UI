@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 export const DOCS_PAGES = [
   { href: "/docs/introduction", label: "Introduction" },
   { href: "/docs/installation", label: "Quick start" },
+  { href: "/docs/video-tutorial", label: "Video tutorial" },
   { href: "/docs/install-nextjs", label: "Install Next.js" },
   { href: "/docs/install-tailwindcss", label: "Install Tailwind CSS" },
   { href: "/docs/add-utilities", label: "Add utilities" },

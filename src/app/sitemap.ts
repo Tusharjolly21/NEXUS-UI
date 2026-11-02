@@ -46,6 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/blog`,                    lastModified: since(allPosts[0]?.date ?? "2026-01-01") },
     { url: `${base}/docs/introduction`,        lastModified: since("2026-03-01") },
     { url: `${base}/docs/installation`,       lastModified: since("2026-03-01") },
+    { url: `${base}/docs/video-tutorial`,     lastModified: since("2026-11-02") },
     { url: `${base}/docs/install-nextjs`,     lastModified: since("2026-03-01") },
     { url: `${base}/docs/install-tailwindcss`,lastModified: since("2026-03-01") },
     { url: `${base}/docs/add-utilities`,      lastModified: since("2026-10-20") },
