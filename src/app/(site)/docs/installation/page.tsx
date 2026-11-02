@@ -65,6 +65,14 @@ export default function InstallationPage() {
         <SetupChecklist steps={STEPS} />
 
         <p className="text-sm leading-relaxed text-muted-foreground">
+          Prefer to watch? The{" "}
+          <Link href="/docs/video-tutorial" className={link}>
+            video tutorial
+          </Link>{" "}
+          shows every step below in VS Code, in under three minutes.
+        </p>
+
+        <p className="text-sm leading-relaxed text-muted-foreground">
           You need <Strong>Node.js 20.9 or newer</Strong> (check with <code className={code}>node -v</code>) and a
           terminal. Free components work without an account. <Strong>Pro</Strong> components need a Pro plan and an API
           key (step 4); the{" "}
@@ -370,7 +378,7 @@ export default function Page() {
 
         <DocFooterNav
           prev={{ href: "/docs/introduction", label: "Introduction" }}
-          next={{ href: "/docs/install-nextjs", label: "Install Next.js" }}
+          next={{ href: "/docs/video-tutorial", label: "Video tutorial" }}
         />
 
         <p className="text-sm text-muted-foreground">
