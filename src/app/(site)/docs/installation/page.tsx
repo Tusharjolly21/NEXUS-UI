@@ -69,7 +69,7 @@ export default function InstallationPage() {
           <Link href="/docs/video-tutorial" className={link}>
             video tutorial
           </Link>{" "}
-          shows every step below in VS Code, in under three minutes.
+          shows every step below in VS Code, plus blocks, icons, sounds, videos and templates, in about five minutes.
         </p>
 
         <p className="text-sm leading-relaxed text-muted-foreground">
@@ -115,11 +115,13 @@ cd my-app`}</DocPre>
               settings from;
             </li>
             <li>
-              creates <code className={code}>src/lib/utils.ts</code> with the <code className={code}>cn()</code> helper;
+              creates <code className={code}>src/lib/utils.ts</code> with the <code className={code}>cn()</code> helper
+              (today it is one line, <code className={code}>{'export { cn } from "cn"'}</code>, backed by the{" "}
+              <code className={code}>cn</code> package it installs) and a starter{" "}
+              <code className={code}>src/components/ui/button.tsx</code>;
             </li>
             <li>
-              installs <code className={code}>clsx</code> and <code className={code}>tailwind-merge</code> (the two
-              packages <code className={code}>cn()</code> is built from) and adds colour variables to{" "}
+              installs the packages those files use and adds colour variables to{" "}
               <code className={code}>src/app/globals.css</code>.
             </li>
           </ul>

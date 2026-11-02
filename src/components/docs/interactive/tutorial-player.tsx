@@ -16,11 +16,14 @@ const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).p
 export function TutorialPlayer({
   src,
   poster,
+  subtitles,
   chapters,
   duration,
 }: {
   src: string;
   poster: string;
+  /** WebVTT file with the narration text, off by default (the captions are also drawn into the video). */
+  subtitles?: string;
   chapters: TutorialChapter[];
   duration: number;
 }) {
@@ -61,7 +64,9 @@ export function TutorialPlayer({
           preload="metadata"
           className="block aspect-video w-full"
           aria-label="Video tutorial: add Nexus UI to a project in VS Code"
-        />
+        >
+          {subtitles ? <track kind="subtitles" src={subtitles} srcLang="en" label="English" /> : null}
+        </video>
       </div>
 
       <nav aria-label="Chapters">
