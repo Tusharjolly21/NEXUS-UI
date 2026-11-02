@@ -29,6 +29,8 @@ export type BlockVariant = {
   component?: string;
   /** Usage snippet shown with the code (sections moved over from the components library). */
   usage?: string;
+  /** Day the section was added (YYYY-MM-DD). The wall's New tab lists the newest ones; sections without a date are older than the tab's window. */
+  addedAt?: string;
 };
 
 function v(id: string, block: string, title: string): BlockVariant {
@@ -39,10 +41,34 @@ function v(id: string, block: string, title: string): BlockVariant {
   return { id, block, title, exportName: `PreviewBlockVariant${pascal}` };
 }
 
+/**
+ * The day each Motion Kit section went in, taken from the first commit of its files. Add a new section
+ * under its day (or a new day) so it shows up under the Blocks wall's New tab.
+ */
+const ADDED_ON: Record<string, string[]> = {
+  "2026-10-20": [
+    "auto-advancing-tabs", "beam-pricing", "changelog-pile", "collapsing-rail", "counting-stats", "drawn-timeline",
+    "drift-gallery", "gravity-404", "halftone-planet", "instant-search-faq", "integrations-orbit", "kinetic-hero",
+    "live-demo-bento", "loupe-logo-cloud", "morphing-nav", "parallax-stack-hero", "pulse-bento", "scramble-heading",
+    "scroll-read-manifesto", "seat-ruler-pricing", "slide-to-pay", "spotlight-hero", "typo-catching-signup",
+    "voice-note-contact", "wall-of-love",
+  ],
+  "2026-10-22": [
+    "announce-bar", "auth-morph", "beam-timeline", "blog-with-contents", "card-rail", "circuit-hero", "clothesline",
+    "cursor-crowd-hero", "filterable-logo-wall", "flip-dot-hero", "logo-stories", "morph-menu", "parallax-slider",
+    "scroll-navbar", "stacking-cards", "stats-odometer", "sticky-scroll-story", "team-clock", "velocity-marquee",
+    "waitlist-cta", "xray-hero",
+  ],
+  "2026-10-30": ["bento-features"],
+  "2026-11-02": ["head-to-head-compare", "receipt-hero", "sealed-and-sent", "wall-clock-contact", "wordmark-footer"],
+};
+const ADDED = new Map(Object.entries(ADDED_ON).flatMap(([day, slugs]) => slugs.map((slug) => [slug, day] as const)));
+
 /** A Motion Kit section: Pro, its own registry package and source file. */
 function mk(slug: string, block: string, title: string, component: string): BlockVariant {
   return {
     ...v(`mk-${slug}`, block, title),
+    addedAt: ADDED.get(slug),
     premium: true,
     registryCliName: slug,
     source: `src/components/blocks/motion-kit/${slug}/${slug}.tsx`,
