@@ -24,6 +24,7 @@ const NAV_LINKS = [
   { href: "/components", label: "Components" },
   { href: "/templates", label: "Templates" },
   { href: "/blocks", label: "Blocks" },
+  { href: "/icons", label: "Icons", fresh: true },
   { href: "/sounds", label: "Sounds" },
   { href: "/videos", label: "Videos" },
   { href: "/docs/introduction", label: "Docs", match: "/docs" },
@@ -52,6 +53,19 @@ function useUser() {
     return () => subscription.unsubscribe();
   }, []);
   return user;
+}
+
+/** A small rainbow dot on a link that leads to something new. It is positioned over the corner, so it adds no width to the capsule. */
+function NewDot({ inline = false }: { inline?: boolean }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "size-1.5 rounded-full bg-[conic-gradient(from_210deg,#0a84ff,#bf5af2,#ff375f,#ff9f0a,#0a84ff)]",
+        inline ? "inline-block" : "absolute right-2 top-[9px]",
+      )}
+    />
+  );
 }
 
 function Logo() {
@@ -113,7 +127,7 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
       <header
         className={cn(
           "pg-frost mx-auto flex h-[52px] items-center gap-1 rounded-full pl-2.5 pr-2 shadow-[0_0_0_0.5px_var(--border),0_10px_30px_-14px_rgba(0,0,0,0.28)] transition-[max-width] duration-300 ease-out motion-reduce:transition-none",
-          compact ? "max-w-[640px]" : "max-w-[1100px]",
+          compact ? "max-w-[640px]" : "max-w-[1100px] xl:max-w-[1160px]",
         )}
       >
         <Logo />
@@ -127,11 +141,12 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
                 href={l.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex h-9 items-center rounded-full px-3.5 text-[14px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                  "relative flex h-9 items-center rounded-full px-2.5 text-[14px] xl:px-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
                   active ? "bg-foreground/[0.07] text-foreground" : "text-foreground/70 hover:bg-foreground/[0.06] hover:text-foreground",
                 )}
               >
                 {l.label}
+                {"fresh" in l ? <NewDot /> : null}
               </Link>
             );
           })}
@@ -145,7 +160,7 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
           {primaryAction ? (
             <Link
               href={primaryAction.href}
-              className="hidden h-[34px] items-center rounded-full bg-action px-4 text-[13.5px] font-medium text-white transition-colors hover:bg-action-hover sm:inline-flex"
+              className="hidden h-[34px] shrink-0 items-center whitespace-nowrap rounded-full bg-action px-4 text-[13.5px] font-medium text-white transition-colors hover:bg-action-hover sm:inline-flex"
             >
               {primaryAction.label}
             </Link>
@@ -185,7 +200,7 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
             <Link
               href="/login"
               className={cn(
-                "hidden h-9 items-center rounded-full px-3 text-[13.5px] text-foreground/70 transition-colors hover:text-foreground sm:flex",
+                "hidden h-9 shrink-0 items-center whitespace-nowrap rounded-full px-3 text-[13.5px] text-foreground/70 transition-colors hover:text-foreground sm:flex",
                 compact && "sm:hidden",
               )}
             >
@@ -225,11 +240,12 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
                   aria-current={active ? "page" : undefined}
                   onClick={() => setMenuOpen(false)}
                   className={cn(
-                    "rounded-2xl px-4 py-3 text-[17px] font-medium transition-colors",
+                    "flex items-center gap-2 rounded-2xl px-4 py-3 text-[17px] font-medium transition-colors",
                     active ? "bg-foreground/[0.07] text-foreground" : "text-foreground/75 hover:bg-foreground/[0.05] hover:text-foreground",
                   )}
                 >
                   {l.label}
+                  {"fresh" in l ? <NewDot inline /> : null}
                 </Link>
               );
             })}

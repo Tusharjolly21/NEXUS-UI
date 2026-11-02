@@ -26,11 +26,11 @@ export function SearchTrigger({
         aria-haspopup="dialog"
         // On phones it is an icon button like the menu button beside it (a 36px circle, icon centred);
         // from sm up it becomes the labelled pill with ⌘K.
-        className="group inline-flex size-9 items-center justify-center gap-2 rounded-full text-[13.5px] text-foreground/75 transition-colors duration-200 hover:bg-foreground/[0.06] hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:bg-foreground/[0.1] sm:w-auto sm:justify-start sm:bg-foreground/[0.06] sm:pl-3 sm:pr-1.5 sm:text-foreground/60 sm:hover:bg-foreground/[0.1] sm:active:bg-foreground/[0.12]"
+        className="group inline-flex size-9 items-center justify-center gap-2 rounded-full text-[13.5px] text-foreground/75 transition-colors duration-200 hover:bg-foreground/[0.06] hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:bg-foreground/[0.1] sm:w-auto sm:justify-start sm:bg-foreground/[0.06] sm:pl-3 sm:pr-1.5 min-[1024px]:max-[1139px]:w-9! min-[1024px]:max-[1139px]:justify-center! min-[1024px]:max-[1139px]:bg-transparent! min-[1024px]:max-[1139px]:px-0! sm:text-foreground/60 sm:hover:bg-foreground/[0.1] sm:active:bg-foreground/[0.12]"
       >
-        <Search className="size-[18px] shrink-0 sm:size-4" strokeWidth={2} aria-hidden />
-        <span className="hidden sm:inline">Search</span>
-        <kbd className="ml-1 hidden rounded-full bg-foreground/[0.07] px-2 py-0.5 font-sans text-[11px] text-foreground/55 transition-colors group-hover:text-foreground/70 sm:inline">
+        <Search className="size-[18px] shrink-0 sm:size-4 min-[1024px]:max-[1139px]:size-[18px]!" strokeWidth={2} aria-hidden />
+        <span className="hidden sm:inline min-[1024px]:max-[1139px]:hidden!">Search</span>
+        <kbd className="ml-1 hidden rounded-full bg-foreground/[0.07] px-2 py-0.5 font-sans text-[11px] text-foreground/55 transition-colors group-hover:text-foreground/70 sm:inline min-[1024px]:max-[1139px]:hidden!">
           ⌘K
         </kbd>
       </button>
