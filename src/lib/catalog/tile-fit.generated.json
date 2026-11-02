@@ -2679,6 +2679,26 @@
   "bg": "#f6f6f6",
   "coverage": 1
  },
+ "liquid-smoke": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "bg": "#0b0b0d",
+  "coverage": 1
+ },
  "lit-keyboard": {
   "canvas": [
    960,

@@ -49,6 +49,7 @@ const EXTRA_INTERACTIONS: Record<string, Interaction[]> = {
 
 /** Previews that already play their own demo (they render a DemoCursor themselves). */
 const SELF_DEMO = new Set([
+  "liquid-smoke",
   "lightfall",
   "pluck-frame",
   "dust-snap",
@@ -400,6 +401,8 @@ const TINT_OF: Record<string, TileTint> = {
  * are all gathered, newest first, under the wall's New tab (see NEW_TAB_DAYS).
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // twenty-fourth batch (Motion Kit Pro: Liquid Smoke)
+  "liquid-smoke",
   // twenty-third batch (Motion Kit Pro: Molten Hold, Mercury Switch, Mercury Upload)
   "molten-hold",
   "mercury-switch",
@@ -607,6 +610,7 @@ export const MOTION_KIT_ORDER: string[] = [
 
 /** The homepage set, in order: newest interactions first, then the best of the rest. */
 export const HOME_PICKS: string[] = [
+  "liquid-smoke",
   "molten-hold",
   "mercury-switch",
   "mercury-upload",
