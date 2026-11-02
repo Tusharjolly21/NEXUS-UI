@@ -201,6 +201,44 @@ import { HammerIcon } from "./icons/hammer";
 import { ShirtIcon } from "./icons/shirt";
 import { GlassesIcon } from "./icons/glasses";
 import { BalloonIcon } from "./icons/balloon";
+import { AlignLeftIcon } from "./icons/align-left";
+import { AlignCenterIcon } from "./icons/align-center";
+import { AlignRightIcon } from "./icons/align-right";
+import { AlignJustifyIcon } from "./icons/align-justify";
+import { BoldIcon } from "./icons/bold";
+import { ItalicIcon } from "./icons/italic";
+import { UnderlineIcon } from "./icons/underline";
+import { TypeIcon } from "./icons/type";
+import { StrikethroughIcon } from "./icons/strikethrough";
+import { QuoteIcon } from "./icons/quote";
+import { CameraOffIcon } from "./icons/camera-off";
+import { VideoOffIcon } from "./icons/video-off";
+import { MicOffIcon } from "./icons/mic-off";
+import { WifiOffIcon } from "./icons/wifi-off";
+import { BellOffIcon } from "./icons/bell-off";
+import { CloudOffIcon } from "./icons/cloud-off";
+import { ZapOffIcon } from "./icons/zap-off";
+import { MenuCloseIcon } from "./icons/menu-close";
+import { MenuBackIcon } from "./icons/menu-back";
+import { PlusCloseIcon } from "./icons/plus-close";
+import { SearchCloseIcon } from "./icons/search-close";
+import { VolumeMuteIcon } from "./icons/volume-mute";
+import { CheckboxIcon } from "./icons/checkbox";
+import { RadioButtonIcon } from "./icons/radio-button";
+import { ArrowUpRightIcon } from "./icons/arrow-up-right";
+import { ArrowDownRightIcon } from "./icons/arrow-down-right";
+import { ArrowUpLeftIcon } from "./icons/arrow-up-left";
+import { ArrowDownLeftIcon } from "./icons/arrow-down-left";
+import { ChevronsDownIcon } from "./icons/chevrons-down";
+import { ChevronsUpIcon } from "./icons/chevrons-up";
+import { ChevronsLeftIcon } from "./icons/chevrons-left";
+import { ChevronsRightIcon } from "./icons/chevrons-right";
+import { ArrowUpCircleIcon } from "./icons/arrow-up-circle";
+import { ArrowDownCircleIcon } from "./icons/arrow-down-circle";
+import { ArrowLeftCircleIcon } from "./icons/arrow-left-circle";
+import { ArrowRightCircleIcon } from "./icons/arrow-right-circle";
+import { MoreVerticalIcon } from "./icons/more-vertical";
+import { CornerDownRightIcon } from "./icons/corner-down-right";
 
 export type NxIconProps = {
   size?: number;
@@ -415,4 +453,42 @@ export const NX_ICONS: Record<string, ComponentType<NxIconProps>> = {
   "shirt": ShirtIcon,
   "glasses": GlassesIcon,
   "balloon": BalloonIcon,
+  "align-left": AlignLeftIcon,
+  "align-center": AlignCenterIcon,
+  "align-right": AlignRightIcon,
+  "align-justify": AlignJustifyIcon,
+  "bold": BoldIcon,
+  "italic": ItalicIcon,
+  "underline": UnderlineIcon,
+  "type": TypeIcon,
+  "strikethrough": StrikethroughIcon,
+  "quote": QuoteIcon,
+  "camera-off": CameraOffIcon,
+  "video-off": VideoOffIcon,
+  "mic-off": MicOffIcon,
+  "wifi-off": WifiOffIcon,
+  "bell-off": BellOffIcon,
+  "cloud-off": CloudOffIcon,
+  "zap-off": ZapOffIcon,
+  "menu-close": MenuCloseIcon,
+  "menu-back": MenuBackIcon,
+  "plus-close": PlusCloseIcon,
+  "search-close": SearchCloseIcon,
+  "volume-mute": VolumeMuteIcon,
+  "checkbox": CheckboxIcon,
+  "radio-button": RadioButtonIcon,
+  "arrow-up-right": ArrowUpRightIcon,
+  "arrow-down-right": ArrowDownRightIcon,
+  "arrow-up-left": ArrowUpLeftIcon,
+  "arrow-down-left": ArrowDownLeftIcon,
+  "chevrons-down": ChevronsDownIcon,
+  "chevrons-up": ChevronsUpIcon,
+  "chevrons-left": ChevronsLeftIcon,
+  "chevrons-right": ChevronsRightIcon,
+  "arrow-up-circle": ArrowUpCircleIcon,
+  "arrow-down-circle": ArrowDownCircleIcon,
+  "arrow-left-circle": ArrowLeftCircleIcon,
+  "arrow-right-circle": ArrowRightCircleIcon,
+  "more-vertical": MoreVerticalIcon,
+  "corner-down-right": CornerDownRightIcon,
 };

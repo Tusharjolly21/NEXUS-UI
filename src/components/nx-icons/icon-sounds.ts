@@ -202,6 +202,45 @@ import * as s_shirt from "./sounds/shirt";
 import * as s_glasses from "./sounds/glasses";
 import * as s_balloon from "./sounds/balloon";
 
+import * as s_align_left from "./sounds/align-left";
+import * as s_align_center from "./sounds/align-center";
+import * as s_align_right from "./sounds/align-right";
+import * as s_align_justify from "./sounds/align-justify";
+import * as s_bold from "./sounds/bold";
+import * as s_italic from "./sounds/italic";
+import * as s_underline from "./sounds/underline";
+import * as s_type from "./sounds/type";
+import * as s_strikethrough from "./sounds/strikethrough";
+import * as s_quote from "./sounds/quote";
+import * as s_camera_off from "./sounds/camera-off";
+import * as s_video_off from "./sounds/video-off";
+import * as s_mic_off from "./sounds/mic-off";
+import * as s_wifi_off from "./sounds/wifi-off";
+import * as s_bell_off from "./sounds/bell-off";
+import * as s_cloud_off from "./sounds/cloud-off";
+import * as s_zap_off from "./sounds/zap-off";
+import * as s_menu_close from "./sounds/menu-close";
+import * as s_menu_back from "./sounds/menu-back";
+import * as s_plus_close from "./sounds/plus-close";
+import * as s_search_close from "./sounds/search-close";
+import * as s_volume_mute from "./sounds/volume-mute";
+import * as s_checkbox from "./sounds/checkbox";
+import * as s_radio_button from "./sounds/radio-button";
+import * as s_arrow_up_right from "./sounds/arrow-up-right";
+import * as s_arrow_down_right from "./sounds/arrow-down-right";
+import * as s_arrow_up_left from "./sounds/arrow-up-left";
+import * as s_arrow_down_left from "./sounds/arrow-down-left";
+import * as s_chevrons_down from "./sounds/chevrons-down";
+import * as s_chevrons_up from "./sounds/chevrons-up";
+import * as s_chevrons_left from "./sounds/chevrons-left";
+import * as s_chevrons_right from "./sounds/chevrons-right";
+import * as s_arrow_up_circle from "./sounds/arrow-up-circle";
+import * as s_arrow_down_circle from "./sounds/arrow-down-circle";
+import * as s_arrow_left_circle from "./sounds/arrow-left-circle";
+import * as s_arrow_right_circle from "./sounds/arrow-right-circle";
+import * as s_more_vertical from "./sounds/more-vertical";
+import * as s_corner_down_right from "./sounds/corner-down-right";
+
 type Score = { length: number; level: number; play: (c: AudioContext, o: AudioNode, t: Time) => void };
 
 /** Every icon's score by slug. Each one is timed against that icon's own animation. */
@@ -406,6 +445,44 @@ const SCORES: Record<string, Score> = {
   "shirt": s_shirt,
   "glasses": s_glasses,
   "balloon": s_balloon,
+  "align-left": s_align_left,
+  "align-center": s_align_center,
+  "align-right": s_align_right,
+  "align-justify": s_align_justify,
+  "bold": s_bold,
+  "italic": s_italic,
+  "underline": s_underline,
+  "type": s_type,
+  "strikethrough": s_strikethrough,
+  "quote": s_quote,
+  "camera-off": s_camera_off,
+  "video-off": s_video_off,
+  "mic-off": s_mic_off,
+  "wifi-off": s_wifi_off,
+  "bell-off": s_bell_off,
+  "cloud-off": s_cloud_off,
+  "zap-off": s_zap_off,
+  "menu-close": s_menu_close,
+  "menu-back": s_menu_back,
+  "plus-close": s_plus_close,
+  "search-close": s_search_close,
+  "volume-mute": s_volume_mute,
+  "checkbox": s_checkbox,
+  "radio-button": s_radio_button,
+  "arrow-up-right": s_arrow_up_right,
+  "arrow-down-right": s_arrow_down_right,
+  "arrow-up-left": s_arrow_up_left,
+  "arrow-down-left": s_arrow_down_left,
+  "chevrons-down": s_chevrons_down,
+  "chevrons-up": s_chevrons_up,
+  "chevrons-left": s_chevrons_left,
+  "chevrons-right": s_chevrons_right,
+  "arrow-up-circle": s_arrow_up_circle,
+  "arrow-down-circle": s_arrow_down_circle,
+  "arrow-left-circle": s_arrow_left_circle,
+  "arrow-right-circle": s_arrow_right_circle,
+  "more-vertical": s_more_vertical,
+  "corner-down-right": s_corner_down_right,
 };
 
 export function hasIconSound(slug: string) {
