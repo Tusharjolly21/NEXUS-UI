@@ -59,8 +59,14 @@ export function LaunchBanner({ isPro = false }: { isPro?: boolean }) {
           <span className="hidden items-center gap-x-1.5 md:inline-flex">
             <span aria-hidden className="text-white/30">|</span>
             {left ? (
-              <span>
-                Early prices: <strong className="font-semibold text-white">{left.total}</strong> {left.total === 1 ? "slot" : "slots"} left, then prices go up.
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#ff9f0a]/[0.16] px-2.5 py-0.5 text-[#ffd60a] ring-1 ring-inset ring-[#ff9f0a]/35">
+                <span aria-hidden className="relative flex size-1.5">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#ff9f0a] opacity-60 motion-reduce:hidden" />
+                  <span className="relative inline-flex size-1.5 rounded-full bg-[#ff9f0a]" />
+                </span>
+                <span>
+                  Early prices: <strong className="font-semibold text-white">{left.total}</strong> {left.total === 1 ? "slot" : "slots"} left, then prices go up
+                </span>
               </span>
             ) : (
               "Pro unlocks the rest."
