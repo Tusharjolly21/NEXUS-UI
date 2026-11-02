@@ -1,0 +1,49 @@
+name: CI
+
+# Runs on every pull request. Vercel already builds a preview of each one; this adds two quick checks it does not:
+#   - the whole project must type-check
+#   - the files the pull request changes must have no lint errors (warnings are ignored)
+# Lint is limited to changed files because older files still carry lint errors that are being cleaned up gradually.
+# The job is named "check"; branch protection on main can require it by that name.
+
+on:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # puppeteer downloads a browser on install; nothing here uses it, so skip the download.
+      - name: Install
+        run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+
+      # The registry build writes files that the type-check reads, so it runs first.
+      - name: Generate registry
+        run: node scripts/build-registry.mjs
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Lint changed files
+        run: |
+          git diff -z --name-only --diff-filter=ACMR "origin/${{ github.base_ref }}...HEAD" -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' \
+            | xargs -0 -r npx eslint --quiet
