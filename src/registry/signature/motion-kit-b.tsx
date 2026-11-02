@@ -8,7 +8,7 @@
 
 import type { ReactNode } from "react";
 import { SaggingField } from "@/components/sagging-field";
-import { TearOffTicket } from "@/components/tear-off-ticket";
+import { TearOffTicket, TicketCta } from "@/components/tear-off-ticket";
 import { ThrowWheel } from "@/components/throw-wheel";
 import { PixelSelect } from "@/components/pixel-select";
 import { ScrubInputs } from "@/components/scrub-inputs";
@@ -34,6 +34,15 @@ export function PreviewTearOffTicket({ compact = false }: { compact?: boolean } 
   return (
     <Stage className="overflow-hidden">
       <TearOffTicket autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewTicketCta({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage className="overflow-hidden p-4 sm:p-8">
+      <TicketCta autoplay className="w-full max-w-[560px]" />
     </Stage>
   );
 }

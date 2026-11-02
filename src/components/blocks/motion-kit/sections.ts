@@ -53,6 +53,7 @@ import { XrayHero } from "./xray-hero";
 import { CircuitHero } from "./circuit-hero";
 import { FlipDotHero } from "./flip-dot-hero";
 import { TeamClock } from "./team-clock";
+import { WallClockContact } from "./wall-clock-contact";
 import { StatsOdometer } from "./stats-odometer";
 import { BlogWithContents } from "./blog-with-contents";
 import { WaitlistCta } from "./waitlist-cta";
@@ -63,6 +64,10 @@ import { StickyScrollStory } from "./sticky-scroll-story";
 import { BeamTimeline } from "./beam-timeline";
 import { StackingCards } from "./stacking-cards";
 import { BentoFeatures } from "./bento-features";
+import { HeadToHeadCompare } from "./head-to-head-compare";
+import { ReceiptHero } from "./receipt-hero";
+import { SealedAndSent } from "./sealed-and-sent";
+import { WordmarkFooter } from "./wordmark-footer";
 import { PreviewBlockVariantMkScrollNavbar } from "@/registry/blocks/nexus-essentials-blocks-c";
 import { MorphMenu } from "./morph-menu";
 import { AnnounceBar } from "./announce-bar";
@@ -74,6 +79,7 @@ const asSection = (c: ComponentType<{ compact?: boolean }>) => c as unknown as C
 export const MOTION_KIT_SECTIONS: Record<string, ComponentType<{ autoplay?: boolean }>> = {
   "mk-morphing-nav": MorphingNavStage,
   "mk-team-clock": TeamClock as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-wall-clock-contact": WallClockContact as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-stats-odometer": StatsOdometer as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-blog-with-contents": BlogWithContents as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-waitlist-cta": WaitlistCta as unknown as ComponentType<{ autoplay?: boolean }>,
@@ -84,6 +90,10 @@ export const MOTION_KIT_SECTIONS: Record<string, ComponentType<{ autoplay?: bool
   "mk-beam-timeline": BeamTimeline as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-stacking-cards": StackingCards as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-bento-features": BentoFeatures as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-head-to-head-compare": HeadToHeadCompare as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-receipt-hero": ReceiptHero as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-sealed-and-sent": SealedAndSent as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-wordmark-footer": WordmarkFooter as unknown as ComponentType<{ autoplay?: boolean }>,
   // The navbar needs a scrolling frame with a page inside it, so the section is its preview.
   "mk-scroll-navbar": asSection(PreviewBlockVariantMkScrollNavbar),
   "mk-morph-menu": MorphMenu as unknown as ComponentType<{ autoplay?: boolean }>,
