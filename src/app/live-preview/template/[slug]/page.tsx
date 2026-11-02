@@ -134,6 +134,11 @@ const FerryPage = nextDynamic(
   { loading: TemplateFallback },
 );
 
+const SkeinPage = nextDynamic(
+  () => import("@/components/templates/skein-page").then((m) => ({ default: m.SkeinPage })),
+  { loading: TemplateFallback },
+);
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -175,6 +180,8 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><AfterglowPage /></ThemeReceiver>;
   } else if (tmpl.slug === "ferry") {
     return <ThemeReceiver><FerryPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "skein") {
+    return <ThemeReceiver><SkeinPage /></ThemeReceiver>;
   } else if (tmpl.slug === "nexus-ai-launch") {
     return <ThemeReceiver><NexusAiLaunchTemplatePage /></ThemeReceiver>;
   } else if (tmpl.slug === "noir-studio") {
