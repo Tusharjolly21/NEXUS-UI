@@ -6,7 +6,7 @@ import { SLOT_CAPS, SLOTS_COUNT_FROM, SLOTS_ENABLED, SLOTS_IGNORE_USER_IDS, type
 /**
  * GET /api/slots: how many early slots each plan has taken, counted from the database. Only two numbers per
  * plan leave the server (taken, cap): no names, no emails. Cached at the edge for five minutes. When the
- * database can't be read the answer is "not enabled", never a guess, so the popup simply stays away.
+ * database can't be read the answer is "not enabled", never a guess, so the banner simply keeps its normal line.
  *
  * - All-Access: people with a paid lifetime order of more than zero (a refund or a free grant takes no slot).
  * - Pro: people with an active subscription (a cancelled one frees its slot).

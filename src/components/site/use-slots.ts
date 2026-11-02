@@ -3,7 +3,7 @@
 import * as React from "react";
 import type { SlotsResponse } from "@/lib/launch-slots";
 
-/** One request per page load, shared by everything that shows the early-slot numbers (the banner and the popup). */
+/** One request per page load, shared by everything that shows the early-slot numbers (the top banner). */
 let pending: Promise<SlotsResponse | null> | null = null;
 function load() {
   return (pending ??= fetch("/api/slots")

@@ -1,10 +1,10 @@
 /**
  * Early-price slots. Each plan has a number of early slots; when they are gone, the price goes up. The numbers
  * shown to visitors are never typed in by hand: how many are taken is counted from the orders and subscriptions
- * tables (see /api/slots), and the cap is the number below. Change a cap here and the popup follows.
+ * tables (see /api/slots), and the cap is the number below. Change a cap here and the banner follows.
  *
  * Only turn this on when the price really will rise once a plan's slots are gone. When a plan's slots are
- * full (or its count can't be read) the popup leaves that plan out, and with both full it doesn't appear at all.
+ * full (or its count can't be read) the banner leaves that plan out, and with both full it shows its normal line.
  */
 export const SLOTS_ENABLED = true;
 
@@ -34,9 +34,6 @@ export type SlotsResponse = {
   enabled: boolean;
   plans: Partial<Record<SlotPlan, { taken: number; cap: number }>>;
 };
-
-/** The popup's dismiss cookie: closing it hides it for a week. */
-export const SLOTS_COOKIE = "nx-slots";
 
 /** Early slots still open: per plan (a full plan is left out) and in all. Null when the numbers aren't available. */
 export function slotsLeft(data: SlotsResponse | null) {
