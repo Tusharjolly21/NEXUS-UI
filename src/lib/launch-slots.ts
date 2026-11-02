@@ -16,6 +16,12 @@ export const SLOT_CAPS = {
 } as const;
 
 /**
+ * Only purchases made on or after this moment take a slot. Anything earlier was test data from setting up
+ * payments. (UTC; the first real purchase was on 2026-10-26.)
+ */
+export const SLOTS_COUNT_FROM = "2026-10-26T00:00:00Z";
+
+/**
  * Accounts that never count toward a slot, such as your own test purchases. Empty: every paying customer, annual or
  * lifetime, takes a slot. These are opaque user ids (from the orders and subscriptions tables), not emails; add an id
  * here and its purchases stop taking a slot.

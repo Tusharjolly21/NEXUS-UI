@@ -1,7 +1,7 @@
 import { getAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/env";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
-import { SLOT_CAPS, SLOTS_ENABLED, SLOTS_IGNORE_USER_IDS, type SlotsResponse } from "@/lib/launch-slots";
+import { SLOT_CAPS, SLOTS_COUNT_FROM, SLOTS_ENABLED, SLOTS_IGNORE_USER_IDS, type SlotsResponse } from "@/lib/launch-slots";
 
 /**
  * GET /api/slots: how many early slots each plan has taken, counted from the database. Only two numbers per
@@ -10,7 +10,7 @@ import { SLOT_CAPS, SLOTS_ENABLED, SLOTS_IGNORE_USER_IDS, type SlotsResponse } f
  *
  * - All-Access: people with a paid lifetime order of more than zero (a refund or a free grant takes no slot).
  * - Pro: people with an active subscription (a cancelled one frees its slot).
- * Each person counts once, and the accounts in SLOTS_IGNORE_USER_IDS (test purchases) never count.
+ * Only purchases from SLOTS_COUNT_FROM onward count (earlier ones were test data). Each person counts once, and the accounts in SLOTS_IGNORE_USER_IDS (test purchases) never count.
  */
 const OFF: SlotsResponse = { enabled: false, plans: {} };
 const CACHE = { "cache-control": "public, s-maxage=300, stale-while-revalidate=900" };
@@ -23,8 +23,8 @@ export async function GET(request: Request) {
   try {
     const admin = getAdminClient();
     const [lifetime, yearly] = await Promise.all([
-      admin.from("orders").select("user_id").eq("product_type", "lifetime").eq("status", "paid").gt("amount_cents", 0).limit(1000),
-      admin.from("subscriptions").select("user_id").eq("status", "active").limit(1000),
+      admin.from("orders").select("user_id").eq("product_type", "lifetime").eq("status", "paid").gt("amount_cents", 0).gte("created_at", SLOTS_COUNT_FROM).limit(1000),
+      admin.from("subscriptions").select("user_id").eq("status", "active").gte("created_at", SLOTS_COUNT_FROM).limit(1000),
     ]);
     if (lifetime.error || yearly.error || !lifetime.data || !yearly.data) {
       return Response.json(OFF, { headers: { "cache-control": "public, s-maxage=60" } });
