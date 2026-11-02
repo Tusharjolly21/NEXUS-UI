@@ -1,7 +1,7 @@
 import { COMMENTS, Card, type Comment } from "@/components/home/reddit-love";
 
 /** Usernames of the comments shown, in order. All three are on the homepage too, quoted as written. */
-const PICKS = ["aspiring_abundance", "DarkBlade_12", "liuxueqi0044"];
+const PICKS = ["aspiring_abundance", "ds1008", "vrangnarr"];
 
 /**
  * A short row of real comments in the middle of the /components wall (one full-width cell, two rows tall, three on a phone), for visitors without Pro. It is

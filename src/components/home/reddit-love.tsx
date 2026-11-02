@@ -22,6 +22,7 @@ export type Comment = {
 const ROW_ONE: Comment[] = [
   { user: "aspiring_abundance", source: "r/SaaS", quote: "The pumpkin smash component alone deserves $79 dollars … what a perfect little detail to throw into a UI library" },
   { user: "JOvertron", source: "r/webdesign", quote: "Very cool" },
+  { user: "vrangnarr", source: "r/MotionDesign", quote: "Brilliant, love it!" },
   { user: "benjaminhu", source: "Reddit", quote: "This is incredibly good! Source code, please! :)" },
   { user: "DarkBlade_12", source: "Reddit", quote: "Woahh this is soo cool!! The effect of the symbiote taking over if you stay close for too long is genuinely awesome" },
   { user: "nuestras", source: "Reddit", quote: "soooooooo nice!" },
@@ -38,6 +39,7 @@ const ROW_ONE: Comment[] = [
 const ROW_TWO: Comment[] = [
   { user: "Skaifessurk", source: "r/SaaS", quote: "agreed, the web needs way more goofy little interactions like that imo." },
   { user: "velvetlane1", source: "r/webdesign", quote: "yeah super creative concept tbh" },
+  { user: "ds1008", source: "r/SaaS", quote: "Pretty sick UI kit" },
   { user: "BonRoxz", source: "r/webdesign", quote: "That's awesome good stuff" },
   { user: "Present_Gur1911", source: "Reddit", quote: "looks cool man. I felt like I'm poisoned with venom when the cursor is all black" },
   { user: "Actual-Deal-4445", source: "Reddit", quote: "I like it man. That's what I can call a cool project" },
