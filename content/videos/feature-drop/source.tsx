@@ -1,13 +1,23 @@
 import type { CSSProperties } from "react";
-import { FONT, H, P, TEXT, W, bgBlobs, clamp, ease, lerp, rise, spring, type VideoMeta } from "./kit";
-import tPay from "./assets/tile-pay.jpg";
-import tIsland from "./assets/tile-island.jpg";
-import tFolder from "./assets/tile-folder.jpg";
-import tDock from "./assets/tile-dock.jpg";
-import tRouter from "./assets/tile-router.jpg";
-import tReel from "./assets/tile-reel.jpg";
-import tPend from "./assets/tile-pend.jpg";
-import tCopy from "./assets/tile-copy.jpg";
+import { FONT, H, P, TEXT, W, bgBlobs, clamp, ease, lerp, rise, spring, type VideoMeta, assetUrl } from "./kit";
+import tPayFile from "./assets/tile-pay.jpg";
+import tIslandFile from "./assets/tile-island.jpg";
+import tFolderFile from "./assets/tile-folder.jpg";
+import tDockFile from "./assets/tile-dock.jpg";
+import tRouterFile from "./assets/tile-router.jpg";
+import tReelFile from "./assets/tile-reel.jpg";
+import tPendFile from "./assets/tile-pend.jpg";
+import tCopyFile from "./assets/tile-copy.jpg";
+
+// Imported files as URL strings, whichever bundler you use (see assetUrl in kit.ts).
+const tPay = assetUrl(tPayFile);
+const tIsland = assetUrl(tIslandFile);
+const tFolder = assetUrl(tFolderFile);
+const tDock = assetUrl(tDockFile);
+const tRouter = assetUrl(tRouterFile);
+const tReel = assetUrl(tReelFile);
+const tPend = assetUrl(tPendFile);
+const tCopy = assetUrl(tCopyFile);
 
 export interface FeatureDropProps {
   app: string;

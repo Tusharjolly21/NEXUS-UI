@@ -1,6 +1,9 @@
 import type { CSSProperties, ReactNode } from "react";
-import { FONT, GRAD, H, P, TEXT, W, clamp, ease, gradText, lerp, rise, spring, type VideoMeta } from "./kit";
-import logoImg from "./assets/nexus-logo.png";
+import { FONT, GRAD, H, P, TEXT, W, clamp, ease, gradText, lerp, rise, spring, type VideoMeta, assetUrl } from "./kit";
+import logoImgFile from "./assets/nexus-logo.png";
+
+// Imported files as URL strings, whichever bundler you use (see assetUrl in kit.ts).
+const logoImg = assetUrl(logoImgFile);
 
 export interface ManifestoProps {
   l1: string; btn: string; l1b: string;

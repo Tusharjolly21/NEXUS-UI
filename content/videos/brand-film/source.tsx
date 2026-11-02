@@ -1,15 +1,26 @@
 import type { CSSProperties, ReactNode } from "react";
-import { MONO, P, clamp, ease, lerp, rand, spring, type Frame, type VideoMeta } from "./kit";
+import { MONO, P, clamp, ease, lerp, rand, spring, type Frame, type VideoMeta, assetUrl } from "./kit";
 import jakarta from "@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2";
-import grain from "./assets/grain.png";
-import tileCopy from "./assets/tile-copy.jpg";
-import tileDock from "./assets/tile-dock.jpg";
-import tileFolder from "./assets/tile-folder.jpg";
-import tileIsland from "./assets/tile-island.jpg";
-import tilePay from "./assets/tile-pay.jpg";
-import tilePend from "./assets/tile-pend.jpg";
-import tileReel from "./assets/tile-reel.jpg";
-import tileRouter from "./assets/tile-router.jpg";
+import grainFile from "./assets/grain.png";
+import tileCopyFile from "./assets/tile-copy.jpg";
+import tileDockFile from "./assets/tile-dock.jpg";
+import tileFolderFile from "./assets/tile-folder.jpg";
+import tileIslandFile from "./assets/tile-island.jpg";
+import tilePayFile from "./assets/tile-pay.jpg";
+import tilePendFile from "./assets/tile-pend.jpg";
+import tileReelFile from "./assets/tile-reel.jpg";
+import tileRouterFile from "./assets/tile-router.jpg";
+
+// Imported files as URL strings, whichever bundler you use (see assetUrl in kit.ts).
+const grain = assetUrl(grainFile);
+const tileCopy = assetUrl(tileCopyFile);
+const tileDock = assetUrl(tileDockFile);
+const tileFolder = assetUrl(tileFolderFile);
+const tileIsland = assetUrl(tileIslandFile);
+const tilePay = assetUrl(tilePayFile);
+const tilePend = assetUrl(tilePendFile);
+const tileReel = assetUrl(tileReelFile);
+const tileRouter = assetUrl(tileRouterFile);
 
 export interface BrandFilmProps {
   hook: string;

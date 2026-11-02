@@ -1,20 +1,37 @@
 import type { CSSProperties, ReactNode } from "react";
-import { FONT, GRAD, H, P, W, bgBlobs, clamp, ease, gradText, lerp, rise, spring, type VideoMeta } from "./kit";
-import pageImg from "./assets/nexus-page.jpg";
-import navImg from "./assets/nexus-nav.jpg";
-import wPort from "./assets/word-port.jpg";
-import wDash from "./assets/word-dash.jpg";
-import wPrice from "./assets/word-price.jpg";
-import wBlank from "./assets/word-blank.jpg";
-import logoImg from "./assets/nexus-logo.png";
-import tPay from "./assets/tile-pay.jpg";
-import tRouter from "./assets/tile-router.jpg";
-import tPend from "./assets/tile-pend.jpg";
-import tReel from "./assets/tile-reel.jpg";
-import tDock from "./assets/tile-dock.jpg";
-import tIsland from "./assets/tile-island.jpg";
-import tFolder from "./assets/tile-folder.jpg";
-import tCopy from "./assets/tile-copy.jpg";
+import { FONT, GRAD, H, P, W, bgBlobs, clamp, ease, gradText, lerp, rise, spring, type VideoMeta, assetUrl } from "./kit";
+import pageImgFile from "./assets/nexus-page.jpg";
+import navImgFile from "./assets/nexus-nav.jpg";
+import wPortFile from "./assets/word-port.jpg";
+import wDashFile from "./assets/word-dash.jpg";
+import wPriceFile from "./assets/word-price.jpg";
+import wBlankFile from "./assets/word-blank.jpg";
+import logoImgFile from "./assets/nexus-logo.png";
+import tPayFile from "./assets/tile-pay.jpg";
+import tRouterFile from "./assets/tile-router.jpg";
+import tPendFile from "./assets/tile-pend.jpg";
+import tReelFile from "./assets/tile-reel.jpg";
+import tDockFile from "./assets/tile-dock.jpg";
+import tIslandFile from "./assets/tile-island.jpg";
+import tFolderFile from "./assets/tile-folder.jpg";
+import tCopyFile from "./assets/tile-copy.jpg";
+
+// Imported files as URL strings, whichever bundler you use (see assetUrl in kit.ts).
+const pageImg = assetUrl(pageImgFile);
+const navImg = assetUrl(navImgFile);
+const wPort = assetUrl(wPortFile);
+const wDash = assetUrl(wDashFile);
+const wPrice = assetUrl(wPriceFile);
+const wBlank = assetUrl(wBlankFile);
+const logoImg = assetUrl(logoImgFile);
+const tPay = assetUrl(tPayFile);
+const tRouter = assetUrl(tRouterFile);
+const tPend = assetUrl(tPendFile);
+const tReel = assetUrl(tReelFile);
+const tDock = assetUrl(tDockFile);
+const tIsland = assetUrl(tIslandFile);
+const tFolder = assetUrl(tFolderFile);
+const tCopy = assetUrl(tCopyFile);
 
 export interface LaunchReelProps {
   words: string;
