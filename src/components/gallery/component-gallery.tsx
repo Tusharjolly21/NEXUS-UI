@@ -55,17 +55,31 @@ function PlansCard({ proCount }: { proCount: number }) {
   );
 }
 
-type Access = "all" | "free" | "pro";
+export type Access = "all" | "free" | "pro";
 const ACCESS: Access[] = ["all", "free", "pro"];
 
-/** All / Free / Pro, as a segmented control with a sliding thumb. */
-function AccessSwitch({ value, onChange, counts }: { value: Access; onChange: (v: Access) => void; counts: Record<Access, number> }) {
+/** All / Free / Pro, as a segmented control with a sliding thumb. Shared by the components and blocks walls. */
+export function AccessSwitch({
+  value,
+  onChange,
+  counts,
+  noun = "components",
+  size = "lg",
+}: {
+  value: Access;
+  onChange: (v: Access) => void;
+  counts: Record<Access, number>;
+  /** What is being filtered, for the screen-reader label. */
+  noun?: string;
+  /** `lg` is 52px (beside the components search); `md` is 44px (beside a compact search). */
+  size?: "md" | "lg";
+}) {
   const id = React.useId();
   const reduce = useReducedMotion();
   const label: Record<Access, string> = { all: "All", free: "Free", pro: "Pro" };
   const { isPro } = useProAccess();
   return (
-    <div role="radiogroup" aria-label="Show free or Pro components" className="pg-float inline-flex h-[52px] shrink-0 items-center gap-0.5 rounded-full bg-card p-1.5">
+    <div role="radiogroup" aria-label={`Show free or Pro ${noun}`} className={cn("pg-float inline-flex shrink-0 items-center gap-0.5 rounded-full bg-card", size === "lg" ? "h-[52px] p-1.5" : "h-11 p-1")}>
       {ACCESS.map((a) => {
         const on = value === a;
         return (
