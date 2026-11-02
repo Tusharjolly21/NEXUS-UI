@@ -20,6 +20,11 @@ export const BLOB_COLORS: Record<string, [string, string]> = {
   Devices: ["#93c5fd", "#4338ca"],
   Gallery: ["#fbcfe8", "#6d28d9"],
   Recorded: ["#fda4af", "#be123c"],
+  "Molten Hold": ["#fdba74", "#dc2626"],
+  "Mercury": ["#e2e8f0", "#64748b"],
+  "Status Morph": ["#a5b4fc", "#4338ca"],
+  Liquid: ["#7dd3fc", "#2563eb"],
+  Icons: ["#fde68a", "#d97706"],
 };
 
 // ── One animation loop for every drop on the page ─────────────────────────

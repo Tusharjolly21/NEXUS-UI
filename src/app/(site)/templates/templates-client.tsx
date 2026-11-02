@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { LayoutGrid, List, Search, X } from "lucide-react";
+import { LayoutGrid, List } from "lucide-react";
 import { InfiniteSentinel, useInfiniteCount } from "@/components/gallery/infinite-scroll";
+import { GallerySearch, matchesWords, searchWords } from "@/components/gallery/gallery-search";
 import { useUrlParam } from "@/components/gallery/use-url-param";
 import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { templateName, templateTagline } from "@/components/templates/template-card";
@@ -32,8 +33,7 @@ const HAYSTACK = new Map<string, string>(
 );
 
 function matchesQuery(t: MarketplaceTemplate, words: string[]) {
-  const hay = HAYSTACK.get(t.slug) ?? "";
-  return words.every((w) => hay.includes(w));
+  return matchesWords(HAYSTACK.get(t.slug) ?? "", words);
 }
 
 function Segmented<T extends string>({
@@ -78,7 +78,7 @@ export default function TemplatesGallery({ isPremium = false }: { isPremium?: bo
   const sort = sortParam === "new" ? "new" : "popular";
   const view = viewParam === "index" ? "index" : "wall";
 
-  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const words = searchWords(query);
   const matches = (sort === "new" ? NEWEST : POPULAR).filter(
     (t) => (!category || t.category === category) && matchesQuery(t, words),
   );
@@ -101,31 +101,7 @@ export default function TemplatesGallery({ isPremium = false }: { isPremium?: bo
     <>
       <div className="mt-8">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          <div className="relative lg:w-[300px] lg:shrink-0">
-            <label htmlFor="template-search" className="sr-only">
-              Search templates
-            </label>
-            <Search aria-hidden className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              id="template-search"
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by name, tag or use"
-              autoComplete="off"
-              className="pg-glass h-11 w-full rounded-full bg-card pl-10 pr-10 text-[14.5px] text-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring [&::-webkit-search-cancel-button]:hidden"
-            />
-            {query ? (
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                aria-label="Clear search"
-                className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
-              >
-                <X className="size-4" aria-hidden />
-              </button>
-            ) : null}
-          </div>
+          <GallerySearch value={query} onChange={setQuery} label="Search templates" placeholder="Search by name, tag or use" className="lg:w-[300px] lg:shrink-0" />
 
           <div className="flex items-center gap-2 lg:ml-auto">
             <Segmented

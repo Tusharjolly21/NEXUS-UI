@@ -14,6 +14,7 @@ import { playRecordedPreview, warmRecordedPreview } from "@/components/sounds/re
 import type { ProSoundCategory, ProSoundName } from "@/lib/ui-sounds-pro";
 import { cn } from "@/lib/utils";
 import { SoundBlob } from "@/components/sounds/sound-blob";
+import { GallerySearch, matchesWords, searchWords } from "@/components/gallery/gallery-search";
 
 type Category = SoundCategory | ProSoundCategory | RecordedSoundCategory;
 type Access = "all" | "free" | "pro";
@@ -58,6 +59,7 @@ export function SoundBoard({
   const { isPro, requestUpgrade } = useProAccess();
   const [access, setAccess] = React.useState<Access>("all");
   const [filter, setFilter] = React.useState<Category | "All">("All");
+  const [query, setQuery] = React.useState("");
   const [selected, setSelected] = React.useState<string>("pop");
   const [hits, setHits] = React.useState<Record<string, number>>({});
   const [volume, setVolume] = React.useState(0.8);
@@ -77,7 +79,9 @@ export function SoundBoard({
 
   const categories = access === "pro" ? PRO_CATEGORIES : access === "free" ? FREE_CATEGORIES : [...FREE_CATEGORIES, ...PRO_CATEGORIES];
   const inAccess = ITEMS.filter((i) => access === "all" || (access === "pro") === i.pro);
-  const visible = filter === "All" ? inAccess : inAccess.filter((i) => i.category === filter);
+  const words = searchWords(query);
+  const byKind = filter === "All" ? inAccess : inAccess.filter((i) => i.category === filter);
+  const visible = words.length ? byKind.filter((i) => matchesWords(`${i.label} ${i.name.replace(/-/g, " ")} ${i.category} ${mac && !i.pro ? MAC_SOUND_LABELS[i.name as SoundName] : ""}`, words)) : byKind;
   const freeCount = ITEMS.filter((i) => !i.pro).length;
   const proCount = ITEMS.length - freeCount;
   const current = ITEMS.find((i) => i.key === selected) ?? ITEMS[0];
@@ -208,6 +212,12 @@ export function SoundBoard({
         </label>
       </div>
 
+      <GallerySearch value={query} onChange={setQuery} label="Search sounds" placeholder="Search sounds: tap, glass, coin…" className="mt-3 sm:max-w-[360px]" />
+      <p className="sr-only" aria-live="polite">
+        {visible.length} {visible.length === 1 ? "sound" : "sounds"}
+        {words.length ? ` matching ${query.trim()}` : ""}
+      </p>
+
       <div role="radiogroup" aria-label="Sound kind" className="-mx-1 mt-3 flex max-w-full flex-wrap gap-1">
         {(["All", ...categories] as const).map((c) => (
           <button
@@ -225,6 +235,23 @@ export function SoundBoard({
           </button>
         ))}
       </div>
+
+      {visible.length === 0 ? (
+        <p className="mt-4 rounded-[22px] bg-card px-6 py-12 text-center text-[15.5px] text-muted-foreground shadow-[0_0_0_1px_var(--border)]">
+          No sound matches that. Try another word, or{" "}
+          <button
+            type="button"
+            onClick={() => {
+              setQuery("");
+              setFilter("All");
+            }}
+            className="font-medium text-foreground underline underline-offset-4"
+          >
+            show every sound
+          </button>
+          .
+        </p>
+      ) : null}
 
       <motion.ul layout={!reduce} className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4" aria-label="Sounds">
         <AnimatePresence initial={false} mode="popLayout">

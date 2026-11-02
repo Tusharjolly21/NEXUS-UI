@@ -6,6 +6,7 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { Check, Lock, LockOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FREE_ICON_COUNT } from "@/lib/icons/count";
+import { trackEvent } from "@/lib/track";
 
 type ProAccess = {
   /** The visitor has Pro (an active plan or All-Access). */
@@ -57,7 +58,12 @@ export function ProAccessProvider({
 }) {
   const [target, setTarget] = React.useState<{ name?: string; feature?: string } | null>(null);
   const value = React.useMemo<ProAccess>(
-    () => ({ isPro, plan, proCount, requestUpgrade: (name, feature) => setTarget({ name, feature }) }),
+    () => ({ isPro, plan, proCount, requestUpgrade: (name, feature) => {
+        // Which locked thing, and which part of it ("build prompt", "icon code"...), made someone want Pro.
+        trackEvent("pro_wall_hit", { item: name ?? "", feature: feature ?? "" });
+        setTarget({ name, feature });
+      },
+    }),
     [isPro, plan, proCount],
   );
 
@@ -203,6 +209,7 @@ function UpgradeDialog({
           <div className="mt-7 grid gap-2">
             <Link
               href="/pricing"
+              data-plans-source="upgrade_dialog"
               onClick={onClose}
               className="inline-flex h-12 items-center justify-center rounded-full bg-action text-[16px] font-semibold text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >

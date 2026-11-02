@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { headers } from "next/headers";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { trackServer } from "@/lib/track-server";
 import { cancelSubscription, planForProductId, subscriptionIdsForPayment, verifyWebhook } from "@/lib/dodo";
 
 export const dynamic = "force-dynamic";
@@ -86,6 +87,8 @@ export async function POST(req: Request) {
   }
 
   const supabase = getAdminClient();
+  // Set when this delivery is a brand-new purchase, so it can be counted once the delivery is safely recorded.
+  let purchased: "lifetime" | "annual" | null = null;
 
   // Idempotency: Dodo retries failed deliveries, so skip anything already processed.
   const { data: existing } = await supabase.from("webhook_events").select("id").eq("id", webhookId).maybeSingle();
@@ -121,6 +124,7 @@ export async function POST(req: Request) {
             });
         if (error) throw error;
         console.log(`[dodo-webhook] lifetime order user=${userId} payment=${payment.payment_id}`);
+        if (!found) purchased = "lifetime";
       } else if (lifetimeItem) {
         // A paid lifetime purchase that can't be tied to an account (no user_id in the metadata, for
         // example from a payment link made in the Dodo dashboard). Nothing can be granted here, so make
@@ -202,6 +206,7 @@ export async function POST(req: Request) {
             .from("subscriptions")
             .insert({ user_id: userId, provider_subscription_id: sub.subscription_id, ...fields });
           if (error) throw error;
+          purchased = "annual";
         } else {
           // Same case for the yearly plan: a subscription we have no row for and can't tie to an account.
           console.error(
@@ -219,5 +224,10 @@ export async function POST(req: Request) {
   }
 
   await supabase.from("webhook_events").insert({ id: webhookId, event_name: event.type });
+  // After the response, so counting can never slow the webhook down or make Dodo retry it.
+  if (purchased) {
+    const plan = purchased;
+    after(() => trackServer("purchase_completed", { plan }, req.headers));
+  }
   return NextResponse.json({ received: true });
 }

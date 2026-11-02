@@ -7,13 +7,20 @@ import { CodeBlock } from "@/components/code-block/code-block";
 import { InstallCard } from "@/components/site/install-card";
 import { Band, PillLink, RainbowWord } from "@/components/site";
 import { SoundBoard } from "@/components/sounds/sound-board";
+import { ScoredSounds } from "@/components/sounds/scored-sounds";
 import { SHADCN_REGISTRY_SCOPE } from "@/lib/registry-scope";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { SOUNDS } from "@/lib/ui-sounds";
 import { COMPONENT_SOUNDS } from "@/lib/catalog/component-sounds";
 import { PRO_SOUND_META } from "@/lib/ui-sounds-pro-meta";
 import { RECORDED_SOUND_META } from "@/lib/ui-sounds-recorded-meta";
+import { ICONS } from "@/lib/icons/catalog";
 import usage from "@/lib/catalog/sound-usage.generated.json";
+
+const ICON_PICKS = ["bell", "heart", "coin", "camera", "lock", "send", "trash", "rocket"]
+  .map((slug) => ICONS.find((i) => i.slug === slug))
+  .filter((i): i is NonNullable<typeof i> => !!i)
+  .map(({ slug, title, heard, premium }) => ({ slug, title, heard, premium }));
 
 const COUNT = Object.keys(SOUNDS).length;
 const SYNTH_PRO_COUNT = PRO_SOUND_META.length;
@@ -207,6 +214,21 @@ export default async function SoundsPage() {
             installMac={INSTALL_MAC}
             installRecorded={INSTALL_RECORDED}
           />
+        </div>
+      </section>
+
+      <section aria-labelledby="scored-heading" className="px-4 pb-20">
+        <div className="mx-auto max-w-[1152px]">
+          <h2 id="scored-heading" className="pg-display text-[clamp(36px,5vw,52px)] leading-[1.02] text-foreground">
+            Sounds scored to a picture
+          </h2>
+          <p className="mt-4 max-w-[620px] text-[17px] leading-relaxed text-muted-foreground">
+            The sounds above are a shared library. These belong to a single component or icon: written to the animation they
+            go with, and installed along with it.
+          </p>
+          <div className="mt-8">
+            <ScoredSounds icons={ICON_PICKS} />
+          </div>
         </div>
       </section>
 
