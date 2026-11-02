@@ -10,7 +10,7 @@ import {
   docInlineCodeClass,
 } from "@/components/docs/doc-page";
 import { McpDemo } from "@/components/docs/interactive/mcp-demo";
-import { McpConnect, PromptChips } from "@/components/docs/interactive/mcp-connect";
+import { McpConnect, PromptChips, ToolIcon } from "@/components/docs/interactive/mcp-connect";
 import { createMetadata } from "@/lib/seo";
 import { API_KEY_ENV_VAR } from "@/lib/registry-config";
 
@@ -105,6 +105,27 @@ export default function McpDocsPage() {
           title="MCP server"
           description="Let your AI coding tool look things up in Nexus UI itself. Ask it for a pricing section or a drag slider and it searches the catalog, finds the right item and writes the files into your project."
         />
+
+        <div data-doc-widget className="-mt-6 flex flex-wrap items-center gap-2.5">
+          <span className="mr-1 text-[14px] text-muted-foreground">Works with</span>
+          {(
+            [
+              ["claude-code", "Claude Code"],
+              ["cursor", "Cursor"],
+            ] as const
+          ).map(([id, name]) => (
+            <span
+              key={id}
+              className="inline-flex h-10 items-center gap-2.5 rounded-full bg-card pr-4 pl-2 text-[14.5px] font-medium text-foreground shadow-[0_0_0_1px_rgba(0,0,0,0.05)]"
+            >
+              <ToolIcon tool={id} size={26} />
+              {name}
+            </span>
+          ))}
+          <span className="inline-flex h-10 items-center rounded-full bg-muted px-4 text-[14.5px] text-muted-foreground">
+            and any MCP client
+          </span>
+        </div>
 
         <DocSection title="See it work">
           <McpDemo />

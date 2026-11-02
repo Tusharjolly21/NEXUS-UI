@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check, Copy } from "lucide-react";
 import { DocPre } from "@/components/docs/doc-page";
@@ -16,6 +17,25 @@ const ENDPOINT = "https://www.nexus-ui.com/mcp";
 
 type Tool = "claude-code" | "cursor";
 type Plan = "free" | "pro";
+
+/** The app icons for the tools this page connects to. */
+export const TOOL_ICONS = {
+  "claude-code": "/images/mcp/claude-code.webp",
+  cursor: "/images/mcp/cursor.webp",
+} as const;
+
+export function ToolIcon({ tool, size = 20, className }: { tool: keyof typeof TOOL_ICONS; size?: number; className?: string }) {
+  return (
+    <Image
+      src={TOOL_ICONS[tool]}
+      alt=""
+      width={size}
+      height={size}
+      className={cn("shrink-0", className)}
+      style={{ width: size, height: size, borderRadius: size * 0.225 }}
+    />
+  );
+}
 
 const TOOLS: { id: Tool; label: string; where: string }[] = [
   { id: "claude-code", label: "Claude Code", where: "Run this in your project folder." },
@@ -47,7 +67,7 @@ function Segmented<T extends string>({
   label: string;
   value: T;
   onChange: (v: T) => void;
-  options: { id: T; label: string }[];
+  options: { id: T; label: string; icon?: keyof typeof TOOL_ICONS }[];
 }) {
   const uid = useId().replace(/:/g, "");
   const reduce = useReducedMotion();
@@ -75,7 +95,10 @@ function Segmented<T extends string>({
                 transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 520, damping: 34 }}
               />
             ) : null}
-            <span className="relative">{o.label}</span>
+            <span className="relative flex items-center gap-2">
+              {o.icon ? <ToolIcon tool={o.icon} size={18} /> : null}
+              {o.label}
+            </span>
           </button>
         );
       })}
@@ -92,7 +115,7 @@ export function McpConnect({ envVar }: { envVar: string }) {
   return (
     <div data-doc-widget className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <Segmented label="Tool" value={tool} onChange={setTool} options={TOOLS} />
+        <Segmented label="Tool" value={tool} onChange={setTool} options={TOOLS.map((t) => ({ id: t.id, label: t.label, icon: t.id }))} />
         <Segmented label="What to unlock" value={plan} onChange={setPlan} options={PLANS} />
       </div>
       <p className="text-sm text-muted-foreground">{current.where}</p>

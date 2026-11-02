@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react"
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { Check, FileCode2, Loader2, Lock, RotateCcw, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ToolIcon } from "@/components/docs/interactive/mcp-connect";
 
 /**
  * A replay of what happens when you ask an AI coding tool for a Nexus UI item over MCP. It plays one
@@ -246,6 +247,16 @@ export function McpDemo() {
         </p>
 
         <div aria-hidden className="space-y-3.5">
+          <div className="-mt-1 mb-1 flex items-center justify-between gap-3 border-b border-white/[0.08] pb-3.5">
+            <span className="flex items-center gap-2.5 text-[13.5px] font-medium text-white">
+              <ToolIcon tool="claude-code" size={22} />
+              Claude Code
+            </span>
+            <span className="flex items-center gap-2 text-[12.5px] text-white/60">
+              <span className="size-1.5 rounded-full" style={{ background: GREEN }} />
+              nexus-ui connected
+            </span>
+          </div>
           <div className="flex justify-end">
             <div className="max-w-[88%] rounded-[20px] rounded-br-md bg-[#0071e3] px-4 py-2.5 text-white">
               {final ? s.prompt : s.prompt.slice(0, typed)}
