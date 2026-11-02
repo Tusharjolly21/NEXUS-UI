@@ -117,6 +117,7 @@ const baseVariants: BlockVariant[] = [
   v("contact-image-story", "block-contact-page", "Image Story Contact"),
   mk("voice-note-contact", "block-contact-page", "Voice Note Contact", "VoiceNoteContact"),
   mk("team-clock", "block-contact-page", "Team Clock", "TeamClock"),
+  mk("wall-clock-contact", "block-contact-page", "Wall Clock Contact", "WallClockContact"),
 
   v("text-typewriter-heading", "block-text-animations", "Typewriter Heading"),
   v("text-typewriter-effect", "block-text-animations", "Text Animation Typewriter Effect"),
@@ -144,6 +145,7 @@ const baseVariants: BlockVariant[] = [
   mk("xray-hero", "block-hero", "X-ray Hero", "XrayHero"),
   mk("circuit-hero", "block-hero", "Circuit Hero", "CircuitHero"),
   mk("flip-dot-hero", "block-hero", "Flip-dot Hero", "FlipDotHero"),
+  mk("receipt-hero", "block-hero", "Receipt Hero", "ReceiptHero"),
 
   mk("auto-advancing-tabs", "block-features", "Auto-advancing Tabs", "AutoAdvancingTabs"),
   mk("drawn-timeline", "block-features", "Drawn Timeline", "DrawnTimeline"),
@@ -152,6 +154,7 @@ const baseVariants: BlockVariant[] = [
   mk("bento-features", "block-features", "Bento Features", "BentoFeatures"),
   mk("beam-timeline", "block-features", "Beam Timeline", "BeamTimeline"),
   mk("sticky-scroll-story", "block-features", "Sticky Scroll Story", "StickyScrollStory"),
+  mk("sealed-and-sent", "block-features", "Sealed and Sent", "SealedAndSent"),
 
   mk("counting-stats", "block-social-proof", "Counting Stats", "CountingStats"),
   mk("wall-of-love", "block-social-proof", "Wall of Love", "WallOfLove"),
@@ -166,6 +169,7 @@ const baseVariants: BlockVariant[] = [
   mk("parallax-slider", "block-gallery", "Parallax Slider", "ParallaxSlider"),
   mk("changelog-pile", "block-changelog", "Changelog Pile", "ChangelogPile"),
   mk("gravity-404", "block-404", "Gravity 404", "Gravity404"),
+  mk("head-to-head-compare", "block-comparison", "Head-to-Head Compare", "HeadToHeadCompare"),
 ];
 
 /** Every section, each block's moved-in sections following its own. */
@@ -187,6 +191,7 @@ export const blockVariants: BlockVariant[] = (() => {
   for (const extra of [
     mk("waitlist-cta", "block-cta", "Waitlist CTA", "WaitlistCta"),
     mk("auth-morph", "block-signup", "Sign In / Sign Up", "AuthMorph"),
+    mk("wordmark-footer", "block-footer", "Wordmark Footer", "WordmarkFooter"),
   ]) {
     let at = -1;
     out.forEach((x, i) => { if (x.block === extra.block) at = i; });

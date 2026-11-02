@@ -6604,7 +6604,7 @@ export default function Page() {
     name: "Tear-off Ticket",
     registryCliName: "tear-off-ticket",
     description:
-      "An event ticket whose stub you pull away along the perforation. Let go early and it snaps back; pull through and it hangs on the last tooth, swings, then drops.",
+      "An event ticket whose stub you pull away along the perforation. Let go early and it snaps back; pull through and it hangs on the last tooth, swings, then drops. Also includes the Motion Kit Ticket CTA variant: an event call to action printed as a ticket, with a button that tears the stub for you.",
     categorySlug: "cards",
     tags: ["ticket", "event", "stub", "drag", "tear", "pass", "motion kit", "framer-motion"],
     premium: true,
@@ -6618,8 +6618,65 @@ export default function Page() {
       { name: "date", type: "string", defaultValue: '"Sat 14 Nov · 11:00"', description: "Second detail line." },
       { name: "seat", type: "string", defaultValue: '"Row C · Seat 12"', description: "Seat shown on the stub." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Tugs, tears and resets on a loop until someone grabs the stub." },
+      { name: "TicketCta.event", type: "Partial<TicketCtaEvent>", description: "Event details: title, host, date, time, start and end (calendar stamps), row, seat, serial and going. Any field left out keeps its default." },
+      { name: "TicketCta.ctaLabel", type: "string", defaultValue: '"Claim my seat"', description: "Label of the primary button, which tears the stub for people who cannot or would rather not drag." },
+      { name: "TicketCta.href", type: "string", description: "Where the follow-up link goes once the stub has come away. Without it the follow-up is Add to calendar." },
+      { name: "TicketCta.doneLabel", type: "string", defaultValue: '"Continue"', description: "Label of the follow-up link that href produces." },
+      { name: "TicketCta.onClaim", type: "() => void", description: "Called once when the stub comes away, by pull, key or button. Not called by autoplay." },
+      { name: "TicketCta.accent", type: "string", defaultValue: '"#0071e3"', description: "Accent for the stamp, the print and the follow-up button in light mode." },
+      { name: "TicketCta.accentDark", type: "string", defaultValue: '"#2997ff"', description: "The same, in dark mode." },
+      { name: "TicketCta.enableSound", type: "boolean", defaultValue: "true", description: "Plays interface sounds on interaction; they follow the site-wide sound switch." },
+      { name: "TicketCta.autoplay", type: "boolean", defaultValue: "false", description: "Tugs at the stub now and then, tears it, resets and repeats until the visitor touches the ticket." },
     ],
     Preview: Previews.PreviewTearOffTicket,
+    previewSections: [
+      {
+        title: "Tear-off Ticket",
+        Preview: Previews.PreviewTearOffTicket,
+        reactSource: `// src/app/page.tsx
+
+import { TearOffTicket } from "@/components/tear-off-ticket";
+
+export default function Page() {
+  return (
+    <div className="flex justify-center py-16">
+      <TearOffTicket title="Night Market" venue="Pier 9 · Lower Deck" date="Fri 20 Nov · 19:30" seat="General admission" />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Ticket CTA",
+        Preview: Previews.PreviewTicketCta,
+        reactSource: `// src/app/page.tsx
+"use client"; // onClaim is a function, which a server page cannot hand to a client component
+
+import { TicketCta } from "@/components/tear-off-ticket";
+
+export default function Page() {
+  return (
+    <TicketCta
+      event={{
+        title: "Launch Night",
+        host: "With the Plume team",
+        date: "Fri 20 Nov",
+        time: "18:30 UTC",
+        start: "20261120T183000Z", // used by the Add to calendar file
+        end: "20261120T200000Z",
+        row: "A",
+        seat: "7",
+      }}
+      ctaLabel="Claim my seat"
+      href="/signup"
+      doneLabel="Finish signing up"
+      onClaim={() => {
+        // Reserve the seat on your server.
+      }}
+    />
+  );
+}`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `// src/app/page.tsx
 

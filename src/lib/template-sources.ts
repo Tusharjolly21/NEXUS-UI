@@ -49,6 +49,7 @@ export const TEMPLATE_SOURCES = {
   strata: { file: "strata-page.tsx", exportName: "StrataPage" },
   afterglow: { file: "afterglow-page.tsx", exportName: "AfterglowPage" },
   ferry: { file: "ferry-page.tsx", exportName: "FerryPage" },
+  skein: { file: "skein-page.tsx", exportName: "SkeinPage" },
 } as const satisfies Record<string, TemplateSource>;
 
 export type TemplateSourceSlug = keyof typeof TEMPLATE_SOURCES;

@@ -21,7 +21,8 @@ export type BlockCategory =
   | "Changelog sections"
   | "Error pages"
   | "Footers"
-  | "Signup sections";
+  | "Signup sections"
+  | "Comparison sections";
 
 export type BlockManifestEntry = {
   slug: string;
@@ -264,7 +265,7 @@ export default function Page() {
     category: "Contact sections",
     tags: ["contact", "forms", "map", "testimonial", "landing page", "framer-motion"],
     premium: false,
-    variants: ["Global Signal", "Centered Intake", "Gradient Proof", "Image Story", "Voice Note Contact", "Split Contact Glass"],
+    variants: ["Global Signal", "Centered Intake", "Gradient Proof", "Image Story", "Voice Note Contact", "Split Contact Glass", "Wall Clock Contact"],
     reactSource: `// src/app/page.tsx
 
 import ContactPageBlock from "@/components/blocks/contact-page";
@@ -361,7 +362,7 @@ export default function Page() {
     category: "Hero blocks",
     tags: ["hero", "landing page", "header section", "above the fold", "motion kit", "framer-motion"],
     premium: true,
-    variants: ["Spotlight Hero", "Parallax Stack Hero", "Kinetic Hero", "Aurora Hero Spotlight", "Interactive Dot Grid Hero", "Interactive Starfield Hero", "Shooting Stars Grid", "Cursor Crowd Hero", "X-ray Hero", "Circuit Hero", "Flip-dot Hero"],
+    variants: ["Spotlight Hero", "Parallax Stack Hero", "Kinetic Hero", "Aurora Hero Spotlight", "Interactive Dot Grid Hero", "Interactive Starfield Hero", "Shooting Stars Grid", "Cursor Crowd Hero", "X-ray Hero", "Circuit Hero", "Flip-dot Hero", "Receipt Hero"],
     reactSource: `// src/app/page.tsx
 
 import { SpotlightHero } from "@/components/blocks/motion-kit/spotlight-hero";
@@ -379,7 +380,7 @@ export default function Page() {
     category: "Feature grids",
     tags: ["features", "feature section", "tabs", "timeline", "integrations", "motion kit", "framer-motion"],
     premium: true,
-    variants: ["Auto-advancing Tabs", "Drawn Timeline", "Integrations Orbit", "Step Flow", "Lattice Feature Grid"],
+    variants: ["Auto-advancing Tabs", "Drawn Timeline", "Integrations Orbit", "Sealed and Sent", "Step Flow", "Lattice Feature Grid"],
     reactSource: `// src/app/page.tsx
 
 import { AutoAdvancingTabs } from "@/components/blocks/motion-kit/auto-advancing-tabs";
@@ -480,6 +481,24 @@ export default function Page() {
 }`,
   },
   {
+    slug: "block-comparison",
+    registryCliName: "comparison-blocks",
+    name: "Comparison",
+    description:
+      "A head-to-head comparison: pick a rival and every measure races again as mirrored bars, the numbers roll, the score ring is cut into one arc per measure, and the features re-sort by who has them.",
+    category: "Comparison sections",
+    tags: ["comparison", "versus", "vs", "benchmark", "pricing page", "score ring", "motion kit"],
+    premium: true,
+    variants: ["Head-to-Head Compare"],
+    reactSource: `// src/app/page.tsx
+
+import { HeadToHeadCompare } from "@/components/blocks/motion-kit/head-to-head-compare";
+
+export default function Page() {
+  return <HeadToHeadCompare />;
+}`,
+  },
+  {
     slug: "block-cta",
     registryCliName: "cta-blocks",
     name: "CTA Sections",
@@ -506,7 +525,7 @@ export default function Page() {
     category: "Footers",
     tags: ["footer", "site footer", "newsletter", "links", "motion kit", "framer-motion"],
     premium: false,
-    variants: ["Orbit Footer"],
+    variants: ["Orbit Footer", "Wordmark Footer"],
     reactSource: `// src/app/page.tsx
 
 import { OrbitFooter } from "@/components/orbit-footer";
