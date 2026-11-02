@@ -55,13 +55,11 @@ const TOOLS = [
   },
 ];
 
-const ACCESS: { what: string; noKey: "yes" | "locked" | "page"; key: "yes" | "locked" | "page" }[] = [
-  { what: "Search the catalog", noKey: "yes", key: "yes" },
-  { what: "Item details and install command", noKey: "yes", key: "yes" },
-  { what: "Source of free items", noKey: "yes", key: "yes" },
-  { what: "Source of Pro items", noKey: "locked", key: "yes" },
-  { what: "Build prompt of free items", noKey: "yes", key: "yes" },
-  { what: "Build prompt of Pro items", noKey: "page", key: "page" },
+const ACCESS: { what: string; free: "yes" | "locked" | "page"; pro: "yes" | "locked" | "page" }[] = [
+  { what: "Search the catalog", free: "yes", pro: "yes" },
+  { what: "Item details and install command", free: "yes", pro: "yes" },
+  { what: "Source code", free: "yes", pro: "locked" },
+  { what: "Build prompt", free: "yes", pro: "page" },
 ];
 
 function Cell({ v }: { v: "yes" | "locked" | "page" }) {
@@ -80,7 +78,7 @@ function Cell({ v }: { v: "yes" | "locked" | "page" }) {
         <span className="flex size-5 items-center justify-center rounded-full bg-[#ff9f0a]/20 text-[#b36b00]">
           <Lock className="size-3" strokeWidth={2.5} aria-hidden />
         </span>
-        Needs a key
+        Needs your API key
       </span>
     );
   return <span className="text-muted-foreground">On the component page</span>;
@@ -133,8 +131,8 @@ export default function McpDocsPage() {
 
         <DocSection title="Connect your tool">
           <p className="text-sm text-muted-foreground">
-            Pick your tool and what you want to unlock, then copy the snippet. Free items need no key. For Pro items, use
-            the same API key the CLI uses: create one in the{" "}
+            Pick your tool and what you want to unlock, then copy the snippet. Free items need no API key. Pro items do, with
+            the same API key the CLI uses. Create one in the{" "}
             <Link href="/dashboard/api-key" className={link}>
               dashboard
             </Link>{" "}
@@ -181,10 +179,10 @@ export default function McpDocsPage() {
                     What you ask for
                   </th>
                   <th scope="col" className="px-3 py-3.5 font-medium">
-                    No key
+                    Free items
                   </th>
                   <th scope="col" className="px-3 py-3.5 font-medium">
-                    With a Pro key
+                    Pro items
                   </th>
                 </tr>
               </thead>
@@ -195,10 +193,10 @@ export default function McpDocsPage() {
                       {r.what}
                     </th>
                     <td className="px-3 py-3.5">
-                      <Cell v={r.noKey} />
+                      <Cell v={r.free} />
                     </td>
                     <td className="px-3 py-3.5">
-                      <Cell v={r.key} />
+                      <Cell v={r.pro} />
                     </td>
                   </tr>
                 ))}

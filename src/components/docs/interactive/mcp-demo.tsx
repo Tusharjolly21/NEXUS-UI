@@ -18,14 +18,14 @@ type Result = { name: string; kind: string; pro: boolean };
 type Scenario = {
   id: string;
   label: string;
+  /** One line saying what this case shows, in terms of the person's setup. */
+  note: string;
   prompt: string;
   query: string;
   results: Result[];
   pick: number;
   slug: string;
-  /** Files returned, or null when the server answers with the Pro message instead. */
-  files: string[] | null;
-  lockedName?: string;
+  files: string[];
   needs: string;
   reply: string;
 };
@@ -34,6 +34,7 @@ const SCENARIOS: Scenario[] = [
   {
     id: "free",
     label: "Free item",
+    note: "Free items need no API key. They work as soon as the server is connected.",
     prompt: "Add a pricing section to my landing page.",
     query: "pricing section",
     results: [
@@ -52,25 +53,9 @@ const SCENARIOS: Scenario[] = [
     reply: "Added the Pricing Section block. Three files are in components/blocks/pricing-section, and it needs framer-motion and lucide-react.",
   },
   {
-    id: "pro-locked",
-    label: "Pro item, no key",
-    prompt: "Add a hold to confirm button.",
-    query: "hold to confirm",
-    results: [
-      { name: "Hold to Confirm", kind: "Component", pro: true },
-      { name: "Slide to Confirm", kind: "Component", pro: true },
-      { name: "Molten Hold", kind: "Component", pro: true },
-    ],
-    pick: 0,
-    slug: "hold-to-confirm",
-    files: null,
-    lockedName: "Hold to Confirm",
-    needs: "",
-    reply: "Hold to Confirm is a Pro component and this server has no API key yet. Create a key in your dashboard, add it to the server settings and ask again.",
-  },
-  {
-    id: "pro-key",
-    label: "Pro item, with key",
+    id: "pro",
+    label: "Pro item",
+    note: "Pro items need your API key. Add it once when you connect (see below) and the code comes through.",
     prompt: "Add a hold to confirm button.",
     query: "hold to confirm",
     results: [
@@ -194,7 +179,6 @@ export function McpDemo() {
   };
 
   const showFinal = final || phase >= 5;
-  const locked = s.files === null;
 
   return (
     <div ref={ref} data-doc-widget className="space-y-4">
@@ -236,6 +220,10 @@ export function McpDemo() {
           Replay
         </button>
       </div>
+
+      <p className="text-[14px] leading-snug text-muted-foreground" aria-live="polite">
+        {s.note}
+      </p>
 
       <div
         role="group"
@@ -304,23 +292,11 @@ export function McpDemo() {
               <ToolLine
                 name="get_component_source"
                 args={`{ "slug": "${s.slug}" }`}
-                state={phase >= 4 || final ? (locked ? "locked" : "ok") : "run"}
+                state={phase >= 4 || final ? "ok" : "run"}
               />
               {phase >= 4 || final ? (
-                locked ? (
-                  <motion.div
-                    initial={reduce ? false : { opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    className="ml-1 rounded-[16px] px-4 py-3 text-[13.5px]"
-                    style={{ background: "rgba(255,159,10,0.12)", boxShadow: "inset 0 0 0 1px rgba(255,159,10,0.35)" }}
-                  >
-                    <span className="font-medium text-white">{s.lockedName} is part of Nexus UI Pro.</span>{" "}
-                    <span className="text-white/75">Create an API key at nexus-ui.com/dashboard/api-key and add it to this server&apos;s configuration.</span>
-                  </motion.div>
-                ) : (
-                  <ul className="ml-1 space-y-1.5">
-                    {s.files!.map((f, i) => (
+                <ul className="ml-1 space-y-1.5">
+                    {s.files.map((f, i) => (
                       <motion.li
                         key={f}
                         initial={reduce ? false : { opacity: 0, x: -10 }}
@@ -352,8 +328,7 @@ export function McpDemo() {
                       <Search className="size-3.5" aria-hidden />
                       npm packages: {s.needs}
                     </li>
-                  </ul>
-                )
+                </ul>
               ) : null}
             </Reveal>
           ) : null}
