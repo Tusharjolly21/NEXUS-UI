@@ -10,9 +10,9 @@ export const SLOTS_ENABLED = true;
 
 export const SLOT_CAPS = {
   /** All-Access, one payment. */
-  lifetime: 100,
+  lifetime: 50,
   /** Pro, yearly. */
-  yearly: 100,
+  yearly: 50,
 } as const;
 
 export type SlotPlan = keyof typeof SLOT_CAPS;
@@ -24,3 +24,13 @@ export type SlotsResponse = {
 
 /** The popup's dismiss cookie: closing it hides it for a week. */
 export const SLOTS_COOKIE = "nx-slots";
+
+/** Early slots still open: per plan (a full plan is left out) and in all. Null when the numbers aren't available. */
+export function slotsLeft(data: SlotsResponse | null) {
+  if (!data?.enabled) return null;
+  const open = (Object.keys(data.plans) as SlotPlan[])
+    .map((plan) => ({ plan, taken: data.plans[plan]!.taken, cap: data.plans[plan]!.cap, left: data.plans[plan]!.cap - data.plans[plan]!.taken }))
+    .filter((r) => r.left > 0);
+  const total = open.reduce((n, r) => n + r.left, 0);
+  return total > 0 ? { total, open } : null;
+}

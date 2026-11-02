@@ -4,6 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { IconPeek } from "@/components/site/icon-peek";
+import { useSlots } from "@/components/site/use-slots";
+import { slotsLeft } from "@/lib/launch-slots";
 import { LAUNCH_BANNER_COOKIE, LAUNCH_BANNER_ID } from "@/lib/launch-banner";
 import { FREE_ICON_COUNT, ICON_COUNT } from "@/lib/icons/count";
 
@@ -17,6 +19,8 @@ import { FREE_ICON_COUNT, ICON_COUNT } from "@/lib/icons/count";
  */
 export function LaunchBanner({ isPro = false }: { isPro?: boolean }) {
   const [open, setOpen] = React.useState(true);
+  // Free visitors see how many early slots are left (counted from the database) where the plans line used to be.
+  const left = slotsLeft(useSlots(!isPro));
   if (!open) return null;
 
   const close = () => {
@@ -54,8 +58,14 @@ export function LaunchBanner({ isPro = false }: { isPro?: boolean }) {
         {isPro ? null : (
           <span className="hidden items-center gap-x-1.5 md:inline-flex">
             <span aria-hidden className="text-white/30">|</span>
-            Pro unlocks the rest.
-            <Link href="/pricing" data-plans-source="banner" className="whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
+            {left ? (
+              <span>
+                Early prices: <strong className="font-semibold text-white">{left.total}</strong> {left.total === 1 ? "slot" : "slots"} left, then prices go up.
+              </span>
+            ) : (
+              "Pro unlocks the rest."
+            )}
+            <Link href="/pricing" className="whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
               See plans ›
             </Link>
           </span>

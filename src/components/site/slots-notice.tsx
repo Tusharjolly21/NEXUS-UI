@@ -9,7 +9,8 @@ import { pillClassName } from "@/components/site/pill-link";
 import { useProAccess } from "@/components/pro/pro-access";
 import { getConsentSnapshot, getServerConsentSnapshot, subscribeConsent } from "@/lib/consent";
 import { WHATS_NEW_COOKIE, WHATS_NEW_ID } from "@/lib/launch-banner";
-import { SLOTS_COOKIE, type SlotPlan, type SlotsResponse } from "@/lib/launch-slots";
+import { SLOTS_COOKIE, slotsLeft, type SlotPlan } from "@/lib/launch-slots";
+import { useSlots } from "@/components/site/use-slots";
 import { PRICES, formatPrice } from "@/lib/pricing";
 
 /**
@@ -35,7 +36,6 @@ export function SlotsNotice() {
   const pathname = usePathname() ?? "/";
   const consent = React.useSyncExternalStore(subscribeConsent, getConsentSnapshot, getServerConsentSnapshot);
   const reduce = useReducedMotion();
-  const [data, setData] = React.useState<SlotsResponse | null>(null);
   const [dismissed, setDismissed] = React.useState(false);
   const [ready, setReady] = React.useState(false);
 
@@ -62,19 +62,9 @@ export function SlotsNotice() {
 
   // The numbers are only fetched when the card could actually show.
   const wantsData = ready && asked && !hiddenHere && !isPro && !dismissed;
-  React.useEffect(() => {
-    if (!wantsData || data) return;
-    let alive = true;
-    fetch("/api/slots")
-      .then((r) => (r.ok ? (r.json() as Promise<SlotsResponse>) : null))
-      .then((d) => alive && d && setData(d))
-      .catch(() => {});
-    return () => {
-      alive = false;
-    };
-  }, [wantsData, data]);
-
-  const rows = data?.enabled ? ROWS.filter((r) => data.plans[r.plan] && data.plans[r.plan]!.taken < data.plans[r.plan]!.cap) : [];
+  const data = useSlots(wantsData);
+  const left = slotsLeft(data);
+  const rows = left ? ROWS.filter((r) => left.open.some((o) => o.plan === r.plan)) : [];
   const visible = wantsData && rows.length > 0;
 
   function close() {
@@ -105,11 +95,11 @@ export function SlotsNotice() {
           </button>
           <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Early prices</p>
           <h2 id="slots-title" className="mt-0.5 pr-8 text-[19px] font-semibold tracking-[-0.015em]">
-            Early slots are open
+            {left?.total} early {left?.total === 1 ? "slot" : "slots"} left
           </h2>
           <ul className="mt-3 grid gap-3">
             {rows.map((r) => {
-              const p = data!.plans[r.plan]!;
+              const p = left!.open.find((o) => o.plan === r.plan)!;
               const pct = Math.max(2, Math.round((p.taken / p.cap) * 100));
               return (
                 <li key={r.plan}>
@@ -118,7 +108,7 @@ export function SlotsNotice() {
                       {r.name} <span className="font-normal text-muted-foreground">{r.price} {r.unit}</span>
                     </span>
                     <span className="tabular-nums text-muted-foreground">
-                      {p.taken} of {p.cap} taken
+                      {p.left} of {p.cap} left
                     </span>
                   </div>
                   <div
@@ -135,7 +125,7 @@ export function SlotsNotice() {
               );
             })}
           </ul>
-          <p className="mt-3 text-[13.5px] text-muted-foreground">When the early slots are gone, the price goes up.</p>
+          <p className="mt-3 text-[13.5px] text-muted-foreground">Once the early slots are gone, the price goes up.</p>
           <div className="mt-4 grid grid-cols-2 gap-2">
             <Link href="/pricing" onClick={close} className={pillClassName("ink", "sm", "w-full")}>
               See plans
