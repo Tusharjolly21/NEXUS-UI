@@ -25,8 +25,8 @@ export function HeroTutorial({ className }: { className?: string }) {
         <span className="text-muted-foreground">5 min</span>
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none" />
-        <Dialog.Popup className="fixed left-1/2 top-1/2 z-[81] w-[min(1120px,calc(100vw-24px))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[22px] bg-[#1d1d1f] shadow-[0_40px_120px_-30px_rgba(0,0,0,0.7)] outline-none transition-[opacity,transform] duration-300 ease-[cubic-bezier(.2,.9,.25,1.1)] data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 motion-reduce:transition-none">
+        <Dialog.Backdrop className="fixed inset-0 z-[95] bg-black/60 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none" />
+        <Dialog.Popup className="fixed left-1/2 top-1/2 z-[96] w-[min(1120px,calc(100vw-24px))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[22px] bg-[#1d1d1f] shadow-[0_40px_120px_-30px_rgba(0,0,0,0.7)] outline-none transition-[opacity,transform] duration-300 ease-[cubic-bezier(.2,.9,.25,1.1)] data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 motion-reduce:transition-none">
           <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
             <Dialog.Title className="truncate text-[15px] font-semibold text-white">Add Nexus UI to your project</Dialog.Title>
             <div className="flex shrink-0 items-center gap-2">
