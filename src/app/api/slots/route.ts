@@ -8,7 +8,7 @@ import { SLOT_CAPS, SLOTS_ENABLED, type SlotsResponse } from "@/lib/launch-slots
  * plan leave the server (taken, cap): no names, no emails. Cached at the edge for five minutes. When the
  * database can't be read the answer is "not enabled", never a guess, so the popup simply stays away.
  *
- * - All-Access: paid lifetime orders (a refund frees its slot).
+ * - All-Access: paid lifetime orders with an amount above zero (a refund or a free grant takes no slot).
  * - Pro: subscriptions that are active, or cancelled but still running to the end of what was paid for.
  */
 const OFF: SlotsResponse = { enabled: false, plans: {} };
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     const admin = getAdminClient();
     const now = new Date().toISOString();
     const [lifetime, yearly] = await Promise.all([
-      admin.from("orders").select("id", { count: "exact", head: true }).eq("product_type", "lifetime").eq("status", "paid"),
+      admin.from("orders").select("id", { count: "exact", head: true }).eq("product_type", "lifetime").eq("status", "paid").gt("amount_cents", 0),
       admin.from("subscriptions").select("id", { count: "exact", head: true }).or(`status.eq.active,ends_at.gt.${now}`),
     ]);
     if (lifetime.error || yearly.error || lifetime.count === null || yearly.count === null) {
