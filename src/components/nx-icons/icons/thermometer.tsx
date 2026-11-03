@@ -38,6 +38,7 @@ export function ThermometerIcon({ size = 24, strokeWidth = 2, className, speed =
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(-1.25 -0.75)">
       <path d="M14 14.8V5a2 2 0 0 0-4 0v9.8a4 4 0 1 0 4 0z" />
       <path d="M16.8 7.5h1.6M16.8 10.5h1.2" />
       <circle cx="12" cy="17" r="1.6" fill={accent} stroke="none" />
@@ -49,6 +50,7 @@ export function ThermometerIcon({ size = 24, strokeWidth = 2, className, speed =
         animate={on ? { scaleY: [0.2, 1, 0.85, 1] } : { scaleY: 1 }}
         transition={{ duration: 0.9 / speed, times: [0, 0.5, 0.7, 1], ease: "easeOut" }}
       />
+      </g>
     </svg>
   );
 }

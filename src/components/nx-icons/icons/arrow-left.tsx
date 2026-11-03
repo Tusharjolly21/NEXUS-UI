@@ -38,6 +38,7 @@ export function ArrowLeftIcon({ size = 24, strokeWidth = 2, className, speed = 1
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(-1.75 0)">
       <motion.path
         d="M21.5 7v10"
         stroke={accent}
@@ -58,6 +59,7 @@ export function ArrowLeftIcon({ size = 24, strokeWidth = 2, className, speed = 1
         animate={on ? { x: [0, -3, 0] } : { x: 0 }}
         transition={{ duration: 0.6 / speed, times: [0, 0.5, 1], ease: ["easeOut", "easeIn"] }}
       />
+      </g>
     </svg>
   );
 }

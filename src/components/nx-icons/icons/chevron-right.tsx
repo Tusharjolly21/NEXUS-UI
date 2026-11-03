@@ -38,6 +38,7 @@ export function ChevronRightIcon({ size = 24, strokeWidth = 2, className, speed 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(-1.0 0)">
       <motion.path
         d="M4.5 5l7 7-7 7"
         stroke={accent}
@@ -51,6 +52,7 @@ export function ChevronRightIcon({ size = 24, strokeWidth = 2, className, speed 
         animate={on ? { x: [0, 4, 0] } : { x: 0 }}
         transition={{ duration: 0.5 / speed, times: [0, 0.5, 1], ease: ["easeOut", "easeInOut"] }}
       />
+      </g>
     </svg>
   );
 }

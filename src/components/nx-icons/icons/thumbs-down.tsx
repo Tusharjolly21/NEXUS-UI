@@ -38,6 +38,7 @@ export function ThumbsDownIcon({ size = 24, strokeWidth = 2, className, speed = 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 0.75)">
       <rect x="3.2" y="3.5" width="4.2" height="9.5" rx="1.3" stroke={accent} />
       <motion.path
         d="M10.5 4h7.2a2.4 2.4 0 0 1 2.3 1.8l1 4a2.4 2.4 0 0 1-2.3 3H14l.5 3.3a2.3 2.3 0 0 1-2.3 2.6c-.6 0-1.1-.3-1.3-.8L10.5 13z"
@@ -46,6 +47,7 @@ export function ThumbsDownIcon({ size = 24, strokeWidth = 2, className, speed = 
         animate={on ? { y: [0, 2.2, 0, 1, 0], rotate: [0, 6, -3, 2, 0] } : { y: 0, rotate: 0 }}
         transition={{ duration: 0.7 / speed, ease: "easeInOut" }}
       />
+      </g>
     </svg>
   );
 }

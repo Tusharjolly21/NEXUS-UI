@@ -38,6 +38,7 @@ export function ShoppingCartIcon({ size = 24, strokeWidth = 2, className, speed 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0.75 0)">
       <motion.g
         initial={false}
         animate={on ? { x: [0, 0, 1.4, 0], y: [0, 0, 0.8, 0] } : { x: 0, y: 0 }}
@@ -59,6 +60,7 @@ export function ShoppingCartIcon({ size = 24, strokeWidth = 2, className, speed 
           transition={on ? { duration: 0.4 / speed, ease: "easeIn" } : { duration: 0.15 / speed }}
         />
       </motion.g>
+      </g>
     </svg>
   );
 }

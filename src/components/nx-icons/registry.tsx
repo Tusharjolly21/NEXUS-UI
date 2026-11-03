@@ -239,6 +239,68 @@ import { ArrowLeftCircleIcon } from "./icons/arrow-left-circle";
 import { ArrowRightCircleIcon } from "./icons/arrow-right-circle";
 import { MoreVerticalIcon } from "./icons/more-vertical";
 import { CornerDownRightIcon } from "./icons/corner-down-right";
+import { LayersIcon } from "./icons/layers";
+import { LayoutIcon } from "./icons/layout";
+import { ColumnsIcon } from "./icons/columns";
+import { TableIcon } from "./icons/table";
+import { CropIcon } from "./icons/crop";
+import { MoveIcon } from "./icons/move";
+import { PenToolIcon } from "./icons/pen-tool";
+import { MousePointerIcon } from "./icons/mouse-pointer";
+import { TriangleIcon } from "./icons/triangle";
+import { HexagonIcon } from "./icons/hexagon";
+import { RulerIcon } from "./icons/ruler";
+import { EyedropperIcon } from "./icons/eyedropper";
+import { GitCommitIcon } from "./icons/git-commit";
+import { GitMergeIcon } from "./icons/git-merge";
+import { GitPullRequestIcon } from "./icons/git-pull-request";
+import { CommandIcon } from "./icons/command";
+import { BracesIcon } from "./icons/braces";
+import { FileCodeIcon } from "./icons/file-code";
+import { SitemapIcon } from "./icons/sitemap";
+import { ContainerIcon } from "./icons/container";
+import { SigmaIcon } from "./icons/sigma";
+import { WebhookIcon } from "./icons/webhook";
+import { RewindIcon } from "./icons/rewind";
+import { FastForwardIcon } from "./icons/fast-forward";
+import { CastIcon } from "./icons/cast";
+import { AirplayIcon } from "./icons/airplay";
+import { ApertureIcon } from "./icons/aperture";
+import { DiscIcon } from "./icons/disc";
+import { FilmIcon } from "./icons/film";
+import { TabletIcon } from "./icons/tablet";
+import { BatteryChargingIcon } from "./icons/battery-charging";
+import { FilePlusIcon } from "./icons/file-plus";
+import { FileMinusIcon } from "./icons/file-minus";
+import { FolderPlusIcon } from "./icons/folder-plus";
+import { FolderMinusIcon } from "./icons/folder-minus";
+import { BookOpenIcon } from "./icons/book-open";
+import { UserCheckIcon } from "./icons/user-check";
+import { UserMinusIcon } from "./icons/user-minus";
+import { PhoneCallIcon } from "./icons/phone-call";
+import { PhoneMissedIcon } from "./icons/phone-missed";
+import { PhoneIncomingIcon } from "./icons/phone-incoming";
+import { PhoneOutgoingIcon } from "./icons/phone-outgoing";
+import { PhoneForwardedIcon } from "./icons/phone-forwarded";
+import { PhoneOffIcon } from "./icons/phone-off";
+import { VoicemailIcon } from "./icons/voicemail";
+import { MailOpenIcon } from "./icons/mail-open";
+import { RssIcon } from "./icons/rss";
+import { MessageCircleIcon } from "./icons/message-circle";
+import { InfinityIcon } from "./icons/infinity";
+import { BarsSpinnerIcon } from "./icons/bars-spinner";
+import { DualRingIcon } from "./icons/dual-ring";
+import { ActivityIcon } from "./icons/activity";
+import { ScrollDownIcon } from "./icons/scroll-down";
+import { DollarSignIcon } from "./icons/dollar-sign";
+import { TrendingDownIcon } from "./icons/trending-down";
+import { BarChartHorizontalIcon } from "./icons/bar-chart-horizontal";
+import { CloudLightningIcon } from "./icons/cloud-lightning";
+import { CloudDrizzleIcon } from "./icons/cloud-drizzle";
+import { NavigationIcon } from "./icons/navigation";
+import { FrownIcon } from "./icons/frown";
+import { MehIcon } from "./icons/meh";
+import { ZoomInIcon } from "./icons/zoom-in";
 
 export type NxIconProps = {
   size?: number;
@@ -491,4 +553,66 @@ export const NX_ICONS: Record<string, ComponentType<NxIconProps>> = {
   "arrow-right-circle": ArrowRightCircleIcon,
   "more-vertical": MoreVerticalIcon,
   "corner-down-right": CornerDownRightIcon,
+  "layers": LayersIcon,
+  "layout": LayoutIcon,
+  "columns": ColumnsIcon,
+  "table": TableIcon,
+  "crop": CropIcon,
+  "move": MoveIcon,
+  "pen-tool": PenToolIcon,
+  "mouse-pointer": MousePointerIcon,
+  "triangle": TriangleIcon,
+  "hexagon": HexagonIcon,
+  "ruler": RulerIcon,
+  "eyedropper": EyedropperIcon,
+  "git-commit": GitCommitIcon,
+  "git-merge": GitMergeIcon,
+  "git-pull-request": GitPullRequestIcon,
+  "command": CommandIcon,
+  "braces": BracesIcon,
+  "file-code": FileCodeIcon,
+  "sitemap": SitemapIcon,
+  "container": ContainerIcon,
+  "sigma": SigmaIcon,
+  "webhook": WebhookIcon,
+  "rewind": RewindIcon,
+  "fast-forward": FastForwardIcon,
+  "cast": CastIcon,
+  "airplay": AirplayIcon,
+  "aperture": ApertureIcon,
+  "disc": DiscIcon,
+  "film": FilmIcon,
+  "tablet": TabletIcon,
+  "battery-charging": BatteryChargingIcon,
+  "file-plus": FilePlusIcon,
+  "file-minus": FileMinusIcon,
+  "folder-plus": FolderPlusIcon,
+  "folder-minus": FolderMinusIcon,
+  "book-open": BookOpenIcon,
+  "user-check": UserCheckIcon,
+  "user-minus": UserMinusIcon,
+  "phone-call": PhoneCallIcon,
+  "phone-missed": PhoneMissedIcon,
+  "phone-incoming": PhoneIncomingIcon,
+  "phone-outgoing": PhoneOutgoingIcon,
+  "phone-forwarded": PhoneForwardedIcon,
+  "phone-off": PhoneOffIcon,
+  "voicemail": VoicemailIcon,
+  "mail-open": MailOpenIcon,
+  "rss": RssIcon,
+  "message-circle": MessageCircleIcon,
+  "infinity": InfinityIcon,
+  "bars-spinner": BarsSpinnerIcon,
+  "dual-ring": DualRingIcon,
+  "activity": ActivityIcon,
+  "scroll-down": ScrollDownIcon,
+  "dollar-sign": DollarSignIcon,
+  "trending-down": TrendingDownIcon,
+  "bar-chart-horizontal": BarChartHorizontalIcon,
+  "cloud-lightning": CloudLightningIcon,
+  "cloud-drizzle": CloudDrizzleIcon,
+  "navigation": NavigationIcon,
+  "frown": FrownIcon,
+  "meh": MehIcon,
+  "zoom-in": ZoomInIcon,
 };

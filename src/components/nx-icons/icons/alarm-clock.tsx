@@ -38,6 +38,7 @@ export function AlarmClockIcon({ size = 24, strokeWidth = 2, className, speed = 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -0.75)">
       <motion.g
         style={{ originX: "50%", originY: "62%" }}
         initial={false}
@@ -57,6 +58,7 @@ export function AlarmClockIcon({ size = 24, strokeWidth = 2, className, speed = 
         animate={on ? { opacity: [0, 1, 0, 1, 0, 1, 0] } : { opacity: 0 }}
         transition={{ duration: 0.8 / speed }}
       />
+      </g>
     </svg>
   );
 }

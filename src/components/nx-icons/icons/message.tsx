@@ -38,6 +38,7 @@ export function MessageIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -0.75)">
       <motion.path
         d="M4.2 5.2h15.6a1.6 1.6 0 0 1 1.6 1.6v8.6a1.6 1.6 0 0 1-1.6 1.6H11.2L6.6 20.2v-3.2H4.2a1.6 1.6 0 0 1-1.6-1.6V6.8a1.6 1.6 0 0 1 1.6-1.6z"
         style={{ originX: "30%", originY: "80%" }}
@@ -58,6 +59,7 @@ export function MessageIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
           transition={on ? { duration: 1 / speed, times: [0, 0.2, 0.35, 0.6, 0.8], delay: (i * 0.1) / speed } : { duration: 0.15 / speed }}
         />
       ))}
+      </g>
     </svg>
   );
 }

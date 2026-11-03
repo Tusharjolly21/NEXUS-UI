@@ -38,6 +38,7 @@ export function LeafIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(1.0 -1.0)">
       <motion.g
         style={{ originX: "22%", originY: "80%" }}
         initial={false}
@@ -55,6 +56,7 @@ export function LeafIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
         <path d="M5.5 18.5C5.5 10 10 5.5 18.5 5.5 18.5 14 14 18.5 5.5 18.5z" />
         <path d="M5.5 18.5 3.6 20.4" />
       </motion.g>
+      </g>
     </svg>
   );
 }

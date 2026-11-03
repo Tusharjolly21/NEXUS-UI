@@ -38,6 +38,7 @@ export function SkipForwardIcon({ size = 24, strokeWidth = 2, className, speed =
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(-1.0 0)">
       <motion.path
         d="M2.6 9.5h2.6M2.6 14.5h2.6"
         stroke={accent}
@@ -59,6 +60,7 @@ export function SkipForwardIcon({ size = 24, strokeWidth = 2, className, speed =
         animate={on ? { x: [0, 1.4, 0] } : { x: 0 }}
         transition={{ duration: 0.5 / speed, ease: "easeInOut", delay: (0.06) / speed }}
       />
+      </g>
     </svg>
   );
 }

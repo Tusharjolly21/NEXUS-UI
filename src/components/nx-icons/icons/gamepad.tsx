@@ -38,6 +38,7 @@ export function GamepadIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -1.75)">
       <path d="M7 8.5h10a4.5 4.5 0 0 1 4.4 5.3l-.7 3.4a2.4 2.4 0 0 1-4 1.2l-1.8-1.9H9.1l-1.8 1.9a2.4 2.4 0 0 1-4-1.2l-.7-3.4A4.5 4.5 0 0 1 7 8.5z" />
       <motion.path
         d="M8 11.8v3.2M6.4 13.4h3.2"
@@ -63,6 +64,7 @@ export function GamepadIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
           transition={{ duration: 0.25 / speed, delay: (b.d) / speed }}
         />
       ))}
+      </g>
     </svg>
   );
 }

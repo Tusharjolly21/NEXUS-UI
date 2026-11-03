@@ -38,6 +38,7 @@ export function WindIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 1.0)">
       <motion.path
         d="M3.5 9h10a2.8 2.8 0 1 0-2.8-2.8"
         initial={false}
@@ -57,6 +58,7 @@ export function WindIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
         animate={on ? { pathLength: [0, 1], x: [-2, 0] } : { pathLength: 1, x: 0 }}
         transition={{ duration: 0.5 / speed, delay: (0.2) / speed, ease: "easeOut" }}
       />
+      </g>
     </svg>
   );
 }

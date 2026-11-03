@@ -38,6 +38,7 @@ export function HeartPulseIcon({ size = 24, strokeWidth = 2, className, speed = 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -1.0)">
       <motion.g
         style={{ originX: "50%", originY: "55%" }}
         initial={false}
@@ -54,6 +55,7 @@ export function HeartPulseIcon({ size = 24, strokeWidth = 2, className, speed = 
           transition={{ duration: 0.6 / speed, delay: (on ? 0.1 : 0) / speed, ease: "easeOut" }}
         />
       </motion.g>
+      </g>
     </svg>
   );
 }

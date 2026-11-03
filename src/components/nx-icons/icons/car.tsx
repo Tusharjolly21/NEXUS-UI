@@ -38,6 +38,7 @@ export function CarIcon({ size = 24, strokeWidth = 2, className, speed = 1, acce
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -0.75)">
       <motion.g
         initial={false}
         animate={on ? { x: [0, 0.5, -0.5, 0.5, -0.5, 0, 2, 0] } : { x: 0 }}
@@ -57,6 +58,7 @@ export function CarIcon({ size = 24, strokeWidth = 2, className, speed = 1, acce
         animate={on ? { opacity: [0, 1, 0, 1, 0.5] } : { opacity: 0 }}
         transition={{ duration: 0.9 / speed, times: [0, 0.35, 0.5, 0.6, 1] }}
       />
+      </g>
     </svg>
   );
 }

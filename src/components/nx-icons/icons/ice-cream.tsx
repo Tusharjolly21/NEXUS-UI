@@ -38,6 +38,7 @@ export function IceCreamIcon({ size = 24, strokeWidth = 2, className, speed = 1,
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -1.0)">
       <motion.g
         style={{ originX: "50%", originY: "100%" }}
         initial={false}
@@ -65,6 +66,7 @@ export function IceCreamIcon({ size = 24, strokeWidth = 2, className, speed = 1,
           transition={{ duration: 0.5 / speed, ease: "easeOut" }}
         />
       </motion.g>
+      </g>
     </svg>
   );
 }

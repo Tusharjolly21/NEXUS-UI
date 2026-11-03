@@ -38,6 +38,7 @@ export function BellIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -2.0)">
       <motion.g
         style={{ originX: "50%", originY: "12%" }}
         initial={false}
@@ -62,6 +63,7 @@ export function BellIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
         animate={on ? { scale: [0, 1.4, 1] } : { scale: 0 }}
         transition={on ? { duration: 0.45 / speed, delay: (0.12) / speed, ease: "easeOut" } : { duration: 0.15 / speed }}
       />
+      </g>
     </svg>
   );
 }

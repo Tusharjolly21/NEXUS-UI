@@ -38,6 +38,7 @@ export function BicycleIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -1.75)">
       <motion.g
         initial={false}
         animate={on ? { x: [0, 2, 0] } : { x: 0 }}
@@ -58,6 +59,7 @@ export function BicycleIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
           </g>
         ))}
       </motion.g>
+      </g>
     </svg>
   );
 }

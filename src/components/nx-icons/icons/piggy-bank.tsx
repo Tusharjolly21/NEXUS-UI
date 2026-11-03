@@ -38,6 +38,7 @@ export function PiggyBankIcon({ size = 24, strokeWidth = 2, className, speed = 1
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -1.25)">
       <motion.circle
         cx="11.7"
         cy="3"
@@ -63,6 +64,7 @@ export function PiggyBankIcon({ size = 24, strokeWidth = 2, className, speed = 1
         <path d="M16.2 11.6h.01" strokeWidth={2.4} />
         <path d="M4 11.6c-1.2-.2-1.8-1-1.4-2" />
       </motion.g>
+      </g>
     </svg>
   );
 }

@@ -38,6 +38,7 @@ export function BarChartIcon({ size = 24, strokeWidth = 2, className, speed = 1,
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -1.25)">
       <path d="M3.5 20.5h17" />
       {[
         { x: 6.5, to: 13 },
@@ -54,6 +55,7 @@ export function BarChartIcon({ size = 24, strokeWidth = 2, className, speed = 1,
           transition={{ duration: 0.6 / speed, times: [0, 0.7, 1], ease: "easeOut", delay: (i * 0.12) / speed }}
         />
       ))}
+      </g>
     </svg>
   );
 }

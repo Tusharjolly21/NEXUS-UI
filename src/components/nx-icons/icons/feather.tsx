@@ -38,6 +38,7 @@ export function FeatherIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0.75 -1.0)">
       <motion.g
         style={{ originX: "75%", originY: "20%" }}
         initial={false}
@@ -55,6 +56,7 @@ export function FeatherIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
         <path d="M19 4.6C11.8 4.2 6.6 8.6 6 15.6L5.5 19.8l4-.6C16.2 18.4 19.6 12 19 4.6z" />
         <path d="M5.5 19.8 3.6 21.4" />
       </motion.g>
+      </g>
     </svg>
   );
 }

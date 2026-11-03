@@ -38,6 +38,7 @@ export function PuzzleIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(-1.5 2.0)">
       <motion.g
         initial={false}
         animate={on ? { x: [3, -0.6, 0], y: [-3, 0.5, 0] } : { x: 0, y: 0 }}
@@ -52,6 +53,7 @@ export function PuzzleIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
           transition={{ duration: 0.5 / speed }}
         />
       </motion.g>
+      </g>
     </svg>
   );
 }

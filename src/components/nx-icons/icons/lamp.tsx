@@ -38,6 +38,7 @@ export function LampIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -1.0)">
       <path d="M7.5 5h9l2.5 8H5z" />
       <path d="M12 13v7.5M8 21h8" />
       {[
@@ -56,6 +57,7 @@ export function LampIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
           transition={{ duration: 0.7 / speed, delay: (on ? 0.15 + i * 0.05 : 0) / speed }}
         />
       ))}
+      </g>
     </svg>
   );
 }

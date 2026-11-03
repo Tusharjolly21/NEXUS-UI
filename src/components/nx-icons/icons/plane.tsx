@@ -38,6 +38,7 @@ export function PlaneIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(1.25 -1.25)">
       <g transform="rotate(45 12 12)">
         <motion.g
           initial={false}
@@ -46,6 +47,7 @@ export function PlaneIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
         >
           <path d="M12 2.5c.9 0 1.5.9 1.5 2V9l7.5 4.5V16l-7.5-2.2V19l2.2 1.5V22L12 21l-3.7 1V20.5L10.5 19v-5.2L3 16v-2.5L10.5 9V4.5c0-1.1.6-2 1.5-2z" stroke={accent} />
         </motion.g>
+      </g>
       </g>
     </svg>
   );

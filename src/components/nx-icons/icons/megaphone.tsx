@@ -38,6 +38,7 @@ export function MegaphoneIcon({ size = 24, strokeWidth = 2, className, speed = 1
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(1.5 -0.75)">
       <motion.g
         style={{ originX: "20%", originY: "60%" }}
         initial={false}
@@ -55,6 +56,7 @@ export function MegaphoneIcon({ size = 24, strokeWidth = 2, className, speed = 1
         animate={on ? { opacity: [0, 1, 0, 1, 0], x: [-1, 0.6, -1, 0.6, 0] } : { opacity: 0 }}
         transition={{ duration: 0.6 / speed }}
       />
+      </g>
     </svg>
   );
 }

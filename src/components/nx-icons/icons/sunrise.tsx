@@ -38,6 +38,7 @@ export function SunriseIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -2.0)">
       <path d="M2.5 19h19" />
       <motion.g
         initial={false}
@@ -57,6 +58,7 @@ export function SunriseIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
           transition={{ duration: 0.3 / speed, delay: (on ? 0.35 + i * 0.1 : 0) / speed }}
         />
       ))}
+      </g>
     </svg>
   );
 }

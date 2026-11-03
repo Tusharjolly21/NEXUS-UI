@@ -38,6 +38,7 @@ export function MapPinIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -1.0)">
       <motion.ellipse
         cx="12"
         cy="21"
@@ -56,6 +57,7 @@ export function MapPinIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
         <path d="M12 20.8s6.2-5.1 6.2-10.6a6.2 6.2 0 0 0-12.4 0c0 5.5 6.2 10.6 6.2 10.6z" />
         <circle cx="12" cy="10.2" r="2.3" fill={accent} stroke="none" />
       </motion.g>
+      </g>
     </svg>
   );
 }

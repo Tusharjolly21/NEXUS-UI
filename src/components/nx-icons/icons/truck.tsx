@@ -38,6 +38,7 @@ export function TruckIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(-1.25 -0.5)">
       <motion.g
         initial={false}
         animate={on ? { y: [0, -0.7, 0, -0.5, 0] } : { y: 0 }}
@@ -58,6 +59,7 @@ export function TruckIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
           transition={on ? { duration: 0.6 / speed, ease: "easeOut", repeat: 2, delay: (i * 0.15) / speed } : { duration: 0.2 / speed }}
         />
       ))}
+      </g>
     </svg>
   );
 }

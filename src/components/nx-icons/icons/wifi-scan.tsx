@@ -34,6 +34,7 @@ export function WifiScanIcon({ size = 24, strokeWidth = 2, className, speed = 1,
       className={className}
       aria-hidden="true"
     >
+      <g transform="translate(0 -1.75)">
       <circle cx="12" cy="19.5" r="1.3" fill={accent} stroke="none" />
       {["M9.17 16.67A4 4 0 0 1 14.83 16.67", "M6.34 13.84A8 8 0 0 1 17.66 13.84", "M3.51 11.01A12 12 0 0 1 20.49 11.01"].map((d, i) => (
         <motion.path
@@ -44,6 +45,7 @@ export function WifiScanIcon({ size = 24, strokeWidth = 2, className, speed = 1,
           transition={on ? { duration: 1.3 / speed, ease: "easeInOut", repeat: Infinity, delay: (i * 0.17) / speed } : { duration: 0.3 / speed }}
         />
       ))}
+      </g>
     </svg>
   );
 }

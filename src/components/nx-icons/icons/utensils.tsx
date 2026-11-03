@@ -38,6 +38,7 @@ export function UtensilsIcon({ size = 24, strokeWidth = 2, className, speed = 1,
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(1.25 0)">
       <motion.g
         style={{ originX: "50%", originY: "100%" }}
         initial={false}
@@ -62,6 +63,7 @@ export function UtensilsIcon({ size = 24, strokeWidth = 2, className, speed = 1,
         style={{ originX: "50%", originY: "50%" }}
         transition={{ duration: 0.6 / speed, times: [0, 0.35, 0.5, 1] }}
       />
+      </g>
     </svg>
   );
 }

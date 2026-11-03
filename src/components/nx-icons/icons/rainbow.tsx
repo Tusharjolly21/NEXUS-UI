@@ -38,6 +38,7 @@ export function RainbowIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -1.5)">
       <motion.g
         style={{ originX: "50%", originY: "100%" }}
         initial={false}
@@ -64,6 +65,7 @@ export function RainbowIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
           transition={{ duration: 0.45 / speed, delay: (on ? 0.28 : 0) / speed, ease: "easeOut" }}
         />
       </motion.g>
+      </g>
     </svg>
   );
 }

@@ -38,6 +38,7 @@ export function PlayPauseIcon({ size = 24, strokeWidth = 2, className, speed = 1
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(-0.75 0)">
       <motion.circle
         cx="12"
         cy="12"
@@ -54,6 +55,7 @@ export function PlayPauseIcon({ size = 24, strokeWidth = 2, className, speed = 1
         animate={{ d: on ? "M6.5 5 L10 5 L10 19 L6.5 19 Z M14 5 L17.5 5 L17.5 19 L14 19 Z" : "M7 5 L12.5 8.4 L12.5 15.6 L7 19 Z M12.5 8.4 L18.5 12 L18.5 12 L12.5 15.6 Z" }}
         transition={{ type: "spring", stiffness: 300 * speed * speed, damping: 26 * speed }}
       />
+      </g>
     </svg>
   );
 }

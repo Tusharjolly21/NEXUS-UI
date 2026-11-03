@@ -38,6 +38,7 @@ export function PizzaIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0 -0.75)">
       <motion.g
         style={{ originX: "50%", originY: "100%" }}
         initial={false}
@@ -65,6 +66,7 @@ export function PizzaIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
           />
         ))}
       </motion.g>
+      </g>
     </svg>
   );
 }

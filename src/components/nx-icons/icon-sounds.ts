@@ -241,6 +241,69 @@ import * as s_arrow_right_circle from "./sounds/arrow-right-circle";
 import * as s_more_vertical from "./sounds/more-vertical";
 import * as s_corner_down_right from "./sounds/corner-down-right";
 
+import * as s_layers from "./sounds/layers";
+import * as s_layout from "./sounds/layout";
+import * as s_columns from "./sounds/columns";
+import * as s_table from "./sounds/table";
+import * as s_crop from "./sounds/crop";
+import * as s_move from "./sounds/move";
+import * as s_pen_tool from "./sounds/pen-tool";
+import * as s_mouse_pointer from "./sounds/mouse-pointer";
+import * as s_triangle from "./sounds/triangle";
+import * as s_hexagon from "./sounds/hexagon";
+import * as s_ruler from "./sounds/ruler";
+import * as s_eyedropper from "./sounds/eyedropper";
+import * as s_git_commit from "./sounds/git-commit";
+import * as s_git_merge from "./sounds/git-merge";
+import * as s_git_pull_request from "./sounds/git-pull-request";
+import * as s_command from "./sounds/command";
+import * as s_braces from "./sounds/braces";
+import * as s_file_code from "./sounds/file-code";
+import * as s_sitemap from "./sounds/sitemap";
+import * as s_container from "./sounds/container";
+import * as s_sigma from "./sounds/sigma";
+import * as s_webhook from "./sounds/webhook";
+import * as s_rewind from "./sounds/rewind";
+import * as s_fast_forward from "./sounds/fast-forward";
+import * as s_cast from "./sounds/cast";
+import * as s_airplay from "./sounds/airplay";
+import * as s_aperture from "./sounds/aperture";
+import * as s_disc from "./sounds/disc";
+import * as s_film from "./sounds/film";
+import * as s_tablet from "./sounds/tablet";
+import * as s_battery_charging from "./sounds/battery-charging";
+import * as s_file_plus from "./sounds/file-plus";
+import * as s_file_minus from "./sounds/file-minus";
+import * as s_folder_plus from "./sounds/folder-plus";
+import * as s_folder_minus from "./sounds/folder-minus";
+import * as s_book_open from "./sounds/book-open";
+import * as s_user_check from "./sounds/user-check";
+import * as s_user_minus from "./sounds/user-minus";
+import * as s_phone_call from "./sounds/phone-call";
+import * as s_phone_missed from "./sounds/phone-missed";
+import * as s_phone_incoming from "./sounds/phone-incoming";
+import * as s_phone_outgoing from "./sounds/phone-outgoing";
+import * as s_phone_forwarded from "./sounds/phone-forwarded";
+import * as s_phone_off from "./sounds/phone-off";
+import * as s_voicemail from "./sounds/voicemail";
+import * as s_mail_open from "./sounds/mail-open";
+import * as s_rss from "./sounds/rss";
+import * as s_message_circle from "./sounds/message-circle";
+import * as s_infinity from "./sounds/infinity";
+import * as s_bars_spinner from "./sounds/bars-spinner";
+import * as s_dual_ring from "./sounds/dual-ring";
+import * as s_activity from "./sounds/activity";
+import * as s_scroll_down from "./sounds/scroll-down";
+import * as s_dollar_sign from "./sounds/dollar-sign";
+import * as s_trending_down from "./sounds/trending-down";
+import * as s_bar_chart_horizontal from "./sounds/bar-chart-horizontal";
+import * as s_cloud_lightning from "./sounds/cloud-lightning";
+import * as s_cloud_drizzle from "./sounds/cloud-drizzle";
+import * as s_navigation from "./sounds/navigation";
+import * as s_frown from "./sounds/frown";
+import * as s_meh from "./sounds/meh";
+import * as s_zoom_in from "./sounds/zoom-in";
+
 type Score = { length: number; level: number; play: (c: AudioContext, o: AudioNode, t: Time) => void };
 
 /** Every icon's score by slug. Each one is timed against that icon's own animation. */
@@ -483,6 +546,68 @@ const SCORES: Record<string, Score> = {
   "arrow-right-circle": s_arrow_right_circle,
   "more-vertical": s_more_vertical,
   "corner-down-right": s_corner_down_right,
+  "layers": s_layers,
+  "layout": s_layout,
+  "columns": s_columns,
+  "table": s_table,
+  "crop": s_crop,
+  "move": s_move,
+  "pen-tool": s_pen_tool,
+  "mouse-pointer": s_mouse_pointer,
+  "triangle": s_triangle,
+  "hexagon": s_hexagon,
+  "ruler": s_ruler,
+  "eyedropper": s_eyedropper,
+  "git-commit": s_git_commit,
+  "git-merge": s_git_merge,
+  "git-pull-request": s_git_pull_request,
+  "command": s_command,
+  "braces": s_braces,
+  "file-code": s_file_code,
+  "sitemap": s_sitemap,
+  "container": s_container,
+  "sigma": s_sigma,
+  "webhook": s_webhook,
+  "rewind": s_rewind,
+  "fast-forward": s_fast_forward,
+  "cast": s_cast,
+  "airplay": s_airplay,
+  "aperture": s_aperture,
+  "disc": s_disc,
+  "film": s_film,
+  "tablet": s_tablet,
+  "battery-charging": s_battery_charging,
+  "file-plus": s_file_plus,
+  "file-minus": s_file_minus,
+  "folder-plus": s_folder_plus,
+  "folder-minus": s_folder_minus,
+  "book-open": s_book_open,
+  "user-check": s_user_check,
+  "user-minus": s_user_minus,
+  "phone-call": s_phone_call,
+  "phone-missed": s_phone_missed,
+  "phone-incoming": s_phone_incoming,
+  "phone-outgoing": s_phone_outgoing,
+  "phone-forwarded": s_phone_forwarded,
+  "phone-off": s_phone_off,
+  "voicemail": s_voicemail,
+  "mail-open": s_mail_open,
+  "rss": s_rss,
+  "message-circle": s_message_circle,
+  "infinity": s_infinity,
+  "bars-spinner": s_bars_spinner,
+  "dual-ring": s_dual_ring,
+  "activity": s_activity,
+  "scroll-down": s_scroll_down,
+  "dollar-sign": s_dollar_sign,
+  "trending-down": s_trending_down,
+  "bar-chart-horizontal": s_bar_chart_horizontal,
+  "cloud-lightning": s_cloud_lightning,
+  "cloud-drizzle": s_cloud_drizzle,
+  "navigation": s_navigation,
+  "frown": s_frown,
+  "meh": s_meh,
+  "zoom-in": s_zoom_in,
 };
 
 export function hasIconSound(slug: string) {
@@ -510,8 +635,20 @@ export function playIconSound(slug: string, opts: { speed?: number; volume?: num
   const score = SCORES[slug];
   if (!score) return;
   const speed = Math.min(4, Math.max(0.25, opts.speed ?? 1));
-  const def: SoundDef = { category: "Icons", label: slug, length: score.length / speed + 0.5, play: (c, o) => scoreIconSound(slug, c, o, speed) };
-  playDef(`nx-icon:${slug}`, def, Math.min(1, (opts.volume ?? 0.9) * score.level), opts.force ?? false);
+  // The icon's measured level goes on the sound itself, where it can be above 1: quiet icons (a level of 2 or 3) are
+  // lifted to match the loud ones, instead of being held at full volume and staying quiet.
+  const def: SoundDef = {
+    category: "Icons",
+    label: slug,
+    length: score.length / speed + 0.5,
+    play: (c, o) => {
+      const lift = c.createGain();
+      lift.gain.value = score.level;
+      lift.connect(o);
+      scoreIconSound(slug, c, lift, speed);
+    },
+  };
+  playDef(`nx-icon:${slug}`, def, Math.min(1, opts.volume ?? 0.9), opts.force ?? false);
 }
 
 /** The three liquid looks have a sound of their own. */

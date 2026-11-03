@@ -38,6 +38,7 @@ export function UserIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g transform="translate(0.75 -0.5)">
       <motion.g
         initial={false}
         animate={on ? { y: [0, -2.2, 0] } : { y: 0 }}
@@ -65,6 +66,7 @@ export function UserIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
         animate={on ? { scale: [0, 1.4, 1] } : { scale: 0 }}
         transition={on ? { duration: 0.5 / speed, delay: (0.15) / speed, ease: "easeOut" } : { duration: 0.1 / speed }}
       />
+      </g>
     </svg>
   );
 }
