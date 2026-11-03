@@ -58,23 +58,32 @@ export function LaunchBanner({ isPro = false }: { isPro?: boolean }) {
           {isPro ? "Open the icons ›" : "See the icons ›"}
         </Link>
         {isPro ? null : (
-          // While the numbers load, the line is there but invisible (same width), so nothing jumps or flashes the old text.
-          <span className={`hidden items-center gap-x-1.5 md:inline-flex ${loading ? "invisible" : ""}`} aria-hidden={loading || undefined}>
-            <span aria-hidden className="text-white/30">|</span>
+          // The early-slots line. On a phone it sits on its own row under the icons line; from tablet width it joins it.
+          // While the numbers load it is there but invisible (same size), so nothing jumps or flashes the old text.
+          // If the numbers can't be read, a phone shows nothing extra and wider screens show the plain plans line.
+          <span
+            className={`flex basis-full items-center justify-center gap-x-1.5 pt-1 md:inline-flex md:basis-auto md:pt-0 ${loading ? "invisible" : ""} ${!left && !loading ? "hidden md:inline-flex" : ""}`}
+            aria-hidden={loading || undefined}
+          >
+            <span aria-hidden className="hidden text-white/30 md:inline">|</span>
             {left || loading ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#ff9f0a]/[0.16] px-2.5 py-0.5 text-[#ffd60a] ring-1 ring-inset ring-[#ff9f0a]/35">
-                <span aria-hidden className="relative flex size-1.5">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#ff9f0a]/[0.16] px-2.5 py-0.5 text-[#ffd60a] ring-1 ring-inset ring-[#ff9f0a]/35"
+              >
+                <span aria-hidden className="relative flex size-1.5 shrink-0">
                   <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#ff9f0a] opacity-60 motion-reduce:hidden" />
                   <span className="relative inline-flex size-1.5 rounded-full bg-[#ff9f0a]" />
                 </span>
-                <span>
-                  Early prices: <strong className="font-semibold text-white">{left ? left.total : 98}</strong> {left && left.total === 1 ? "slot" : "slots"} left, then prices go up
+                <span className="whitespace-nowrap">
+                  <span className="hidden md:inline">Early prices: </span>
+                  <strong className="font-semibold text-white">{left ? left.total : 98}</strong> {left && left.total === 1 ? "slot" : "slots"} left, then prices go up
                 </span>
-              </span>
+              </Link>
             ) : (
               "Pro unlocks the rest."
             )}
-            <Link href="/pricing" className="whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
+            <Link href="/pricing" className="hidden whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4 md:inline">
               See plans ›
             </Link>
           </span>
