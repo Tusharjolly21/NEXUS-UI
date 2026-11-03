@@ -14009,6 +14009,86 @@ export default function Page() {
     ],
     tailwindSource: tw,
   },
+  {
+    slug: "liquid-smoke",
+    name: "Liquid Smoke",
+    registryCliName: "liquid-smoke",
+    description:
+      "A fluid you stir with the pointer, solved on the GPU. Move and smoke pours out of the cursor, curls into eddies and fades, lit so it reads as a body of smoke with a wet glint on its folds. A slow drift leaves a wisp and a fast sweep pours. Screen it over a dark section or set Multiply for ink on a light one, inside any element or over the whole page. Clicks pass straight through. It sleeps once the trail has gone, skips machines without a GPU, and stays off for people who ask for reduced motion.",
+    categorySlug: "background-effects",
+    tags: ["fluid", "smoke", "ink", "cursor", "pointer trail", "fluid simulation", "navier-stokes", "webgl", "shader", "gpu", "hero background", "autoplay", "motion kit"],
+    premium: true,
+    trendingScore: 192,
+    createdAt: "2026-11-02",
+    animationKinds: ["hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "area", type: '"inside" | "page"', defaultValue: '"inside"', description: "inside fills its parent and listens to the pointer there (give the parent position: relative). page is a fixed layer over the whole window." },
+      { name: "color", type: "string", defaultValue: '"#e9e9ee"', description: "Colour of the smoke. Ignored when rainbow is on. With blend set to multiply and no colour given, it draws in near-black." },
+      { name: "rainbow", type: "boolean", defaultValue: "false", description: "Shifts the hue by itself as you move." },
+      { name: "blend", type: '"normal" | "screen" | "multiply" | "difference"', defaultValue: '"screen"', description: "How the smoke sits on what is behind it. screen for dark backgrounds, multiply for ink on light ones." },
+      { name: "cursor", type: '"native" | "dot" | "ring"', defaultValue: '"ring"', description: "The pointer over the area. native keeps the system cursor." },
+      { name: "fade", type: "number", defaultValue: "2.4", description: "How fast the trail fades. Higher is shorter." },
+      { name: "force", type: "number", defaultValue: "6000", description: "How hard the pointer pushes the fluid." },
+      { name: "radius", type: "number", defaultValue: "0.25", description: "Size of each puff." },
+      { name: "swirl", type: "number", defaultValue: "14", description: "How much it curls into eddies. 0 flows smooth." },
+      { name: "shading", type: "boolean", defaultValue: "true", description: "Lights the surface so it reads as a body of smoke." },
+      { name: "gloss", type: "number", defaultValue: "0.5", description: "The wet glint on the shaded surface, 0 to 1." },
+      { name: "cursorColor", type: "string", description: "Colour of the ring or dot. White on dark blends and near-black in ink mode when left out." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Stirs itself along a slow path until a pointer moves over it, and again after it leaves. Off under reduced motion." },
+      { name: "pixelRatio", type: "number", defaultValue: "1.5", description: "Highest device pixel ratio the canvas draws at. Lower is lighter on the GPU." },
+      { name: "allowSoftware", type: "boolean", defaultValue: "false", description: "Also run where WebGL is drawn in software (no GPU). Slow, so it is off and the area stays empty there." },
+      { name: "className", type: "string", description: "Classes for the layer that holds the canvas." },
+    ],
+    Preview: Previews.PreviewLiquidSmoke,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { LiquidSmoke } from "@/components/liquid-smoke";
+
+export default function Page() {
+  return (
+    <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden bg-[#0b0b0d] px-4">
+      <LiquidSmoke color="#e8e8ee" swirl={18} gloss={0.9} />
+      <h1 className="relative text-5xl font-semibold tracking-tight text-white">Move your pointer</h1>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Ink on a light section",
+        code: `// src/app/page.tsx
+
+import { LiquidSmoke } from "@/components/liquid-smoke";
+
+export default function Page() {
+  return (
+    <section className="relative min-h-[480px] overflow-hidden rounded-3xl bg-[#f5f4f0]">
+      <LiquidSmoke blend="multiply" fade={1.3} swirl={9} gloss={0} />
+    </section>
+  );
+}`,
+      },
+      {
+        title: "Over the whole page, in colour",
+        code: `// src/app/layout.tsx
+
+import { LiquidSmoke } from "@/components/liquid-smoke";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body className="bg-[#0b0b0d] text-white">
+        {children}
+        <LiquidSmoke area="page" rainbow swirl={26} radius={0.3} cursor="native" />
+      </body>
+    </html>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */
