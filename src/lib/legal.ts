@@ -7,7 +7,7 @@ export const legalConfig = {
   operator: "Nexus UI",
   // REVIEW: the country/state whose law governs the terms and whose courts
   // hear disputes. Rendered as-is in the "Governing law" section.
-  jurisdiction: "[jurisdiction to be confirmed]",
+  jurisdiction: "India",
   // Shown on the site (footer, contact page, legal pages) and used as the sender of the contact-form
   // notification. The domain must be verified in Resend for that email to send.
   contactEmail: "support@nexus-ui.com",
