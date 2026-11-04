@@ -7,7 +7,7 @@ import {
   getPreviewExportName,
   libraryComponents,
 } from "@/lib/catalog/library-components";
-import { createMetadata, siteConfig } from "@/lib/seo";
+import { createMetadata, shortDescription, siteConfig } from "@/lib/seo";
 import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
 import { COMPONENT_FAQ } from "@/lib/catalog/component-faq";
 import { soundFaq, soundFor, typesFor } from "@/lib/catalog/component-sounds";
@@ -107,12 +107,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const item = getLibraryComponent(slug);
   if (!item) return {};
   const seo = COMPONENT_SEO[item.slug];
-  return createMetadata({
-    title: seo?.title ?? `${item.name} — Animated React Component`,
-    description: seo?.description ?? item.description,
-    openGraph: { title: `${item.name} · ${siteConfig.siteName}` },
-    alternates: { canonical: `/components/${item.slug}` },
-  });
+  return createMetadata(
+    {
+      title: seo?.title ?? `${item.name} — Animated React Component`,
+      description: seo?.description ?? shortDescription(item.description),
+      openGraph: { title: `${item.name} · ${siteConfig.siteName}` },
+      alternates: { canonical: `/components/${item.slug}` },
+    },
+    { title: item.name, pro: item.premium },
+  );
 }
 
 export default async function ComponentDetailPage({ params }: Props) {

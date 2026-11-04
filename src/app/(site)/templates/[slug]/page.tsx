@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTemplate, templates } from "@/lib/catalog/templates";
 import { TemplateDetailContent } from "@/components/templates/template-detail-content";
-import { createMetadata, siteConfig } from "@/lib/seo";
+import { createMetadata, shortDescription, siteConfig } from "@/lib/seo";
 import { sessionCanAccessTemplate } from "@/lib/template-access";
 
 export const dynamic = "force-dynamic";
@@ -32,12 +32,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     });
   }
 
-  return createMetadata({
-    title: `${t.title} — Next.js Landing Page Template`,
-    description: t.description,
-    openGraph: { title: `${t.title} · ${siteConfig.siteName}` },
-    alternates: { canonical: `/templates/${slug}` },
-  });
+  return createMetadata(
+    {
+      title: `${t.title} — Next.js Landing Page Template`,
+      description: shortDescription(t.description),
+      openGraph: { title: `${t.title} · ${siteConfig.siteName}` },
+      alternates: { canonical: `/templates/${slug}` },
+    },
+    { title: t.title, pro: !!t.premium },
+  );
 }
 
 export default async function TemplateDetailPage({ params, searchParams }: Props) {

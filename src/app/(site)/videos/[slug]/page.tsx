@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? `${v.blurb} A ${v.duration}-second ${v.formats.join(", ")} video as one HTML file: take the prompt and the source, then render it to MP4 with HyperFrames.`
       : `${v.blurb} A ${v.duration}-second ${v.formats.join(", ")} video${v.silent ? " that loops without a seam" : " with its own soundtrack"}: edit the words live, then take the prompt and the code.`,
     alternates: { canonical: `/videos/${v.slug}` },
-  });
+  }, { title: v.title, pro: !!v.premium });
 }
 
 export default async function VideoPage({ params }: Props) {
