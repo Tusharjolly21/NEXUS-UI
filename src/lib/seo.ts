@@ -37,6 +37,8 @@ export type ShareCard = {
   kind?: string;
   /** Adds a Pro pill. */
   pro?: boolean;
+  /** The picture on the card, as "<kind>/<slug>" (see ogShot in src/lib/og-shot.ts). */
+  shot?: string;
 };
 
 const KIND_BY_PATH: [RegExp, string][] = [
@@ -104,6 +106,7 @@ export function createMetadata(override: Metadata = {}, card: ShareCard = {}): M
     description: shortDescription(descStr, 120),
     ...(kind ? { kind } : {}),
     ...(card.pro ? { pro: "1" } : {}),
+    ...(card.shot ? { shot: card.shot } : {}),
   }).toString()}`;
   const ogImages = [{ url: ogImageUrl, width: 1200, height: 630, alt: titleStr }];
 

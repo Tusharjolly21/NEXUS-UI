@@ -56,6 +56,7 @@ import LogoCloudSwap from "@/components/blocks/logo-clouds/logo-cloud-swap";
 import LogoCloudSingleRow from "@/components/blocks/logo-clouds/logo-cloud-single-row";
 import LogoCloudShelf from "@/components/blocks/logo-clouds/logo-cloud-shelf";
 import { createMetadata, shortDescription, siteConfig } from "@/lib/seo";
+import { ogShot } from "@/lib/og-shot";
 import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
 import { getMovedSection } from "@/lib/catalog/moved-sections";
 import { SHADCN_REGISTRY_SCOPE } from "@/lib/registry-scope";
@@ -95,7 +96,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       openGraph: { title: `${block.name} · ${siteConfig.siteName}` },
       alternates: { canonical: `/blocks/${slug}` },
     },
-    { title: block.name, pro: !!block.premium },
+    { title: block.name, pro: !!block.premium, shot: ogShot("blocks", slug) },
   );
 }
 

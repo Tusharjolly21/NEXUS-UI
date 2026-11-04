@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getTemplate, templates } from "@/lib/catalog/templates";
 import { TemplateDetailContent } from "@/components/templates/template-detail-content";
 import { createMetadata, shortDescription, siteConfig } from "@/lib/seo";
+import { ogShot } from "@/lib/og-shot";
 import { sessionCanAccessTemplate } from "@/lib/template-access";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       openGraph: { title: `${t.title} · ${siteConfig.siteName}` },
       alternates: { canonical: `/templates/${slug}` },
     },
-    { title: t.title, pro: !!t.premium },
+    { title: t.title.split(" — ")[0], pro: !!t.premium, shot: ogShot("templates", slug) },
   );
 }
 

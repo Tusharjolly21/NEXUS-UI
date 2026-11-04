@@ -83,15 +83,20 @@ const nextConfig = {
     "/api/prompt/blocks/[id]": ["./content/build-prompts/blocks/*.md"],
     // The sounds page shows the library's own source.
     "/sounds": ["./src/lib/ui-sounds.ts"],
-    // Component pages list the guides that link to them.
-    "/components/[slug]": ["./content/blog/*.mdx"],
     // Block pages read section source at request time (only for sessions allowed to see it).
     "/blocks/[slug]": [
+      "./public/og-shots/blocks/*.jpg",
       "./src/components/blocks/**/*.{ts,tsx}",
       "./src/components/{interactive-dots,layered-wave-background,particle-noise,wavy-lines}/**/*.{ts,tsx}",
       "./src/app/globals.css",
     ],
-    "/components/[slug]": ["./.generated/registry/**/*.json", "./content/build-prompts/*.md"],
+    // Component pages: the registry and build prompts, the guides that link to them (listed on the page;
+    // this key used to appear twice, so the guides were dropped) and the share-card stills they check for.
+    "/components/[slug]": ["./.generated/registry/**/*.json", "./content/build-prompts/*.md", "./content/blog/*.mdx", "./public/og-shots/components/*.jpg"],
+    // The share card reads its font and the picture it shows (src/app/api/og/route.tsx).
+    "/api/og": ["./src/app/api/og/fonts/*", "./public/og-shots/**/*.jpg", "./public/videos/previews/*.jpg"],
+    "/templates/[slug]": ["./public/og-shots/templates/*.jpg"],
+    "/videos/[slug]": ["./public/videos/previews/*.jpg"],
     // Pro build prompts live outside public/ and are only read by this gated route.
     "/api/prompt/[slug]": ["./content/build-prompts/*.md"],
     // Icon pages show each icon's own source, its sound score and the look helper, read at request time.

@@ -8,6 +8,7 @@ import {
   libraryComponents,
 } from "@/lib/catalog/library-components";
 import { createMetadata, shortDescription, siteConfig } from "@/lib/seo";
+import { ogShot } from "@/lib/og-shot";
 import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
 import { COMPONENT_FAQ } from "@/lib/catalog/component-faq";
 import { soundFaq, soundFor, typesFor } from "@/lib/catalog/component-sounds";
@@ -114,7 +115,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       openGraph: { title: `${item.name} · ${siteConfig.siteName}` },
       alternates: { canonical: `/components/${item.slug}` },
     },
-    { title: item.name, pro: item.premium },
+    { title: item.name, pro: item.premium, shot: ogShot("components", item.slug) },
   );
 }
 
