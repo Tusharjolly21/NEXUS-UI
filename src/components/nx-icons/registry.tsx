@@ -301,6 +301,7 @@ import { NavigationIcon } from "./icons/navigation";
 import { FrownIcon } from "./icons/frown";
 import { MehIcon } from "./icons/meh";
 import { ZoomInIcon } from "./icons/zoom-in";
+import { MusicNotesIcon } from "./icons/music-notes";
 
 export type NxIconProps = {
   size?: number;
@@ -615,4 +616,5 @@ export const NX_ICONS: Record<string, ComponentType<NxIconProps>> = {
   "frown": FrownIcon,
   "meh": MehIcon,
   "zoom-in": ZoomInIcon,
+  "music-notes": MusicNotesIcon,
 };

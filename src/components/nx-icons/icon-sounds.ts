@@ -304,6 +304,8 @@ import * as s_frown from "./sounds/frown";
 import * as s_meh from "./sounds/meh";
 import * as s_zoom_in from "./sounds/zoom-in";
 
+import * as s_music_notes from "./sounds/music-notes";
+
 type Score = { length: number; level: number; play: (c: AudioContext, o: AudioNode, t: Time) => void };
 
 /** Every icon's score by slug. Each one is timed against that icon's own animation. */
@@ -608,6 +610,7 @@ const SCORES: Record<string, Score> = {
   "frown": s_frown,
   "meh": s_meh,
   "zoom-in": s_zoom_in,
+  "music-notes": s_music_notes,
 };
 
 export function hasIconSound(slug: string) {
