@@ -19,7 +19,7 @@ import { PRICES, formatPrice } from "@/lib/pricing";
 const FEATURED = "aspiring_abundance";
 const HIGHLIGHT = "$79 dollars";
 /** Who leads the deck: the fullest, most specific comments first; the rest follow in the homepage's order. */
-const LEAD = ["benjaminhu", "No_Speech8210", "Skaifessurk", "liuxueqi0044", "ds1008", "DarkBlade_12", "vrangnarr", "Actual-Deal-4445", "webdesign_786", "dfnslvtr", "velvetlane1", "ssmlee04"];
+const LEAD = ["benjaminhu", "noahelhadedy", "No_Speech8210", "Skaifessurk", "liuxueqi0044", "ds1008", "DarkBlade_12", "vrangnarr", "Actual-Deal-4445", "webdesign_786", "dfnslvtr", "velvetlane1", "ssmlee04"];
 const DECK: Comment[] = [
   ...LEAD.map((u) => COMMENTS.find((c) => c.user === u)).filter((c): c is Comment => !!c),
   ...COMMENTS.filter((c) => c.user !== FEATURED && !LEAD.includes(c.user)),

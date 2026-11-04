@@ -37,6 +37,7 @@ const ROW_ONE: Comment[] = [
 ];
 
 const ROW_TWO: Comment[] = [
+  { user: "noahelhadedy", source: "Instagram", quote: "The library looks really solid\u{1F525}", platform: "instagram", verified: true },
   { user: "Skaifessurk", source: "r/SaaS", quote: "agreed, the web needs way more goofy little interactions like that imo." },
   { user: "velvetlane1", source: "r/webdesign", quote: "yeah super creative concept tbh" },
   { user: "ds1008", source: "r/SaaS", quote: "Pretty sick UI kit" },

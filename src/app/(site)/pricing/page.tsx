@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, Minus, Plus } from "lucide-react";
 import { CommentDeck } from "@/components/pricing/comment-deck";
+import { MembersRow } from "@/components/pricing/members-row";
 import { PlanAction, PlanNotice, PlanTag } from "@/components/pricing/plan-action";
 import { PillLink, RainbowWord } from "@/components/site";
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
@@ -241,6 +242,7 @@ export default function PricingPage() {
               Request a component ›
             </Link>
           </p>
+          <MembersRow />
         </div>
       </section>
 
