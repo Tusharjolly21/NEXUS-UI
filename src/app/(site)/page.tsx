@@ -180,7 +180,14 @@ export default function Home() {
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-rainbow-green opacity-60 motion-reduce:animate-none" />
               <span className="relative inline-flex size-2 rounded-full bg-rainbow-green" />
             </span>
-            {CATALOG_COUNTS.components} animated components, free to start
+            <span>
+              <strong className="font-semibold">{CATALOG_COUNTS.components}+</strong>
+              <span className="sm:hidden"> components, </span>
+              <span className="hidden sm:inline"> animated components, and </span>
+              <span className="ml-0.5 inline-block whitespace-nowrap rounded-full bg-[linear-gradient(90deg,#0090f7,#6e5bff_35%,#ba62fc_65%,#f2416b)] px-2.5 py-0.5 font-semibold text-white shadow-[0_4px_14px_-4px_rgba(110,91,255,0.55)]">
+                more coming for Pro
+              </span>
+            </span>
           </p>
           <h1 className="pg-display mt-7 text-[clamp(52px,11vw,124px)] text-foreground">
             <span className="block">Make your</span>

@@ -17,7 +17,7 @@ export type CakeIconProps = {
   play?: boolean;
 };
 
-/** A birthday cake whose candle flame flickers as the frosting wiggles. */
+/** A two-tier birthday cake whose candle flame flickers while the icing wiggles and the cake gives a little bounce. */
 export function CakeIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: CakeIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -40,21 +40,28 @@ export function CakeIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
     >
       <motion.g
         initial={false}
-        animate={on ? { y: [0, -1, 0] } : { y: 0 }}
+        animate={on ? { y: [0, -0.8, 0] } : { y: 0 }}
         transition={{ duration: 0.4 / speed }}
       >
-        <rect x="4" y="13" width="16" height="8" rx="1.5" />
-        <path d="M12 13V9" />
-        <path d="M4 16.5q2 2.5 4 0t4 0 4 0 4 0" stroke={accent} />
+        <rect x="3.5" y="14.5" width="17" height="6.5" rx="1.6" />
+        <rect x="6.5" y="10" width="11" height="4.5" rx="1.3" />
+        <path d="M12 10V7.6" />
+        <motion.path
+          d="M6.4 17.9q1.4 1.5 2.8 0t2.8 0 2.8 0 2.8 0"
+          stroke={accent}
+          initial={false}
+          animate={on ? { d: ["M6.4 17.9q1.4 1.5 2.8 0t2.8 0 2.8 0 2.8 0", "M6.4 17.9q1.4 -1.5 2.8 0t2.8 0 2.8 0 2.8 0", "M6.4 17.9q1.4 1.5 2.8 0t2.8 0 2.8 0 2.8 0"] } : { d: "M6.4 17.9q1.4 1.5 2.8 0t2.8 0 2.8 0 2.8 0" }}
+          transition={{ duration: 0.7 / speed, ease: "easeInOut" }}
+        />
       </motion.g>
       <motion.path
-        d="M12 7.8c-1.4-1.2-1.6-2.6 0-4.4 1.6 1.8 1.4 3.2 0 4.4z"
+        d="M12 6.4c-1.25-1-1.45-2.3 0-3.9 1.45 1.6 1.25 2.9 0 3.9z"
         fill={accent}
         stroke={accent}
-        strokeWidth={1.4}
+        strokeWidth={1.3}
         style={{ originX: "50%", originY: "100%" }}
         initial={false}
-        animate={on ? { scaleY: [1, 1.25, 0.85, 1.15, 1], skewX: [0, -8, 6, -4, 0] } : { scaleY: 1, skewX: 0 }}
+        animate={on ? { scaleY: [1, 1.22, 0.86, 1.14, 1], skewX: [0, -8, 6, -4, 0] } : { scaleY: 1, skewX: 0 }}
         transition={{ duration: 0.8 / speed, ease: "easeInOut" }}
       />
     </svg>
