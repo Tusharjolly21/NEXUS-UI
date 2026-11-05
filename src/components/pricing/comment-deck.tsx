@@ -51,7 +51,7 @@ function Avatar({ c, size = 36 }: { c: Comment; size?: number }) {
 function Source({ c }: { c: Comment }) {
   const insta = c.platform === "instagram";
   if (c.platform === "x") {
-    return <Image src="/images/testimonials/x.png" alt="X" width={22} height={22} className="size-[22px] shrink-0 rounded-[6px] dark:ring-1 dark:ring-white/25" />;
+    return <Image src="/images/testimonials/x.png" alt="X" width={22} height={22} className="size-[22px] shrink-0 rounded-[6px] dark:invert" />;
   }
   return insta ? (
     <Image src="/images/testimonials/instagram.png" alt="Instagram" width={22} height={22} className="size-[22px] shrink-0" />

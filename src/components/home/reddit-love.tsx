@@ -104,7 +104,7 @@ export function Card({ c, className }: { c: Comment; className?: string }) {
         {insta ? (
           <Image src="/images/testimonials/instagram.png" alt="Instagram" width={24} height={24} className="ml-auto size-6 shrink-0" />
         ) : onX ? (
-          <Image src="/images/testimonials/x.png" alt="X" width={24} height={24} className="ml-auto size-6 shrink-0 rounded-[7px] dark:ring-1 dark:ring-white/25" />
+          <Image src="/images/testimonials/x.png" alt="X" width={24} height={24} className="ml-auto size-6 shrink-0 rounded-[7px] dark:invert" />
         ) : (
           <Image src="/reddit-icon.png" alt="Reddit" width={24} height={24} className="ml-auto size-6 shrink-0 rounded-[7px]" />
         )}
