@@ -19,7 +19,7 @@ import { PRICES, formatPrice } from "@/lib/pricing";
 const FEATURED = "aspiring_abundance";
 const HIGHLIGHT = "$79 dollars";
 /** Who leads the deck: the fullest, most specific comments first; the rest follow in the homepage's order. */
-const LEAD = ["benjaminhu", "noahelhadedy", "No_Speech8210", "Skaifessurk", "liuxueqi0044", "ds1008", "DarkBlade_12", "vrangnarr", "Actual-Deal-4445", "webdesign_786", "dfnslvtr", "velvetlane1", "ssmlee04"];
+const LEAD = ["benjaminhu", "noahelhadedy", "itsmeekaran", "No_Speech8210", "Skaifessurk", "liuxueqi0044", "ds1008", "DarkBlade_12", "vrangnarr", "Actual-Deal-4445", "webdesign_786", "dfnslvtr", "velvetlane1", "ssmlee04"];
 const DECK: Comment[] = [
   ...LEAD.map((u) => COMMENTS.find((c) => c.user === u)).filter((c): c is Comment => !!c),
   ...COMMENTS.filter((c) => c.user !== FEATURED && !LEAD.includes(c.user)),
@@ -50,6 +50,9 @@ function Avatar({ c, size = 36 }: { c: Comment; size?: number }) {
 
 function Source({ c }: { c: Comment }) {
   const insta = c.platform === "instagram";
+  if (c.platform === "x") {
+    return <Image src="/images/testimonials/x.png" alt="X" width={22} height={22} className="size-[22px] shrink-0 rounded-[6px] dark:ring-1 dark:ring-white/25" />;
+  }
   return insta ? (
     <Image src="/images/testimonials/instagram.png" alt="Instagram" width={22} height={22} className="size-[22px] shrink-0" />
   ) : (
@@ -62,7 +65,7 @@ function Byline({ c }: { c: Comment }) {
   return (
     <span className="min-w-0">
       <span className="flex items-center gap-1.5 text-[14px] font-medium text-foreground">
-        <span className="truncate">{insta ? c.user : `u/${c.user}`}</span>
+        <span className="truncate">{insta ? c.user : c.platform === "x" ? `@${c.user}` : `u/${c.user}`}</span>
         {c.verified ? <Image src="/images/testimonials/verified.png" alt="Verified account" width={15} height={15} className="size-[15px] shrink-0" /> : null}
       </span>
       <span className="block text-[13px] text-muted-foreground">on {c.source}</span>
@@ -227,7 +230,7 @@ export function CommentDeck() {
     <div>
       <div className="max-w-[640px]">
         <h2 className="pg-display text-[clamp(36px,5vw,48px)] leading-[1.04] text-foreground">Don&apos;t take our word for it.</h2>
-        <p className="mt-4 text-[17px] text-muted-foreground">Comments from Reddit and Instagram on the components, quoted as written.</p>
+        <p className="mt-4 text-[17px] text-muted-foreground">Comments from Reddit, Instagram and X on the components, quoted as written.</p>
       </div>
       <div className="mt-14 grid items-center gap-16 lg:grid-cols-[1.15fr_1fr] lg:gap-20">
         <Featured />

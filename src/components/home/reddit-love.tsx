@@ -2,11 +2,11 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * Real comments from Reddit threads and Instagram about Nexus UI components, quoted as written (an
+ * Real comments from Reddit threads, Instagram and X about Nexus UI components, quoted as written (an
  * ellipsis marks anything left out). Two rows drift in opposite directions and never end; hovering pauses them, and
  * people who prefer reduced motion get a row they can scroll by hand instead. No images or scripts
- * are loaded from Reddit or Instagram: the avatar is just the first letter of the username, and the
- * small Reddit or Instagram logo marks where each comment came from. The blue badge shows only on an
+ * are loaded from Reddit, Instagram or X: the avatar is just the first letter of the username, and the
+ * small Reddit, Instagram or X logo marks where each comment came from. The blue badge shows only on an
  * account that Instagram itself shows as verified.
  */
 
@@ -15,7 +15,7 @@ export type Comment = {
   source: string;
   quote: string;
   /** Defaults to Reddit. */
-  platform?: "instagram";
+  platform?: "instagram" | "x";
   verified?: boolean;
 };
 
@@ -37,6 +37,7 @@ const ROW_ONE: Comment[] = [
 ];
 
 const ROW_TWO: Comment[] = [
+  { user: "itsmeekaran", source: "X", quote: "This really looks cool, especially the attention to physics and smooth animations. Love seeing people build things like this", platform: "x" },
   { user: "noahelhadedy", source: "Instagram", quote: "The library looks really solid\u{1F525}", platform: "instagram", verified: true },
   { user: "Skaifessurk", source: "r/SaaS", quote: "agreed, the web needs way more goofy little interactions like that imo." },
   { user: "velvetlane1", source: "r/webdesign", quote: "yeah super creative concept tbh" },
@@ -72,6 +73,7 @@ export function tone(user: string) {
 export function Card({ c, className }: { c: Comment; className?: string }) {
   const [from, to] = tone(c.user);
   const insta = c.platform === "instagram";
+  const onX = c.platform === "x";
   return (
     <figure
       className={cn(
@@ -92,7 +94,7 @@ export function Card({ c, className }: { c: Comment; className?: string }) {
         </span>
         <span className="min-w-0">
           <span className="flex items-center gap-1.5 text-[14px] font-medium text-foreground">
-            <span className="truncate">{insta ? c.user : `u/${c.user}`}</span>
+            <span className="truncate">{insta ? c.user : onX ? `@${c.user}` : `u/${c.user}`}</span>
             {c.verified ? (
               <Image src="/images/testimonials/verified.png" alt="Verified account" width={16} height={16} className="size-4 shrink-0" />
             ) : null}
@@ -101,6 +103,8 @@ export function Card({ c, className }: { c: Comment; className?: string }) {
         </span>
         {insta ? (
           <Image src="/images/testimonials/instagram.png" alt="Instagram" width={24} height={24} className="ml-auto size-6 shrink-0" />
+        ) : onX ? (
+          <Image src="/images/testimonials/x.png" alt="X" width={24} height={24} className="ml-auto size-6 shrink-0 rounded-[7px] dark:ring-1 dark:ring-white/25" />
         ) : (
           <Image src="/reddit-icon.png" alt="Reddit" width={24} height={24} className="ml-auto size-6 shrink-0 rounded-[7px]" />
         )}
@@ -148,7 +152,7 @@ export function RedditLove() {
       <div className="max-w-[640px]">
         <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">What people say</h2>
         <p className="mt-4 text-[18px] text-muted-foreground">
-          Comments from Reddit and Instagram on the components, quoted as written.
+          Comments from Reddit, Instagram and X on the components, quoted as written.
         </p>
       </div>
       <div className="-mx-4 mt-12 flex flex-col gap-2 sm:mx-0">
