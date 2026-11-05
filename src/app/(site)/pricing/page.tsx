@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, Minus, Plus } from "lucide-react";
 import { CommentDeck } from "@/components/pricing/comment-deck";
+import { MembersRow } from "@/components/pricing/members-row";
 import { PlanAction, PlanNotice, PlanTag } from "@/components/pricing/plan-action";
 import { PillLink, RainbowWord } from "@/components/site";
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
@@ -17,11 +18,14 @@ const PRO_PRICE = formatPrice(PRICES.pro);
 const ALL_ACCESS_PRICE = formatPrice(PRICES.allAccess);
 
 export const metadata: Metadata = {
-  ...createMetadata({
-    description: `${freeComponents} Nexus UI components are free. Pro (${PRO_PRICE} a year) and All-Access (${ALL_ACCESS_PRICE} once) unlock the ${proComponents} Pro components, the source of all ${templates} Next.js templates and the premium blocks.`,
-    alternates: { canonical: "/pricing" },
-  }),
-  title: { absolute: "Pricing — Nexus UI" },
+  ...createMetadata(
+    {
+      title: { absolute: "Pricing — Nexus UI" },
+      description: `${freeComponents} Nexus UI components are free. Pro (${PRO_PRICE} a year) and All-Access (${ALL_ACCESS_PRICE} once) unlock the ${proComponents} Pro components, the source of all ${templates} Next.js templates and the premium blocks.`,
+      alternates: { canonical: "/pricing" },
+    },
+    { title: "Free to start. Pay once for everything.", kind: "Pricing" },
+  ),
 };
 
 type Plan = {
@@ -241,6 +245,7 @@ export default function PricingPage() {
               Request a component ›
             </Link>
           </p>
+          <MembersRow />
         </div>
       </section>
 

@@ -50,6 +50,8 @@ export const TEMPLATE_SOURCES = {
   afterglow: { file: "afterglow-page.tsx", exportName: "AfterglowPage" },
   ferry: { file: "ferry-page.tsx", exportName: "FerryPage" },
   skein: { file: "skein-page.tsx", exportName: "SkeinPage" },
+  nimbus: { file: "nimbus-page.tsx", exportName: "NimbusPage" },
+  margin: { file: "margin-page.tsx", exportName: "MarginPage" },
 } as const satisfies Record<string, TemplateSource>;
 
 export type TemplateSourceSlug = keyof typeof TEMPLATE_SOURCES;

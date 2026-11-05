@@ -139,6 +139,16 @@ const SkeinPage = nextDynamic(
   { loading: TemplateFallback },
 );
 
+const NimbusPage = nextDynamic(
+  () => import("@/components/templates/nimbus-page").then((m) => ({ default: m.NimbusPage })),
+  { loading: TemplateFallback },
+);
+
+const MarginPage = nextDynamic(
+  () => import("@/components/templates/margin-page").then((m) => ({ default: m.MarginPage })),
+  { loading: TemplateFallback },
+);
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -182,6 +192,10 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><FerryPage /></ThemeReceiver>;
   } else if (tmpl.slug === "skein") {
     return <ThemeReceiver><SkeinPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "nimbus") {
+    return <ThemeReceiver><NimbusPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "margin") {
+    return <ThemeReceiver><MarginPage /></ThemeReceiver>;
   } else if (tmpl.slug === "nexus-ai-launch") {
     return <ThemeReceiver><NexusAiLaunchTemplatePage /></ThemeReceiver>;
   } else if (tmpl.slug === "noir-studio") {

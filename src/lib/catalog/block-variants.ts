@@ -60,6 +60,7 @@ const ADDED_ON: Record<string, string[]> = {
     "waitlist-cta", "xray-hero",
   ],
   "2026-10-30": ["bento-features"],
+  "2026-11-05": ["fluffy-footer", "broken-bridge-404", "postal-signup", "spotlight-tour", "brand-reveal"],
   "2026-11-02": ["head-to-head-compare", "receipt-hero", "sealed-and-sent", "wall-clock-contact", "wordmark-footer"],
 };
 const ADDED = new Map(Object.entries(ADDED_ON).flatMap(([day, slugs]) => slugs.map((slug) => [slug, day] as const)));
@@ -172,6 +173,7 @@ const baseVariants: BlockVariant[] = [
   mk("circuit-hero", "block-hero", "Circuit Hero", "CircuitHero"),
   mk("flip-dot-hero", "block-hero", "Flip-dot Hero", "FlipDotHero"),
   mk("receipt-hero", "block-hero", "Receipt Hero", "ReceiptHero"),
+  mk("brand-reveal", "block-hero", "Brand Reveal", "BrandReveal"),
 
   mk("auto-advancing-tabs", "block-features", "Auto-advancing Tabs", "AutoAdvancingTabs"),
   mk("drawn-timeline", "block-features", "Drawn Timeline", "DrawnTimeline"),
@@ -181,6 +183,7 @@ const baseVariants: BlockVariant[] = [
   mk("beam-timeline", "block-features", "Beam Timeline", "BeamTimeline"),
   mk("sticky-scroll-story", "block-features", "Sticky Scroll Story", "StickyScrollStory"),
   mk("sealed-and-sent", "block-features", "Sealed and Sent", "SealedAndSent"),
+  mk("spotlight-tour", "block-features", "Spotlight Tour", "SpotlightTour"),
 
   mk("counting-stats", "block-social-proof", "Counting Stats", "CountingStats"),
   mk("wall-of-love", "block-social-proof", "Wall of Love", "WallOfLove"),
@@ -189,12 +192,14 @@ const baseVariants: BlockVariant[] = [
   mk("stats-odometer", "block-social-proof", "Stats Odometer", "StatsOdometer"),
 
   mk("typo-catching-signup", "block-newsletter", "Typo-catching Signup", "TypoCatchingSignup"),
+  mk("postal-signup", "block-newsletter", "Postal Signup", "PostalSignup"),
 
   mk("drift-gallery", "block-gallery", "Drift Gallery", "DriftGallery"),
   mk("card-rail", "block-gallery", "Card Rail", "CardRail"),
   mk("parallax-slider", "block-gallery", "Parallax Slider", "ParallaxSlider"),
   mk("changelog-pile", "block-changelog", "Changelog Pile", "ChangelogPile"),
   mk("gravity-404", "block-404", "Gravity 404", "Gravity404"),
+  mk("broken-bridge-404", "block-404", "Broken Bridge 404", "BrokenBridge404"),
   mk("head-to-head-compare", "block-comparison", "Head-to-Head Compare", "HeadToHeadCompare"),
 ];
 
@@ -218,6 +223,7 @@ export const blockVariants: BlockVariant[] = (() => {
     mk("waitlist-cta", "block-cta", "Waitlist CTA", "WaitlistCta"),
     mk("auth-morph", "block-signup", "Sign In / Sign Up", "AuthMorph"),
     mk("wordmark-footer", "block-footer", "Wordmark Footer", "WordmarkFooter"),
+    mk("fluffy-footer", "block-footer", "Fluffy Footer", "FluffyFooter"),
   ]) {
     let at = -1;
     out.forEach((x, i) => { if (x.block === extra.block) at = i; });

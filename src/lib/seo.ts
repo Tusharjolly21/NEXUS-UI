@@ -29,7 +29,57 @@ export const siteConfig = {
   // headings, and structured data instead (per Google SEO Starter Guide).
 };
 
-export function createMetadata(override: Metadata = {}): Metadata {
+/** What the share card says about a page, where it differs from the page's own title. */
+export type ShareCard = {
+  /** The big words on the card. Defaults to the page title without the site name. */
+  title?: string;
+  /** The small pill in the corner. Defaults to the kind of page, from its address. */
+  kind?: string;
+  /** Adds a Pro pill. */
+  pro?: boolean;
+  /** The picture on the card, as "<kind>/<slug>" (see ogShot in src/lib/og-shot.ts). */
+  shot?: string;
+};
+
+const KIND_BY_PATH: [RegExp, string][] = [
+  [/^\/components\/./, "Component"],
+  [/^\/templates\/./, "Template"],
+  [/^\/blocks\/./, "Block"],
+  [/^\/videos\/./, "Video"],
+  [/^\/icons\/./, "Icon"],
+  [/^\/blog\/./, "Blog"],
+  [/^\/docs(\/|$)/, "Docs"],
+];
+
+/** The page title as the card shows it: without the site name or the generic "— Animated React Component" ending. */
+function cardTitle(title: string) {
+  return title
+    .replace(/\s+[·|]\s+Nexus UI( Labs)?$/, "")
+    .replace(/\s+—\s+(Nexus UI( Labs)?|Animated React Component|Next\.js Landing Page Template|Next\.js UI Block)$/, "")
+    .trim();
+}
+
+/**
+ * A page description short enough for Google (about 155 characters) and a share card: whole
+ * sentences while they fit, otherwise cut at a word with an ellipsis.
+ */
+export function shortDescription(text: string, max = 155) {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  // a sentence ends at . ! or ? followed by a space and a capital or a number, so "Next.js" stays whole
+  const sentences = clean.split(/(?<=[.!?])\s+(?=[A-Z0-9"“])/);
+  let out = "";
+  for (const s of sentences) {
+    const next = out ? `${out} ${s}` : s;
+    if (next.length > max) break;
+    out = next;
+  }
+  if (out.length >= max * 0.5) return out;
+  const cut = clean.slice(0, max);
+  return `${cut.slice(0, cut.lastIndexOf(" ")).replace(/[\s,.;:—–-]+$/, "")}…`;
+}
+
+export function createMetadata(override: Metadata = {}, card: ShareCard = {}): Metadata {
   let metadataBase: URL;
   try {
     metadataBase = new URL(siteConfig.url);
@@ -37,16 +87,26 @@ export function createMetadata(override: Metadata = {}): Metadata {
     metadataBase = new URL("http://localhost:3000");
   }
 
+  const rawTitle = override.title;
   const titleStr =
-    typeof override.title === "string" ? override.title : siteConfig.siteName;
+    typeof rawTitle === "string"
+      ? rawTitle
+      : rawTitle && typeof rawTitle === "object" && "absolute" in rawTitle && typeof rawTitle.absolute === "string"
+        ? rawTitle.absolute
+        : siteConfig.siteName;
   const descStr =
     typeof override.description === "string"
       ? override.description
       : siteConfig.tagline;
 
+  const path = typeof override.alternates?.canonical === "string" ? override.alternates.canonical : "";
+  const kind = card.kind ?? KIND_BY_PATH.find(([re]) => re.test(path))?.[1];
   const ogImageUrl = `/api/og?${new URLSearchParams({
-    title: titleStr,
-    description: descStr.slice(0, 120),
+    title: card.title ?? cardTitle(titleStr),
+    description: shortDescription(descStr, 120),
+    ...(kind ? { kind } : {}),
+    ...(card.pro ? { pro: "1" } : {}),
+    ...(card.shot ? { shot: card.shot } : {}),
   }).toString()}`;
   const ogImages = [{ url: ogImageUrl, width: 1200, height: 630, alt: titleStr }];
 

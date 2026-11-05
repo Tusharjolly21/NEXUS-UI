@@ -139,6 +139,26 @@
   "bg": null,
   "coverage": 0.08
  },
+ "aquarium-prompt": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   94,
+   130,
+   774,
+   492
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.97
+ },
  "ascii-wake": {
   "canvas": [
    960,
@@ -839,6 +859,26 @@
   "bg": "#ffffff",
   "coverage": 1
  },
+ "bloom-gift-card": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   266,
+   196,
+   344,
+   328
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.98
+ },
  "bolting-sliders": {
   "canvas": [
    960,
@@ -1098,6 +1138,26 @@
   ],
   "bg": null,
   "coverage": 0.05
+ },
+ "clock-picker": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   250,
+   104,
+   362,
+   530
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.98
  },
  "cloth-banner": {
   "canvas": [
@@ -1639,6 +1699,26 @@
   "bg": "#ffffff",
   "coverage": 0.74
  },
+ "effort-slider": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   176,
+   228,
+   470,
+   300
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "elastic-stepper": {
   "canvas": [
    960,
@@ -1658,6 +1738,26 @@
   ],
   "bg": null,
   "coverage": 0.01
+ },
+ "elemental-picker": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   170,
+   166,
+   622,
+   426
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.98
  },
  "emoji-reactions": {
   "canvas": [
@@ -1879,6 +1979,26 @@
   "bg": null,
   "coverage": 0.03
  },
+ "flap-clock": {
+  "canvas": [
+   1200,
+   820
+  ],
+  "surface": [
+   0,
+   0,
+   1200,
+   820
+  ],
+  "content": [
+   0,
+   0,
+   1200,
+   820
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "flight-tracker": {
   "canvas": [
    960,
@@ -1999,6 +2119,26 @@
   "bg": "#f6f6f6",
   "coverage": 1
  },
+ "forecast-status": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   240,
+   124,
+   402,
+   512
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.99
+ },
  "forge-ai-command-bar": {
   "canvas": [
    960,
@@ -2019,6 +2159,26 @@
   "bg": "#ffffff",
   "coverage": 0.14
  },
+ "frozen-card": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   194,
+   116,
+   452,
+   556
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "generate-image": {
   "canvas": [
    960,
@@ -2038,6 +2198,26 @@
   ],
   "bg": null,
   "coverage": 0.17
+ },
+ "genie-uploader": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   180,
+   112,
+   422,
+   514
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.97
  },
  "glass-bubbles": {
   "canvas": [
@@ -2259,6 +2439,26 @@
   "bg": null,
   "coverage": 0.66
  },
+ "highlight-popover": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   36,
+   106,
+   656,
+   528
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "hold-to-confirm": {
   "canvas": [
    960,
@@ -2338,6 +2538,26 @@
   ],
   "bg": null,
   "coverage": 0.01
+ },
+ "image-press": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   100,
+   58,
+   422,
+   632
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.99
  },
  "image-trail": {
   "canvas": [
@@ -2478,6 +2698,26 @@
   ],
   "bg": null,
   "coverage": 0.03
+ },
+ "jelly-splitter": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   140,
+   60,
+   562,
+   622
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.99
  },
  "lanyard-badge": {
   "canvas": [
@@ -3199,6 +3439,46 @@
   "bg": "#ffffff",
   "coverage": 0.29
  },
+ "mk-brand-reveal": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   10,
+   200,
+   1260,
+   462
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.94
+ },
+ "mk-broken-bridge-404": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   184,
+   190,
+   912,
+   526
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "mk-changelog-pile": {
   "canvas": [
    1280,
@@ -3398,6 +3678,26 @@
   ],
   "bg": null,
   "coverage": 0.31
+ },
+ "mk-fluffy-footer": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   80,
+   216,
+   1122,
+   470
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.98
  },
  "mk-gravity-404": {
   "canvas": [
@@ -3679,6 +3979,26 @@
   "bg": "#fcfcfc",
   "coverage": 0.99
  },
+ "mk-postal-signup": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   490,
+   192,
+   302,
+   462
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "mk-pulse-bento": {
   "canvas": [
    1280,
@@ -3878,6 +4198,26 @@
   ],
   "bg": "#ffffff",
   "coverage": 1
+ },
+ "mk-spotlight-tour": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   10,
+   180,
+   1260,
+   520
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.92
  },
  "mk-starfield-hero": {
   "canvas": [
@@ -4199,6 +4539,26 @@
   "bg": null,
   "coverage": 0.01
  },
+ "oracle-orb": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   168,
+   80,
+   544,
+   598
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "orbit-footer": {
   "canvas": [
    960,
@@ -4319,6 +4679,26 @@
   "bg": "#fffcf6",
   "coverage": 0.15
  },
+ "paperclip-attach": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   180,
+   164,
+   462,
+   412
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "particle-mark": {
   "canvas": [
    960,
@@ -4398,6 +4778,26 @@
   ],
   "bg": null,
   "coverage": 0.02
+ },
+ "piano-text": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   100,
+   164,
+   762,
+   410
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.98
  },
  "pixel-select": {
   "canvas": [
@@ -5039,6 +5439,26 @@
   "bg": null,
   "coverage": 0.06
  },
+ "seat-crowd": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   100,
+   116,
+   462,
+   508
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.99
+ },
  "seek-search": {
   "canvas": [
    960,
@@ -5298,6 +5718,26 @@
   ],
   "bg": null,
   "coverage": 0.02
+ },
+ "smear-carousel": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   24,
+   146,
+   912,
+   430
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.62
  },
  "sort-stack": {
   "canvas": [
@@ -6299,6 +6739,26 @@
   "bg": null,
   "coverage": 0.15
  },
+ "vine-progress": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   220,
+   94,
+   402,
+   550
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "vinyl-player": {
   "canvas": [
    960,
@@ -6438,6 +6898,26 @@
   ],
   "bg": "#ffffff",
   "coverage": 0.22
+ },
+ "window-seat-toggle": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   192,
+   152,
+   378,
+   450
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.99
  },
  "word-magnet": {
   "canvas": [

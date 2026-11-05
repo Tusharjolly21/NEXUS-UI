@@ -227,6 +227,25 @@ import { ConsentDock } from "@/components/consent-dock";
 import { AddToBag } from "@/components/add-to-bag";
 import { LiquidPagination } from "@/components/liquid-pagination";
 import { MercuryTabs } from "@/components/mercury-tabs";
+import { FrozenCard } from "@/components/frozen-card";
+import { SeatCrowd } from "@/components/seat-crowd";
+import { FlapClock } from "@/components/flap-clock";
+import { ImagePress } from "@/components/image-press";
+import { JellySplitter } from "@/components/jelly-splitter";
+import { EffortSlider } from "@/components/effort-slider";
+import { WindowSeatToggle } from "@/components/window-seat-toggle";
+import { SmearCarousel } from "@/components/smear-carousel";
+import { ForecastStatus } from "@/components/forecast-status";
+import { PaperclipAttach } from "@/components/paperclip-attach";
+import { AquariumPrompt } from "@/components/aquarium-prompt";
+import { ElementalPicker } from "@/components/elemental-picker";
+import { OracleOrb } from "@/components/oracle-orb";
+import { ClockPicker } from "@/components/clock-picker";
+import { VineProgress } from "@/components/vine-progress";
+import { BloomGiftCard } from "@/components/bloom-gift-card";
+import { GenieUploader } from "@/components/genie-uploader";
+import { PianoText } from "@/components/piano-text";
+import { HighlightPopover } from "@/components/highlight-popover";
 import { MoltenHold } from "@/components/molten-hold";
 import { MercurySwitch } from "@/components/mercury-switch";
 import { MercuryUpload } from "@/components/mercury-upload";
@@ -4469,6 +4488,272 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => (
       <div className="mx-auto flex w-full max-w-[460px] justify-center">
         <MercuryUpload key={String(v.autoplay)} autoplay={v.autoplay as boolean} enableSound={v.enableSound as boolean} volume={v.volume as number} />
+      </div>
+    ),
+  },
+  "frozen-card": {
+    lightOnly: true,
+    componentName: "FrozenCard",
+    importPath: "@/components/frozen-card",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[520px] justify-center">
+        <FrozenCard key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "seat-crowd": {
+    lightOnly: true,
+    componentName: "SeatCrowd",
+    importPath: "@/components/seat-crowd",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[760px] justify-center">
+        <SeatCrowd key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "flap-clock": {
+    lightOnly: true,
+    componentName: "FlapClock",
+    importPath: "@/components/flap-clock",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[680px] justify-center">
+        <FlapClock key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "image-press": {
+    lightOnly: true,
+    componentName: "ImagePress",
+    importPath: "@/components/image-press",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[760px] justify-center">
+        <ImagePress key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "jelly-splitter": {
+    lightOnly: true,
+    componentName: "JellySplitter",
+    importPath: "@/components/jelly-splitter",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[680px] justify-center">
+        <JellySplitter key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "effort-slider": {
+    lightOnly: true,
+    componentName: "EffortSlider",
+    importPath: "@/components/effort-slider",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[600px] justify-center">
+        <EffortSlider key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "window-seat-toggle": {
+    lightOnly: true,
+    componentName: "WindowSeatToggle",
+    importPath: "@/components/window-seat-toggle",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[560px] justify-center">
+        <WindowSeatToggle key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "smear-carousel": {
+    lightOnly: true,
+    componentName: "SmearCarousel",
+    importPath: "@/components/smear-carousel",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[960px] justify-center">
+        <SmearCarousel key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "forecast-status": {
+    lightOnly: true,
+    componentName: "ForecastStatus",
+    importPath: "@/components/forecast-status",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <ForecastStatus key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "paperclip-attach": {
+    lightOnly: true,
+    componentName: "PaperclipAttach",
+    importPath: "@/components/paperclip-attach",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[600px] justify-center">
+        <PaperclipAttach key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "aquarium-prompt": {
+    lightOnly: true,
+    componentName: "AquariumPrompt",
+    importPath: "@/components/aquarium-prompt",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[760px] justify-center">
+        <AquariumPrompt key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "elemental-picker": {
+    lightOnly: true,
+    componentName: "ElementalPicker",
+    importPath: "@/components/elemental-picker",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[600px] justify-center">
+        <ElementalPicker key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "oracle-orb": {
+    lightOnly: true,
+    componentName: "OracleOrb",
+    importPath: "@/components/oracle-orb",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[600px] justify-center">
+        <OracleOrb key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "clock-picker": {
+    lightOnly: true,
+    componentName: "ClockPicker",
+    importPath: "@/components/clock-picker",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <ClockPicker key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "vine-progress": {
+    lightOnly: true,
+    componentName: "VineProgress",
+    importPath: "@/components/vine-progress",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[520px] justify-center">
+        <VineProgress key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "bloom-gift-card": {
+    lightOnly: true,
+    componentName: "BloomGiftCard",
+    importPath: "@/components/bloom-gift-card",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <BloomGiftCard key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "genie-uploader": {
+    lightOnly: true,
+    componentName: "GenieUploader",
+    importPath: "@/components/genie-uploader",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[600px] justify-center">
+        <GenieUploader key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "piano-text": {
+    lightOnly: true,
+    componentName: "PianoText",
+    importPath: "@/components/piano-text",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[760px] justify-center">
+        <PianoText key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "highlight-popover": {
+    lightOnly: true,
+    componentName: "HighlightPopover",
+    importPath: "@/components/highlight-popover",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[700px] justify-center">
+        <HighlightPopover key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
       </div>
     ),
   },

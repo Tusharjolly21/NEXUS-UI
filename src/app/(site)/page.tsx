@@ -31,8 +31,10 @@ import { PRICES, formatPrice } from "@/lib/pricing";
 import { createMetadata, siteConfig } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  ...createMetadata({ alternates: { canonical: "/" } }),
-  title: { absolute: `${siteConfig.siteName} — ${siteConfig.tagline}` },
+  ...createMetadata(
+    { title: { absolute: `${siteConfig.siteName} — ${siteConfig.tagline}` }, description: siteConfig.description, alternates: { canonical: "/" } },
+    { title: "Animated React components, blocks and templates" },
+  ),
 };
 
 const HOME_VIDEOS = ["launch-reel", "feature-drop", "brand-film", "whats-new"];

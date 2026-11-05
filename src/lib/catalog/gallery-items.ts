@@ -401,6 +401,26 @@ const TINT_OF: Record<string, TileTint> = {
  * are all gathered, newest first, under the wall's New tab (see NEW_TAB_DAYS).
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // twenty-third batch (Motion Kit Everyday: Frozen Card, Seat Crowd, Flap Clock, Image Press, Jelly Splitter, Effort Slider, Window Seat Toggle, Smear Carousel, Forecast Status, Paperclip Attach, Aquarium Prompt, Elemental Picker, Oracle Orb, Clock Picker, Vine Progress, Bloom Gift Card, Genie Uploader, Piano Text, Highlight Popover)
+  "frozen-card",
+  "seat-crowd",
+  "flap-clock",
+  "image-press",
+  "jelly-splitter",
+  "effort-slider",
+  "window-seat-toggle",
+  "smear-carousel",
+  "forecast-status",
+  "paperclip-attach",
+  "aquarium-prompt",
+  "elemental-picker",
+  "oracle-orb",
+  "clock-picker",
+  "vine-progress",
+  "bloom-gift-card",
+  "genie-uploader",
+  "piano-text",
+  "highlight-popover",
   // twenty-fourth batch (Motion Kit Pro: Liquid Smoke)
   "liquid-smoke",
   // twenty-third batch (Motion Kit Pro: Molten Hold, Mercury Switch, Mercury Upload)
@@ -610,6 +630,25 @@ export const MOTION_KIT_ORDER: string[] = [
 
 /** The homepage set, in order: newest interactions first, then the best of the rest. */
 export const HOME_PICKS: string[] = [
+  "frozen-card",
+  "seat-crowd",
+  "flap-clock",
+  "image-press",
+  "jelly-splitter",
+  "effort-slider",
+  "window-seat-toggle",
+  "smear-carousel",
+  "forecast-status",
+  "paperclip-attach",
+  "aquarium-prompt",
+  "elemental-picker",
+  "oracle-orb",
+  "clock-picker",
+  "vine-progress",
+  "bloom-gift-card",
+  "genie-uploader",
+  "piano-text",
+  "highlight-popover",
   "liquid-smoke",
   "molten-hold",
   "mercury-switch",

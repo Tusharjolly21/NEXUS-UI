@@ -55,7 +55,8 @@ import LogoCloudSpotlight from "@/components/blocks/logo-clouds/logo-cloud-spotl
 import LogoCloudSwap from "@/components/blocks/logo-clouds/logo-cloud-swap";
 import LogoCloudSingleRow from "@/components/blocks/logo-clouds/logo-cloud-single-row";
 import LogoCloudShelf from "@/components/blocks/logo-clouds/logo-cloud-shelf";
-import { createMetadata, siteConfig } from "@/lib/seo";
+import { createMetadata, shortDescription, siteConfig } from "@/lib/seo";
+import { ogShot } from "@/lib/og-shot";
 import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
 import { getMovedSection } from "@/lib/catalog/moved-sections";
 import { SHADCN_REGISTRY_SCOPE } from "@/lib/registry-scope";
@@ -88,12 +89,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const block = getBlock(slug);
   if (!block) return {};
-  return createMetadata({
-    title: `${block.name} — Next.js UI Block`,
-    description: block.description,
-    openGraph: { title: `${block.name} · ${siteConfig.siteName}` },
-    alternates: { canonical: `/blocks/${slug}` },
-  });
+  return createMetadata(
+    {
+      title: `${block.name} — Next.js UI Block`,
+      description: shortDescription(block.description),
+      openGraph: { title: `${block.name} · ${siteConfig.siteName}` },
+      alternates: { canonical: `/blocks/${slug}` },
+    },
+    { title: block.name, pro: !!block.premium, shot: ogShot("blocks", slug) },
+  );
 }
 
 export default async function BlockDetailPage({ params }: Props) {
