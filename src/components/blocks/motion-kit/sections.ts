@@ -68,6 +68,11 @@ import { HeadToHeadCompare } from "./head-to-head-compare";
 import { ReceiptHero } from "./receipt-hero";
 import { SealedAndSent } from "./sealed-and-sent";
 import { WordmarkFooter } from "./wordmark-footer";
+import { FluffyFooter } from "./fluffy-footer";
+import { BrokenBridge404 } from "./broken-bridge-404";
+import { PostalSignup } from "./postal-signup";
+import { SpotlightTour } from "./spotlight-tour";
+import { BrandReveal } from "./brand-reveal";
 import { PreviewBlockVariantMkScrollNavbar } from "@/registry/blocks/nexus-essentials-blocks-c";
 import { MorphMenu } from "./morph-menu";
 import { AnnounceBar } from "./announce-bar";
@@ -94,6 +99,11 @@ export const MOTION_KIT_SECTIONS: Record<string, ComponentType<{ autoplay?: bool
   "mk-receipt-hero": ReceiptHero as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-sealed-and-sent": SealedAndSent as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-wordmark-footer": WordmarkFooter as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-fluffy-footer": FluffyFooter as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-broken-bridge-404": BrokenBridge404 as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-postal-signup": PostalSignup as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-spotlight-tour": SpotlightTour as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-brand-reveal": BrandReveal as unknown as ComponentType<{ autoplay?: boolean }>,
   // The navbar needs a scrolling frame with a page inside it, so the section is its preview.
   "mk-scroll-navbar": asSection(PreviewBlockVariantMkScrollNavbar),
   "mk-morph-menu": MorphMenu as unknown as ComponentType<{ autoplay?: boolean }>,

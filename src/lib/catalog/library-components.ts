@@ -14089,6 +14089,791 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     ],
     tailwindSource: tw,
   },
+  {
+    slug: "frozen-card",
+    name: "Frozen Card",
+    registryCliName: "frozen-card",
+    description:
+      "The card screen of a banking app, where you can freeze your card. The “Aurora” debit card tilts toward your pointer with a glare and a holographic sheen, glowing in its own colours on a dark panel. Press Freeze card and feathery frost grows in from the corners and edges with a frosted bloom behind it, the print blurs and drains to icy slate blue, the card shivers, a Frozen tag replaces the network mark, and snow falls across the whole screen, some of it in front of the card; tilt it and the glare sparkles on the ice. Unfreeze and cracks race across the ice, it melts from the middle outwards with drips running off the bottom edge, and a warm glow brings the colour back. The eye on the card shows the full number. Keyboard: Tab to Freeze card (a switch) and press Space or Enter; the eye, Change limits, Transactions, back and more are buttons.",
+    categorySlug: "cards",
+    tags: ["card", "bank card", "freeze", "frost", "snow", "banking", "fintech", "tilt", "holographic", "motion kit"],
+    premium: true,
+    trendingScore: 200,
+    createdAt: "2026-11-05",
+    animationKinds: ["hover", "press", "3d"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "frozen", type: "boolean", description: "controlled frozen state" },
+      { name: "defaultFrozen", type: "boolean", defaultValue: "false", description: "Starting value of frozen when you leave it uncontrolled." },
+      { name: "onFrozenChange", type: "(frozen: boolean) => void", description: "Called when the visitor uses frozen change." },
+      { name: "holder", type: "string", defaultValue: "\"Maya Chen\"", description: "The holder shown in the component." },
+      { name: "last4", type: "string", defaultValue: "\"7481\"", description: "The last4 shown in the component." },
+      { name: "number", type: "string", description: "the full number shown when the eye is pressed (a sample ending in last4 by default)" },
+      { name: "expiry", type: "string", defaultValue: "\"08/29\"", description: "The expiry shown in the component." },
+      { name: "title", type: "string", defaultValue: "\"Debit card\"", description: "The title shown in the component." },
+      { name: "spent", type: "number", defaultValue: "1284.2", description: "spent so far this month and the monthly limit, for the meter under the card" },
+      { name: "limit", type: "number", defaultValue: "2000", description: "The limit shown in the component." },
+      { name: "currency", type: "string", defaultValue: "\"$\"", description: "The currency shown in the component." },
+      { name: "onLimits", type: "() => void", description: "Called when the visitor uses limits." },
+      { name: "onDetails", type: "() => void", description: "the \"more\" button in the header" },
+      { name: "onTransactions", type: "() => void", description: "Called when the visitor uses transactions." },
+      { name: "onBack", type: "() => void", description: "Called when the visitor uses back." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a demo by itself until the first touch. Held still under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewFrozenCard,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { FrozenCard } from "@/components/frozen-card";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[520px] justify-center">
+        <FrozenCard />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "seat-crowd",
+    name: "Seat Crowd",
+    registryCliName: "seat-crowd",
+    description:
+      "The seat picker for a pricing page, as a crowd of little people. Drag or fling the yellow ruler and your team appears on stage: each new person hops in from the side on an arc, lands with a squash and the row shuffles to make room, while the camera zooms out as the crowd grows. Take seats away and the newest wave goodbye and hop off. Cross into a bigger plan and the badge flips over with a pop of confetti in the plan's colour; past forty people, the last one holds up a “+12 more” sign. The price rolls like an odometer, monthly or yearly. Keyboard: focus the ruler; arrow keys add or remove one seat, Page Up and Page Down five, Home and End jump to the ends. Arrow keys also switch between monthly and yearly billing.",
+    categorySlug: "inputs-controls",
+    tags: ["pricing", "seat picker", "slider", "ruler", "crowd", "team size", "odometer", "confetti", "motion kit"],
+    premium: true,
+    trendingScore: 199,
+    createdAt: "2026-11-05",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "min", type: "number", defaultValue: "1", description: "The min shown in the component." },
+      { name: "max", type: "number", defaultValue: "100", description: "The max shown in the component." },
+      { name: "value", type: "number", description: "The value shown in the component." },
+      { name: "defaultValue", type: "number", defaultValue: "8", description: "Starting value of value when you leave it uncontrolled." },
+      { name: "pricePerSeat", type: "number", defaultValue: "12", description: "monthly price per seat (ignored when you pass price)" },
+      { name: "price", type: "(seats: number) => number", description: "monthly total for a seat count, for tiered pricing" },
+      { name: "currency", type: "string", defaultValue: "\"$\"", description: "The currency shown in the component." },
+      { name: "plans", type: "SeatPlan[]", defaultValue: "PLANS", description: "The plans shown in the component." },
+      { name: "defaultBilling", type: "\"monthly\" | \"yearly\"", defaultValue: "\"monthly\"", description: "Starting value of billing when you leave it uncontrolled." },
+      { name: "onBillingChange", type: "(billing: \"monthly\" | \"yearly\") => void", description: "Called when the visitor uses billing change." },
+      { name: "onChange", type: "(seats: number) => void", description: "Called with the new value whenever the visitor changes it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a demo by itself until the first touch. Held still under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewSeatCrowd,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { SeatCrowd } from "@/components/seat-crowd";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[760px] justify-center">
+        <SeatCrowd />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "flap-clock",
+    name: "Flap Clock",
+    registryCliName: "flap-clock",
+    description:
+      "A team world clock on a split-flap board. Every row is a city: its local time and name on enamel flaps in the row's own colour, and whether they're asleep, starting their morning, working or done for the day. When a minute turns, the flaps clatter round to the new time. Drag the handle along the sky strip underneath to look up to twelve hours either way (“what time is it for everyone if we meet at four?”): the whole board flips as you go, and the count at the top says how many people would be working. Now snaps it back to the live time. Keyboard: the handle is a slider; arrows move by a quarter hour, Page Up and Page Down by an hour, Home returns to now.",
+    categorySlug: "dashboards",
+    tags: ["clock", "world clock", "split flap", "time zones", "team", "scrubber", "board", "motion kit"],
+    premium: true,
+    trendingScore: 198,
+    createdAt: "2026-11-05",
+    animationKinds: ["drag", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "cities", type: "FlapCity[]", defaultValue: "CITIES", description: "The cities shown in the component." },
+      { name: "hour12", type: "boolean", defaultValue: "false", description: "12-hour clock with am/pm; 24-hour by default" },
+      { name: "workHours", type: "[number, number]", defaultValue: "[9, 17]", description: "local working hours, start and end (24h); 9 to 17 by default" },
+      { name: "title", type: "string", defaultValue: "\"Team clock\"", description: "The title shown in the component." },
+      { name: "onScrub", type: "(time: Date, offsetMinutes: number) => void", description: "called as the visitor plans a time: the moment they're looking at and its distance from now in minutes" },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a demo by itself until the first touch. Held still under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewFlapClock,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { FlapClock } from "@/components/flap-clock";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[680px] justify-center">
+        <FlapClock />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "image-press",
+    name: "Image Press",
+    registryCliName: "image-press",
+    description:
+      "A toy press that really shrinks photos before you upload them. Drop a photo on it (or choose one, or drag the sample in) and it sits on top of the machine, wobbling. Turn the cobalt dial to Tiny, Balanced or Crisp and hit the red button: the photo is pulled into the slot between striped rollers, the machine rumbles while the LCD counts the size down, and the pressed copy slides out of the bottom slot, smaller, with a perforated edge and a sticker showing how much it saved. Download it or press another. Anything that isn't a photo is spat back out. The compression is real: the photo is redrawn at the level's size limit and exported as WebP (JPEG where WebP isn't available), and onCompressed hands you the new File. Keyboard: the tray is a button that opens the file picker, the dial is a slider (arrow keys, Home, End), and the red button presses. Progress is announced politely.",
+    categorySlug: "inputs-controls",
+    tags: ["upload", "image", "compress", "file", "dropzone", "webp", "machine", "motion kit"],
+    premium: true,
+    trendingScore: 197,
+    createdAt: "2026-11-05",
+    animationKinds: ["drag", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "onCompressed", type: "(file: File, info: PressResult) => void", description: "Called when the visitor uses compressed." },
+      { name: "levels", type: "PressLevel[]", defaultValue: "LEVELS", description: "the dial's notches, smallest file first" },
+      { name: "defaultLevel", type: "string", description: "id of the level the dial starts on" },
+      { name: "accept", type: "string", defaultValue: "\"image/*\"", description: "The accept shown in the component." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a demo by itself until the first touch. Held still under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewImagePress,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { ImagePress } from "@/components/image-press";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[760px] justify-center">
+        <ImagePress />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "jelly-splitter",
+    name: "Jelly Splitter",
+    registryCliName: "jelly-splitter",
+    description:
+      "A bill splitter where the bill is a slab of glossy watermelon jelly on a plate. Move over the jelly and a cleaver follows you; click or tap and it chops down, the slab splits there and the two pieces wobble apart, each one labelled with the next person and what they owe. Drag the handle in a gap to move the cut and the neighbouring pieces squash and stretch while the amounts follow, snapping to whole percents with a pull at every 5%. The small cross on a piece squishes it back into its neighbour, “Split evenly” glides every cut into place with a jiggle that runs left to right, and “Send requests” hands you the shares. Keyboard: Tab to a cut handle and use the arrow keys (1%, or 5% with Shift); “Add a cut” halves the biggest piece, and each piece's cross button merges it.",
+    categorySlug: "inputs-controls",
+    tags: ["bill split", "split", "payments", "slider", "jelly", "squash", "fintech", "motion kit"],
+    premium: true,
+    trendingScore: 196,
+    createdAt: "2026-11-05",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "total", type: "number", defaultValue: "186.4", description: "the bill" },
+      { name: "currency", type: "string", defaultValue: "\"$\"", description: "The currency shown in the component." },
+      { name: "title", type: "string", defaultValue: "\"Dinner at Nori\"", description: "The title shown in the component." },
+      { name: "subtitle", type: "string", defaultValue: "\"Friday", description: "a second line under the title, e.g. the date" },
+      { name: "people", type: "JellyPerson[]", description: "who can be in, in the order the pieces are handed out (up to 6; more slices add guests)" },
+      { name: "defaultShares", type: "{ personId: string; percent: number }[]", description: "where to start: the pieces from left to right, each a person and their percent" },
+      { name: "onChange", type: "(shares: JellyShare[]) => void", description: "Called with the new value whenever the visitor changes it." },
+      { name: "onRequest", type: "(shares: JellyShare[]) => void", description: "Called when the visitor uses request." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a demo by itself until the first touch. Held still under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewJellySplitter,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { JellySplitter } from "@/components/jelly-splitter";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[680px] justify-center">
+        <JellySplitter />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "effort-slider",
+    name: "Effort Slider",
+    registryCliName: "effort-slider",
+    description:
+      "An effort setting for an AI answer, from Faster to Smarter. Below the top level the track is a calm glowing fill with a few stars in it and a shimmer running through, coloured from cool teal up to violet, and the thumb is a spiral galaxy seen at an angle, like a telescope photograph: thousands of stars, dust lanes, pink star-forming knots, a warm core and diffraction spikes, maturing from a faint loose spiral into a bright grand-design one as you go. Reach the top and the slider transforms: a flash, a burst of sparks, and the fill breaks into a dense mosaic of violet, pink, cyan and white star pixels that cascade back from the thumb and then stream smoothly out of it from right to left in three depth layers, while dotted rays stream out of the thumb like a starburst and the level's name turns iridescent. Drag it and the thumb squashes with speed, throws a comet trail only when you really fling it, rings each level it passes and clicks into the nearest one with a little bounce. Keyboard: it's a slider, so the arrow keys move a level at a time and Home and End jump to the ends.",
+    categorySlug: "ai-components",
+    tags: ["slider", "ai", "effort", "model picker", "galaxy", "stars", "canvas", "motion kit"],
+    premium: true,
+    trendingScore: 195,
+    createdAt: "2026-11-05",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "levels", type: "EffortLevel[]", defaultValue: "LEVELS", description: "The levels shown in the component." },
+      { name: "value", type: "string", description: "the selected level id (controlled)" },
+      { name: "defaultValue", type: "string", description: "Starting value of value when you leave it uncontrolled." },
+      { name: "onChange", type: "(id: string, level: EffortLevel) => void", description: "Called with the new value whenever the visitor changes it." },
+      { name: "title", type: "string", defaultValue: "\"Effort\"", description: "The title shown in the component." },
+      { name: "recommended", type: "string", description: "the id of the level to mark as recommended" },
+      { name: "startLabel", type: "string", defaultValue: "\"Faster\"", description: "The start label shown in the component." },
+      { name: "endLabel", type: "string", defaultValue: "\"Smarter\"", description: "The end label shown in the component." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a demo by itself until the first touch. Held still under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewEffortSlider,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { EffortSlider } from "@/components/effort-slider";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[600px] justify-center">
+        <EffortSlider />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "window-seat-toggle",
+    name: "Window Seat Toggle",
+    registryCliName: "window-seat-toggle",
+    description:
+      "A light/dark theme switch drawn as an aeroplane window set in a piece of cabin wall. Outside it's a bright blue sky over a drifting sea of cumulus with the tip of a wing. Grab the shade's tab and pull it down: it follows your finger with a little resistance, and the light in the cabin follows it: the daylight on the wall and in the recess shrinks to the open strip of glass, the room's exposure drops, the sunlit shade glows warm, and near the bottom only a thin line of light leaks round its sides and under its lip. Let go past halfway and it snaps shut with a soft bounce, the cabin dims, and a moment later the shade glides back up by itself on a night sky of stars, a crescent moon, lilac clouds and amber city lights far below. Pull it again and it's day. Let go early and it springs back open. A click anywhere on the window runs the whole thing for you, and the view shifts slightly against your pointer. Applying the theme is your job, for example: <WindowSeatToggle onThemeChange={(t) => { document.documentElement.dataset.theme = t; }} /> Keyboard: focus the window; Space or Enter toggles, Arrow Down closes towards dark, Arrow Up opens towards light.",
+    categorySlug: "inputs-controls",
+    tags: ["theme toggle", "dark mode", "light switch", "aeroplane", "window", "shade", "drag", "motion kit"],
+    premium: true,
+    trendingScore: 194,
+    createdAt: "2026-11-05",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "theme", type: "WindowSeatTheme", description: "the current theme (controlled)" },
+      { name: "defaultTheme", type: "WindowSeatTheme", defaultValue: "\"light\"", description: "the theme to start on (uncontrolled)" },
+      { name: "onThemeChange", type: "(theme: WindowSeatTheme) => void", description: "Called when the visitor uses theme change." },
+      { name: "labels", type: "{ light?: string; dark?: string; lightHint?: string; darkHint?: string }", description: "The labels shown in the component." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a demo by itself until the first touch. Held still under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewWindowSeatToggle,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { WindowSeatToggle } from "@/components/window-seat-toggle";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[560px] justify-center">
+        <WindowSeatToggle />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "smear-carousel",
+    name: "Smear Carousel",
+    registryCliName: "smear-carousel",
+    description:
+      "A carousel whose neighbours smear. The card in the middle is a colour-graded photograph with its own long-exposure streak; the cards either side are turned away from you, and from their outer edge the picture is pulled out to the edge of the stage in long flowing streaks that flare open like the bell of a trumpet, edged with a thin iridescent rim. Drag or fling it (or scroll sideways) and the cards turn and slide through the smear, then settle on the nearest one with a spring. Click a side card to bring it in. Keyboard: Arrow Left and Right move, Home and End jump to the ends, Enter selects the middle card.",
+    categorySlug: "cards",
+    tags: ["carousel", "slider", "gallery", "smear", "streak", "drag", "swipe", "motion kit"],
+    premium: true,
+    trendingScore: 193,
+    createdAt: "2026-11-05",
+    animationKinds: ["drag", "3d", "parallax"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "cards", type: "SmearCard[]", defaultValue: "CARDS", description: "The cards shown in the component." },
+      { name: "onSelect", type: "(card: SmearCard) => void", description: "called when someone clicks the middle card, presses Enter, or presses the action button" },
+      { name: "actionLabel", type: "string", defaultValue: "\"Open\"", description: "label of the action button under the middle card (only shown when you pass onSelect)" },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a demo by itself until the first touch. Held still under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewSmearCarousel,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { SmearCarousel } from "@/components/smear-carousel";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[960px] justify-center">
+        <SmearCarousel />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "forecast-status",
+    name: "Forecast Status",
+    registryCliName: "forecast-status",
+    description:
+      "An app-review status card that shows its state as weather. Waiting is a lilac sky with clouds drifting by; in review it clouds over and rains; approved, the clouds part, the sun comes out with turning rays and a rainbow; rejected, a purple storm rolls in with sheets of rain and lightning. Every change blends the sky, clouds and rain over a second. Move across the sky and the clouds drift away from you; tap it and the weather answers (a splash, a lightning strike, a sparkle).",
+    categorySlug: "cards",
+    tags: ["status", "app review", "weather", "rain", "sun", "storm", "canvas", "motion kit"],
+    premium: true,
+    trendingScore: 192,
+    createdAt: "2026-11-05",
+    animationKinds: ["hover", "gradient"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "status", type: "ReviewStatus", description: "The status shown in the component." },
+      { name: "defaultStatus", type: "ReviewStatus", defaultValue: "\"waiting\"", description: "Starting value of status when you leave it uncontrolled." },
+      { name: "onStatusChange", type: "(s: ReviewStatus) => void", description: "Called when the visitor uses status change." },
+      { name: "appName", type: "string", defaultValue: "\"Orbit\"", description: "The app name shown in the component." },
+      { name: "version", type: "string", defaultValue: "\"Version 2.4 (318)\"", description: "The version shown in the component." },
+      { name: "rejection", type: "string", description: "reason shown when it's rejected" },
+      { name: "onRelease", type: "() => void", description: "Called when the visitor uses release." },
+      { name: "onResubmit", type: "() => void", description: "Called when the visitor uses resubmit." },
+      { name: "showSwitcher", type: "boolean", defaultValue: "false", description: "a row of buttons under the card to preview every state" },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a demo by itself until the first touch. Held still under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewForecastStatus,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { ForecastStatus } from "@/components/forecast-status";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <ForecastStatus />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "paperclip-attach",
+    name: "Paperclip Attach",
+    registryCliName: "paperclip-attach",
+    description:
+      "A message composer that clips attachments on with a real paperclip. Attach a file (or drop it on the message) and the clip springs open, the file flies in from the button and slides under the wire, and the clip snaps shut, jiggling the stack. Older files fan out behind, pinned at the same corner; tap one to slip it out and back on top, or pull the top one off with its close button. Keyboard: the paperclip button opens the file picker; every card and close button is reachable with Tab.",
+    categorySlug: "inputs-controls",
+    tags: ["attachment", "composer", "file", "paperclip", "message", "email", "upload", "motion kit"],
+    premium: true,
+    trendingScore: 191,
+    createdAt: "2026-11-05",
+    animationKinds: ["press", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "to", type: "string", defaultValue: "\"Priya Shah\"", description: "The to shown in the component." },
+      { name: "placeholder", type: "string", defaultValue: "\"Write a message\"", description: "The placeholder shown in the component." },
+      { name: "defaultMessage", type: "string", description: "Starting value of message when you leave it uncontrolled." },
+      { name: "maxFiles", type: "number", defaultValue: "6", description: "most files that fit under the clip" },
+      { name: "onSend", type: "(message: string, files: Attachment[]) => void | Promise<void>", description: "Called when the visitor uses send." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a demo by itself until the first touch. Held still under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewPaperclipAttach,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { PaperclipAttach } from "@/components/paperclip-attach";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[600px] justify-center">
+        <PaperclipAttach />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "aquarium-prompt",
+    name: "Aquarium Prompt",
+    registryCliName: "aquarium-prompt",
+    description:
+      "Aquarium Prompt: an AI prompt box floating in a pixel-art aquarium. A shoal of pixel fish swims behind the frosted glass, each kind schooling with its own: clownfish, blue and yellow tangs, and a fast flicker of sardines. Move the pointer through the water and they scatter; click the water and a ripple sends them darting. Type, and they crowd round the caret to watch, a bubble rising with each key. Press send and they all swim into the box with your message, which floats up as a bubble and pops. Keyboard: it's a normal text field; Enter sends.",
+    categorySlug: "ai-components",
+    tags: ["prompt", "ai", "chat input", "aquarium", "pixel art", "fish", "canvas", "motion kit"],
+    premium: true,
+    trendingScore: 190,
+    createdAt: "2026-11-05",
+    animationKinds: ["type", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: "\"What's on your mind?\"", description: "The title shown in the component." },
+      { name: "placeholder", type: "string", defaultValue: "\"Ask anything\"", description: "The placeholder shown in the component." },
+      { name: "onSubmit", type: "(text: string) => void", description: "called with the text when it's sent" },
+      { name: "fish", type: "number", description: "how many fish swim in the tank" },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Demo itself until someone touches it. Off by default." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewAquariumPrompt,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { AquariumPrompt } from "@/components/aquarium-prompt";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[760px] justify-center">
+        <AquariumPrompt />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "elemental-picker",
+    name: "Elemental Picker",
+    registryCliName: "elemental-picker",
+    description:
+      "Elemental Picker: a set of mode capsules where the chosen one comes alive. Choose Ember and the capsule catches fire: flames lick up its sides, embers fly and smoke curls off the top. Solar throws long rays that turn slowly behind it, Bloom showers it in petals that flutter down and settle, and Breeze sends wind streaks curling past with tumbling leaves while the capsule sways in the gusts. The old element dies down as the new one starts, and everything is reflected in a glossy floor. Keyboard: it's a radio group. Arrow keys move the choice; Tab leaves.",
+    categorySlug: "inputs-controls",
+    tags: ["picker", "segmented control", "mode", "fire", "particles", "canvas", "motion kit"],
+    premium: true,
+    trendingScore: 189,
+    createdAt: "2026-11-05",
+    animationKinds: ["press", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "options", type: "ElementOption[]", defaultValue: "DEMO", description: "the choices, in order; any of bloom, ember, solar and breeze" },
+      { name: "value", type: "ElementName", description: "The value shown in the component." },
+      { name: "defaultValue", type: "ElementName", defaultValue: "\"ember\"", description: "Starting value of value when you leave it uncontrolled." },
+      { name: "onChange", type: "(value: ElementName) => void", description: "Called with the new value whenever the visitor changes it." },
+      { name: "title", type: "string", defaultValue: "\"Choose a tone\"", description: "The title shown in the component." },
+      { name: "subtitle", type: "string", defaultValue: "\"Sets the mood of every answer.\"", description: "The subtitle shown in the component." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Demo itself until someone touches it. Off by default." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewElementalPicker,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { ElementalPicker } from "@/components/elemental-picker";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[600px] justify-center">
+        <ElementalPicker />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "oracle-orb",
+    name: "Oracle Orb",
+    registryCliName: "oracle-orb",
+    description:
+      "Oracle Orb: a crystal ball for AI answers. A glass sphere holds a liquid nebula of violet, pink and amber that drifts and swirls, with stars caught in it and light pooling on the floor beneath. Ask something and the orb thinks: the swirl quickens, its heart glows and a halo breathes round it. Then the answer condenses out of the mist below, word by word, sharpening from a blur. Move the pointer over the ball to tilt the nebula toward you; drag across it to stir. Keyboard: type a question and press Enter, or Tab to a suggestion.",
+    categorySlug: "ai-components",
+    tags: ["ai", "crystal ball", "orb", "answer", "webgl", "shader", "nebula", "motion kit"],
+    premium: true,
+    trendingScore: 188,
+    createdAt: "2026-11-05",
+    animationKinds: ["type", "hover", "3d"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "onAsk", type: "(question: string) => Promise<string> | string", description: "your assistant: return (or resolve) the answer to a question. Without it the orb answers from samples." },
+      { name: "suggestions", type: "string[]", defaultValue: "SUGGEST", description: "questions offered as chips" },
+      { name: "placeholder", type: "string", defaultValue: "\"Ask the orb anything\"", description: "The placeholder shown in the component." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Demo itself until someone touches it. Off by default." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewOracleOrb,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { OracleOrb } from "@/components/oracle-orb";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[600px] justify-center">
+        <OracleOrb />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "clock-picker",
+    name: "Clock Picker",
+    registryCliName: "clock-picker",
+    description:
+      "A time picker on a real clock face. Drag either hand: it trails your finger on a spring, the hour hand creeps as the minute hand goes round, and the numbers swell as a hand passes. Let go mid-spin and it coasts, then ticks into place. Wind past twelve and the AM/PM flap flips; the dial's sky follows the hour so night looks like night. Tap a number to jump the hour, or the minute track to set minutes. Keyboard: focus a hand and use the arrow keys (Page Up/Down for an hour, A/P for AM/PM).",
+    categorySlug: "inputs-controls",
+    tags: ["time picker", "clock", "dial", "hands", "am pm", "sound", "drag", "motion kit"],
+    premium: true,
+    trendingScore: 187,
+    createdAt: "2026-11-05",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "defaultValue", type: "string", defaultValue: "\"07:30\"", description: "Starting time, 24-hour \"HH:MM\"." },
+      { name: "step", type: "number", defaultValue: "5", description: "Minutes the minute hand snaps to when you let go." },
+      { name: "label", type: "string", defaultValue: "\"Alarm\"", description: "Small line above the title." },
+      { name: "title", type: "string", defaultValue: "\"Wake up\"", description: "The title shown in the component." },
+      { name: "countdown", type: "boolean", defaultValue: "true", description: "Show \"Rings in 7 hr 30 min\" under the time." },
+      { name: "sound", type: "boolean", defaultValue: "true", description: "Soft watch ticks while the hands move (only after someone touches it)." },
+      { name: "onChange", type: "(value: string) => void", description: "Called with \"HH:MM\" (24-hour) once the hands settle." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a demo by itself until the first touch. Held still under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewClockPicker,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { ClockPicker } from "@/components/clock-picker";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <ClockPicker />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "vine-progress",
+    name: "Vine Progress",
+    registryCliName: "vine-progress",
+    description:
+      "An onboarding checklist with a vine for a progress bar. The vine grows down to the step you're on, unfurling a leaf for every step behind it; untick one and it pulls back and the leaves drop. Finish them all and it reaches the bottom and flowers. Brush the leaves with the pointer and they rustle.",
+    categorySlug: "loaders",
+    tags: ["progress", "checklist", "onboarding", "vine", "leaves", "steps", "motion kit"],
+    premium: true,
+    trendingScore: 186,
+    createdAt: "2026-11-05",
+    animationKinds: ["layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "steps", type: "VineStep[]", defaultValue: "DEFAULT_STEPS", description: "The steps shown in the component." },
+      { name: "defaultDone", type: "string[]", defaultValue: "[\"account\"]", description: "ids of steps that start out done" },
+      { name: "title", type: "string", defaultValue: "\"Get set up\"", description: "The title shown in the component." },
+      { name: "onChange", type: "(done: string[]) => void", description: "Called with the ids of every done step whenever one is ticked or unticked." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a demo by itself until the first touch. Held still under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewVineProgress,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { VineProgress } from "@/components/vine-progress";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[520px] justify-center">
+        <VineProgress />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "bloom-gift-card",
+    name: "Bloom Gift Card",
+    registryCliName: "bloom-gift-card",
+    description:
+      "A gift card with a flower bud on it. Tilt it with the pointer; press and hold to open it and the bud swells and trembles, then blooms in 3D, petal ring by petal ring, to show the amount in the middle with a puff of pollen. Let go early and it closes up again. Keyboard: hold Space or Enter on the button.",
+    categorySlug: "cards",
+    tags: ["gift card", "flower", "bloom", "hold", "3d", "tilt", "reveal", "motion kit"],
+    premium: true,
+    trendingScore: 185,
+    createdAt: "2026-11-05",
+    animationKinds: ["press", "3d", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "amount", type: "number", defaultValue: "50", description: "The amount shown in the component." },
+      { name: "currency", type: "string", defaultValue: "\"$\"", description: "The currency shown in the component." },
+      { name: "to", type: "string", defaultValue: "\"Sam\"", description: "The to shown in the component." },
+      { name: "from", type: "string", defaultValue: "\"Maya\"", description: "The from shown in the component." },
+      { name: "brand", type: "string", defaultValue: "\"Petal & Co.\"", description: "The brand shown in the component." },
+      { name: "last4", type: "string", defaultValue: "\"2948\"", description: "Last four of the card number." },
+      { name: "holdFor", type: "number", defaultValue: "1.3", description: "How long to hold, in seconds." },
+      { name: "onClaim", type: "() => void", description: "Called when the visitor uses claim." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a demo by itself until the first touch. Held still under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewBloomGiftCard,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { BloomGiftCard } from "@/components/bloom-gift-card";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <BloomGiftCard />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "genie-uploader",
+    name: "Genie Uploader",
+    registryCliName: "genie-uploader",
+    description:
+      "Genie Uploader: a file drop that swallows files the way macOS minimises a window. Drop files on the well, or click it to choose some. Each file appears as a card where it landed (a real thumbnail for images), then bends into a funnel and pours into the cloud, which gulps it and fills with blue as the uploads run. The files settle into a list with a progress line each; a file that's too big goes halfway in, gets spat back out and shakes its head, and a failed upload can be retried, which sends it into the cloud again. A check lands on the cloud when everything is up. Keyboard: Tab to the well and press Enter or Space to choose files; each row's buttons remove or retry.",
+    categorySlug: "inputs-controls",
+    tags: ["upload", "dropzone", "file", "genie", "cloud", "progress", "macOS", "motion kit"],
+    premium: true,
+    trendingScore: 184,
+    createdAt: "2026-11-05",
+    animationKinds: ["drag", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: "\"Upload files\"", description: "The title shown in the component." },
+      { name: "subtitle", type: "string", defaultValue: "\"Photos", description: "The subtitle shown in the component." },
+      { name: "accept", type: "string", description: "passed to the file picker, for example \"image/*,.pdf\"" },
+      { name: "maxSize", type: "number", defaultValue: "25 * MB", description: "files larger than this many bytes are refused; 25 MB by default" },
+      { name: "onChange", type: "(items: UploadItem[]) => void", description: "the list, every time it changes" },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Demo the gestures on its own until someone touches it. Off by default." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewGenieUploader,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { GenieUploader } from "@/components/genie-uploader";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[600px] justify-center">
+        <GenieUploader />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "piano-text",
+    name: "Piano Text",
+    registryCliName: "piano-text",
+    description:
+      "Piano Text: words you can play. Every letter is a key, climbing a scale from the first letter to the last. Glide the pointer across the words and each letter you cross plays its note and dances: it's pressed down, springs up, wobbles and lands, while its neighbours sway along and it flashes its colour. The faster you glide, the louder and higher it jumps. The line underneath vibrates like a plucked string where you play, and with sound on it also traces the real waveform. Browsers keep pages silent until a click, so the first click on the words turns sound on with a run up the scale. On touch screens, drag a finger along the words. Keyboard: focus the words and press Enter to turn sound on, Arrow Left or Right to play letter by letter, or type a letter to play it.",
+    categorySlug: "motion-effects",
+    tags: ["text", "piano", "sound", "audio", "hover", "typography", "playable", "motion kit"],
+    premium: true,
+    trendingScore: 183,
+    createdAt: "2026-11-05",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "text", type: "string", defaultValue: "\"Click to hear music\"", description: "the words; every letter becomes a key, spaces are rests" },
+      { name: "scale", type: "PianoScale", defaultValue: "\"major\"", description: "the scale the letters climb, left to right" },
+      { name: "root", type: "number", defaultValue: "60", description: "MIDI note of the first letter; 60 is middle C" },
+      { name: "caption", type: "string", description: "a line under the words" },
+      { name: "onNote", type: "(index: number, midi: number) => void", description: "called for every note, with the letter's index among the letters and its MIDI note" },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Demo itself until someone touches it. Off by default. Sound plays once the page has had a click." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewPianoText,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { PianoText } from "@/components/piano-text";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[760px] justify-center">
+        <PianoText />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "highlight-popover",
+    name: "Highlight Popover",
+    registryCliName: "highlight-popover",
+    description:
+      "Highlight Popover: select text in an article and a toolbar rises out of the selection like a drop of ink. The dark pill and a bead of liquid start at the selection; the pill lifts and widens while the bead stretches a neck behind it and snaps away. Point at a colour to see it on the words, then pick it and a marker nib draws the highlight line by line: a chisel-tip band with uneven edges and ink pooled where the tip stopped, multiplied onto the page so the words stay crisp. Tap a highlight to change its colour, add a note (the pill widens into a field and a marker appears in the margin), copy it, or remove it, which wipes the ink back off. Keyboard: select with Shift and the arrows, then press Enter to reach the toolbar. Highlights are buttons; Escape closes.",
+    categorySlug: "inputs-controls",
+    tags: ["highlight", "selection", "popover", "toolbar", "marker", "article", "text", "motion kit"],
+    premium: true,
+    trendingScore: 182,
+    createdAt: "2026-11-05",
+    animationKinds: ["press", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: "\"The quiet power of springs\"", description: "The title shown in the component." },
+      { name: "byline", type: "string", defaultValue: "\"Notes on interface motion", description: "The byline shown in the component." },
+      { name: "paragraphs", type: "string[]", defaultValue: "DEMO_TEXT", description: "The paragraphs shown in the component." },
+      { name: "highlights", type: "Highlight[]", description: "The highlights shown in the component." },
+      { name: "notes", type: "Record<string, string>", description: "notes by highlight group" },
+      { name: "onChange", type: "(highlights: Highlight[], notes: Record<string, string>) => void", description: "Called with the new value whenever the visitor changes it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Demo it on its own until someone touches it. Off by default." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewHighlightPopover,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { HighlightPopover } from "@/components/highlight-popover";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto flex w-full max-w-[700px] justify-center">
+        <HighlightPopover />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */
