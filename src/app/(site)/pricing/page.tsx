@@ -4,6 +4,7 @@ import { Check, Minus, Plus } from "lucide-react";
 import { CommentDeck } from "@/components/pricing/comment-deck";
 import { MembersRow } from "@/components/pricing/members-row";
 import { PlanAction, PlanNotice, PlanTag } from "@/components/pricing/plan-action";
+import { TwentyFirstMilestone } from "@/components/home/twenty-first-milestone";
 import { PillLink, RainbowWord } from "@/components/site";
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
@@ -248,6 +249,9 @@ export default function PricingPage() {
           <MembersRow />
         </div>
       </section>
+
+      {/* Where the components are seen: our 21st.dev numbers */}
+      <TwentyFirstMilestone />
 
       {/* What people say, as a pull quote and a deck of comments */}
       <section className="overflow-hidden px-4 pb-28">
