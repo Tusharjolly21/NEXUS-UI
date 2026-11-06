@@ -55,11 +55,12 @@ const DEMO: ElementOption[] = [
 ];
 
 // each element's colours: the capsule's glow inside, the floor light, and the label
-const LOOK: Record<ElementName, { inner: string; floor: string; ring: string }> = {
-  bloom: { inner: "radial-gradient(120% 90% at 50% 100%, #ff8fb1 0%, #e0487a 45%, #4a1426 100%)", floor: "255,120,170", ring: "rgba(255,170,200,.75)" },
-  ember: { inner: "radial-gradient(120% 90% at 50% 100%, #ffd36b 0%, #ff6a1a 40%, #5a1206 100%)", floor: "255,110,30", ring: "rgba(255,190,120,.8)" },
-  solar: { inner: "radial-gradient(120% 90% at 50% 100%, #fff3c4 0%, #ffc43d 42%, #5c3a05 100%)", floor: "255,200,80", ring: "rgba(255,236,170,.85)" },
-  breeze: { inner: "radial-gradient(120% 90% at 50% 100%, #c8fff0 0%, #34c8a8 45%, #083a33 100%)", floor: "90,230,200", ring: "rgba(180,255,235,.75)" },
+// `ink` is the label colour once chosen: the gradient is lightest at the bottom, where the label sits.
+const LOOK: Record<ElementName, { inner: string; floor: string; ring: string; ink: string }> = {
+  bloom: { inner: "radial-gradient(120% 90% at 50% 100%, #ff8fb1 0%, #e0487a 45%, #4a1426 100%)", floor: "255,120,170", ring: "rgba(255,170,200,.75)", ink: "#3d0a1f" },
+  ember: { inner: "radial-gradient(120% 90% at 50% 100%, #ffd36b 0%, #ff6a1a 40%, #5a1206 100%)", floor: "255,110,30", ring: "rgba(255,190,120,.8)", ink: "#3a1203" },
+  solar: { inner: "radial-gradient(120% 90% at 50% 100%, #fff3c4 0%, #ffc43d 42%, #5c3a05 100%)", floor: "255,200,80", ring: "rgba(255,236,170,.85)", ink: "#3a2400" },
+  breeze: { inner: "radial-gradient(120% 90% at 50% 100%, #c8fff0 0%, #34c8a8 45%, #083a33 100%)", floor: "90,230,200", ring: "rgba(180,255,235,.75)", ink: "#04302a" },
 };
 
 // ─── The elements ──────────────────────────────────────────────────────────────
@@ -347,7 +348,7 @@ export function ElementalPicker({ options = DEMO, value: valueProp, defaultValue
             const g = ctx.createLinearGradient(tail.x, tail.y, head.x, head.y);
             g.addColorStop(0, "rgba(210,255,240,0)");
             g.addColorStop(1, "rgba(225,255,248,.9)");
-            ctx.globalAlpha = base * Math.sin(Math.PI * clamp(u * 1.1));
+            ctx.globalAlpha = base * 0.6 * Math.sin(Math.PI * clamp(u * 1.1));
             ctx.strokeStyle = g;
             ctx.lineWidth = p.size * 1.5;
             ctx.beginPath();
@@ -525,8 +526,8 @@ export function ElementalPicker({ options = DEMO, value: valueProp, defaultValue
               />
               <span className="relative flex h-full flex-col items-center justify-end pb-5 sm:pb-6">
                 <svg viewBox={`0 0 ${ICON[o.id].vb} ${ICON[o.id].vb}`} width={22} height={22} aria-hidden="true" className={`mb-auto mt-6 transition-colors sm:mt-7 ${on ? "text-white" : "text-white/55 group-hover:text-white/80"}`} dangerouslySetInnerHTML={{ __html: ICON[o.id].body }} />
-                <span className={`text-[13px] font-semibold tracking-[-0.01em] ${on ? "text-white" : "text-white/80"}`}>{o.label}</span>
-                <span className={`mt-0.5 text-[11px] ${on ? "text-white/85" : "text-white/45"}`}>{o.hint}</span>
+                <span className={`text-[13px] font-semibold tracking-[-0.01em] transition-colors duration-300 ${on ? "" : "text-white/80"}`} style={on ? { color: L.ink } : undefined}>{o.label}</span>
+                <span className={`mt-0.5 text-[11px] font-medium transition-colors duration-300 ${on ? "" : "text-white/45"}`} style={on ? { color: L.ink, opacity: 0.78 } : undefined}>{o.hint}</span>
               </span>
             </motion.button>
             {/* its reflection in the floor */}
@@ -545,11 +546,17 @@ export function ElementalPicker({ options = DEMO, value: valueProp, defaultValue
       {/* the glossy floor the capsules stand on */}
       <div ref={floorRef} aria-hidden="true" className="relative mx-auto mt-5 h-px w-[88%] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
       <div aria-hidden="true" className="h-[64px]" />
-      <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-20 h-full w-full" />
+      <canvas
+        ref={canvasRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-20 h-full w-full"
+        // sparks and streaks fade out before they reach the heading, so the title stays readable
+        style={{ maskImage: "linear-gradient(to bottom, transparent 64px, #000 128px)", WebkitMaskImage: "linear-gradient(to bottom, transparent 64px, #000 128px)" }}
+      />
       <motion.span
         aria-hidden="true"
         style={{ x: gx, y: gy, scale: gs, opacity: go }}
-        className="pointer-events-none absolute left-0 top-0 z-30 -ml-[15px] -mt-[15px] h-[30px] w-[30px] rounded-full border-[1.5px] border-white/80 bg-white/15 shadow-[0_4px_14px_rgba(0,0,0,.3)] backdrop-blur-[2px]"
+        className="pointer-events-none absolute left-0 top-0 z-30 -ml-[15px] -mt-[15px] h-[30px] w-[30px] rounded-full border-[1.5px] border-white/80 bg-white/10 shadow-[0_4px_14px_rgba(0,0,0,.3)]"
       />
     </div>
   );
