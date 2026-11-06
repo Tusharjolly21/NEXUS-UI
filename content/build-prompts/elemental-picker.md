@@ -63,6 +63,11 @@ const LOOK: Record<ElementName, { inner: string; floor: string; ring: string; in
   breeze: { inner: "radial-gradient(120% 90% at 50% 100%, #c8fff0 0%, #34c8a8 45%, #083a33 100%)", floor: "90,230,200", ring: "rgba(180,255,235,.75)", ink: "#04302a" },
 };
 
+/** How much an ancestor's transform has scaled this element (1 when nothing scales it). */
+function localScale(el: HTMLElement) {
+  return el.offsetWidth ? el.getBoundingClientRect().width / el.offsetWidth : 1;
+}
+
 // ─── The elements ──────────────────────────────────────────────────────────────
 // One canvas over the capsules draws whichever element is alive, plus its reflection in the glossy floor.
 // Fire: soft additive flames licking up the capsule's outline, embers flying, smoke curling off the top.
@@ -138,17 +143,20 @@ export function ElementalPicker({ options = DEMO, value: valueProp, defaultValue
     let last = performance.now();
     const t0 = last;
     let rayA = 0;
+    // Gallery tiles show this inside a CSS scale(); rects are then in scaled pixels while the canvas is in
+    // local ones, so every measurement is divided by the current scale.
     const box = (): Box | null => {
       const el = caps.current.get(valueRef.current);
       if (!el) return null;
       const r = el.getBoundingClientRect();
       const b = root.getBoundingClientRect();
-      return { x: r.left - b.left, y: r.top - b.top, w: r.width, h: r.height };
+      const sc = localScale(root);
+      return { x: (r.left - b.left) / sc, y: (r.top - b.top) / sc, w: r.width / sc, h: r.height / sc };
     };
     const floorY = () => {
       const f = floorRef.current;
       if (!f) return root.clientHeight * 0.8;
-      return f.getBoundingClientRect().top - root.getBoundingClientRect().top;
+      return (f.getBoundingClientRect().top - root.getBoundingClientRect().top) / localScale(root);
     };
     /** a point on the capsule's outline, from the top cap down its sides to fraction `down` */
     const onEdge = (bx: Box, down: number) => {
@@ -456,8 +464,9 @@ export function ElementalPicker({ options = DEMO, value: valueProp, defaultValue
         }
         const r = c.getBoundingClientRect();
         const b = root.getBoundingClientRect();
-        const x = r.left - b.left + r.width / 2;
-        const y = r.top - b.top + r.height * 0.62;
+        const sc = localScale(root);
+        const x = (r.left - b.left + r.width / 2) / sc;
+        const y = (r.top - b.top + r.height * 0.62) / sc;
         if (go.get() < 0.5) {
           gx.set(x + 30);
           gy.set(y + 50);
