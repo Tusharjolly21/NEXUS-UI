@@ -17,7 +17,7 @@ export type ApertureIconProps = {
   play?: boolean;
 };
 
-/** A camera iris whose six blades turn a sixth of a revolution, squeezing shut and then flaring wide open before settling. */
+/** A camera iris: its six blades turn as the lit opening squeezes almost shut, then flares wide and settles. */
 export function ApertureIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: ApertureIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -38,27 +38,30 @@ export function ApertureIcon({ size = 24, strokeWidth = 2, className, speed = 1,
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <circle cx="12" cy="12" r="9" />
       <motion.g
         style={{ originX: "50%", originY: "50%" }}
         initial={false}
-        animate={on ? { rotate: [0, 60] } : { rotate: 0 }}
-        transition={{ duration: 0.9 / speed, ease: "easeInOut" }}
+        animate={on ? { rotate: [0, 40, 60] } : { rotate: 0 }}
+        transition={on ? { duration: 0.9 / speed, times: [0, 0.5, 1], ease: "easeInOut" } : { duration: 0 / speed }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
         <motion.path
-          d="M12 8.6L20.84 13.7M14.94 10.3L14.94 20.5M14.94 13.7L6.11 18.8M12 15.4L3.16 10.3M9.06 13.7L9.06 3.5M9.06 10.3L17.89 5.2"
-          stroke={accent}
+          d="M12 8.3L15.2 10.15L15.2 13.85L12 15.7L8.8 13.85L8.8 10.15Z"
+          fill={accent}
+          stroke="none"
           initial={false}
-          animate={on ? { d: [
-            "M12 8.6L20.84 13.7M14.94 10.3L14.94 20.5M14.94 13.7L6.11 18.8M12 15.4L3.16 10.3M9.06 13.7L9.06 3.5M9.06 10.3L17.89 5.2",
-            "M12 11.1L20.15 15.81M12.78 11.55L12.78 20.97M12.78 12.45L4.62 17.16M12 12.9L3.85 8.19M11.22 12.45L11.22 3.03M11.22 11.55L19.38 6.84",
-            "M12 6.6L21 11.79M16.68 9.3L16.68 19.69M16.68 14.7L7.68 19.89M12 17.4L3 12.21M7.32 14.7L7.32 4.31M7.32 9.3L16.32 4.11",
-            "M12 8.6L20.84 13.7M14.94 10.3L14.94 20.5M14.94 13.7L6.11 18.8M12 15.4L3.16 10.3M9.06 13.7L9.06 3.5M9.06 10.3L17.89 5.2",
-          ] } : { d: "M12 8.6L20.84 13.7M14.94 10.3L14.94 20.5M14.94 13.7L6.11 18.8M12 15.4L3.16 10.3M9.06 13.7L9.06 3.5M9.06 10.3L17.89 5.2" }}
+          animate={on ? { d: ["M12 8.3L15.2 10.15L15.2 13.85L12 15.7L8.8 13.85L8.8 10.15Z", "M12 10.75L13.08 11.38L13.08 12.62L12 13.25L10.92 12.62L10.92 11.38Z", "M12 6.7L16.59 9.35L16.59 14.65L12 17.3L7.41 14.65L7.41 9.35Z", "M12 8.3L15.2 10.15L15.2 13.85L12 15.7L8.8 13.85L8.8 10.15Z"] } : { d: "M12 8.3L15.2 10.15L15.2 13.85L12 15.7L8.8 13.85L8.8 10.15Z" }}
+          transition={{ duration: 0.9 / speed, times: [0, 0.35, 0.7, 1], ease: "easeInOut" }}
+        />
+        <motion.path
+          d="M12 8.3L20.89 13.43M15.2 10.15L15.2 20.41M15.2 13.85L6.32 18.98M12 15.7L3.11 10.57M8.8 13.85L8.8 3.59M8.8 10.15L17.68 5.02"
+          strokeWidth={strokeWidth * 0.75}
+          initial={false}
+          animate={on ? { d: ["M12 8.3L20.89 13.43M15.2 10.15L15.2 20.41M15.2 13.85L6.32 18.98M12 15.7L3.11 10.57M8.8 13.85L8.8 3.59M8.8 10.15L17.68 5.02", "M12 10.75L20.28 15.53M13.08 11.38L13.08 20.93M13.08 12.62L4.8 17.4M12 13.25L3.72 8.47M10.92 12.62L10.92 3.07M10.92 11.38L19.2 6.6", "M12 6.7L21 11.9M16.59 9.35L16.59 19.74M16.59 14.65L7.59 19.85M12 17.3L3 12.1M7.41 14.65L7.41 4.26M7.41 9.35L16.41 4.15", "M12 8.3L20.89 13.43M15.2 10.15L15.2 20.41M15.2 13.85L6.32 18.98M12 15.7L3.11 10.57M8.8 13.85L8.8 3.59M8.8 10.15L17.68 5.02"] } : { d: "M12 8.3L20.89 13.43M15.2 10.15L15.2 20.41M15.2 13.85L6.32 18.98M12 15.7L3.11 10.57M8.8 13.85L8.8 3.59M8.8 10.15L17.68 5.02" }}
           transition={{ duration: 0.9 / speed, times: [0, 0.35, 0.7, 1], ease: "easeInOut" }}
         />
       </motion.g>
+      <circle cx="12" cy="12" r="9" />
     </svg>
   );
 }

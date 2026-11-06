@@ -160,7 +160,7 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
           {primaryAction ? (
             <Link
               href={primaryAction.href}
-              className="hidden h-[34px] shrink-0 items-center whitespace-nowrap rounded-full bg-action px-4 text-[13.5px] font-medium text-white transition-colors hover:bg-action-hover sm:inline-flex"
+              className="inline-flex h-[34px] shrink-0 items-center whitespace-nowrap rounded-full bg-action px-3.5 text-[13.5px] font-medium text-white transition-colors hover:bg-action-hover sm:px-4"
             >
               {primaryAction.label}
             </Link>

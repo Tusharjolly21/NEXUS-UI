@@ -1810,4 +1810,11 @@ export const ICON_USES: Record<string, IconUse[]> = {
     { scene: "row", title: "Document viewer", label: "Zoom", sub: "Currently 100%", body: "Lead a zoom setting in a PDF or design tool, next to its percentage." },
     { scene: "button", title: "Product photo", label: "Zoom in on fabric", body: "A button on a product page that opens a close look at the material." },
   ],
+  "music-notes": [
+    { scene: "hero", title: "Player buffering a track", label: "Buffering your song", sub: "Almost there", body: "Notes float up while a stream fills, so a pause in the music reads as a moment, not a freeze." },
+    { scene: "card", title: "Playlist loading", label: "Chill Vibes", sub: "Loading 42 tracks", body: "Sits on a playlist card while the track list arrives, and leaves when the first song is ready." },
+    { scene: "toast", title: "Library syncing", label: "Syncing your library", sub: "Adding your liked songs.", body: "A friendly, music-shaped way to say a background sync is running." },
+    { scene: "row", title: "Finding lyrics", label: "Looking for lyrics", sub: "Matching the song to its words", body: "Leads a lyrics panel or search result while the words are fetched." },
+    { scene: "button", title: "Generating a mix", label: "Making your mix", body: "Replaces the label of a Create mix button while a playlist is being generated." },
+  ],
 };

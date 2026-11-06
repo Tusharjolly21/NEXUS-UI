@@ -186,7 +186,14 @@ export default function Home() {
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-rainbow-green opacity-60 motion-reduce:animate-none" />
                 <span className="relative inline-flex size-2 rounded-full bg-rainbow-green" />
               </span>
-              {CATALOG_COUNTS.components} animated components, free to start
+              <span>
+                <strong className="font-semibold">{CATALOG_COUNTS.components}+</strong>
+                <span className="sm:hidden"> components, </span>
+                <span className="hidden sm:inline"> animated components, and </span>
+                <span className="ml-0.5 inline-block whitespace-nowrap rounded-full bg-[linear-gradient(90deg,#0090f7,#6e5bff_35%,#ba62fc_65%,#f2416b)] px-2.5 py-0.5 font-semibold text-white shadow-[0_4px_14px_-4px_rgba(110,91,255,0.55)]">
+                  more coming for Pro
+                </span>
+              </span>
             </p>
           </div>
           <h1 className="pg-display mt-7 text-[clamp(52px,11vw,124px)] text-foreground">
@@ -201,7 +208,24 @@ export default function Home() {
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <PillLink href="/components">Browse components</PillLink>
             <HeroTutorial />
+            <IfPro
+              pro={null}
+              otherwise={
+                <PillLink href="/pricing" variant="white" plansSource="hero">
+                  See Pro plans
+                </PillLink>
+              }
+            />
           </div>
+          <IfPro
+            pro={null}
+            otherwise={
+              <p className="mx-auto mt-5 max-w-[520px] text-[14px] leading-[1.5] text-muted-foreground">
+                Free to start. Pro unlocks everything and every new release: {formatPrice(PRICES.pro)} a year, or{" "}
+                {formatPrice(PRICES.allAccess)} once.
+              </p>
+            }
+          />
           <HeroInstall className="mx-auto mt-6 max-w-[520px]" />
         </div>
       </section>

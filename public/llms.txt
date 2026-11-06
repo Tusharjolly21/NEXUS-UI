@@ -1,14 +1,14 @@
 # Nexus UI
 > Animated React Components & Next.js Templates
 
-Nexus UI is a premium UI component library offering 200+ animated React components, 300 animated icons, production-ready Next.js templates, and copy-paste UI blocks built with Tailwind CSS, Framer Motion, and TypeScript. Designed for developers shipping SaaS products, landing pages, and marketing sites faster.
+Nexus UI is a premium UI component library offering 200+ animated React components, 301 animated icons, production-ready Next.js templates, and copy-paste UI blocks built with Tailwind CSS, Framer Motion, and TypeScript. Designed for developers shipping SaaS products, landing pages, and marketing sites faster.
 
 ## Product
 
 - [Components](/components): 200+ animated React components including motion effects, 3D, backgrounds, cards, forms, and navigation
 - [Blocks](/blocks): Production-ready UI blocks for Next.js landing pages — hero sections, pricing grids, testimonials, CTAs
 - [Templates](/templates): Full-page Next.js templates for SaaS — animated landing pages, pricing flows, and dashboards
-- [Icons](/icons): 300 animated React icons (75 free, the rest Pro: every icon can be previewed and played, Pro unlocks code and sound), each one self-contained file built with Framer Motion, with its own synthesised sound, a live playground and four real-interface examples of where it fits; copy one file, no dependencies beyond Framer Motion
+- [Icons](/icons): 301 animated React icons (75 free, the rest Pro: every icon can be previewed and played, Pro unlocks code and sound), each one self-contained file built with Framer Motion, with its own synthesised sound, a live playground and four real-interface examples of where it fits; copy one file, no dependencies beyond Framer Motion
 - [Icon sounds](/icons/sounds): how to add the icons' sounds to a project: a dependency-free sound engine, a per-icon score, one function call
 - [Videos](/videos): Product videos in 9:16, 1:1, 16:9 and more (launch, pricing, changelog, walkthrough, app store preview, logo bumper, hero loop, teaser) as React components with their own soundtracks; edit the copy live, then take the prompt, source and a script that renders MP4
 - [Pricing](/pricing): Free tier available; Pro plan unlocks premium components and templates

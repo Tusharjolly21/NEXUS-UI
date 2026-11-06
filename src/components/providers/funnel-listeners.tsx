@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { LOGIN_MARKER } from "@/lib/login-marker";
-import { trackEvent } from "@/lib/track";
+import { rememberSource, trackEvent } from "@/lib/track";
 
 const LABEL = /^[a-z0-9-]{1,24}$/;
 
@@ -50,6 +50,12 @@ export function FunnelListeners() {
     }
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
+  }, []);
+
+  // A link that says where it came from (?src=ig) is remembered for the session and counted once as a landing.
+  React.useEffect(() => {
+    const src = new URL(window.location.href).searchParams.get("src");
+    if (src && rememberSource(src)) trackEvent("src_landing", { page: sectionOf(window.location.pathname) });
   }, []);
 
   React.useEffect(() => {

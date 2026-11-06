@@ -17,7 +17,7 @@ export type CoinIconProps = {
   play?: boolean;
 };
 
-/** A coin that flips over twice and lands with a sparkle. */
+/** A gold coin that flips over twice and lands with a sparkle at two of its corners. */
 export function CoinIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: CoinIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -44,9 +44,10 @@ export function CoinIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
         animate={on ? { scaleX: [1, 0.04, 1, 0.04, 1] } : { scaleX: 1 }}
         transition={{ duration: 0.9 / speed, ease: "easeInOut" }}
       >
+        <rect width="24" height="24" fill="none" stroke="none" />
         <circle cx="12" cy="12" r="9" />
-        <circle cx="12" cy="12" r="6.2" opacity="0.35" />
-        <path d="M14.2 9.6c-.4-.8-1.2-1.2-2.2-1.2-1.3 0-2.2.7-2.2 1.7 0 2.3 4.6 1.2 4.6 3.6 0 1-1 1.8-2.4 1.8-1 0-1.9-.5-2.4-1.3M12 6.9v1.5M12 15.6v1.5" />
+        <circle cx="12" cy="12" r="6.5" stroke={accent} strokeWidth={strokeWidth * 0.6} />
+        <path d="M14.25 9.85C13.85 9.1 13 8.7 12 8.7C10.75 8.7 9.75 9.35 9.75 10.3C9.75 11.35 10.9 11.65 12 12C13.1 12.35 14.25 12.65 14.25 13.7C14.25 14.65 13.25 15.3 12 15.3C11 15.3 10.15 14.9 9.75 14.15M12 7.7V8.7M12 15.3V16.3" />
       </motion.g>
       {[
         { x: 21, y: 3, d: 0.8 },

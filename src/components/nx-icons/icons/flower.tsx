@@ -17,7 +17,7 @@ export type FlowerIconProps = {
   play?: boolean;
 };
 
-/** A flower whose petals spin open round a pulsing centre. */
+/** A flower whose five round petals turn and bloom open round a pulsing centre, with its leaf lifting on the stem. */
 export function FlowerIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: FlowerIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -38,28 +38,34 @@ export function FlowerIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <path d="M12 16.4V21.6" />
-      <path d="M12 20.6c0-1.3 1-2 2.6-2 0 1.4-1 2-2.6 2z" stroke={accent} strokeWidth={1.6} />
-      <motion.g
-        style={{ originX: "50%", originY: "46%" }}
+      <path d="M12 12.89V21" />
+      <motion.path
+        d="M12 19.6c.35-1.75 1.75-2.65 3.6-2.65-.3 1.75-1.65 2.65-3.6 2.65z"
+        stroke={accent}
+        strokeWidth={1.6}
+        style={{ originX: "0%", originY: "100%" }}
         initial={false}
-        animate={on ? { rotate: [0, 72] } : { rotate: 0 }}
+        animate={on ? { rotate: [0, -14, 4, 0] } : { rotate: 0 }}
         transition={{ duration: 0.8 / speed, ease: "easeInOut" }}
+      />
+      <motion.g
+        style={{ originX: "50%", originY: "50%" }}
+        initial={false}
+        animate={on ? { rotate: [0, 72], scale: [1, 1.08, 1] } : { rotate: 0, scale: 1 }}
+        transition={on ? { duration: 0.8 / speed, ease: "easeInOut" } : { duration: 0 / speed }}
       >
-        <rect width="24" height="24" fill="none" stroke="none" />
-        {[0, 72, 144, 216, 288].map((a) => (
-          <ellipse key={a} cx="12" cy="5.8" rx="1.5" ry="3" transform={`rotate(${a} 12 10.4)`} />
-        ))}
+        <rect x="5.95" y="3.15" width="12.1" height="12.1" fill="none" stroke="none" />
+        <path d="M9.83 6.21A2.3 2.3 0 1 1 14.17 6.21A2.3 2.3 0 1 1 15.51 10.34A2.3 2.3 0 1 1 12 12.89A2.3 2.3 0 1 1 8.49 10.34A2.3 2.3 0 1 1 9.83 6.21Z" />
       </motion.g>
       <motion.circle
         cx="12"
-        cy="10.4"
+        cy="9.2"
         r="1.7"
         fill={accent}
         stroke="none"
         style={{ originX: "50%", originY: "50%" }}
         initial={false}
-        animate={on ? { scale: [1, 1.5, 1, 1.3, 1] } : { scale: 1 }}
+        animate={on ? { scale: [1, 1.45, 1, 1.25, 1] } : { scale: 1 }}
         transition={{ duration: 0.8 / speed }}
       />
     </svg>
