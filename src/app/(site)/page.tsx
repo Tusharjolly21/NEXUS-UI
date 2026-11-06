@@ -194,7 +194,24 @@ export default function Home() {
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <PillLink href="/components">Browse components</PillLink>
             <HeroTutorial />
+            <IfPro
+              pro={null}
+              otherwise={
+                <PillLink href="/pricing" variant="white" plansSource="hero">
+                  See Pro plans
+                </PillLink>
+              }
+            />
           </div>
+          <IfPro
+            pro={null}
+            otherwise={
+              <p className="mx-auto mt-5 max-w-[520px] text-[14px] leading-[1.5] text-muted-foreground">
+                Free to start. Pro unlocks everything and every new release: {formatPrice(PRICES.pro)} a year, or{" "}
+                {formatPrice(PRICES.allAccess)} once.
+              </p>
+            }
+          />
           <HeroInstall className="mx-auto mt-6 max-w-[520px]" />
         </div>
       </section>
