@@ -6,6 +6,7 @@ import { track } from "@vercel/analytics";
  * It does nothing in browsers where analytics is off (opted out), and it can never break the page.
  */
 export type FunnelEvent =
+  | "src_landing"
   | "buy_click"
   | "login_needed"
   | "checkout_opened"
@@ -16,10 +17,40 @@ export type FunnelEvent =
   | "plans_click"
   | "login_completed";
 
+/**
+ * Where a visit came from, when the link said so: nexus-ui.com/components/venom-button?src=ig.
+ * It is kept for the tab's session only (sessionStorage: no cookie, nothing that outlives the tab) and added
+ * to every funnel event, so an Instagram or ad visitor can be followed from the landing page to the purchase.
+ */
+const SRC_KEY = "nx_src";
+const SRC_LABEL = /^[a-z0-9_-]{1,24}$/;
+
+export function readSource(): string | undefined {
+  try {
+    return window.sessionStorage.getItem(SRC_KEY) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Keeps a ?src label for this session. Returns true when it is new, so the landing is counted once. */
+export function rememberSource(raw: string): boolean {
+  const label = raw.trim().toLowerCase();
+  if (!SRC_LABEL.test(label) || readSource() === label) return false;
+  try {
+    window.sessionStorage.setItem(SRC_KEY, label);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function trackEvent(name: FunnelEvent, props?: Record<string, string | number | boolean>) {
+  const src = readSource();
+  const withSrc = src && !(props && "src" in props) ? { ...props, src } : props;
   const send = () => {
     try {
-      track(name, props);
+      track(name, withSrc);
     } catch {
       // Analytics must never get in the way of the page.
     }

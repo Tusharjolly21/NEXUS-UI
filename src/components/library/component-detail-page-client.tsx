@@ -1313,6 +1313,8 @@ export function ComponentDetailPageClient({
             />
           </div>
 
+          {!premium ? <ProNudge slug={slug} name={name} picks={proPicks} placement="top" /> : null}
+
           {livePlayground ? (
             <section aria-labelledby="playground-heading" className="mt-20">
               <SectionTitle id="playground-heading">Play with it</SectionTitle>
