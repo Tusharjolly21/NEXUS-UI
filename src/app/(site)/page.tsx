@@ -13,6 +13,8 @@ import { RedditLove } from "@/components/home/reddit-love";
 import { IfPro } from "@/components/pro/pro-access";
 import { ShippingLog } from "@/components/home/shipping-log";
 import { StackStrip } from "@/components/home/stack-strip";
+import { TwentyFirstLogo } from "@/components/home/twenty-first-logo";
+import { TwentyFirstMilestone } from "@/components/home/twenty-first-milestone";
 import { ComponentGallery } from "@/components/gallery/component-gallery";
 import { VideoCard } from "@/components/videos/video-card";
 import { getVideo, videos } from "@/lib/catalog/videos";
@@ -177,13 +179,22 @@ export default function Home() {
           Psst. Try throwing a sticker.
         </p>
         <div className="relative z-20 mx-auto max-w-[980px] text-center">
-          <p className="pg-glass inline-flex items-center gap-2 rounded-full bg-card px-3.5 py-1.5 text-[13px] font-medium text-foreground">
-            <span className="relative flex size-2" aria-hidden>
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-rainbow-green opacity-60 motion-reduce:animate-none" />
-              <span className="relative inline-flex size-2 rounded-full bg-rainbow-green" />
-            </span>
-            {CATALOG_COUNTS.components} animated components, free to start
-          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2.5">
+            <p className="pg-glass inline-flex items-center gap-2 rounded-full bg-card px-3.5 py-1.5 text-[13px] font-medium text-foreground">
+              <span className="relative flex size-2" aria-hidden>
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-rainbow-green opacity-60 motion-reduce:animate-none" />
+                <span className="relative inline-flex size-2 rounded-full bg-rainbow-green" />
+              </span>
+              {CATALOG_COUNTS.components} animated components, free to start
+            </p>
+            <a
+              href="#21st"
+              className="pg-glass inline-flex items-center gap-2 rounded-full bg-card px-3.5 py-1.5 text-[13px] font-medium text-foreground transition-transform duration-150 hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              <TwentyFirstLogo word={false} className="size-[15px]" />
+              Almost 1M views on 21st.dev
+            </a>
+          </div>
           <h1 className="pg-display mt-7 text-[clamp(52px,11vw,124px)] text-foreground">
             <span className="block">Make your</span>
             <HeroWord className="block" />
@@ -200,6 +211,9 @@ export default function Home() {
           <HeroInstall className="mx-auto mt-6 max-w-[520px]" />
         </div>
       </section>
+
+      {/* Milestone: our 21st.dev numbers, straight under the hero so every visitor sees it */}
+      <TwentyFirstMilestone />
 
       <section id="gallery" aria-label="Components by interaction" className="scroll-mt-20 px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
