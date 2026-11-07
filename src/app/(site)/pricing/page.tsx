@@ -246,12 +246,14 @@ export default function PricingPage() {
               Request a component ›
             </Link>
           </p>
-          <MembersRow />
         </div>
       </section>
 
       {/* Where the components are seen: our 21st.dev numbers */}
       <TwentyFirstMilestone />
+
+      {/* Named buyers, after the bigger proof. Shows nothing until MEMBERS has names. */}
+      <MembersRow />
 
       {/* What people say, as a pull quote and a deck of comments */}
       <section className="overflow-hidden px-4 pb-28">

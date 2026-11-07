@@ -13,10 +13,11 @@ import { RAINBOW_HUES } from "@/components/site/rainbow-word";
  * Motion: one soft rise-in as the section scrolls into view, staggered by a few tens of milliseconds.
  * With reduced motion they are simply there.
  */
-const MEMBERS: { name: string; country: string }[] = [
-  { name: "GoCellar GoWinery", country: "Australia" },
-  { name: "Jon Massey", country: "United Kingdom" },
-];
+// Hidden on purpose while the list is this short: two names read as "few buyers". Put them back around five.
+// Parked, both agreed to be shown:
+//   { name: "GoCellar GoWinery", country: "Australia" }
+//   { name: "Jon Massey", country: "United Kingdom" }
+const MEMBERS: { name: string; country: string }[] = [];
 
 /** Up to two initials for the disc. */
 function initials(name: string) {
@@ -71,7 +72,7 @@ export function MembersRow() {
 
   if (MEMBERS.length === 0) return null;
   return (
-    <section aria-labelledby="members" className="mx-auto mt-20 flex max-w-[1000px] flex-col items-center px-2">
+    <section aria-labelledby="members" className="mx-auto flex max-w-[1000px] flex-col items-center px-6 pb-24 pt-2">
       <div className="text-center">
         <h2 id="members" className="pg-display text-[clamp(30px,4vw,40px)] leading-[1.05] text-foreground">
           Recently joined <span className="whitespace-nowrap">All-Access</span>
