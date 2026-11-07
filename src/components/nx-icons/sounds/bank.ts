@@ -1,18 +1,23 @@
-import { ding, blip, swish, tick, thud, N, type Time } from "../sound-kit";
+import { ding, swish, tick, thud, puff, type Time } from "../sound-kit";
 
 /** How long it plays at normal speed, in seconds (for a loader, one lap). */
-export const length = 1.3;
+export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.85;
 
-/** Four stony taps stepping up as the columns rise, a thin whistle as a coin falls, and a bright coin clink with a low vault thud under it. */
+/** Four marble columns each lift with a puff of stone dust and land back with a marble knock that rings, one after another, then a coin appears with a glint and drops with a thin falling whistle to a soft clink. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
-  [0, 1, 2, 3].forEach((i) => blip(c, o, 190 + i * 28, t(0.2 + i * 0.08), 0.1, 0.09, 150 + i * 28, "square"));
-  swish(c, o, t(0.48), t(0.3), 2600, 1100, 0.02);
-  ding(c, o, N.A6, t(0.82), 0.07, 0.55);
-  ding(c, o, N.C8, t(0.85), 0.035, 0.4);
-  ding(c, o, N.D6, t(0.9), 0.04, 0.45);
-  thud(c, o, t(0.82), 70, 0.16, 0.12);
-  tick(c, o, t(0.84), 0.09, 4800);
+  [[0, 1046], [0.08, 880], [0.16, 1175], [0.24, 988]].forEach(([d, f]) => {
+    puff(c, o, t(d + 0.08), 0.05, 1400, 0.03, "bandpass"); // the column lifts
+    const at = d + 0.4; // the column settles back
+    thud(c, o, t(at), 240, 0.2, 0.08);
+    ding(c, o, f, t(at), 0.05, 0.16);
+    tick(c, o, t(at), 0.06, 3500);
+  });
+  tick(c, o, t(0.43), 0.04, 6500); // 0.43 the coin appears
+  swish(c, o, t(0.54), t(0.34), 3800, 1500, 0.02); // 0.54-0.88 the coin drops
+  ding(c, o, 2217, t(0.88), 0.05, 0.3); // 0.88 the coin reaches the floor and fades
+  ding(c, o, 1480, t(0.88), 0.035, 0.35);
+  tick(c, o, t(0.88), 0.05, 5000);
 }

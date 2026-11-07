@@ -1,19 +1,21 @@
-import { ding, blip, swish, tick, N, type Time } from "../sound-kit";
+import { blip, swish, tick, thud, type Time } from "../sound-kit";
 
 /** How long it plays at normal speed, in seconds (for a loader, one lap). */
 export const length = 1.4;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.03;
 
-/** A whoosh and a steady whirr of the pulley as the cabin glides off and back, then four bright bell dings, G, D, A and E, and a gentle creak as it swings to a stop. */
+/** A motor hum and air sweep as the cabin glides off along the cable, the same hum swelling as it glides back in from the left, a clunk as it docks in the station, and soft hanger creaks that fade as the cabin swings to rest. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
-  swish(c, o, t(0.04), t(0.4), 400, 1800, 0.045);
-  swish(c, o, t(0.44), t(0.35), 1700, 500, 0.04);
-  [0.08, 0.16, 0.24, 0.32, 0.5, 0.58, 0.66].forEach((at) => tick(c, o, t(at), 0.05, 2400));
-  ding(c, o, N.G6, t(0.72), 0.08, 0.5);
-  ding(c, o, N.D6, t(0.82), 0.09, 0.5);
-  ding(c, o, N.A6, t(0.96), 0.05, 0.45);
-  ding(c, o, N.E6, t(1.08), 0.04, 0.4);
-  blip(c, o, 240, t(0.78), 0.03, 0.3, 200, "triangle");
+  swish(c, o, t(0.04), t(0.34), 500, 1400, 0.04); // 0.04-0.38 the cabin glides off to the right (fastest 0.2)
+  blip(c, o, 120, t(0.04), 0.03, 0.34, 200, "sawtooth"); // 0.04-0.38 the pulley motor whirr rises as it speeds up
+  swish(c, o, t(0.42), t(0.58), 1200, 500, 0.04); // 0.42-1.00 the cabin glides back in from the left (fastest 0.7)
+  blip(c, o, 110, t(0.42), 0.03, 0.5, 180, "sawtooth"); // 0.42-0.92 the motor hum swells as it re-enters
+  thud(c, o, t(0.97), 110, 0.2, 0.12); // 0.97 the cabin docks into the station
+  tick(c, o, t(0.97), 0.1, 1900); // 0.97 the grip clamps on
+  blip(c, o, 220, t(0.66), 0.035, 0.2, 280, "triangle"); // 0.66 the cabin starts to swing out (7 degrees)
+  blip(c, o, 280, t(0.87), 0.045, 0.18, 210, "triangle"); // 0.87 it swings back through the middle
+  blip(c, o, 210, t(1.05), 0.035, 0.15, 260, "triangle"); // 1.05 it swings out the other way
+  blip(c, o, 260, t(1.22), 0.02, 0.12, 235, "triangle"); // 1.22 the last small swing before it stops
 }

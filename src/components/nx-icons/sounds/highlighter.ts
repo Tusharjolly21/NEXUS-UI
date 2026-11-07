@@ -1,19 +1,17 @@
-import { ding, blip, swish, tick, puff, N, type Time } from "../sound-kit";
+import { blip, swish, tick, puff, type Time } from "../sound-kit";
 
 /** How long it plays at normal speed, in seconds (for a loader, one lap). */
-export const length = 1.35;
+export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 3.12;
 
-/** A squeaky marker glide that slides up and settles, a soft felt hiss under it, and a pair of tiny cap clicks at the end. */
+/** A quick dry swipe as the marker slides back, a soft felt touch where it meets the page, then a long felt hiss with a squeak that rides along as the yellow band draws in. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
-  swish(c, o, t(0.02), t(0.2), 2400, 800, 0.025);
-  blip(c, o, N.D5, t(0.3), 0.04, 0.6, N.A5, "triangle");
-  swish(c, o, t(0.3), t(0.7), 1200, 2600, 0.04);
-  puff(c, o, t(0.3), 0.7, 4200, 0.02, "bandpass");
-  tick(c, o, t(0.96), 0.08, 3000);
-  tick(c, o, t(1.02), 0.06, 4200);
-  ding(c, o, N.B6, t(1.0), 0.04, 0.3);
-  ding(c, o, N.E6, t(1.06), 0.03, 0.25);
+  swish(c, o, t(0.02), t(0.2), 1400, 3000, 0.035); // 0.02-0.22 the marker slides back, the band is wiped away
+  tick(c, o, t(0.3), 0.06, 2200); // 0.30 the felt tip meets the page again
+  swish(c, o, t(0.31), t(0.79), 1300, 3400, 0.05); // 0.31-1.10 the felt tip glides, fastest near 0.70
+  puff(c, o, t(0.32), 0.78, 4200, 0.018, "bandpass"); // 0.32-1.10 the soft felt hiss along the band
+  blip(c, o, 1500, t(0.32), 0.022, 0.75, 2500, "triangle"); // 0.32-1.07 squeak of the marker following the stroke
+  blip(c, o, 2600, t(0.66), 0.015, 0.2, 1900, "sine"); // 0.66 a squeak at the quickest part
 }

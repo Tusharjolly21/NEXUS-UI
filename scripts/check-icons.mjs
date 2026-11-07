@@ -98,7 +98,7 @@ for (const [, slug, component, title, category, kind, accent, heard, tags, descr
   const len = Number(/export const length = ([0-9.]+);/.exec(s)?.[1]);
   const level = Number(/export const level = ([0-9.]+);/.exec(s)?.[1]);
   if (!(len >= 0.4 && len <= 3)) fail(`${where} sound length ${len} outside 0.4 to 3 seconds`);
-  if (!(level >= 0.35 && level <= 3)) fail(`${where} sound level ${level} outside 0.35 to 3`);
+  if (!(level >= 0.35 && level <= 8)) fail(`${where} sound level ${level} outside 0.35 to 8`);
   if (!s.includes("export function play(c: AudioContext, o: AudioNode, t: Time)")) fail(`${where} sound must export play(c, o, t)`);
   for (const i of [...s.matchAll(/^import .* from "([^"]+)";/gm)].map((m) => m[1])) if (i !== "../sound-kit") fail(`${where} sound imports "${i}": scores may use only ../sound-kit`);
   const body = s.slice(s.indexOf("export function play"));

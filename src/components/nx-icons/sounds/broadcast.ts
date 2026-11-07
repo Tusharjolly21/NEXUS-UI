@@ -1,18 +1,21 @@
-import { ding, blip, puff, type Time } from "../sound-kit";
+import { ding, blip, type Time } from "../sound-kit";
 
 /** How long it plays at normal speed, in seconds (for a loader, one lap). */
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.4;
 
-/** A low carrier throb under sonar pings that go out in two pairs, near ones first and far ones after, with a bed of radio hiss and three short morse blips. */
+/** A soft throbbing carrier as the centre dot swells (peaks 0.22 and 0.68), and sonar pings as the signal arcs pulse outward: two bright pings for the inner pair at 0.25 and 0.31, two lower ones for the outer pair at 0.53 and 0.59. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
-  blip(c, o, 196, t(0.02), 0.08, 0.3, 240, "triangle");
-  ding(c, o, 1120, t(0.03), 0.07, 0.4);
-  ding(c, o, 1150, t(0.09), 0.05, 0.35);
-  ding(c, o, 1680, t(0.31), 0.06, 0.45);
-  ding(c, o, 1720, t(0.37), 0.045, 0.4);
-  puff(c, o, t(0.1), 0.5, 5200, 0.012, "bandpass");
-  [0.62, 0.7, 0.78].forEach((at) => blip(c, o, 2350, t(at), 0.03, 0.04));
+  // 0.02-0.22 the centre dot swells
+  blip(c, o, 170, t(0.02), 0.08, 0.22, 330, "triangle");
+  // 0.25 / 0.31 inner arcs flash and pulse out
+  ding(c, o, 1400, t(0.25), 0.07, 0.35);
+  ding(c, o, 1480, t(0.31), 0.05, 0.3);
+  // 0.45-0.68 the centre dot swells a second time
+  blip(c, o, 200, t(0.46), 0.06, 0.2, 320, "triangle");
+  // 0.53 / 0.59 outer arcs flash and pulse out
+  ding(c, o, 880, t(0.53), 0.055, 0.4);
+  ding(c, o, 930, t(0.59), 0.04, 0.35);
 }

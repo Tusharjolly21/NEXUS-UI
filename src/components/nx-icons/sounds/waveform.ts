@@ -1,18 +1,21 @@
-import { ding, blip, swish, type Time } from "../sound-kit";
+import { blip, type Time } from "../sound-kit";
 
 /** How long it plays at normal speed, in seconds (for a loader, one lap). */
-export const length = 1.1;
+export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.79;
 
-/** Seven soft sine pulses that swell to the middle and fade away, each a little higher then lower, rolling like a wave. */
+/** Seven bars pulse one after another from left to right: each bar's swell is a sine that sweeps up in pitch as the bars climb in tone, followed by a lower hollow drop as the bar collapses. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
-  [196, 233.08, 293.66, 369.99, 311.13, 261.63, 207.65].forEach((f, i) => {
-    const g = 0.04 + 0.09 * Math.sin(((i + 0.5) / 7) * Math.PI);
-    blip(c, o, f, t(0.02 + i * 0.07), g, 0.28);
-    blip(c, o, f * 2, t(0.02 + i * 0.07), g * 0.25, 0.12);
+  const f = [233, 262, 311, 349, 415, 466, 554];
+  const big = [1.7, 1.62, 1.7, 1.11, 1.7, 1.4, 1.7];
+  f.forEach((hz, i) => {
+    const d = 0.07 * i;
+    // d + 0.10 the bar swells upward
+    blip(c, o, hz, t(d + 0.1), 0.05 + 0.03 * big[i], 0.2, hz * 1.4);
+    blip(c, o, hz * 2, t(d + 0.1), 0.015, 0.1, hz * 2.8);
+    // d + 0.29 the bar collapses to its shortest
+    blip(c, o, hz * 1.5, t(d + 0.29), 0.05, 0.2, hz * 0.6, "triangle");
   });
-  swish(c, o, t(0.05), t(0.6), 500, 2400, 0.02);
-  ding(c, o, 1174.66 * 1.0595, t(0.62), 0.04, 0.45);
 }

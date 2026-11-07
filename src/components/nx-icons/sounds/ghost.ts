@@ -1,17 +1,20 @@
-import { ding, blip, swish, tick, N, type Time } from "../sound-kit";
+import { blip, tick, puff, type Time } from "../sound-kit";
 
 /** How long it plays at normal speed, in seconds (for a loader, one lap). */
-export const length = 1.1;
+export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.96;
 
-/** A thin airy wail that wavers down and up like a ghost moaning, with a soft whoosh under it and two tiny clicks for the blinks. */
+/** A hollow whoo that wobbles up as the ghost floats up and down as it sinks, with soft cloth flutters for the rippling hem and two faint ticks as the eyes shut. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
-  swish(c, o, t(0.02), t(0.95), 260, 900, 0.035);
-  blip(c, o, N.E5 * 0.8, t(0.04), 0.05, 0.5, N.C5 * 0.7, "triangle");
-  blip(c, o, N.C5 * 0.7, t(0.5), 0.045, 0.5, N.E5 * 0.75, "triangle");
-  tick(c, o, t(0.3), 0.05, 6500);
-  tick(c, o, t(0.78), 0.05, 6500);
-  ding(c, o, N.B6, t(0.85), 0.035, 0.3);
+  blip(c, o, 300, t(0.03), 0.05, 0.26, 430, "sine"); // 0.03 the ghost starts floating up
+  blip(c, o, 450, t(0.03), 0.012, 0.26, 640, "triangle"); // hollow overtone of the same float
+  blip(c, o, 430, t(0.27), 0.05, 0.26, 290, "sine"); // 0.27 it turns and sinks
+  blip(c, o, 290, t(0.52), 0.05, 0.26, 400, "sine"); // 0.52 second rise
+  blip(c, o, 435, t(0.52), 0.012, 0.26, 600, "triangle"); // hollow overtone
+  blip(c, o, 400, t(0.77), 0.045, 0.28, 260, "sine"); // 0.77 final sink
+  [0.1, 0.3, 0.5, 0.7, 0.9].forEach((at) => puff(c, o, t(at), 0.12, 700, 0.035, "bandpass")); // hem ripple at its fastest
+  tick(c, o, t(0.38), 0.045, 4500); // 0.38 eyes closed in the first blink
+  tick(c, o, t(0.78), 0.045, 4500); // 0.78 eyes closed in the second blink
 }

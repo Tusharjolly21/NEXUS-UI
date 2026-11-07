@@ -1,18 +1,18 @@
-import { ding, plink, blip, swish, tick, puff, N, type Time } from "../sound-kit";
+import { swish, puff, type Time } from "../sound-kit";
 
 /** How long it plays at normal speed, in seconds (for a loader, one lap). */
-export const length = 1.2;
+export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 4.1;
 
-/** A quick dry swish as the brush pulls back, then a long soft bristle drag with a rising squeaky glide under it, ending in one clear tap as the stroke lands. */
+/** A dry swish as the brush pulls back, a soft bristle touch where it meets the page, then a long scratchy bristle drag that swells and fades along the stroke. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
-  swish(c, o, t(0.02), t(0.22), 2800, 900, 0.03);
-  puff(c, o, t(0.3), 0.6, 3600, 0.03, "bandpass");
-  swish(c, o, t(0.3), t(0.62), 800, 3000, 0.055);
-  blip(c, o, N.E5, t(0.34), 0.045, 0.55, N.B5, "triangle");
-  tick(c, o, t(0.94), 0.08, 3600);
-  plink(c, o, N.G5, t(0.96), 0.08, 0.2);
-  ding(c, o, N.E7, t(1.02), 0.025, 0.2);
+  swish(c, o, t(0.02), t(0.21), 1800, 700, 0.03); // 0.02-0.23 the brush swings back, the old stroke retracts
+  puff(c, o, t(0.29), 0.05, 2600, 0.07, "bandpass"); // 0.29 bristles touch the page
+  swish(c, o, t(0.3), t(0.74), 1500, 3800, 0.06); // 0.30-1.04 bristles drag along the stroke, fastest near 0.65
+  swish(c, o, t(0.32), t(0.7), 5200, 2800, 0.025); // 0.32-1.02 the scratchy top of the bristles
+  puff(c, o, t(0.45), 0.08, 4500, 0.03, "highpass"); // 0.45 a few bristles flick
+  puff(c, o, t(0.7), 0.08, 5200, 0.03, "highpass"); // 0.70 more flicking bristles
+  puff(c, o, t(1.0), 0.07, 1800, 0.04, "bandpass"); // 1.00 the brush settles at the end of the stroke
 }

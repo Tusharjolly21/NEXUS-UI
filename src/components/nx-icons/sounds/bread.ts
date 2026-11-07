@@ -1,17 +1,16 @@
-import { ding, blip, swish, tick, puff, N, type Time } from "../sound-kit";
+import { blip, swish, tick, puff, type Time } from "../sound-kit";
 
 /** How long it plays at normal speed, in seconds (for a loader, one lap). */
-export const length = 1.1;
+export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.06;
 
-/** A warm low swell as the dough rises, a crackle of crust, then three breathy puffs of steam with a soft high chime. */
+/** A low warm swell as the dough rises with a run of crackling crust, a second swell and crackle, and a soft steam hiss that follows the three wisps. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
-  blip(c, o, 147, t(0.02), 0.07, 0.6, 196, "triangle");
-  swish(c, o, t(0.04), t(0.5), 220, 700, 0.03);
-  [0.22, 0.3, 0.37, 0.52].forEach((at, i) => tick(c, o, t(at), 0.05 + i * 0.01, 2400 + i * 380));
-  [0.2, 0.38, 0.56].forEach((at) => puff(c, o, t(at), 0.22, 4800, 0.03, "bandpass"));
-  ding(c, o, N.G5, t(0.74), 0.035, 0.4);
-  ding(c, o, N.A6, t(0.84), 0.03, 0.4);
+  blip(c, o, 110, t(0.02), 0.07, 0.25, 150); // 0.02-0.23 the loaf swells up, a low warm rise
+  [0.07, 0.12, 0.15, 0.19, 0.22].forEach((at, i) => { if (i % 2) puff(c, o, t(at), 0.03, 3600, 0.05, "bandpass"); else tick(c, o, t(at), 0.07, 2600 + i * 300); }); // 0.07-0.22 the crust crackles as it stretches
+  blip(c, o, 120, t(0.45), 0.06, 0.25, 165); // 0.45-0.68 the second swell
+  [0.5, 0.56, 0.6, 0.64, 0.67].forEach((at, i) => { if (i % 2) puff(c, o, t(at), 0.03, 3600, 0.05, "bandpass"); else tick(c, o, t(at), 0.07, 2800 + i * 300); }); // 0.5-0.67 more crackle
+  [0.15, 0.33, 0.51].forEach((at) => swish(c, o, t(at), t(0.35), 5200, 3600, 0.02)); // 0.15 0.33 0.51 each wisp of steam starts to rise
 }

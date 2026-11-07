@@ -1,19 +1,27 @@
-import { plink, blip, swish, tick, N, type Time } from "../sound-kit";
+import { blip, swish, tick, thud, type Time } from "../sound-kit";
 
 /** How long it plays at normal speed, in seconds (for a loader, one lap). */
-export const length = 1.3;
+export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.4;
 
-/** A mechanical click, the shutter sliding with a low whirr, four quick disk-seek chirps, and a bright two note jingle that says saved before the shutter clicks home. */
+/** The metal shutter slides open with a scrape and a click at the end of its travel (0.25), a rising digital chirp as the save tick is drawn and a square beep when it completes at 0.5, then the shutter slides shut and clicks home at 1.0. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
-  tick(c, o, t(0.02), 0.14, 3600);
-  swish(c, o, t(0.04), t(0.24), 300, 900, 0.04);
-  blip(c, o, 140, t(0.1), 0.05, 0.4, 190, "sawtooth");
-  [0.32, 0.38, 0.43, 0.49].forEach((at, i) => blip(c, o, [1900, 2600, 2100, 3000][i], t(at), 0.035, 0.03));
-  plink(c, o, N.D5, t(0.58), 0.09, 0.14);
-  plink(c, o, N.B5, t(0.67), 0.09, 0.22);
-  swish(c, o, t(0.76), t(0.22), 900, 300, 0.03);
-  tick(c, o, t(0.98), 0.12, 3200);
+  // 0.02-0.25 shutter slides open
+  tick(c, o, t(0.02), 0.1, 3600);
+  swish(c, o, t(0.02), t(0.23), 500, 1400, 0.04);
+  // 0.25 shutter hits the end of its travel
+  tick(c, o, t(0.25), 0.12, 2800);
+  thud(c, o, t(0.25), 260, 0.07, 0.04);
+  // 0.26-0.5 the save tick is drawn: chirp rises
+  blip(c, o, 900, t(0.26), 0.035, 0.24, 2100, "square");
+  // 0.5 the tick is complete: save beep
+  blip(c, o, 2400, t(0.5), 0.05, 0.12, undefined, "square");
+  // 0.7-1.0 shutter slides shut
+  tick(c, o, t(0.7), 0.05, 3000);
+  swish(c, o, t(0.7), t(0.3), 1400, 500, 0.035);
+  // 1.0 shutter clicks home
+  tick(c, o, t(1.0), 0.14, 3200);
+  thud(c, o, t(1.0), 260, 0.08, 0.05);
 }

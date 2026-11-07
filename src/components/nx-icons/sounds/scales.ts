@@ -1,18 +1,19 @@
-import { ding, swish, thud, N, type Time } from "../sound-kit";
+import { ding, blip, type Time } from "../sound-kit";
 
 /** How long it plays at normal speed, in seconds (for a loader, one lap). */
 export const length = 1.4;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.53;
 
-/** A wooden thud and creak as the beam tips, a heavier thud the other way, then smaller and smaller knocks, closing with a calm two-tone chime when the scales settle level. */
+/** A wooden creak each time the beam swings through the middle, and a small metal clink of the pans at each tip of the swing, all dying away as the scales settle. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
-  swish(c, o, t(0.05), t(0.3), 300, 900, 0.03);
-  thud(c, o, t(0.3), 130, 0.26, 0.16);
-  swish(c, o, t(0.38), t(0.4), 900, 300, 0.028);
-  thud(c, o, t(0.76), 105, 0.2, 0.14);
-  thud(c, o, t(1.0), 90, 0.1, 0.12);
-  ding(c, o, N.D5, t(1.1), 0.05, 0.6);
-  ding(c, o, N.A5, t(1.2), 0.04, 0.6);
+  blip(c, o, 170, t(0.1), 0.05, 0.14, 250, "sawtooth"); // 0.14 beam starts to tip, fastest
+  blip(c, o, 250, t(0.38), 0.06, 0.15, 150, "sawtooth"); // 0.42 beam swings back through level, fastest
+  blip(c, o, 160, t(0.65), 0.045, 0.14, 230, "sawtooth"); // 0.69 swings back again
+  blip(c, o, 220, t(0.95), 0.03, 0.12, 160, "sawtooth"); // 0.98 last small swing
+  ding(c, o, 3300, t(0.28), 0.065, 0.2); // 0.28 beam at its highest tilt, pans clink
+  ding(c, o, 3900, t(0.56), 0.05, 0.18); // 0.56 tips the other way, pans clink
+  ding(c, o, 4400, t(0.84), 0.035, 0.16); // 0.84 smaller tip, pans clink
+  ding(c, o, 4800, t(1.12), 0.02, 0.14); // 1.12 last tiny clink as the pans settle
 }

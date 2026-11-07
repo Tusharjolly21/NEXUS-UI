@@ -1,18 +1,19 @@
-import { ding, blip, swish, thud, N, type Time } from "../sound-kit";
+import { blip, swish, tick, type Time } from "../sound-kit";
 
 /** How long it plays at normal speed, in seconds (for a loader, one lap). */
-export const length = 1.1;
+export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.97;
 
-/** Two squelchy wobbles on the stick, a sticky stretch, then a tiny plip as the drip lands and a soft sweet chime. */
+/** A rubbery squeak as the lolly rocks on its stick, a wet stretching whine as the drip grows, a tiny pinch-pop when it lets go and a plip as the drop falls out of sight. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
-  blip(c, o, 330, t(0.04), 0.07, 0.14, 262, "triangle");
-  blip(c, o, 294, t(0.2), 0.06, 0.14, 349, "triangle");
-  swish(c, o, t(0.25), t(0.25), 900, 1600, 0.02);
-  blip(c, o, 1900, t(0.52), 0.05, 0.05, 700);
-  thud(c, o, t(0.88), 260, 0.1, 0.07);
-  ding(c, o, N.E5, t(0.9), 0.045, 0.3);
-  ding(c, o, N.B6, t(0.97), 0.04, 0.3);
+  swish(c, o, t(0.02), t(0.3), 700, 1500, 0.02); // 0.02-0.32 the drip stretches, sticky air
+  blip(c, o, 900, t(0.05), 0.04, 0.26, 1500, "triangle"); // 0.05-0.31 the stretch whines up in pitch
+  blip(c, o, 1900, t(0.2), 0.05, 0.08, 1300, "triangle"); // 0.22 the lolly rocks to the left, a rubbery squeak
+  blip(c, o, 1250, t(0.45), 0.05, 0.08, 1800, "triangle"); // 0.45 it rocks right, a squeak the other way
+  blip(c, o, 420, t(0.46), 0.05, 0.08, 900); // 0.46 a drop breaks free, a wet bloop
+  blip(c, o, 2300, t(0.6), 0.06, 0.05, 800); // 0.6 the stretched drip snaps back into the lolly
+  tick(c, o, t(0.6), 0.05, 4000);
+  blip(c, o, 1500, t(0.86), 0.05, 0.07, 650); // 0.87 the falling drop drips away out of sight
 }

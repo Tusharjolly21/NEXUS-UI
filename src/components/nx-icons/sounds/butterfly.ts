@@ -1,18 +1,18 @@
-import { ding, swish, puff, N, type Time } from "../sound-kit";
+import { swish, puff, type Time } from "../sound-kit";
 
 /** How long it plays at normal speed, in seconds (for a loader, one lap). */
-export const length = 0.9;
+export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 8.0;
 
-/** Two airy flutters of the wings, a thin shimmer between them and a delicate two-note chime as it floats upward. */
+/** A very soft dry flutter of the wings on each close and open, with a faint breath of air as it floats up. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
-  puff(c, o, t(0.04), 0.14, 4200, 0.03, "bandpass");
-  puff(c, o, t(0.16), 0.1, 5600, 0.025, "bandpass");
-  puff(c, o, t(0.42), 0.14, 4600, 0.03, "bandpass");
-  puff(c, o, t(0.54), 0.1, 6000, 0.025, "bandpass");
-  swish(c, o, t(0.1), t(0.6), 2600, 5200, 0.012);
-  ding(c, o, N.B5, t(0.62), 0.04, 0.4);
-  ding(c, o, N.G6, t(0.72), 0.035, 0.4);
+  swish(c, o, t(0.03), t(0.16), 2600, 4400, 0.02); // 0.10 wings fold in
+  swish(c, o, t(0.23), t(0.16), 4400, 2800, 0.018); // 0.30 wings open
+  swish(c, o, t(0.43), t(0.16), 2600, 4400, 0.02); // 0.50 wings fold in again
+  swish(c, o, t(0.63), t(0.16), 4400, 2800, 0.018); // 0.70 wings open
+  puff(c, o, t(0.1), 0.05, 6500, 0.012, "highpass"); // 0.10 wing flutter detail
+  puff(c, o, t(0.5), 0.05, 6500, 0.012, "highpass"); // 0.50 wing flutter detail
+  swish(c, o, t(0.05), t(0.8), 900, 1500, 0.008); // 0.05-0.85 body floats upward
 }
