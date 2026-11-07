@@ -27,6 +27,7 @@ import { TYPING_NOTE } from "@/lib/catalog/component-sounds";
 import { ProBadge, ProLock, useCopyBuildPrompt, useProAccess } from "@/components/pro/pro-access";
 import { RainbowWord } from "@/components/site/rainbow-word";
 import { cn } from "@/lib/utils";
+import { MemberStack } from "@/components/pricing/member-stack";
 import { PropControl, cleanDefaultValue, getEditableProps, propValueToCode, type PropDoc } from "@/components/library/prop-controls";
 import PROMPT_ASSETS from "@/lib/catalog/prompt-assets.json";
 
@@ -599,6 +600,7 @@ function InstallPanel({
         >
           See what Pro includes
         </Link>
+        <MemberStack className="mt-3" />
         {hasPrompt ? <BuildPromptCard slug={slug} name={name} locked={locked} free={!premium} /> : null}
         {interactions.length ? (
           <div className="mt-6">

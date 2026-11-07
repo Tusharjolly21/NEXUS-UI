@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { RAINBOW_HUES } from "@/components/site/rainbow-word";
+import { Flag } from "@/components/pricing/flag";
+import { MEMBERS, discBackground, initials } from "@/components/pricing/members";
 
 /**
  * People who bought All-Access (the lifetime plan), shown by name under the plans with their permission.
@@ -13,21 +14,12 @@ import { RAINBOW_HUES } from "@/components/site/rainbow-word";
  * Motion: one soft rise-in as the section scrolls into view, staggered by a few tens of milliseconds.
  * With reduced motion they are simply there.
  */
-// Hidden on purpose while the list is this short: two names read as "few buyers". Put them back around five.
-// Parked, both agreed to be shown:
-//   { name: "GoCellar GoWinery", country: "Australia" }
-//   { name: "Jon Massey", country: "United Kingdom" }
-const MEMBERS: { name: string; country: string }[] = [];
-
-/** Up to two initials for the disc. */
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/);
-  return (parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "");
-}
+// The full row stays hidden until there are enough names: two read as "few buyers". Below this the names
+// show only as the small MemberStack under the buy buttons.
+const MIN_FOR_ROW = 5;
 
 function Member({ m, i, inView }: { m: (typeof MEMBERS)[number]; i: number; inView: boolean }) {
   const reduced = !!useReducedMotion();
-  const hue = RAINBOW_HUES[(i * 2) % RAINBOW_HUES.length];
   return (
     <motion.li
       className="flex items-center gap-3 rounded-full bg-card py-2 pl-2 pr-6 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_10px_24px_-18px_rgba(0,0,0,.35)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.09)]"
@@ -38,13 +30,15 @@ function Member({ m, i, inView }: { m: (typeof MEMBERS)[number]; i: number; inVi
       <span
         aria-hidden
         className="flex size-11 shrink-0 items-center justify-center rounded-full text-[15px] font-semibold uppercase tracking-[-0.2px] text-white"
-        style={{ background: `linear-gradient(140deg, ${hue}, color-mix(in oklab, ${hue} 62%, #000))` }}
+        style={{ background: discBackground(i) }}
       >
         {initials(m.name)}
       </span>
       <span className="min-w-0">
         <span className="block truncate text-[16px] font-semibold leading-tight tracking-[-0.2px] text-foreground">{m.name}</span>
-        <span className="mt-0.5 block text-[14px] leading-tight text-muted-foreground">{m.country}</span>
+        <span className="mt-1 block leading-none">
+          <Flag code={m.code} country={m.country} className="h-[14px] w-[21px]" />
+        </span>
       </span>
     </motion.li>
   );
@@ -70,7 +64,7 @@ export function MembersRow() {
     return () => io.disconnect();
   }, []);
 
-  if (MEMBERS.length === 0) return null;
+  if (MEMBERS.length < MIN_FOR_ROW) return null;
   return (
     <section aria-labelledby="members" className="mx-auto flex max-w-[1000px] flex-col items-center px-6 pb-24 pt-2">
       <div className="text-center">
