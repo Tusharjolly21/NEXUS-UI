@@ -14961,6 +14961,79 @@ export default function Page() {
 }`,
     tailwindSource: tw,
   },
+  {
+    slug: "murmur",
+    name: "Murmur",
+    registryCliName: "murmur",
+    description:
+      "Murmur: a landing screen for a writing assistant where four swallows fly around the prompt, and the whole sky is drawn live as a field of type. Each bird is built from real wing shapes, then re-read as a grid of small coloured cells that each pick a character by how much of the bird covers them, with a soft blurred shadow and drifting specks of dust. The birds wander, steer away from the screen edges, from the prompt box and from each other, flap in bursts, glide, and now and then tuck into a fast dart. Tap the sky near a bird and it startles away; send the prompt and every bird takes off at full flap while a line says what is being drafted. The prompt box is real glass over the sky, with a real textarea: Enter sends, Shift+Enter makes a new line. The drawing pauses when it is off screen or the tab is hidden, and with reduced motion the sky is drawn once and stays still.",
+    categorySlug: "ai-components",
+    tags: ["ai", "prompt", "writing", "ascii", "birds", "canvas", "landing", "motion kit"],
+    premium: true,
+    trendingScore: 189,
+    createdAt: "2026-11-07",
+    animationKinds: ["hover", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "height", type: "number | \"fill\"", defaultValue: "\"fill\"", description: "Height of the screen in px, or \"fill\" to fill a sized parent." },
+      { name: "autoplay", type: "boolean", defaultValue: "true", description: "Let the swallows fly. When false, or with reduced motion, the sky is drawn once and stays still." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewMurmur,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { Murmur } from "@/components/murmur";
+
+export default function Page() {
+  return (
+    <main className="h-[100svh] min-h-[560px]">
+      <Murmur height="fill" />
+    </main>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "loupe-lens",
+    name: "Loupe Lens",
+    registryCliName: "loupe-lens",
+    description:
+      "Loupe Lens: a glass ball you drag across a table of tiny printed things, and it bends the light like real glass. A fragment shader magnifies what is under it, refracts the rim with a separate bend for red, green and blue so white light splits into a spectrum, lays a thin film of colour along the edge, and adds a highlight, a window reflection, a soft shadow and a caustic. Under it sit eight printed objects drawn on a canvas, each with micro-print you can only read through the glass: a stamp, a ticket, a working watch dial, a map of the Amsterdam canals, a type specimen, a film strip, a facts label and a badge. Drag the glass and it follows on a spring, then coasts on release; tap the table and it glides there; drag an object and it lifts and tilts to the front. Scroll over it or pinch with two fingers to resize; arrow keys nudge it from the focused stage. A Lens panel sets size, magnification, refraction, dispersion and iridescence. It drifts by itself until first touch, pauses when off screen, shows a note when WebGL is missing, and with reduced motion it stays still.",
+    categorySlug: "motion-effects",
+    tags: ["lens", "magnify", "glass", "refraction", "webgl", "shader", "drag", "interactive", "motion kit"],
+    premium: true,
+    trendingScore: 188,
+    createdAt: "2026-11-07",
+    animationKinds: ["drag", "hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "height", type: "number | \"fill\"", defaultValue: "\"fill\"", description: "Height of the scene in px, or \"fill\" to fill a positioned parent." },
+      { name: "autoplay", type: "boolean", defaultValue: "true", description: "Let the glass drift across the table on its own until the first touch. Stays still with reduced motion." },
+      { name: "size", type: "number", defaultValue: "1", description: "Size of the glass as a multiple of its natural size, from 0.55 to 1.8." },
+      { name: "magnification", type: "number", defaultValue: "1.65", description: "How much the middle of the glass magnifies, from 1 to 3.2." },
+      { name: "refraction", type: "number", defaultValue: "1.52", description: "Index of refraction: how hard the rim bends the light, from 1.05 to 2.2." },
+      { name: "dispersion", type: "number", defaultValue: "0.035", description: "How far the rim splits white light into a spectrum, from 0 to 0.12." },
+      { name: "iridescence", type: "number", defaultValue: "0.35", description: "How strongly a thin film of colour plays along the rim, from 0 to 1." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewLoupeLens,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { LoupeLens } from "@/components/loupe-lens";
+
+export default function Page() {
+  return (
+    <main className="h-[100svh] min-h-[560px]">
+      <LoupeLens height="fill" />
+    </main>
+  );
+}`,
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */

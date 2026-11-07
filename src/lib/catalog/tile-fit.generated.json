@@ -3119,6 +3119,26 @@
   "bg": "#ffffff",
   "coverage": 1
  },
+ "loupe-lens": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   32,
+   28,
+   892,
+   670
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.97
+ },
  "mac-keyboard": {
   "canvas": [
    1100,
@@ -4498,6 +4518,26 @@
   ],
   "bg": null,
   "coverage": 0.24
+ },
+ "murmur": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   10,
+   10,
+   940,
+   700
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.93
  },
  "nebula-cta-glow": {
   "canvas": [
