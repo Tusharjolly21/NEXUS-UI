@@ -14874,6 +14874,93 @@ export default function Page() {
 }`,
     tailwindSource: tw,
   },
+  {
+    slug: "pixel-atlas",
+    name: "Pixel Atlas",
+    registryCliName: "pixel-atlas",
+    description:
+      "Pixel Atlas: a live map of where you are in the world, drawn in glowing pixels. Every place warms the land around it, from slate through violet and magenta to orange and cream at the busiest, with slow waves of signal running outward. The map pops in from west to east, then tours your places one by one. Hover to swell the pixels under the pointer, click a place for its card, drag to pan all the way round the world, and use the filters to glide to one kind of place. Pinch, Ctrl-scroll or the buttons zoom. Keyboard: arrow keys pan, plus and minus zoom, Escape closes the card.",
+    categorySlug: "dashboards",
+    tags: ["map", "world map", "pixels", "heatmap", "webgl", "locations", "offices", "motion kit"],
+    premium: true,
+    trendingScore: 191,
+    createdAt: "2026-11-07",
+    animationKinds: ["hover", "drag"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "points", type: "AtlasPoint[]", defaultValue: "DEFAULT_POINTS", description: "The places to show: id, name, type, lat, lon, optional description and activity. The busiest place is the hottest on the map, and any new type gets a filter of its own." },
+      { name: "height", type: "number | \"fill\"", defaultValue: "520", description: "Height in px, or \"fill\" to fill a positioned parent." },
+      { name: "resolution", type: "number", defaultValue: "3.2", description: "Degrees of the world in each pixel of the map: smaller is finer." },
+      { name: "palette", type: "string[]", description: "Six colours for the heat, coolest to hottest." },
+      { name: "tour", type: "boolean", defaultValue: "true", description: "Visit the places one by one until someone takes over." },
+      { name: "tourEvery", type: "number", defaultValue: "4", description: "Seconds at each place on the tour." },
+      { name: "onSelect", type: "(point: AtlasPoint | null) => void", description: "Called with the place that is selected, or null." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewPixelAtlas,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { PixelAtlas } from "@/components/pixel-atlas";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto w-full max-w-[1000px] overflow-hidden rounded-3xl">
+        <PixelAtlas height={560} />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "glass-recorder",
+    name: "Glass Recorder",
+    registryCliName: "glass-recorder",
+    description:
+      "Glass Recorder: a voice button for AI apps, made of liquid glass that really bends the light behind it. Bring the pointer near and the drop swells out towards it like a liquid drawn to a finger; press and it squashes and turns milky, then spreads into a bar while a glass knob buds from its end to hold stop. Your voice pours in as glowing liquid that rises and ripples as you talk. Tap stop and the knob pinches off and floats away carrying your recording's length. With the microphone allowed it follows your voice (it only measures loudness and tone, and keeps nothing); otherwise it plays a sample voice. Keyboard: it is one real button, so Space or Enter records and stops, with the status spoken to screen readers.",
+    categorySlug: "ai-components",
+    tags: ["voice", "record", "microphone", "liquid glass", "refraction", "webgl", "ai", "motion kit"],
+    premium: true,
+    trendingScore: 190,
+    createdAt: "2026-11-07",
+    animationKinds: ["hover", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "height", type: "number | \"fill\"", defaultValue: "420", description: "Height of the scene in px, or \"fill\" to fill a positioned parent." },
+      { name: "barWidth", type: "number", defaultValue: "340", description: "Width of the glass bar while recording, in px. It never grows past 86% of the scene." },
+      { name: "barHeight", type: "number", defaultValue: "80", description: "Height of the glass bar while recording, in px. The resting drop is a little larger." },
+      { name: "listen", type: "\"microphone\" | \"simulate\"", defaultValue: "\"microphone\"", description: "\"microphone\" listens after a tap and falls back to a sample voice if it is blocked or missing; \"simulate\" always uses the sample voice." },
+      { name: "backdrop", type: "string", description: "An image for the glass to sit on (it must allow cross-origin use). Without one it sits on moving satin." },
+      { name: "scene", type: "string[]", description: "Five colours for the satin behind the glass." },
+      { name: "colors", type: "string[]", description: "Four colours for the light your voice pours into the glass, from the low end of the bar to the high end." },
+      { name: "ink", type: "\"white\" | \"dark\"", defaultValue: "\"white\"", description: "Icon and timer colour: white over a dark or colourful backdrop, dark over a light one." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Demo itself, with a pointer, until the first touch. Off by default." },
+      { name: "onStart", type: "() => void", description: "Called when recording starts." },
+      { name: "onStop", type: "(seconds: number) => void", description: "Called with how many seconds were recorded." },
+      { name: "onMicrophoneError", type: "(error: unknown) => void", description: "Called if the microphone cannot be opened." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewGlassRecorder,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { GlassRecorder } from "@/components/glass-recorder";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto w-full max-w-[860px] overflow-hidden rounded-3xl">
+        <GlassRecorder height={460} onStop={(seconds) => console.log(\`recorded \${seconds}s\`)} />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */

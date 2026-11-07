@@ -149,6 +149,11 @@ const MarginPage = nextDynamic(
   { loading: TemplateFallback },
 );
 
+const LastLightPage = nextDynamic(
+  () => import("@/components/templates/last-light-page").then((m) => ({ default: m.LastLightPage })),
+  { loading: TemplateFallback },
+);
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -196,6 +201,8 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><NimbusPage /></ThemeReceiver>;
   } else if (tmpl.slug === "margin") {
     return <ThemeReceiver><MarginPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "last-light") {
+    return <ThemeReceiver><LastLightPage /></ThemeReceiver>;
   } else if (tmpl.slug === "nexus-ai-launch") {
     return <ThemeReceiver><NexusAiLaunchTemplatePage /></ThemeReceiver>;
   } else if (tmpl.slug === "noir-studio") {

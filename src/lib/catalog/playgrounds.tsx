@@ -240,6 +240,8 @@ import { PaperclipAttach } from "@/components/paperclip-attach";
 import { AquariumPrompt } from "@/components/aquarium-prompt";
 import { ElementalPicker } from "@/components/elemental-picker";
 import { OracleOrb } from "@/components/oracle-orb";
+import { PixelAtlas } from "@/components/pixel-atlas";
+import { GlassRecorder } from "@/components/glass-recorder";
 import { ClockPicker } from "@/components/clock-picker";
 import { VineProgress } from "@/components/vine-progress";
 import { BloomGiftCard } from "@/components/bloom-gift-card";
@@ -4656,6 +4658,45 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => (
       <div className="mx-auto flex w-full max-w-[600px] justify-center">
         <ElementalPicker key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "pixel-atlas": {
+    lightOnly: true,
+    componentName: "PixelAtlas",
+    importPath: "@/components/pixel-atlas",
+    defaultFill: "dark",
+    snippetBaseProps: ["height={520}"],
+    controls: [
+      { kind: "toggle", prop: "tour", label: "Tour the places", defaultValue: true },
+      { kind: "range", prop: "resolution", label: "Pixel size", min: 1.6, max: 6, step: 0.2, unit: "°", defaultValue: 3.2 },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[1000px] overflow-hidden rounded-3xl">
+        <PixelAtlas key={`${v.tour}-${v.resolution}`} height={520} tour={v.tour as boolean} resolution={v.resolution as number} />
+      </div>
+    ),
+  },
+  "glass-recorder": {
+    lightOnly: true,
+    componentName: "GlassRecorder",
+    importPath: "@/components/glass-recorder",
+    defaultFill: "dark",
+    snippetBaseProps: ["height={460}"],
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Demo it by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "ink", label: "Icon colour", options: ["white", "dark"], defaultValue: "white" },
+      { kind: "select", prop: "listen", label: "Voice", options: ["microphone", "simulate"], defaultValue: "microphone" },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[860px] overflow-hidden rounded-3xl">
+        <GlassRecorder
+          key={`${v.autoplay}-${v.ink}-${v.listen}`}
+          height={460}
+          autoplay={v.autoplay as boolean}
+          ink={v.ink as "white" | "dark"}
+          listen={v.listen as "microphone" | "simulate"}
+        />
       </div>
     ),
   },

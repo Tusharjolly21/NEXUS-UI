@@ -49,6 +49,8 @@ const EXTRA_INTERACTIONS: Record<string, Interaction[]> = {
 
 /** Previews that already play their own demo (they render a DemoCursor themselves). */
 const SELF_DEMO = new Set([
+  "pixel-atlas",
+  "glass-recorder",
   "liquid-smoke",
   "lightfall",
   "pluck-frame",
@@ -401,6 +403,9 @@ const TINT_OF: Record<string, TileTint> = {
  * are all gathered, newest first, under the wall's New tab (see NEW_TAB_DAYS).
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // twenty-fifth batch (Motion Kit Everyday: Pixel Atlas, Glass Recorder)
+  "pixel-atlas",
+  "glass-recorder",
   // twenty-third batch (Motion Kit Everyday: Frozen Card, Seat Crowd, Flap Clock, Image Press, Jelly Splitter, Effort Slider, Window Seat Toggle, Smear Carousel, Forecast Status, Paperclip Attach, Aquarium Prompt, Elemental Picker, Oracle Orb, Clock Picker, Vine Progress, Bloom Gift Card, Genie Uploader, Piano Text, Highlight Popover)
   "frozen-card",
   "seat-crowd",
@@ -649,6 +654,8 @@ export const HOME_PICKS: string[] = [
   "genie-uploader",
   "piano-text",
   "highlight-popover",
+  "pixel-atlas",
+  "glass-recorder",
   "liquid-smoke",
   "molten-hold",
   "mercury-switch",
