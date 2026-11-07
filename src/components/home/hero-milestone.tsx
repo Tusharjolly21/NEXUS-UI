@@ -6,14 +6,17 @@ import { TwentyFirstLogo } from "@/components/home/twenty-first-logo";
 
 /**
  * The hero's milestone pill: the 21st mark, one line of text and a thin blue edge. A soft light passes
- * over it every few seconds. Links down to the milestone band. With reduced motion nothing moves.
+ * over it every few seconds. Opens our 21st.dev profile (the milestone band is not on the landing page,
+ * so this must not point at an on-page anchor). With reduced motion nothing moves.
  */
 export function HeroMilestone() {
   const still = !!useReducedMotion();
   return (
     <motion.a
-      href="#21st"
-      aria-label="Almost one million views on 21st.dev. See the details."
+      href="https://21st.dev/@nexus-ui"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Almost one million views on 21st.dev. Open our 21st.dev profile in a new tab."
       initial={still ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1], delay: 0.1 }}
