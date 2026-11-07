@@ -3,7 +3,9 @@ import Link from "next/link";
 import { Check, Minus, Plus } from "lucide-react";
 import { CommentDeck } from "@/components/pricing/comment-deck";
 import { MembersRow } from "@/components/pricing/members-row";
+import { MemberStack } from "@/components/pricing/member-stack";
 import { PlanAction, PlanNotice, PlanTag } from "@/components/pricing/plan-action";
+import { TwentyFirstMilestone } from "@/components/home/twenty-first-milestone";
 import { PillLink, RainbowWord } from "@/components/site";
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
@@ -228,9 +230,12 @@ export default function PricingPage() {
                   ) : p.name === "Pro" ? (
                     <PlanAction tier="pro">Get Pro</PlanAction>
                   ) : (
-                    <PlanAction tier="all-access" variant="cta">
-                      Get All-Access
-                    </PlanAction>
+                    <>
+                      <PlanAction tier="all-access" variant="cta">
+                        Get All-Access
+                      </PlanAction>
+                      <MemberStack className="mt-4" />
+                    </>
                   )}
                 </div>
               </article>
@@ -245,9 +250,14 @@ export default function PricingPage() {
               Request a component ›
             </Link>
           </p>
-          <MembersRow />
         </div>
       </section>
+
+      {/* Where the components are seen: our 21st.dev numbers */}
+      <TwentyFirstMilestone />
+
+      {/* Named buyers, after the bigger proof. Shows nothing until MEMBERS has names. */}
+      <MembersRow />
 
       {/* What people say, as a pull quote and a deck of comments */}
       <section className="overflow-hidden px-4 pb-28">

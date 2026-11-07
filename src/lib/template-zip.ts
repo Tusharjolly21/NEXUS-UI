@@ -427,6 +427,21 @@ export async function planTemplateZip(slug: string, root: string = process.cwd()
     }
   }
 
+  // Fonts under public/fonts/<family>/ travel with the licence files kept beside them (OFL and similar ask that the
+  // licence text ships with the font), even though nothing in the code refers to them by path.
+  const fontFolders = new Set(
+    [...assets].filter((a) => /^public\/fonts\/.+\.(?:woff2?|ttf|otf)$/i.test(toPosixPath(a))).map((a) => path.posix.dirname(toPosixPath(a))),
+  );
+  for (const dir of fontFolders) {
+    const names = await fs.readdir(path.join(root, dir)).catch(() => [] as string[]);
+    for (const name of names) {
+      if (!/^(?:licen[cs]e|ofl|copying|notice)[^/]*\.(?:txt|md)$/i.test(name)) continue;
+      const relative = `${dir}/${name}`;
+      const absolute = path.join(root, relative);
+      if ((await isFile(absolute)) && (await realPathWithinRoot(absolute, path.join(root, "public")))) assets.add(relative);
+    }
+  }
+
   // Ambient type declarations the repo keeps for untyped packages (src/@types/<pkg>.d.ts).
   for (const name of packages.keys()) {
     const declaration = `src/@types/${name.replace(/^@/, "").replace("/", "__")}.d.ts`;

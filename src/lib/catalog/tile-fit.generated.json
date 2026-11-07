@@ -2319,6 +2319,26 @@
   "bg": null,
   "coverage": 0.51
  },
+ "glass-recorder": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   10,
+   10,
+   940,
+   700
+  ],
+  "bg": null,
+  "coverage": 0.94
+ },
  "glow-button": {
   "canvas": [
    1200,
@@ -3098,6 +3118,26 @@
   ],
   "bg": "#ffffff",
   "coverage": 1
+ },
+ "loupe-lens": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   32,
+   28,
+   892,
+   670
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.97
  },
  "mac-keyboard": {
   "canvas": [
@@ -4479,6 +4519,26 @@
   "bg": null,
   "coverage": 0.24
  },
+ "murmur": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   10,
+   10,
+   940,
+   700
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.93
+ },
  "nebula-cta-glow": {
   "canvas": [
    1200,
@@ -4798,6 +4858,26 @@
   ],
   "bg": "#f6f6f6",
   "coverage": 0.98
+ },
+ "pixel-atlas": {
+  "canvas": [
+   1200,
+   820
+  ],
+  "surface": [
+   0,
+   0,
+   1200,
+   820
+  ],
+  "content": [
+   10,
+   12,
+   1180,
+   798
+  ],
+  "bg": "#060c0c",
+  "coverage": 1
  },
  "pixel-select": {
   "canvas": [

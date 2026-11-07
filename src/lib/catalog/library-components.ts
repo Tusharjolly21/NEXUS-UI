@@ -14874,6 +14874,166 @@ export default function Page() {
 }`,
     tailwindSource: tw,
   },
+  {
+    slug: "pixel-atlas",
+    name: "Pixel Atlas",
+    registryCliName: "pixel-atlas",
+    description:
+      "Pixel Atlas: a live map of where you are in the world, drawn in glowing pixels. Every place warms the land around it, from slate through violet and magenta to orange and cream at the busiest, with slow waves of signal running outward. The map pops in from west to east, then tours your places one by one. Hover to swell the pixels under the pointer, click a place for its card, drag to pan all the way round the world, and use the filters to glide to one kind of place. Pinch, Ctrl-scroll or the buttons zoom. Keyboard: arrow keys pan, plus and minus zoom, Escape closes the card.",
+    categorySlug: "dashboards",
+    tags: ["map", "world map", "pixels", "heatmap", "webgl", "locations", "offices", "motion kit"],
+    premium: true,
+    trendingScore: 191,
+    createdAt: "2026-11-07",
+    animationKinds: ["hover", "drag"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "points", type: "AtlasPoint[]", defaultValue: "DEFAULT_POINTS", description: "The places to show: id, name, type, lat, lon, optional description and activity. The busiest place is the hottest on the map, and any new type gets a filter of its own." },
+      { name: "height", type: "number | \"fill\"", defaultValue: "520", description: "Height in px, or \"fill\" to fill a positioned parent." },
+      { name: "resolution", type: "number", defaultValue: "3.2", description: "Degrees of the world in each pixel of the map: smaller is finer." },
+      { name: "palette", type: "string[]", description: "Six colours for the heat, coolest to hottest." },
+      { name: "tour", type: "boolean", defaultValue: "true", description: "Visit the places one by one until someone takes over." },
+      { name: "tourEvery", type: "number", defaultValue: "4", description: "Seconds at each place on the tour." },
+      { name: "onSelect", type: "(point: AtlasPoint | null) => void", description: "Called with the place that is selected, or null." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewPixelAtlas,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { PixelAtlas } from "@/components/pixel-atlas";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto w-full max-w-[1000px] overflow-hidden rounded-3xl">
+        <PixelAtlas height={560} />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "glass-recorder",
+    name: "Glass Recorder",
+    registryCliName: "glass-recorder",
+    description:
+      "Glass Recorder: a voice button for AI apps, made of liquid glass that really bends the light behind it. Bring the pointer near and the drop swells out towards it like a liquid drawn to a finger; press and it squashes and turns milky, then spreads into a bar while a glass knob buds from its end to hold stop. Your voice pours in as glowing liquid that rises and ripples as you talk. Tap stop and the knob pinches off and floats away carrying your recording's length. With the microphone allowed it follows your voice (it only measures loudness and tone, and keeps nothing); otherwise it plays a sample voice. Keyboard: it is one real button, so Space or Enter records and stops, with the status spoken to screen readers.",
+    categorySlug: "ai-components",
+    tags: ["voice", "record", "microphone", "liquid glass", "refraction", "webgl", "ai", "motion kit"],
+    premium: true,
+    trendingScore: 190,
+    createdAt: "2026-11-07",
+    animationKinds: ["hover", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "height", type: "number | \"fill\"", defaultValue: "420", description: "Height of the scene in px, or \"fill\" to fill a positioned parent." },
+      { name: "barWidth", type: "number", defaultValue: "340", description: "Width of the glass bar while recording, in px. It never grows past 86% of the scene." },
+      { name: "barHeight", type: "number", defaultValue: "80", description: "Height of the glass bar while recording, in px. The resting drop is a little larger." },
+      { name: "listen", type: "\"microphone\" | \"simulate\"", defaultValue: "\"microphone\"", description: "\"microphone\" listens after a tap and falls back to a sample voice if it is blocked or missing; \"simulate\" always uses the sample voice." },
+      { name: "backdrop", type: "string", description: "An image for the glass to sit on (it must allow cross-origin use). Without one it sits on moving satin." },
+      { name: "scene", type: "string[]", description: "Five colours for the satin behind the glass." },
+      { name: "colors", type: "string[]", description: "Four colours for the light your voice pours into the glass, from the low end of the bar to the high end." },
+      { name: "ink", type: "\"white\" | \"dark\"", defaultValue: "\"white\"", description: "Icon and timer colour: white over a dark or colourful backdrop, dark over a light one." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Demo itself, with a pointer, until the first touch. Off by default." },
+      { name: "onStart", type: "() => void", description: "Called when recording starts." },
+      { name: "onStop", type: "(seconds: number) => void", description: "Called with how many seconds were recorded." },
+      { name: "onMicrophoneError", type: "(error: unknown) => void", description: "Called if the microphone cannot be opened." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewGlassRecorder,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { GlassRecorder } from "@/components/glass-recorder";
+
+export default function Page() {
+  return (
+    <section className="px-4 py-16">
+      <div className="mx-auto w-full max-w-[860px] overflow-hidden rounded-3xl">
+        <GlassRecorder height={460} onStop={(seconds) => console.log(\`recorded \${seconds}s\`)} />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "murmur",
+    name: "Murmur",
+    registryCliName: "murmur",
+    description:
+      "Murmur: a landing screen for a writing assistant where four swallows fly around the prompt, and the whole sky is drawn live as a field of type. Each bird is built from real wing shapes, then re-read as a grid of small coloured cells that each pick a character by how much of the bird covers them, with a soft blurred shadow and drifting specks of dust. The birds wander, steer away from the screen edges, from the prompt box and from each other, flap in bursts, glide, and now and then tuck into a fast dart. Tap the sky near a bird and it startles away; send the prompt and every bird takes off at full flap while a line says what is being drafted. The prompt box is real glass over the sky, with a real textarea: Enter sends, Shift+Enter makes a new line. The drawing pauses when it is off screen or the tab is hidden, and with reduced motion the sky is drawn once and stays still.",
+    categorySlug: "ai-components",
+    tags: ["ai", "prompt", "writing", "ascii", "birds", "canvas", "landing", "motion kit"],
+    premium: true,
+    trendingScore: 189,
+    createdAt: "2026-11-07",
+    animationKinds: ["hover", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "height", type: "number | \"fill\"", defaultValue: "\"fill\"", description: "Height of the screen in px, or \"fill\" to fill a sized parent." },
+      { name: "autoplay", type: "boolean", defaultValue: "true", description: "Let the swallows fly. When false, or with reduced motion, the sky is drawn once and stays still." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewMurmur,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { Murmur } from "@/components/murmur";
+
+export default function Page() {
+  return (
+    <main className="h-[100svh] min-h-[560px]">
+      <Murmur height="fill" />
+    </main>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "loupe-lens",
+    name: "Loupe Lens",
+    registryCliName: "loupe-lens",
+    description:
+      "Loupe Lens: a glass ball you drag across a table of tiny printed things, and it bends the light like real glass. A fragment shader magnifies what is under it, refracts the rim with a separate bend for red, green and blue so white light splits into a spectrum, lays a thin film of colour along the edge, and adds a highlight, a window reflection, a soft shadow and a caustic. Under it sit eight printed objects drawn on a canvas, each with micro-print you can only read through the glass: a stamp, a ticket, a working watch dial, a map of the Amsterdam canals, a type specimen, a film strip, a facts label and a badge. Drag the glass and it follows on a spring, then coasts on release; tap the table and it glides there; drag an object and it lifts and tilts to the front. Scroll over it or pinch with two fingers to resize; arrow keys nudge it from the focused stage. A Lens panel sets size, magnification, refraction, dispersion and iridescence. It drifts by itself until first touch, pauses when off screen, shows a note when WebGL is missing, and with reduced motion it stays still.",
+    categorySlug: "motion-effects",
+    tags: ["lens", "magnify", "glass", "refraction", "webgl", "shader", "drag", "interactive", "motion kit"],
+    premium: true,
+    trendingScore: 188,
+    createdAt: "2026-11-07",
+    animationKinds: ["drag", "hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "height", type: "number | \"fill\"", defaultValue: "\"fill\"", description: "Height of the scene in px, or \"fill\" to fill a positioned parent." },
+      { name: "autoplay", type: "boolean", defaultValue: "true", description: "Let the glass drift across the table on its own until the first touch. Stays still with reduced motion." },
+      { name: "size", type: "number", defaultValue: "1", description: "Size of the glass as a multiple of its natural size, from 0.55 to 1.8." },
+      { name: "magnification", type: "number", defaultValue: "1.65", description: "How much the middle of the glass magnifies, from 1 to 3.2." },
+      { name: "refraction", type: "number", defaultValue: "1.52", description: "Index of refraction: how hard the rim bends the light, from 1.05 to 2.2." },
+      { name: "dispersion", type: "number", defaultValue: "0.035", description: "How far the rim splits white light into a spectrum, from 0 to 0.12." },
+      { name: "iridescence", type: "number", defaultValue: "0.35", description: "How strongly a thin film of colour plays along the rim, from 0 to 1." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewLoupeLens,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { LoupeLens } from "@/components/loupe-lens";
+
+export default function Page() {
+  return (
+    <main className="h-[100svh] min-h-[560px]">
+      <LoupeLens height="fill" />
+    </main>
+  );
+}`,
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */

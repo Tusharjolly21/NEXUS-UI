@@ -14,7 +14,8 @@ export type TemplateCategory =
   | "E-Commerce"
   | "Fintech"
   | "Travel"
-  | "Music";
+  | "Music"
+  | "Gaming";
 
 export type MarketplaceTemplate = {
   slug: string;
@@ -46,6 +47,50 @@ export type MarketplaceTemplate = {
 };
 
 export const templates: MarketplaceTemplate[] = [
+  {
+    slug: "last-light",
+    title: "Last Light — game landing page",
+    description:
+      "A landing page for an invented open-country western, where every picture is drawn live in characters. The hero is a full-screen scene that spills out from the sun as the page loads, with birds crossing the sky, fireflies over the meadow and a warm lantern that follows the pointer. Below it come the story with a short list of facts, a second scene of the villain with embers and wheeling vultures, a third scene of the gang with a hotspot on every rider and a matching roster, four gameplay pillars, a wishlist call to action and a footer. The scenes are WebGL 2 with a still 2D fallback and need no animation library. IBM Plex Mono and Libre Caslon Display are self-hosted, and the three pictures ship with the template. All names, places and dates are invented sample content.",
+    category: "Gaming",
+    tags: ["game landing page", "video game", "western", "webgl", "ascii art", "canvas", "dark", "wishlist", "studio", "motion-kit"],
+    difficulty: "Advanced",
+    premium: true,
+    trendingScore: 312,
+    createdAt: "2026-11-07",
+    techStack: ["Next.js", "TypeScript", "WebGL 2"],
+    pages: ["/"],
+    sections: [
+      "Live Character Scene Hero",
+      "Story and Facts",
+      "Villain Scene",
+      "Gang Scene With Rider Hotspots",
+      "Rider Roster",
+      "Gameplay Pillars",
+      "Wishlist Call to Action",
+      "Footer",
+    ],
+    pageLabels: ["Story", "The world", "The gang"],
+    previewImages: {
+      hero: "/templates/last-light/hero.webp",
+      sections: [
+        "/templates/last-light/section-1.webp",
+        "/templates/last-light/section-2.webp",
+        "/templates/last-light/section-3.webp",
+        "/templates/last-light/section-4.webp",
+      ],
+    },
+    features: [
+      "Full-screen hero scene drawn live in characters with WebGL 2, spilling out from the sun when the page loads",
+      "A warm lantern follows the pointer over every scene, and a tap leaves one on touch screens",
+      "Life inside each scene: birds and a hawk, fireflies, embers, wheeling vultures, heat haze and drifting dust",
+      "Gang scene with a keyboard-focusable hotspot on every rider, a name card and a matching roster that move the lantern together",
+      "Scenes only draw while on screen, and the lower two draw themselves in the first time they scroll into view",
+      "A still 2D canvas version when WebGL 2 is missing, and no movement at all with reduced motion",
+      "IBM Plex Mono and Libre Caslon Display self-hosted (both Open Font Licence), no Google Fonts and no animation library",
+      "Every word and scene setting lives in one data file; swap the pictures and tune the scene settings to make your own",
+    ],
+  },
   {
     slug: "nimbus",
     title: "Nimbus — weather app",

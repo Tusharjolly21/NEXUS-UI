@@ -22,6 +22,7 @@ const CATEGORY_TINT: Partial<Record<TemplateCategory, string>> = {
   Fintech: "bg-tint-mint",
   Travel: "bg-tint-peach",
   Music: "bg-tint-violet",
+  Gaming: "bg-tint-peach",
 };
 
 /**
