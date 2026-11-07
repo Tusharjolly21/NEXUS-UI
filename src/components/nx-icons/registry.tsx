@@ -302,6 +302,105 @@ import { FrownIcon } from "./icons/frown";
 import { MehIcon } from "./icons/meh";
 import { ZoomInIcon } from "./icons/zoom-in";
 import { MusicNotesIcon } from "./icons/music-notes";
+import { SailBoatIcon } from "./icons/sailboat";
+import { LighthouseIcon } from "./icons/lighthouse";
+import { MotorcycleIcon } from "./icons/motorcycle";
+import { TrafficSignalIcon } from "./icons/traffic-signal";
+import { GasPumpIcon } from "./icons/gas-pump";
+import { SignpostIcon } from "./icons/signpost";
+import { SuitcaseIcon } from "./icons/suitcase";
+import { BridgeIcon } from "./icons/bridge";
+import { CableCarIcon } from "./icons/cable-car";
+import { ChargingStationIcon } from "./icons/charging-station";
+import { GhostIcon } from "./icons/ghost";
+import { SwordIcon } from "./icons/sword";
+import { TreasureChestIcon } from "./icons/treasure-chest";
+import { JoystickIcon } from "./icons/joystick";
+import { DiscoBallIcon } from "./icons/disco-ball";
+import { FlyingSaucerIcon } from "./icons/flying-saucer";
+import { BombIcon } from "./icons/bomb";
+import { BoxingGloveIcon } from "./icons/boxing-glove";
+import { SkullIcon } from "./icons/skull";
+import { AlienIcon } from "./icons/alien";
+import { BirdIcon } from "./icons/bird";
+import { CatIcon } from "./icons/cat";
+import { DogIcon } from "./icons/dog";
+import { FishIcon } from "./icons/fish";
+import { ButterflyIcon } from "./icons/butterfly";
+import { CactusIcon } from "./icons/cactus";
+import { CampfireIcon } from "./icons/campfire";
+import { PlanetIcon } from "./icons/planet";
+import { ShootingStarIcon } from "./icons/shooting-star";
+import { WavesIcon } from "./icons/waves";
+import { ArmchairIcon } from "./icons/armchair";
+import { DoorOpenIcon } from "./icons/door-open";
+import { LadderIcon } from "./icons/ladder";
+import { SirenIcon } from "./icons/siren";
+import { SecurityCameraIcon } from "./icons/security-camera";
+import { MetronomeIcon } from "./icons/metronome";
+import { ToolboxIcon } from "./icons/toolbox";
+import { BroomIcon } from "./icons/broom";
+import { VinylRecordIcon } from "./icons/vinyl-record";
+import { GuitarIcon } from "./icons/guitar";
+import { PianoKeysIcon } from "./icons/piano-keys";
+import { EqualizerIcon } from "./icons/equalizer";
+import { WaveformIcon } from "./icons/waveform";
+import { CassetteTapeIcon } from "./icons/cassette-tape";
+import { MicrophoneStageIcon } from "./icons/microphone-stage";
+import { FilmSlateIcon } from "./icons/film-slate";
+import { StethoscopeIcon } from "./icons/stethoscope";
+import { ToothIcon } from "./icons/tooth";
+import { DnaIcon } from "./icons/dna";
+import { BrainIcon } from "./icons/brain";
+import { FirstAidKitIcon } from "./icons/first-aid-kit";
+import { HandshakeIcon } from "./icons/handshake";
+import { BankIcon } from "./icons/bank";
+import { GavelIcon } from "./icons/gavel";
+import { HamburgerIcon } from "./icons/hamburger";
+import { BreadIcon } from "./icons/bread";
+import { PopsicleIcon } from "./icons/popsicle";
+import { MartiniIcon } from "./icons/martini";
+import { BeerSteinIcon } from "./icons/beer-stein";
+import { ChefHatIcon } from "./icons/chef-hat";
+import { CheeseIcon } from "./icons/cheese";
+import { PaintBucketIcon } from "./icons/paint-bucket";
+import { PaintBrushIcon } from "./icons/paint-brush";
+import { MagicWandIcon } from "./icons/magic-wand";
+import { EraserIcon } from "./icons/eraser";
+import { HighlighterIcon } from "./icons/highlighter";
+import { PenNibIcon } from "./icons/pen-nib";
+import { SwatchesIcon } from "./icons/swatches";
+import { StampIcon } from "./icons/stamp";
+import { RobotIcon } from "./icons/robot";
+import { TestTubeIcon } from "./icons/test-tube";
+import { SpeedometerIcon } from "./icons/speedometer";
+import { GitForkIcon } from "./icons/git-fork";
+import { AppWindowIcon } from "./icons/app-window";
+import { VrHeadsetIcon } from "./icons/vr-headset";
+import { FlashlightIcon } from "./icons/flashlight";
+import { StopwatchIcon } from "./icons/stopwatch";
+import { HandWavingIcon } from "./icons/hand-waving";
+import { HandsClappingIcon } from "./icons/hands-clapping";
+import { CellTowerIcon } from "./icons/cell-tower";
+import { HandPointingIcon } from "./icons/hand-pointing";
+import { SparkleIcon } from "./icons/sparkle";
+import { ConfettiIcon } from "./icons/confetti";
+import { TranslateIcon } from "./icons/translate";
+import { BroadcastIcon } from "./icons/broadcast";
+import { SignatureIcon } from "./icons/signature";
+import { NotebookIcon } from "./icons/notebook";
+import { KanbanIcon } from "./icons/kanban";
+import { PushPinIcon } from "./icons/push-pin";
+import { FloppyDiskIcon } from "./icons/floppy-disk";
+import { ListChecksIcon } from "./icons/list-checks";
+import { BanknoteIcon } from "./icons/banknote";
+import { ChartDonutIcon } from "./icons/chart-donut";
+import { ChartScatterIcon } from "./icons/chart-scatter";
+import { ScalesIcon } from "./icons/scales";
+import { CloudSnowIcon } from "./icons/cloud-snow";
+import { TornadoIcon } from "./icons/tornado";
+import { MeteorIcon } from "./icons/meteor";
+import { CloudSunIcon } from "./icons/cloud-sun";
 
 export type NxIconProps = {
   size?: number;
@@ -617,4 +716,103 @@ export const NX_ICONS: Record<string, ComponentType<NxIconProps>> = {
   "meh": MehIcon,
   "zoom-in": ZoomInIcon,
   "music-notes": MusicNotesIcon,
+  "sailboat": SailBoatIcon,
+  "lighthouse": LighthouseIcon,
+  "motorcycle": MotorcycleIcon,
+  "traffic-signal": TrafficSignalIcon,
+  "gas-pump": GasPumpIcon,
+  "signpost": SignpostIcon,
+  "suitcase": SuitcaseIcon,
+  "bridge": BridgeIcon,
+  "cable-car": CableCarIcon,
+  "charging-station": ChargingStationIcon,
+  "ghost": GhostIcon,
+  "sword": SwordIcon,
+  "treasure-chest": TreasureChestIcon,
+  "joystick": JoystickIcon,
+  "disco-ball": DiscoBallIcon,
+  "flying-saucer": FlyingSaucerIcon,
+  "bomb": BombIcon,
+  "boxing-glove": BoxingGloveIcon,
+  "skull": SkullIcon,
+  "alien": AlienIcon,
+  "bird": BirdIcon,
+  "cat": CatIcon,
+  "dog": DogIcon,
+  "fish": FishIcon,
+  "butterfly": ButterflyIcon,
+  "cactus": CactusIcon,
+  "campfire": CampfireIcon,
+  "planet": PlanetIcon,
+  "shooting-star": ShootingStarIcon,
+  "waves": WavesIcon,
+  "armchair": ArmchairIcon,
+  "door-open": DoorOpenIcon,
+  "ladder": LadderIcon,
+  "siren": SirenIcon,
+  "security-camera": SecurityCameraIcon,
+  "metronome": MetronomeIcon,
+  "toolbox": ToolboxIcon,
+  "broom": BroomIcon,
+  "vinyl-record": VinylRecordIcon,
+  "guitar": GuitarIcon,
+  "piano-keys": PianoKeysIcon,
+  "equalizer": EqualizerIcon,
+  "waveform": WaveformIcon,
+  "cassette-tape": CassetteTapeIcon,
+  "microphone-stage": MicrophoneStageIcon,
+  "film-slate": FilmSlateIcon,
+  "stethoscope": StethoscopeIcon,
+  "tooth": ToothIcon,
+  "dna": DnaIcon,
+  "brain": BrainIcon,
+  "first-aid-kit": FirstAidKitIcon,
+  "handshake": HandshakeIcon,
+  "bank": BankIcon,
+  "gavel": GavelIcon,
+  "hamburger": HamburgerIcon,
+  "bread": BreadIcon,
+  "popsicle": PopsicleIcon,
+  "martini": MartiniIcon,
+  "beer-stein": BeerSteinIcon,
+  "chef-hat": ChefHatIcon,
+  "cheese": CheeseIcon,
+  "paint-bucket": PaintBucketIcon,
+  "paint-brush": PaintBrushIcon,
+  "magic-wand": MagicWandIcon,
+  "eraser": EraserIcon,
+  "highlighter": HighlighterIcon,
+  "pen-nib": PenNibIcon,
+  "swatches": SwatchesIcon,
+  "stamp": StampIcon,
+  "robot": RobotIcon,
+  "test-tube": TestTubeIcon,
+  "speedometer": SpeedometerIcon,
+  "git-fork": GitForkIcon,
+  "app-window": AppWindowIcon,
+  "vr-headset": VrHeadsetIcon,
+  "flashlight": FlashlightIcon,
+  "stopwatch": StopwatchIcon,
+  "hand-waving": HandWavingIcon,
+  "hands-clapping": HandsClappingIcon,
+  "cell-tower": CellTowerIcon,
+  "hand-pointing": HandPointingIcon,
+  "sparkle": SparkleIcon,
+  "confetti": ConfettiIcon,
+  "translate": TranslateIcon,
+  "broadcast": BroadcastIcon,
+  "signature": SignatureIcon,
+  "notebook": NotebookIcon,
+  "kanban": KanbanIcon,
+  "push-pin": PushPinIcon,
+  "floppy-disk": FloppyDiskIcon,
+  "list-checks": ListChecksIcon,
+  "banknote": BanknoteIcon,
+  "chart-donut": ChartDonutIcon,
+  "chart-scatter": ChartScatterIcon,
+  "scales": ScalesIcon,
+  "cloud-snow": CloudSnowIcon,
+  "tornado": TornadoIcon,
+  "meteor": MeteorIcon,
+  "cloud-sun": CloudSunIcon,
 };
