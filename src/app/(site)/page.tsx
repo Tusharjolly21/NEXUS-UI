@@ -14,7 +14,6 @@ import { IfPro } from "@/components/pro/pro-access";
 import { ShippingLog } from "@/components/home/shipping-log";
 import { StackStrip } from "@/components/home/stack-strip";
 import { HeroMilestone } from "@/components/home/hero-milestone";
-import { TwentyFirstMilestone } from "@/components/home/twenty-first-milestone";
 import { ComponentGallery } from "@/components/gallery/component-gallery";
 import { VideoCard } from "@/components/videos/video-card";
 import { getVideo, videos } from "@/lib/catalog/videos";
@@ -229,9 +228,6 @@ export default function Home() {
           <HeroInstall className="mx-auto mt-6 max-w-[520px]" />
         </div>
       </section>
-
-      {/* Milestone: our 21st.dev numbers, straight under the hero so every visitor sees it */}
-      <TwentyFirstMilestone />
 
       <section id="gallery" aria-label="Components by interaction" className="scroll-mt-20 px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
