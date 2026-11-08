@@ -45,6 +45,7 @@ export default function ComponentsPage() {
             categories={galleryCategories(items)}
             searchable
             plansLine
+            proRow
             interlude={<ComponentsProofRow />}
             aside={
               funCount ? (

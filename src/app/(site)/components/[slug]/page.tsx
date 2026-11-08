@@ -15,6 +15,7 @@ import { soundFaq, soundFor, typesFor } from "@/lib/catalog/component-sounds";
 import { getGuidesForComponent } from "@/lib/blog";
 import { getComponentCategoryHref, getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
 import { promptIdsFor } from "@/lib/build-prompts";
+import { getProTeaser } from "@/lib/registry-teaser";
 import { ComponentDetailPageClient } from "@/components/library/component-detail-page-client";
 import { allGalleryItems, hasBuildPrompt } from "@/lib/catalog/gallery-items";
 import { sessionCanAccessComponent, sessionHasPro } from "@/lib/component-access";
@@ -131,6 +132,8 @@ export default async function ComponentDetailPage({ params }: Props) {
   const locked = !(await sessionCanAccessComponent(item.slug, item.premium));
   const registryName = item.registryCliName ?? item.slug;
   const installInfo = await getRegistryInstallInfo(registryName, item.name, item.dependencies);
+  // A locked Pro page shows the plain-English note from the top of the source (prose only, no code), so the idea is visible before the purchase.
+  const teaser = locked && item.premium ? await getProTeaser(registryName) : undefined;
 
   const softwareJsonLd = {
     "@context": "https://schema.org",
@@ -243,6 +246,7 @@ export default async function ComponentDetailPage({ params }: Props) {
         faq={faq}
         guides={getGuidesForComponent(item.slug)}
         proPicks={proPicks}
+        teaser={teaser}
       />
     </>
   );

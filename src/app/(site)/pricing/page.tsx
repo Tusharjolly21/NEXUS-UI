@@ -109,6 +109,14 @@ const FAQ = [
     a: `${freeComponents} of the ${components} are free, with full source, for personal, commercial and client projects. Pro unlocks the other ${proComponents}: you can preview every one of them, but their source, install and playground come with Pro, along with the template source and the premium blocks.`,
   },
   {
+    q: "What can I use the components for?",
+    a: "Personal, commercial and client projects, as many as you like, with no credit needed. What you can't do is resell or hand out the source on its own, put it in a UI kit, library or template that competes with Nexus UI, or publish premium code in a public repository. The terms have the exact wording.",
+  },
+  {
+    q: "Can Claude Code or Cursor install them for me?",
+    a: "Yes. Nexus UI is a shadcn registry, so any coding agent that can run a shell installs a component with one command, and free components also come with a build prompt you can paste in. Pro components need your API key in the project first. The Claude Code page shows the steps.",
+  },
+  {
     q: "What's the difference between Pro and All-Access?",
     a: `Only how you pay. Both unlock every template, every block, everything we release next, requests and priority support. Pro is ${PRO_PRICE} a year and renews until you cancel. All-Access is ${ALL_ACCESS_PRICE} once and never expires.`,
   },
@@ -250,6 +258,25 @@ export default function PricingPage() {
               Request a component ›
             </Link>
           </p>
+        </div>
+      </section>
+
+      <section aria-labelledby="agents" className="px-4 pb-24">
+        <div className="mx-auto max-w-[1152px] rounded-tile bg-tint-violet px-7 py-9 sm:px-10 md:flex md:items-center md:justify-between md:gap-10">
+          <div className="min-w-0">
+            <h2 id="agents" className="pg-display text-[clamp(28px,3.6vw,38px)] leading-[1.06] text-foreground">
+              Your coding agent can install them.
+            </h2>
+            <p className="mt-3 max-w-[620px] text-[16px] leading-[1.55] text-body">
+              Nexus UI is a shadcn registry, so Claude Code, Cursor or any agent that runs a shell adds a component with one command. Free
+              components come with a build prompt too, and Pro components install with your API key.
+            </p>
+          </div>
+          <div className="mt-6 shrink-0 md:mt-0">
+            <PillLink href="/claude-code" variant="white">
+              See how it works
+            </PillLink>
+          </div>
         </div>
       </section>
 
