@@ -13,6 +13,7 @@ import { SHADCN_REGISTRY_SCOPE } from "@/lib/registry-scope";
 import { cn } from "@/lib/utils";
 import { SoundSwitch, TypingSoundSwitch } from "@/components/site/sound-switch";
 import { TYPING_NOTE } from "@/lib/catalog/component-sounds";
+import { AfterCopyProLine } from "@/components/pro/after-copy-pro-line";
 import { ProBadge, useCopyBuildPrompt, useLocked, useProAccess } from "@/components/pro/pro-access";
 import { FitPreview } from "./fit-preview";
 import { INTERACTION_FILTERS, TINT_CLASSES, type GalleryItem } from "./types";
@@ -55,7 +56,7 @@ function writeUrlValues(playground: Playground, values: PlaygroundValues) {
   window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
 }
 
-function useCopied(ms = 1600): [boolean, (text: string) => Promise<void>] {
+function useCopied(ms = 1600): [boolean, (text: string) => Promise<boolean>] {
   const [copied, setCopied] = React.useState(false);
   React.useEffect(() => {
     if (!copied) return;
@@ -66,8 +67,10 @@ function useCopied(ms = 1600): [boolean, (text: string) => Promise<void>] {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
+      return true;
     } catch {
       // clipboard blocked; nothing to undo
+      return false;
     }
   }, []);
   return [copied, copy];
@@ -104,6 +107,7 @@ function Section({
   onToggle,
   copyText,
   aside,
+  afterCopySlug,
   children,
 }: {
   title: string;
@@ -111,9 +115,12 @@ function Section({
   onToggle: () => void;
   copyText?: string;
   aside?: React.ReactNode;
+  /** For visitors without Pro: a quiet line under the content once the text was copied. Give the component's slug to turn it on. */
+  afterCopySlug?: string;
   children: React.ReactNode;
 }) {
   const [copied, copy] = useCopied();
+  const [copiedOnce, setCopiedOnce] = React.useState(false);
   return (
     <div className="rounded-[20px] bg-card shadow-[0_0_0_1px_rgba(23,23,28,0.06)]">
       <div className="flex items-center gap-2 px-2 py-1.5">
@@ -130,7 +137,7 @@ function Section({
         {copyText ? (
           <button
             type="button"
-            onClick={() => copy(copyText)}
+            onClick={() => void copy(copyText).then((ok) => ok && setCopiedOnce(true))}
             aria-label={`Copy ${title.toLowerCase()}`}
             className="grid size-8 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
@@ -138,7 +145,12 @@ function Section({
           </button>
         ) : null}
       </div>
-      {open ? <div className="px-2 pb-2">{children}</div> : null}
+      {open ? (
+        <div className="px-2 pb-2">
+          {children}
+          {afterCopySlug ? <AfterCopyProLine slug={afterCopySlug} copied={copiedOnce} /> : null}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -301,7 +313,7 @@ function Inspector({ item }: { item: GalleryItem }) {
           )
         ) : (
           <div className="absolute inset-0 space-y-2 overflow-y-auto p-3 pt-[60px]">
-            <Section title="Install" open={openSection === "install"} onToggle={() => setOpenSection("install")} copyText={install}>
+            <Section title="Install" open={openSection === "install"} onToggle={() => setOpenSection("install")} copyText={install} afterCopySlug={item.premium ? undefined : item.slug}>
               <Code code={install} />
               <p className="px-2 pb-1 pt-3 text-[12.5px] leading-relaxed text-muted-foreground">
                 {item.premium ? (

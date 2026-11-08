@@ -42,6 +42,13 @@ export default function ClaudeCodePage() {
             one command. Components also come with a build prompt: the written brief an agent needs to
             recreate it. It is free on free components and part of Pro on Pro ones.
           </p>
+          <p className="mt-4 max-w-[640px] text-[16px] leading-[1.55] text-muted-foreground">
+            Rather ask for components by what they do? Connect the{" "}
+            <Link href="/mcp" className="text-link underline-offset-4 hover:underline">
+              Nexus UI MCP server
+            </Link>{" "}
+            and your agent searches the library and adds them by name.
+          </p>
         </div>
       </section>
 

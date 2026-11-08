@@ -13,6 +13,8 @@ export type FunnelEvent =
   | "checkout_error"
   | "purchase_return"
   | "pro_card_click"
+  | "after_copy_shown"
+  | "pro_row_click"
   | "pro_wall_hit"
   | "plans_click"
   | "login_completed";
