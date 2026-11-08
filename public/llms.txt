@@ -25,6 +25,7 @@ Nexus UI is a premium UI component library offering 200+ animated React componen
 - [Videos docs](/docs/videos): Render a Nexus video to MP4 with Playwright and ffmpeg
 - [CLI Usage](/docs/cli): Using the Nexus UI CLI to add components via shadcn
 - [Compare libraries](/alternatives): Nexus UI next to Magic UI, React Bits and Aceternity UI
+- [MCP server](/mcp): Connect Claude Code, Cursor, VS Code or Codex to https://www.nexus-ui.com/api/mcp to search components and add them by name (free without a key; Pro with an API key)
 - [Claude Code](/claude-code): Install Nexus UI items with the shadcn CLI and use Pro build prompts with AI coding tools
 
 ## Blog

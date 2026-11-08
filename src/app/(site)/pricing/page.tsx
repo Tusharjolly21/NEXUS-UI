@@ -114,7 +114,7 @@ const FAQ = [
   },
   {
     q: "Can Claude Code or Cursor install them for me?",
-    a: "Yes. Nexus UI is a shadcn registry, so any coding agent that can run a shell installs a component with one command, and free components also come with a build prompt you can paste in. Pro components need your API key in the project first. The Claude Code page shows the steps.",
+    a: "Yes, two ways. Connect the Nexus UI MCP server and your agent can search the library and add a component by name; or, since Nexus UI is a shadcn registry, any agent that can run a shell installs one with a single command. Free components need no key; Pro components need your API key. The MCP page has the setup for Claude Code, Cursor, VS Code and Codex.",
   },
   {
     q: "What's the difference between Pro and All-Access?",
@@ -268,13 +268,16 @@ export default function PricingPage() {
               Your coding agent can install them.
             </h2>
             <p className="mt-3 max-w-[620px] text-[16px] leading-[1.55] text-body">
-              Nexus UI is a shadcn registry, so Claude Code, Cursor or any agent that runs a shell adds a component with one command. Free
-              components come with a build prompt too, and Pro components install with your API key.
+              Connect the Nexus UI MCP server to Claude Code, Cursor, VS Code or Codex and ask for a component by what it does: your agent finds
+              it and adds it to your project. Free components need no key; Pro components come through with your API key.
             </p>
           </div>
-          <div className="mt-6 shrink-0 md:mt-0">
+          <div className="mt-6 flex shrink-0 flex-wrap gap-3 md:mt-0">
+            <PillLink href="/mcp" variant="white">
+              Connect the MCP
+            </PillLink>
             <PillLink href="/claude-code" variant="white">
-              See how it works
+              Use the shadcn CLI
             </PillLink>
           </div>
         </div>

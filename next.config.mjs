@@ -80,6 +80,8 @@ const nextConfig = {
     // Template build prompts: outside public/, only read by this gated route.
     "/api/prompt/template/[slug]": ["./content/build-prompts/templates/*.md"],
     "/api/registry/[name]": ["./.generated/registry/**/*.json"],
+    // The MCP server hands out the same registry files (src/lib/mcp/server.ts).
+    "/api/mcp": ["./.generated/registry/**/*.json"],
     "/api/prompt/blocks/[id]": ["./content/build-prompts/blocks/*.md"],
     // The sounds page shows the library's own source.
     "/sounds": ["./src/lib/ui-sounds.ts"],
