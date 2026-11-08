@@ -8,7 +8,7 @@ import { adminCanAccessComponent, resolveApiToken } from "@/lib/entitlements";
 import { stampRegistryItem } from "@/lib/license-stamp";
 import { installCommand, registryAddCommand } from "@/lib/registry-config";
 import { getProTeaser } from "@/lib/registry-teaser";
-import { siteConfig } from "@/lib/seo";
+import { PUBLIC_SITE } from "@/lib/mcp/config";
 
 /**
  * The Nexus UI MCP server: lets a coding agent (Claude Code, Cursor, Codex...) search the library and pull a
@@ -22,7 +22,7 @@ import { siteConfig } from "@/lib/seo";
 
 type Item = LibraryComponent;
 
-const SITE = siteConfig.url.replace(/\/$/, "");
+const SITE = PUBLIC_SITE;
 const pageUrl = (c: Item) => `${SITE}/components/${c.slug}`;
 const registryName = (c: Item) => c.registryCliName ?? c.slug;
 

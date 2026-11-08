@@ -9,7 +9,7 @@
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { createNexusMcpServer } from "@/lib/mcp/server";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
-import { siteConfig } from "@/lib/seo";
+import { MCP_URL, PUBLIC_SITE } from "@/lib/mcp/config";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -56,9 +56,9 @@ export async function GET(req: Request) {
     {
       name: "Nexus UI MCP server",
       transport: "streamable-http",
-      url: `${siteConfig.url.replace(/\/$/, "")}/api/mcp`,
+      url: MCP_URL,
       tools: ["search_components", "list_categories", "get_component"],
-      setup: `${siteConfig.url.replace(/\/$/, "")}/mcp`,
+      setup: `${PUBLIC_SITE}/mcp`,
     },
     { headers: NO_STORE },
   );
