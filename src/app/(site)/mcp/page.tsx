@@ -4,6 +4,7 @@ import { ArrowRight, BadgeCheck, Check, KeyRound, LayoutGrid, Lock, MessageSquar
 import { RainbowWord } from "@/components/site";
 import { PillLink } from "@/components/site/pill-link";
 import { AgentDemo } from "@/components/mcp/agent-demo";
+import { IfPro } from "@/components/pro/pro-access";
 import { BrandMark } from "@/components/mcp/brand-marks";
 import { AskChips, CopyButton, SetupTabs, type Setup } from "@/components/mcp/setup-tabs";
 import { libraryComponents } from "@/lib/catalog/library-components";
@@ -114,9 +115,13 @@ export default function McpPage() {
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
         <div className="relative mx-auto grid max-w-[1152px] grid-cols-[minmax(0,1fr)] items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
           <div className="min-w-0">
-            <span className="pg-glass inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-[13px] font-medium text-foreground">
+            <span className="pg-glass inline-flex items-center gap-2 rounded-full bg-card py-1 pl-3 pr-1 text-[13px] font-medium text-foreground">
               <BrandMark name="mcp" className="size-3.5" />
               MCP server
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#16161a] px-2 py-0.5 text-[11.5px] font-semibold text-white">
+                <Lock className="size-3 text-[#ffc65c]" aria-hidden />
+                Pro unlocks all {FREE + PRO}
+              </span>
             </span>
             <h1 className="pg-display mt-5 text-[clamp(44px,6.4vw,72px)] leading-[1.02] text-foreground">
               Nexus UI in your <RainbowWord>coding agent</RainbowWord>
@@ -146,9 +151,18 @@ export default function McpPage() {
               <PillLink href="#connect" variant="ink">
                 Connect it
               </PillLink>
-              <PillLink href="/dashboard/api-key" variant="white">
-                Get your API key
-              </PillLink>
+              <IfPro
+                pro={
+                  <PillLink href="/dashboard/api-key" variant="white">
+                    Get your API key
+                  </PillLink>
+                }
+                otherwise={
+                  <PillLink href="/pricing" variant="white" plansSource="mcp_hero">
+                    Get your key with Pro
+                  </PillLink>
+                }
+              />
             </div>
           </div>
 

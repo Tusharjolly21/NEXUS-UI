@@ -7,6 +7,7 @@ import { MemberStack } from "@/components/pricing/member-stack";
 import { PlanAction, PlanNotice, PlanTag } from "@/components/pricing/plan-action";
 import { TwentyFirstMilestone } from "@/components/home/twenty-first-milestone";
 import { PillLink, RainbowWord } from "@/components/site";
+import { BrandMark, type MarkName } from "@/components/mcp/brand-marks";
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { createMetadata, siteConfig } from "@/lib/seo";
@@ -53,6 +54,7 @@ const PLANS: Plan[] = [
       `${freeIcons} animated icons, with their sounds`,
       "Commercial and client projects",
       "Install with the shadcn CLI",
+      "MCP server for your coding agent, free components",
     ],
   },
   {
@@ -68,6 +70,7 @@ const PLANS: Plan[] = [
       `All ${blocks} section blocks`,
       `All ${videos} videos: prompt, source, live editing and render script`,
       `All ${icons} animated icons: ${proIcons} more, with their sounds`,
+      "MCP server: Claude Code, Cursor and Codex add any component for you",
       "Every new template, block and component as it ships",
       "Request components, blocks and templates",
       "Priority support, 24 to 48 hours",
@@ -88,6 +91,23 @@ const PLANS: Plan[] = [
   },
 ];
 
+/** The stack every component is written in, shown under the title. */
+const STACK: { mark: MarkName; name: string }[] = [
+  { mark: "react", name: "React" },
+  { mark: "nextjs", name: "Next.js" },
+  { mark: "typescript", name: "TypeScript" },
+  { mark: "tailwind", name: "Tailwind CSS" },
+  { mark: "framer", name: "Framer Motion" },
+];
+
+/** The coding agents the MCP server works with. */
+const AGENTS: { mark: MarkName; bg: string }[] = [
+  { mark: "claude", bg: "bg-[#fbeee8]" },
+  { mark: "cursor", bg: "bg-[#1d1d1f] text-white" },
+  { mark: "vscode", bg: "bg-[#e8f3fc]" },
+  { mark: "openai", bg: "bg-[#f1f1f3]" },
+];
+
 type Cell = string | boolean;
 const COMPARE: [string, Cell, Cell, Cell][] = [
   ["Animated components", `${freeComponents} free`, `All ${components}`, `All ${components}`],
@@ -95,6 +115,7 @@ const COMPARE: [string, Cell, Cell, Cell][] = [
   ["Template source", "Preview only", true, true],
   ["Videos", `${freeVideos} free`, `All ${videos}`, `All ${videos}`],
   ["Animated icons and sounds", `${freeIcons} free`, `All ${icons}`, `All ${icons}`],
+  ["MCP server for coding agents", "Free components", `All ${components}`, `All ${components}`],
   ["Commercial and client use", true, true, true],
   ["New templates, blocks and components", "Free items", true, true],
   ["Requests", false, true, true],
@@ -200,9 +221,37 @@ export default function PricingPage() {
             <br />
             Pay once for <RainbowWord>everything</RainbowWord>.
           </h1>
-          <p className="mx-auto mt-6 max-w-[580px] text-[19px] leading-[1.55] text-muted-foreground">
-            {freeComponents} components and {freeTemplates} templates are free. One plan unlocks every Pro component, all {templates} templates and every block.
+          <p className="mx-auto mt-6 max-w-[600px] text-[19px] leading-[1.55] text-muted-foreground">
+            {freeComponents} components and {freeTemplates} templates are free. One plan unlocks every Pro component, all {templates} templates, every
+            block and the MCP server for your coding agent.
           </p>
+          <ul aria-label="Built with" className="mt-7 flex flex-wrap items-center justify-center gap-2">
+            {STACK.map((t) => (
+              <li key={t.mark} title={t.name} className="pg-glass grid size-10 place-items-center rounded-xl bg-card">
+                <BrandMark name={t.mark} className="size-5" title={t.name} />
+              </li>
+            ))}
+            <li aria-hidden className="mx-1 hidden h-6 w-px bg-border sm:block" />
+            <li>
+              <Link
+                href="/mcp"
+                className="pg-glass group inline-flex items-center gap-2.5 rounded-full bg-card py-1.5 pl-1.5 pr-4 text-[14px] font-medium text-foreground transition-colors hover:bg-secondary"
+              >
+                <span className="flex items-center">
+                  {AGENTS.map((a, i) => (
+                    <span key={a.mark} className={cn("grid size-7 place-items-center rounded-full ring-2 ring-card", a.bg, i ? "-ml-2" : "")}>
+                      <BrandMark name={a.mark} className="size-3.5" />
+                    </span>
+                  ))}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <BrandMark name="mcp" className="size-3.5" />
+                  MCP server included
+                </span>
+                <span aria-hidden className="text-muted-foreground transition-transform group-hover:translate-x-0.5">›</span>
+              </Link>
+            </li>
+          </ul>
           <PlanNotice />
         </div>
       </section>
