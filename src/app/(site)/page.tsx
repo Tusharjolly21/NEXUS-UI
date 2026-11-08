@@ -195,7 +195,7 @@ export default function Home() {
               </span>
             </p>
           </div>
-          <h1 className="pg-display mt-7 text-[clamp(52px,11vw,124px)] text-foreground">
+          <h1 className="pg-display mt-7 text-[clamp(52px,11vw,124px)] text-foreground selection:bg-[#fdf0c9] selection:text-[#6b3a00]">
             <span className="block">Make your</span>
             <HeroWord className="block" />
             <span className="block">move.</span>
