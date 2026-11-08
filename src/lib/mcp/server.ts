@@ -121,6 +121,27 @@ function setupText(c: Item) {
   ].join("\n");
 }
 
+/** Characters of source per answer: comfortably under the ~25,000-token cap agents apply to one tool result. */
+const ANSWER_BUDGET = 60_000;
+
+/** A file cut at line ends into pieces that each fit in one answer. Joined in order they give the file back exactly. */
+function splitForAnswers(content: string): string[] {
+  if (content.length <= ANSWER_BUDGET) return [content];
+  const parts: string[] = [];
+  let current = "";
+  for (const line of content.match(/[^\n]*\n|[^\n]+$/g) ?? []) {
+    if (current && current.length + line.length > ANSWER_BUDGET) {
+      parts.push(current);
+      current = "";
+    }
+    current += line;
+  }
+  if (current) parts.push(current);
+  return parts;
+}
+
+const KEY_CHECK_FAILED = "The API key could not be checked just now. Try again in a minute.";
+
 const text = (t: string) => ({ content: [{ type: "text" as const, text: t }] });
 
 export function createNexusMcpServer({ token }: { token: string | null }) {
@@ -129,7 +150,13 @@ export function createNexusMcpServer({ token }: { token: string | null }) {
   const resolveAccess = () =>
     (access ??= (async () => {
       if (!token) return { userId: null, problem: "no-key" };
-      const r = await resolveApiToken(token);
+      let r: Awaited<ReturnType<typeof resolveApiToken>>;
+      try {
+        r = await resolveApiToken(token);
+      } catch {
+        // The database could not be reached: say so plainly, never pass the internal error on.
+        return { userId: null, problem: KEY_CHECK_FAILED };
+      }
       if (r.status === "legacy") return { userId: null, problem: "This API key format has been retired. Create a new key at nexus-ui.com/dashboard/api-key." };
       if (r.status !== "valid") return { userId: null, problem: "This API key was not recognised. Create a new one at nexus-ui.com/dashboard/api-key." };
       return { userId: r.userId, problem: null };
@@ -199,10 +226,22 @@ export function createNexusMcpServer({ token }: { token: string | null }) {
         "Everything needed to add one component to a project: the install command, the npm packages, and the source files with the paths they go to. Free components always include the source; Pro components include it when the connection's API key belongs to an account with Pro.",
       inputSchema: {
         slug: z.string().min(1).max(80).describe("The component's slug from search_components, e.g. 'glow-button'."),
+        file: z
+          .string()
+          .max(200)
+          .optional()
+          .describe("Only this file, by its path as listed in an earlier answer. Large components send some files this way."),
+        part: z
+          .number()
+          .int()
+          .min(1)
+          .max(50)
+          .optional()
+          .describe("With file: which part of a very long file (1, 2, ...). The answer says how many parts there are."),
       },
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
-    async ({ slug }) => {
+    async ({ slug, file, part }) => {
       const c = getLibraryComponent(slug.trim().toLowerCase());
       if (!c) return { ...text(`There is no component called "${slug}". Use search_components to find the right slug.`), isError: true };
 
@@ -215,13 +254,21 @@ export function createNexusMcpServer({ token }: { token: string | null }) {
       let licensedTo: string | undefined;
       if (c.premium) {
         const a = await resolveAccess();
-        const allowed = a.userId ? await adminCanAccessComponent(a.userId, c.slug) : false;
+        let allowed = false;
+        let problem = a.problem;
+        if (a.userId) {
+          try {
+            allowed = await adminCanAccessComponent(a.userId, c.slug);
+          } catch {
+            problem = KEY_CHECK_FAILED;
+          }
+        }
         if (!allowed) {
           const teaser = await getProTeaser(registryName(c));
           const why =
-            a.problem === "no-key"
+            problem === "no-key"
               ? `This connection has no API key. If you have Pro, create one at ${SITE}/dashboard/api-key and add it to the MCP connection as an "Authorization: Bearer <key>" header (setup: ${SITE}/mcp).`
-              : a.problem ?? `The account behind this API key does not have Pro. Plans: ${SITE}/pricing.`;
+              : problem ?? `The account behind this API key does not have Pro. Plans: ${SITE}/pricing.`;
           return text(
             [
               ...head,
@@ -237,6 +284,34 @@ export function createNexusMcpServer({ token }: { token: string | null }) {
       const reg = await readRegistry(registryName(c), licensedTo);
       const deps = reg?.dependencies?.length ? reg.dependencies : c.dependencies;
       const files = (reg?.files ?? []).filter((f) => typeof f.content === "string");
+      const pathOf = (f: RegistryFile) => f.target ?? f.path ?? "file";
+      const block = (f: RegistryFile) => `\n### ${pathOf(f)}\n\`\`\`${lang(pathOf(f))}\n${f.content!.trimEnd()}\n\`\`\``;
+
+      // One file on its own, for components too big to send in one answer.
+      if (file) {
+        const want = file.trim().replace(/^\.?\//, "").replace(/^src\//, "");
+        const f = files.find((x) => pathOf(x) === want || pathOf(x).endsWith(`/${want}`));
+        if (!f) return { ...text(`${c.name} has no file "${file}". Its files: ${files.map(pathOf).join(", ") || "none listed"}.`), isError: true };
+        const parts = splitForAnswers(f.content!);
+        const n = part ?? 1;
+        if (n > parts.length) return { ...text(`${pathOf(f)} has ${parts.length} part${parts.length === 1 ? "" : "s"}.`), isError: true };
+        if (parts.length === 1) return text(`# ${c.name}: ${pathOf(f)}${block(f)}`);
+        const next = n < parts.length ? `Get the rest with part: ${n + 1}, then join the parts in order, with nothing between them, to make the file.` : "That was the last part: join all the parts in order, with nothing between them, to make the file.";
+        return text(`# ${c.name}: ${pathOf(f)}, part ${n} of ${parts.length}\n${next}\n\n\`\`\`${lang(pathOf(f))}\n${parts[n - 1]}${parts[n - 1].endsWith("\n") ? "" : "\n"}\`\`\``);
+      }
+
+      // Agents cap how much one tool answer may hold (Claude Code's default is about 25,000 tokens), so a large
+      // component sends what fits and lists the rest to fetch one by one.
+      const sent: RegistryFile[] = [];
+      const held: RegistryFile[] = [];
+      let used = 0;
+      for (const f of files) {
+        const size = f.content!.length + 200;
+        if (used + size <= ANSWER_BUDGET) {
+          sent.push(f);
+          used += size;
+        } else held.push(f);
+      }
       const body = [
         ...head,
         "",
@@ -244,11 +319,16 @@ export function createNexusMcpServer({ token }: { token: string | null }) {
         "",
         `## npm packages\n${deps.length ? deps.join(" ") : "none beyond React"}`,
         files.length ? `\n## Files (${files.length})` : `\n## Files\nThe file list is not available right now; use the install command above.`,
-        ...files.map((f) => {
-          const target = f.target ?? f.path ?? "file";
-          return `\n### ${target}\n\`\`\`${lang(target)}\n${f.content!.trimEnd()}\n\`\`\``;
-        }),
-        c.reactSource ? `\n## Example usage\n\`\`\`tsx\n${c.reactSource.trimEnd()}\n\`\`\`` : "",
+        held.length
+          ? `This component is large, so ${sent.length} of its ${files.length} files are below. Get each of the others with get_component and its path in "file": ${held
+              .map((f) => {
+                const n = splitForAnswers(f.content!).length;
+                return n > 1 ? `${pathOf(f)} (in ${n} parts: pass part 1 to ${n})` : pathOf(f);
+              })
+              .join(", ")}. Or run the install command, which adds them all.`
+          : "",
+        ...sent.map(block),
+        c.reactSource && !held.length ? `\n## Example usage\n\`\`\`tsx\n${c.reactSource.trimEnd()}\n\`\`\`` : "",
       ];
       return text(body.filter((x) => x !== "").join("\n"));
     },

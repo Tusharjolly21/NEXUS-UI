@@ -24,8 +24,8 @@ const SETUPS: { app: string; where: string; free: string; pro: string; note?: st
     app: "Cursor",
     where: "Add this to .cursor/mcp.json in your project, or ~/.cursor/mcp.json for every project.",
     free: `{\n  "mcpServers": {\n    "nexus-ui": { "url": "${URL}" }\n  }\n}`,
-    pro: `{\n  "mcpServers": {\n    "nexus-ui": {\n      "url": "${URL}",\n      "headers": { "Authorization": "Bearer nxs_your_key_here" }\n    }\n  }\n}`,
-    note: "If you use the project file, keep it out of git when it holds your key.",
+    pro: `{\n  "mcpServers": {\n    "nexus-ui": {\n      "url": "${URL}",\n      "headers": { "Authorization": "Bearer \${env:NEXUS_API_KEY}" }\n    }\n  }\n}`,
+    note: "Cursor reads the key from the NEXUS_API_KEY environment variable (set it in your shell profile), so the file holds no secret and is safe to commit.",
   },
   {
     app: "VS Code",
@@ -91,7 +91,7 @@ export default function McpPage() {
             <Link href="/dashboard/api-key" className="text-link underline-offset-4 hover:underline">
               your dashboard
             </Link>{" "}
-            (it is shown once, so copy it straight away) and use the second version with your key in place of nxs_your_key_here.
+            (it is shown once, so copy it straight away) and use the second version, which shows where your key goes.
           </p>
           <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
             {SETUPS.map((s) => (
