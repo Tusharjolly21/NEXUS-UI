@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { PRICES, formatPrice } from "@/lib/pricing";
+import { GLOBAL_PRICING, type DisplayPricing } from "@/lib/pricing";
+import { IndiaDiscountBadge } from "@/components/pricing/india-discount-badge";
 import Link from "next/link";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { Check, ChevronRight, Download, Lock, Maximize2, Play, Sparkles, X } from "lucide-react";
@@ -16,8 +17,6 @@ import type { MarketplaceTemplate } from "@/lib/catalog/templates";
 import { templateSectionShots } from "@/lib/template-shots";
 import { ProLockVeil } from "@/components/templates/pro-lock-veil";
 
-const PRO_PRICE = formatPrice(PRICES.pro);
-const ALL_ACCESS_PRICE = formatPrice(PRICES.allAccess);
 
 // What a feature name means, for the ones whose name alone doesn't say.
 const FEATURE_COPY: Record<string, string> = {
@@ -168,9 +167,11 @@ function AccessPanel({
   tmpl,
   hasAccess,
   promptAccess,
+  pricing,
 }: {
   tmpl: MarketplaceTemplate;
   hasAccess: boolean;
+  pricing: DisplayPricing;
   /** The build prompt is Pro even on a free template: a plan, lifetime or a purchase of this one. */
   promptAccess: boolean;
 }) {
@@ -221,12 +222,13 @@ function AccessPanel({
             Templates aren&apos;t sold one by one. Pro opens this one, every other template, every component and block,
             and everything we release next.
           </p>
+          {pricing.proDiscount ? <IndiaDiscountBadge percent={pricing.proDiscount} upTo className="mt-4" /> : null}
           <div className="mt-6 flex flex-col gap-2">
             <CheckoutButton plan="annual" returnPath={`/templates/${tmpl.slug}`}>
-              Get Pro, {PRO_PRICE} a year
+              Get Pro, {pricing.pro} a year
             </CheckoutButton>
             <CheckoutButton plan="lifetime" variant="white" returnPath={`/templates/${tmpl.slug}`}>
-              Lifetime, {ALL_ACCESS_PRICE} once
+              Lifetime, {pricing.allAccess} once
             </CheckoutButton>
             <BuildPromptButton slug={tmpl.slug} name={name} hasAccess={promptAccess} />
             <PillLink href={previewHref} variant="white">
@@ -235,7 +237,8 @@ function AccessPanel({
             </PillLink>
           </div>
           <p className="mt-5 border-t border-border/60 pt-4 text-[14px] leading-relaxed text-muted-foreground">
-            Same access on both plans. Pro renews yearly, lifetime is paid once.{" "}
+            Same access on both plans. Pro renews yearly, lifetime is paid once.
+            {pricing.region === "india" ? " India prices are paid with UPI." : ""}{" "}
             <Link href="/pricing" className="font-semibold text-foreground underline underline-offset-2">
               Compare plans
             </Link>
@@ -294,12 +297,14 @@ export function TemplateDetailContent({
   related = [],
   isPremium = false,
   checkoutPending = false,
+  pricing = GLOBAL_PRICING,
 }: {
   tmpl: MarketplaceTemplate;
   related?: MarketplaceTemplate[];
   /** The visitor can open this template (bought it, or has a plan that includes it). */
   isPremium?: boolean;
   checkoutPending?: boolean;
+  pricing?: DisplayPricing;
 }) {
   const [shot, setShot] = React.useState<{ src: string; label: string; unoptimized?: boolean } | null>(null);
 
@@ -379,7 +384,7 @@ export function TemplateDetailContent({
             </Link>
           </div>
 
-          <AccessPanel tmpl={tmpl} hasAccess={hasAccess} promptAccess={isPremium} />
+          <AccessPanel tmpl={tmpl} hasAccess={hasAccess} promptAccess={isPremium} pricing={pricing} />
         </div>
       </section>
 
@@ -519,7 +524,7 @@ export function TemplateDetailContent({
             <p className="mt-4 max-w-[520px] text-[18px] text-muted-foreground">
               {hasAccess
                 ? "Swap in your words and colours, or drop in more sections from the component library."
-                : `Included in Pro, ${PRO_PRICE} a year, along with every other template. Swap in your words and colours and ship it.`}
+                : `Included in Pro, ${pricing.pro} a year, along with every other template. Swap in your words and colours and ship it.`}
             </p>
           </div>
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row">

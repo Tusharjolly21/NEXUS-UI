@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { Check } from "lucide-react";
-import { PRICES, formatPrice } from "@/lib/pricing";
+import { GLOBAL_PRICING, type DisplayPricing } from "@/lib/pricing";
 import { templateSectionShots } from "@/lib/template-shots";
 import type { MarketplaceTemplate } from "@/lib/catalog/templates";
 import {
@@ -20,9 +20,11 @@ import {
 export function LockedTemplatePreview({
   tmpl,
   name,
+  pricing = GLOBAL_PRICING,
 }: {
   tmpl: MarketplaceTemplate;
   name: string;
+  pricing?: DisplayPricing;
 }) {
   const reduce = useReducedMotion();
   const shots = templateSectionShots(tmpl, false);
@@ -144,14 +146,14 @@ export function LockedTemplatePreview({
                   target="_top"
                   className="inline-flex h-12 items-center justify-center rounded-full bg-[#0071e3] text-[16px] font-semibold text-white transition-colors hover:bg-[#0077ed] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]"
                 >
-                  Get Pro, {formatPrice(PRICES.pro)} a year
+                  Get Pro, {pricing.pro} a year
                 </a>
                 <a
                   href="/pricing"
                   target="_top"
                   className="inline-flex h-11 items-center justify-center rounded-full text-[15px] font-medium text-[#0066cc] transition-colors hover:bg-black/[0.04]"
                 >
-                  Or lifetime, {formatPrice(PRICES.allAccess)} once
+                  Or lifetime, {pricing.allAccess} once
                 </a>
               </div>
             </motion.div>

@@ -8,6 +8,7 @@ import { ThemeReceiver } from "@/components/templates/theme-receiver";
 import { LockedTemplatePreview } from "@/components/templates/locked-template-preview";
 import { templateName } from "@/components/templates/template-card";
 import { sessionCanAccessTemplate } from "@/lib/template-access";
+import { getPricing } from "@/lib/region";
 
 // Rendered per request: whether the visitor gets the running template or the locked preview
 // depends on their session. A Pro template's page code is only sent to people who can open it.
@@ -174,7 +175,7 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
 
   // Fails closed: without a session, or if the access check errors, a Pro template stays locked.
   if (tmpl.premium && !(await sessionCanAccessTemplate(tmpl.slug))) {
-    return <LockedTemplatePreview tmpl={tmpl} name={templateName(tmpl)} />;
+    return <LockedTemplatePreview tmpl={tmpl} name={templateName(tmpl)} pricing={await getPricing()} />;
   }
 
   if (tmpl.slug === "relay") {

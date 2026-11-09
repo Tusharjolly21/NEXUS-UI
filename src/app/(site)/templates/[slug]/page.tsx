@@ -5,6 +5,7 @@ import { TemplateDetailContent } from "@/components/templates/template-detail-co
 import { createMetadata, shortDescription, siteConfig } from "@/lib/seo";
 import { ogShot } from "@/lib/og-shot";
 import { sessionCanAccessTemplate } from "@/lib/template-access";
+import { getPricing } from "@/lib/region";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,7 @@ export default async function TemplateDetailPage({ params, searchParams }: Props
 
   // Fails closed: an auth or database outage renders the page as locked instead of erroring.
   const hasAccess = await sessionCanAccessTemplate(slug);
+  const pricing = await getPricing();
   const checkoutPending = checkout === "success" && !hasAccess;
   const others = templates.filter((t) => t.slug !== slug).sort((a, b) => b.trendingScore - a.trendingScore);
   const related = [...others.filter((t) => t.category === tmpl.category), ...others.filter((t) => t.category !== tmpl.category)].slice(0, 2);
@@ -85,7 +87,7 @@ export default async function TemplateDetailPage({ params, searchParams }: Props
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <TemplateDetailContent tmpl={tmpl} related={related} isPremium={hasAccess} checkoutPending={checkoutPending} />
+      <TemplateDetailContent tmpl={tmpl} related={related} isPremium={hasAccess} checkoutPending={checkoutPending} pricing={pricing} />
     </>
   );
 }
