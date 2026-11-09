@@ -1,8 +1,8 @@
 /**
  * region.ts — SERVER ONLY
  *
- * Works out which prices a visitor gets from the country Vercel attaches to
- * each request. The checkout route calls this too, so the product charged never
+ * Works out which prices a visitor gets from the country attached to each
+ * request. The checkout route calls this too, so the product charged never
  * depends on anything the browser sends.
  */
 
@@ -14,7 +14,9 @@ function countryOf(requestHeaders: Pick<Headers, "get">): string | null {
   if (process.env.NODE_ENV !== "production" && process.env.DEV_COUNTRY) {
     return process.env.DEV_COUNTRY.toUpperCase();
   }
-  return requestHeaders.get("x-vercel-ip-country")?.toUpperCase() ?? null;
+  // The site is behind Cloudflare, so Vercel's header describes Cloudflare's server, not the visitor.
+  const country = requestHeaders.get("cf-ipcountry") ?? requestHeaders.get("x-vercel-ip-country");
+  return country?.toUpperCase() ?? null;
 }
 
 /** Without both India products, showing rupees would promise a price checkout can't charge. */
