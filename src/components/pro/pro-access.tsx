@@ -279,8 +279,16 @@ export function UnlockedBadge({
 export function ProBadge({ className, onDark = false }: { className?: string; onDark?: boolean }) {
   const { isPro } = useProAccess();
   if (isPro) return <UnlockedBadge className={className} onDark={onDark} />;
-  // A dark pill with a thin amber-to-violet-to-blue ring and a gold lock: it reads as the premium tier
-  // without adding a size, a motion or a colour fill that fights the preview behind it.
+  return <ProMark className={className} onDark={onDark} />;
+}
+
+/**
+ * The Pro tag itself, the one look used on every page: a dark pill with a thin amber-to-violet-to-blue ring
+ * and a gold lock. It reads as the premium tier without adding a size, a motion or a colour fill that fights
+ * the preview behind it. It does not look at the visitor's plan: use ProBadge where a member should see
+ * "Unlocked" instead, and pass `lock={false}` where the tag names a plan the visitor is on (nothing is locked).
+ */
+export function ProMark({ className, onDark = false, lock = true }: { className?: string; onDark?: boolean; lock?: boolean }) {
   const fill = onDark ? "rgba(29,29,31,0.55)" : "#1d1d1f";
   return (
     <span
@@ -294,7 +302,7 @@ export function ProBadge({ className, onDark = false }: { className?: string; on
         className,
       )}
     >
-      <Lock className="size-3 text-[#ffc65c]" strokeWidth={2.5} aria-hidden />
+      {lock ? <Lock className="size-3 text-[#ffc65c]" strokeWidth={2.5} aria-hidden /> : null}
       Pro
     </span>
   );
@@ -304,15 +312,10 @@ export function ProBadge({ className, onDark = false }: { className?: string; on
 export function AccessTag({ premium, className }: { premium: boolean; className?: string }) {
   const { isPro } = useProAccess();
   if (premium && isPro) return <UnlockedBadge className={cn("px-2.5 py-0.5 text-[12px]", className)} />;
+  if (premium) return <ProMark className={cn("py-0.5 text-[12px]", className)} />;
   return (
-    <span
-      className={cn(
-        "rounded-full px-2.5 py-0.5 text-[12px] font-semibold",
-        premium ? "bg-[#1d1d1f] text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]" : "bg-[#34c759]/12 text-[#248a3d] dark:text-[#30d158]",
-        className,
-      )}
-    >
-      {premium ? "Pro" : "Free"}
+    <span className={cn("rounded-full bg-[#34c759]/12 px-2.5 py-0.5 text-[12px] font-semibold text-[#248a3d] dark:text-[#30d158]", className)}>
+      Free
     </span>
   );
 }

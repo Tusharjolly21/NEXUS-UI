@@ -1,5 +1,6 @@
 import { TypingSoundPanel } from "@/components/site/typing-sound-panel";
 import { notFound } from "next/navigation";
+import { AccessTag, ProMark } from "@/components/pro/pro-access";
 import { PreviewShield } from "@/components/pro/preview-shield";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -261,14 +262,8 @@ export default async function BlockDetailPage({ params }: Props) {
           </h1>
           <p className="mt-5 max-w-[680px] text-[19px] leading-[1.55] text-muted-foreground">{block.description}</p>
           <ul className="mt-6 flex flex-wrap gap-2" aria-label="About this block">
-            <li
-              className={
-                block.premium
-                  ? "rounded-full bg-[#1d1d1f] px-3 py-1 text-[13px] font-semibold text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]"
-                  : "rounded-full bg-[#34c759]/12 px-3 py-1 text-[13px] font-semibold text-[#248a3d] dark:text-[#30d158]"
-              }
-            >
-              {block.premium ? "Pro" : "Free"}
+            <li>
+              <AccessTag premium={!!block.premium} className="px-3 py-1 text-[13px]" />
             </li>
             <li className="pg-glass rounded-full bg-card px-3 py-1 text-[13px] font-medium text-foreground">{block.category}</li>
             <li className="pg-glass rounded-full bg-card px-3 py-1 text-[13px] font-medium text-foreground">
@@ -762,7 +757,7 @@ export default async function BlockDetailPage({ params }: Props) {
                     <span className="min-w-0">
                       <span className="block truncate text-[16px] font-semibold tracking-[-0.01em] text-foreground">{b.name}</span>
                       <span className="block text-[13px] text-muted-foreground">
-                        {variantsOf(b.slug).length || b.variants.length} sections · {b.premium ? "Pro" : "Free"}
+                        {variantsOf(b.slug).length || b.variants.length} sections · {b.premium ? <ProMark className="px-2 py-px align-[1px] text-[10.5px]" /> : "Free"}
                       </span>
                     </span>
                     <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden />

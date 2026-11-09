@@ -7,6 +7,7 @@ import { BrandMark, type MarkName } from "@/components/mcp/brand-marks";
 import { useSlots } from "@/components/site/use-slots";
 import { slotsLeft } from "@/lib/launch-slots";
 import { LAUNCH_BANNER_COOKIE, LAUNCH_BANNER_ID } from "@/lib/launch-banner";
+import { ProMark } from "@/components/pro/pro-access";
 
 /** The coding agents the MCP server works with, as small overlapping logo coins. */
 const AGENTS: { mark: MarkName; bg: string }[] = [
@@ -58,7 +59,7 @@ export function LaunchBanner({ isPro = false }: { isPro?: boolean }) {
     >
       <p className="flex flex-wrap items-center justify-center gap-x-1.5">
         {isPro ? (
-          <span className="inline-flex rounded-full bg-[linear-gradient(135deg,#ffd60a,#ff9f0a)] px-2 py-px text-[11px] font-semibold text-black">Pro</span>
+          <ProMark lock={false} onDark className="px-2 py-px text-[11px]" />
         ) : (
           <span className="inline-flex rounded-full bg-[conic-gradient(from_210deg,#0a84ff,#bf5af2,#ff375f,#ff9f0a,#0a84ff)] px-2 py-px text-[11px] font-semibold text-white">New</span>
         )}

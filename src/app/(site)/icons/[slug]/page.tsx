@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { CodeBlock } from "@/components/code-block";
+import { AccessTag } from "@/components/pro/pro-access";
 import { DEFAULT_HEADER } from "@/components/code-block/code-block";
 import { IconTile } from "@/components/nx-icons/icon-grid";
 import { CopyButton } from "@/components/nx-icons/copy-button";
@@ -158,9 +159,7 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
             <span className="text-foreground">{icon.title}</span>
           </nav>
           <p className="mt-5 flex items-center gap-2 text-[13.5px] text-muted-foreground">
-            <span className={icon.premium ? "rounded-full bg-foreground px-2.5 py-0.5 text-[12px] font-semibold text-background" : "rounded-full bg-card px-2.5 py-0.5 text-[12px] font-semibold text-foreground shadow-[0_0_0_1px_rgba(0,0,0,.08)]"}>
-              {icon.premium ? "Pro" : "Free"}
-            </span>
+            <AccessTag premium={icon.premium} />
             {icon.premium ? "Preview and play it free. Its code and sound come with Pro." : "Free to copy, with its sound."}
           </p>
           <h1 className="pg-display mt-3 max-w-[900px] text-[clamp(40px,6.6vw,72px)] leading-[1.02] text-foreground">

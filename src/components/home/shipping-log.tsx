@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { PillLink } from "@/components/site";
 import { libraryComponents } from "@/lib/catalog/library-components";
+import { ProMark } from "@/components/pro/pro-access";
 
 type Drop = { month: string; label: string; count: number; picks: { slug: string; name: string; premium: boolean }[] };
 
@@ -67,7 +68,7 @@ export function ShippingLog() {
                     className="pg-glass inline-flex items-center gap-1.5 rounded-full bg-card px-3.5 py-1.5 text-[14px] font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                   >
                     {p.name}
-                    {p.premium ? <span className="text-[11.5px] font-semibold text-muted-foreground">Pro</span> : null}
+                    {p.premium ? <ProMark className="px-2 py-px text-[10.5px]" /> : null}
                     <ArrowUpRight className="size-3.5 text-muted-foreground" aria-hidden />
                   </Link>
                 </li>

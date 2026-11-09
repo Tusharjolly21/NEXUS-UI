@@ -5,6 +5,7 @@ import type { MarketplaceTemplate, TemplateCategory } from "@/lib/catalog/templa
 import { templatePageShots } from "@/lib/template-shots";
 import { cn } from "@/lib/utils";
 import { templateName, templateTagline } from "./template-card";
+import { ProMark } from "@/components/pro/pro-access";
 
 /** One pastel per category, so the wall reads as a set rather than a list. */
 const CATEGORY_TINT: Partial<Record<TemplateCategory, string>> = {
@@ -146,9 +147,7 @@ export function TemplateTile({
               Unlocked
             </span>
           ) : (
-            <span className="rounded-full bg-foreground px-2.5 py-1 text-[12px] font-semibold text-background transition-opacity md:group-hover:opacity-0 md:group-focus-within:opacity-0 [@media(hover:none)]:hidden">
-              Pro
-            </span>
+            <ProMark className="py-1 text-[12px] transition-opacity md:group-hover:opacity-0 md:group-focus-within:opacity-0 [@media(hover:none)]:hidden" />
           )}
           <div
             className={cn(

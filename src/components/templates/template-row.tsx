@@ -4,6 +4,7 @@ import { ArrowUpRight, Check, Play } from "lucide-react";
 import type { MarketplaceTemplate } from "@/lib/catalog/templates";
 import { cn } from "@/lib/utils";
 import { templateName, templateTagline } from "./template-card";
+import { ProMark } from "@/components/pro/pro-access";
 
 /**
  * A template as one line of the index view: a small thumbnail, the name and what it is for, its
@@ -56,25 +57,20 @@ export function TemplateRow({
 
       <p className="hidden w-[150px] shrink-0 truncate text-[13.5px] text-muted-foreground md:block">{tmpl.category}</p>
 
-      <span
-        className={cn(
-          "hidden shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold sm:inline-flex",
-          !tmpl.premium || unlocked
-            ? "bg-tint-mint text-[#126b3a] dark:text-[#7ee2a8]"
-            : "bg-foreground text-background",
-        )}
-      >
-        {!tmpl.premium ? (
-          "Free"
-        ) : unlocked ? (
-          <>
-            <Check className="size-3" aria-hidden />
-            Unlocked
-          </>
-        ) : (
-          "Pro"
-        )}
-      </span>
+      {tmpl.premium && !unlocked ? (
+        <ProMark className="hidden shrink-0 py-1 text-[12px] sm:inline-flex" />
+      ) : (
+        <span className="hidden shrink-0 items-center gap-1 rounded-full bg-tint-mint px-2.5 py-1 text-[12px] font-semibold text-[#126b3a] sm:inline-flex dark:text-[#7ee2a8]">
+          {!tmpl.premium ? (
+            "Free"
+          ) : (
+            <>
+              <Check className="size-3" aria-hidden />
+              Unlocked
+            </>
+          )}
+        </span>
+      )}
 
       <div className="relative z-20 hidden shrink-0 items-center gap-1.5 sm:flex">
         <Link

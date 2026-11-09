@@ -6,7 +6,7 @@ import { useInView } from "framer-motion";
 import { Lock, LockOpen, PartyPopper, Search, Volume2, VolumeX, Waves } from "lucide-react";
 import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { ICONS, ICON_CATEGORIES, type IconCategory, type IconMeta } from "@/lib/icons/catalog";
-import { useLocked, useProAccess } from "@/components/pro/pro-access";
+import { ProBadge, useLocked, useProAccess } from "@/components/pro/pro-access";
 import { cn } from "@/lib/utils";
 import { IconMaterial, type IconMaterialName } from "./icon-material";
 import { CopyButton } from "./copy-button";
@@ -186,17 +186,7 @@ export function IconTile({
           {icon.title}
         </span>
       </Link>
-      {icon.premium ? (
-        <span
-          className={cn(
-            "pointer-events-none absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold",
-            dark ? "bg-white/15 text-white" : "bg-foreground text-background",
-          )}
-        >
-          {locked ? <Lock className="size-2.5" strokeWidth={3} aria-hidden /> : null}
-          Pro
-        </span>
-      ) : null}
+      {icon.premium ? <ProBadge onDark={dark} className="pointer-events-none absolute left-2.5 top-2.5 px-2 py-0.5 text-[11px]" /> : null}
       {/* one click copies this icon's whole file (a Pro icon asks to upgrade); always there on touch screens, on hover or focus elsewhere */}
       <CopyButton
         slug={icon.slug}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProMark } from "@/components/pro/pro-access";
 import { cn } from "@/lib/utils";
 
 export type Tint = "violet" | "sky" | "peach" | "mint" | "butter" | "pink" | "dark";
@@ -16,7 +17,7 @@ const TINTS: Record<Tint, string> = {
 /** Free / Pro tag shown on library tiles. */
 export function PlanTag({ pro }: { pro?: boolean }) {
   return pro ? (
-    <span className="rounded-full bg-foreground px-2.5 py-0.5 text-[11.5px] font-semibold text-background">Pro</span>
+    <ProMark />
   ) : (
     <span className="pg-glass rounded-full bg-card px-2.5 py-0.5 text-[11.5px] font-semibold text-foreground">Free</span>
   );

@@ -19,6 +19,7 @@ import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { ThemeTrio } from "./theme-trio";
+import { ProMark } from "@/components/pro/pro-access";
 
 const NAV_LINKS = [
   { href: "/components", label: "Components" },
@@ -178,7 +179,7 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
                   {displayName.charAt(0).toUpperCase()}
                 </span>
                 <span className="max-w-24 truncate">{displayName}</span>
-                {isPremium ? <span className="rounded-full bg-[#34c759]/15 px-1.5 text-[10.5px] font-semibold text-[#248a3d] dark:text-[#30d158]">Pro</span> : null}
+                {isPremium ? <ProMark lock={false} className="px-2 py-px text-[10.5px]" /> : null}
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" sideOffset={10} className="w-52">
                 <p className="truncate px-2.5 py-2 text-xs text-muted-foreground">{user.email}</p>
