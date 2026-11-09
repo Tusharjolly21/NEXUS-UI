@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Check, Play } from "lucide-react";
 import type { MarketplaceTemplate } from "@/lib/catalog/templates";
-import { cn } from "@/lib/utils";
 import { templateName, templateTagline } from "./template-card";
 import { ProMark } from "@/components/pro/pro-access";
 
