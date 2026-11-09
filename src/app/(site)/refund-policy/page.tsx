@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LegalLink, LegalPage, LegalSection, Strong } from "@/components/legal/legal-page";
 import { legalConfig } from "@/lib/legal";
 import { createMetadata } from "@/lib/seo";
+import { getPricing } from "@/lib/region";
 
 // Keep in step with /terms (section 4) and the refund answer on /pricing.
 
@@ -14,14 +15,16 @@ export const metadata: Metadata = createMetadata({
 
 const { contactEmail } = legalConfig;
 
-export default function RefundPolicyPage() {
+export default async function RefundPolicyPage() {
+  const pricing = await getPricing();
+
   return (
     <LegalPage
       title="Refund and Cancellation Policy"
       intro={
         <p>
-          Nexus UI sells two plans: <Strong>Pro</Strong> ($49.99 per year, renews yearly until you cancel) and{" "}
-          <Strong>All-Access</Strong> ($79.99, one payment, no renewal). This page explains how to cancel and how
+          Nexus UI sells two plans: <Strong>Pro</Strong> ({pricing.pro} per year, renews yearly until you cancel) and{" "}
+          <Strong>All-Access</Strong> ({pricing.allAccess}, one payment, no renewal). This page explains how to cancel and how
           to get a refund. It forms part of our <LegalLink href="/terms">Terms of Service</LegalLink>.
         </p>
       }

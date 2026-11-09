@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ComponentGallery } from "@/components/gallery/component-gallery";
+import { getPricing } from "@/lib/region";
 import { ComponentsProofRow } from "@/components/gallery/components-proof-row";
 import { Band, PillLink, RainbowWord } from "@/components/site";
 import { getPopulatedCategories, isIndexableCategory } from "@/lib/catalog/category-seo";
@@ -18,7 +19,8 @@ export const metadata: Metadata = createMetadata({
 /** The "For fun" group (web slingers, portals, black holes, a shredder). Heavy canvas and WebGL, so it lives on its own page instead of in the wall. */
 const FUN_GROUP = "fun";
 
-export default function ComponentsPage() {
+export default async function ComponentsPage() {
+  const pricing = await getPricing();
   const all = allGalleryItems();
   const items = all.filter((i) => i.group !== FUN_GROUP);
   const funCount = all.length - items.length;
@@ -42,6 +44,7 @@ export default function ComponentsPage() {
         <div className="mx-auto max-w-[1152px]">
           <ComponentGallery
             items={items}
+            pricing={pricing}
             categories={galleryCategories(items)}
             searchable
             plansLine
