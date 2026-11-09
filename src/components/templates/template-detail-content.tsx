@@ -225,10 +225,10 @@ function AccessPanel({
           {pricing.proDiscount ? <IndiaDiscountBadge percent={pricing.proDiscount} upTo className="mt-4" /> : null}
           <div className="mt-6 flex flex-col gap-2">
             <CheckoutButton plan="annual" returnPath={`/templates/${tmpl.slug}`}>
-              Get Pro, {pricing.pro} a year
+              Get Pro, {pricing.proOriginal ? <s className="font-normal opacity-60">{pricing.proOriginal}</s> : null} {pricing.pro} a year
             </CheckoutButton>
             <CheckoutButton plan="lifetime" variant="white" returnPath={`/templates/${tmpl.slug}`}>
-              Lifetime, {pricing.allAccess} once
+              Lifetime, {pricing.allAccessOriginal ? <s className="font-normal opacity-60">{pricing.allAccessOriginal}</s> : null} {pricing.allAccess} once
             </CheckoutButton>
             <BuildPromptButton slug={tmpl.slug} name={name} hasAccess={promptAccess} />
             <PillLink href={previewHref} variant="white">

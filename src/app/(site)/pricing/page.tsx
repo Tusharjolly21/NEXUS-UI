@@ -38,6 +38,7 @@ type Plan = {
   features: string[];
   featured?: boolean;
   discount?: number | null;
+  original?: string | null;
 };
 
 function buildPlans(pricing: DisplayPricing): Plan[] {
@@ -65,6 +66,7 @@ function buildPlans(pricing: DisplayPricing): Plan[] {
       pitch: "Everything Nexus UI makes, renewed yearly.",
       featured: true,
       discount: pricing.proDiscount,
+      original: pricing.proOriginal,
       features: [
         "Everything in Starter",
         `All ${components} components, including ${proComponents} Pro`,
@@ -83,6 +85,7 @@ function buildPlans(pricing: DisplayPricing): Plan[] {
       name: "All-Access",
       price: pricing.allAccess,
       discount: pricing.allAccessDiscount,
+      original: pricing.allAccessOriginal,
       term: "one payment",
       pitch: "Exactly what Pro unlocks, paid once and yours for good.",
       features: [
@@ -281,7 +284,7 @@ export default async function PricingPage() {
                   <span className="text-[48px] font-semibold leading-none tracking-[-0.035em] text-foreground">{p.price}</span>
                   <span className="text-[15px] text-muted-foreground">{p.term}</span>
                 </p>
-                {p.discount ? <IndiaDiscountBadge percent={p.discount} className="mt-3" /> : null}
+                {p.discount ? <IndiaDiscountBadge percent={p.discount} original={p.original} className="mt-3" /> : null}
                 <p className="mt-3 text-[15px] text-muted-foreground">{p.pitch}</p>
                 <ul className="mt-6 space-y-3">
                   {p.features.map((f) => (

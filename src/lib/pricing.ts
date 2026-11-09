@@ -37,6 +37,9 @@ export type DisplayPricing = {
   /** Percent off shown on the badge, or null where no regional discount applies. */
   proDiscount: number | null;
   allAccessDiscount: number | null;
+  /** The usual USD price, struck through beside a regional price. Null where the price is the usual one. */
+  proOriginal: string | null;
+  allAccessOriginal: string | null;
 };
 
 /** 49 → "$49", 49.99 → "$49.99" */
@@ -56,6 +59,8 @@ export const GLOBAL_PRICING: DisplayPricing = {
   allAccess: formatPrice(PRICES.allAccess),
   proDiscount: null,
   allAccessDiscount: null,
+  proOriginal: null,
+  allAccessOriginal: null,
 };
 
 export const INDIA_PRICING: DisplayPricing = {
@@ -65,4 +70,6 @@ export const INDIA_PRICING: DisplayPricing = {
   allAccess: formatInr(INDIA_PRICES.allAccess),
   proDiscount: INDIA_DISCOUNT.pro,
   allAccessDiscount: INDIA_DISCOUNT.allAccess,
+  proOriginal: formatPrice(PRICES.pro),
+  allAccessOriginal: formatPrice(PRICES.allAccess),
 };
