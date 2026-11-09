@@ -140,6 +140,26 @@ const nextConfig = {
       { source: "/docs", destination: "/docs/introduction", permanent: true },
       { source: "/demos", destination: "/components", permanent: true },
       { source: "/Nexus", destination: "/", permanent: true },
+      // Component categories whose components all moved to the Blocks pages are empty now and 404'd in
+      // Search Console. Send each to the block page that took its place.
+      { source: "/components/category/hero-sections", destination: "/blocks/block-hero", permanent: true },
+      { source: "/components/category/bento-grids", destination: "/blocks/block-why-choose-us", permanent: true },
+      { source: "/components/category/footers", destination: "/blocks/block-footer", permanent: true },
+      { source: "/components/category/sidebars", destination: "/blocks/block-sidebar", permanent: true },
+      { source: "/components/category/faq-sections", destination: "/blocks/block-faq-folder-card", permanent: true },
+      { source: "/components/category/contact-sections", destination: "/blocks/block-contact-page", permanent: true },
+      { source: "/components/category/logo-clouds", destination: "/blocks/block-logo-clouds", permanent: true },
+      // Older block URLs, before the blocks got their block-* names.
+      { source: "/blocks/logos", destination: "/blocks/block-logo-clouds", permanent: true },
+      { source: "/blocks/blog-content-centered", destination: "/blocks/block-blog-content-sections", permanent: true },
+      // Sign-in is passwordless (one email form), so signing up is signing in.
+      { source: "/signup", destination: "/login", permanent: true },
+      // The sound kit docs live at /icons/sounds. Google guesses these paths from the import lines
+      // ("./sound-kit", "./sound-engine", "sounds/coin") printed in the code blocks on that page.
+      { source: "/sound-kit", destination: "/icons/sounds", permanent: true },
+      { source: "/icons/sound-kit", destination: "/icons/sounds", permanent: true },
+      { source: "/icons/sound-engine", destination: "/icons/sounds", permanent: true },
+      { source: "/icons/sounds/:icon", destination: "/icons/sounds", permanent: true },
       // Components that are really page sections now live on the Blocks pages (moved-sections.ts).
       { source: "/components/cinematic-logo-cloud", destination: "/blocks/block-logo-clouds#cinematic-logo-cloud", permanent: true },
       { source: "/components/step-flow", destination: "/blocks/block-features#step-flow", permanent: true },

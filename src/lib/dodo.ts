@@ -1,9 +1,12 @@
 import crypto from "crypto";
+import type { PriceRegion } from "@/lib/pricing";
 
 /**
  * Dodo Payments client. Two plans are for sale and each maps to one Dodo product:
  *   annual   -> DODO_PRODUCT_ANNUAL   (subscription, $49.99 / year)
  *   lifetime -> DODO_PRODUCT_LIFETIME (one-time, $79.99)
+ * India has its own two products: DODO_PRODUCT_ANNUAL_IN (₹1,999 / year) and
+ * DODO_PRODUCT_LIFETIME_IN (₹3,499 one-time).
  * Test and live mode use different API keys, webhook secrets and product IDs, so every value
  * comes from the environment.
  */
@@ -16,20 +19,24 @@ export function dodoBaseUrl() {
     : "https://test.dodopayments.com";
 }
 
-export function productIdForPlan(plan: Plan): string | undefined {
+export function productIdForPlan(plan: Plan, region: PriceRegion = "global"): string | undefined {
+  if (region === "india") {
+    return plan === "annual" ? process.env.DODO_PRODUCT_ANNUAL_IN : process.env.DODO_PRODUCT_LIFETIME_IN;
+  }
   return plan === "annual" ? process.env.DODO_PRODUCT_ANNUAL : process.env.DODO_PRODUCT_LIFETIME;
 }
 
 /** Which plan a Dodo product ID belongs to, or null when it is neither of ours. */
 export function planForProductId(productId: string | null | undefined): Plan | null {
   if (!productId) return null;
-  if (productId === process.env.DODO_PRODUCT_ANNUAL) return "annual";
-  if (productId === process.env.DODO_PRODUCT_LIFETIME) return "lifetime";
+  if (productId === process.env.DODO_PRODUCT_ANNUAL || productId === process.env.DODO_PRODUCT_ANNUAL_IN) return "annual";
+  if (productId === process.env.DODO_PRODUCT_LIFETIME || productId === process.env.DODO_PRODUCT_LIFETIME_IN) return "lifetime";
   return null;
 }
 
 export type CheckoutOptions = {
   plan: Plan;
+  region: PriceRegion;
   userId: string;
   email?: string;
   name?: string;
@@ -39,7 +46,7 @@ export type CheckoutOptions = {
 
 /** Creates a hosted checkout session and returns its URL. */
 export async function createCheckoutSession(opts: CheckoutOptions): Promise<string> {
-  const productId = productIdForPlan(opts.plan);
+  const productId = productIdForPlan(opts.plan, opts.region);
   if (!productId) throw new Error("Payment not configured.");
 
   const res = await fetch(`${dodoBaseUrl()}/checkouts`, {
@@ -54,6 +61,16 @@ export async function createCheckoutSession(opts: CheckoutOptions): Promise<stri
       return_url: opts.returnUrl,
       cancel_url: opts.cancelUrl,
       metadata: { user_id: opts.userId, plan: opts.plan },
+      // The region comes from IP location, which a VPN can fake. UPI needs an Indian bank
+      // account, so it's the only way to pay the India price. Don't add cards here.
+      ...(opts.region === "india"
+        ? {
+            allowed_payment_method_types: ["upi_intent"],
+            billing_address: { country: "IN" },
+            billing_currency: "INR",
+            feature_flags: { allow_customer_editing_country: false },
+          }
+        : {}),
     }),
   });
 

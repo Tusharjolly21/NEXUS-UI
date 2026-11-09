@@ -5,6 +5,7 @@ import { CommentDeck } from "@/components/pricing/comment-deck";
 import { MembersRow } from "@/components/pricing/members-row";
 import { MemberStack } from "@/components/pricing/member-stack";
 import { PlanAction, PlanNotice, PlanTag } from "@/components/pricing/plan-action";
+import { IndiaDiscountBadge } from "@/components/pricing/india-discount-badge";
 import { TwentyFirstMilestone } from "@/components/home/twenty-first-milestone";
 import { PillLink, RainbowWord } from "@/components/site";
 import { BrandMark, type MarkName } from "@/components/mcp/brand-marks";
@@ -12,19 +13,17 @@ import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { cn } from "@/lib/utils";
-import { PRICES, formatPrice } from "@/lib/pricing";
+import { GLOBAL_PRICING, PRICES, type DisplayPricing } from "@/lib/pricing";
+import { getPricing } from "@/lib/region";
 
 const { components, freeComponents, proComponents, templates, freeTemplates, blocks, videos, freeVideos, icons, freeIcons, proIcons } = CATALOG_COUNTS;
 const freeBlocks = blocksManifest.filter((b) => !b.premium).length;
-
-const PRO_PRICE = formatPrice(PRICES.pro);
-const ALL_ACCESS_PRICE = formatPrice(PRICES.allAccess);
 
 export const metadata: Metadata = {
   ...createMetadata(
     {
       title: { absolute: "Pricing — Nexus UI" },
-      description: `${freeComponents} Nexus UI components are free. Pro (${PRO_PRICE} a year) and All-Access (${ALL_ACCESS_PRICE} once) unlock the ${proComponents} Pro components, the source of all ${templates} Next.js templates and the premium blocks.`,
+      description: `${freeComponents} Nexus UI components are free. Pro (${GLOBAL_PRICING.pro} a year) and All-Access (${GLOBAL_PRICING.allAccess} once) unlock the ${proComponents} Pro components, the source of all ${templates} Next.js templates and the premium blocks.`,
       alternates: { canonical: "/pricing" },
     },
     { title: "Free to start. Pay once for everything.", kind: "Pricing" },
@@ -38,58 +37,66 @@ type Plan = {
   pitch: string;
   features: string[];
   featured?: boolean;
+  discount?: number | null;
+  original?: string | null;
 };
 
-const PLANS: Plan[] = [
-  {
-    name: "Starter",
-    price: "$0",
-    term: "free forever",
-    pitch: "The free components, free to use anywhere.",
-    features: [
-      `${freeComponents} components with full source`,
-      `${freeBlocks} of the ${blocks} section blocks`,
-      `${freeTemplates} full templates, plus a first look at all ${templates}`,
-      `${freeVideos} of the ${videos} videos with their prompt and source`,
-      `${freeIcons} animated icons, with their sounds`,
-      "Commercial and client projects",
-      "Install with the shadcn CLI",
-      "MCP server for your coding agent, free components",
-    ],
-  },
-  {
-    name: "Pro",
-    price: PRO_PRICE,
-    term: "per year",
-    pitch: "Everything Nexus UI makes, renewed yearly.",
-    featured: true,
-    features: [
-      "Everything in Starter",
-      `All ${components} components, including ${proComponents} Pro`,
-      `Full source of all ${templates} templates`,
-      `All ${blocks} section blocks`,
-      `All ${videos} videos: prompt, source, live editing and render script`,
-      `All ${icons} animated icons: ${proIcons} more, with their sounds`,
-      "MCP server: Claude Code, Cursor and Codex add any component for you",
-      "Every new template, block and component as it ships",
-      "Request components, blocks and templates",
-      "Priority support, 24 to 48 hours",
-      "Cancel anytime",
-    ],
-  },
-  {
-    name: "All-Access",
-    price: ALL_ACCESS_PRICE,
-    term: "one payment",
-    pitch: "Exactly what Pro unlocks, paid once and yours for good.",
-    features: [
-      "Everything in Pro",
-      "Every future release, for life",
-      "Requests and priority support, for life",
-      "One payment, never renews",
-    ],
-  },
-];
+function buildPlans(pricing: DisplayPricing): Plan[] {
+  return [
+    {
+      name: "Starter",
+      price: pricing.free,
+      term: "free forever",
+      pitch: "The free components, free to use anywhere.",
+      features: [
+        `${freeComponents} components with full source`,
+        `${freeBlocks} of the ${blocks} section blocks`,
+        `${freeTemplates} full templates, plus a first look at all ${templates}`,
+        `${freeVideos} of the ${videos} videos with their prompt and source`,
+        `${freeIcons} animated icons, with their sounds`,
+        "Commercial and client projects",
+        "Install with the shadcn CLI",
+        "MCP server for your coding agent, free components",
+      ],
+    },
+    {
+      name: "Pro",
+      price: pricing.pro,
+      term: "per year",
+      pitch: "Everything Nexus UI makes, renewed yearly.",
+      featured: true,
+      discount: pricing.proDiscount,
+      original: pricing.proOriginal,
+      features: [
+        "Everything in Starter",
+        `All ${components} components, including ${proComponents} Pro`,
+        `Full source of all ${templates} templates`,
+        `All ${blocks} section blocks`,
+        `All ${videos} videos: prompt, source, live editing and render script`,
+        `All ${icons} animated icons: ${proIcons} more, with their sounds`,
+        "MCP server: Claude Code, Cursor and Codex add any component for you",
+        "Every new template, block and component as it ships",
+        "Request components, blocks and templates",
+        "Priority support, 24 to 48 hours",
+        "Cancel anytime",
+      ],
+    },
+    {
+      name: "All-Access",
+      price: pricing.allAccess,
+      discount: pricing.allAccessDiscount,
+      original: pricing.allAccessOriginal,
+      term: "one payment",
+      pitch: "Exactly what Pro unlocks, paid once and yours for good.",
+      features: [
+        "Everything in Pro",
+        "Every future release, for life",
+        "Requests and priority support, for life",
+        "One payment, never renews",
+      ],
+    },
+  ];
+}
 
 /** The stack every component is written in, shown under the title. */
 const STACK: { mark: MarkName; name: string }[] = [
@@ -124,66 +131,69 @@ const COMPARE: [string, Cell, Cell, Cell][] = [
   ["Billing", "Free", "Yearly, cancel anytime", "Once"],
 ];
 
-const FAQ = [
-  {
-    q: "Are the components free?",
-    a: `${freeComponents} of the ${components} are free, with full source, for personal, commercial and client projects. Pro unlocks the other ${proComponents}: you can preview every one of them, but their source, install and playground come with Pro, along with the template source and the premium blocks.`,
-  },
-  {
-    q: "What can I use the components for?",
-    a: "Personal, commercial and client projects, as many as you like, with no credit needed. What you can't do is resell or hand out the source on its own, put it in a UI kit, library or template that competes with Nexus UI, or publish premium code in a public repository. The terms have the exact wording.",
-  },
-  {
-    q: "Can Claude Code or Cursor install them for me?",
-    a: "Yes, two ways. Connect the Nexus UI MCP server and your agent can search the library and add a component by name; or, since Nexus UI is a shadcn registry, any agent that can run a shell installs one with a single command. Free components need no key; Pro components need your API key. The MCP page has the setup for Claude Code, Cursor, VS Code and Codex.",
-  },
-  {
-    q: "What's the difference between Pro and All-Access?",
-    a: `Only how you pay. Both unlock every template, every block, everything we release next, requests and priority support. Pro is ${PRO_PRICE} a year and renews until you cancel. All-Access is ${ALL_ACCESS_PRICE} once and never expires.`,
-  },
-  {
-    q: "What happens if I cancel Pro?",
-    a: "You keep access until the end of the year you've paid for, and you keep using whatever you built. After that you can't download premium items or get updates unless you subscribe again.",
-  },
-  {
-    q: "Can I buy a single template?",
-    a: `Templates aren't sold one by one. ${freeTemplates} are free; Pro unlocks all ${templates}, plus everything we add later, for ${PRO_PRICE} a year, or ${ALL_ACCESS_PRICE} once for lifetime.`,
-  },
-  {
-    q: "Can I request a component or template?",
-    a: "Yes. Pro and All-Access members can send requests from the contact page. The most-asked-for ones get built next, and both plans get them as they ship.",
-  },
-  {
-    q: "Can I upgrade from Pro to All-Access?",
-    a: "Yes, any time. Buy All-Access, then cancel Pro from Billing or email us and we'll stop the renewal for you.",
-  },
-  {
-    q: "Are taxes included in the price?",
-    a: `No. ${PRO_PRICE} a year and ${ALL_ACCESS_PRICE} once are the prices before tax. Checkout adds GST, VAT or sales tax where your country requires it and shows the full total before you pay. Payments are handled by Dodo Payments, our merchant of record, who collect and remit the tax. In some countries you can pay in your local currency.`,
-  },
-  {
-    q: "Can I get a refund?",
-    a: "All-Access: a full refund if you ask within 7 days. Pro: if something doesn't work as described, write within 7 days and we'll fix it or refund you.",
-  },
-  {
-    q: "What comes with a video?",
-    a: `Every video plays in your browser with its own soundtrack. ${freeVideos} of the ${videos} come with everything: the build prompt, the React source, live editing of every word and colour, and a script that renders your edit to MP4. Pro unlocks the same for the rest.`,
-  },
-  {
-    q: "Are the animated icons free?",
-    a: `${freeIcons} of the ${icons} are free, with their sounds, for personal, commercial and client projects, with no sign-in. The other ${proIcons} are Pro: you can preview and play every one of them, but their code and sound come with Pro. The icon engine, the sound engine and the sound guide are free.`,
-  },
-  {
-    q: "How do I get the code after paying?",
-    a: "Sign in with the same email. Pro components show their code and playground right on their pages, every template page gets a Download source button, and Pro components and premium blocks install with the shadcn CLI using your API key.",
-  },
-];
+function buildFaq(pricing: DisplayPricing) {
+  return [
+    {
+      q: "Are the components free?",
+      a: `${freeComponents} of the ${components} are free, with full source, for personal, commercial and client projects. Pro unlocks the other ${proComponents}: you can preview every one of them, but their source, install and playground come with Pro, along with the template source and the premium blocks.`,
+    },
+    {
+      q: "What can I use the components for?",
+      a: "Personal, commercial and client projects, as many as you like, with no credit needed. What you can't do is resell or hand out the source on its own, put it in a UI kit, library or template that competes with Nexus UI, or publish premium code in a public repository. The terms have the exact wording.",
+    },
+    {
+      q: "Can Claude Code or Cursor install them for me?",
+      a: "Yes, two ways. Connect the Nexus UI MCP server and your agent can search the library and add a component by name; or, since Nexus UI is a shadcn registry, any agent that can run a shell installs one with a single command. Free components need no key; Pro components need your API key. The MCP page has the setup for Claude Code, Cursor, VS Code and Codex.",
+    },
+    {
+      q: "What's the difference between Pro and All-Access?",
+      a: `Only how you pay. Both unlock every template, every block, everything we release next, requests and priority support. Pro is ${pricing.pro} a year and renews until you cancel. All-Access is ${pricing.allAccess} once and never expires.`,
+    },
+    {
+      q: "What happens if I cancel Pro?",
+      a: "You keep access until the end of the year you've paid for, and you keep using whatever you built. After that you can't download premium items or get updates unless you subscribe again.",
+    },
+    {
+      q: "Can I buy a single template?",
+      a: `Templates aren't sold one by one. ${freeTemplates} are free; Pro unlocks all ${templates}, plus everything we add later, for ${pricing.pro} a year, or ${pricing.allAccess} once for lifetime.`,
+    },
+    {
+      q: "Can I request a component or template?",
+      a: "Yes. Pro and All-Access members can send requests from the contact page. The most-asked-for ones get built next, and both plans get them as they ship.",
+    },
+    {
+      q: "Can I upgrade from Pro to All-Access?",
+      a: "Yes, any time. Buy All-Access, then cancel Pro from Billing or email us and we'll stop the renewal for you.",
+    },
+    {
+      q: "Are taxes included in the price?",
+      a: `${pricing.region === "india" ? "Any GST due is shown at checkout, with the full total, before you pay." : `No. ${pricing.pro} a year and ${pricing.allAccess} once are the prices before tax. Checkout adds GST, VAT or sales tax where your country requires it and shows the full total before you pay.`} Payments are handled by Dodo Payments, our merchant of record, who collect and remit the tax. In some countries you can pay in your local currency.`,
+    },
+    {
+      q: "Can I get a refund?",
+      a: "All-Access: a full refund if you ask within 7 days. Pro: if something doesn't work as described, write within 7 days and we'll fix it or refund you.",
+    },
+    {
+      q: "What comes with a video?",
+      a: `Every video plays in your browser with its own soundtrack. ${freeVideos} of the ${videos} come with everything: the build prompt, the React source, live editing of every word and colour, and a script that renders your edit to MP4. Pro unlocks the same for the rest.`,
+    },
+    {
+      q: "Are the animated icons free?",
+      a: `${freeIcons} of the ${icons} are free, with their sounds, for personal, commercial and client projects, with no sign-in. The other ${proIcons} are Pro: you can preview and play every one of them, but their code and sound come with Pro. The icon engine, the sound engine and the sound guide are free.`,
+    },
+    {
+      q: "How do I get the code after paying?",
+      a: "Sign in with the same email. Pro components show their code and playground right on their pages, every template page gets a Download source button, and Pro components and premium blocks install with the shadcn CLI using your API key.",
+    },
+  ];
+}
 
+// Structured data stays in USD whatever the visitor's region, so search results are consistent.
 const jsonLd = [
   {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: FAQ.map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+    mainEntity: buildFaq(GLOBAL_PRICING).map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
   },
   {
     "@context": "https://schema.org",
@@ -206,7 +216,11 @@ function CompareCell({ value }: { value: Cell }) {
   return <span>{value}</span>;
 }
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const pricing = await getPricing();
+  const plans = buildPlans(pricing);
+  const faq = buildFaq(pricing);
+
   return (
     <>
       {jsonLd.map((d, i) => (
@@ -259,7 +273,7 @@ export default function PricingPage() {
       <section aria-label="Plans" className="px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
           <div className="grid gap-5 lg:grid-cols-3">
-            {PLANS.map((p) => (
+            {plans.map((p) => (
               <article
                 key={p.name}
                 className={cn("pg-float relative flex flex-col rounded-tile p-7", p.featured ? "bg-card ring-2 ring-action" : "bg-card")}
@@ -270,6 +284,7 @@ export default function PricingPage() {
                   <span className="text-[48px] font-semibold leading-none tracking-[-0.035em] text-foreground">{p.price}</span>
                   <span className="text-[15px] text-muted-foreground">{p.term}</span>
                 </p>
+                {p.discount ? <IndiaDiscountBadge percent={p.discount} original={p.original} className="mt-3" /> : null}
                 <p className="mt-3 text-[15px] text-muted-foreground">{p.pitch}</p>
                 <ul className="mt-6 space-y-3">
                   {p.features.map((f) => (
@@ -299,7 +314,9 @@ export default function PricingPage() {
             ))}
           </div>
           <p className="mx-auto mt-6 max-w-[640px] text-center text-[14px] leading-[1.55] text-muted-foreground">
-            Prices are in US dollars and don&apos;t include tax. GST, VAT or sales tax is added at checkout based on your country, so the total can be higher than the price shown. In some countries you can pay in your local currency.
+            {pricing.region === "india"
+              ? "Prices are in Indian rupees and paid with UPI. Any GST due is shown at checkout before you pay."
+              : "Prices are in US dollars and don't include tax. GST, VAT or sales tax is added at checkout based on your country, so the total can be higher than the price shown. In some countries you can pay in your local currency."}
           </p>
           <p className="mt-4 text-center text-[15px] text-muted-foreground">
             Need something we don&apos;t have yet? Both plans include requests.{" "}
@@ -341,7 +358,7 @@ export default function PricingPage() {
       {/* What people say, as a pull quote and a deck of comments */}
       <section className="overflow-hidden px-4 pb-28">
         <div className="mx-auto max-w-[1152px]">
-          <CommentDeck />
+          <CommentDeck allAccessPrice={pricing.allAccess} />
         </div>
       </section>
 
@@ -357,7 +374,7 @@ export default function PricingPage() {
                   <th scope="col" className="px-6 py-4 font-medium text-muted-foreground">
                     What you get
                   </th>
-                  {PLANS.map((p) => (
+                  {plans.map((p) => (
                     <th key={p.name} scope="col" className="w-[22%] px-6 py-4 text-center font-semibold text-foreground">
                       {p.name}
                     </th>
@@ -400,7 +417,7 @@ export default function PricingPage() {
             </p>
           </div>
           <div className="border-t border-border">
-            {FAQ.map((f) => (
+            {faq.map((f) => (
               <details key={f.q} className="group border-b border-border">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[17px] font-semibold tracking-[-0.3px] text-foreground [&::-webkit-details-marker]:hidden">
                   {f.q}

@@ -6,7 +6,8 @@ import { getCachedUser } from "@/lib/supabase/server";
 import { hasPremiumAccess } from "@/lib/entitlements";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createMetadata } from "@/lib/seo";
-import { PRICES, formatPrice } from "@/lib/pricing";
+import { getPricing } from "@/lib/region";
+import { IndiaDiscountBadge } from "@/components/pricing/india-discount-badge";
 import { templates } from "@/lib/catalog/templates";
 import TemplatesGallery from "./templates-client";
 
@@ -19,6 +20,7 @@ export const metadata: Metadata = createMetadata({
 });
 
 export default async function TemplatesPage() {
+  const pricing = await getPricing();
   let isPremium = false;
 
   if (isSupabaseConfigured()) {
@@ -70,8 +72,9 @@ export default async function TemplatesPage() {
                 Get every template
               </h2>
               <p className="mt-4 max-w-[520px] text-[18px] text-muted-foreground">
-                Pro unlocks all {templates.length}, every block and everything we release next for {formatPrice(PRICES.pro)} a year. All-Access unlocks the same, for good, at {formatPrice(PRICES.allAccess)} once.
+                Pro unlocks all {templates.length}, every block and everything we release next for {pricing.pro} a year. All-Access unlocks the same, for good, at {pricing.allAccess} once.
               </p>
+              {pricing.proDiscount ? <IndiaDiscountBadge percent={pricing.proDiscount} upTo className="mt-4" /> : null}
             </div>
           )}
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row">

@@ -97,7 +97,7 @@ function DeckCard({ c }: { c: Comment }) {
   );
 }
 
-function Featured() {
+function Featured({ allAccessPrice }: { allAccessPrice: string }) {
   const c = COMMENTS.find((x) => x.user === FEATURED);
   if (!c) return null;
   const at = c.quote.indexOf(HIGHLIGHT);
@@ -125,7 +125,7 @@ function Featured() {
           <Source c={c} />
         </span>
         <span className="rounded-full bg-foreground/[0.06] px-3.5 py-1.5 text-[13px] text-muted-foreground">
-          All-Access is {formatPrice(PRICES.allAccess)}, once. They weren&apos;t far off.
+          All-Access is {allAccessPrice}, once. They weren&apos;t far off.
         </span>
       </figcaption>
     </figure>
@@ -225,7 +225,7 @@ function Deck() {
   );
 }
 
-export function CommentDeck() {
+export function CommentDeck({ allAccessPrice = formatPrice(PRICES.allAccess) }: { allAccessPrice?: string }) {
   return (
     <div>
       <div className="max-w-[640px]">
@@ -233,7 +233,7 @@ export function CommentDeck() {
         <p className="mt-4 text-[17px] text-muted-foreground">Comments from Reddit, Instagram and X on the components, quoted as written.</p>
       </div>
       <div className="mt-14 grid items-center gap-16 lg:grid-cols-[1.15fr_1fr] lg:gap-20">
-        <Featured />
+        <Featured allAccessPrice={allAccessPrice} />
         <Deck />
       </div>
     </div>

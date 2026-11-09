@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { PRICES } from "@/lib/pricing";
+import { INDIA_PRICES, PRICES } from "@/lib/pricing";
 import { trackEvent } from "@/lib/track";
 
 type Gtag = (...args: unknown[]) => void;
@@ -9,14 +9,15 @@ type Gtag = (...args: unknown[]) => void;
 const GA_DONE_KEY = "nexus-ga-purchase";
 
 /** Sends Google Analytics' standard `purchase` event for the plan named in the return address. False if Google's tag is not on the page. */
-function sendGaPurchase(plan: "annual" | "lifetime"): boolean {
+function sendGaPurchase(plan: "annual" | "lifetime", india: boolean): boolean {
   const gtag = (window as unknown as { gtag?: Gtag }).gtag;
   if (typeof gtag !== "function") return false;
-  const price = plan === "annual" ? PRICES.pro : PRICES.allAccess;
+  const list = india ? INDIA_PRICES : PRICES;
+  const price = plan === "annual" ? list.pro : list.allAccess;
   gtag("event", "purchase", {
     transaction_id: `${plan}-${Date.now().toString(36)}`,
     value: price,
-    currency: "USD",
+    currency: india ? "INR" : "USD",
     items: [{ item_id: plan, item_name: plan === "annual" ? "Nexus UI Pro (yearly)" : "Nexus UI All-Access (lifetime)", price, quantity: 1 }],
   });
   return true;
@@ -43,7 +44,9 @@ export function PurchaseReturnTracker({ state }: { state: "activating" | "unlock
 
   React.useEffect(() => {
     if (state !== "unlocked") return;
-    const plan = new URLSearchParams(window.location.search).get("plan");
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get("plan");
+    const india = params.get("region") === "india";
     if (plan !== "annual" && plan !== "lifetime") return;
     try {
       if (window.sessionStorage.getItem(GA_DONE_KEY) === "1") return;
@@ -54,7 +57,7 @@ export function PurchaseReturnTracker({ state }: { state: "activating" | "unlock
     let tries = 0;
     const timer = window.setInterval(() => {
       tries += 1;
-      if (sendGaPurchase(plan)) {
+      if (sendGaPurchase(plan, india)) {
         try {
           window.sessionStorage.setItem(GA_DONE_KEY, "1");
         } catch {
