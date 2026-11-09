@@ -2,36 +2,43 @@ import { Check } from "lucide-react";
 import { PillLink } from "@/components/site";
 import { PlanLink } from "@/components/pricing/plan-action";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
-import { PRICES, formatPrice } from "@/lib/pricing";
+import { IndiaDiscountBadge } from "@/components/pricing/india-discount-badge";
+import type { DisplayPricing } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 
-const PLANS = [
-  {
-    name: "Free",
-    price: "$0",
-    term: "forever",
-    line: `${CATALOG_COUNTS.freeComponents} components with full source, for any project.`,
-    href: "/components",
-    cta: "Start free",
-  },
-  {
-    name: "Pro",
-    price: formatPrice(PRICES.pro),
-    term: "per year",
-    line: "Everything, plus every release while you're subscribed.",
-    href: "/pricing",
-    cta: "Get Pro",
-    featured: true,
-  },
-  {
-    name: "All-Access",
-    price: formatPrice(PRICES.allAccess),
-    term: "once",
-    line: "The same as Pro, paid once and yours for good.",
-    href: "/pricing",
-    cta: "Get lifetime",
-  },
-] as const;
+function buildPlans(pricing: DisplayPricing) {
+  return [
+    {
+      name: "Free",
+      price: pricing.free,
+      term: "forever",
+      line: `${CATALOG_COUNTS.freeComponents} components with full source, for any project.`,
+      href: "/components",
+      cta: "Start free",
+    },
+    {
+      name: "Pro",
+      price: pricing.pro,
+      discount: pricing.proDiscount,
+      original: pricing.proOriginal,
+      term: "per year",
+      line: "Everything, plus every release while you're subscribed.",
+      href: "/pricing",
+      cta: "Get Pro",
+      featured: true,
+    },
+    {
+      name: "All-Access",
+      price: pricing.allAccess,
+      discount: pricing.allAccessDiscount,
+      original: pricing.allAccessOriginal,
+      term: "once",
+      line: "The same as Pro, paid once and yours for good.",
+      href: "/pricing",
+      cta: "Get lifetime",
+    },
+  ] as const;
+}
 
 const INCLUDED = [
   `All ${CATALOG_COUNTS.components} components`,
@@ -44,7 +51,9 @@ const INCLUDED = [
 ];
 
 /** Short version of /pricing: three plans and what the paid ones unlock. */
-export function PricingTeaser() {
+export function PricingTeaser({ pricing }: { pricing: DisplayPricing }) {
+  const plans = buildPlans(pricing);
+
   return (
     <div>
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
@@ -62,7 +71,7 @@ export function PricingTeaser() {
       </div>
 
       <div className="mt-12 grid gap-5 md:grid-cols-3">
-        {PLANS.map((p) => (
+        {plans.map((p) => (
           <article
             key={p.name}
             className={cn(
@@ -77,6 +86,7 @@ export function PricingTeaser() {
               </span>
               <span className="text-[15px] text-muted-foreground">{p.term}</span>
             </p>
+            {"discount" in p && p.discount ? <IndiaDiscountBadge percent={p.discount} original={p.original} className="mt-3" /> : null}
             <p className="mt-3 flex-1 text-[15px] text-muted-foreground">{p.line}</p>
             {p.name === "Free" ? (
               <PillLink href={p.href} variant="white" className="mt-7 w-full">

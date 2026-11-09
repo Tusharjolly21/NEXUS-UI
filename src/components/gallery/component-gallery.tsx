@@ -6,7 +6,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Lock, LockOpen, Search, Sparkles, X } from "lucide-react";
 import { ProBadge, useProAccess } from "@/components/pro/pro-access";
 import { PillLink } from "@/components/site/pill-link";
-import { PRICES, formatPrice } from "@/lib/pricing";
+import { GLOBAL_PRICING, type DisplayPricing } from "@/lib/pricing";
 import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { cn } from "@/lib/utils";
 import { ComponentModal } from "./component-modal";
@@ -32,7 +32,7 @@ const PRO_ROW_AFTER = 8;
  * cost. It scrolls away like any tile. It never pops up, never comes back after you pass it, and
  * everything on the wall stays previewable.
  */
-function PlansCard({ proCount }: { proCount: number }) {
+function PlansCard({ proCount, pricing }: { proCount: number; pricing: DisplayPricing }) {
   return (
     <li className="[grid-row-end:span_3] sm:[grid-column-end:span_2] sm:[grid-row-end:span_2]">
       <div className="pg-float flex h-full flex-col justify-between gap-4 rounded-tile bg-card p-6">
@@ -51,7 +51,7 @@ function PlansCard({ proCount }: { proCount: number }) {
             See plans
           </PillLink>
           <span className="text-[13px] text-muted-foreground">
-            From {formatPrice(PRICES.pro)} a year, or {formatPrice(PRICES.allAccess)} once
+            From {pricing.pro} a year, or {pricing.allAccess} once
           </span>
         </div>
       </div>
@@ -125,6 +125,7 @@ export function AccessSwitch({
  */
 export function ComponentGallery({
   items,
+  pricing = GLOBAL_PRICING,
   categories,
   searchable = false,
   limit,
@@ -138,6 +139,8 @@ export function ComponentGallery({
   proRow = false,
 }: {
   items: GalleryItem[];
+  /** The visitor's regional prices, from the server. */
+  pricing?: DisplayPricing;
   /** Category chips; omit to hide them. */
   categories?: CategoryFilter[];
   searchable?: boolean;
@@ -223,7 +226,7 @@ export function ComponentGallery({
           <ProPreviewRow picks={proPicks} proCount={proCount} />
         </li>
       ) : null}
-      {paged && !isPro && !needle && access !== "pro" && i === PLANS_CARD_AFTER ? <PlansCard proCount={proCount} /> : null}
+      {paged && !isPro && !needle && access !== "pro" && i === PLANS_CARD_AFTER ? <PlansCard proCount={proCount} pricing={pricing} /> : null}
       {interlude && paged && !isPro && !needle && i === interludeAfter - 1 ? (
         // a full-width cell (three rows on a phone, two above); the grid packs densely, so the tiles after it fill any gap above it
         <li className="col-span-full [grid-row-end:span_3] sm:[grid-row-end:span_2]">{interlude}</li>
@@ -335,8 +338,8 @@ export function ComponentGallery({
 
         {plansLine && !isPro ? (
           <p className="text-[14px] leading-[1.5] text-muted-foreground">
-            {accessCounts.free} are free, with full source. {accessCounts.pro} more come with Pro: {formatPrice(PRICES.pro)} a year,
-            or {formatPrice(PRICES.allAccess)} once.{" "}
+            {accessCounts.free} are free, with full source. {accessCounts.pro} more come with Pro: {pricing.pro} a year,
+            or {pricing.allAccess} once.{" "}
             <Link href="/pricing" data-plans-source="plans_line" className="text-link hover:underline hover:underline-offset-4">
               See plans
             </Link>

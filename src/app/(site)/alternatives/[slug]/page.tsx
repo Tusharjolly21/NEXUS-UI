@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { RainbowWord } from "@/components/site";
 import { CHECKED_ON, GUIDE, alternatives, getAlternative } from "@/lib/alternatives";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
-import { PRICES, formatPrice } from "@/lib/pricing";
+import { getPricing } from "@/lib/region";
 import { createMetadata } from "@/lib/seo";
 
 export const dynamicParams = false;
@@ -29,13 +29,14 @@ export default async function AlternativePage({ params }: { params: Promise<{ sl
   const alt = getAlternative(slug);
   if (!alt) notFound();
 
+  const pricing = await getPricing();
   const { components, freeComponents, proComponents, templates, freeTemplates, blocks } = CATALOG_COUNTS;
   const nexus = {
     summary: "A library of animated React components, blocks and Next.js templates.",
     stack: "React, TypeScript, Tailwind CSS and Framer Motion.",
     install: "Copy from each component page, or install with the shadcn CLI through the @nexus-labs registry.",
     free: `${freeComponents} of ${components} components, ${freeTemplates} of ${templates} templates and the free blocks.`,
-    paid: `Pro is ${formatPrice(PRICES.pro)} a year, or All-Access is ${formatPrice(PRICES.allAccess)} once. Either unlocks the ${proComponents} Pro components, all ${templates} templates and the premium blocks (${blocks} block groups in total), plus Pro build prompts.`,
+    paid: `Pro is ${pricing.pro} a year, or All-Access is ${pricing.allAccess} once. Either unlocks the ${proComponents} Pro components, all ${templates} templates and the premium blocks (${blocks} block groups in total), plus Pro build prompts.`,
   };
 
   const rows: { label: string; them: string; us: string }[] = [

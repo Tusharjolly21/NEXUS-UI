@@ -5,7 +5,7 @@ import { VideoGallery } from "@/components/videos/video-gallery";
 import { IfPro } from "@/components/pro/pro-access";
 import { videos } from "@/lib/catalog/videos";
 import { createMetadata } from "@/lib/seo";
-import { PRICES, formatPrice } from "@/lib/pricing";
+import { getPricing } from "@/lib/region";
 
 export const metadata: Metadata = createMetadata({
   title: "Product Video Templates: Launch, Pricing and Update Videos for React and HyperFrames",
@@ -19,7 +19,8 @@ const STEPS = [
   { title: "Render it", body: "A small script turns your edit into an MP4 in the shape you pick: 9:16 for Reels, 1:1 for X, 16:9 for YouTube." },
 ];
 
-export default function VideosPage() {
+export default async function VideosPage() {
+  const pricing = await getPricing();
   const free = videos.filter((v) => !v.premium).length;
   return (
     <>
@@ -81,7 +82,7 @@ export default function VideosPage() {
               <div>
                 <h2 className="pg-display max-w-[620px] text-[clamp(36px,5vw,52px)] leading-[1.02] text-foreground">Get every video</h2>
                 <p className="mt-4 max-w-[520px] text-[18px] text-muted-foreground">
-                  Pro unlocks the prompt and the source of all {videos.length}, plus live editing and the render script for the React ones, and everything we release next, for {formatPrice(PRICES.pro)} a year. All-Access does it for good at {formatPrice(PRICES.allAccess)} once.
+                  Pro unlocks the prompt and the source of all {videos.length}, plus live editing and the render script for the React ones, and everything we release next, for {pricing.pro} a year. All-Access does it for good at {pricing.allAccess} once.
                 </p>
               </div>
             }
