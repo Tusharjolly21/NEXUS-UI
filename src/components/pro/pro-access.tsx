@@ -279,15 +279,22 @@ export function UnlockedBadge({
 export function ProBadge({ className, onDark = false }: { className?: string; onDark?: boolean }) {
   const { isPro } = useProAccess();
   if (isPro) return <UnlockedBadge className={className} onDark={onDark} />;
+  // A dark pill with a thin amber-to-violet-to-blue ring and a gold lock: it reads as the premium tier
+  // without adding a size, a motion or a colour fill that fights the preview behind it.
+  const fill = onDark ? "rgba(29,29,31,0.55)" : "#1d1d1f";
   return (
     <span
+      style={{
+        background: `linear-gradient(${fill}, ${fill}) padding-box, linear-gradient(120deg, #ffb340, #ff6482 38%, #bf5af2 68%, #0a84ff) border-box`,
+        border: "1px solid transparent",
+      }}
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11.5px] font-semibold tracking-[-0.01em]",
-        onDark ? "bg-white/15 text-white backdrop-blur-md" : "bg-[#1d1d1f] text-white dark:bg-white dark:text-[#1d1d1f]",
+        "inline-flex items-center gap-1 rounded-full px-[9px] py-[3px] text-[11.5px] font-semibold tracking-[0.01em] text-white shadow-[0_1px_2px_rgba(0,0,0,0.18)]",
+        onDark && "backdrop-blur-md",
         className,
       )}
     >
-      <Lock className="size-3" strokeWidth={2.4} aria-hidden />
+      <Lock className="size-3 text-[#ffc65c]" strokeWidth={2.5} aria-hidden />
       Pro
     </span>
   );

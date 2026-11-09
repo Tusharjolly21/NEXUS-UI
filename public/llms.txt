@@ -11,6 +11,7 @@ Nexus UI is a premium UI component library offering 200+ animated React componen
 - [Icons](/icons): 500 animated React icons (75 free, the rest Pro: every icon can be previewed and played, Pro unlocks code and sound), each one self-contained file built with Framer Motion, with its own synthesised sound, a live playground and four real-interface examples of where it fits; copy one file, no dependencies beyond Framer Motion
 - [Icon sounds](/icons/sounds): how to add the icons' sounds to a project: a dependency-free sound engine, a per-icon score, one function call
 - [Videos](/videos): Product videos in 9:16, 1:1, 16:9 and more (launch, pricing, changelog, walkthrough, app store preview, logo bumper, hero loop, teaser) as React components with their own soundtracks; edit the copy live, then take the prompt, source and a script that renders MP4
+- [Every component](/llms-full.txt): One line per component, free and Pro, with its install name, in a single plain-text file
 - [Pricing](/pricing): Free tier available; Pro plan unlocks premium components and templates
 
 ## Documentation
@@ -24,6 +25,7 @@ Nexus UI is a premium UI component library offering 200+ animated React componen
 - [Videos docs](/docs/videos): Render a Nexus video to MP4 with Playwright and ffmpeg
 - [CLI Usage](/docs/cli): Using the Nexus UI CLI to add components via shadcn
 - [Compare libraries](/alternatives): Nexus UI next to Magic UI, React Bits and Aceternity UI
+- [MCP server](/mcp): Connect Claude Code, Cursor, VS Code or Codex to https://www.nexus-ui.com/api/mcp to search components and add them by name (free without a key; Pro with an API key)
 - [Claude Code](/claude-code): Install Nexus UI items with the shadcn CLI and use Pro build prompts with AI coding tools
 
 ## Blog

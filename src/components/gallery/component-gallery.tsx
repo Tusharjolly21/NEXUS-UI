@@ -14,6 +14,7 @@ import { GalleryTile, TileCell, TileGrid } from "./gallery-tile";
 import { INTERACTION_FILTERS, type GalleryItem, type Interaction } from "./types";
 import { useUrlParam } from "./use-url-param";
 import { InfiniteSentinel, useInfiniteCount } from "./infinite-scroll";
+import { ProPreviewRow, pickProPreviews } from "./pro-preview-row";
 
 export type CategoryFilter = { id: string; label: string };
 
@@ -22,6 +23,9 @@ const NEW_TAB = "new";
 
 /** Where the plans card sits in the wall: after this many tiles, once, so it is passed rather than chased. */
 const PLANS_CARD_AFTER = 11;
+
+/** Where the row of live Pro previews sits: after this many tiles. */
+const PRO_ROW_AFTER = 8;
 
 /**
  * One quiet card inside the wall, for visitors without Pro: what the Pro tiles are and what they
@@ -131,6 +135,7 @@ export function ComponentGallery({
   plansLine = false,
   interlude,
   interludeAfter = 20,
+  proRow = false,
 }: {
   items: GalleryItem[];
   /** Category chips; omit to hide them. */
@@ -152,6 +157,8 @@ export function ComponentGallery({
   interlude?: React.ReactNode;
   /** How many tiles come before the interlude. */
   interludeAfter?: number;
+  /** For visitors without Pro: a row of the newest Pro components, live, early in the wall. Off while any filter or search is active. */
+  proRow?: boolean;
 }) {
   const [interaction, setInteraction] = React.useState<Interaction | "all">("all");
   const [category, setCategory] = React.useState("all");
@@ -204,11 +211,18 @@ export function ComponentGallery({
     setAccessParam(null);
   };
 
+  const proPicks = React.useMemo(() => (proRow ? pickProPreviews(items) : []), [proRow, items]);
   const renderTile = (item: GalleryItem, i: number) => (
     <React.Fragment key={item.slug}>
       <TileCell item={item} className={cn(!filtering && mobileLimit && i >= mobileLimit && "max-sm:hidden")}>
         <GalleryTile item={item} onOpen={setOpenSlug} playOnClick={playOnClick} />
       </TileCell>
+      {proPicks.length && paged && !isPro && !filtering && i === PRO_ROW_AFTER - 1 ? (
+        // full width, two rows tall; same dense packing as the interlude below
+        <li className="col-span-full [grid-row-end:span_2]">
+          <ProPreviewRow picks={proPicks} proCount={proCount} />
+        </li>
+      ) : null}
       {paged && !isPro && !needle && access !== "pro" && i === PLANS_CARD_AFTER ? <PlansCard proCount={proCount} /> : null}
       {interlude && paged && !isPro && !needle && i === interludeAfter - 1 ? (
         // a full-width cell (three rows on a phone, two above); the grid packs densely, so the tiles after it fill any gap above it

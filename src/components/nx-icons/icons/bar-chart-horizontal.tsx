@@ -38,24 +38,26 @@ export function BarChartHorizontalIcon({ size = 24, strokeWidth = 2, className, 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <path d="M3.5 3v18" />
+      {/* Bars step down evenly and the drawing is centred: the same gap above the first bar as below the last. */}
       {[
-        { y: 5.5, to: 19.5 },
-        { y: 10, to: 13 },
-        { y: 14.5, to: 16.5 },
-        { y: 19, to: 9.5 },
+        { y: 6, to: 20.5 },
+        { y: 10, to: 16 },
+        { y: 14, to: 11.5 },
+        { y: 18, to: 7 },
       ].map((b, i) => (
         <motion.line
           key={b.y}
-          x1="4"
+          x1="3.5"
           y1={b.y}
           y2={b.y}
           stroke={i === 0 ? accent : "currentColor"}
           initial={false}
-          animate={on ? { x2: [4, b.to + 1.4, b.to] } : { x2: b.to }}
+          animate={on ? { x2: [3.5, b.to + 1.4, b.to] } : { x2: b.to }}
           transition={{ duration: 0.6 / speed, times: [0, 0.7, 1], ease: "easeOut", delay: (on ? i * 0.12 : 0) / speed }}
         />
       ))}
+      {/* Drawn last, so the axis stays one unbroken line and the coloured bar grows out from behind it. */}
+      <path d="M3.5 3.5v17" />
     </svg>
   );
 }

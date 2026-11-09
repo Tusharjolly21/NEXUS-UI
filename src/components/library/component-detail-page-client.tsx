@@ -1,5 +1,6 @@
 "use client";
 
+import { AfterCopyProLine } from "@/components/pro/after-copy-pro-line";
 import { ProNudge, type ProPick } from "@/components/pro/pro-nudge";
 import { AutoplaySound } from "@/lib/ui-sounds";
 import * as React from "react";
@@ -125,13 +126,14 @@ const INTERACTION_OF: Record<string, string> = {
 
 // ── small pieces ─────────────────────────────────────────────────────
 
-function CopyBtn({ text, label = "Copy", dark = false }: { text: string; label?: string; dark?: boolean }) {
+function CopyBtn({ text, label = "Copy", dark = false, onCopied }: { text: string; label?: string; dark?: boolean; onCopied?: () => void }) {
   const [copied, setCopied] = React.useState(false);
   function copy() {
     navigator.clipboard.writeText(text).then(
       () => {
         setCopied(true);
         setTimeout(() => setCopied(false), 1600);
+        onCopied?.();
       },
       () => {}, // blocked (insecure context / permission denied): leave the button as it was
     );
@@ -151,12 +153,12 @@ function CopyBtn({ text, label = "Copy", dark = false }: { text: string; label?:
   );
 }
 
-function CodeSnippet({ code }: { code: string }) {
+function CodeSnippet({ code, onCopied }: { code: string; onCopied?: () => void }) {
   return (
     <div className="relative mt-3 rounded-2xl bg-[#1d1d1f]">
       <pre tabIndex={0} className="overflow-auto p-4 pr-24 font-mono text-[12.5px] leading-relaxed text-[#e6e6ea]">{code}</pre>
       <div className="absolute right-3 top-3">
-        <CopyBtn text={code} dark />
+        <CopyBtn text={code} dark onCopied={onCopied} />
       </div>
     </div>
   );
@@ -875,6 +877,7 @@ function Setup({
   usageSource,
   premium,
   locked = false,
+  teaser,
 }: {
   name: string;
   slug: string;
@@ -886,7 +889,10 @@ function Setup({
   premium: boolean;
   /** Visitor has no access: steps after the first two show their titles but not their commands, files or code. */
   locked?: boolean;
+  /** Shown above the locked steps: how the component works, in the author's own words. */
+  teaser?: string;
 }) {
+  const [installCopied, setInstallCopied] = React.useState(false);
   const registryName = registryCliName ?? slug;
   const extra = getExtraLibraries(dependencies);
   const exampleImport = getExampleImport(usageSource, registryImport, registryName, name);
@@ -962,7 +968,8 @@ function Setup({
       body: (
         <>
           <p>Run this from your project root. It adds the component, the helpers it imports and its npm packages.</p>
-          <CodeSnippet code={installCommand(registryName)} />
+          <CodeSnippet code={installCommand(registryName)} onCopied={() => setInstallCopied(true)} />
+          {premium ? null : <AfterCopyProLine slug={slug} copied={installCopied} />}
         </>
       ),
     },
@@ -1013,6 +1020,13 @@ function Setup({
           </SetupStep>
         ))}
       </ol>
+      {locked && teaser ? (
+        <div className="pg-float mt-4 rounded-tile bg-tint-sky/70 p-6 sm:p-7">
+          <h3 className="text-[19px] font-semibold tracking-[-0.4px] text-foreground">How {name} works</h3>
+          <p className="mt-2 max-w-[680px] text-[15.5px] leading-[1.6] text-body">{teaser}</p>
+          <p className="mt-3 text-[13.5px] text-muted-foreground">The source, the install command and the build prompt come with Pro.</p>
+        </div>
+      ) : null}
       {steps.length > OPEN_STEPS ? (
         <ProLock locked={locked} name={name} label="Install it with Pro" className="mt-4 rounded-tile" followScroll>
           <ol className="grid gap-4">
@@ -1139,6 +1153,8 @@ type ComponentDetailProps = {
   guides?: { slug: string; title: string }[];
   /** A few Pro components from the same category, named in the upgrade card on free pages. */
   proPicks?: ProPick[];
+  /** Locked Pro pages only: the plain-English note from the top of the source. */
+  teaser?: string;
 };
 
 /** Anchor id for one variant section, so the jump bar and shared links can land on it. */
@@ -1171,6 +1187,7 @@ export function ComponentDetailPageClient({
   faq = [],
   guides = [],
   proPicks = [],
+  teaser,
 }: ComponentDetailProps) {
   const usageSource = serializedPreviewSections?.[0]?.reactSource ?? reactSource;
   const categoryLabel = getComponentCategoryLabel(categorySlug as ComponentCategorySlug);
@@ -1341,6 +1358,7 @@ export function ComponentDetailPageClient({
             usageSource={usageSource}
             premium={premium}
             locked={locked}
+            teaser={teaser}
           />
           {!premium ? <ProNudge slug={slug} name={name} picks={proPicks} /> : null}
           <About slug={slug} name={name} />

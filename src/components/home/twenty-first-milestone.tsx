@@ -12,7 +12,7 @@ import { TwentyFirstLogo } from "@/components/home/twenty-first-logo";
 const PROFILE_URL = "https://21st.dev/@nexus-ui";
 const AS_OF = "November 2026";
 const STATS = [
-  { digits: "930.2", suffix: "K", label: "views", spoken: "930.2 thousand views" },
+  { digits: "939", suffix: "K", label: "views", spoken: "939 thousand views" },
   { digits: "3.8", suffix: "K", label: "bookmarks", spoken: "3.8 thousand bookmarks" },
   { digits: "30", suffix: "", label: "components listed", spoken: "30 components listed" },
 ] as const;

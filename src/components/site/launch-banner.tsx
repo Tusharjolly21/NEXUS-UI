@@ -3,14 +3,34 @@
 import * as React from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
-import { IconPeek } from "@/components/site/icon-peek";
+import { BrandMark, type MarkName } from "@/components/mcp/brand-marks";
 import { useSlots } from "@/components/site/use-slots";
 import { slotsLeft } from "@/lib/launch-slots";
 import { LAUNCH_BANNER_COOKIE, LAUNCH_BANNER_ID } from "@/lib/launch-banner";
-import { FREE_ICON_COUNT, ICON_COUNT } from "@/lib/icons/count";
+
+/** The coding agents the MCP server works with, as small overlapping logo coins. */
+const AGENTS: { mark: MarkName; bg: string }[] = [
+  { mark: "claude", bg: "bg-[#fbeee8]" },
+  { mark: "cursor", bg: "bg-black text-white ring-white/25" },
+  { mark: "vscode", bg: "bg-[#e8f3fc]" },
+  { mark: "openai", bg: "bg-white" },
+];
+
+function AgentCoins() {
+  return (
+    <span aria-hidden className="mr-1 inline-flex items-center">
+      {AGENTS.map((a, i) => (
+        <span key={a.mark} className={`grid size-[22px] place-items-center rounded-full ring-2 ring-[#1d1d1f] ${a.bg} ${i ? "-ml-1.5" : ""}`}>
+          <BrandMark name={a.mark} className="size-3" />
+        </span>
+      ))}
+    </span>
+  );
+}
 
 /**
- * The thin strip above the nav: what Pro unlocks and what it costs, with one link to the plans.
+ * The thin strip above the nav: the newest thing (the MCP server for coding agents, with Pro unlocking every
+ * component through it), with one link to its setup and, for free visitors, the early-prices line.
  * It names no per-category counts (templates and blocks are the smaller numbers and read as "not much
  * for the price"); only the components figure, which is well past it, and that more is coming.
  * Closing it stores a cookie for 60 days; the site shell reads that cookie on the server so the
@@ -42,20 +62,24 @@ export function LaunchBanner({ isPro = false }: { isPro?: boolean }) {
         ) : (
           <span className="inline-flex rounded-full bg-[conic-gradient(from_210deg,#0a84ff,#bf5af2,#ff375f,#ff9f0a,#0a84ff)] px-2 py-px text-[11px] font-semibold text-white">New</span>
         )}
-        <IconPeek count={4} size={18} className="gap-2 text-white" />
+        <AgentCoins />
         {isPro ? (
           <>
-            <span className="hidden sm:inline">All {ICON_COUNT} animated icons are in your plan, and every new one. </span>
-            <span className="sm:hidden">All {ICON_COUNT} animated icons are yours. </span>
+            <span className="hidden sm:inline">Your MCP server is ready: Claude Code, Cursor or Codex can add any Nexus UI component for you. </span>
+            <span className="sm:hidden">Your MCP server is ready. </span>
           </>
         ) : (
           <>
-            <span className="hidden sm:inline">{ICON_COUNT} animated icons with sound, {FREE_ICON_COUNT} free. </span>
-            <span className="sm:hidden">{ICON_COUNT} animated icons, {FREE_ICON_COUNT} free. </span>
+            <span className="hidden sm:inline">
+              <strong className="font-semibold text-white">MCP server</strong>: your coding agent adds components by name. Pro unlocks every one.{" "}
+            </span>
+            <span className="sm:hidden">
+              <strong className="font-semibold text-white">MCP server</strong> for your coding agent.{" "}
+            </span>
           </>
         )}
-        <Link href="/icons" className={`whitespace-nowrap font-medium hover:underline hover:underline-offset-4 ${isPro ? "text-[#ffd60a]" : "text-[#2997ff]"}`}>
-          {isPro ? "Open the icons ›" : "See the icons ›"}
+        <Link href="/mcp" className={`whitespace-nowrap font-medium hover:underline hover:underline-offset-4 ${isPro ? "text-[#ffd60a]" : "text-[#2997ff]"}`}>
+          {isPro ? "Connect it ›" : "Set it up ›"}
         </Link>
         {isPro ? null : (
           // The early-slots line. On a phone it sits on its own row under the icons line; from tablet width it joins it.
