@@ -44,22 +44,22 @@ export function DrillIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
         transition={{ duration: 0.8 / speed, ease: "linear" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <rect x="9.95" y="3.81" width="11.4" height="6.8" rx="2.6" />
-        <rect x="7.35" y="5.51" width="2.6" height="3.4" rx="0.8" fill="currentColor" />
-        <path d="M13.55 10.61 L14.55 16.21 H19.15 L18.15 10.61" />
-        <path d="M13.87 12.41 L11.75 12.41" />
-        <rect x="11.75" y="16.21" width="9.6" height="4" rx="1.2" />
-        <path d="M7.35 7.21 H1.65" strokeWidth={1.7} strokeLinecap="butt" />
+        <path d="M6.8 7.1H2.4" strokeWidth={strokeWidth * 0.8} />
         <motion.path
-          d="M7.35 7.21 H1.65"
+          d="M6.8 7.1H2.4"
           stroke={accent}
-          strokeWidth={1.7}
+          strokeWidth={strokeWidth * 0.8}
           strokeLinecap="butt"
-          strokeDasharray="1.2 1.1"
+          strokeDasharray="1.1 1.1"
           initial={false}
-          animate={on ? { strokeDashoffset: [0, -6.9] } : { strokeDashoffset: 0 }}
+          animate={on ? { strokeDashoffset: [0, -8.8] } : { strokeDashoffset: 0 }}
           transition={{ duration: 0.8 / speed, ease: "linear" }}
         />
+        <rect x="6.8" y="5.4" width="3.6" height="3.4" rx="0.9" fill="currentColor" stroke="none" />
+        <rect x="10" y="3.8" width="11.3" height="6.6" rx="2.4" />
+        <path d="M13.6 10.4L14.6 16.2M18.2 10.4L19.2 16.2" />
+        <path d="M14.08 13.2H11.9" />
+        <rect x="11.7" y="16.2" width="9.6" height="4" rx="1.2" />
       </motion.g>
     </svg>
   );

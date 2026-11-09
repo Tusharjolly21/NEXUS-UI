@@ -38,9 +38,11 @@ export function RadarIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
+      <g opacity="0.5" strokeWidth={strokeWidth * 0.5}>
+        <path d="M14.4 12.0L21.5 12.0M12.0 9.6L12.0 2.5M9.6 12.0L2.5 12.0M12.0 14.4L12.0 21.5" />
+        <circle cx="12" cy="12" r="5.5" />
+      </g>
       <circle cx="12" cy="12" r="9.5" />
-      <circle cx="12" cy="12" r="3.2" strokeWidth={strokeWidth * 0.6} />
-      <path d="M15.2 12L21.5 12M12 15.2L12 21.5M8.8 12L2.5 12M12 8.8L12 2.5" strokeWidth={strokeWidth * 0.5} opacity="0.55" />
       <motion.g
         style={{ originX: "50%", originY: "50%" }}
         initial={false}
@@ -48,13 +50,16 @@ export function RadarIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
         transition={on ? { duration: 1 / speed, ease: "linear" } : { duration: 0 / speed }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="M12 12L13.91 3.72A8.5 8.5 0 0 1 18.01 5.99z" fill={accent} fillOpacity="0.3" stroke="none" />
-        <path d="M12 12L18.08 5.92" stroke={accent} />
+        <path d="M12 12L18.01 5.99A8.5 8.5 0 0 0 16.63 4.87z" fill={accent} fillOpacity="0.34" stroke="none" />
+        <path d="M12 12L16.63 4.87A8.5 8.5 0 0 0 15.05 4.06z" fill={accent} fillOpacity="0.2" stroke="none" />
+        <path d="M12 12L15.05 4.06A8.5 8.5 0 0 0 13.33 3.6z" fill={accent} fillOpacity="0.09" stroke="none" />
+        <path d="M12 12L17.3 6.7" stroke={accent} />
       </motion.g>
+      <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none" />
       <motion.circle
-        cx="17.83"
-        cy="14.12"
-        r="1.1"
+        cx="18.58"
+        cy="14.39"
+        r="1"
         fill="currentColor"
         stroke="none"
         initial={false}
@@ -63,13 +68,13 @@ export function RadarIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
         transition={{ duration: 0.4 / speed, delay: (on ? 0.18 : 0) / speed, ease: "easeOut" }}
       />
       <motion.circle
-        cx="17.83"
-        cy="14.12"
+        cx="18.58"
+        cy="14.39"
         r="1.4"
         strokeWidth={strokeWidth * 0.6}
         style={{ originX: "50%", originY: "50%" }}
         initial={false}
-        animate={on ? { scale: [0.6, 2.2], opacity: [0.9, 0] } : { opacity: 0 }}
+        animate={on ? { scale: [0.6, 1.6], opacity: [0.9, 0] } : { opacity: 0 }}
         transition={{ duration: 0.45 / speed, delay: (on ? 0.18 : 0) / speed, ease: "easeOut" }}
       />
     </svg>

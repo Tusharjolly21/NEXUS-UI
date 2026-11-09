@@ -43,7 +43,6 @@ export function VolcanoIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
         animate={on ? { x: [0, -0.5, 0.5, -0.45, 0.4, -0.2, 0] } : { x: 0 }}
         transition={{ duration: 0.55 / speed, delay: (on ? 0.08 : 0) / speed, ease: "linear" }}
       >
-        <path d="M2.8 21.5Q6 15.7 8.8 9.9Q12 13.5 15.2 9.9Q18 15.7 21.2 21.5Z" />
         <motion.path
           d="M10.3 11.19C10.3 12.99 9.4 13.79 9.4 15.79"
           stroke={accent}
@@ -53,18 +52,19 @@ export function VolcanoIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
           transition={{ duration: 0.9 / speed, ease: "easeOut", pathLength: { times: [0, 0.3, 1] }, opacity: { times: [0, 0.3, 0.32, 1], ease: "linear" } }}
         />
         <motion.path
-          d="M13.7 11.19C13.7 12.59 14.4 13.09 14.4 14.39"
+          d="M13.7 11.19C13.7 12.99 14.6 13.79 14.6 15.79"
           stroke={accent}
           strokeWidth={strokeWidth * 0.75}
           initial={false}
           animate={on ? { pathLength: [0, 0, 1], opacity: [0, 0, 1, 1] } : { pathLength: 1, opacity: 1 }}
           transition={{ duration: 0.9 / speed, ease: "easeOut", pathLength: { times: [0, 0.4, 1] }, opacity: { times: [0, 0.4, 0.42000000000000004, 1], ease: "linear" } }}
         />
+        <path d="M2.8 21.5Q6 15.7 8.8 9.9Q12 13.5 15.2 9.9Q18 15.7 21.2 21.5Z" />
       </motion.g>
       <svg x="0" y="0" width="24" height="24" viewBox="0 0 24 24" overflow="hidden">
         <motion.circle
-          cx="11.6"
-          cy="7.1"
+          cx="11.5"
+          cy="8.2"
           r="0.9"
           fill="currentColor"
           stroke="none"
@@ -73,8 +73,8 @@ export function VolcanoIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
           transition={{ duration: 0.9 / speed, times: [0, 0.4, 0.5, 1], delay: (on ? 0 : 0) / speed, ease: "easeOut" }}
         />
         <motion.circle
-          cx="13.4"
-          cy="4.9"
+          cx="12.4"
+          cy="5.6"
           r="1.1"
           fill="currentColor"
           stroke="none"
@@ -83,9 +83,9 @@ export function VolcanoIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
           transition={{ duration: 0.9 / speed, times: [0, 0.4, 0.5, 1], delay: (on ? 0.05 : 0) / speed, ease: "easeOut" }}
         />
         <motion.circle
-          cx="11.4"
-          cy="2.8"
-          r="1.3"
+          cx="13.3"
+          cy="2.7"
+          r="1.2"
           fill="currentColor"
           stroke="none"
           initial={false}

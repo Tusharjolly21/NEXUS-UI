@@ -45,12 +45,11 @@ export function DroneIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
       >
         <path d="M9.44 9.44L6.94 6.94M9.44 14.56L6.94 17.06M14.56 9.44L17.06 6.94M14.56 14.56L17.06 17.06" />
         <rect x="9" y="9" width="6" height="6" rx="1.5" />
-        <circle cx="12" cy="16.4" r="1.4" fill="currentColor" stroke="none" />
         <circle cx="5.1" cy="5.1" r="2.6" />
         <motion.circle
           cx="5.1"
           cy="5.1"
-          r="2.6"
+          r="1.6"
           fill={accent}
           stroke="none"
           initial={false}
@@ -64,13 +63,13 @@ export function DroneIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
           transition={{ duration: 0.9 / speed, ease: "easeInOut", times: [0, 0.15, 0.8, 1] }}
         >
           <rect width="24" height="24" fill="none" stroke="none" />
-          <path d="M3.5 5.1h3.2" stroke={accent} strokeWidth={strokeWidth * 0.75} />
+          <path d="M3.65 5.1h2.9" stroke={accent} strokeWidth={strokeWidth * 0.75} strokeLinecap="butt" />
         </motion.g>
         <circle cx="18.9" cy="5.1" r="2.6" />
         <motion.circle
           cx="18.9"
           cy="5.1"
-          r="2.6"
+          r="1.6"
           fill={accent}
           stroke="none"
           initial={false}
@@ -84,13 +83,13 @@ export function DroneIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
           transition={{ duration: 0.9 / speed, ease: "easeInOut", times: [0, 0.15, 0.8, 1] }}
         >
           <rect width="24" height="24" fill="none" stroke="none" />
-          <path d="M17.3 5.1h3.2" stroke={accent} strokeWidth={strokeWidth * 0.75} />
+          <path d="M17.45 5.1h2.9" stroke={accent} strokeWidth={strokeWidth * 0.75} strokeLinecap="butt" />
         </motion.g>
         <circle cx="5.1" cy="18.9" r="2.6" />
         <motion.circle
           cx="5.1"
           cy="18.9"
-          r="2.6"
+          r="1.6"
           fill={accent}
           stroke="none"
           initial={false}
@@ -104,13 +103,13 @@ export function DroneIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
           transition={{ duration: 0.9 / speed, ease: "easeInOut", times: [0, 0.15, 0.8, 1] }}
         >
           <rect width="24" height="24" fill="none" stroke="none" />
-          <path d="M3.5 18.9h3.2" stroke={accent} strokeWidth={strokeWidth * 0.75} />
+          <path d="M3.65 18.9h2.9" stroke={accent} strokeWidth={strokeWidth * 0.75} strokeLinecap="butt" />
         </motion.g>
         <circle cx="18.9" cy="18.9" r="2.6" />
         <motion.circle
           cx="18.9"
           cy="18.9"
-          r="2.6"
+          r="1.6"
           fill={accent}
           stroke="none"
           initial={false}
@@ -124,7 +123,7 @@ export function DroneIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
           transition={{ duration: 0.9 / speed, ease: "easeInOut", times: [0, 0.15, 0.8, 1] }}
         >
           <rect width="24" height="24" fill="none" stroke="none" />
-          <path d="M17.3 18.9h3.2" stroke={accent} strokeWidth={strokeWidth * 0.75} />
+          <path d="M17.45 18.9h2.9" stroke={accent} strokeWidth={strokeWidth * 0.75} strokeLinecap="butt" />
         </motion.g>
       </motion.g>
     </svg>

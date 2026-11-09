@@ -38,32 +38,32 @@ export function WindmillIcon({ size = 24, strokeWidth = 2, className, speed = 1,
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <path d="M10.8 10.4 8.2 21H15.8L13.2 10.4" />
+      <path d="M11 10.84L9.4 20.49H14.6L13 10.84" />
       <motion.g
-        style={{ originX: "50%", originY: "36.67%" }}
+        style={{ originX: "50%", originY: "45.17%" }}
         initial={false}
         animate={on ? { rotate: [0, -8, 95, 90] } : { rotate: 0 }}
         transition={on ? { duration: 0.95 / speed, times: [0, 0.16, 0.85, 1], ease: "easeInOut" } : { duration: 0 / speed }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <g transform="rotate(45 12 8.8)" fill={accent} stroke={accent}>
-          <path d="M12 8.8H18.6" strokeWidth={1.5} />
-          <rect x="14.6" y="9.55" width="4" height="2.5" rx="0.4" stroke="none" />
+        <g transform="translate(12 10.84) rotate(45)">
+          <path d="M0 0H6.8" stroke={accent} strokeWidth={strokeWidth * 0.5} />
+          <path d="M6.8 -1.1H10V1.1H6.8Z" fill={accent} stroke={accent} strokeWidth={strokeWidth * 0.5} />
         </g>
-        <g transform="rotate(135 12 8.8)" fill={accent} stroke={accent}>
-          <path d="M12 8.8H18.6" strokeWidth={1.5} />
-          <rect x="14.6" y="9.55" width="4" height="2.5" rx="0.4" stroke="none" />
+        <g transform="translate(12 10.84) rotate(135)">
+          <path d="M0 0H6.8" stroke={accent} strokeWidth={strokeWidth * 0.5} />
+          <path d="M6.8 -1.1H10V1.1H6.8Z" fill={accent} stroke={accent} strokeWidth={strokeWidth * 0.5} />
         </g>
-        <g transform="rotate(225 12 8.8)" fill={accent} stroke={accent}>
-          <path d="M12 8.8H18.6" strokeWidth={1.5} />
-          <rect x="14.6" y="9.55" width="4" height="2.5" rx="0.4" stroke="none" />
+        <g transform="translate(12 10.84) rotate(225)">
+          <path d="M0 0H6.8" stroke={accent} strokeWidth={strokeWidth * 0.5} />
+          <path d="M6.8 -1.1H10V1.1H6.8Z" fill={accent} stroke={accent} strokeWidth={strokeWidth * 0.5} />
         </g>
-        <g transform="rotate(315 12 8.8)" fill={accent} stroke={accent}>
-          <path d="M12 8.8H18.6" strokeWidth={1.5} />
-          <rect x="14.6" y="9.55" width="4" height="2.5" rx="0.4" stroke="none" />
+        <g transform="translate(12 10.84) rotate(315)">
+          <path d="M0 0H6.8" stroke={accent} strokeWidth={strokeWidth * 0.5} />
+          <path d="M6.8 -1.1H10V1.1H6.8Z" fill={accent} stroke={accent} strokeWidth={strokeWidth * 0.5} />
         </g>
       </motion.g>
-      <circle cx="12" cy="8.8" r="1.7" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="10.84" r="2" fill="currentColor" stroke="none" />
     </svg>
   );
 }

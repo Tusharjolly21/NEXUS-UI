@@ -43,31 +43,27 @@ export function BulldozerIcon({ size = 24, strokeWidth = 2, className, speed = 1
         animate={on ? { x: [0, 0, 0.8, 0] } : { x: 0 }}
         transition={{ duration: 1 / speed, times: [0, 0.3, 0.7, 1], ease: "easeInOut" }}
       >
-        <path d="M6.7 13.1V6.7a1.2 1.2 0 0 1 1.2-1.2H10.7a1.2 1.2 0 0 1 1.2 1.2V9.5H14.9V13.1" />
-        <rect x="8" y="7.5" width="2.8" height="2.6" rx="0.6" fill="currentColor" stroke="none" />
-        <rect x="4" y="13.1" width="13.6" height="5.4" rx="2.7" />
-        <path d="M6.7 15.8h.01M10.8 15.8h.01M14.9 15.8h.01" strokeWidth={1.8} />
         <motion.g
-          style={{ originX: "62.08%", originY: "47.5%" }}
+          style={{ originX: "55.21%", originY: "44.79%" }}
           initial={false}
-          animate={on ? { rotate: [0, 11, 11, 0] } : { rotate: 0 }}
+          animate={on ? { rotate: [0, 9, 9, 0] } : { rotate: 0 }}
           transition={{ duration: 1 / speed, times: [0, 0.3, 0.7, 1], ease: "easeInOut" }}
         >
           <rect width="24" height="24" fill="none" stroke="none" />
-          <path d="M14.9 11.4H19M19 8.4Q21 12.9 19 17.4" stroke={accent} />
+          <path d="M13.25 10.75H20.54M19.25 7.95Q22.45 12.95 19.25 17.95" stroke={accent} />
         </motion.g>
+        <path d="M6.25 13.25V6.55a1.2 1.2 0 0 1 1.2-1.2H9.95a1.2 1.2 0 0 1 1.2 1.2V9.55H13.25V13.25" />
+        <rect x="3.15" y="13.25" width="12.8" height="5.4" rx="2.7" />
+        <path d="M6.15 15.95h.01 M9.55 15.95h.01 M12.95 15.95h.01" strokeWidth={1.8} />
       </motion.g>
-      <svg x="0" y="0" width="24" height="24" viewBox="0 0 24 24" overflow="hidden">
-        <motion.path
-          d="M21.6 19.4Q22.7 14.2 23.8 19.4Z"
-          fill="currentColor"
-          stroke="none"
-          style={{ originX: "94.58%", originY: "80.83%" }}
-          initial={false}
-          animate={on ? { scale: [0.2, 0.2, 1, 1, 0.2], opacity: [0, 1, 1, 1, 0] } : { opacity: 0 }}
-          transition={{ duration: 1 / speed, times: [0, 0.3, 0.7, 0.85, 1] }}
-        />
-      </svg>
+      <motion.path
+        d="M22.85 19.25h.01M23.55 19.25h.01M23.2 18.15h.01"
+        strokeWidth={1.3}
+        style={{ originX: "96.88%", originY: "82.71%" }}
+        initial={false}
+        animate={on ? { scale: [0.2, 0.2, 1, 1, 0.2], opacity: [0, 1, 1, 1, 0] } : { opacity: 0 }}
+        transition={{ duration: 1 / speed, times: [0, 0.3, 0.7, 0.85, 1] }}
+      />
     </svg>
   );
 }

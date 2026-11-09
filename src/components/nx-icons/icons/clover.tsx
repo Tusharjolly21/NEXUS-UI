@@ -45,7 +45,7 @@ export function CloverIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
         transition={{ duration: 0.9 / speed, ease: "easeInOut" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="M12 9.53C12 14.93 11.6 14.23 12.2 16.63C12.7 18.83 14 20.23 15.8 21.03" />
+        <path d="M12 15.4C12 18.1 12.9 20.2 15.8 21.03" />
       </motion.g>
       {([-45, 45, 135, 225] as number[]).map((a, i) => (
         <g key={a} transform={`rotate(${a} 12 9.53)`}>

@@ -45,19 +45,19 @@ export function BackpackIcon({ size = 24, strokeWidth = 2, className, speed = 1,
         transition={{ duration: 0.9 / speed, times: [0, 0.25, 0.5, 0.75, 1], ease: "easeInOut" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="M5.5 19.4 V12.3 A5.4 5.4 0 0 1 10.9 6.9 H13.1 A5.4 5.4 0 0 1 18.5 12.3 V19.4 A1.8 1.8 0 0 1 16.7 21.2 H7.3 A1.8 1.8 0 0 1 5.5 19.4 z" />
-        <path d="M9.6 7.06 V5.2 a2.4 2.4 0 0 1 4.8 0 V7.06" />
-        <path d="M8.2 21.2 V15.6 a2 2 0 0 1 2 -2 h3.6 a2 2 0 0 1 2 2 V21.2" />
-        <path d="M5.58 11.4 C3.6 11.6 3.1 13 3.1 14.6 V17.8 C3.1 18.8 4.1 19.2 5.5 19.2" />
-        <path d="M 18.42 11.4C 20.4 11.6 20.9 13 20.9 14.6V 17.8C 20.9 18.8 19.9 19.2 18.5 19.2" />
         <motion.path
-          d="M12 13.6 v2.4"
+          d="M12 13.6V16.6"
           stroke={accent}
           style={{ originX: "50%", originY: "0%" }}
           initial={false}
           animate={on ? { rotate: [0, 26, -20, 12, -5, 0] } : { rotate: 0 }}
           transition={{ duration: 0.8 / speed, delay: (0.2) / speed, ease: "easeInOut" }}
         />
+        <path d="M6 19.4V12.3A5.4 5.4 0 0 1 11.4 6.9H12.6A5.4 5.4 0 0 1 18 12.3V19.4A1.8 1.8 0 0 1 16.2 21.2H7.8A1.8 1.8 0 0 1 6 19.4z" />
+        <path d="M9.6 7.21V5.2a2.4 2.4 0 0 1 4.8 0V7.21" />
+        <path d="M9 21.2V15.6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2V21.2" />
+        <path d="M6 13.4H4.2a1.6 1.6 0 0 0 -1.6 1.6V17.4a1.6 1.6 0 0 0 1.6 1.6H6" />
+        <path d="M18 13.4H19.8a1.6 1.6 0 0 1 1.6 1.6V17.4a1.6 1.6 0 0 1 -1.6 1.6H18" />
       </motion.g>
     </svg>
   );

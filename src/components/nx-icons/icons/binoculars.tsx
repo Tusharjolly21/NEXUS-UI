@@ -46,7 +46,7 @@ export function BinocularsIcon({ size = 24, strokeWidth = 2, className, speed = 
           transition={{ duration: 0.8 / speed, times: [0, 0.01, 0.999, 1], ease: "easeInOut" }}
         >
           <g stroke={accent} strokeWidth={strokeWidth * 0.75}>
-            <path d="M8 8V11" strokeLinecap="butt" /><path d="M12 8V11" strokeLinecap="butt" /><path d="M16 8V11" strokeLinecap="butt" />
+            <path d="M8 7.5V11.5" strokeLinecap="butt" /><path d="M12 7.5V11.5" strokeLinecap="butt" /><path d="M16 7.5V11.5" strokeLinecap="butt" />
           </g>
         </motion.g>
       </svg>

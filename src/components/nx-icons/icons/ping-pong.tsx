@@ -40,26 +40,26 @@ export function PingPongIcon({ size = 24, strokeWidth = 2, className, speed = 1,
     >
       <svg x="0" y="0" width="24" height="24" viewBox="0 0 24 24" overflow="hidden">
         <motion.circle
-          cx="18.23"
-          cy="19.66"
-          r="1.9"
+          cx="19.22"
+          cy="19.69"
+          r="1.5"
           fill="currentColor"
           stroke="none"
           initial={false}
-          animate={on ? { x: [0, 0, 7.98, 7.98, -0.42, 0.12, 0], y: [0, 0, 15.01, 15.01, -0.79, 0.22, 0] } : { x: 0, y: 0 }}
+          animate={on ? { x: [0, 0, 3.96, 3.96, -0.3, 0.08, 0], y: [0, 0, 11.33, 11.33, -0.85, 0.24, 0] } : { x: 0, y: 0 }}
           transition={{ duration: 1.1 / speed, times: [0, 0.155, 0.4, 0.5, 0.74, 0.86, 1], ease: ["linear", "easeOut", "linear", "easeIn", "easeOut", "easeInOut"] }}
         />
       </svg>
       <motion.g
-        style={{ originX: "27.75%", originY: "78.25%" }}
+        style={{ originX: "19.41%", originY: "80.59%" }}
         initial={false}
-        animate={on ? { rotate: [0, -5, 13, 0, 0] } : { rotate: 0 }}
+        animate={on ? { rotate: [0, -4, 9.5, 0, 0] } : { rotate: 0 }}
         transition={{ duration: 0.85 / speed, times: [0, 0.1, 0.22, 0.5, 1], ease: ["easeOut", "easeIn", "easeOut", "linear"] }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <circle cx="12.97" cy="9.77" r="6.4" fill={accent} fillOpacity={0.3} />
-        <path d="M11.22 15.93 L9.81 19.52 Q9.12 20.5 8.14 19.81 L5.19 17.75 Q4.2 17.06 4.89 16.08 L7.78 13.52 Z" fill="currentColor" />
-        <path d="M9.18 10.1 A3.8 3.8 0 0 0 13.95 13.44" stroke={accent} strokeWidth={strokeWidth * 0.75} />
+        <circle cx="14.7" cy="9.3" r="6.6" fill={accent} />
+        <path d="M9.21 12.96L2.75 17.43L6.57 21.25L11.04 14.79A6.6 6.6 0 0 1 9.21 12.96Z" fill="currentColor" />
+        <path d="M7.24 14.85L9.15 16.76M5.66 15.95L8.05 18.34" stroke={accent} strokeWidth={0.9} />
       </motion.g>
     </svg>
   );

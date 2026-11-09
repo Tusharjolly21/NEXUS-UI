@@ -45,35 +45,35 @@ export function CroissantIcon({ size = 24, strokeWidth = 2, className, speed = 1
         transition={{ duration: 0.8 / speed, times: [0, 0.45, 1], ease: "easeInOut" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
+        <motion.path
+          d="M4.32 11.35L6.12 14.93"
+          stroke={accent}
+          initial={false}
+          animate={on ? { d: ["M4.32 11.35L6.12 14.93", "M4.32 11.35L5.34 15.36", "M4.32 11.35L6.12 14.93"] } : { d: "M4.32 11.35L6.12 14.93" }}
+          transition={{ duration: 0.8 / speed, times: [0, 0.45, 1], ease: "easeInOut" }}
+        />
+        <motion.path
+          d="M9.01 7.64L9.97 13.69"
+          stroke={accent}
+          initial={false}
+          animate={on ? { d: ["M9.01 7.64L9.97 13.69", "M9.01 7.64L9.08 13.86", "M9.01 7.64L9.97 13.69"] } : { d: "M9.01 7.64L9.97 13.69" }}
+          transition={{ duration: 0.8 / speed, times: [0, 0.45, 1], ease: "easeInOut" }}
+        />
+        <motion.path
+          d="M14.99 7.64L14.03 13.69"
+          stroke={accent}
+          initial={false}
+          animate={on ? { d: ["M14.99 7.64L14.03 13.69", "M14.99 7.64L14.92 13.86", "M14.99 7.64L14.03 13.69"] } : { d: "M14.99 7.64L14.03 13.69" }}
+          transition={{ duration: 0.8 / speed, times: [0, 0.45, 1], ease: "easeInOut" }}
+        />
+        <motion.path
+          d="M19.68 11.35L17.88 14.93"
+          stroke={accent}
+          initial={false}
+          animate={on ? { d: ["M19.68 11.35L17.88 14.93", "M19.68 11.35L18.66 15.36", "M19.68 11.35L17.88 14.93"] } : { d: "M19.68 11.35L17.88 14.93" }}
+          transition={{ duration: 0.8 / speed, times: [0, 0.45, 1], ease: "easeInOut" }}
+        />
         <path d="M2.95 17.18A5.43 5.43 0 0 1 4.32 11.35A5.43 5.43 0 0 1 9.01 7.64A5.43 5.43 0 0 1 14.99 7.64A5.43 5.43 0 0 1 19.68 11.35A5.43 5.43 0 0 1 21.05 17.18A13.04 13.04 0 0 0 2.95 17.18z" />
-        <motion.path
-          d="M4.32 11.35L8.5 14.01"
-          stroke={accent}
-          initial={false}
-          animate={on ? { d: ["M4.32 11.35L8.5 14.01", "M3.79 12.31L7.8 14.23", "M4.32 11.35L8.5 14.01"] } : { d: "M4.32 11.35L8.5 14.01" }}
-          transition={{ duration: 0.8 / speed, times: [0, 0.45, 1], ease: "easeInOut" }}
-        />
-        <motion.path
-          d="M9.01 7.64L11.07 13.56"
-          stroke={accent}
-          initial={false}
-          animate={on ? { d: ["M9.01 7.64L11.07 13.56", "M8.66 7.76L10.95 13.57", "M9.01 7.64L11.07 13.56"] } : { d: "M9.01 7.64L11.07 13.56" }}
-          transition={{ duration: 0.8 / speed, times: [0, 0.45, 1], ease: "easeInOut" }}
-        />
-        <motion.path
-          d="M14.99 7.64L12.93 13.56"
-          stroke={accent}
-          initial={false}
-          animate={on ? { d: ["M14.99 7.64L12.93 13.56", "M15.34 7.76L13.05 13.57", "M14.99 7.64L12.93 13.56"] } : { d: "M14.99 7.64L12.93 13.56" }}
-          transition={{ duration: 0.8 / speed, times: [0, 0.45, 1], ease: "easeInOut" }}
-        />
-        <motion.path
-          d="M19.68 11.35L15.5 14.01"
-          stroke={accent}
-          initial={false}
-          animate={on ? { d: ["M19.68 11.35L15.5 14.01", "M20.21 12.31L16.2 14.23", "M19.68 11.35L15.5 14.01"] } : { d: "M19.68 11.35L15.5 14.01" }}
-          transition={{ duration: 0.8 / speed, times: [0, 0.45, 1], ease: "easeInOut" }}
-        />
       </motion.g>
       <svg x="0" y="0" width="24" height="24" viewBox="0 0 24 24" overflow="hidden">
         <motion.path

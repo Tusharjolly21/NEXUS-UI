@@ -38,19 +38,19 @@ export function TelescopeIcon({ size = 24, strokeWidth = 2, className, speed = 1
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <path d="M11.618 11.728V20.67M11.618 14.928L6.418 20.67M11.618 14.928L16.818 20.67" />
+      <path d="M12.014 11.298V20.6M12.014 14.298L7.414 20.6M12.014 14.298L16.614 20.6" />
       <motion.g
-        style={{ originX: "48.41%", originY: "48.867%" }}
+        style={{ originX: "50.058%", originY: "47.077%" }}
         initial={false}
         animate={on ? { rotate: [0, -12, -12, -9, 0] } : { rotate: 0 }}
         transition={{ duration: 1.0 / speed, times: [0, 0.32, 0.55, 0.72, 1], ease: "easeInOut" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <g transform="translate(10.5 10.07) rotate(-34)">
-          <path d="M-6 0H-3" />
-          <path d="M-3 -2V2H4V-2z" />
-          <path d="M4 -2L7.6 -3V3L4 2" />
-          <path d="M7.6 -3V3" stroke={accent} />
+        <g transform="translate(10.4 9.8) rotate(-34)">
+          <path d="M-5.2 0 H-2.5" />
+          <path d="M7 -3 L-2.5 -1.75 V1.75 L7 3" />
+          <path d="M2.5 -2.408 V2.408" />
+          <path d="M7 -3 V3" stroke={accent} />
         </g>
       </motion.g>
       <g transform="translate(19.3 3.2)">

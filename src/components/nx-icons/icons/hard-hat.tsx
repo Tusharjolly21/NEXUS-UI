@@ -39,23 +39,24 @@ export function HardHatIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
       aria-hidden="true"
     >
       <motion.g
-        style={{ originX: "50%", originY: "74.42%" }}
+        style={{ originX: "50%", originY: "71.67%" }}
         initial={false}
         animate={on ? { rotate: [0, -15, -12, 3, 0] } : { rotate: 0 }}
         transition={{ duration: 1 / speed, times: [0, 0.28, 0.48, 0.78, 1], ease: "easeInOut" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="M5.2 17.86 V14.26 A6.8 6.8 0 0 1 10.1 7.73 M13.9 7.73 A6.8 6.8 0 0 1 18.8 14.26 V17.86" />
         <motion.path
-          d="M10.1 17.86 V6.16 H13.9 V17.86"
+          d="M10.1 17.2V7.07M13.9 17.2V7.07"
           stroke={accent}
+          strokeWidth={strokeWidth * 0.75}
           initial={false}
-          animate={on ? { strokeWidth: [strokeWidth, strokeWidth * 1.45, strokeWidth] } : { strokeWidth: strokeWidth }}
+          animate={on ? { strokeWidth: [strokeWidth * 0.75, strokeWidth * 1.1, strokeWidth * 0.75] } : { strokeWidth: strokeWidth * 0.75 }}
           transition={{ duration: 0.22 / speed, delay: (0.46) / speed }}
         />
-        <path d="M2.6 17.86 H21.4" />
+        <path d="M5.2 17.2V13.6A6.8 6.8 0 0 1 18.8 13.6V17.2" strokeLinecap="butt" />
+        <path d="M2.6 17.2H21.4" />
         <motion.path
-          d="M5.2 17.86 V14.26 A6.8 6.8 0 0 1 10.1 7.73 V6.16 H13.9 V7.73 A6.8 6.8 0 0 1 18.8 14.26 V17.86"
+          d="M5.2 16.2V13.6A6.8 6.8 0 0 1 18.8 13.6V16.2"
           stroke={accent}
           initial={false}
           animate={on ? { pathLength: 0.16, pathOffset: [0, 0.84], opacity: [0, 1, 1, 0] } : { pathLength: 0.16, pathOffset: 0, opacity: 0 }}

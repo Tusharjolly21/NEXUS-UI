@@ -38,11 +38,6 @@ export function SofaIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <path d="M2.5 16.8 V10.8 a1.75 1.75 0 0 1 3.5 0 V16.8" />
-      <path d="M2.5 16.8 V10.8 a1.75 1.75 0 0 1 3.5 0 V16.8" transform="translate(24 0) scale(-1 1)" />
-      <path d="M6 10.8H18" />
-      <path d="M2.5 16.8H21.5" />
-      <path d="M4.25 16.8V18.8M19.75 16.8V18.8" />
       <motion.path
         d="M6 10.8 V6.8 a1.5 1.5 0 0 1 1.5 -1.5 H10.5 a1.5 1.5 0 0 1 1.5 1.5 V10.8"
         stroke={accent}
@@ -57,6 +52,11 @@ export function SofaIcon({ size = 24, strokeWidth = 2, className, speed = 1, acc
         animate={on ? { d: ["M12 10.8 V6.8 a1.5 1.5 0 0 1 1.5 -1.5 H16.5 a1.5 1.5 0 0 1 1.5 1.5 V10.8", "M12 10.8 V5.4 a1.5 1.5 0 0 1 1.5 -1.5 H16.5 a1.5 1.5 0 0 1 1.5 1.5 V10.8", "M12 10.8 V6.8 a1.5 1.5 0 0 1 1.5 -1.5 H16.5 a1.5 1.5 0 0 1 1.5 1.5 V10.8"] } : { d: "M12 10.8 V6.8 a1.5 1.5 0 0 1 1.5 -1.5 H16.5 a1.5 1.5 0 0 1 1.5 1.5 V10.8" }}
         transition={{ duration: 0.5 / speed, delay: (0.3) / speed, times: [0, 0.4, 1], ease: "easeInOut" }}
       />
+      <path d="M2.5 16.8 V10.8 a1.75 1.75 0 0 1 3.5 0 V16.8" />
+      <path d="M2.5 16.8 V10.8 a1.75 1.75 0 0 1 3.5 0 V16.8" transform="translate(24 0) scale(-1 1)" />
+      <path d="M6 10.8H18" />
+      <path d="M2.5 16.8H21.5" />
+      <path d="M4.25 16.8V18.8M19.75 16.8V18.8" />
     </svg>
   );
 }

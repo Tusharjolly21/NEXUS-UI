@@ -38,31 +38,32 @@ export function CastleIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <path d="M2.5 21V10.5M6 21V10.5M2.5 12.5H6" />
-      <path d="M18 21V10.5M21.5 21V10.5M18 12.5H21.5" />
-      <path d="M9 21V8.5M15 21V3.2M9 10.5H15" />
-      <path d="M6 15H9M15 15H18" />
-      <path d="M2.5 21H21.5" />
-      <svg x="9" y="16" width="6" height="5" viewBox="9 16 6 5" overflow="hidden">
-        <motion.path
-          d="M12 16.5V20M10.5 18.3H13.5"
-          strokeWidth={strokeWidth * 0.75}
-          strokeLinecap="butt"
-          initial={false}
-          animate={on ? { y: [0, -4.2, -4.2, 0] } : { y: 0 }}
-          transition={{ duration: 1 / speed, times: [0, 0.4, 0.62, 1], ease: "easeInOut" }}
-        />
-      </svg>
-      <path d="M9 21V18a3 3 0 0 1 6 0V21" />
       <motion.path
-        d="M15 3.2 L17.6 4.1 L20.2 5 L15 6.8Z"
+        d="M12 3.7L14.9 4.4L17.8 5.1L12 6.5Z"
         fill={accent}
         stroke={accent}
         strokeWidth={strokeWidth * 0.5}
         initial={false}
-        animate={on ? { d: ["M15 3.2 L17.6 4.1 L20.2 5 L15 6.8Z", "M15 3.2 L17.6 3.5 L20.2 5.8 L15 6.8Z", "M15 3.2 L17.6 4.8 L20.2 4.2 L15 6.8Z", "M15 3.2 L17.6 3.7 L20.2 5.7 L15 6.8Z", "M15 3.2 L17.6 4.4 L20.2 4.5 L15 6.8Z", "M15 3.2 L17.6 4.1 L20.2 5 L15 6.8Z"] } : { d: "M15 3.2 L17.6 4.1 L20.2 5 L15 6.8Z" }}
+        animate={on ? { d: ["M12 3.7L14.9 4.4L17.8 5.1L12 6.5Z", "M12 3.7L14.9 3.7L17.8 6L12 6.5Z", "M12 3.7L14.9 5L17.8 4.3L12 6.5Z", "M12 3.7L14.9 3.9L17.8 5.8L12 6.5Z", "M12 3.7L14.9 4.8L17.8 4.6L12 6.5Z", "M12 3.7L14.9 4.4L17.8 5.1L12 6.5Z"] } : { d: "M12 3.7L14.9 4.4L17.8 5.1L12 6.5Z" }}
         transition={{ duration: 0.9 / speed, ease: "easeInOut" }}
       />
+      <motion.path
+        d="M11.21 15.31V21.2"
+        strokeWidth={strokeWidth * 0.375}
+        initial={false}
+        animate={on ? { d: ["M11.21 15.31V21.2", "M11.21 15.31V15.36", "M11.21 15.31V15.36", "M11.21 15.31V21.2"] } : { d: "M11.21 15.31V21.2" }}
+        transition={{ duration: 1 / speed, times: [0, 0.4, 0.62, 1], ease: "easeInOut" }}
+      />
+      <motion.path
+        d="M12.79 15.31V21.2"
+        strokeWidth={strokeWidth * 0.375}
+        initial={false}
+        animate={on ? { d: ["M12.79 15.31V21.2", "M12.79 15.31V15.36", "M12.79 15.31V15.36", "M12.79 15.31V21.2"] } : { d: "M12.79 15.31V21.2" }}
+        transition={{ duration: 1 / speed, times: [0, 0.4, 0.62, 1], ease: "easeInOut" }}
+      />
+      <path d="M3 21.2V8.7H6.6V12.2H10.2V8.7H13.8V12.2H17.4V8.7H21V21.2Z" />
+      <path d="M9 21.2V18.2a3 3 0 0 1 6 0V21.2" />
+      <path d="M12 8.7V2.8" />
     </svg>
   );
 }

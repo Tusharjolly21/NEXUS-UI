@@ -38,7 +38,7 @@ export function BasketballIcon({ size = 24, strokeWidth = 2, className, speed = 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <path d="M4.6 21.3H19.4" />
+      <path d="M5 21.3H19" />
       <motion.g
         initial={false}
         animate={on ? { y: [0, 2.6, -0.9, 2.6, 0] } : { y: 0 }}
@@ -51,8 +51,8 @@ export function BasketballIcon({ size = 24, strokeWidth = 2, className, speed = 
           transition={{ duration: 1 / speed, times: [0, 0.21, 0.26, 0.34, 0.54, 0.72, 0.76, 0.85, 1], ease: "easeOut" }}
         >
           <rect width="24" height="24" fill="none" stroke="none" />
-          <circle cx="12" cy="9.7" r="7" />
           <path d="M12 2.7V16.7M5 9.7H19M7.32 4.5A8.07 8.07 0 0 1 7.32 14.9M16.68 4.5A8.07 8.07 0 0 0 16.68 14.9" stroke={accent} strokeWidth={strokeWidth * 0.75} />
+          <circle cx="12" cy="9.7" r="7" />
         </motion.g>
       </motion.g>
     </svg>
