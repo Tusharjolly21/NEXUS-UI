@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createCheckoutSession, productIdForPlan, type Plan } from "@/lib/dodo";
 import { getUserEntitlements } from "@/lib/entitlements";
 import { summarisePlan } from "@/lib/plan";
+import { regionFor } from "@/lib/region";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -36,7 +37,8 @@ export async function POST(req: Request) {
     // If the check itself fails, let checkout continue: the payment provider and webhook are the source of truth.
   }
 
-  if (!process.env.DODO_PAYMENTS_API_KEY || !productIdForPlan(plan)) {
+  const region = regionFor(req.headers);
+  if (!process.env.DODO_PAYMENTS_API_KEY || !productIdForPlan(plan, region)) {
     return NextResponse.json({ error: "Payment not configured." }, { status: 501 });
   }
 
@@ -46,11 +48,12 @@ export async function POST(req: Request) {
   try {
     const url = await createCheckoutSession({
       plan,
+      region,
       userId: user.id,
       email: user.email ?? undefined,
       name: fullName,
       // Access is granted by the webhook, never by this redirect.
-      returnUrl: `${origin}/dashboard?checkout=success&plan=${plan}`,
+      returnUrl: `${origin}/dashboard?checkout=success&plan=${plan}${region === "india" ? "&region=india" : ""}`,
       cancelUrl: `${origin}/pricing?checkout=cancel`,
     });
     return NextResponse.json({ url });
