@@ -4,7 +4,7 @@ import { blip, swish, tick, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.62;
 
 /** Eight rubbery pops that climb in pitch, one for each spike as it reaches its furthest point, over a soft wobbling swish of the body rolling. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

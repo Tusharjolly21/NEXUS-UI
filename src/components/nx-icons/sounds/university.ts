@@ -4,7 +4,7 @@ import { ding, swish, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.13;
 
 /** Cord and cloth swishes that fade as the tassel swings out, back, and settles, with four marble-like bell tones rising as the columns light up one after another. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

@@ -4,7 +4,7 @@ import { ding, swish, tick, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.65;
 
 /** A light plastic slide as the shades drop on the nose and a tick as they land, a bright glassy ting for the glint on each lens with a quick high shimmer between, then a slide up and a last tick as they are nudged home. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

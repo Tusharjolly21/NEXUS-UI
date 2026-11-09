@@ -4,7 +4,7 @@ import { ding, blip, tick, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.87;
 
 /** Four soft servo whirrs as the panels tilt and swing back, a latch click at each turn, and two quick radio beeps as the signal arcs go out. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

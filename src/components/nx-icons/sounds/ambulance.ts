@@ -4,7 +4,7 @@ import { blip, thud, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.78;
 
 /** A two-tone siren that wails up as the light flashes on the left (0.225), down as it flashes on the right (0.45) and up again on the left (0.675), under a low engine rumble that surges as the van lunges forward and four small shudder knocks. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

@@ -4,7 +4,7 @@ import { ding, blip, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.33;
 
 /** A servo whine that opens and then closes in as the sight ring tightens, a hard metal clack the moment it locks on, two sonar style pulses from the red dot, and a faint rising shimmer as the ripple spreads. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

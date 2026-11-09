@@ -4,7 +4,7 @@ import { swish, tick, puff, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 3.26;
 
 /** A low whoosh for the twirl in two halves, then three crisp green leaf flicks that crackle one after another, with a last crunchy tick as the carrot settles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

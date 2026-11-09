@@ -4,7 +4,7 @@ import { ding, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.69;
 
 /** A fabric rustle as the bag lifts, a small bell-like tick at each swing of the zip pull, and a soft thump with a rustle on each footfall, the second lighter than the first. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

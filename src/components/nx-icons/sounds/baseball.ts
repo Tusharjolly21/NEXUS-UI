@@ -4,7 +4,7 @@ import { swish, tick, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.57;
 
 /** A soft low rustle as the ball is pulled back, then a run of dry ticks that speed up as each stitch whips past, ending in a whip of air at the release. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

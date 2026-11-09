@@ -4,7 +4,7 @@ import { blip, swish, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 3.08;
 
 /** A laser sweep that glides up as the scan line rises, drops slowly as it crosses the code, and a sharp checkout beep when the corners snap in. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

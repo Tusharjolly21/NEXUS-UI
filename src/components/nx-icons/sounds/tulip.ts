@@ -4,7 +4,7 @@ import { ding, swish, puff, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 4.56;
 
 /** A silky sweep as the outer petals swing open, one glassy dewdrop glint at the widest point, a falling sweep as they close, and a soft kiss when they touch. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

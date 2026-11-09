@@ -17,7 +17,7 @@ export type SandwichIconProps = {
   play?: boolean;
 };
 
-/** A sandwich whose layers lift apart one after another and settle back down. */
+/** A sandwich whose top slice, lettuce and cheese lift apart one after another and settle back down. */
 export function SandwichIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: SandwichIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -38,22 +38,31 @@ export function SandwichIcon({ size = 24, strokeWidth = 2, className, speed = 1,
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <motion.g
-        initial={false}
-        animate={on ? { y: [0, -2.4, 0.35, 0] } : { y: 0 }}
-        transition={{ duration: 0.5 / speed, delay: (0) / speed, times: [0, 0.45, 0.8, 1], ease: "easeInOut" }}
-      >
-        <path d="M12 4L15.41 9.8H8.59z" />
-      </motion.g>
-      <motion.g
-        initial={false}
-        animate={on ? { y: [0, -2.0, 0.35, 0] } : { y: 0 }}
-        transition={{ duration: 0.5 / speed, delay: (0.17) / speed, times: [0, 0.45, 0.8, 1], ease: "easeInOut" }}
-      >
-        <path d="M8.59 9.8H15.41L19.4 16.6H4.6z" />
-        <path d="M6.65 13.1Q7.54 14.3 8.44 13.1Q9.33 11.9 10.22 13.1Q11.11 14.3 12 13.1Q12.89 11.9 13.78 13.1Q14.67 14.3 15.56 13.1Q16.46 11.9 17.35 13.1" stroke={accent} />
-      </motion.g>
-      <path d="M4.6 16.6H19.4L21.4 20H2.6z" />
+      <svg x="0" y="0" width="24" height="24" viewBox="0 0 24 24" overflow="hidden">
+        <motion.g
+          initial={false}
+          animate={on ? { y: [0, -1.8, -1.8, 0.15, 0] } : { y: 0 }}
+          transition={{ duration: 0.95 / speed, times: [0, 0.28, 0.55, 0.82, 1], ease: "easeInOut" }}
+        >
+          <path d="M4.9 9.35V7.15C2.8 7.35 2.9 3.05 7.3 3.05H16.7C21.1 3.05 21.2 7.35 19.1 7.15V9.35Z" />
+        </motion.g>
+        <motion.path
+          d="M3.22 12.15q0.97 -1.5 1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0"
+          stroke={accent}
+          strokeWidth={strokeWidth * 0.75}
+          initial={false}
+          animate={on ? { d: ["M3.22 12.15q0.97 -1.5 1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0", "M3.22 12.15q0.97 1.5 1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0", "M3.22 12.15q0.97 -1.5 1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0"], y: [0, -0.8, 0.2, 0] } : { d: "M3.22 12.15q0.97 -1.5 1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0t1.95 0", y: 0 }}
+          transition={{ d: { duration: 0.7 / speed, delay: (0.1) / speed, ease: "easeInOut" }, y: { duration: 0.6 / speed, delay: (0.1) / speed, times: [0, 0.4, 0.8, 1], ease: "easeInOut" } }}
+        />
+        <motion.path
+          d="M5.3 15.15H18.7"
+          strokeWidth={strokeWidth * 0.75}
+          initial={false}
+          animate={on ? { y: [0, -0.4, 0.1, 0] } : { y: 0 }}
+          transition={{ duration: 0.55 / speed, delay: (0.2) / speed, times: [0, 0.4, 0.8, 1], ease: "easeInOut" }}
+        />
+        <path d="M4.9 17.45H19.1V18.95C19.1 20.35 18.3 20.95 17.1 20.95H6.9C5.7 20.95 4.9 20.35 4.9 18.95Z" />
+      </svg>
     </svg>
   );
 }

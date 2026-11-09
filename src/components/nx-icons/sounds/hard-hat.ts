@@ -4,7 +4,7 @@ import { ding, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.85;
 
 /** A breath of air as the helmet tips up, a hard plastic knock at full tilt, a bright shimmer that runs along the shell with a glassy ping as the glint crosses the ridge, and a soft knock as the hat settles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

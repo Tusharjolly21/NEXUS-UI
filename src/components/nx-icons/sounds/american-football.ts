@@ -4,7 +4,7 @@ import { blip, swish, thud, puff, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 3.68;
 
 /** A leathery throw puff, then a low spiral whirr that swells to the fastest point of the spin and fades as the ball floats down, with a soft pat as it settles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

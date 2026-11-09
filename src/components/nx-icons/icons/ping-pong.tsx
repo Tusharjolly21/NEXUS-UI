@@ -17,7 +17,7 @@ export type PingPongIconProps = {
   play?: boolean;
 };
 
-/** A paddle that pops up and smacks the ball away; it drops back and bounces on the paddle before settling. */
+/** A paddle that swings through a hit and sends the ball off the edge; it drops back in and settles beside the blade. */
 export function PingPongIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: PingPongIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -40,25 +40,26 @@ export function PingPongIcon({ size = 24, strokeWidth = 2, className, speed = 1,
     >
       <svg x="0" y="0" width="24" height="24" viewBox="0 0 24 24" overflow="hidden">
         <motion.circle
-          cx="11.88"
-          cy="3.65"
-          r="1.7"
+          cx="18.23"
+          cy="19.66"
+          r="1.9"
           fill="currentColor"
           stroke="none"
           initial={false}
-          animate={on ? { y: [0, 0, -16, -16, 1.15, -1.2, 0] } : { y: 0 }}
+          animate={on ? { x: [0, 0, 7.98, 7.98, -0.42, 0.12, 0], y: [0, 0, 15.01, 15.01, -0.79, 0.22, 0] } : { x: 0, y: 0 }}
           transition={{ duration: 1.1 / speed, times: [0, 0.155, 0.4, 0.5, 0.74, 0.86, 1], ease: ["linear", "easeOut", "linear", "easeIn", "easeOut", "easeInOut"] }}
         />
       </svg>
       <motion.g
-        style={{ originX: "49.5%", originY: "53.54%" }}
+        style={{ originX: "27.75%", originY: "78.25%" }}
         initial={false}
-        animate={on ? { y: [0, 0, -1.2, 0, 0], rotate: [0, 0, -9, 0, 0] } : { y: 0, rotate: 0 }}
-        transition={{ duration: 0.9 / speed, times: [0, 0.08, 0.19, 0.45, 1], ease: ["linear", "easeIn", "easeOut", "linear"] }}
+        animate={on ? { rotate: [0, -5, 13, 0, 0] } : { rotate: 0 }}
+        transition={{ duration: 0.85 / speed, times: [0, 0.1, 0.22, 0.5, 1], ease: ["easeOut", "easeIn", "easeOut", "linear"] }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="M12.25 18.24L13.47 20.53A1 1 0 0 0 14.83 20.95L16.94 19.82A1 1 0 0 0 17.36 18.47L16.14 16.17" />
-        <circle cx="11.88" cy="12.85" r="5.4" fill={accent} fillOpacity={0.3} />
+        <circle cx="12.97" cy="9.77" r="6.4" fill={accent} fillOpacity={0.3} />
+        <path d="M11.22 15.93 L9.81 19.52 Q9.12 20.5 8.14 19.81 L5.19 17.75 Q4.2 17.06 4.89 16.08 L7.78 13.52 Z" fill="currentColor" />
+        <path d="M9.18 10.1 A3.8 3.8 0 0 0 13.95 13.44" stroke={accent} strokeWidth={strokeWidth * 0.75} />
       </motion.g>
     </svg>
   );

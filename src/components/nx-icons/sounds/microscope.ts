@@ -4,7 +4,7 @@ import { ding, blip, swish, tick, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.19;
 
 /** Twelve fine thread clicks as the knob turns a full circle, a warm rising hum as a ring of light spreads from the sample, a soft glass ping at each glow pulse. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

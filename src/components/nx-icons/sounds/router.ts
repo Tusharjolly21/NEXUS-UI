@@ -4,7 +4,7 @@ import { blip, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 3.42;
 
 /** Three digital ticks that rise in pitch as the port lights blink in turn, then two bright pings for the signal arcs. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

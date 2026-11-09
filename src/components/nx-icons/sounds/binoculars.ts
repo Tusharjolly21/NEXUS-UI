@@ -4,7 +4,7 @@ import { ding, swish, tick, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.03;
 
 /** A soft rubber whirr under seven knurled ratchet clicks that follow the focus wheel's eased roll, then a bright glass ping as the glint redraws on the left lens and a higher one on the right. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

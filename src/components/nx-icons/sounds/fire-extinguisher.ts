@@ -4,7 +4,7 @@ import { ding, swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.65;
 
 /** A metal clack as the lever hits the grip, a long airy hiss from the nozzle with three soft cloud puffs on top, a tiny bell as the gauge needle reaches the top, and a spring click as the lever returns. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

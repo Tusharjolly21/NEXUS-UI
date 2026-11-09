@@ -4,7 +4,7 @@ import { ding, blip, swish, tick, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.46;
 
 /** A soft leather swing and a creak at the end of each pendulum swing, each smaller than the last, then a tiny tick and a two-note glassy shimmer as the clasp glints. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

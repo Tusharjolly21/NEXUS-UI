@@ -4,7 +4,7 @@ import { blip, thud, puff, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.62;
 
 /** A low growl that sags as the symbol winds back, a wet blorp as the hub shrinks, a growl that climbs with the turn, a bigger blorp as the hub swells and a dull knock when it settles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

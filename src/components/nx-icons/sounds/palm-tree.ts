@@ -4,7 +4,7 @@ import { blip, swish, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.81;
 
 /** Five long brushy rustles, one for each frond as it sways in turn and each a little higher than the last, with three wooden knocks as the coconuts swing against each other. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

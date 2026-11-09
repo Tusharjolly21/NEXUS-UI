@@ -4,7 +4,7 @@ import { ding, blip, swish, tick, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.3;
 
 /** A quiet backswing, a rising whoosh that peaks as the racquet meets the ball with a hollow pock and a string twang, the ball whistling away, then a small pop as it comes back. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

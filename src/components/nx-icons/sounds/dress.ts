@@ -4,7 +4,7 @@ import { swish, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 6.92;
 
 /** Five soft cloth swishes, one for each swing of the skirt, alternating rising and falling in pitch and fading as it settles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

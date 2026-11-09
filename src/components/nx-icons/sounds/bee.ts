@@ -4,7 +4,7 @@ import { blip, swish, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.53;
 
 /** A continuous bright buzz that wavers in pitch while the wings beat and the bee hovers in its figure of eight, with a thin hiss of wing air over it, fading as the wings stop. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

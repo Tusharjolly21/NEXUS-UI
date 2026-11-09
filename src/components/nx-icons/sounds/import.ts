@@ -4,7 +4,7 @@ import { swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.03;
 
 /** A quick paper flick as the arrow lifts away, a falling rush as it drops diagonally into the tray, a cardboard thud on landing, a lower knock as the tray bumps, and a tick as it rebounds. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

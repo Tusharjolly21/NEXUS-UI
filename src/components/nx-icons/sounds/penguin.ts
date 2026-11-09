@@ -4,7 +4,7 @@ import { blip, thud, puff, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.77;
 
 /** Four rubbery slaps on ice as the penguin rocks from foot to foot, each a squeaky pat over a low thump, the right foot a little higher than the left. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

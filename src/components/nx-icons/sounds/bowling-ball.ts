@@ -4,7 +4,7 @@ import { blip, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.61;
 
 /** A low rumble as the ball rolls away and thunders back in, a sharp crack and wooden clonk when it strikes the pin, then two little clacks as the pin rocks upright on the lane. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

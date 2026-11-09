@@ -4,7 +4,7 @@ import { tick, puff, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.24;
 
 /** Four muffled fabric whumps as the hood bobs up and down and settles, with tiny metal ticks as each drawstring tip swings out and back. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

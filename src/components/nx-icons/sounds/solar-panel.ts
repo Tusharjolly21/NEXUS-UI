@@ -4,7 +4,7 @@ import { ding, blip, swish, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.45;
 
 /** A warm swell as the sun's rays pulse out twice, with a glassy chime for each diagonal of cells as they light up in a rising run. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

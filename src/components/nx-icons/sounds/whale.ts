@@ -4,7 +4,7 @@ import { blip, swish, thud, puff, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.03;
 
 /** A deep rising whale call as it surfaces, a bright hiss of spray as the spout shoots up, and a low splash as the tail slaps back down, ending on a falling answer. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

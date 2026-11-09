@@ -4,7 +4,7 @@ import { blip, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.29;
 
 /** A quick air swish as the mic boom swings out and back, tiny plastic ticks where it reverses, then two soft bass thumps as the ear cups swell. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

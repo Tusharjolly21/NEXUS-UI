@@ -4,7 +4,7 @@ import { blip, swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.89;
 
 /** A hydraulic whine that sinks as the blade lowers, a metal clunk when it bites the ground at 0.30, a diesel rumble with a gravelly scrape and a rising soft sweep as the pile grows until 0.70, a stop thump, then a rising whine as the blade lifts and a puff of dust as the pile drops away. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

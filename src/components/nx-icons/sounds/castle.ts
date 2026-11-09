@@ -4,7 +4,7 @@ import { ding, swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 1.3;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.62;
 
 /** A winch ratcheting the portcullis up in dry iron clicks, a small ring at the top, a chain rush and heavy iron slam as it drops, and four quick cloth snaps from the fluttering flag. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

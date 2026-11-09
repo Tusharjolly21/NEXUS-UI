@@ -4,7 +4,7 @@ import { ding, blip, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 0.7;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.73;
 
 /** A soft rubbery squeeze as the grips close, a steel click with a short ring as the jaw tips meet, a spring creak as they open and a tick as they come to rest. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

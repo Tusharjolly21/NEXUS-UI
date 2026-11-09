@@ -4,7 +4,7 @@ import { ding, blip, tick, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.28;
 
 /** A small motor whine that turns with the dish as it swings away and back, gear ticks at each turn, and three clean pings as the signal locks on. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

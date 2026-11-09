@@ -4,7 +4,7 @@ import { blip, swish, tick, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.73;
 
 /** A trigger click, then a rising electric whirr that lasts exactly as long as the bit spins, with a buzzing sawtooth pulse at each shudder of the body. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

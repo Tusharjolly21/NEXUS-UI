@@ -4,7 +4,7 @@ import { blip, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.02;
 
 /** Air is sucked inwards as the four arrows pull towards the centre, a dull squeeze thud as the heads meet closest, a light bounce back out, and a tick as they settle. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

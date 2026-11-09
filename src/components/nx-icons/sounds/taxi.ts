@@ -4,7 +4,7 @@ import { blip, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.95;
 
 /** A starter growl as the car winds back, two square-wave meter beeps exactly as the roof sign lights (0.27 and 0.56), little relay ticks as it dims, and an engine rev with an air sweep that surges as the car lurches forward, then drops away. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

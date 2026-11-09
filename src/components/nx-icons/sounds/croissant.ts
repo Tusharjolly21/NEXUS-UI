@@ -4,7 +4,7 @@ import { swish, puff, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 4.05;
 
 /** A soft air swell as the pastry puffs, a cluster of brittle flaky crackles at the peak of the spread, then a thin fading hiss as the flake drifts down. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

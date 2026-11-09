@@ -4,7 +4,7 @@ import { blip, swish, thud, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.18;
 
 /** A deep rotor whop at each of the four rotor blur beats (0.11, 0.34, 0.56 and 0.79) over a high tail rotor buzz that sinks as its spin slows, and a turbine whine that climbs as the helicopter lifts (0.00 to 0.35) and falls as it settles to a light skid tap at 1.00. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

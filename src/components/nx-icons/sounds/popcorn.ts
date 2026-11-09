@@ -4,7 +4,7 @@ import { blip, tick, puff, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.88;
 
 /** Three sharp kernel pops, each a dry crack with a short rising boing, then a quiet soft landing of kernels and a puff as the heap settles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

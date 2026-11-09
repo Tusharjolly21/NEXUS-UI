@@ -4,7 +4,7 @@ import { swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.05;
 
 /** Dull wooden knocks as the cookie rocks on its edge, each softer than the last, with dry snaps as two crumbs break off the bite. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

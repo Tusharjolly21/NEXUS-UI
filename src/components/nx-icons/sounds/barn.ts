@@ -4,7 +4,7 @@ import { blip, tick, thud, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.66;
 
 /** Heavy wooden doors: a creak rising as they swing open, a soft knock where they stop, a lower creak as they swing back, and a two-part slam with a latch click as they meet. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

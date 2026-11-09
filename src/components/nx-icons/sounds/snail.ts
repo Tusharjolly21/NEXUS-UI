@@ -4,7 +4,7 @@ import { blip, swish, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.4;
 
 /** A wet slow squelch that glides forward with the shell, four tiny wet pops as the eye stalks wiggle, and a quieter squelch back as the snail settles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

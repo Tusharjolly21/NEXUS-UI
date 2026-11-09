@@ -4,7 +4,7 @@ import { ding, blip, swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.75;
 
 /** A soft roll across the green, a hollow plop and a rattle of the cup as the ball drops in, fabric flaps as the flag flutters, and a small pop as the ball reappears on its mound. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

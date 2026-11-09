@@ -4,7 +4,7 @@ import { blip, swish, tick, type Time } from "../sound-kit";
 export const length = 1.3;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.83;
 
 /** A rubbery squeak as the plunger slides in, a small click as it bottoms out, a watery plip as the drop leaves the needle, and a softer slide back ending with a snug click. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

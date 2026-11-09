@@ -4,7 +4,7 @@ import { blip, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.6;
 
 /** A rubbery boing as the cap stretches, squashes and rebounds, with a round bubble pop each time one of the three spots pulses. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

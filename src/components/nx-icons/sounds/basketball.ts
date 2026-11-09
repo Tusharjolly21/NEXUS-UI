@@ -4,7 +4,7 @@ import { blip, swish, thud, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.68;
 
 /** A rubbery bonk each time the ball hits the floor, a hollow thud under it, with soft air as it falls and rises between the two bounces. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

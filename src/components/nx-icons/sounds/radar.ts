@@ -4,7 +4,7 @@ import { blip, swish, tick, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.19;
 
 /** A smooth rising sweep that follows the beam for one full turn, a soft tick each time it crosses an axis, a sonar ping as it hits the blip and a lower echo as the blip swells. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

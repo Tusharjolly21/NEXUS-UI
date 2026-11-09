@@ -4,7 +4,7 @@ import { blip, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.61;
 
 /** A rubbery squeak as the heel lifts, a dull thump and a dry scuff as it lands, then a smaller lift and a second thump, with a faint sweep as the stripe draws in. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

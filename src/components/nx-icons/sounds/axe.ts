@@ -4,7 +4,7 @@ import { blip, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.55;
 
 /** A quiet draw back, a fast whoosh as the axe swings down, a woody crack with a hollow tock as the blade bites, two small chip ticks as the chip spins away, and a low sigh as the axe eases back. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

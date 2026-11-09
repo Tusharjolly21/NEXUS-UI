@@ -4,7 +4,7 @@ import { blip, swish, thud, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.63;
 
 /** A motor hum that rises and falls with the drum's full turn, soft cabinet thumps at each shudder, and three water sloshes with two bubble pops while the suds slide about. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

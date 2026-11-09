@@ -17,7 +17,7 @@ export type SharkIconProps = {
   play?: boolean;
 };
 
-/** A shark that glides forward, its tail sweeping while its dorsal fin cuts the water and leaves a wake. */
+/** A shark that glides forward with its tail sweeping from side to side while its dorsal fin cuts through the water. */
 export function SharkIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: SharkIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -40,33 +40,26 @@ export function SharkIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
     >
       <motion.g
         initial={false}
-        animate={on ? { x: [0, 1.3, 1.3, 0] } : { x: 0 }}
+        animate={on ? { x: [0, 0.9, 0.9, 0] } : { x: 0 }}
         transition={{ duration: 1 / speed, times: [0, 0.4, 0.6, 1], ease: "easeInOut" }}
       >
         <motion.g
-          style={{ originX: "26.25%", originY: "54.29%" }}
+          style={{ originX: "24.58%", originY: "56.25%" }}
           initial={false}
-          animate={on ? { rotate: [0, 13, -13, 9, -6, 0] } : { rotate: 0 }}
+          animate={on ? { rotate: [0, 10, -10, 7, -5, 0] } : { rotate: 0 }}
           transition={{ duration: 1 / speed, ease: "easeInOut" }}
         >
           <rect width="24" height="24" fill="none" stroke="none" />
-          <path d="M6.3 13.03C5.5 10.43 4.1 7.43 2.2 4.63Q2.1 9.43 4.5 13.03Q2.3 16.63 2.7 20.03C4.5 18.23 5.9 15.63 6.3 13.03Z" fill="currentColor" strokeWidth={1} />
+          <path d="M5.9 11.9 Q4.7 8.2 2.2 4.1 Q2.1 9.2 4.4 13.1 Q3.5 17 3 19.8 Q5.5 17.9 5.9 15.1Z" fill="currentColor" strokeWidth={1.2} />
         </motion.g>
-        <path d="M15.3 17.8C14.2 19.73 12.4 20.83 10.7 21.33Q10.9 19.73 11.9 17.88Z" fill="currentColor" strokeWidth={1} />
-        <path d="M14.9 8.63C13.3 6.23 11.9 4.23 10.5 2.73C10.1 4.63 9.7 6.83 9.1 9.48Z" fill={accent} stroke={accent} strokeWidth={1} />
-        <path d="M21.3 12.53C19.3 9.63 16.3 8.43 12.3 8.43C9.5 8.43 7.9 10.23 6.3 13.03C7.9 16.03 10.3 18.03 13.3 18.03C16.5 18.03 19.1 16.43 21.3 12.53Z" />
-        <motion.path
-          d="M8.5 5.03h-2.4M8.3 7.33h-2.4"
-          stroke={accent}
-          strokeWidth={1.3}
-          initial={false}
-          animate={on ? { x: [0, -1.3, -1.3, 0], opacity: [0, 1, 1, 0] } : { x: 0, opacity: 0 }}
-          transition={{ duration: 1 / speed, times: [0, 0.4, 0.6, 1], ease: "easeInOut" }}
-        />
-        <path d="M9.7 10.73Q10.6 12.83 9.7 14.93M12.1 10.73Q13 12.83 12.1 14.93" strokeWidth={1.3} />
-        <path d="M18.5 14.03Q15.9 14.73 13.1 14.33" strokeWidth={1.3} />
-        <path d="M16.6 14.43L18.2 14.43L17.4 15.83ZM14.6 14.58L16.2 14.58L15.4 15.98ZM12.7 14.48L14.3 14.48L13.5 15.88Z" fill="currentColor" stroke="none" />
-        <circle cx="17.1" cy="11.73" r="0.9" fill="currentColor" stroke="none" />
+        <path d="M9.3 9.8 C8.1 10.2 6.7 11 5.9 11.9" />
+        <path d="M14.9 9.3 C17.7 9.3 20 11.9 21.5 13.4 C18.9 16.8 10.5 20.2 5.9 15.1" />
+        <path d="M12.63 17.68 L10.1 21.5 L15.87 17.05Z" fill="currentColor" strokeWidth={1.2} />
+        <path d="M14.9 9.3 Q13.7 5.6 10.7 2.9 Q10 6.8 9.3 9.8Z" fill={accent} stroke={accent} />
+        <path d="M14.1 11.2Q13.5 12.9 14.1 14.6 M12.5 11.2Q11.9 12.9 12.5 14.6 M10.9 11.2Q10.3 12.9 10.9 14.6" strokeWidth={strokeWidth * 0.5} />
+        <path d="M19.8 14.1 Q18.1 15.3 15.9 14.9" strokeWidth={strokeWidth * 0.5} />
+        <path d="M7.9 14.8 Q9.9 17.1 13.7 17.2" strokeWidth={strokeWidth * 0.5} opacity={0.5} />
+        <path d="M17.5 12.4h0.01" strokeWidth={strokeWidth * 0.85} />
       </motion.g>
     </svg>
   );

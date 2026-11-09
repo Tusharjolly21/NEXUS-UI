@@ -4,7 +4,7 @@ import { blip, tick, puff, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.51;
 
 /** A soft feather rustle and a low double hoot, one as the head turns to the left and one as it turns to the right, then a tiny click as the eyes blink shut. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

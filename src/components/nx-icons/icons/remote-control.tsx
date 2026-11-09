@@ -17,7 +17,7 @@ export type RemoteControlIconProps = {
   play?: boolean;
 };
 
-/** A TV remote whose buttons press in turn before its infrared rays fire twice. */
+/** A TV remote whose power button presses in, then its signal arcs pulse outward twice. */
 export function RemoteControlIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: RemoteControlIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -38,60 +38,36 @@ export function RemoteControlIcon({ size = 24, strokeWidth = 2, className, speed
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <g transform="translate(0 -0.12)">
-      <rect x="7.5" y="8" width="9" height="13.5" rx="2.5" />
-      <path d="M12 6.4h.01" stroke={accent} strokeWidth={2.4} />
+      <rect x="7.8" y="7.4" width="8.4" height="14.1" rx="2.4" />
       <motion.path
-        d="M9.79 4.85L8.81 4.16"
+        d="M12 10.48h0.01"
+        stroke={accent}
+        strokeWidth={2.6}
+        style={{ originX: "50%", originY: "43.67%" }}
+        initial={false}
+        animate={on ? { scale: [1, 0.65, 1] } : { scale: 1 }}
+        transition={{ duration: 0.25 / speed, delay: (0.05) / speed }}
+      />
+      <circle cx="12" cy="14.91" r="1.7" strokeWidth={strokeWidth * 0.65} />
+      <path d="M10.1 18.89h0.01M13.9 18.89h0.01" strokeWidth={strokeWidth * 0.85} />
+      <motion.path
+        d="M10.46 4.94A2.3 2.3 0 0 1 13.54 4.94"
         stroke={accent}
         strokeWidth={strokeWidth * 0.75}
+        style={{ originX: "50%", originY: "27.71%" }}
         initial={false}
-        animate={on ? { pathLength: [1, 1, 0, 1, 0, 1], opacity: [1, 1, 0, 1, 0, 1] } : { pathLength: 1, opacity: 1 }}
-        transition={{ duration: 1.2 / speed, times: [0, 0.49, 0.5, 0.7, 0.71, 1], ease: "easeOut" }}
+        animate={on ? { opacity: [1, 1, 0, 1, 1, 0, 1, 1], scale: [1, 1, 0.55, 1, 1, 0.55, 1, 1] } : { opacity: 1, scale: 1 }}
+        transition={{ duration: 1.2 / speed, times: [0, 0.3, 0.33, 0.52, 0.75, 0.78, 0.97, 1] }}
       />
       <motion.path
-        d="M12 3.7L12 2.5"
+        d="M9.06 3.38A4.4 4.4 0 0 1 14.94 3.38"
         stroke={accent}
         strokeWidth={strokeWidth * 0.75}
+        style={{ originX: "50%", originY: "27.71%" }}
         initial={false}
-        animate={on ? { pathLength: [1, 1, 0, 1, 0, 1], opacity: [1, 1, 0, 1, 0, 1] } : { pathLength: 1, opacity: 1 }}
-        transition={{ duration: 1.2 / speed, times: [0, 0.49, 0.5, 0.7, 0.71, 1], ease: "easeOut" }}
+        animate={on ? { opacity: [1, 1, 0, 1, 1, 0, 1, 1], scale: [1, 1, 0.55, 1, 1, 0.55, 1, 1] } : { opacity: 1, scale: 1 }}
+        transition={{ duration: 1.2 / speed, times: [0, 0.42, 0.45, 0.64, 0.87, 0.9, 1.09, 1] }}
       />
-      <motion.path
-        d="M14.21 4.85L15.19 4.16"
-        stroke={accent}
-        strokeWidth={strokeWidth * 0.75}
-        initial={false}
-        animate={on ? { pathLength: [1, 1, 0, 1, 0, 1], opacity: [1, 1, 0, 1, 0, 1] } : { pathLength: 1, opacity: 1 }}
-        transition={{ duration: 1.2 / speed, times: [0, 0.49, 0.5, 0.7, 0.71, 1], ease: "easeOut" }}
-      />
-      <motion.circle
-        cx="12"
-        cy="13.65"
-        r="2.3"
-        strokeWidth={strokeWidth * 0.75}
-        style={{ originX: "50%", originY: "56.9%" }}
-        initial={false}
-        animate={on ? { scale: [1, 1, 0.8, 1, 1] } : { scale: 1 }}
-        transition={{ duration: 1.2 / speed, times: [0, 0.38, 0.46, 0.58, 1] }}
-      />
-      <motion.path
-        d="M10.2 18.6h.01"
-        strokeWidth={2.2}
-        style={{ originX: "42.5%", originY: "77.5%" }}
-        initial={false}
-        animate={on ? { scale: [1, 0.5, 1] } : { scale: 1 }}
-        transition={{ duration: 0.25 / speed, delay: (on ? 0.05 : 0) / speed }}
-      />
-      <motion.path
-        d="M13.8 18.6h.01"
-        strokeWidth={2.2}
-        style={{ originX: "57.5%", originY: "77.5%" }}
-        initial={false}
-        animate={on ? { scale: [1, 0.5, 1] } : { scale: 1 }}
-        transition={{ duration: 0.25 / speed, delay: (on ? 0.22 : 0) / speed }}
-      />
-      </g>
     </svg>
   );
 }

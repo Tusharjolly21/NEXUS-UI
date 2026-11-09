@@ -4,7 +4,7 @@ import { ding, blip, swish, thud, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.81;
 
 /** A cardboard creak as the carton tips, a bubbly glug when the milk starts to pour, one clear drip as the drop lands, and a dull knock when the carton sits upright again. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

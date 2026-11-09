@@ -4,7 +4,7 @@ import { blip, swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 1.3;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.93;
 
 /** A hydraulic pump whine and hiss as the ladder raises (0.00 to 0.30), a metallic clink when it locks, a long rasping metal slide as the next section runs out (0.30 to 0.72) ending in a clack, then a falling whine as it folds back down (0.86 to 1.20) and a heavy clunk as it rests on the truck. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

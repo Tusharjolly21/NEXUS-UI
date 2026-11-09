@@ -4,7 +4,7 @@ import { blip, swish, thud, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.35;
 
 /** A wooden creak as the sails wind back, a rising and falling whoosh as they sweep a quarter turn with one low whump at their fastest, and a small wooden knock as they settle. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

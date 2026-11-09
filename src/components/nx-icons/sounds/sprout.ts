@@ -4,7 +4,7 @@ import { ding, blip, swish, puff, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 3.08;
 
 /** A soft crumble of soil as the mound heaves, a rising creak while the stem pushes up, then two airy sweeps with a dewdrop glint each as the leaves unfurl. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

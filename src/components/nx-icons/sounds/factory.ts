@@ -4,7 +4,7 @@ import { swish, thud, puff, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.57;
 
 /** Two steam chuffs, a low one as the left chimney lets its puff rise and a slightly higher one for the right chimney a quarter second later, each with a soft rising hiss, then two small breaths as fresh puffs form. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

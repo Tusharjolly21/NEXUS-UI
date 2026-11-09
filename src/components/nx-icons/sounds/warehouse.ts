@@ -4,7 +4,7 @@ import { swish, tick, thud, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.71;
 
 /** A metal shutter rattling: a run of rolling clicks as the slats climb into the frame, a clunk at the top, then a quicker rattle down and two heavy thumps as the slats land on the floor. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

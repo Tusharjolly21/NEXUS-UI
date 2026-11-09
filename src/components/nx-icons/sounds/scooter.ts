@@ -4,7 +4,7 @@ import { swish, tick, puff, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.94;
 
 /** A foot scuff on the pavement as the rider kicks off, a rubbery whirr of two wheels that starts bright and slowly sinks as the spin eases off, three soft ticks where the wheel marks pass at 0.14, 0.31 and 0.51, and a last small tick as it rolls to a stop. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

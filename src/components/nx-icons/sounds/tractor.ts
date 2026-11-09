@@ -4,7 +4,7 @@ import { blip, thud, puff, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.83;
 
 /** A slow diesel chug in three beats (0.10, 0.28, 0.46), each a low thump with a woolly puff of exhaust as the smoke leaves the pipe and the tractor bumps forward, then a low rumble that sinks away as it rolls back. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

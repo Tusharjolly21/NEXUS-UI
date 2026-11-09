@@ -4,7 +4,7 @@ import { blip, tick, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.3;
 
 /** A tiny motor whirr that follows the ball as it swings left, right and back, three quick focus ratchets as the lens breathes, and two short recording beeps as the red light comes on. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

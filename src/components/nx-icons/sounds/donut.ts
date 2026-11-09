@@ -4,7 +4,7 @@ import { blip, swish, thud, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.09;
 
 /** A low soft roll as the ring turns a quarter, a muffled plop when it settles, and three bright rising pops as the sprinkles hop. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

@@ -4,7 +4,7 @@ import { blip, swish, puff, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.31;
 
 /** Water washes past all the way through, a splash and a bubbly gulp as the paddle blade dips in, a few drips as it lifts out, soft wooden creaks of the hull gliding, and a light air sweep as the paddle swings across. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

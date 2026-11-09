@@ -4,7 +4,7 @@ import { blip, tick, thud, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.0;
 
 /** A heartbeat: a low lub as the red cross swells, a lighter dub as it swells again, with four rising monitor beeps and tiny switch clicks as the windows light one after another. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

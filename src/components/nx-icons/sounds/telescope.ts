@@ -4,7 +4,7 @@ import { ding, blip, swish, tick, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.95;
 
 /** A smooth brass slide as the tube pans up, a small lock click when it stops, a three note starlight shimmer as the sparkle blooms, twinkles and fades, then a slide back down and a last click as it settles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

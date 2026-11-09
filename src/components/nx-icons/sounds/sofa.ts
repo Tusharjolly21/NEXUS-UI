@@ -4,7 +4,7 @@ import { swish, thud, puff, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.19;
 
 /** Two soft foam sounds, each a breath of air into the cushion and a low pillowy thump as it reaches full plumpness, the left first then the right a little higher, with a faint settling sigh after each. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

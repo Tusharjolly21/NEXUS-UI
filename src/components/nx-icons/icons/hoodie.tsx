@@ -38,38 +38,36 @@ export function HoodieIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <path d="M6 18L2.8 18L4.4 8.8L8.2 7" />
-      <path d="M15.8 7L19.6 8.8L21.2 18L18 18" />
-      <path d="M6.9 7.62L6 11.8L6 21L18 21L18 11.8L17.1 7.62" />
-      <path d="M8.4 21L9.4 15.6L14.6 15.6L15.6 21" />
+      <path d="M6.2 7.7L2.6 11.99L4.75 13.79L6.2 12.06V20.3" />
+      <path d="M17.8 7.7L21.4 11.99L19.25 13.79L17.8 12.06V20.3" />
+      <path d="M6.2 20.3H17.8" />
+      <path d="M7.6 20.3L9.2 15.9H14.8L16.4 20.3" />
       <motion.g
-        style={{ originX: "50%", originY: "29.17%" }}
+        style={{ originX: "50%", originY: "32.08%" }}
         initial={false}
-        animate={on ? { scaleY: [1, 1.12, 0.95, 1.03, 1] } : { scaleY: 1 }}
+        animate={on ? { scaleY: [1, 1.1, 0.95, 1.03, 1] } : { scaleY: 1 }}
         transition={{ duration: 0.8 / speed, ease: "easeInOut" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="M8.2 7C7.2 4.8 9.6 3 12 3C14.4 3 16.8 4.8 15.8 7" />
-        <path d="M8.2 7C8.8 8.8 10.4 9.6 12 9.6C13.6 9.6 15.2 8.8 15.8 7" />
-
+        <path d="M6.2 7.7C5.9 5.1 9.2 3.7 12 3.7C14.8 3.7 18.1 5.1 17.8 7.7" />
+        <path d="M6.2 7.7C7.6 10.9 10.2 11.5 12 11.5C13.8 11.5 16.4 10.9 17.8 7.7" />
         <motion.g
-          style={{ originX: "41.82%", originY: "38.13%" }}
+          style={{ originX: "42.5%", originY: "47%" }}
           initial={false}
           animate={on ? { rotate: [0, 16, -11, 6, -3, 0] } : { rotate: 0 }}
           transition={{ duration: 0.75 / speed, delay: (on ? 0.05 : 0) / speed, ease: "easeInOut" }}
         >
           <rect width="24" height="24" fill="none" stroke="none" />
-          <path d="M10 9.15L10 12.95" stroke={accent} strokeWidth={strokeWidth * 0.75} />
+          <path d="M10.2 11.28V13.68" stroke={accent} strokeWidth={strokeWidth * 0.75} />
         </motion.g>
-
         <motion.g
-          style={{ originX: "58.18%", originY: "38.13%" }}
+          style={{ originX: "57.5%", originY: "47%" }}
           initial={false}
           animate={on ? { rotate: [0, 16, -11, 6, -3, 0] } : { rotate: 0 }}
           transition={{ duration: 0.75 / speed, delay: (on ? 0.12 : 0) / speed, ease: "easeInOut" }}
         >
           <rect width="24" height="24" fill="none" stroke="none" />
-          <path d="M14 9.15L14 12.95" stroke={accent} strokeWidth={strokeWidth * 0.75} />
+          <path d="M13.8 11.28V13.68" stroke={accent} strokeWidth={strokeWidth * 0.75} />
         </motion.g>
       </motion.g>
     </svg>

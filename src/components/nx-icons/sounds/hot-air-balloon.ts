@@ -4,7 +4,7 @@ import { blip, swish, puff, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 3.36;
 
 /** A roaring burner blast at each flame flare (0.18, 0.58 and 0.98, each a little softer), a faint rope creak at each end of the sway (0.40 and 0.80) with a rustle of fabric, and a soft breath of air that swells as the balloon rises and eases as it settles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

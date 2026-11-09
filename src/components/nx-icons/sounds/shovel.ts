@@ -4,7 +4,7 @@ import { swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.66;
 
 /** Gritty soil as the blade pushes in, a heavy thump when it bottoms out, three light taps of clods landing on the steel, an air flick as it lifts, and a scatter of grit as the soil is tossed and falls. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

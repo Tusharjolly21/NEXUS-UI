@@ -4,7 +4,7 @@ import { blip, swish, tick, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.42;
 
 /** A short electronic zip as the four corners tighten and lock with a click, a thin scanner whine that climbs while the beam goes down and falls as it comes back up, a bar-code beep each time it crosses the centre dot, and a soft release. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
