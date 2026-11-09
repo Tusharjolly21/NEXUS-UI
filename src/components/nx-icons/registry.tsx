@@ -401,6 +401,106 @@ import { CloudSnowIcon } from "./icons/cloud-snow";
 import { TornadoIcon } from "./icons/tornado";
 import { MeteorIcon } from "./icons/meteor";
 import { CloudSunIcon } from "./icons/cloud-sun";
+import { CroissantIcon } from "./icons/croissant";
+import { DonutIcon } from "./icons/donut";
+import { CookieIcon } from "./icons/cookie";
+import { PopcornIcon } from "./icons/popcorn";
+import { SandwichIcon } from "./icons/sandwich";
+import { SoupBowlIcon } from "./icons/soup-bowl";
+import { CarrotIcon } from "./icons/carrot";
+import { AvocadoIcon } from "./icons/avocado";
+import { OrangeSliceIcon } from "./icons/orange-slice";
+import { MilkCartonIcon } from "./icons/milk-carton";
+import { WheatIcon } from "./icons/wheat";
+import { LollipopIcon } from "./icons/lollipop";
+import { BasketballIcon } from "./icons/basketball";
+import { AmericanFootballIcon } from "./icons/american-football";
+import { TennisRacquetIcon } from "./icons/tennis-racquet";
+import { BaseballIcon } from "./icons/baseball";
+import { BowlingBallIcon } from "./icons/bowling-ball";
+import { GolfIcon } from "./icons/golf";
+import { VolleyballIcon } from "./icons/volleyball";
+import { PingPongIcon } from "./icons/ping-pong";
+import { SkateboardIcon } from "./icons/skateboard";
+import { KayakIcon } from "./icons/kayak";
+import { TramIcon } from "./icons/tram";
+import { TaxiIcon } from "./icons/taxi";
+import { ScooterIcon } from "./icons/scooter";
+import { TractorIcon } from "./icons/tractor";
+import { BulldozerIcon } from "./icons/bulldozer";
+import { CraneIcon } from "./icons/crane";
+import { AmbulanceIcon } from "./icons/ambulance";
+import { FireTruckIcon } from "./icons/fire-truck";
+import { HotAirBalloonIcon } from "./icons/hot-air-balloon";
+import { HelicopterIcon } from "./icons/helicopter";
+import { HospitalIcon } from "./icons/hospital";
+import { FactoryIcon } from "./icons/factory";
+import { WarehouseIcon } from "./icons/warehouse";
+import { CastleIcon } from "./icons/castle";
+import { WindmillIcon } from "./icons/windmill";
+import { BarnIcon } from "./icons/barn";
+import { UniversityIcon } from "./icons/university";
+import { StadiumIcon } from "./icons/stadium";
+import { HardHatIcon } from "./icons/hard-hat";
+import { ShovelIcon } from "./icons/shovel";
+import { AxeIcon } from "./icons/axe";
+import { DrillIcon } from "./icons/drill";
+import { ScrewdriverIcon } from "./icons/screwdriver";
+import { PliersIcon } from "./icons/pliers";
+import { BackpackIcon } from "./icons/backpack";
+import { HandbagIcon } from "./icons/handbag";
+import { BinocularsIcon } from "./icons/binoculars";
+import { TelescopeIcon } from "./icons/telescope";
+import { MicroscopeIcon } from "./icons/microscope";
+import { FireExtinguisherIcon } from "./icons/fire-extinguisher";
+import { SofaIcon } from "./icons/sofa";
+import { WashingMachineIcon } from "./icons/washing-machine";
+import { SunglassesIcon } from "./icons/sunglasses";
+import { BaseballCapIcon } from "./icons/baseball-cap";
+import { UsbIcon } from "./icons/usb";
+import { WebcamIcon } from "./icons/webcam";
+import { ProjectorIcon } from "./icons/projector";
+import { HeadsetIcon } from "./icons/headset";
+import { DroneIcon } from "./icons/drone";
+import { RouterIcon } from "./icons/router";
+import { BarcodeIcon } from "./icons/barcode";
+import { SimCardIcon } from "./icons/sim-card";
+import { RemoteControlIcon } from "./icons/remote-control";
+import { SatelliteDishIcon } from "./icons/satellite-dish";
+import { RadiationIcon } from "./icons/radiation";
+import { BiohazardIcon } from "./icons/biohazard";
+import { VirusIcon } from "./icons/virus";
+import { BoneIcon } from "./icons/bone";
+import { SyringeIcon } from "./icons/syringe";
+import { SatelliteIcon } from "./icons/satellite";
+import { RadarIcon } from "./icons/radar";
+import { SolarPanelIcon } from "./icons/solar-panel";
+import { RabbitIcon } from "./icons/rabbit";
+import { TurtleIcon } from "./icons/turtle";
+import { OwlIcon } from "./icons/owl";
+import { PenguinIcon } from "./icons/penguin";
+import { BeeIcon } from "./icons/bee";
+import { SnailIcon } from "./icons/snail";
+import { HorseIcon } from "./icons/horse";
+import { WhaleIcon } from "./icons/whale";
+import { FrogIcon } from "./icons/frog";
+import { SharkIcon } from "./icons/shark";
+import { SproutIcon } from "./icons/sprout";
+import { CloverIcon } from "./icons/clover";
+import { TulipIcon } from "./icons/tulip";
+import { PalmTreeIcon } from "./icons/palm-tree";
+import { MushroomIcon } from "./icons/mushroom";
+import { VolcanoIcon } from "./icons/volcano";
+import { AcornIcon } from "./icons/acorn";
+import { DressIcon } from "./icons/dress";
+import { HoodieIcon } from "./icons/hoodie";
+import { SneakerIcon } from "./icons/sneaker";
+import { ScanViewfinderIcon } from "./icons/scan-viewfinder";
+import { HistoryIcon } from "./icons/history";
+import { CrosshairIcon } from "./icons/crosshair";
+import { ExpandIcon } from "./icons/expand";
+import { CollapseIcon } from "./icons/collapse";
+import { ImportIcon } from "./icons/import";
 
 export type NxIconProps = {
   size?: number;
@@ -815,4 +915,104 @@ export const NX_ICONS: Record<string, ComponentType<NxIconProps>> = {
   "tornado": TornadoIcon,
   "meteor": MeteorIcon,
   "cloud-sun": CloudSunIcon,
+  "croissant": CroissantIcon,
+  "donut": DonutIcon,
+  "cookie": CookieIcon,
+  "popcorn": PopcornIcon,
+  "sandwich": SandwichIcon,
+  "soup-bowl": SoupBowlIcon,
+  "carrot": CarrotIcon,
+  "avocado": AvocadoIcon,
+  "orange-slice": OrangeSliceIcon,
+  "milk-carton": MilkCartonIcon,
+  "wheat": WheatIcon,
+  "lollipop": LollipopIcon,
+  "basketball": BasketballIcon,
+  "american-football": AmericanFootballIcon,
+  "tennis-racquet": TennisRacquetIcon,
+  "baseball": BaseballIcon,
+  "bowling-ball": BowlingBallIcon,
+  "golf": GolfIcon,
+  "volleyball": VolleyballIcon,
+  "ping-pong": PingPongIcon,
+  "skateboard": SkateboardIcon,
+  "kayak": KayakIcon,
+  "tram": TramIcon,
+  "taxi": TaxiIcon,
+  "scooter": ScooterIcon,
+  "tractor": TractorIcon,
+  "bulldozer": BulldozerIcon,
+  "crane": CraneIcon,
+  "ambulance": AmbulanceIcon,
+  "fire-truck": FireTruckIcon,
+  "hot-air-balloon": HotAirBalloonIcon,
+  "helicopter": HelicopterIcon,
+  "hospital": HospitalIcon,
+  "factory": FactoryIcon,
+  "warehouse": WarehouseIcon,
+  "castle": CastleIcon,
+  "windmill": WindmillIcon,
+  "barn": BarnIcon,
+  "university": UniversityIcon,
+  "stadium": StadiumIcon,
+  "hard-hat": HardHatIcon,
+  "shovel": ShovelIcon,
+  "axe": AxeIcon,
+  "drill": DrillIcon,
+  "screwdriver": ScrewdriverIcon,
+  "pliers": PliersIcon,
+  "backpack": BackpackIcon,
+  "handbag": HandbagIcon,
+  "binoculars": BinocularsIcon,
+  "telescope": TelescopeIcon,
+  "microscope": MicroscopeIcon,
+  "fire-extinguisher": FireExtinguisherIcon,
+  "sofa": SofaIcon,
+  "washing-machine": WashingMachineIcon,
+  "sunglasses": SunglassesIcon,
+  "baseball-cap": BaseballCapIcon,
+  "usb": UsbIcon,
+  "webcam": WebcamIcon,
+  "projector": ProjectorIcon,
+  "headset": HeadsetIcon,
+  "drone": DroneIcon,
+  "router": RouterIcon,
+  "barcode": BarcodeIcon,
+  "sim-card": SimCardIcon,
+  "remote-control": RemoteControlIcon,
+  "satellite-dish": SatelliteDishIcon,
+  "radiation": RadiationIcon,
+  "biohazard": BiohazardIcon,
+  "virus": VirusIcon,
+  "bone": BoneIcon,
+  "syringe": SyringeIcon,
+  "satellite": SatelliteIcon,
+  "radar": RadarIcon,
+  "solar-panel": SolarPanelIcon,
+  "rabbit": RabbitIcon,
+  "turtle": TurtleIcon,
+  "owl": OwlIcon,
+  "penguin": PenguinIcon,
+  "bee": BeeIcon,
+  "snail": SnailIcon,
+  "horse": HorseIcon,
+  "whale": WhaleIcon,
+  "frog": FrogIcon,
+  "shark": SharkIcon,
+  "sprout": SproutIcon,
+  "clover": CloverIcon,
+  "tulip": TulipIcon,
+  "palm-tree": PalmTreeIcon,
+  "mushroom": MushroomIcon,
+  "volcano": VolcanoIcon,
+  "acorn": AcornIcon,
+  "dress": DressIcon,
+  "hoodie": HoodieIcon,
+  "sneaker": SneakerIcon,
+  "scan-viewfinder": ScanViewfinderIcon,
+  "history": HistoryIcon,
+  "crosshair": CrosshairIcon,
+  "expand": ExpandIcon,
+  "collapse": CollapseIcon,
+  "import": ImportIcon,
 };

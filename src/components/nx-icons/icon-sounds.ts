@@ -406,6 +406,107 @@ import * as s_tornado from "./sounds/tornado";
 import * as s_meteor from "./sounds/meteor";
 import * as s_cloud_sun from "./sounds/cloud-sun";
 
+import * as s_croissant from "./sounds/croissant";
+import * as s_donut from "./sounds/donut";
+import * as s_cookie from "./sounds/cookie";
+import * as s_popcorn from "./sounds/popcorn";
+import * as s_sandwich from "./sounds/sandwich";
+import * as s_soup_bowl from "./sounds/soup-bowl";
+import * as s_carrot from "./sounds/carrot";
+import * as s_avocado from "./sounds/avocado";
+import * as s_orange_slice from "./sounds/orange-slice";
+import * as s_milk_carton from "./sounds/milk-carton";
+import * as s_wheat from "./sounds/wheat";
+import * as s_lollipop from "./sounds/lollipop";
+import * as s_basketball from "./sounds/basketball";
+import * as s_american_football from "./sounds/american-football";
+import * as s_tennis_racquet from "./sounds/tennis-racquet";
+import * as s_baseball from "./sounds/baseball";
+import * as s_bowling_ball from "./sounds/bowling-ball";
+import * as s_golf from "./sounds/golf";
+import * as s_volleyball from "./sounds/volleyball";
+import * as s_ping_pong from "./sounds/ping-pong";
+import * as s_skateboard from "./sounds/skateboard";
+import * as s_kayak from "./sounds/kayak";
+import * as s_tram from "./sounds/tram";
+import * as s_taxi from "./sounds/taxi";
+import * as s_scooter from "./sounds/scooter";
+import * as s_tractor from "./sounds/tractor";
+import * as s_bulldozer from "./sounds/bulldozer";
+import * as s_crane from "./sounds/crane";
+import * as s_ambulance from "./sounds/ambulance";
+import * as s_fire_truck from "./sounds/fire-truck";
+import * as s_hot_air_balloon from "./sounds/hot-air-balloon";
+import * as s_helicopter from "./sounds/helicopter";
+import * as s_hospital from "./sounds/hospital";
+import * as s_factory from "./sounds/factory";
+import * as s_warehouse from "./sounds/warehouse";
+import * as s_castle from "./sounds/castle";
+import * as s_windmill from "./sounds/windmill";
+import * as s_barn from "./sounds/barn";
+import * as s_university from "./sounds/university";
+import * as s_stadium from "./sounds/stadium";
+import * as s_hard_hat from "./sounds/hard-hat";
+import * as s_shovel from "./sounds/shovel";
+import * as s_axe from "./sounds/axe";
+import * as s_drill from "./sounds/drill";
+import * as s_screwdriver from "./sounds/screwdriver";
+import * as s_pliers from "./sounds/pliers";
+import * as s_backpack from "./sounds/backpack";
+import * as s_handbag from "./sounds/handbag";
+import * as s_binoculars from "./sounds/binoculars";
+import * as s_telescope from "./sounds/telescope";
+import * as s_microscope from "./sounds/microscope";
+import * as s_fire_extinguisher from "./sounds/fire-extinguisher";
+import * as s_sofa from "./sounds/sofa";
+import * as s_washing_machine from "./sounds/washing-machine";
+import * as s_sunglasses from "./sounds/sunglasses";
+import * as s_baseball_cap from "./sounds/baseball-cap";
+import * as s_usb from "./sounds/usb";
+import * as s_webcam from "./sounds/webcam";
+import * as s_projector from "./sounds/projector";
+import * as s_headset from "./sounds/headset";
+import * as s_drone from "./sounds/drone";
+import * as s_router from "./sounds/router";
+import * as s_barcode from "./sounds/barcode";
+import * as s_sim_card from "./sounds/sim-card";
+import * as s_remote_control from "./sounds/remote-control";
+import * as s_satellite_dish from "./sounds/satellite-dish";
+import * as s_radiation from "./sounds/radiation";
+import * as s_biohazard from "./sounds/biohazard";
+import * as s_virus from "./sounds/virus";
+import * as s_bone from "./sounds/bone";
+import * as s_syringe from "./sounds/syringe";
+import * as s_satellite from "./sounds/satellite";
+import * as s_radar from "./sounds/radar";
+import * as s_solar_panel from "./sounds/solar-panel";
+import * as s_rabbit from "./sounds/rabbit";
+import * as s_turtle from "./sounds/turtle";
+import * as s_owl from "./sounds/owl";
+import * as s_penguin from "./sounds/penguin";
+import * as s_bee from "./sounds/bee";
+import * as s_snail from "./sounds/snail";
+import * as s_horse from "./sounds/horse";
+import * as s_whale from "./sounds/whale";
+import * as s_frog from "./sounds/frog";
+import * as s_shark from "./sounds/shark";
+import * as s_sprout from "./sounds/sprout";
+import * as s_clover from "./sounds/clover";
+import * as s_tulip from "./sounds/tulip";
+import * as s_palm_tree from "./sounds/palm-tree";
+import * as s_mushroom from "./sounds/mushroom";
+import * as s_volcano from "./sounds/volcano";
+import * as s_acorn from "./sounds/acorn";
+import * as s_dress from "./sounds/dress";
+import * as s_hoodie from "./sounds/hoodie";
+import * as s_sneaker from "./sounds/sneaker";
+import * as s_scan_viewfinder from "./sounds/scan-viewfinder";
+import * as s_history from "./sounds/history";
+import * as s_crosshair from "./sounds/crosshair";
+import * as s_expand from "./sounds/expand";
+import * as s_collapse from "./sounds/collapse";
+import * as s_import from "./sounds/import";
+
 type Score = { length: number; level: number; play: (c: AudioContext, o: AudioNode, t: Time) => void };
 
 /** Every icon's score by slug. Each one is timed against that icon's own animation. */
@@ -810,6 +911,106 @@ const SCORES: Record<string, Score> = {
   "tornado": s_tornado,
   "meteor": s_meteor,
   "cloud-sun": s_cloud_sun,
+  "croissant": s_croissant,
+  "donut": s_donut,
+  "cookie": s_cookie,
+  "popcorn": s_popcorn,
+  "sandwich": s_sandwich,
+  "soup-bowl": s_soup_bowl,
+  "carrot": s_carrot,
+  "avocado": s_avocado,
+  "orange-slice": s_orange_slice,
+  "milk-carton": s_milk_carton,
+  "wheat": s_wheat,
+  "lollipop": s_lollipop,
+  "basketball": s_basketball,
+  "american-football": s_american_football,
+  "tennis-racquet": s_tennis_racquet,
+  "baseball": s_baseball,
+  "bowling-ball": s_bowling_ball,
+  "golf": s_golf,
+  "volleyball": s_volleyball,
+  "ping-pong": s_ping_pong,
+  "skateboard": s_skateboard,
+  "kayak": s_kayak,
+  "tram": s_tram,
+  "taxi": s_taxi,
+  "scooter": s_scooter,
+  "tractor": s_tractor,
+  "bulldozer": s_bulldozer,
+  "crane": s_crane,
+  "ambulance": s_ambulance,
+  "fire-truck": s_fire_truck,
+  "hot-air-balloon": s_hot_air_balloon,
+  "helicopter": s_helicopter,
+  "hospital": s_hospital,
+  "factory": s_factory,
+  "warehouse": s_warehouse,
+  "castle": s_castle,
+  "windmill": s_windmill,
+  "barn": s_barn,
+  "university": s_university,
+  "stadium": s_stadium,
+  "hard-hat": s_hard_hat,
+  "shovel": s_shovel,
+  "axe": s_axe,
+  "drill": s_drill,
+  "screwdriver": s_screwdriver,
+  "pliers": s_pliers,
+  "backpack": s_backpack,
+  "handbag": s_handbag,
+  "binoculars": s_binoculars,
+  "telescope": s_telescope,
+  "microscope": s_microscope,
+  "fire-extinguisher": s_fire_extinguisher,
+  "sofa": s_sofa,
+  "washing-machine": s_washing_machine,
+  "sunglasses": s_sunglasses,
+  "baseball-cap": s_baseball_cap,
+  "usb": s_usb,
+  "webcam": s_webcam,
+  "projector": s_projector,
+  "headset": s_headset,
+  "drone": s_drone,
+  "router": s_router,
+  "barcode": s_barcode,
+  "sim-card": s_sim_card,
+  "remote-control": s_remote_control,
+  "satellite-dish": s_satellite_dish,
+  "radiation": s_radiation,
+  "biohazard": s_biohazard,
+  "virus": s_virus,
+  "bone": s_bone,
+  "syringe": s_syringe,
+  "satellite": s_satellite,
+  "radar": s_radar,
+  "solar-panel": s_solar_panel,
+  "rabbit": s_rabbit,
+  "turtle": s_turtle,
+  "owl": s_owl,
+  "penguin": s_penguin,
+  "bee": s_bee,
+  "snail": s_snail,
+  "horse": s_horse,
+  "whale": s_whale,
+  "frog": s_frog,
+  "shark": s_shark,
+  "sprout": s_sprout,
+  "clover": s_clover,
+  "tulip": s_tulip,
+  "palm-tree": s_palm_tree,
+  "mushroom": s_mushroom,
+  "volcano": s_volcano,
+  "acorn": s_acorn,
+  "dress": s_dress,
+  "hoodie": s_hoodie,
+  "sneaker": s_sneaker,
+  "scan-viewfinder": s_scan_viewfinder,
+  "history": s_history,
+  "crosshair": s_crosshair,
+  "expand": s_expand,
+  "collapse": s_collapse,
+  "import": s_import,
 };
 
 export function hasIconSound(slug: string) {
