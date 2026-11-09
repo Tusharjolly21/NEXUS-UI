@@ -3,8 +3,9 @@
 import * as React from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Copy, FileCog, KeyRound, Lock, MessageSquareText, Unlock } from "lucide-react";
 import { BrandMark, type MarkName } from "./brand-marks";
+import { ICON_TILE, McpIcon, type McpIconName } from "./mcp-icon";
+import { useSound } from "@/lib/ui-sounds";
 import { cn } from "@/lib/utils";
 
 export type Setup = {
@@ -20,8 +21,12 @@ export type Setup = {
   note?: string;
 };
 
-/** A Copy button that says "Copied" for a moment. */
+/**
+ * A Copy button. On a real copy it plays the site's copy sound (which follows the visitor's sound switch), its
+ * copy icon ticks, and the label says "Copied" for a moment.
+ */
 export function CopyButton({ text, label = "Copy", className, onDark = false }: { text: string; label?: string; className?: string; onDark?: boolean }) {
+  const play = useSound();
   const [copied, setCopied] = React.useState(false);
   React.useEffect(() => {
     if (!copied) return;
@@ -34,6 +39,7 @@ export function CopyButton({ text, label = "Copy", className, onDark = false }: 
       onClick={async () => {
         try {
           await navigator.clipboard.writeText(text);
+          play("success", 0.6);
           setCopied(true);
         } catch {
           // clipboard blocked; the text stays selectable
@@ -45,7 +51,7 @@ export function CopyButton({ text, label = "Copy", className, onDark = false }: 
         className,
       )}
     >
-      {copied ? <Check className="size-3.5" aria-hidden /> : <Copy className="size-3.5" aria-hidden />}
+      <McpIcon name="copy" size={15} play={copied} />
       <span aria-live="polite">{copied ? "Copied" : label}</span>
     </button>
   );
@@ -105,9 +111,9 @@ export function SetupTabs({ setups }: { setups: Setup[] }) {
 
         <div role="radiogroup" aria-label="Which components" className="flex shrink-0 rounded-full bg-secondary p-1 ring-1 ring-border">
           {[
-            { v: false, label: "Free", Icon: Unlock },
-            { v: true, label: "Pro", Icon: Lock },
-          ].map(({ v, label, Icon }) => (
+            { v: false, label: "Free", icon: "unlock" },
+            { v: true, label: "Pro", icon: "lock" },
+          ].map(({ v, label, icon }) => (
             <button
               key={label}
               type="button"
@@ -120,7 +126,7 @@ export function SetupTabs({ setups }: { setups: Setup[] }) {
               )}
             >
               {pro === v ? <motion.span layoutId="setup-tier" className="absolute inset-0 rounded-full bg-foreground" transition={{ type: "spring", stiffness: 420, damping: 34 }} /> : null}
-              <Icon className="relative size-3.5" aria-hidden />
+              <McpIcon name={icon as McpIconName} size={14} className="relative" />
               <span className="relative">{label}</span>
             </button>
           ))}
@@ -138,7 +144,7 @@ export function SetupTabs({ setups }: { setups: Setup[] }) {
           <p className="mt-4 text-[15.5px] leading-relaxed text-body">{s.where}</p>
           {s.file ? (
             <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 font-mono text-[12.5px] text-foreground ring-1 ring-border">
-              <FileCog className="size-3.5 text-muted-foreground" aria-hidden />
+              <McpIcon name="file-code" size={15} className="text-muted-foreground" />
               {s.file}
             </p>
           ) : null}
@@ -147,7 +153,7 @@ export function SetupTabs({ setups }: { setups: Setup[] }) {
               {pro ? (
                 <div className="mt-5 rounded-2xl bg-[#7c5cff]/10 p-4 ring-1 ring-[#7c5cff]/20">
                   <p className="flex items-center gap-2 text-[14px] font-semibold text-foreground">
-                    <KeyRound className="size-4" aria-hidden /> Needs your API key
+                    <McpIcon name="key" size={16} /> Needs your API key
                   </p>
                   <p className="mt-1.5 text-[14px] leading-relaxed text-body">
                     Create it on your dashboard. It is shown once, so copy it straight away.
@@ -156,13 +162,13 @@ export function SetupTabs({ setups }: { setups: Setup[] }) {
                     href="/dashboard/api-key"
                     className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 text-[13px] font-semibold text-background hover:opacity-90"
                   >
-                    <KeyRound className="size-3.5" aria-hidden /> Get your API key
+                    <McpIcon name="key" size={14} /> Get your API key
                   </Link>
                 </div>
               ) : (
                 <div className="mt-5 rounded-2xl bg-[#1f9d55]/10 p-4 ring-1 ring-[#1f9d55]/20">
                   <p className="flex items-center gap-2 text-[14px] font-semibold text-foreground">
-                    <Unlock className="size-4" aria-hidden /> No key, no account
+                    <McpIcon name="unlock" size={16} /> No key, no account
                   </p>
                   <p className="mt-1.5 text-[14px] leading-relaxed text-body">Every free component, with its full source. Switch to Pro when you want the rest.</p>
                 </div>
@@ -197,14 +203,12 @@ export function SetupTabs({ setups }: { setups: Setup[] }) {
 }
 
 /** Example requests as chips you can copy. */
-export function AskChips({ asks }: { asks: { text: string; tint: string }[] }) {
+export function AskChips({ asks }: { asks: { text: string; icon: McpIconName }[] }) {
   return (
     <ul className="grid gap-3 sm:grid-cols-2">
       {asks.map((a) => (
-        <li key={a.text} className="pg-float flex items-center gap-3.5 rounded-[20px] bg-card p-4">
-          <span className={cn("grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br text-white", a.tint)}>
-            <MessageSquareText className="size-[18px]" aria-hidden />
-          </span>
+        <li key={a.text} data-icon-card className="pg-float flex items-center gap-3.5 rounded-[20px] bg-card p-4">
+          <McpIcon name={a.icon} size={22} tile={cn(ICON_TILE, "size-10 rounded-xl")} />
           <p className="min-w-0 flex-1 text-[15.5px] leading-snug text-foreground">&ldquo;{a.text}&rdquo;</p>
           <CopyButton text={a.text} label="Copy" />
         </li>

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Check, KeyRound, LayoutGrid, Lock, MessageSquareText, PackageOpen, Plug, RefreshCcw, Search, ShieldCheck, Stamp, Unlock } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { RainbowWord } from "@/components/site";
 import { PillLink } from "@/components/site/pill-link";
 import { AgentDemo } from "@/components/mcp/agent-demo";
 import { IfPro } from "@/components/pro/pro-access";
 import { BrandMark } from "@/components/mcp/brand-marks";
+import { ICON_TILE, McpIcon, type McpIconName } from "@/components/mcp/mcp-icon";
 import { AskChips, CopyButton, SetupTabs, type Setup } from "@/components/mcp/setup-tabs";
 import { libraryComponents } from "@/lib/catalog/library-components";
 import { MCP_URL } from "@/lib/mcp/config";
@@ -65,44 +66,38 @@ const SETUPS: Setup[] = [
   },
 ];
 
-const STEPS = [
-  { Icon: KeyRound, tile: "from-[#ffcc4d] to-[#ff8a00]", glow: "bg-[#ffb020]/20", title: "Get a key, if you have Pro", text: "Free components need nothing. For Pro, create an API key on your dashboard." },
-  { Icon: Plug, tile: "from-[#5ac8fa] to-[#2f6bff]", glow: "bg-[#2f80ed]/20", title: "Connect your app", text: "One command or a few lines of config, below for Claude Code, Cursor, VS Code and Codex." },
-  { Icon: MessageSquareText, tile: "from-[#5ee08a] to-[#12a150]", glow: "bg-[#1f9d55]/20", title: "Ask in plain words", text: "Say what you want and where. Your agent finds the component and writes the files." },
+const STEPS: { icon: McpIconName; title: string; text: string }[] = [
+  { icon: "key", title: "Get a key, if you have Pro", text: "Free components need nothing. For Pro, create an API key on your dashboard." },
+  { icon: "plug", title: "Connect your app", text: "One command or a few lines of config, below for Claude Code, Cursor, VS Code and Codex." },
+  { icon: "message", title: "Ask in plain words", text: "Say what you want and where. Your agent finds the component and writes the files." },
 ];
 
-const TOOLS = [
+const TOOLS: { icon: McpIconName; name: string; text: string; example: string }[] = [
   {
-    Icon: Search,
-    tint: "bg-[#7c5cff]/20",
-    iconBg: "from-[#b18cff] to-[#6b4dff]",
+    icon: "search",
     name: "search_components",
     text: "Finds components by what they are or do. Each result says whether it is free or Pro.",
     example: `search_components("magnetic button")`,
   },
   {
-    Icon: PackageOpen,
-    tint: "bg-[#ff7a45]/20",
-    iconBg: "from-[#ffa25e] to-[#ff5a36]",
+    icon: "package",
     name: "get_component",
     text: "Hands over one component whole: the files and where they go, the npm packages, the install command and an example.",
     example: `get_component("orbital-loader")`,
   },
   {
-    Icon: LayoutGrid,
-    tint: "bg-[#2f80ed]/20",
-    iconBg: "from-[#5ac8fa] to-[#2f6bff]",
+    icon: "grid",
     name: "list_categories",
     text: "Lists the categories, from hero sections to loaders, with how many free and Pro components each has.",
     example: "list_categories()",
   },
 ];
 
-const ASKS = [
-  { text: "Find a Nexus UI loader and show it on the dashboard while the data loads", tint: "from-[#5ac8fa] to-[#2f6bff]" },
-  { text: "Add a Nexus UI pricing section to app/pricing/page.tsx using our plans", tint: "from-[#ffa25e] to-[#ff5a36]" },
-  { text: "Which free Nexus UI components are there for backgrounds?", tint: "from-[#5ee08a] to-[#12a150]" },
-  { text: "Add the Nexus UI scroll progress bar to the blog post layout", tint: "from-[#b18cff] to-[#6b4dff]" },
+const ASKS: { text: string; icon: McpIconName }[] = [
+  { text: "Find a Nexus UI loader and show it on the dashboard while the data loads", icon: "arc-spinner" },
+  { text: "Add a Nexus UI pricing section to app/pricing/page.tsx using our plans", icon: "tag" },
+  { text: "Which free Nexus UI components are there for backgrounds?", icon: "layers" },
+  { text: "Add the Nexus UI scroll progress bar to the blog post layout", icon: "bar-chart-horizontal" },
 ];
 
 const APPS: { name: string; mark: Setup["mark"]; tile: string }[] = SETUPS.map((s) => ({ name: s.app, mark: s.mark, tile: s.tile }));
@@ -119,7 +114,7 @@ export default function McpPage() {
               <BrandMark name="mcp" className="size-3.5" />
               MCP server
               <span className="inline-flex items-center gap-1 rounded-full bg-[#16161a] px-2 py-0.5 text-[11.5px] font-semibold text-white">
-                <Lock className="size-3 text-[#ffc65c]" aria-hidden />
+                <McpIcon name="lock" size={12} strokeWidth={2.4} accent="#ffc65c" className="text-[#ffc65c]" />
                 Pro unlocks all {FREE + PRO}
               </span>
             </span>
@@ -142,7 +137,7 @@ export default function McpPage() {
             </ul>
 
             <div className="pg-float mt-7 flex max-w-[520px] items-center gap-3 rounded-2xl bg-card py-2 pl-4 pr-2">
-              <Plug className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+              <McpIcon name="plug" size={18} className="text-muted-foreground" />
               <code className="min-w-0 flex-1 truncate font-mono text-[13.5px] text-foreground">{URL}</code>
               <CopyButton text={URL} />
             </div>
@@ -177,13 +172,10 @@ export default function McpPage() {
             How it works
           </h2>
           <ol className="grid gap-4 md:grid-cols-3">
-            {STEPS.map(({ Icon, tile, glow, title, text }, i) => (
-              <li key={title} className="pg-float relative overflow-hidden rounded-[24px] bg-card p-6">
-                <div aria-hidden className={`pointer-events-none absolute -right-10 -top-10 size-40 rounded-full blur-2xl ${glow}`} />
+            {STEPS.map(({ icon, title, text }, i) => (
+              <li key={title} data-icon-card className="pg-float relative overflow-hidden rounded-[24px] bg-card p-6">
                 <div className="relative flex items-center justify-between">
-                  <span className={`grid size-12 place-items-center rounded-2xl bg-gradient-to-br text-white shadow-[0_8px_20px_-8px_rgba(0,0,0,0.35)] ${tile}`}>
-                    <Icon className="size-5" strokeWidth={2.2} aria-hidden />
-                  </span>
+                  <McpIcon name={icon} size={26} tile={ICON_TILE} />
                   <span aria-hidden className="grid size-8 place-items-center rounded-full bg-secondary font-mono text-[13px] font-semibold text-muted-foreground ring-1 ring-border">
                     {i + 1}
                   </span>
@@ -212,7 +204,8 @@ export default function McpPage() {
           <p className="mt-5 flex items-start gap-2.5 text-[14.5px] leading-[1.6] text-muted-foreground">
             <BrandMark name="claude" className="mt-1 size-4 shrink-0" />
             <span>
-              The Claude app can add {URL} as a custom connector too, but it doesn&apos;t send a key, so there you get the free components. For Pro, use
+              The Claude app can add <span className="font-mono text-foreground">{URL}</span>{" "}
+              as a custom connector too, but it doesn&apos;t send a key, so there you get the free components. For Pro, use
               one of the coding tools above.
             </span>
           </p>
@@ -226,12 +219,9 @@ export default function McpPage() {
             What your agent can do
           </h2>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {TOOLS.map(({ Icon, tint, iconBg, name, text, example }) => (
-              <article key={name} className="pg-float relative flex flex-col overflow-hidden rounded-[24px] bg-card p-6">
-                <div aria-hidden className={`pointer-events-none absolute -right-12 -top-12 size-44 rounded-full blur-2xl ${tint}`} />
-                <span className={`relative grid size-12 place-items-center rounded-2xl bg-gradient-to-br text-white shadow-[0_8px_20px_-8px_rgba(0,0,0,0.35)] ${iconBg}`}>
-                  <Icon className="size-5" strokeWidth={2.2} aria-hidden />
-                </span>
+            {TOOLS.map(({ icon, name, text, example }) => (
+              <article key={name} data-icon-card className="pg-float relative flex flex-col overflow-hidden rounded-[24px] bg-card p-6">
+                <McpIcon name={icon} size={26} tile={ICON_TILE} />
                 <h3 className="relative mt-5 font-mono text-[15px] font-semibold text-foreground">{name}</h3>
                 <p className="relative mt-2 flex-1 text-[15px] leading-relaxed text-body">{text}</p>
                 <code className="relative mt-5 block truncate rounded-xl bg-[#16161a] px-3 py-2.5 font-mono text-[12.5px] text-[#e6e6ea]">
@@ -254,14 +244,14 @@ export default function McpPage() {
             <div className="pg-float relative overflow-hidden rounded-[28px] bg-card p-7">
               <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-[#5ee08a]/20 blur-3xl" />
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#1f9d55]/12 px-3 py-1 text-[13px] font-semibold text-[#1f9d55]">
-                <Unlock className="size-3.5" aria-hidden /> No key
+                <McpIcon name="unlock" size={14} /> No key
               </span>
               <p className="pg-display mt-5 text-[44px] text-foreground">{FREE}</p>
               <p className="text-[15px] text-muted-foreground">free components</p>
               <ul className="mt-6 space-y-2.5 text-[15px] text-body">
                 {["Full source for every one", "Search, files, packages and install command", "Works in the Claude app too"].map((t) => (
                   <li key={t} className="flex items-center gap-2.5">
-                    <Check className="size-4 shrink-0 text-[#1f9d55]" aria-hidden />
+                    <McpIcon name="check" size={16} strokeWidth={2.4} className="text-[#1f9d55]" />
                     {t}
                   </li>
                 ))}
@@ -270,18 +260,18 @@ export default function McpPage() {
             <div className="relative overflow-hidden rounded-[28px] bg-[#16161a] p-7 text-white">
               <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-[#7c5cff]/35 blur-3xl" />
               <span className="relative inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[13px] font-semibold">
-                <Lock className="size-3.5 text-[#ffc65c]" aria-hidden /> With your API key
+                <McpIcon name="lock" size={14} accent="#ffc65c" className="text-[#ffc65c]" /> With your API key
               </span>
               <p className="pg-display relative mt-5 text-[44px]">{FREE + PRO}</p>
               <p className="relative text-[15px] text-white/60">components, all {PRO} Pro ones included</p>
               <ul className="relative mt-6 space-y-2.5 text-[15px] text-white/85">
                 {[
-                  { Icon: BadgeCheck, t: "Every Pro component, with full source" },
-                  { Icon: Stamp, t: "Files stamped with your licence, like a CLI install" },
-                  { Icon: RefreshCcw, t: "Everything we release next" },
-                ].map(({ Icon, t }) => (
+                  { icon: "check-circle", t: "Every Pro component, with full source" },
+                  { icon: "stamp", t: "Files stamped with your licence, like a CLI install" },
+                  { icon: "refresh", t: "Everything we release next" },
+                ].map(({ icon, t }) => (
                   <li key={t} className="flex items-center gap-2.5">
-                    <Icon className="size-4 shrink-0 text-[#c9a6ff]" aria-hidden />
+                    <McpIcon name={icon as McpIconName} size={16} className="text-[#c9a6ff]" />
                     {t}
                   </li>
                 ))}
@@ -311,23 +301,20 @@ export default function McpPage() {
       {/* Key safety */}
       <section aria-labelledby="key" className="px-4 pb-28">
         <div className="pg-float relative mx-auto max-w-[1152px] overflow-hidden rounded-[28px] bg-card p-7 sm:p-10">
-          <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 size-80 rounded-full bg-[#ffb020]/15 blur-3xl" />
           <div className="relative flex items-center gap-3">
-            <span className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-[#ffcc4d] to-[#ff8a00] text-white shadow-[0_8px_20px_-8px_rgba(0,0,0,0.35)]">
-              <ShieldCheck className="size-5" strokeWidth={2.2} aria-hidden />
-            </span>
+            <McpIcon name="shield" size={26} tile={ICON_TILE} />
             <h2 id="key" className="pg-display text-[clamp(28px,3.6vw,38px)] text-foreground">
               Keep your key private
             </h2>
           </div>
           <div className="relative mt-7 grid gap-4 md:grid-cols-3">
             {[
-              { Icon: KeyRound, t: "It is yours alone", d: "It unlocks Pro under your account and every Pro file it fetches carries your licence line. Don't share it or commit it to a public repo." },
-              { Icon: Plug, t: "Same key as the CLI", d: "The shadcn CLI uses it too, and the MCP server checks it the same way. No key or no Pro means free components only." },
-              { Icon: RefreshCcw, t: "Leaked? Make a new one", d: "Create a new key on your dashboard and the old one stops working. Update NEXUS_API_KEY in .env.local too." },
-            ].map(({ Icon, t, d }) => (
-              <div key={t} className="rounded-[20px] bg-secondary p-5 ring-1 ring-border">
-                <Icon className="size-5 text-[#ff8a00]" aria-hidden />
+              { icon: "key", t: "It is yours alone", d: "It unlocks Pro under your account and every Pro file it fetches carries your licence line. Don't share it or commit it to a public repo." },
+              { icon: "plug", t: "Same key as the CLI", d: "The shadcn CLI uses it too, and the MCP server checks it the same way. No key or no Pro means free components only." },
+              { icon: "refresh", t: "Leaked? Make a new one", d: "Create a new key on your dashboard and the old one stops working. Update NEXUS_API_KEY in .env.local too." },
+            ].map(({ icon, t, d }) => (
+              <div key={t} data-icon-card className="rounded-[20px] bg-secondary p-5 ring-1 ring-border">
+                <McpIcon name={icon as McpIconName} size={26} />
                 <h3 className="mt-3 text-[16px] font-semibold text-foreground">{t}</h3>
                 <p className="mt-1.5 text-[14.5px] leading-relaxed text-body">{d}</p>
               </div>
