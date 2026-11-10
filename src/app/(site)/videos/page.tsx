@@ -6,6 +6,11 @@ import { IfPro } from "@/components/pro/pro-access";
 import { videos } from "@/lib/catalog/videos";
 import { createMetadata } from "@/lib/seo";
 import { getPricing } from "@/lib/region";
+import { ListingShell } from "@/components/listing/listing-shell";
+import { ListingBrowse, ListingSidebar } from "@/components/listing/listing-sidebar";
+import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
+import { totalOf } from "@/lib/catalog/listing-groups/total";
+import { videoGroups } from "@/lib/catalog/listing-groups/videos";
 
 export const metadata: Metadata = createMetadata({
   title: "Product Video Templates for React",
@@ -22,23 +27,27 @@ const STEPS = [
 export default async function VideosPage() {
   const pricing = await getPricing();
   const free = videos.filter((v) => !v.premium).length;
+  const groups = videoGroups();
+  const total = totalOf(groups);
+  const copy: PromoCopy = {
+    title: ["Get every ", "video", ""],
+    body: `The prompt and source of all ${videos.length}, live editing and the render script, plus every component, block and template.`,
+    band: "Get every video with Pro",
+  };
   return (
     <>
-      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-6 pt-[136px]">
-        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1152px]">
-          <h1 className="pg-display max-w-[900px] text-[clamp(48px,8vw,80px)] text-foreground">
-            Product videos, ready to make <RainbowWord>yours</RainbowWord>
-          </h1>
-          <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">
-            {videos.length} videos for launches, pricing, updates, demos and app stores, in the shapes each platform wants. Most are React with their
-            own soundtrack; the HTML ones are made for HyperFrames, so an agent can render them. Watch one, then take the prompt and the code. {free} are free.
-          </p>
-        </div>
-      </section>
+      <ListingShell sidebar={<ListingSidebar title="Videos" total={total} groups={groups} />} rail={<ProRail copy={copy} pricing={pricing} />}>
+        <ListingBrowse title="Videos" total={total} groups={groups} className="mb-8" />
+        <h1 className="pg-display max-w-[900px] text-[clamp(44px,5.6vw,76px)] text-foreground">
+          Product videos, ready to make <RainbowWord>yours</RainbowWord>
+        </h1>
+        <p className="mt-5 max-w-[620px] text-[18px] leading-[1.55] text-muted-foreground">
+          {videos.length} videos for launches, pricing, updates, demos and app stores, in the shapes each platform wants. Most are React with their
+          own soundtrack; the HTML ones are made for HyperFrames, so an agent can render them. Watch one, then take the prompt and the code. {free} are free.
+        </p>
+        <ProBand copy={copy} pricing={pricing} className="mt-8" />
 
-      <section aria-label="Videos" className="px-4 pb-24 pt-6">
-        <div className="mx-auto max-w-[1152px]">
+        <section aria-label="Videos" className="mt-10">
           <VideoGallery
             videos={videos.map(({ slug, title, purpose, motion, app, platforms, formats, duration, loop, premium }) => ({
               slug,
@@ -53,8 +62,8 @@ export default async function VideosPage() {
               premium,
             }))}
           />
-        </div>
-      </section>
+        </section>
+      </ListingShell>
 
       <Band tint="sky">
         <h2 className="pg-display max-w-[620px] text-[clamp(36px,5vw,52px)] leading-[1.02] text-foreground">From a tab to an MP4 in three steps</h2>

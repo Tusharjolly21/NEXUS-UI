@@ -7,7 +7,7 @@ import { ArrowUpRight, ChevronRight } from "lucide-react";
 import { useProAccess } from "@/components/pro/pro-access";
 import { useSlots } from "@/components/site/use-slots";
 import { slotsLeft } from "@/lib/launch-slots";
-import type { DisplayPricing } from "@/lib/pricing";
+import { GLOBAL_PRICING, type DisplayPricing } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 
 export type PromoCopy = {
@@ -78,8 +78,10 @@ const RING =
  * The right-hand column on wide screens, for visitors without Pro: four Pro pieces, what Pro costs, how many early
  * slots are left, then the 21st.dev line and the MCP server. It stays in view while the page scrolls.
  */
-export function ProRail({ copy, pricing }: { copy: PromoCopy; pricing: DisplayPricing }) {
-  const { isPro } = useProAccess();
+export function ProRail({ copy, pricing: given }: { copy: PromoCopy; pricing?: DisplayPricing }) {
+  const { isPro, pricing: shell } = useProAccess();
+  // the page's own regional prices when it has them, otherwise the ones the site shell already worked out
+  const pricing = given ?? shell ?? GLOBAL_PRICING;
   if (isPro) return null;
   const [before, accent, after] = copy.title;
   return (
@@ -140,8 +142,9 @@ export function ProRail({ copy, pricing }: { copy: PromoCopy; pricing: DisplayPr
 /**
  * The Pro card's place below 1280px, where there is no right column: one band in the page, under the filters.
  */
-export function ProBand({ copy, pricing, className }: { copy: PromoCopy; pricing: DisplayPricing; className?: string }) {
-  const { isPro } = useProAccess();
+export function ProBand({ copy, pricing: given, className }: { copy: PromoCopy; pricing?: DisplayPricing; className?: string }) {
+  const { isPro, pricing: shell } = useProAccess();
+  const pricing = given ?? shell ?? GLOBAL_PRICING;
   if (isPro) return null;
   return (
     <div className={cn("flex items-center gap-4 rounded-[24px] p-2 pr-3 xl:hidden", RING, className)}>

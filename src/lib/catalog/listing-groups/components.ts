@@ -23,6 +23,6 @@ export function componentGroups(all: GalleryItem[] = allGalleryItems()): Sidebar
   }))
     .filter((g) => g.items.length)
     .sort((a, b) => Number(a.id === FUN_GROUP) - Number(b.id === FUN_GROUP) || b.items.length - a.items.length);
-  return fresh.length ? [{ id: "new", label: "New this week", items: fresh.map(toItem) }, ...groups] : groups;
+  return fresh.length ? [{ id: "new", label: "New this week", short: "New", items: fresh.map(toItem) }, ...groups] : groups;
 }
 

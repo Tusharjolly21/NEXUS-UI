@@ -4,216 +4,217 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, ChevronRight, Search, X } from "lucide-react";
+import { ChevronRight, Search, Volume2, X } from "lucide-react";
+import { playSound, type SoundName } from "@/lib/ui-sounds";
 import { cn } from "@/lib/utils";
 
-export type SidebarItem = { name: string; href: string; isNew?: boolean };
-export type SidebarGroup = { id: string; label: string; items: SidebarItem[]; /** The group's own page, if it has one. */ href?: string };
+export type SidebarItem = {
+  name: string;
+  /** Where the name goes. For a sound it is only its key: the name plays the sound instead of opening a page. */
+  href: string;
+  isNew?: boolean;
+  /** A sound to play when the name is pressed (the sounds page lists sounds, which have no pages of their own). */
+  play?: SoundName;
+};
+export type SidebarGroup = {
+  id: string;
+  label: string;
+  items: SidebarItem[];
+  /** A shorter name for the group's chip, where the label is long ("Inputs" for "Inputs & controls"). */
+  short?: string;
+  /** The group's own page, if it has one. */
+  href?: string;
+};
 
-/** One dot colour per group, in turn, so the list reads in the site's spectrum. */
-const DOTS = ["#ff7a1a", "#0a7aff", "#30d158", "#8b5cf6", "#ff3b8d", "#ffcc00"];
+const ALL = "all";
 
-/** Names shown in an open group before its "N more". */
-const PEEK = 8;
-
-/** How many groups start open. */
-const OPEN_AT_START = 2;
+/** Chips shown before "N more", so a long set of groups (icons have two dozen) doesn't push the names out of view. */
+const CHIP_PEEK = 9;
 
 const subscribeNever = () => () => {};
 
+/** "Inputs & controls" → "Inputs"; short labels stay as they are. */
+function chipLabel(g: SidebarGroup) {
+  if (g.short) return g.short;
+  const first = g.label.split(/ & |, | \/ /)[0];
+  return first.length <= 16 ? first : first.split(" ")[0];
+}
+
 /**
- * Every name on the page, grouped, with a "Find by name" box. A group opens to its first few names and a "N more"
- * shows the rest. Each name is an ordinary link to the page it already had.
+ * Every name on the page, in the site's own look: a title and count, a "Find by name" pill, one chip per group (the
+ * same chips as the page's filters) and the names under them. "All" lists every group with a small heading; a
+ * group's chip lists only its names. On the page of one item, its group is chosen and the item wears the rainbow
+ * ring the Pro card wears. Each name is an ordinary link to the page it already had (a sound plays instead).
  */
-function SidebarBody({
+function RailBody({
   title,
   total,
   groups,
   onNavigate,
-  autoFocus = false,
+  scrolls = false,
+  listRef,
 }: {
   title: string;
   total: number;
   groups: SidebarGroup[];
   onNavigate?: () => void;
-  autoFocus?: boolean;
+  /** The names scroll inside a fixed height (the wide-screen column) while the title, search and chips stay put. */
+  scrolls?: boolean;
+  listRef?: React.Ref<HTMLDivElement>;
 }) {
-  const [query, setQuery] = React.useState("");
-  const [open, setOpen] = React.useState<Set<string>>(() => new Set(groups.slice(0, OPEN_AT_START).map((g) => g.id)));
-  // the group of the page you are on is always open, unless you close it yourself
-  const [closed, setClosed] = React.useState<Set<string>>(() => new Set());
-  const [full, setFull] = React.useState<Set<string>>(() => new Set());
   const pathname = usePathname();
   const activeId = groups.find((g) => g.href === pathname || g.items.some((i) => i.href === pathname))?.id ?? null;
-  const id = React.useId();
+  const [picked, setPicked] = React.useState<string | null>(null);
+  const chip = picked ?? activeId ?? ALL;
+  const [allChips, setAllChips] = React.useState(false);
+  const [query, setQuery] = React.useState("");
   const needle = query.trim().toLowerCase();
 
-  const matches = React.useMemo(() => {
-    if (!needle) return [];
-    const seen = new Set<string>();
-    const out: (SidebarItem & { group: string })[] = [];
-    for (const g of groups)
-      for (const i of g.items)
-        if (!seen.has(i.href) && i.name.toLowerCase().includes(needle)) {
-          seen.add(i.href);
-          out.push({ ...i, group: g.label });
-        }
-    return out;
-  }, [groups, needle]);
+  const chosen = chip === ALL ? groups : groups.filter((g) => g.id === chip);
+  const lists: { label: string; id: string; items: SidebarItem[] }[] = needle
+    ? [
+        {
+          id: "found",
+          label: "",
+          items: [...new Map(groups.flatMap((g) => g.items).filter((i) => i.name.toLowerCase().includes(needle)).map((i) => [i.href, i])).values()],
+        },
+      ]
+    : chosen;
+  const found = needle ? lists[0].items.length : 0;
 
-  const toggle = (set: Set<string>, key: string) => {
-    const next = new Set(set);
-    if (next.has(key)) next.delete(key);
-    else next.add(key);
-    return next;
-  };
+  // the chosen chip always shows, even when it is past the first few
+  const chosenAt = groups.findIndex((g) => g.id === chip);
+  const chips = allChips || groups.length <= CHIP_PEEK + 1 ? groups : groups.filter((g, i) => i < CHIP_PEEK || i === chosenAt);
+  const hidden = groups.length - chips.length;
 
-  const link =
-    "flex min-w-0 items-center justify-between gap-2 rounded-xl px-3 py-[7px] text-[14px] text-foreground/70 transition-colors hover:bg-foreground/[0.05] hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring";
+  const chipClass = (on: boolean) =>
+    cn(
+      "inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full px-[11px] text-[12.5px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring",
+      on ? "bg-foreground text-background" : "bg-card text-foreground shadow-[0_0_0_0.5px_var(--border)] hover:bg-foreground/[0.04]",
+    );
+  const count = (on: boolean) => cn("text-[11px] tabular-nums", on ? "text-background/60" : "text-muted-foreground");
+  const row =
+    "flex min-h-[34px] w-full items-center justify-between gap-2 rounded-xl px-2.5 py-[7px] text-left text-[13.5px] leading-snug text-foreground/70 transition-colors hover:bg-foreground/[0.04] hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring";
+  // the page you are on: the rainbow ring the Pro card wears, on a white pill
+  const here =
+    "border-[1.5px] border-transparent font-semibold text-foreground [background:linear-gradient(var(--card),var(--card))_padding-box,linear-gradient(120deg,#0090f7,#6e5bff_35%,#ba62fc_55%,#f2416b_78%,#f55600)_border-box] shadow-[0_6px_16px_-10px_rgba(110,91,255,0.55)] hover:bg-transparent";
 
   return (
-    <>
-      <div className="flex items-baseline justify-between px-2 pt-1">
-        <p className="text-[17px] font-semibold tracking-[-0.02em] text-foreground">{title}</p>
-        <span className="text-[13px] tabular-nums text-muted-foreground">{total}</span>
-      </div>
-      <label className="mt-3 flex h-10 items-center gap-2 rounded-full bg-foreground/[0.05] px-3.5 focus-within:outline-2 focus-within:outline-ring">
-        <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-        <span className="sr-only">Find {title.toLowerCase()} by name</span>
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Find by name"
-          autoFocus={autoFocus}
-          className="h-full min-w-0 flex-1 bg-transparent text-[14px] text-foreground outline-none placeholder:text-muted-foreground"
-        />
-        {query ? (
-          <button type="button" onClick={() => setQuery("")} aria-label="Clear" className="grid size-6 place-items-center rounded-full text-muted-foreground hover:text-foreground">
-            <X className="size-3.5" aria-hidden />
-          </button>
-        ) : null}
-      </label>
-
-      {needle ? (
-        <div className="mt-3">
-          <p className="px-3 pb-1 text-[12.5px] text-muted-foreground" aria-live="polite">
-            {matches.length ? `${matches.length} found` : "Nothing by that name"}
-          </p>
-          <ul>
-            {matches.slice(0, 60).map((m) => (
-              <li key={m.href}>
-                <Link href={m.href} onClick={onNavigate} className={link}>
-                  <span className="truncate">{m.name}</span>
-                  <span className="shrink-0 text-[12px] text-muted-foreground">{m.group}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+    <div className={cn("flex flex-col", scrolls && "min-h-0 flex-1")}>
+      <div className="shrink-0">
+        <div className="flex items-center justify-between px-2">
+          <p className="text-[15px] font-semibold tracking-[-0.015em] text-foreground">{title}</p>
+          <span className="rounded-full bg-foreground/[0.05] px-2 py-0.5 text-[12px] font-semibold tabular-nums text-muted-foreground">{total}</span>
         </div>
-      ) : (
-        <ul className="mt-3 flex flex-col gap-0.5">
-          {groups.map((g, gi) => {
-            const isOpen = (open.has(g.id) || g.id === activeId) && !closed.has(g.id);
-            const activeAt = g.items.findIndex((i) => i.href === pathname);
-            const shown = full.has(g.id) || activeAt >= PEEK ? g.items : g.items.slice(0, PEEK);
-            const rest = g.items.length - shown.length;
-            const listId = `${id}-${g.id}`;
-            return (
-              <li key={g.id}>
-                <button
-                  type="button"
-                  aria-expanded={isOpen}
-                  aria-controls={listId}
-                  onClick={() => {
-                    if (isOpen) {
-                      setClosed((s) => new Set(s).add(g.id));
-                      setOpen((s) => {
-                        const n = new Set(s);
-                        n.delete(g.id);
-                        return n;
-                      });
-                    } else {
-                      setOpen((s) => new Set(s).add(g.id));
-                      setClosed((s) => {
-                        const n = new Set(s);
-                        n.delete(g.id);
-                        return n;
-                      });
-                    }
-                  }}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left text-[14.5px] font-semibold tracking-[-0.01em] text-foreground transition-colors hover:bg-foreground/[0.05] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
-                >
-                  <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ backgroundColor: DOTS[gi % DOTS.length] }} />
-                  <span className="min-w-0 flex-1 truncate">{g.label}</span>
-                  <span className="text-[12.5px] font-normal tabular-nums text-muted-foreground">{g.items.length}</span>
-                  {isOpen ? <ChevronDown className="size-3.5 text-muted-foreground" aria-hidden /> : <ChevronRight className="size-3.5 text-muted-foreground" aria-hidden />}
-                </button>
-                {isOpen ? (
-                  <ul id={listId} className="mb-2 ml-[13px] border-l border-foreground/10 pl-1.5">
-                    {shown.map((i) => (
-                      <li key={i.href}>
-                        <Link
-                          href={i.href}
-                          onClick={onNavigate}
-                          aria-current={i.href === pathname ? "page" : undefined}
-                          className={cn(link, i.href === pathname && "bg-foreground/[0.07] font-medium text-foreground")}
-                        >
-                          <span className="truncate">{i.name}</span>
-                          {i.isNew ? (
-                            <span className="shrink-0 rounded-full bg-[#ff9f0a]/14 px-2 py-px text-[11px] font-semibold text-[#bf4800] dark:text-[#ffb340]">New</span>
-                          ) : null}
-                        </Link>
-                      </li>
-                    ))}
-                    {rest > 0 ? (
-                      <li>
-                        <button
-                          type="button"
-                          onClick={() => setFull((s) => toggle(s, g.id))}
-                          className="rounded-xl px-3 py-[7px] text-[14px] font-medium text-link hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
-                        >
-                          {rest} more
-                        </button>
-                      </li>
-                    ) : null}
-                  </ul>
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </>
+        <label className="mt-3 flex h-[38px] items-center gap-2 rounded-full bg-card px-3.5 shadow-[0_0_0_0.5px_var(--border),0_1px_2px_rgba(0,0,0,0.04)] focus-within:outline-2 focus-within:outline-ring">
+          <Search className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+          <span className="sr-only">Find {title.toLowerCase()} by name</span>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Find by name"
+            className="h-full min-w-0 flex-1 bg-transparent text-[13.5px] text-foreground outline-none placeholder:text-muted-foreground"
+          />
+          {query ? (
+            <button type="button" onClick={() => setQuery("")} aria-label="Clear" className="grid size-6 place-items-center rounded-full text-muted-foreground hover:text-foreground">
+              <X className="size-3.5" aria-hidden />
+            </button>
+          ) : null}
+        </label>
+
+        {needle ? null : (
+          <div role="group" aria-label={`Show ${title.toLowerCase()} by group`} className="flex flex-wrap gap-1.5 border-b border-foreground/[0.07] pb-3 pt-3.5">
+            <button type="button" aria-pressed={chip === ALL} onClick={() => setPicked(ALL)} className={chipClass(chip === ALL)}>
+              All <span className={count(chip === ALL)}>{total}</span>
+            </button>
+            {chips.map((g) => (
+              <button key={g.id} type="button" aria-pressed={chip === g.id} onClick={() => setPicked(g.id)} title={g.label} className={chipClass(chip === g.id)}>
+                {chipLabel(g)} <span className={count(chip === g.id)}>{g.items.length}</span>
+              </button>
+            ))}
+            {hidden > 0 || allChips ? (
+              <button type="button" aria-expanded={allChips} onClick={() => setAllChips((v) => !v)} className="inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[12.5px] font-medium text-link hover:underline hover:underline-offset-4">
+                {allChips ? "Fewer" : `${hidden} more`}
+                <ChevronRight className={cn("size-3 transition-transform", allChips && "rotate-90")} aria-hidden />
+              </button>
+            ) : null}
+          </div>
+        )}
+      </div>
+
+      <div
+        ref={listRef}
+        className={cn(
+          "pt-2",
+          // the names scroll on their own with no scrollbar of their own; the bottom edge fades instead
+          scrolls &&
+            "min-h-0 flex-1 overflow-y-auto overscroll-contain pb-8 [mask-image:linear-gradient(to_bottom,black_calc(100%-48px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        )}
+      >
+        {needle ? (
+          <p className="px-2.5 pb-1 pt-1 text-[12px] text-muted-foreground" aria-live="polite">
+            {found ? `${found} found` : "Nothing by that name"}
+          </p>
+        ) : null}
+        {lists.map((g) => (
+          <section key={g.id} aria-label={g.label || undefined} className="pb-2">
+            {g.label ? <p className="px-2.5 pb-1 pt-2 text-[12px] text-muted-foreground">{g.label}</p> : null}
+            <ul className="flex flex-col gap-px">
+              {g.items.map((i) => {
+                const current = i.href === pathname;
+                const tag = i.isNew && g.id !== "new" ? <span className="shrink-0 text-[10.5px] font-semibold text-[#bf4800] dark:text-[#ffb340]">New</span> : null;
+                return (
+                  <li key={i.href}>
+                    {i.play ? (
+                      <button type="button" onClick={() => playSound(i.play!, 1, true)} className={row} aria-label={`Play ${i.name}`}>
+                        <span className="min-w-0 break-words">{i.name}</span>
+                        <Volume2 className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+                      </button>
+                    ) : (
+                      <Link href={i.href} onClick={onNavigate} aria-current={current ? "page" : undefined} className={cn(row, current && here)}>
+                        <span className="min-w-0 break-words">{i.name}</span>
+                        {tag}
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </div>
   );
 }
 
-/** The names column for wide screens: it stays in view while the page scrolls, and scrolls on its own when long. */
+/**
+ * The names column for wide screens: a frosted panel in the nav's own glass, which stays in view while the page
+ * scrolls. Its names scroll inside it, and the page you are on is kept in sight.
+ */
 export function ListingSidebar({ title, total, groups }: { title: string; total: number; groups: SidebarGroup[] }) {
-  const ref = React.useRef<HTMLElement>(null);
+  const list = React.useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  // keep the page you are on in sight within the column (the column scrolls, the window is left alone)
   React.useEffect(() => {
-    const nav = ref.current;
-    const here = nav?.querySelector<HTMLElement>('[aria-current="page"]');
-    if (!nav || !here) return;
-    const n = nav.getBoundingClientRect();
+    const box = list.current;
+    const here = box?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!box || !here) return;
+    const b = box.getBoundingClientRect();
     const h = here.getBoundingClientRect();
-    if (h.top < n.top + 60 || h.bottom > n.bottom - 20) nav.scrollTop += h.top - n.top - n.height / 3;
+    if (h.top < b.top + 20 || h.bottom > b.bottom - 48) box.scrollTop += h.top - b.top - b.height / 3;
   }, [pathname]);
   return (
     <nav
-      ref={ref}
       aria-label={`${title} by name`}
-      className="pg-float sticky top-[88px] max-h-[calc(100dvh-104px)] overflow-y-auto overscroll-contain rounded-[24px] bg-card p-3 [scrollbar-width:thin]"
+      className="sticky top-[88px] flex h-[calc(100dvh-104px)] flex-col rounded-[28px] bg-white/65 px-2.5 pt-3.5 shadow-[0_0_0_0.5px_rgba(0,0,0,0.07),inset_0_1px_0_rgba(255,255,255,0.9),0_18px_40px_-22px_rgba(0,0,0,0.32)] backdrop-blur-2xl backdrop-saturate-[1.8] dark:bg-[#1c1c1e]/65 dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.1),0_18px_40px_-22px_rgba(0,0,0,0.8)]"
     >
-      <SidebarBody title={title} total={total} groups={groups} />
+      <RailBody title={title} total={total} groups={groups} scrolls listRef={list} />
     </nav>
   );
 }
 
 /**
- * The same names for phones and tablets: a "Browse by name" button that opens them in a sheet from the bottom.
- * The sheet closes on a pick, on Close, on the backdrop or on Escape, and gives focus back to the button.
+ * The same names for phones and tablets: a button that opens them in a sheet from the bottom. The sheet closes on a
+ * pick, on Close, on the backdrop or on Escape, and gives focus back to the button.
  */
 export function ListingBrowse({
   title,
@@ -226,7 +227,7 @@ export function ListingBrowse({
   total: number;
   groups: SidebarGroup[];
   className?: string;
-  /** A small pill fixed at the bottom left, for the pages of single items (shown until the names column appears at 1280px). */
+  /** A small glass pill fixed at the bottom left, for the pages of single items (until the column appears at 1280px). */
   floating?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
@@ -250,6 +251,9 @@ export function ListingBrowse({
     };
   }, [open]);
 
+  const glass =
+    "bg-white/70 shadow-[0_0_0_0.5px_rgba(0,0,0,0.07),inset_0_1px_0_rgba(255,255,255,0.9),0_12px_32px_-18px_rgba(0,0,0,0.35)] backdrop-blur-2xl backdrop-saturate-[1.8] dark:bg-[#1c1c1e]/70 dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.1)]";
+
   return (
     <>
       <button
@@ -258,13 +262,15 @@ export function ListingBrowse({
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
         className={cn(
+          glass,
+          "items-center rounded-full font-semibold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
           floating
-            ? "pg-float fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-[max(1rem,env(safe-area-inset-left))] z-40 inline-flex h-12 items-center gap-2.5 rounded-full bg-card/95 pl-4 pr-5 text-[14.5px] font-semibold text-foreground backdrop-blur-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring xl:hidden"
-            : "pg-float flex h-12 w-full items-center gap-3 rounded-full bg-card px-5 text-left text-[15px] font-semibold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring lg:hidden",
+            ? "fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-[max(1rem,env(safe-area-inset-left))] z-40 inline-flex h-11 gap-2 pl-3.5 pr-4 text-[14px] xl:hidden"
+            : "flex h-12 w-full gap-3 px-5 text-left text-[15px] lg:hidden",
           className,
         )}
       >
-        <span aria-hidden className="size-2 rounded-full bg-[#0a7aff]" />
+        <span aria-hidden className="size-2 rounded-full bg-[linear-gradient(135deg,#0090f7,#ba62fc,#f55600)]" />
         {floating ? (
           <span>All {title.toLowerCase()}</span>
         ) : (
@@ -277,24 +283,20 @@ export function ListingBrowse({
       {mounted && open
         ? createPortal(
             <div className={cn("fixed inset-0 z-[70]", floating ? "xl:hidden" : "lg:hidden")} role="dialog" aria-modal="true" aria-label={`${title} by name`}>
-              <button type="button" aria-label="Close" tabIndex={-1} onClick={() => setOpen(false)} className="absolute inset-0 bg-black/35 backdrop-blur-[2px]" />
-              <div className="absolute inset-x-0 bottom-0 flex max-h-[86dvh] flex-col rounded-t-[28px] bg-card shadow-[0_-20px_60px_-20px_rgba(0,0,0,0.45)] [padding-bottom:env(safe-area-inset-bottom)]">
-                <div className="flex items-center justify-between px-4 pb-1 pt-3">
-                  <span aria-hidden className="mx-auto h-1 w-10 rounded-full bg-foreground/15" />
-                </div>
-                <div className="absolute right-3 top-3">
-                  <button
-                    ref={closeBtn}
-                    type="button"
-                    onClick={() => setOpen(false)}
-                    aria-label="Close"
-                    className="grid size-9 place-items-center rounded-full bg-foreground/[0.06] text-foreground focus-visible:outline-2 focus-visible:outline-ring"
-                  >
-                    <X className="size-4" aria-hidden />
-                  </button>
-                </div>
-                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-5 pt-2">
-                  <SidebarBody title={title} total={total} groups={groups} onNavigate={() => setOpen(false)} />
+              <button type="button" aria-label="Close" tabIndex={-1} onClick={() => setOpen(false)} className="absolute inset-0 bg-black/30 backdrop-blur-[3px]" />
+              <div className="absolute inset-x-0 bottom-0 flex max-h-[86dvh] flex-col rounded-t-[30px] bg-background shadow-[0_-20px_60px_-20px_rgba(0,0,0,0.45)] [padding-bottom:env(safe-area-inset-bottom)]">
+                <span aria-hidden className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-foreground/15" />
+                <button
+                  ref={closeBtn}
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  aria-label="Close"
+                  className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-foreground/[0.06] text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+                >
+                  <X className="size-4" aria-hidden />
+                </button>
+                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-3">
+                  <RailBody title={title} total={total} groups={groups} onNavigate={() => setOpen(false)} />
                 </div>
               </div>
             </div>,
