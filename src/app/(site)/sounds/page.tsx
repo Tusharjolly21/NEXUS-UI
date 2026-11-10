@@ -194,7 +194,7 @@ export default async function SoundsPage() {
       <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[136px]">
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
         <div className="relative mx-auto max-w-[1152px]">
-          <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">Sounds</h1>
+          <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">UI sound effects</h1>
           <p className="mt-5 max-w-[640px] text-[19px] leading-[1.55] text-muted-foreground">
             {COUNT + PRO_COUNT} interface sounds you can <RainbowWord>hear</RainbowWord>, made entirely in code with the
             Web Audio API, apart from {RECORDED_COUNT} recorded ones. {COUNT} are free and {PRO_COUNT} are Pro, and every one plays here. Switch to the Mac style to

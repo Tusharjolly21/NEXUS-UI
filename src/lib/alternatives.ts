@@ -19,6 +19,10 @@ export type Alternative = {
   paid: string;
   /** Reasons someone may pick it over Nexus UI. */
   chooseThem: string[];
+  /** Replaces the standard opening line when "both give you animated components" is not true of it. */
+  intro?: string;
+  /** When its site was read, if not CHECKED_ON. */
+  checkedOn?: string;
 };
 
 /** The longer blog guide that covers every library compared. */
@@ -72,6 +76,25 @@ export const alternatives: Alternative[] = [
       "You want the largest set of ready-made blocks and templates it lists, and you are happy with a one-time pass.",
       "You want to add blocks through an AI agent over MCP, which it describes on its homepage.",
     ],
+  },
+  {
+    slug: "shadcn-ui",
+    name: "shadcn/ui",
+    alsoSpelled: "shadcn",
+    url: "https://ui.shadcn.com",
+    host: "ui.shadcn.com",
+    summary: "A set of accessible components and a code distribution platform. In its own words, it is not a component library but how you build your component library.",
+    stack: "Its site lists Next.js, React and Tailwind CSS.",
+    install: "It hands you the component code to edit in your project, and has a CLI to install components across projects.",
+    free: "Open source, with the source code on GitHub.",
+    paid: "Its site does not mention a paid plan.",
+    chooseThem: [
+      "You want accessible base components (buttons, dialogs, forms, menus) to build your own design system on.",
+      "You only want free, open-source code and do not need motion-heavy components.",
+    ],
+    intro:
+      "shadcn/ui gives you the base components to build a design system on. Nexus UI adds the animated ones, and installs through the same shadcn CLI, so many projects use both. Here is how they differ, and when shadcn/ui on its own is enough.",
+    checkedOn: "November 2026",
   },
 ];
 

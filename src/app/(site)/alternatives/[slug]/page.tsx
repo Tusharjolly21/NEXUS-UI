@@ -106,9 +106,13 @@ export default async function AlternativePage({ params }: { params: Promise<{ sl
             A {alt.name} alternative for <RainbowWord>animated</RainbowWord> React components
           </h1>
           <p className="mt-5 max-w-[660px] text-[19px] leading-[1.55] text-muted-foreground">
-            {alt.name}
-            {alt.alsoSpelled ? ` (also written ${alt.alsoSpelled})` : ""} and Nexus UI both give you animated React
-            components you add to your own project. Here is how they differ, and when {alt.name} is the better fit.
+            {alt.intro ?? (
+              <>
+                {alt.name}
+                {alt.alsoSpelled ? ` (also written ${alt.alsoSpelled})` : ""} and Nexus UI both give you animated React
+                components you add to your own project. Here is how they differ, and when {alt.name} is the better fit.
+              </>
+            )}
           </p>
           <div className="mt-7 flex flex-wrap gap-2.5">
             <Link
@@ -236,7 +240,7 @@ export default async function AlternativePage({ params }: { params: Promise<{ sl
             <a href={alt.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">
               {alt.host}
             </a>{" "}
-            as we read it in {CHECKED_ON}, and it may have changed since. Anything its homepage did not state is left
+            as we read it in {alt.checkedOn ?? CHECKED_ON}, and it may have changed since. Anything its homepage did not state is left
             out. Nexus UI is independent and not affiliated with {alt.name}.
           </p>
           <p className="mt-2">

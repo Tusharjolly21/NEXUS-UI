@@ -6,7 +6,7 @@ import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
   title: "Animated React libraries compared",
-  description: "How Nexus UI compares with Magic UI, React Bits and Aceternity UI: install method, what is free, what costs money and when each is the better pick.",
+  description: "How Nexus UI compares with shadcn/ui, Magic UI, React Bits and Aceternity UI: how each installs, what is free, what it costs and when to pick it.",
   alternates: { canonical: "/alternatives" },
 });
 
@@ -54,7 +54,7 @@ export default function AlternativesPage() {
         </div>
       </section>
       <section className="px-4 pb-24">
-        <ul className="mx-auto grid max-w-[1152px] grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-3">
+        <ul className="mx-auto grid max-w-[1152px] grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2">
           {alternatives.map((a) => (
             <li key={a.slug} className="rounded-tile bg-card p-7 pg-float">
               <h2 className="text-[19px] font-semibold text-foreground">{a.name}</h2>

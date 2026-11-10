@@ -40,12 +40,12 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
       "Orb loader for React: glowing dots circle counter-rotating rings while status messages cycle below, with optional progress. Tailwind CSS + Framer Motion.",
   },
   "chat-messages": {
-    title: "React Chat Message UI with Typing Animation",
+    title: "React Chat UI with Typing Animation",
     description:
       "Animated React chat message UI: bubbles appear one by one after a typing indicator, made for AI assistant demos. Built with Tailwind CSS and Framer Motion.",
   },
   "animated-countdown": {
-    title: "Animated Countdown Timer for React",
+    title: "React Countdown Timer: Animated Countdown",
     description:
       "Animated React countdown timer: days, hours, minutes and seconds roll over with a blur-fade, in four styles. Tailwind CSS and Framer Motion for Next.js.",
   },
@@ -75,7 +75,7 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
       "React scroll card deck: cards tilt away in 3D as you scroll to reveal the next, with progress dots and cursor parallax. Tailwind CSS and Framer Motion.",
   },
   "circular-carousel": {
-    title: "React Circular Carousel Component",
+    title: "React Carousel: Circular Card Carousel",
     description:
       "Circular carousel for React: cards move along an arc around a slide counter, with arrows, dots, arrow keys and autoplay. Tailwind CSS + Framer Motion.",
   },

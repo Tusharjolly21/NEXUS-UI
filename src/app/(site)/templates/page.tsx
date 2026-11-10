@@ -40,7 +40,7 @@ export default async function TemplatesPage() {
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
         <div className="relative mx-auto max-w-[1280px]">
           <h1 className="pg-display max-w-[900px] text-[clamp(48px,8vw,80px)] text-foreground">
-            Whole pages, ready to make <RainbowWord>yours</RainbowWord>
+            Next.js templates, ready to make <RainbowWord>yours</RainbowWord>
           </h1>
           <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">
             {templates.length} Next.js landing pages with the motion already done. Open any of them live, then take the
