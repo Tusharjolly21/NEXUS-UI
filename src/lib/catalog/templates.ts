@@ -48,6 +48,52 @@ export type MarketplaceTemplate = {
 
 export const templates: MarketplaceTemplate[] = [
   {
+    slug: "wharf",
+    title: "Wharf — onchain payments landing page",
+    description:
+      "A landing page for an onchain settlement layer: a business takes any token in and settles in stablecoins across 30 chains. The hero plays a payment through a live chain map and a settlement card, from quote to settled. Then four steps (accept, route, sponsor, settle) play out on a working checkout as you scroll, followed by the four products each with its own animated drawing, customer logos and a volume chart that reads out under the pointer, a developer section that runs code samples against a pretend API, a testimonial, security, a FAQ, and a call to action over a field of falling glyphs. Wharf Labs and every company, figure and quote are invented sample content.",
+    category: "Fintech",
+    tags: ["fintech", "crypto", "web3", "onchain", "stablecoins", "payments", "api", "developer", "landing page", "canvas", "motion-kit"],
+    difficulty: "Advanced",
+    premium: true,
+    trendingScore: 312,
+    createdAt: "2026-11-10",
+    techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
+    pages: ["/"],
+    sections: [
+      "Navigation",
+      "Hero with Chain Map and Settlement Card",
+      "How It Works",
+      "Products with Animated Drawings",
+      "Customers and Volume Chart",
+      "Developers with Runnable Code Samples",
+      "Testimonial",
+      "Security",
+      "FAQ",
+      "Call to Action",
+      "Footer",
+    ],
+    pageLabels: ["How it works", "Products", "Customers", "Developers"],
+    previewImages: {
+      hero: "/templates/wharf/hero.webp",
+      sections: [
+        "/templates/wharf/section-1.webp",
+        "/templates/wharf/section-2.webp",
+        "/templates/wharf/section-3.webp",
+        "/templates/wharf/section-4.webp",
+      ],
+    },
+    features: [
+      "Hero that plays a whole payment: the chain map draws the route while the settlement card steps from quote to settled",
+      "How it works as a pinned scroll: four steps play out on a working checkout where changing the amount or token requotes, gas sponsorship toggles and Pay confirms with a countdown",
+      "Four products, each with its own animated drawing: a machine that turns any token into USDC, a route drawn across a map, a gas gauge and a ledger that folds open and reconciles",
+      "A cumulative volume chart that draws itself in and reads out the month under the pointer, next to customer logos and headline numbers",
+      "Developer section with code samples for each endpoint that run against a pretend API and print the response",
+      "Call to action over a canvas of falling glyphs that answers the pointer",
+      "Geist and Geist Mono self-hosted (both Open Font Licence), reduced-motion support, all content in one data file",
+    ],
+  },
+  {
     slug: "kiosk",
     title: "Kiosk — magazine and blog",
     description:

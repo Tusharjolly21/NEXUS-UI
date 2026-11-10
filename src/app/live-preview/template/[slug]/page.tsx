@@ -160,6 +160,11 @@ const KioskPage = nextDynamic(
   { loading: TemplateFallback },
 );
 
+const WharfPage = nextDynamic(
+  () => import("@/components/templates/wharf-page").then((m) => ({ default: m.WharfPage })),
+  { loading: TemplateFallback },
+);
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -211,6 +216,8 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><LastLightPage /></ThemeReceiver>;
   } else if (tmpl.slug === "kiosk") {
     return <ThemeReceiver><KioskPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "wharf") {
+    return <ThemeReceiver><WharfPage /></ThemeReceiver>;
   } else if (tmpl.slug === "nexus-ai-launch") {
     return <ThemeReceiver><NexusAiLaunchTemplatePage /></ThemeReceiver>;
   } else if (tmpl.slug === "noir-studio") {

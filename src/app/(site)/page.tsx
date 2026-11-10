@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 const HOME_VIDEOS = ["launch-reel", "feature-drop", "brand-film", "whats-new"];
 
 // Dark and light alternate across the grid so the wall reads as a mix, not a single look.
-const WALL_SLUGS = ["kiosk", "kiln", "cairn", "strata", "wayfare", "afterglow"];
+const WALL_SLUGS = ["kiosk", "wharf", "kiln", "cairn", "strata", "wayfare"];
 
 function buildFaq(pricing: DisplayPricing) {
   return [

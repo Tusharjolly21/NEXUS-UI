@@ -37,6 +37,7 @@ const ONLY = (process.env.SLUGS || "").split(",").map((s) => s.trim()).filter(Bo
 // All template slugs from the catalog
 const TEMPLATE_SLUGS = [
   "kiosk",
+  "wharf",
   "last-light",
   "nimbus",
   "margin",

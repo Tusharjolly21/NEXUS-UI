@@ -54,6 +54,7 @@ export const TEMPLATE_SOURCES = {
   margin: { file: "margin-page.tsx", exportName: "MarginPage" },
   "last-light": { file: "last-light-page.tsx", exportName: "LastLightPage" },
   kiosk: { file: "kiosk-page.tsx", exportName: "KioskPage" },
+  wharf: { file: "wharf-page.tsx", exportName: "WharfPage" },
 } as const satisfies Record<string, TemplateSource>;
 
 export type TemplateSourceSlug = keyof typeof TEMPLATE_SOURCES;
