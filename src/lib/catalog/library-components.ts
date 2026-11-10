@@ -15099,6 +15099,344 @@ export default function Page() {
     ],
     tailwindSource: tw,
   },
+  {
+    slug: "bubble-tags",
+    name: "Bubble Tags",
+    registryCliName: "bubble-tags",
+    description:
+      "A tag input where every tag is a soap bubble. Type a word and press Enter: a wand in the corner blows a bubble with the word inside, which swells, lets go with a wobble and drifts up to join the others. The bubbles hang in a sunlit garden, turning their colours, pressing softly against each other and leaning away when your pointer passes like a breath of air. Tap a bubble to remove its tag and it pops in a ring of droplets; Backspace in the empty field pops the newest. Every bubble is a real button and the field is a real input, so keyboards and screen readers get a plain list.",
+    categorySlug: "inputs-controls",
+    tags: ["tags", "tag input", "chips", "multi select", "bubbles", "physics", "input", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 196,
+    createdAt: "2026-11-10",
+    animationKinds: ["type", "press", "hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "tags", type: "string[]", description: "The tags, when you control the list. Leave it out to let the component keep its own." },
+      { name: "defaultTags", type: "string[]", defaultValue: "[\"design\", \"coffee\", \"hiking\"]", description: "The starting tags when the component keeps its own." },
+      { name: "onChange", type: "(tags: string[]) => void", description: "Called with the new list whenever a tag is added or popped." },
+      { name: "max", type: "number", defaultValue: "8", description: "The most tags it will hold." },
+      { name: "label", type: "string", defaultValue: "\"Topics\"", description: "The field's label." },
+      { name: "placeholder", type: "string", defaultValue: "\"Add a topic\"", description: "The field's placeholder." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Soft synthesised sounds, scored to the motion. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Adds and pops a few tags by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewBubbleTags,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { BubbleTags } from "@/components/bubble-tags";
+
+// Type a word and press Enter to blow a bubble. Tap a bubble to pop it.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <BubbleTags defaultTags={["design", "music"]} onChange={(tags) => console.log(tags)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "eclipse-toggle",
+    name: "Eclipse Toggle",
+    registryCliName: "eclipse-toggle",
+    description:
+      "A light and dark switch played as a total eclipse, that can change the whole page with it. The switch is a strip of sky with the sun at one end, and the knob is the moon. Switch to dark and the moon slides over the sun: the light goes steely as it takes a bite, the last bead of sun flares into a diamond ring, and at totality the sky drops to night, the corona and two pink prominences open round the black disc, Venus and the stars come out and the horizon glows like a sunset. Switch back and the sun bursts out of the far edge and a few birds, fooled into thinking it was dusk, fly off singing. Tap it, use Space, Enter or the arrow keys, or drag the moon to scrub the eclipse by hand. Turn on pageTransition and the page changes inside an eclipse too: the moon's shadow spills out of the switch and across the page with a burning corona edge as the stars come out, and switching back floods it with sunlight from the sun.",
+    categorySlug: "inputs-controls",
+    tags: ["theme toggle", "dark mode toggle", "light dark switch", "switch", "toggle", "eclipse", "sun", "moon", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 198,
+    createdAt: "2026-11-10",
+    animationKinds: ["press", "drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "theme", type: "\"light\" | \"dark\"", description: "The theme, when you control it. Leave it out to let the switch keep its own." },
+      { name: "defaultTheme", type: "\"light\" | \"dark\"", defaultValue: "\"light\"", description: "The starting theme when the switch keeps its own." },
+      { name: "onThemeChange", type: "(theme: \"light\" | \"dark\", detail: { fromUser: boolean }) => void", description: "Called with the new theme. Apply it to your page here. fromUser is false while autoplay runs, so you can leave the page alone then." },
+      { name: "pageTransition", type: "boolean", defaultValue: "false", description: "Changes the page inside an eclipse when the visitor flips it: the moon's shadow spills out of the switch across the page with a burning corona edge and stars, or sunlight floods back out of the sun. Uses the View Transitions API; without it, or with reduced motion, the theme just changes." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A low swell as the light drains, a shimmer at totality and birdsong at sunrise. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Runs the eclipse back and forth by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewEclipseToggle,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { EclipseToggle } from "@/components/eclipse-toggle";
+
+// Tap the switch, or drag the moon across the sun.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      {/* pageTransition: the whole page changes theme inside an eclipse that spills out of the switch */}
+      <EclipseToggle
+        pageTransition
+        onThemeChange={(theme, { fromUser }) => {
+          if (fromUser) document.documentElement.classList.toggle("dark", theme === "dark");
+        }}
+      />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "neon-star-rating",
+    name: "Neon Star Rating",
+    registryCliName: "neon-star-rating",
+    description:
+      "A star rating in neon: five star-shaped glass tubes on a brick wall, each bent round ten corners and held off the bricks by two small brackets. Off, they are grey glass. Choose a score and the tubes up to it strike one after another: a click from the transformer, a stutter of flickers with a crackle on each and a short buzz, then a steady amber glow that washes over the bricks around it. Lower the score and the rest drop out with a fading afterglow. Pointing at a star warms the tubes up to it, and now and then a lit tube stutters the way old neon does. It is a radio group with arrow keys, and the score is read out in a polite live region.",
+    categorySlug: "inputs-controls",
+    tags: ["rating", "star rating", "stars", "neon", "review", "feedback", "score", "glow", "sound", "input", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 194,
+    createdAt: "2026-11-10",
+    animationKinds: ["hover", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "value", type: "number", description: "The score, 0 to 5, when you control it. Leave it out to let the component keep its own." },
+      { name: "defaultValue", type: "number", defaultValue: "0", description: "The starting score when the component keeps its own." },
+      { name: "onChange", type: "(value: number) => void", description: "Called with the new score." },
+      { name: "question", type: "string", defaultValue: "\"How was dinner?\"", description: "The line above the stars." },
+      { name: "labels", type: "[string, string, string, string, string]", description: "The word shown for each score, 1 to 5." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Transformer clicks, crackles and a short buzz as each tube strikes. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Scores by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewNeonStarRating,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { NeonStarRating } from "@/components/neon-star-rating";
+
+// Click a star to light the tubes up to it. Arrow keys move the score.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <NeonStarRating question="How was dinner?" onChange={(score) => console.log(score)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "lens-search",
+    name: "Lens Search",
+    registryCliName: "lens-search",
+    description:
+      "A search box whose magnifying glass is a real lens. Type, and the magnifier lifts out of the field and grows into a glass lens over the list. It looks down the rows, magnifying each as it passes and dimming the ones that do not match, and parks on the first match with a chime, the matched letters in blue under the glass. Arrow keys glide it between matches, and Enter or a click opens one. When nothing matches it reaches the bottom, shakes its head and goes home. Clear the field or press Escape and it drops back in as the icon. The field is a combobox over a listbox, with the result count in a polite live region.",
+    categorySlug: "inputs-controls",
+    tags: ["search", "search bar", "combobox", "autocomplete", "command menu", "filter", "magnifier", "lens", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 195,
+    createdAt: "2026-11-10",
+    animationKinds: ["type", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "{ id: string; title: string; caption?: string; keywords?: string; color?: string }[]", description: "The rows to search. Keywords are extra words a row answers to, not shown; color is the icon tile's colour." },
+      { name: "placeholder", type: "string", defaultValue: "\"Search settings\"", description: "The field's placeholder." },
+      { name: "onSelect", type: "(item) => void", description: "Called with the row that is opened with Enter or a click." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A lift as the lens comes out, soft ticks as it passes rows and a chime on a match. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a few searches by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewLensSearch,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { LensSearch } from "@/components/lens-search";
+
+// Type to send the lens down the list. Arrow keys move it, Enter opens a row.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <LensSearch onSelect={(item) => console.log(item.title)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "peel-delete",
+    name: "Peel Delete",
+    registryCliName: "peel-delete",
+    description:
+      "Hold to delete, where holding peels the note off like a sticker. Press and hold the bin and the note's corner lifts, then the fold runs in across it, the paper back of the curl showing and its shadow falling on the note, with a rasp that follows the speed of the peel. Let go early and it sticks back down with a pat. Hold all the way and it rips off like a plaster in one continuous pull, leaving the patch where it was stuck. The bin turns into Undo with the time left drawn round it, and Undo slides the note back and smooths it flat. Space or Enter holds from the keyboard, and the bin's label says to press and hold.",
+    categorySlug: "inputs-controls",
+    tags: ["delete", "hold to delete", "undo", "destructive action", "confirm", "sticker", "peel", "list", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 197,
+    createdAt: "2026-11-10",
+    animationKinds: ["press", "3d", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "{ id: string; title: string; text?: string; time?: string; color?: string }[]", description: "The notes. Color is the sticker's paper colour." },
+      { name: "onDelete", type: "(item) => void", description: "Called when a note is really gone, after the undo window closes." },
+      { name: "holdMs", type: "number", defaultValue: "1000", description: "How long to hold the bin, in milliseconds." },
+      { name: "undoSeconds", type: "number", defaultValue: "5", description: "How long Undo stays." },
+      { name: "title", type: "string", defaultValue: "\"Notes\"", description: "The card's heading." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A rasp that follows the peel, a pat when it sticks back and a rip when it comes free. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Peels a note and undoes it by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewPeelDelete,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { PeelDelete } from "@/components/peel-delete";
+
+// Press and hold a bin to peel the note off. Undo puts it back.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <PeelDelete onDelete={(note) => console.log("deleted", note.id)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "upload-morph",
+    name: "Upload Morph",
+    registryCliName: "upload-morph",
+    description:
+      "An upload status that takes itself apart to do the job. Tap it and the cloud's puffs smooth out, from the top round to the bottom, into a ring that becomes the progress track; a glowing head leads the progress round it while the arrow keeps rising up through the ring like a conveyor. When it lands the ring gives a soft pulse and a ripple, puffs back out into the cloud, and the arrow's head folds into a check. If the upload fails the ring turns red and shakes, and the cloud comes back with its arrow. Its sounds follow the picture: a tap, air as the cloud rounds, a note for each tenth that climbs the scale, a chime as it lands.",
+    categorySlug: "inputs-controls",
+    tags: ["upload", "file upload", "progress", "progress ring", "cloud", "morph", "icon morph", "status", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 193,
+    createdAt: "2026-11-10",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "fileName", type: "string", defaultValue: "\"Q3-report.pdf\"", description: "The file name under the glyph." },
+      { name: "fileSize", type: "string", defaultValue: "\"2.4 MB\"", description: "The file size under the glyph." },
+      { name: "onUpload", type: "(report: (progress: number) => void) => Promise<void>", description: "Upload the file yourself: call report with 0 to 1 as it goes and resolve when it is done, or throw to show the failure. Without it the demo fills over about three seconds." },
+      { name: "size", type: "number", defaultValue: "300", description: "Width of the card in pixels." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A tap, air as the cloud rounds, a rising note per tenth and a landing chime. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Uploads by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewUploadMorph,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { UploadMorph } from "@/components/upload-morph";
+
+// Tap to upload. Report real progress from onUpload, or leave it out for the demo.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <UploadMorph
+        fileName="Q3-report.pdf"
+        fileSize="2.4 MB"
+        onUpload={async (report) => {
+          for (let i = 1; i <= 10; i++) {
+            await new Promise((r) => setTimeout(r, 250));
+            report(i / 10);
+          }
+        }}
+      />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "voice-morph",
+    name: "Voice Morph",
+    registryCliName: "voice-morph",
+    description:
+      "A voice-message button whose glyph takes itself apart to do the job. Tap the mic and its head splits into five bars that spread into a live waveform while the stand folds away; the button turns red and a timer runs. Tap again and the bars pack themselves into the send arrow: three become its shaft and wings, the other two fold away, the button turns blue and the arrow shoots up out of it as the message lands in the thread. Then the mic rises back into place. Escape cancels a recording. The loudness is simulated, so it needs no microphone; it is decoration over a plain button.",
+    categorySlug: "ai-components",
+    tags: ["voice message", "voice note", "record button", "microphone", "waveform", "chat", "send", "morph", "icon morph", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 192,
+    createdAt: "2026-11-10",
+    animationKinds: ["press", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "placeholder", type: "string", defaultValue: "\"Message\"", description: "What the field says before anyone records." },
+      { name: "incoming", type: "string", defaultValue: "\"Running five minutes late, save me a seat?\"", description: "A message already in the thread, from the other person." },
+      { name: "onSend", type: "(seconds: number, levels: number[]) => void", description: "Called with the length and a loudness trace (0 to 1, ten a second) when a voice message is sent." },
+      { name: "maxSeconds", type: "number", defaultValue: "60", description: "Recording stops and sends by itself at this length." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A rising bloop as the mic opens and a whoosh as the arrow sends. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Records and sends a message by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewVoiceMorph,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { VoiceMorph } from "@/components/voice-morph";
+
+// Tap the mic to record, tap again to send. Escape cancels.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <VoiceMorph onSend={(seconds) => console.log("sent", seconds, "s")} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "face-scan-morph",
+    name: "Face Scan Morph",
+    registryCliName: "face-scan-morph",
+    description:
+      "A pay-with-your-face confirmation whose glyph takes itself apart to check you. Tap it and the four scan corners curl inward into the arcs of a ring that spins while the face glances about and blinks. A match closes the ring into one green circle as the eyes fade and the smile straightens into a check. No match stops the spin, the arcs straighten back into corners, and the face shakes its head with a flat mouth and waits for another go. The glyph is a plain button with each state spoken in a live region.",
+    categorySlug: "inputs-controls",
+    tags: ["face id", "payment", "checkout", "confirm", "biometric", "scan", "morph", "icon morph", "status", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 191,
+    createdAt: "2026-11-10",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "merchant", type: "string", defaultValue: "\"Little Fern Café\"", description: "Who is being paid." },
+      { name: "amount", type: "string", defaultValue: "\"$24.00\"", description: "The amount, as shown." },
+      { name: "onConfirm", type: "() => Promise<boolean>", description: "Check the face yourself and resolve true to pay. Without it the demo fails the first try and passes the next." },
+      { name: "onPaid", type: "() => void", description: "Called once the payment goes through." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Soft ticks while it scans, a chime on a match and a low note on a miss. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Scans by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewFaceScanMorph,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { FaceScanMorph } from "@/components/face-scan-morph";
+
+// Tap to scan. Resolve onConfirm with your own check.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <FaceScanMorph merchant="Little Fern Café" amount="$24.00" onPaid={() => console.log("paid")} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */

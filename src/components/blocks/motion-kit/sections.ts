@@ -73,6 +73,7 @@ import { BrokenBridge404 } from "./broken-bridge-404";
 import { PostalSignup } from "./postal-signup";
 import { SpotlightTour } from "./spotlight-tour";
 import { BrandReveal } from "./brand-reveal";
+import { LanyardSignup } from "./lanyard-signup";
 import { PreviewBlockVariantMkScrollNavbar } from "@/registry/blocks/nexus-essentials-blocks-c";
 import { MorphMenu } from "./morph-menu";
 import { AnnounceBar } from "./announce-bar";
@@ -104,6 +105,7 @@ export const MOTION_KIT_SECTIONS: Record<string, ComponentType<{ autoplay?: bool
   "mk-postal-signup": PostalSignup as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-spotlight-tour": SpotlightTour as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-brand-reveal": BrandReveal as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-lanyard-signup": LanyardSignup as unknown as ComponentType<{ autoplay?: boolean }>,
   // The navbar needs a scrolling frame with a page inside it, so the section is its preview.
   "mk-scroll-navbar": asSection(PreviewBlockVariantMkScrollNavbar),
   "mk-morph-menu": MorphMenu as unknown as ComponentType<{ autoplay?: boolean }>,
