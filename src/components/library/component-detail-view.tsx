@@ -629,7 +629,7 @@ export function ComponentDetailView({ item }: { item: LibraryComponent }) {
                 </p>
               </div>
             </div>
-            <Link href="/pricing" className={cn(buttonVariants(), "shrink-0 rounded-full px-5")}>
+            <Link href="/pricing" data-plans-source="component_modal" className={cn(buttonVariants(), "shrink-0 rounded-full px-5")}>
               View plans
             </Link>
           </motion.div>

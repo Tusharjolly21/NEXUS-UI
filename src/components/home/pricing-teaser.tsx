@@ -65,7 +65,7 @@ export function PricingTeaser({ pricing }: { pricing: DisplayPricing }) {
             Pro and All-Access unlock exactly the same things. Pay yearly, or pay once.
           </p>
         </div>
-        <PillLink href="/pricing" variant="white" className="shrink-0 self-start md:self-auto">
+        <PillLink href="/pricing" variant="white" plansSource="home_teaser" className="shrink-0 self-start md:self-auto">
           Compare plans
         </PillLink>
       </div>

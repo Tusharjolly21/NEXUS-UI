@@ -9,6 +9,7 @@ import { ProAccessProvider } from "@/components/pro/pro-access";
 import { sessionHasPro, sessionPlanKind } from "@/lib/component-access";
 import { preload } from "react-dom";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
+import { getPricing } from "@/lib/region";
 
 export async function SiteShell({ children }: { children: React.ReactNode }) {
   // Only drives what the UI shows; every Pro resource is checked again on the server.
@@ -17,9 +18,11 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
   // Start fetching the early-slot numbers with the page, so the banner has them by the time it hydrates.
   if (!isPremium) preload("/api/slots", { as: "fetch", crossOrigin: "anonymous" });
   const bannerClosed = (await cookies()).get(LAUNCH_BANNER_COOKIE)?.value === LAUNCH_BANNER_ID;
+  // The upgrade dialog quotes the price, in rupees for India, the same prices checkout will charge.
+  const pricing = isPremium ? undefined : await getPricing();
 
   return (
-    <ProAccessProvider isPro={isPremium} plan={plan} proCount={CATALOG_COUNTS.proComponents}>
+    <ProAccessProvider isPro={isPremium} plan={plan} proCount={CATALOG_COUNTS.proComponents} pricing={pricing}>
       <div className="flex min-h-dvh flex-col">
         <a
           href="#site-main"

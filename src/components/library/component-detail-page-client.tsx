@@ -1,6 +1,7 @@
 "use client";
 
 import { AfterCopyProLine } from "@/components/pro/after-copy-pro-line";
+import { announceCopy } from "@/components/pro/pro-access";
 import { ProNudge, type ProPick } from "@/components/pro/pro-nudge";
 import { AutoplaySound } from "@/lib/ui-sounds";
 import * as React from "react";
@@ -475,7 +476,7 @@ function Stage({
               enabled: true,
               showDots: true,
               title: "Usage example",
-              copy: { enabled: true, label: "Copy code", copiedLabel: "Copied", copiedDurationMs: 1400 },
+              copy: { enabled: true, label: "Copy code", copiedLabel: "Copied", copiedDurationMs: 1400, onCopied: announceCopy },
             }}
             codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
             border={{ radius: "20px" }}
@@ -492,6 +493,8 @@ function Stage({
           .
         </p>
       ) : null}
+      {/* Under the first preview, where the code and prompt buttons are: the free-copy note shows here too */}
+      {!locked && (!variant || variant.index === 0) ? <AfterCopyProLine slug={slug} listen /> : null}
     </div>
   );
 }
@@ -578,7 +581,7 @@ function InstallPanel({
 }) {
   const command = installCommand(registryCliName ?? slug);
   const extra = getExtraLibraries(dependencies);
-  const { requestUpgrade } = useProAccess();
+  const { requestUpgrade, pricing } = useProAccess();
 
   if (locked) {
     return (
@@ -588,6 +591,15 @@ function InstallPanel({
         <p className="mt-1.5 text-[14px] leading-relaxed text-muted-foreground">
           Preview it as much as you like. The source, the one-line install and the playground come with Pro.
         </p>
+        {pricing ? (
+          <p className="mt-3 text-[14px] leading-relaxed text-foreground">
+            <span className="font-semibold tabular-nums">{pricing.pro}</span>
+            <span className="text-muted-foreground"> a year, or </span>
+            <span className="font-semibold tabular-nums">{pricing.allAccess}</span>
+            <span className="text-muted-foreground"> once for </span>
+            <span className="whitespace-nowrap text-muted-foreground">All-Access.</span>
+          </p>
+        ) : null}
         <button
           type="button"
           onClick={() => requestUpgrade(name)}
@@ -598,6 +610,7 @@ function InstallPanel({
         </button>
         <Link
           href="/pricing"
+          data-plans-source="component_card"
           className="mt-2 inline-flex h-9 w-full items-center justify-center text-[14px] font-medium text-link hover:underline hover:underline-offset-4"
         >
           See what Pro includes

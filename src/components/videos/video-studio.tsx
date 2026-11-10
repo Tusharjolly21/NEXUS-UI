@@ -209,7 +209,7 @@ function Overview({ video, unlocked, onTab }: { video: VideoEntry; unlocked: boo
           </>
         ) : (
           <>
-            <Link href="/pricing" className="inline-flex h-11 items-center rounded-full bg-action px-5 text-[14px] font-semibold text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+            <Link href="/pricing" data-plans-source="video_page" className="inline-flex h-11 items-center rounded-full bg-action px-5 text-[14px] font-semibold text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
               Get the prompt and source
             </Link>
             <button type="button" onClick={() => onTab(hf ? "prompt" : "customize")} className="h-11 rounded-full bg-foreground/[0.07] px-5 text-[14px] font-semibold text-foreground transition-colors hover:bg-foreground/[0.12] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">

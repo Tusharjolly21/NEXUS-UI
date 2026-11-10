@@ -260,7 +260,7 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
                   Dashboard
                 </Link>
                 {isPremium ? null : (
-                  <Link href="/pricing" onClick={() => setMenuOpen(false)} className="h-10 flex-1 content-center rounded-full bg-action text-center text-[14px] font-medium text-white">
+                  <Link href="/pricing" data-plans-source="nav_menu" onClick={() => setMenuOpen(false)} className="h-10 flex-1 content-center rounded-full bg-action text-center text-[14px] font-medium text-white">
                     Get Pro
                   </Link>
                 )}
@@ -273,7 +273,7 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
                 <Link href="/login" onClick={() => setMenuOpen(false)} className="h-10 flex-1 content-center rounded-full bg-foreground/[0.06] text-center text-[14px] font-medium text-foreground">
                   Sign in
                 </Link>
-                <Link href="/pricing" onClick={() => setMenuOpen(false)} className="h-10 flex-1 content-center rounded-full bg-action text-center text-[14px] font-medium text-white">
+                <Link href="/pricing" data-plans-source="nav_menu" onClick={() => setMenuOpen(false)} className="h-10 flex-1 content-center rounded-full bg-action text-center text-[14px] font-medium text-white">
                   Get Pro
                 </Link>
               </>

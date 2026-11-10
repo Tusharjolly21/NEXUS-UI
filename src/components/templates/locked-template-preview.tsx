@@ -142,14 +142,14 @@ export function LockedTemplatePreview({
               </ul>
               <div className="mt-6 grid gap-2">
                 <a
-                  href="/pricing"
+                  href="/pricing" data-plans-source="template_locked"
                   target="_top"
                   className="inline-flex h-12 items-center justify-center rounded-full bg-[#0071e3] text-[16px] font-semibold text-white transition-colors hover:bg-[#0077ed] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]"
                 >
                   Get Pro, {pricing.pro} a year
                 </a>
                 <a
-                  href="/pricing"
+                  href="/pricing" data-plans-source="template_locked"
                   target="_top"
                   className="inline-flex h-11 items-center justify-center rounded-full text-[15px] font-medium text-[#0066cc] transition-colors hover:bg-black/[0.04]"
                 >
