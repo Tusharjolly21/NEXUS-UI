@@ -198,6 +198,23 @@ const coverage = (d: number) => {
   return clamp(a / (Math.PI * RS * RS));
 };
 
+/**
+ * The lit part of the moon, as a path round its centre, lit on the side facing the sun (the right). `lit` runs from 1,
+ * the full face, to 0, a new moon: the shadow sweeps in from the far side and leaves a crescent that thins towards the
+ * sun, the way the moon looks in the days before an eclipse. The shadow's edge is half an ellipse.
+ */
+const phasePath = (lit: number) => {
+  if (lit >= 0.999) return `M0,${-RM} A${RM},${RM} 0 1 1 0,${RM} A${RM},${RM} 0 1 1 0,${-RM} Z`;
+  if (lit <= 0.001) return "M0,0 Z";
+  const e = RM * (1 - 2 * lit); // where the shadow's edge crosses the middle: -RM is full, RM is new
+  let d = `M0,${-RM} A${RM},${RM} 0 0 1 0,${RM}`;
+  for (let i = 1; i < 24; i++) {
+    const y = RM - (2 * RM * i) / 24;
+    d += ` L${(e * Math.sqrt(1 - (y / RM) ** 2)).toFixed(2)},${y.toFixed(2)}`;
+  }
+  return `${d} Z`;
+};
+
 /** a fixed scatter: the same sky every time */
 const rand = (i: number) => {
   const x = Math.sin(i * 127.1 + 311.7) * 43758.5453;
@@ -369,12 +386,8 @@ export function eclipsePageTransition(next: Theme, origin: { x: number; y: numbe
       ? "box-shadow:inset 0 0 0 1.5px rgba(255,246,226,.95),inset 0 0 10px 3px rgba(255,214,160,.8),inset 0 0 36px 8px rgba(255,140,90,.35),inset 0 0 70px 14px rgba(130,90,255,.14)"
       : "box-shadow:inset 0 0 0 2px rgba(255,250,225,1),inset 0 0 14px 4px rgba(255,214,120,.85),inset 0 0 60px 16px rgba(255,186,90,.35)");
   layer.appendChild(rim);
-  // the diamond ring as the last of the sun goes (dark), or the sun breaking out (light)
-  const fr = dark ? 70 : 150;
-  const flare = document.createElement("div");
-  flare.style.cssText = `position:absolute;left:${x - fr}px;top:${y - fr}px;width:${fr * 2}px;height:${fr * 2}px;border-radius:50%;opacity:0;` +
-    "background:radial-gradient(circle,rgba(255,255,255,.95) 0,rgba(255,236,190,.55) 18%,rgba(255,190,120,.16) 42%,transparent 70%)";
-  layer.appendChild(flare);
+  // no flare of our own: the switch draws the diamond ring at the sun's edge, at the right moment. A glow here would
+  // sit on top of the moon that is still in front of the sun.
   const stars: HTMLDivElement[] = [];
   if (dark) {
     for (let i = 0; i < 70; i++) {
@@ -386,9 +399,12 @@ export function eclipsePageTransition(next: Theme, origin: { x: number; y: numbe
     }
   } else {
     const rays = document.createElement("div");
+    // the rays start outside the switch, so they never cross the moon that is still in front of the sun
+    const inner = Math.round(from), mid = Math.round(Math.max(from + 60, far * 0.42));
+    const rayMask = `radial-gradient(circle,transparent 0,transparent ${inner}px,#000 ${inner + 40}px,rgba(0,0,0,.6) ${mid}px,transparent ${Math.round(far)}px)`;
     rays.style.cssText = `position:absolute;left:${x - far}px;top:${y - far}px;width:${far * 2}px;height:${far * 2}px;opacity:0;` +
       "background:repeating-conic-gradient(rgba(255,206,120,.22) 0deg 3deg,transparent 3deg 13deg);" +
-      "-webkit-mask:radial-gradient(circle,#000 0,rgba(0,0,0,.6) 30%,transparent 70%);mask:radial-gradient(circle,#000 0,rgba(0,0,0,.6) 30%,transparent 70%)";
+      `-webkit-mask:${rayMask};mask:${rayMask}`;
     layer.appendChild(rays);
     stars.push(rays);
   }
@@ -406,7 +422,6 @@ export function eclipsePageTransition(next: Theme, origin: { x: number; y: numbe
         { duration: dur, easing: "ease-in", fill: "forwards", pseudoElement: "::view-transition-old(root)" },
       );
       rim.animate({ width: [`${from * 2}px`, `${far * 2}px`], height: [`${from * 2}px`, `${far * 2}px`], opacity: [1, 1, 0] }, { duration: dur, easing: ease, fill: "forwards" });
-      flare.animate({ opacity: [0, 1, 0], transform: ["scale(.4)", "scale(1.25)", "scale(.8)"] }, { duration: 900, easing: "ease-out", fill: "forwards" });
       if (dark) {
         stars.forEach((st) => {
           st.animate({ opacity: [0, 0.9, 0.3, 0.8, 0] }, { duration: dur + 1400, delay: Math.random() * 300, easing: "ease-in-out", fill: "forwards" });
@@ -489,6 +504,7 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
     corona: useRef<SVGGElement>(null),
     coronaSpin: useRef<SVGGElement>(null),
     pale: useRef<SVGGElement>(null),
+    phase: useRef<SVGPathElement>(null),
     bite: useRef<SVGCircleElement>(null),
     disc: useRef<SVGGElement>(null),
     beads: useRef<SVGGElement>(null),
@@ -523,7 +539,10 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
       set(r.corona.current, "opacity", corona);
       if (!reduce) set(r.coronaSpin.current, "transform", `rotate(${(t * 0.8).toFixed(2)}) scale(${(1 + 0.018 * Math.sin(t * 0.9)).toFixed(4)})`);
       set(r.pale.current, "transform", `translate(${x.toFixed(2)} ${CY})`);
-      set(r.pale.current, "opacity", 0.86 * step(28, 104, d));
+      // by day the moon is lit on its sunward side: full at rest, a thinning crescent as it nears the sun, then gone
+      // before it reaches the sun's edge, so all that shows in front of the sun is the black bite
+      r.phase.current?.setAttribute("d", phasePath(step(72, 150, d)));
+      set(r.pale.current, "opacity", 0.86 * step(70, 98, d));
       set(r.bite.current, "cx", x);
       set(r.disc.current, "transform", `translate(${x.toFixed(2)} ${CY})`);
       set(r.disc.current, "opacity", corona);
@@ -854,6 +873,9 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
               <stop offset="0.75" stopColor="#f3f7fd" stopOpacity=".78" />
               <stop offset="1" stopColor="#e6eef9" stopOpacity=".6" />
             </radialGradient>
+            <mask id={id("phase")} maskUnits="userSpaceOnUse" x={-RM - 2} y={-RM - 2} width={RM * 2 + 4} height={RM * 2 + 4}>
+              <path ref={r.phase} d={phasePath(startDark ? 0 : 1)} fill="#ffffff" filter={url("b04")} />
+            </mask>
             <filter id={id("b25")} x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="2.5" />
             </filter>
@@ -919,9 +941,12 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
             {/* the sun */}
             <circle cx={SUN} cy={CY} r={RS} fill={url("disc")} />
 
-            {/* the moon by day: its real face, the seas letting the blue through, gone in the glare as it nears the sun */}
+            {/* the moon by day: its real face, the seas letting the blue through, lit from the sun's side and waning to a
+                crescent as it nears the sun */}
             <g ref={r.pale} transform={`translate(${startDark ? SUN : LEFT} ${CY})`} opacity={startDark ? 0 : 0.86}>
-              {face ? <image href={face.day} x={-RM} y={-RM} width={RM * 2} height={RM * 2} preserveAspectRatio="none" /> : <circle r={RM} fill={url("pale")} />}
+              <g mask={url("phase")}>
+                {face ? <image href={face.day} x={-RM} y={-RM} width={RM * 2} height={RM * 2} preserveAspectRatio="none" /> : <circle r={RM} fill={url("pale")} />}
+              </g>
             </g>
             {/* where it is in front of the sun, it is a black bite */}
             <g clipPath={url("sun")}>
