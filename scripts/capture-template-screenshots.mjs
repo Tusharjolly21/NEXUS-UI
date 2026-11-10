@@ -38,6 +38,7 @@ const ONLY = (process.env.SLUGS || "").split(",").map((s) => s.trim()).filter(Bo
 const TEMPLATE_SLUGS = [
   "kiosk",
   "wharf",
+  "plotline",
   "last-light",
   "nimbus",
   "margin",

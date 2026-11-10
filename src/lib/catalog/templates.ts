@@ -48,6 +48,55 @@ export type MarketplaceTemplate = {
 
 export const templates: MarketplaceTemplate[] = [
   {
+    slug: "plotline",
+    title: "Plotline — product planning SaaS landing page",
+    description:
+      "A landing page for a product-planning tool where requests, roadmaps and releases live in one workspace. The hero holds a working app in a browser frame on a painted sky: a timeline where dragging one bar moves every linked project after it, a board, a task list you can tick off, and a weekly update that types itself, with teammates' cursors drifting across. Then come a logo wall, how it works in four live demos (a request inbox you can filter and upvote, a Now / Next / Later board, tracking with a blocker to escalate, and release notes you publish), stats that count up, the new weekly-update feature, customer stories whose drawings play on hover, a quote, pricing with a team-size slider, a FAQ, a changelog and a closing call to action. Plotline and every company, person and figure are invented sample content.",
+    category: "SaaS",
+    tags: ["saas", "product", "roadmap", "project management", "planning", "b2b", "landing page", "pricing", "interactive", "motion-kit"],
+    difficulty: "Advanced",
+    premium: true,
+    trendingScore: 310,
+    createdAt: "2026-11-10",
+    techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
+    pages: ["/"],
+    sections: [
+      "Navigation",
+      "Hero with Working App Mock",
+      "Logo Wall",
+      "How It Works with Live Demos",
+      "Stats",
+      "Weekly Updates Feature",
+      "Customer Stories",
+      "Quote",
+      "Pricing with Team Size Slider",
+      "FAQ",
+      "Changelog",
+      "Call to Action",
+      "Footer",
+    ],
+    pageLabels: ["How it works", "Weekly updates", "Customers", "Pricing"],
+    previewImages: {
+      hero: "/templates/plotline/hero.webp",
+      sections: [
+        "/templates/plotline/section-1.webp",
+        "/templates/plotline/section-2.webp",
+        "/templates/plotline/section-3.webp",
+        "/templates/plotline/section-4.webp",
+      ],
+    },
+    features: [
+      "A working app in the hero: timeline, board, list and updates views behind tabs, in a browser frame that tilts flat as you scroll",
+      "Drag the onboarding bar (or use the arrow keys) and the linked projects follow on softer springs, with a toast saying how far they moved",
+      "How it works as four live demos: upvote and filter requests, pull cards across a roadmap board, escalate a blocker, publish release notes",
+      "A sticky step list on wide screens that follows the demo you are reading, with a progress line",
+      "Customer stories whose drawings play on hover, and stats that count up once on screen",
+      "Pricing with a monthly or yearly switch and a team-size slider that totals every plan with rolling numbers",
+      "Painted skies with drifting light and film grain behind the mocks, all drawn in CSS, so there are no image files",
+      "Inter Tight and Geist self-hosted (both Open Font Licence), reduced-motion support",
+    ],
+  },
+  {
     slug: "wharf",
     title: "Wharf — onchain payments landing page",
     description:

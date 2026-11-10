@@ -165,6 +165,11 @@ const WharfPage = nextDynamic(
   { loading: TemplateFallback },
 );
 
+const PlotlinePage = nextDynamic(
+  () => import("@/components/templates/plotline-page").then((m) => ({ default: m.PlotlinePage })),
+  { loading: TemplateFallback },
+);
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -218,6 +223,8 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><KioskPage /></ThemeReceiver>;
   } else if (tmpl.slug === "wharf") {
     return <ThemeReceiver><WharfPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "plotline") {
+    return <ThemeReceiver><PlotlinePage /></ThemeReceiver>;
   } else if (tmpl.slug === "nexus-ai-launch") {
     return <ThemeReceiver><NexusAiLaunchTemplatePage /></ThemeReceiver>;
   } else if (tmpl.slug === "noir-studio") {
