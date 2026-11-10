@@ -11,9 +11,9 @@ import { alternatives } from "@/lib/alternatives";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
-  title: "Animated React Components with Tailwind CSS",
+  title: "Animated React Components for Next.js and Tailwind CSS",
   description:
-    "Free animated React components for Next.js, built with Tailwind CSS and Framer Motion: text effects, backgrounds, sidebars, cards and more. Copy-paste or install with the shadcn CLI.",
+    "Free and Pro animated React components built with Tailwind CSS and Framer Motion, many with sound: buttons, cards, loaders, text effects and more. Install with the shadcn CLI.",
   alternates: { canonical: "/components" },
 });
 
@@ -31,12 +31,12 @@ export default async function ComponentsPage() {
       <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[136px]">
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
         <div className="relative mx-auto max-w-[1152px]">
-          <h1 className="pg-display max-w-[900px] text-[clamp(48px,8vw,84px)] leading-[1.02] text-foreground">
-            Components that feel <RainbowWord>alive</RainbowWord>.
+          <h1 className="pg-display max-w-[1040px] text-[clamp(44px,7vw,76px)] leading-[1.02] text-foreground">
+            Animated React components that feel <RainbowWord>alive</RainbowWord>.
           </h1>
           <p className="mt-5 max-w-[600px] text-[19px] leading-[1.55] text-muted-foreground">
-            Springs, physics and the small details that usually take a week to get right. Play with any of them below, then add it
-            to your React app with one command.
+            Springs, physics, sound and the small details that usually take a week to get right, built with Tailwind CSS and
+            Framer Motion. Play with any of them below, then add it to your Next.js or React app with one command.
           </p>
         </div>
       </section>
