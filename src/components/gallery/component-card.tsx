@@ -2,20 +2,14 @@
 
 import * as React from "react";
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  Lock,
-  RotateCcw,
-  SlidersHorizontal,
-  Volume2,
-} from "lucide-react";
+import { ArrowUpRight, Lock, RotateCcw, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ProBadge, useLocked, useProAccess } from "@/components/pro/pro-access";
+import { ProBadge, useLocked } from "@/components/pro/pro-access";
 import { demoScript, FitPreview } from "./fit-preview";
 import { PreviewGuard } from "@/components/library/dynamic-preview";
 import { TINT_CLASSES, type GalleryItem } from "./types";
 
-/** The even grid the listing pages use: one column on a phone, then two, then three as the middle column widens. */
+/** The even grid the listing pages use: one column on a phone, then up to five as the middle column widens. */
 export function CardGrid({
   className,
   children,
@@ -26,7 +20,7 @@ export function CardGrid({
   return (
     <ul
       className={cn(
-        "grid grid-cols-1 gap-4 @[500px]:grid-cols-2 @[720px]:grid-cols-3",
+        "grid grid-cols-1 gap-4 @[500px]:grid-cols-2 @[720px]:grid-cols-3 @[1040px]:grid-cols-4 @[1400px]:grid-cols-5",
         className,
       )}
     >
@@ -41,21 +35,12 @@ const tag =
 /**
  * A component as a card: the live component, whole, in a frame of its own above its name. The frame is the same
  * shape on every card and the component is scaled down to fit inside it (never up, never cropped), below the
- * strip that holds its tags, so nothing on the card covers it. The live component stays playable; the name is
- * the link to its page and the blue button opens the inspector (or, on a locked Pro card, the upgrade).
+ * strip that holds its tags, so nothing on the card covers it. The live component stays playable; the caption
+ * (name, category and the blue arrow, a lock on a Pro card you don't have yet) opens the component's page.
  */
-export function ComponentCard({
-  item,
-  onOpen,
-  eager = false,
-}: {
-  item: GalleryItem;
-  onOpen?: (slug: string) => void;
-  eager?: boolean;
-}) {
+export function ComponentCard({ item, eager = false }: { item: GalleryItem; eager?: boolean }) {
   const [run, setRun] = React.useState(0);
   const locked = useLocked(item.premium);
-  const { requestUpgrade } = useProAccess();
   const { fit } = item;
   const dark = fit.dark;
   const href = `/components/${item.slug}`;
@@ -67,13 +52,6 @@ export function ComponentCard({
   const chip = dark
     ? "bg-white/12 text-white backdrop-blur-md"
     : "bg-white/90 text-[#1d1d1f] shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)] backdrop-blur-md";
-
-  const openInspector = (e: React.MouseEvent) => {
-    if (!onOpen || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0)
-      return;
-    e.preventDefault();
-    onOpen(item.slug);
-  };
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-[28px] bg-card p-2 shadow-[0_0_0_0.5px_var(--border)] transition-shadow duration-200 hover:shadow-[0_0_0_0.5px_var(--border),0_18px_40px_-18px_rgba(0,0,0,0.3)]">
@@ -148,7 +126,7 @@ export function ComponentCard({
       <div className="relative flex shrink-0 items-center justify-between gap-3 px-3 pb-1.5 pt-3">
         <div className="min-w-0">
           <h3 className="truncate text-[15.5px] font-semibold tracking-[-0.015em] text-foreground">
-            {/* the caption row is the link's target area; the live component above stays free to play with */}
+            {/* the whole caption row opens the component's page; the live component above stays free to play with */}
             <Link
               href={href}
               className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none [&:focus-visible]:after:rounded-[18px] [&:focus-visible]:after:outline-2 [&:focus-visible]:after:outline-ring"
@@ -160,35 +138,14 @@ export function ComponentCard({
             {item.categoryLabel}
           </p>
         </div>
-        {locked ? (
-          <button
-            type="button"
-            onClick={() => requestUpgrade(item.name)}
-            aria-label={`Unlock ${item.name} with Pro`}
-            title="Unlock with Pro"
-            className="relative z-10 grid size-9 shrink-0 place-items-center rounded-full bg-action text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-          >
-            <Lock className="size-3.5" aria-hidden />
-          </button>
-        ) : (
-          <Link
-            href={href}
-            onClick={openInspector}
-            aria-label={
-              onOpen
-                ? `Open ${item.name} in the inspector`
-                : `Open ${item.name}`
-            }
-            title={onOpen ? "Tweak and copy" : "Open"}
-            className="relative z-10 grid size-9 shrink-0 place-items-center rounded-full bg-action text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-          >
-            {onOpen ? (
-              <SlidersHorizontal className="size-3.5" aria-hidden />
-            ) : (
-              <ArrowUpRight className="size-4" aria-hidden />
-            )}
-          </Link>
-        )}
+        <span
+          aria-hidden
+          className={cn(
+            "grid size-9 shrink-0 place-items-center rounded-full bg-action text-white transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+          )}
+        >
+          {locked ? <Lock className="size-3.5" /> : <ArrowUpRight className="size-4" />}
+        </span>
       </div>
     </article>
   );

@@ -5,7 +5,8 @@ import { useProAccess } from "@/components/pro/pro-access";
 import { cn } from "@/lib/utils";
 
 /**
- * The listing pages' frame: names down the left, the page in the middle, the Pro card on the right.
+ * The listing pages' frame: names down the left, the page in the middle, the Pro card on the right, edge to edge
+ * on any screen (the middle takes whatever width there is, and the card grid adds columns as it grows).
  *
  * - 1280px and up: all three columns. The two side columns stay put while the middle scrolls.
  * - 1024px to 1279px: names and page; the Pro card moves into the page as a band (see ProBand).
@@ -30,8 +31,8 @@ export function ListingShell({
       </div>
       <div
         className={cn(
-          "relative mx-auto grid w-full max-w-[1480px] grid-cols-1 gap-6 px-4 sm:px-6 lg:grid-cols-[236px_minmax(0,1fr)] lg:gap-8",
-          !isPro && "xl:grid-cols-[248px_minmax(0,1fr)_296px]",
+          "relative grid w-full grid-cols-1 gap-6 px-4 sm:px-6 lg:grid-cols-[236px_minmax(0,1fr)] lg:gap-8 2xl:grid-cols-[264px_minmax(0,1fr)] 2xl:gap-10 2xl:px-8",
+          !isPro && "xl:grid-cols-[248px_minmax(0,1fr)_296px] 2xl:grid-cols-[264px_minmax(0,1fr)_312px]",
         )}
       >
         <div className="hidden lg:block">{sidebar}</div>

@@ -363,7 +363,7 @@ export function ComponentGallery({
         <CardGrid className="mt-6">
           {shown.map((item, i) => (
             <li key={item.slug}>
-              <ComponentCard item={item} onOpen={setOpenSlug} eager={i < 3} />
+              <ComponentCard item={item} eager={i < 3} />
             </li>
           ))}
         </CardGrid>

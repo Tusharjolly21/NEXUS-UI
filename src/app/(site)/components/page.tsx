@@ -8,11 +8,10 @@ import { allGalleryItems } from "@/lib/catalog/gallery-items";
 import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
 import { alternatives } from "@/lib/alternatives";
 import { createMetadata } from "@/lib/seo";
-import { COMPONENT_SIDEBAR_SECTIONS } from "@/lib/catalog/taxonomy";
+import { componentGroups } from "@/lib/catalog/listing-groups/components";
 import { ListingShell } from "@/components/listing/listing-shell";
-import { ListingBrowse, ListingSidebar, type SidebarGroup } from "@/components/listing/listing-sidebar";
+import { ListingBrowse, ListingSidebar } from "@/components/listing/listing-sidebar";
 import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
-import type { GalleryItem } from "@/components/gallery/types";
 
 export const metadata: Metadata = createMetadata({
   title: { absolute: "Animated React Components for Next.js | Nexus UI" },
@@ -24,21 +23,6 @@ export const metadata: Metadata = createMetadata({
 /** The "For fun" group (web slingers, portals, black holes, a shredder). Heavy canvas and WebGL, so it lives on its own page instead of in the wall. */
 const FUN_GROUP = "fun";
 
-/** The names column: what is new first, then each group by size, with the just-for-fun ones last. */
-function sidebarGroups(all: GalleryItem[]): SidebarGroup[] {
-  const toItem = (i: GalleryItem) => ({ name: i.name, href: `/components/${i.slug}`, isNew: !!i.isRecent });
-  // the same rule as the wall's New tab: the latest week or so of additions, newest first
-  const fresh = all.filter((i) => i.isRecent).sort((a, b) => (b.addedAt ?? 0) - (a.addedAt ?? 0));
-  const groups = COMPONENT_SIDEBAR_SECTIONS.map((sec) => ({
-    id: sec.id,
-    label: sec.label,
-    items: all.filter((i) => i.group === sec.id).map(toItem),
-  }))
-    .filter((g) => g.items.length)
-    .sort((a, b) => Number(a.id === FUN_GROUP) - Number(b.id === FUN_GROUP) || b.items.length - a.items.length);
-  return fresh.length ? [{ id: "new", label: "New this week", items: fresh.map(toItem) }, ...groups] : groups;
-}
-
 export default async function ComponentsPage() {
   const pricing = await getPricing();
   const all = allGalleryItems();
@@ -46,7 +30,7 @@ export default async function ComponentsPage() {
   const funCount = all.length - items.length;
 
   const pro = items.filter((i) => i.premium).length;
-  const groups = sidebarGroups(all);
+  const groups = componentGroups(all);
   const copy: PromoCopy = {
     title: ["Unlock all ", String(pro), " Pro components"],
     body: "Every one with full source, sound and its own demo, and your coding agent can add any of them by name.",

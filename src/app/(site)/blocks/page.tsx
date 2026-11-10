@@ -8,7 +8,8 @@ import { getTileFit } from "@/lib/catalog/tile-fit";
 import { createMetadata } from "@/lib/seo";
 import { getPricing } from "@/lib/region";
 import { ListingShell } from "@/components/listing/listing-shell";
-import { ListingBrowse, ListingSidebar, type SidebarGroup } from "@/components/listing/listing-sidebar";
+import { ListingBrowse, ListingSidebar } from "@/components/listing/listing-sidebar";
+import { BLOCK_ORDER as ORDER, BLOCK_SHORT_NAME as CHIP_NAME, blockGroups } from "@/lib/catalog/listing-groups/blocks";
 import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
 import { BlocksGallery, type BlockFilter, type BlockTileItem } from "./_catalog";
 
@@ -17,58 +18,6 @@ export const metadata: Metadata = createMetadata({
   description: `${blocks.length} animated section blocks for React and Next.js: heroes, navigation, pricing, testimonials, FAQ, footers and more. Built with Tailwind CSS and Framer Motion.`,
   alternates: { canonical: "/blocks" },
 });
-
-/** Wall order: the liveliest blocks first. */
-const ORDER = [
-  "block-hero",
-  "block-gallery",
-  "block-pricing-section",
-  "block-features",
-  "block-checkout-moments",
-  "block-why-choose-us",
-  "block-social-proof",
-  "block-changelog",
-  "block-logo-clouds",
-  "block-navigation",
-  "block-faq-folder-card",
-  "block-newsletter",
-  "block-signup",
-  "block-comparison",
-  "block-cta",
-  "block-footer",
-  "block-404",
-  "block-sidebar",
-  "block-contact-page",
-  "block-interactive-dots",
-  "block-text-animations",
-  "block-blog-content-sections",
-];
-
-/** Shorter chip labels than the block names. */
-const CHIP_NAME: Record<string, string> = {
-  "block-hero": "Heroes",
-  "block-navigation": "Navigation",
-  "block-features": "Features",
-  "block-social-proof": "Social proof",
-  "block-newsletter": "Newsletter",
-  "block-pricing-section": "Pricing",
-  "block-checkout-moments": "Checkout",
-  "block-why-choose-us": "Feature bentos",
-  "block-logo-clouds": "Logo clouds",
-  "block-faq-folder-card": "FAQ",
-  "block-sidebar": "Sidebars",
-  "block-contact-page": "Contact",
-  "block-interactive-dots": "Backgrounds",
-  "block-text-animations": "Text animations",
-  "block-blog-content-sections": "Blog",
-  "block-gallery": "Gallery",
-  "block-changelog": "Changelog",
-  "block-404": "404 pages",
-  "block-comparison": "Comparison",
-  "block-cta": "CTA",
-  "block-footer": "Footers",
-  "block-signup": "Sign-up",
-};
 
 const TINTS: TileTint[] = ["violet", "sky", "peach", "mint", "butter", "pink"];
 
@@ -135,12 +84,7 @@ export default async function BlocksPage() {
   const free = items.filter((i) => !i.premium).length;
 
   const pro = items.length - free;
-  // the names column: each block with its sections, in the wall's order
-  const groups: SidebarGroup[] = queues.map((q) => ({
-    id: q[0].block,
-    label: CHIP_NAME[q[0].block] ?? bySlug.get(q[0].block)!.name,
-    items: items.filter((i) => i.block === q[0].block).map((i) => ({ name: i.name, href: i.href, isNew: i.isNew })),
-  }));
+  const groups = blockGroups();
   const copy: PromoCopy = {
     title: ["Every block with ", "Pro", ""],
     body: `${pro} Pro sections across ${blocks.length} blocks: heroes, pricing, checkout, navigation and more. Paste one in and make it yours.`,

@@ -201,7 +201,7 @@ export function BlocksGallery({
 
       {afterFilters}
 
-      <ul className="mt-5 grid grid-cols-1 gap-4 @[620px]:grid-cols-2">
+      <ul className="mt-5 grid grid-cols-1 gap-4 @[620px]:grid-cols-2 @[1180px]:grid-cols-3">
         {shown.map((item, i) => (
           <li key={item.slug}>
             <BlockTile item={item} eager={i < 4} />

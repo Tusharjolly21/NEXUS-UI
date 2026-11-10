@@ -11,19 +11,9 @@ import { IndiaDiscountBadge } from "@/components/pricing/india-discount-badge";
 import { templates } from "@/lib/catalog/templates";
 import TemplatesGallery from "./templates-client";
 import { ListingShell } from "@/components/listing/listing-shell";
-import { ListingBrowse, ListingSidebar, type SidebarGroup } from "@/components/listing/listing-sidebar";
+import { ListingBrowse, ListingSidebar } from "@/components/listing/listing-sidebar";
+import { templateGroups } from "@/lib/catalog/listing-groups/templates";
 import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
-
-/** The names column: one group per category, biggest first, each template under its own name. */
-function sidebarGroups(): SidebarGroup[] {
-  const by = new Map<string, SidebarGroup>();
-  for (const t of templates) {
-    const g = by.get(t.category) ?? { id: t.category, label: t.category, items: [] };
-    g.items.push({ name: templateName(t), href: `/templates/${t.slug}` });
-    by.set(t.category, g);
-  }
-  return [...by.values()].sort((a, b) => b.items.length - a.items.length);
-}
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +38,7 @@ export default async function TemplatesPage() {
     }
   }
 
-  const groups = sidebarGroups();
+  const groups = templateGroups();
   const copy: PromoCopy = {
     title: ["Launch with every ", "template", ""],
     body: `All ${templates.length} templates with full source, plus every component and block, and everything we release next.`,

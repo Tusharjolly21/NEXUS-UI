@@ -158,7 +158,7 @@ export default function TemplatesGallery({ isPremium = false, afterFilters }: { 
           </button>
         </div>
       ) : view === "wall" ? (
-        <ul className="mt-6 grid grid-cols-1 gap-4 @[600px]:grid-cols-2">
+        <ul className="mt-6 grid grid-cols-1 gap-4 @[600px]:grid-cols-2 @[1120px]:grid-cols-3">
           {shown.map((t, i) => (
             <li key={t.slug}>
               <TemplateTile tmpl={t} isPro={isPremium} priority={i < 2} />

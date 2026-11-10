@@ -3,11 +3,12 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ChevronDown, ChevronRight, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type SidebarItem = { name: string; href: string; isNew?: boolean };
-export type SidebarGroup = { id: string; label: string; items: SidebarItem[] };
+export type SidebarGroup = { id: string; label: string; items: SidebarItem[]; /** The group's own page, if it has one. */ href?: string };
 
 /** One dot colour per group, in turn, so the list reads in the site's spectrum. */
 const DOTS = ["#ff7a1a", "#0a7aff", "#30d158", "#8b5cf6", "#ff3b8d", "#ffcc00"];
@@ -39,7 +40,11 @@ function SidebarBody({
 }) {
   const [query, setQuery] = React.useState("");
   const [open, setOpen] = React.useState<Set<string>>(() => new Set(groups.slice(0, OPEN_AT_START).map((g) => g.id)));
+  // the group of the page you are on is always open, unless you close it yourself
+  const [closed, setClosed] = React.useState<Set<string>>(() => new Set());
   const [full, setFull] = React.useState<Set<string>>(() => new Set());
+  const pathname = usePathname();
+  const activeId = groups.find((g) => g.href === pathname || g.items.some((i) => i.href === pathname))?.id ?? null;
   const id = React.useId();
   const needle = query.trim().toLowerCase();
 
@@ -108,8 +113,9 @@ function SidebarBody({
       ) : (
         <ul className="mt-3 flex flex-col gap-0.5">
           {groups.map((g, gi) => {
-            const isOpen = open.has(g.id);
-            const shown = full.has(g.id) ? g.items : g.items.slice(0, PEEK);
+            const isOpen = (open.has(g.id) || g.id === activeId) && !closed.has(g.id);
+            const activeAt = g.items.findIndex((i) => i.href === pathname);
+            const shown = full.has(g.id) || activeAt >= PEEK ? g.items : g.items.slice(0, PEEK);
             const rest = g.items.length - shown.length;
             const listId = `${id}-${g.id}`;
             return (
@@ -118,7 +124,23 @@ function SidebarBody({
                   type="button"
                   aria-expanded={isOpen}
                   aria-controls={listId}
-                  onClick={() => setOpen((s) => toggle(s, g.id))}
+                  onClick={() => {
+                    if (isOpen) {
+                      setClosed((s) => new Set(s).add(g.id));
+                      setOpen((s) => {
+                        const n = new Set(s);
+                        n.delete(g.id);
+                        return n;
+                      });
+                    } else {
+                      setOpen((s) => new Set(s).add(g.id));
+                      setClosed((s) => {
+                        const n = new Set(s);
+                        n.delete(g.id);
+                        return n;
+                      });
+                    }
+                  }}
                   className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left text-[14.5px] font-semibold tracking-[-0.01em] text-foreground transition-colors hover:bg-foreground/[0.05] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
                 >
                   <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ backgroundColor: DOTS[gi % DOTS.length] }} />
@@ -130,7 +152,12 @@ function SidebarBody({
                   <ul id={listId} className="mb-2 ml-[13px] border-l border-foreground/10 pl-1.5">
                     {shown.map((i) => (
                       <li key={i.href}>
-                        <Link href={i.href} onClick={onNavigate} className={link}>
+                        <Link
+                          href={i.href}
+                          onClick={onNavigate}
+                          aria-current={i.href === pathname ? "page" : undefined}
+                          className={cn(link, i.href === pathname && "bg-foreground/[0.07] font-medium text-foreground")}
+                        >
                           <span className="truncate">{i.name}</span>
                           {i.isNew ? (
                             <span className="shrink-0 rounded-full bg-[#ff9f0a]/14 px-2 py-px text-[11px] font-semibold text-[#bf4800] dark:text-[#ffb340]">New</span>
@@ -162,8 +189,20 @@ function SidebarBody({
 
 /** The names column for wide screens: it stays in view while the page scrolls, and scrolls on its own when long. */
 export function ListingSidebar({ title, total, groups }: { title: string; total: number; groups: SidebarGroup[] }) {
+  const ref = React.useRef<HTMLElement>(null);
+  const pathname = usePathname();
+  // keep the page you are on in sight within the column (the column scrolls, the window is left alone)
+  React.useEffect(() => {
+    const nav = ref.current;
+    const here = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!nav || !here) return;
+    const n = nav.getBoundingClientRect();
+    const h = here.getBoundingClientRect();
+    if (h.top < n.top + 60 || h.bottom > n.bottom - 20) nav.scrollTop += h.top - n.top - n.height / 3;
+  }, [pathname]);
   return (
     <nav
+      ref={ref}
       aria-label={`${title} by name`}
       className="pg-float sticky top-[88px] max-h-[calc(100dvh-104px)] overflow-y-auto overscroll-contain rounded-[24px] bg-card p-3 [scrollbar-width:thin]"
     >
@@ -176,7 +215,20 @@ export function ListingSidebar({ title, total, groups }: { title: string; total:
  * The same names for phones and tablets: a "Browse by name" button that opens them in a sheet from the bottom.
  * The sheet closes on a pick, on Close, on the backdrop or on Escape, and gives focus back to the button.
  */
-export function ListingBrowse({ title, total, groups, className }: { title: string; total: number; groups: SidebarGroup[]; className?: string }) {
+export function ListingBrowse({
+  title,
+  total,
+  groups,
+  className,
+  floating = false,
+}: {
+  title: string;
+  total: number;
+  groups: SidebarGroup[];
+  className?: string;
+  /** A small pill fixed at the bottom left, for the pages of single items (shown until the names column appears at 1280px). */
+  floating?: boolean;
+}) {
   const [open, setOpen] = React.useState(false);
   const button = React.useRef<HTMLButtonElement>(null);
   const closeBtn = React.useRef<HTMLButtonElement>(null);
@@ -206,19 +258,25 @@ export function ListingBrowse({ title, total, groups, className }: { title: stri
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
         className={cn(
-          "pg-float flex h-12 w-full items-center gap-3 rounded-full bg-card px-5 text-left text-[15px] font-semibold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring lg:hidden",
+          floating
+            ? "pg-float fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-[max(1rem,env(safe-area-inset-left))] z-40 inline-flex h-12 items-center gap-2.5 rounded-full bg-card/95 pl-4 pr-5 text-[14.5px] font-semibold text-foreground backdrop-blur-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring xl:hidden"
+            : "pg-float flex h-12 w-full items-center gap-3 rounded-full bg-card px-5 text-left text-[15px] font-semibold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring lg:hidden",
           className,
         )}
       >
         <span aria-hidden className="size-2 rounded-full bg-[#0a7aff]" />
-        <span className="flex-1">
-          Browse all {total} by name
-        </span>
-        <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
+        {floating ? (
+          <span>All {title.toLowerCase()}</span>
+        ) : (
+          <>
+            <span className="flex-1">Browse all {total} by name</span>
+            <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
+          </>
+        )}
       </button>
       {mounted && open
         ? createPortal(
-            <div className="fixed inset-0 z-[70] lg:hidden" role="dialog" aria-modal="true" aria-label={`${title} by name`}>
+            <div className={cn("fixed inset-0 z-[70]", floating ? "xl:hidden" : "lg:hidden")} role="dialog" aria-modal="true" aria-label={`${title} by name`}>
               <button type="button" aria-label="Close" tabIndex={-1} onClick={() => setOpen(false)} className="absolute inset-0 bg-black/35 backdrop-blur-[2px]" />
               <div className="absolute inset-x-0 bottom-0 flex max-h-[86dvh] flex-col rounded-t-[28px] bg-card shadow-[0_-20px_60px_-20px_rgba(0,0,0,0.45)] [padding-bottom:env(safe-area-inset-bottom)]">
                 <div className="flex items-center justify-between px-4 pb-1 pt-3">
