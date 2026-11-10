@@ -155,6 +155,11 @@ const LastLightPage = nextDynamic(
   { loading: TemplateFallback },
 );
 
+const KioskPage = nextDynamic(
+  () => import("@/components/templates/kiosk-page").then((m) => ({ default: m.KioskPage })),
+  { loading: TemplateFallback },
+);
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -204,6 +209,8 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><MarginPage /></ThemeReceiver>;
   } else if (tmpl.slug === "last-light") {
     return <ThemeReceiver><LastLightPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "kiosk") {
+    return <ThemeReceiver><KioskPage /></ThemeReceiver>;
   } else if (tmpl.slug === "nexus-ai-launch") {
     return <ThemeReceiver><NexusAiLaunchTemplatePage /></ThemeReceiver>;
   } else if (tmpl.slug === "noir-studio") {

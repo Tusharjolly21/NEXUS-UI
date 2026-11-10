@@ -53,6 +53,7 @@ export const TEMPLATE_SOURCES = {
   nimbus: { file: "nimbus-page.tsx", exportName: "NimbusPage" },
   margin: { file: "margin-page.tsx", exportName: "MarginPage" },
   "last-light": { file: "last-light-page.tsx", exportName: "LastLightPage" },
+  kiosk: { file: "kiosk-page.tsx", exportName: "KioskPage" },
 } as const satisfies Record<string, TemplateSource>;
 
 export type TemplateSourceSlug = keyof typeof TEMPLATE_SOURCES;
