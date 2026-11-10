@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { AccessSwitch, type Access } from "@/components/gallery/component-gallery";
 import { FitPreview } from "@/components/gallery/fit-preview";
-import { TileCell, TileGrid } from "@/components/gallery/gallery-tile";
 import type { GalleryItem } from "@/components/gallery/types";
 import * as React from "react";
 import { GallerySearch, matchesWords, searchWords } from "@/components/gallery/gallery-search";
@@ -34,19 +33,22 @@ export type BlockFilter = { slug: string; name: string; count: number };
 const PHONE_FILTERS = 5;
 
 /**
- * A section tile: the live section, scaled down so all of it shows, above a caption that is always
- * visible (section name, its block, Free or Pro). The whole card is one link to the section.
+ * A section card: the live section, scaled down so all of it shows inside a frame that is the same shape on every
+ * card, above a caption that is always visible (section name, its block, Free or Pro). The whole card is one link
+ * to the section.
  */
 function BlockTile({ item, eager }: { item: BlockTileItem; eager: boolean }) {
   const { fit } = item;
   return (
-    <article className="group relative isolate flex h-full flex-col overflow-hidden rounded-[28px] bg-card p-2 shadow-[0_0_0_0.5px_var(--border)] transition-shadow duration-200 hover:shadow-[0_0_0_0.5px_var(--border),0_18px_40px_-18px_rgba(0,0,0,0.3)]">
+    <article className="group relative isolate flex flex-col overflow-hidden rounded-[28px] bg-card p-2 shadow-[0_0_0_0.5px_var(--border)] transition-shadow duration-200 hover:shadow-[0_0_0_0.5px_var(--border),0_18px_40px_-18px_rgba(0,0,0,0.3)]">
       <div
         aria-hidden
-        className="pointer-events-none relative min-h-0 flex-1 overflow-hidden rounded-[22px] bg-background"
+        className="pointer-events-none relative aspect-[16/10] overflow-hidden rounded-[22px] bg-background"
         style={fit.bg ? { backgroundColor: fit.bg } : undefined}
       >
-        <FitPreview exportName={item.exportName} canvas={fit.canvas} focus={fit.focus} eager={eager} />
+        <div className="absolute inset-3">
+          <FitPreview exportName={item.exportName} canvas={fit.canvas} focus={fit.focus} eager={eager} />
+        </div>
         {item.isNew ? (
           <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11.5px] font-semibold text-[#bf4800] shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)] backdrop-blur-md">
             New
@@ -87,7 +89,16 @@ const NEW_TAB = "new";
  * tile sized to the section, with a New tab (the latest additions, newest first), chips to narrow
  * the wall to one block (deep-linked as `?block=`) and an All / Free / Pro switch (`?access=`).
  */
-export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filters: BlockFilter[] }) {
+export function BlocksGallery({
+  items,
+  filters,
+  afterFilters,
+}: {
+  items: BlockTileItem[];
+  filters: BlockFilter[];
+  /** Shown under the filters, above the wall (the Pro band on narrower screens). */
+  afterFilters?: React.ReactNode;
+}) {
   const [param, setParam] = useUrlParam("block");
   const [accessParam, setAccessParam] = useUrlParam("access");
   const access: Access = accessParam === "free" || accessParam === "pro" ? accessParam : "all";
@@ -130,7 +141,7 @@ export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filt
   return (
     <div className="scroll-mt-28">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <GallerySearch value={query} onChange={setQuery} label="Search blocks" placeholder="Search sections: hero, pricing, FAQ…" className="sm:w-[360px]" />
+        <GallerySearch value={query} onChange={setQuery} label="Search blocks" placeholder="Search sections: hero, pricing, FAQ…" className="sm:min-w-0 sm:flex-1 sm:max-w-[420px]" />
         <AccessSwitch value={access} counts={accessCounts} noun="sections" size="md" onChange={(a) => setAccessParam(a === "all" ? null : a)} />
       </div>
       <ChipRail wrap>
@@ -188,13 +199,15 @@ export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filt
         </p>
       ) : null}
 
-      <TileGrid className="mt-5">
+      {afterFilters}
+
+      <ul className="mt-5 grid grid-cols-1 gap-4 @[620px]:grid-cols-2">
         {shown.map((item, i) => (
-          <TileCell key={item.slug} item={item}>
+          <li key={item.slug}>
             <BlockTile item={item} eager={i < 4} />
-          </TileCell>
+          </li>
         ))}
-      </TileGrid>
+      </ul>
 
       {infinite.done ? null : (
         <InfiniteSentinel onMore={infinite.more} shown={shown.length} total={matches.length} noun="sections" className="mt-12" />

@@ -68,7 +68,7 @@ function Segmented<T extends string>({
   );
 }
 
-export default function TemplatesGallery({ isPremium = false }: { isPremium?: boolean }) {
+export default function TemplatesGallery({ isPremium = false, afterFilters }: { isPremium?: boolean; afterFilters?: React.ReactNode }) {
   const [categoryParam, setCategoryParam] = useUrlParam("category");
   const [sortParam, setSortParam] = useUrlParam("sort");
   const [viewParam, setViewParam] = useUrlParam("view");
@@ -89,8 +89,6 @@ export default function TemplatesGallery({ isPremium = false }: { isPremium?: bo
     storeKey: `templates|${view}|${sort}|${category ?? ""}|${words.join(" ")}`,
   });
   const shown = matches.slice(0, infinite.count);
-  // The big opening tile needs neighbours to sit beside; with one or two results it would stand alone.
-  const hasFeatured = view === "wall" && matches.length >= 3;
 
   const clearAll = () => {
     setQuery("");
@@ -99,11 +97,11 @@ export default function TemplatesGallery({ isPremium = false }: { isPremium?: bo
 
   return (
     <>
-      <div className="mt-8">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          <GallerySearch value={query} onChange={setQuery} label="Search templates" placeholder="Search by name, tag or use" className="lg:w-[300px] lg:shrink-0" />
+      <div>
+        <div className="flex flex-col gap-3 @[640px]:flex-row @[640px]:items-center">
+          <GallerySearch value={query} onChange={setQuery} label="Search templates" placeholder="Search by name, tag or use" className="@[640px]:min-w-0 @[640px]:flex-1 @[640px]:max-w-[380px]" />
 
-          <div className="flex items-center gap-2 lg:ml-auto">
+          <div className="flex items-center gap-2 @[640px]:ml-auto">
             <Segmented
               label="Sort by"
               value={sort}
@@ -139,6 +137,8 @@ export default function TemplatesGallery({ isPremium = false }: { isPremium?: bo
         </ChipRail>
       </div>
 
+      {afterFilters}
+
       <p className="sr-only" aria-live="polite">
         {matches.length} {matches.length === 1 ? "template" : "templates"}
         {category ? ` in ${category}` : ""}
@@ -158,10 +158,10 @@ export default function TemplatesGallery({ isPremium = false }: { isPremium?: bo
           </button>
         </div>
       ) : view === "wall" ? (
-        <ul className="mt-6 grid grid-flow-dense grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-6 grid grid-cols-1 gap-4 @[600px]:grid-cols-2">
           {shown.map((t, i) => (
-            <li key={t.slug} className={cn(hasFeatured && i === 0 && "lg:col-span-2 lg:row-span-2")}>
-              <TemplateTile tmpl={t} isPro={isPremium} priority={i < 3} featured={hasFeatured && i === 0} />
+            <li key={t.slug}>
+              <TemplateTile tmpl={t} isPro={isPremium} priority={i < 2} />
             </li>
           ))}
         </ul>

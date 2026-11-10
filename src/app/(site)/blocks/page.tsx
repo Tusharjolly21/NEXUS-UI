@@ -6,6 +6,10 @@ import { blocks } from "@/lib/catalog/blocks";
 import { blockVariants, variantAnchor } from "@/lib/catalog/block-variants";
 import { getTileFit } from "@/lib/catalog/tile-fit";
 import { createMetadata } from "@/lib/seo";
+import { getPricing } from "@/lib/region";
+import { ListingShell } from "@/components/listing/listing-shell";
+import { ListingBrowse, ListingSidebar, type SidebarGroup } from "@/components/listing/listing-sidebar";
+import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
 import { BlocksGallery, type BlockFilter, type BlockTileItem } from "./_catalog";
 
 export const metadata: Metadata = createMetadata({
@@ -80,7 +84,8 @@ function sectionsLabel(slug: string, blockPremium: boolean) {
   return free === vs.length ? `${n}, free` : free ? `${n}, ${free} free` : `${n}, Pro`;
 }
 
-export default function BlocksPage() {
+export default async function BlocksPage() {
+  const pricing = await getPricing();
   const bySlug = new Map(blocks.map((b) => [b.slug, b]));
   const rank = (slug: string) => {
     const i = ORDER.indexOf(slug);
@@ -129,24 +134,36 @@ export default function BlocksPage() {
   }));
   const free = items.filter((i) => !i.premium).length;
 
+  const pro = items.length - free;
+  // the names column: each block with its sections, in the wall's order
+  const groups: SidebarGroup[] = queues.map((q) => ({
+    id: q[0].block,
+    label: CHIP_NAME[q[0].block] ?? bySlug.get(q[0].block)!.name,
+    items: items.filter((i) => i.block === q[0].block).map((i) => ({ name: i.name, href: i.href, isNew: i.isNew })),
+  }));
+  const copy: PromoCopy = {
+    title: ["Every block with ", "Pro", ""],
+    body: `${pro} Pro sections across ${blocks.length} blocks: heroes, pricing, checkout, navigation and more. Paste one in and make it yours.`,
+    band: "Every block with Pro",
+  };
+
   return (
     <>
-      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[136px]">
-        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1152px]">
-          <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">Blocks</h1>
-          <p className="mt-5 max-w-[640px] text-[19px] leading-[1.55] text-muted-foreground">
-            Whole sections that <RainbowWord>drop</RainbowWord> straight into a page: heroes, navigation, pricing,
-            testimonials, FAQ and more. {items.length} sections across {blocks.length} blocks, {free} of them free.
-          </p>
-        </div>
-      </section>
+      <ListingShell
+        sidebar={<ListingSidebar title="Blocks" total={items.length} groups={groups} />}
+        rail={<ProRail copy={copy} pricing={pricing} />}
+      >
+        <ListingBrowse title="Blocks" total={items.length} groups={groups} className="mb-8" />
+        <h1 className="pg-display text-[clamp(52px,7vw,84px)] text-foreground">Blocks</h1>
+        <p className="mt-5 max-w-[640px] text-[18px] leading-[1.55] text-muted-foreground">
+          Whole sections that <RainbowWord>drop</RainbowWord> straight into a page: heroes, navigation, pricing,
+          testimonials, FAQ and more. {items.length} sections across {blocks.length} blocks, {free} of them free.
+        </p>
 
-      <section aria-label="Block gallery" className="px-4 pb-24">
-        <div className="mx-auto max-w-[1152px]">
-          <BlocksGallery items={items} filters={filters} />
-        </div>
-      </section>
+        <section aria-label="Block gallery" className="mt-10">
+          <BlocksGallery items={items} filters={filters} afterFilters={<ProBand copy={copy} pricing={pricing} className="mt-5" />} />
+        </section>
+      </ListingShell>
 
       <Band tint="sky">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">

@@ -2,13 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ComponentGallery } from "@/components/gallery/component-gallery";
 import { getPricing } from "@/lib/region";
-import { ComponentsProofRow } from "@/components/gallery/components-proof-row";
 import { Band, PillLink, RainbowWord } from "@/components/site";
 import { getPopulatedCategories, isIndexableCategory } from "@/lib/catalog/category-seo";
-import { allGalleryItems, galleryCategories } from "@/lib/catalog/gallery-items";
+import { allGalleryItems } from "@/lib/catalog/gallery-items";
 import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
 import { alternatives } from "@/lib/alternatives";
 import { createMetadata } from "@/lib/seo";
+import { COMPONENT_SIDEBAR_SECTIONS } from "@/lib/catalog/taxonomy";
+import { ListingShell } from "@/components/listing/listing-shell";
+import { ListingBrowse, ListingSidebar, type SidebarGroup } from "@/components/listing/listing-sidebar";
+import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
+import type { GalleryItem } from "@/components/gallery/types";
 
 export const metadata: Metadata = createMetadata({
   title: { absolute: "Animated React Components for Next.js | Nexus UI" },
@@ -20,37 +24,58 @@ export const metadata: Metadata = createMetadata({
 /** The "For fun" group (web slingers, portals, black holes, a shredder). Heavy canvas and WebGL, so it lives on its own page instead of in the wall. */
 const FUN_GROUP = "fun";
 
+/** The names column: what is new first, then each group by size, with the just-for-fun ones last. */
+function sidebarGroups(all: GalleryItem[]): SidebarGroup[] {
+  const toItem = (i: GalleryItem) => ({ name: i.name, href: `/components/${i.slug}`, isNew: !!i.isRecent });
+  // the same rule as the wall's New tab: the latest week or so of additions, newest first
+  const fresh = all.filter((i) => i.isRecent).sort((a, b) => (b.addedAt ?? 0) - (a.addedAt ?? 0));
+  const groups = COMPONENT_SIDEBAR_SECTIONS.map((sec) => ({
+    id: sec.id,
+    label: sec.label,
+    items: all.filter((i) => i.group === sec.id).map(toItem),
+  }))
+    .filter((g) => g.items.length)
+    .sort((a, b) => Number(a.id === FUN_GROUP) - Number(b.id === FUN_GROUP) || b.items.length - a.items.length);
+  return fresh.length ? [{ id: "new", label: "New this week", items: fresh.map(toItem) }, ...groups] : groups;
+}
+
 export default async function ComponentsPage() {
   const pricing = await getPricing();
   const all = allGalleryItems();
   const items = all.filter((i) => i.group !== FUN_GROUP);
   const funCount = all.length - items.length;
 
+  const pro = items.filter((i) => i.premium).length;
+  const groups = sidebarGroups(all);
+  const copy: PromoCopy = {
+    title: ["Unlock all ", String(pro), " Pro components"],
+    body: "Every one with full source, sound and its own demo, and your coding agent can add any of them by name.",
+    band: `Unlock all ${pro} Pro components`,
+  };
+
   return (
     <>
-      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[136px]">
-        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1152px]">
-          <h1 className="pg-display max-w-[1040px] text-[clamp(44px,7vw,76px)] leading-[1.02] text-foreground">
-            Animated React components that feel <RainbowWord>alive</RainbowWord>.
-          </h1>
-          <p className="mt-5 max-w-[600px] text-[19px] leading-[1.55] text-muted-foreground">
-            Springs, physics, sound and the small details that usually take a week to get right, built with Tailwind CSS and
-            Framer Motion. Play with any of them below, then add it to your Next.js or React app with one command.
-          </p>
-        </div>
-      </section>
+      <ListingShell
+        sidebar={<ListingSidebar title="Components" total={all.length} groups={groups} />}
+        rail={<ProRail copy={copy} pricing={pricing} />}
+      >
+        <ListingBrowse title="Components" total={all.length} groups={groups} className="mb-8" />
+        <h1 className="pg-display max-w-[900px] text-[clamp(42px,5.4vw,72px)] leading-[1.02] text-foreground">
+          Animated React components that feel <RainbowWord>alive</RainbowWord>.
+        </h1>
+        <p className="mt-5 max-w-[600px] text-[18px] leading-[1.55] text-muted-foreground">
+          Springs, physics, sound and the small details that usually take a week to get right, built with Tailwind CSS and
+          Framer Motion. Play with any of them below, then add it to your Next.js or React app with one command.
+        </p>
 
-      <section aria-label="Component gallery" className="px-4 pb-24">
-        <div className="mx-auto max-w-[1152px]">
+        <section aria-label="Component gallery" className="mt-10">
           <ComponentGallery
             items={items}
             pricing={pricing}
-            categories={galleryCategories(items)}
             searchable
             plansLine
-            proRow
-            interlude={<ComponentsProofRow />}
+            cards
+            afterFilters={<ProBand copy={copy} pricing={pricing} className="mt-5" />}
             aside={
               funCount ? (
                 <Link
@@ -62,8 +87,12 @@ export default async function ComponentsPage() {
               ) : null
             }
           />
+        </section>
+      </ListingShell>
 
-          <nav aria-labelledby="by-category" className="mt-20">
+      <section className="px-4 pb-24">
+        <div className="mx-auto max-w-[1152px]">
+          <nav aria-labelledby="by-category">
             <h2 id="by-category" className="text-[17px] font-semibold text-foreground">
               Browse by category
             </h2>

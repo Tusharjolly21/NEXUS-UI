@@ -180,6 +180,8 @@ export function AquariumPrompt({ title = "What's on your mind?", placeholder = "
     const w = world.current;
     const size = () => {
       const dpr = Math.min(2, window.devicePixelRatio || 1);
+      // nothing to draw into while the tank has no size (hidden, or on its way off the page)
+      if (!root.clientWidth || !root.clientHeight) return;
       w.W = root.clientWidth;
       w.H = root.clientHeight;
       cv.width = Math.round(w.W * dpr);

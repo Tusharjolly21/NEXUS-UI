@@ -7,6 +7,7 @@ import { ArrowUpRight, Lock, Play, RotateCcw, SlidersHorizontal, Volume2 } from 
 import { cn } from "@/lib/utils";
 import { ProBadge, useLocked, useProAccess } from "@/components/pro/pro-access";
 import { demoScript, FitPreview } from "./fit-preview";
+import { PreviewGuard } from "@/components/library/dynamic-preview";
 import { TINT_CLASSES, type GalleryItem } from "./types";
 
 /**
@@ -152,6 +153,7 @@ export function GalleryTile({
           )}
         </button>
       ) : (
+      <PreviewGuard name={item.exportName} resetKey={run}>
       <FitPreview
         key={run}
         exportName={item.exportName}
@@ -164,6 +166,7 @@ export function GalleryTile({
             "not-dark:[&>div>*]:!rounded-none not-dark:[&>div>*]:!border-0 not-dark:[&>div>*]:!bg-transparent not-dark:[&>div>*]:!shadow-none",
         )}
       />
+      </PreviewGuard>
       )}
 
       {item.premium ? <ProBadge onDark={dark} className="pointer-events-none absolute right-4 top-4" /> : null}

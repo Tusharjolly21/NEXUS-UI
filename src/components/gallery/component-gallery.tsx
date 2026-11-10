@@ -15,6 +15,7 @@ import { INTERACTION_FILTERS, type GalleryItem, type Interaction } from "./types
 import { useUrlParam } from "./use-url-param";
 import { InfiniteSentinel, useInfiniteCount } from "./infinite-scroll";
 import { ProPreviewRow, pickProPreviews } from "./pro-preview-row";
+import { CardGrid, ComponentCard } from "./component-card";
 
 export type CategoryFilter = { id: string; label: string };
 
@@ -137,6 +138,8 @@ export function ComponentGallery({
   interlude,
   interludeAfter = 20,
   proRow = false,
+  cards = false,
+  afterFilters,
 }: {
   items: GalleryItem[];
   /** The visitor's regional prices, from the server. */
@@ -162,6 +165,13 @@ export function ComponentGallery({
   interludeAfter?: number;
   /** For visitors without Pro: a row of the newest Pro components, live, early in the wall. Off while any filter or search is active. */
   proRow?: boolean;
+  /**
+   * The listing page's even card grid instead of the bento: every card the same shape, the component whole inside
+   * it. The in-wall Pro row, plans card and interlude are left out, since the page's Pro column does that job.
+   */
+  cards?: boolean;
+  /** Shown under the filters, above the wall (the listing page puts its Pro band here on narrower screens). */
+  afterFilters?: React.ReactNode;
 }) {
   const [interaction, setInteraction] = React.useState<Interaction | "all">("all");
   const [category, setCategory] = React.useState("all");
@@ -347,7 +357,17 @@ export function ComponentGallery({
         ) : null}
       </div>
 
-      {shown.length ? (
+      {afterFilters}
+
+      {shown.length && cards ? (
+        <CardGrid className="mt-6">
+          {shown.map((item, i) => (
+            <li key={item.slug}>
+              <ComponentCard item={item} onOpen={setOpenSlug} eager={i < 3} />
+            </li>
+          ))}
+        </CardGrid>
+      ) : shown.length ? (
         <TileGrid className="mt-6">{shown.map((item, i) => renderTile(item, i))}</TileGrid>
       ) : null}
       {shown.length && paged && !infinite.done ? (
