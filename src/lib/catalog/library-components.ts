@@ -15146,9 +15146,9 @@ export default function Page() {
     name: "Eclipse Toggle",
     registryCliName: "eclipse-toggle",
     description:
-      "A light and dark switch played as a total eclipse, that can change the whole page with it. The switch is a strip of sky with the sun at one end, and the knob is the moon. Switch to dark and the moon slides over the sun: the light goes steely as it takes a bite, the last bead of sun flares into a diamond ring, and at totality the sky drops to night, the corona and two pink prominences open round the black disc, Venus and the stars come out and the horizon glows like a sunset. Switch back and the sun bursts out of the far edge and a few birds, fooled into thinking it was dusk, fly off singing. Tap it, use Space, Enter or the arrow keys, or drag the moon to scrub the eclipse by hand. Turn on pageTransition and the page changes inside an eclipse too: the moon's shadow spills out of the switch and across the page with a burning corona edge as the stars come out, and switching back floods it with sunlight from the sun.",
+      "A light and dark switch played as an evening going by, that can change the whole page with it. The switch is a strip of sky over low hills, and the knob is the sun. Switch to dark and the sun sinks towards the hills: the light turns golden, the sun grows larger and goes orange and then red as it nears the horizon, and it sets behind the hills while a silver moon rises in its place. A rosy afterglow lingers, the evening star comes out first and then the stars, and the hills turn to silhouettes in the moonlight. Switch back and it plays as a sunrise, and a few birds fly off singing. Tap it, use Space, Enter or the arrow keys, or drag the knob to scrub the evening by hand. Turn on pageTransition and the page changes with it: dusk spreads out of the switch across the page as the stars come out, and switching back floods it with sunlight.",
     categorySlug: "inputs-controls",
-    tags: ["theme toggle", "dark mode toggle", "light dark switch", "switch", "toggle", "eclipse", "sun", "moon", "sound", "motion kit", "framer-motion"],
+    tags: ["theme toggle", "dark mode toggle", "light dark switch", "switch", "toggle", "sunset", "sun", "moon", "eclipse", "sound", "motion kit", "framer-motion"],
     premium: true,
     trendingScore: 198,
     createdAt: "2026-11-10",
@@ -15158,10 +15158,10 @@ export default function Page() {
       { name: "theme", type: "\"light\" | \"dark\"", description: "The theme, when you control it. Leave it out to let the switch keep its own." },
       { name: "defaultTheme", type: "\"light\" | \"dark\"", defaultValue: "\"light\"", description: "The starting theme when the switch keeps its own." },
       { name: "onThemeChange", type: "(theme: \"light\" | \"dark\", detail: { fromUser: boolean }) => void", description: "Called with the new theme. Apply it to your page here. fromUser is false while autoplay runs, so you can leave the page alone then." },
-      { name: "pageTransition", type: "boolean", defaultValue: "false", description: "Changes the page inside an eclipse when the visitor flips it: the moon's shadow spills out of the switch across the page with a burning corona edge and stars, or sunlight floods back out of the sun. Uses the View Transitions API; without it, or with reduced motion, the theme just changes." },
-      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A low swell as the light drains, a shimmer at totality and birdsong at sunrise. They also follow the site-wide sound switch." },
+      { name: "pageTransition", type: "boolean", defaultValue: "false", description: "Changes the page with the switch when the visitor flips it: dusk spreads out of the switch across the page with a glowing edge as the stars come out, and switching back floods it with sunlight. Uses the View Transitions API; elsewhere the theme just changes." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A low swell as the light drains, a soft bell as the sun sets, a glassy chord when night falls, and a bright ting and birdsong at sunrise. They also follow the site-wide sound switch." },
       { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
-      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Runs the eclipse back and forth by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Runs the evening back and forth by itself until the visitor touches it. Never runs under reduced motion." },
       { name: "className", type: "string", description: "Extra classes for the card." },
     ],
     Preview: Previews.PreviewEclipseToggle,
@@ -15171,7 +15171,7 @@ export default function Page() {
 
 import { EclipseToggle } from "@/components/eclipse-toggle";
 
-// Tap the switch, or drag the moon across the sun.
+// Tap the switch, or drag the sun across.
 export default function Page() {
   return (
     <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">

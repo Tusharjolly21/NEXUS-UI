@@ -44,7 +44,7 @@ export const COMPONENT_SOUNDS: Record<string, string> = {
   "storage-clean": "Clicks when you press a recommendation, crumbles as the bar breaks into grains, bloops as they drop into the can, chimes when the space is freed, and pours with a soft ping when you undo.",
   "web-sling-button": "Thwips like a web-shooter as each line leaves, slaps wetly as it sticks to the button with a crackle of glue, creaks as you pull it tighter, swishes when you let go, and cracks and twangs when it snaps. An empty cartridge just clicks.",
   "bubble-tags": "A soft breath as the wand blows, a rising note as each bubble swells and lets go, and a bright little pop with a falling blip when you tap one.",
-  "eclipse-toggle": "A low swell as the light drains away behind the moon; at sunrise a bright ting, a rising arpeggio and two birds answering each other.",
+  "eclipse-toggle": "A low swell as the light drains away and a soft bell as the sun sets; at sunrise a bright ting, a rising arpeggio and two birds answering each other.",
   "neon-star-rating": "Each tube strikes with a click from the transformer, a crackle on every flicker and a short electric buzz before it settles into a steady glow.",
   "lens-search": "Air as the lens lifts out of the field, soft ticks as it passes rows, a chime when it parks on a match, and two low notes when nothing matches.",
   "peel-delete": "A rasp that follows the speed of the peel, a pat when it sticks back down, a rip and a rush of air when it comes free, and a soft slide and chime on Undo.",

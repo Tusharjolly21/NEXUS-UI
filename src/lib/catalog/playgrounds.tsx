@@ -4776,11 +4776,11 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "EclipseToggle",
     importPath: "@/components/eclipse-toggle",
     defaultFill: "light",
-    blurb: "This one is wired to the page: flip it and the whole site goes dark, or light, inside an eclipse.",
+    blurb: "This one is wired to the page: flip it and the whole site goes dark at sunset, or light at sunrise.",
     controls: [
       { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
     ],
-    // wired to this site's theme: flipping it changes the whole page, inside an eclipse
+    // wired to this site's theme: flipping it changes the whole page with it
     render: (v) => (
       <div className="mx-auto flex w-full max-w-[380px] justify-center">
         <SiteEclipseToggle enableSound={v.enableSound as boolean} />

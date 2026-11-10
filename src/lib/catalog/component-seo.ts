@@ -5,9 +5,9 @@
  */
 export const COMPONENT_SEO: Record<string, { title: string; description: string }> = {
   "eclipse-toggle": {
-    title: "React Dark Mode Toggle: Animated Eclipse Switch",
+    title: "React Dark Mode Toggle: Animated Sunset Switch",
     description:
-      "React dark mode toggle: the moon slides over the sun into a total eclipse, with stars, a corona and sound. Drag or tap it. Framer Motion + Tailwind CSS.",
+      "React dark mode toggle: the sun sets behind the hills and turns into the moon, with golden hour, stars and sound. Drag or tap it. Framer Motion + Tailwind CSS.",
   },
   "bubble-tags": {
     title: "React Tag Input with Animated Bubbles",

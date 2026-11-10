@@ -22,10 +22,10 @@ export type EclipseToggleProps = {
   /** Called with the new theme. `fromUser` is false while autoplay is running, so you can leave the page alone then. */
   onThemeChange?: (theme: Theme, detail: { fromUser: boolean }) => void;
   /**
-   * Change the page inside an eclipse when the visitor flips the switch: the moon's shadow spills out of the switch
-   * and across the page, its edge burning like the corona, and the stars come out; switching back, sunlight floods
-   * out of the sun with a golden rim. Whatever your onThemeChange does to the page is what gets revealed.
-   * Uses the View Transitions API; without it, or with reduced motion, the theme just changes.
+   * Change the page with the switch when the visitor flips it: going dark, dusk spreads out from the switch across the
+   * page with a glowing edge and the stars come out; going light, sunlight floods out with a golden rim. Whatever your
+   * onThemeChange does to the page is what gets revealed. Uses the View Transitions API; without it, or with reduced
+   * motion, the theme just changes.
    */
   pageTransition?: boolean;
   /** Soft synthesised sounds, scored to the motion. They also follow the site-wide sound switch. */
@@ -173,13 +173,14 @@ function useSound(enabled: boolean, volume: number, allow: () => boolean = () =>
   }, []);
 }
 
-// ───────────── the sky, 260 by 104: a pill of sky with the sun at the right; the knob is the moon ─────────────
+// ───────────── the sky, 260 by 104: a pill of sky over low hills; the knob is the sun by day and the moon by night ─────────────
 
 const W = 260, H = 104, CY = 52;
-const LEFT = 52; // the moon at rest, light mode
-const SUN = 208; // the sun's centre, and the moon's in dark mode
-const RS = 27; // the sun: small enough to leave room round it for the corona
-const RM = 27.9; // the moon, a touch larger, as it is when an eclipse is total
+const LEFT = 52; // the sun at rest, light mode
+const RIGHT = 208; // the moon at rest, dark mode
+const DIP = 25; // how far the knob sinks towards the hills half way across: the sun sets, then the moon rises
+const RS = 25; // the sun
+const RM = 23; // the moon
 
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 /** a smooth step from a to b; a may be larger than b, for a step down */
@@ -187,33 +188,35 @@ const step = (a: number, b: number, x: number) => {
   const t = clamp((x - a) / (b - a));
   return t * t * (3 - 2 * t);
 };
-/** how much of the sun the moon covers, as a fraction, from the distance between their centres */
-const coverage = (d: number) => {
-  if (d >= RM + RS) return 0;
-  if (d <= RM - RS) return 1;
-  const a =
-    RS * RS * Math.acos((d * d + RS * RS - RM * RM) / (2 * d * RS)) +
-    RM * RM * Math.acos((d * d + RM * RM - RS * RS) / (2 * d * RM)) -
-    0.5 * Math.sqrt((-d + RS + RM) * (d + RS - RM) * (d - RS + RM) * (d + RS + RM));
-  return clamp(a / (Math.PI * RS * RS));
-};
+/** rises from a to a peak at b, falls away by c */
+const bell = (x: number, a: number, b: number, c: number) => step(a, b, x) * (1 - step(b, c, x));
 
-/**
- * The lit part of the moon, as a path round its centre, lit on the side facing the sun (the right). `lit` runs from 1,
- * the full face, to 0, a new moon: the shadow sweeps in from the far side and leaves a crescent that thins towards the
- * sun, the way the moon looks in the days before an eclipse. The shadow's edge is half an ellipse.
- */
-const phasePath = (lit: number) => {
-  if (lit >= 0.999) return `M0,${-RM} A${RM},${RM} 0 1 1 0,${RM} A${RM},${RM} 0 1 1 0,${-RM} Z`;
-  if (lit <= 0.001) return "M0,0 Z";
-  const e = RM * (1 - 2 * lit); // where the shadow's edge crosses the middle: -RM is full, RM is new
-  let d = `M0,${-RM} A${RM},${RM} 0 0 1 0,${RM}`;
-  for (let i = 1; i < 24; i++) {
-    const y = RM - (2 * RM * i) / 24;
-    d += ` L${(e * Math.sqrt(1 - (y / RM) ** 2)).toFixed(2)},${y.toFixed(2)}`;
-  }
-  return `${d} Z`;
-};
+/** how far through the evening the knob is: 0 is midday, 1 is night */
+const progress = (x: number) => clamp((x - LEFT) / (RIGHT - LEFT));
+/** the knob's height: it sinks towards the horizon at sunset and climbs again as the moon */
+const knobY = (t: number) => CY + DIP * Math.sin(Math.PI * t);
+
+/** everything in the sky at a moment of the evening, from 0 (day) to 1 (night) */
+function scene(t: number) {
+  return {
+    golden: bell(t, 0.12, 0.44, 0.7), // golden hour into sunset
+    night: step(0.4, 0.88, t),
+    afterglow: bell(t, 0.36, 0.6, 0.92), // the rosy band left on the horizon after the sun has gone
+    stars: step(0.62, 0.96, t),
+    venus: step(0.48, 0.72, t), // the evening star, first to show
+    // the moon comes in underneath while the sun is still solid, then the red sun fades off it, so the knob never
+    // turns see-through: it changes, from the setting sun into the moon
+    sun: 1 - step(0.46, 0.62, t),
+    sunset: bell(t, 0.16, 0.46, 0.62), // the disc going orange, then red, low over the hills
+    moon: step(0.4, 0.48, t),
+    glare: 1 - step(0.1, 0.42, t),
+    warm: bell(t, 0.1, 0.44, 0.6),
+    moonGlow: step(0.58, 0.92, t),
+    size: 1 + 0.16 * bell(t, 0.08, 0.47, 0.58), // the sun looks larger near the horizon
+    duskLand: step(0.22, 0.52, t),
+    nightLand: step(0.52, 0.9, t),
+  };
+}
 
 /** a fixed scatter: the same sky every time */
 const rand = (i: number) => {
@@ -222,21 +225,7 @@ const rand = (i: number) => {
 };
 // rounded, so the server and the browser print the same numbers (their sin() can differ in the last digits)
 const r2 = (n: number) => Math.round(n * 100) / 100;
-const STARS = Array.from({ length: 22 }, (_, i) => ({ x: r2(10 + rand(i) * 150), y: r2(8 + rand(i + 50) * 72), r: r2(0.35 + rand(i + 99) * 0.6), g: i % 3 }));
-/**
- * The corona's streamers: angle in degrees (0 points right), length and width at the root. Long, petal-like helmet
- * streamers near the sun's equator reach out across the sky; short fine plumes stand at its poles.
- */
-const STREAMERS: [number, number, number][] = [
-  [174, 74, 11], [188, 64, 10], [160, 48, 8], [202, 46, 8], [181, 96, 3.5], [146, 32, 6], [216, 30, 6],
-  [-6, 52, 11], [9, 46, 10], [-22, 34, 7], [25, 32, 7], [3, 64, 3],
-  [-40, 26, 6], [-140, 28, 6], [40, 25, 6], [140, 27, 6], [-62, 20, 5], [-118, 21, 5], [62, 19, 5], [118, 20, 5],
-];
-/** fine rays all round, the corona's texture */
-const RAYS = Array.from({ length: 44 }, (_, i) => ({ a: (i / 44) * 360 + rand(i + 7) * 7, l: 7 + rand(i + 21) * (Math.abs(Math.cos(((i / 44) * 360 * Math.PI) / 180)) * 30 + 8), w: 0.5 + rand(i + 3) * 0.5 }));
-/** a streamer or a ray along +x from the sun's edge: wide at the root, curving to a point */
-const streamer = (l: number, w: number) =>
-  `M${RS - 1},${-w / 2} C${RS + l * 0.3},${-w * 0.45} ${RS + l * 0.7},${-w * 0.1} ${RS + l},0 C${RS + l * 0.7},${w * 0.1} ${RS + l * 0.3},${w * 0.45} ${RS - 1},${w / 2} Z`;
+const STARS = Array.from({ length: 26 }, (_, i) => ({ x: r2(12 + rand(i) * 236), y: r2(8 + rand(i + 50) * 62), r: r2(0.35 + rand(i + 99) * 0.6), g: i % 3 }));
 
 // ───────────── the moon's face, painted once into a small bitmap: the real near side, north up ─────────────
 
@@ -357,15 +346,15 @@ function moonFaces(size = 256) {
 
 type Bird = { id: number; y: number; d: number; delay: number; s: number };
 
-// ───────────── the page eclipse: a view transition whose new page is revealed through a circle that grows out of the sun ─────────────
+// ───────────── the page change: a view transition whose new page is revealed through a circle that grows out of the switch ─────────────
 
 type ViewTransitionDoc = Document & { startViewTransition?: (update: () => void) => { ready: Promise<void>; finished: Promise<void> } };
 
 /**
- * Run `apply` (which should change the page's theme straight away) inside an eclipse that starts at `origin`, the
- * sun's centre in viewport pixels, and only covers `from` pixels to begin with, so the switch itself stays live.
- * To dark, the old page dims steely as the shadow comes, the shadow's edge burns like the corona and stars come out
- * behind it, then fade. To light, sunlight floods out with a golden rim and slow rays.
+ * Run `apply` (which should change the page's theme straight away) inside a change of light that starts at `origin`,
+ * where the knob is going, in viewport pixels, and only covers `from` pixels to begin with, so the switch itself stays
+ * live. To dark, the old page dims as dusk spreads, its edge glowing like a sunset, and stars come out behind it, then
+ * fade. To light, sunlight floods out with a golden rim and slow rays.
  */
 export function eclipsePageTransition(next: Theme, origin: { x: number; y: number }, from: number, apply: () => void) {
   const doc = document as ViewTransitionDoc;
@@ -384,18 +373,16 @@ export function eclipsePageTransition(next: Theme, origin: { x: number; y: numbe
   css.textContent = "::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}";
   document.head.appendChild(css);
 
-  // the edge of the shadow (or the light), stars and rays: part of the new page, so they are revealed with it
+  // the edge of the dusk (or the light), stars and rays: part of the new page, so they are revealed with it
   const layer = document.createElement("div");
   layer.setAttribute("aria-hidden", "true");
   layer.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:2147483647;overflow:hidden";
   const rim = document.createElement("div");
   rim.style.cssText = `position:absolute;left:${x}px;top:${y}px;border-radius:50%;transform:translate(-50%,-50%);` +
     (dark
-      ? "box-shadow:inset 0 0 0 1.5px rgba(255,246,226,.95),inset 0 0 10px 3px rgba(255,214,160,.8),inset 0 0 36px 8px rgba(255,140,90,.35),inset 0 0 70px 14px rgba(130,90,255,.14)"
+      ? "box-shadow:inset 0 0 0 1.5px rgba(255,222,186,.9),inset 0 0 12px 3px rgba(255,160,112,.7),inset 0 0 40px 8px rgba(233,112,138,.32),inset 0 0 70px 14px rgba(110,90,210,.16)"
       : "box-shadow:inset 0 0 0 2px rgba(255,250,225,1),inset 0 0 14px 4px rgba(255,214,120,.85),inset 0 0 60px 16px rgba(255,186,90,.35)");
   layer.appendChild(rim);
-  // no flare of our own: the switch draws the diamond ring at the sun's edge, at the right moment. A glow here would
-  // sit on top of the moon that is still in front of the sun.
   const stars: HTMLDivElement[] = [];
   if (dark) {
     for (let i = 0; i < 70; i++) {
@@ -452,15 +439,14 @@ export function eclipsePageTransition(next: Theme, origin: { x: number; y: numbe
 }
 
 /**
- * A light and dark switch as a total eclipse.
+ * A light and dark switch as an evening going by.
  *
- * The switch is a strip of sky with the sun at one end; the knob is the moon, pale in the daylight. Switch to dark and
- * the moon slides across and over the sun: the light goes steely and dim as it takes a bite, the last bead of sun
- * flares into a diamond ring, and at totality the sky drops to night, the corona and two pink prominences open round
- * the black disc, Venus and the stars come out and the whole horizon glows like a sunset. Switch back and the sun
- * bursts out of the far edge, the day returns and a few birds, fooled into thinking it was dusk, fly off singing.
- * You can tap it, use Space, Enter or the arrow keys, or drag the moon and scrub the eclipse by hand. The scene is a
- * switch (role switch); applying the theme is your job:
+ * The switch is a strip of sky over low hills, and the knob is the sun. Switch to dark and the sun sinks towards the
+ * hills: the light turns golden, the sun grows larger and goes orange and then red as it nears the horizon, and it sets
+ * behind the hills. A silver moon rises on the far side, a rosy afterglow lingers on the horizon, the evening star comes
+ * out first and then the stars, and the hills turn to silhouettes in the moonlight. Switch back and it plays as a
+ * sunrise, and a few birds fly off singing. You can tap it, use Space, Enter or the arrow keys, or drag the knob and
+ * scrub the evening by hand. The scene is a switch (role switch); applying the theme is your job:
  *   <EclipseToggle pageTransition onThemeChange={(t) => (document.documentElement.dataset.theme = t)} />
  */
 export default function EclipseToggle({ theme, defaultTheme = "light", onThemeChange, pageTransition = false, enableSound = true, volume = 0.8, autoplay = false, className = "" }: EclipseToggleProps) {
@@ -493,73 +479,74 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
   const btnRef = useRef<HTMLButtonElement>(null);
   const inView = useInView(rootRef, { margin: "100px" });
 
-  const cx = useMotionValue(defaultTheme === "dark" ? SUN : LEFT); // the moon
-  const night = useMotionValue(defaultTheme === "dark" ? 1 : 0); // how dark the sky is, for the card around it
+  const startDark = defaultTheme === "dark";
+  const cx = useMotionValue(startDark ? RIGHT : LEFT); // the knob
+  const night = useMotionValue(startDark ? 1 : 0); // how dark the sky is, for the card around it
   const anim = useRef<AnimationPlaybackControls | null>(null);
   const [birds, setBirds] = useState<Bird[]>([]);
-  const [face, setFace] = useState<{ day: string; earth: string } | null>(null);
-  useEffect(() => setFace(moonFaces()), []);
+  const [face, setFace] = useState<string | null>(null);
+  useEffect(() => setFace(moonFaces()?.day ?? null), []);
 
   const cardBg = useTransform(night, [0, 0.5, 1], ["#ffffff", "#6b6d72", "#0e1119"]); // an even grey in the middle, not a pale one
   // the text flips from dark to light where the two read equally well, so it never sits grey on a grey card
   const cardInk = useTransform(night, (v) => (v < 0.44 ? "#1d1d1f" : "#f5f5f7"));
+  // the switch sits in the card with a little depth: a soft shadow by day, a faint cool moonlit glow by night
+  const switchShadow = useTransform(night, [0, 1], [
+    "0px 1px 0px rgba(255,255,255,0.7), 0px 14px 26px -16px rgba(16,70,140,0.6)",
+    "0px 1px 0px rgba(255,255,255,0.07), 0px 16px 40px -16px rgba(150,172,255,0.32)",
+  ]);
+  // the focus ring is for the keyboard; after a click or a tap it stays hidden
+  const [pointerUsed, setPointerUsed] = useState(false);
   const cardSub = useTransform(night, (v) => (v < 0.2 ? "#6e6e73" : v < 0.44 ? "#2c2c30" : v < 0.8 ? "#e4e4e8" : "#a1a1a6"));
 
   // what the frame loop writes to
   const r = {
+    golden: useRef<SVGGElement>(null),
     night: useRef<SVGGElement>(null),
-    glow: useRef<SVGGElement>(null),
+    afterglow: useRef<SVGGElement>(null),
     stars: [useRef<SVGGElement>(null), useRef<SVGGElement>(null), useRef<SVGGElement>(null)],
     venus: useRef<SVGGElement>(null),
+    lights: useRef<SVGGElement>(null),
     glare: useRef<SVGGElement>(null),
-    corona: useRef<SVGGElement>(null),
-    coronaSpin: useRef<SVGGElement>(null),
-    pale: useRef<SVGGElement>(null),
-    phase: useRef<SVGPathElement>(null),
-    bite: useRef<SVGCircleElement>(null),
-    disc: useRef<SVGGElement>(null),
-    beads: useRef<SVGGElement>(null),
-    diamond: useRef<SVGGElement>(null),
-    ridgeNight: useRef<SVGGElement>(null),
+    warm: useRef<SVGGElement>(null),
+    moonGlow: useRef<SVGGElement>(null),
+    body: useRef<SVGGElement>(null),
+    sun: useRef<SVGGElement>(null),
+    sunset: useRef<SVGGElement>(null),
+    moon: useRef<SVGGElement>(null),
+    duskLand: useRef<SVGGElement>(null),
+    nightLand: useRef<SVGGElement>(null),
   };
 
-  // ── the sky, worked out from where the moon is ──
+  // ── the sky, worked out from where the knob is ──
   useEffect(() => {
     if (!inView) return;
     let raf = 0;
     const t0 = performance.now();
     const set = (el: Element | null, k: string, v: number | string) => el?.setAttribute(k, typeof v === "number" ? v.toFixed(3) : v);
     const frame = (now: number) => {
-      const t = (now - t0) / 1000;
+      const time = (now - t0) / 1000;
       const x = cx.get();
-      const d = Math.abs(SUN - x); // distance between the centres
-      const cov = coverage(d);
-      // the light hardly changes until the sun is nearly gone, then falls away at the last moment
-      const k = 0.5 * step(0.45, 0.995, cov) + 0.5 * step(7, 0.8, d);
-      night.set(k);
-      const corona = step(6, 0.8, d);
-      const diamond = d < 1 ? 0 : d < 2.5 ? (d - 1) / 1.5 : clamp(1 - (d - 2.5) / 3.5);
-      const beads = step(1.3, 2.3, d) * step(6.5, 3.6, d);
-      set(r.night.current, "opacity", k);
-      set(r.glow.current, "opacity", step(0.3, 0.95, k));
-      set(r.ridgeNight.current, "opacity", k);
-      const twinkle = reduce ? [1, 1, 1] : [0, 1, 2].map((g) => 0.72 + 0.28 * Math.sin(t * (1.3 + g * 0.7) + g * 2.1));
-      r.stars.forEach((s, g) => set(s.current, "opacity", step(0.72, 0.98, k) * twinkle[g]!));
-      set(r.venus.current, "opacity", step(0.35, 0.75, k));
-      set(r.glare.current, "opacity", Math.pow(1 - cov, 0.6) * (1 - corona));
-      set(r.corona.current, "opacity", corona);
-      if (!reduce) set(r.coronaSpin.current, "transform", `rotate(${(t * 0.8).toFixed(2)}) scale(${(1 + 0.018 * Math.sin(t * 0.9)).toFixed(4)})`);
-      set(r.pale.current, "transform", `translate(${x.toFixed(2)} ${CY})`);
-      // by day the moon is lit on its sunward side: full at rest, a thinning crescent as it nears the sun, then gone
-      // before it reaches the sun's edge, so all that shows in front of the sun is the black bite
-      r.phase.current?.setAttribute("d", phasePath(step(RS + RM + 3, 150, d)));
-      set(r.pale.current, "opacity", 0.86 * step(RS + RM + 1, RS + RM + 30, d));
-      set(r.bite.current, "cx", x);
-      set(r.disc.current, "transform", `translate(${x.toFixed(2)} ${CY})`);
-      set(r.disc.current, "opacity", corona);
-      set(r.beads.current, "opacity", beads);
-      set(r.diamond.current, "opacity", diamond);
-      set(r.diamond.current, "transform", `translate(${(SUN + RS - 0.6).toFixed(2)} ${CY}) scale(${(0.6 + 0.55 * diamond).toFixed(3)})`);
+      const t = progress(x);
+      const y = knobY(t);
+      const v = scene(t);
+      night.set(v.night);
+      set(r.golden.current, "opacity", v.golden);
+      set(r.night.current, "opacity", v.night);
+      set(r.afterglow.current, "opacity", v.afterglow);
+      const twinkle = reduce ? [1, 1, 1] : [0, 1, 2].map((g) => 0.72 + 0.28 * Math.sin(time * (1.3 + g * 0.7) + g * 2.1));
+      r.stars.forEach((s, g) => set(s.current, "opacity", v.stars * twinkle[g]!));
+      set(r.venus.current, "opacity", v.venus);
+      set(r.lights.current, "transform", `translate(${x.toFixed(2)} ${y.toFixed(2)})`);
+      set(r.glare.current, "opacity", v.glare);
+      set(r.warm.current, "opacity", v.warm);
+      set(r.moonGlow.current, "opacity", v.moonGlow);
+      set(r.body.current, "transform", `translate(${x.toFixed(2)} ${y.toFixed(2)}) scale(${v.size.toFixed(4)})`);
+      set(r.sun.current, "opacity", v.sun);
+      set(r.sunset.current, "opacity", v.sunset);
+      set(r.moon.current, "opacity", v.moon);
+      set(r.duskLand.current, "opacity", v.duskLand);
+      set(r.nightLand.current, "opacity", v.nightLand);
       raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
@@ -644,51 +631,51 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
     ]);
   };
 
-  // the eclipse's moments, wherever they happen: under a tap, a key or a finger dragging the moon
+  // the evening's moments, wherever they happen: under a tap, a key or a finger dragging the knob
   useEffect(() => {
-    let prev = Math.abs(SUN - cx.get());
+    let prev = progress(cx.get());
     return cx.on("change", (x) => {
-      const d = Math.abs(SUN - x);
-      if (prev >= 3 && d < 3 && once("in")) {
-        // the diamond ring, going in
-        sfx.note(2637, { dur: 0.9, gain: 0.045, bell: 0.5 });
-        sfx.note(3951, { at: 0.03, dur: 0.5, gain: 0.015, bell: 0 });
+      const t = progress(x);
+      if (prev < 0.52 && t >= 0.52 && once("set", 900)) {
+        // the sun slips behind the hills: a soft falling breath and a low bell
+        sfx.whoosh(1800, 480, { dur: 0.8, gain: 0.022 });
+        sfx.note(784, { at: 0.05, dur: 1.2, gain: 0.028, bell: 0.4 });
       }
-      if (prev >= 1 && d < 1 && once("total", 900)) {
-        // totality: an open, glassy chord
+      if (prev < 0.97 && t >= 0.97 && once("night", 900)) {
+        // night: an open, glassy chord as the stars come out
         [659.3, 987.8, 1480, 1975.5].forEach((f, i) => sfx.note(f, { at: 0.04 + i * 0.1, dur: 1.8, gain: 0.026 - i * 0.004, bell: 0.35 }));
       }
-      if (prev < 1.4 && d >= 1.4 && once("out", 900)) {
-        // the sun bursts out of the edge: a bright ting, a rising arpeggio, and later the birds
+      if (prev > 0.5 && t <= 0.5 && once("rise", 900)) {
+        // the sun clears the hills: a bright ting and a rising breath
         padStop.current?.();
-        sfx.note(3136, { dur: 0.7, gain: 0.05, bell: 0.6 });
-        sfx.whoosh(900, 4200, { at: 0.02, dur: 0.5, gain: 0.03 });
-        [1046.5, 1318.5, 1568, 2093].forEach((f, i) => sfx.note(f, { at: 0.12 + i * 0.075, dur: 0.9, gain: 0.024, bell: 0.3 }));
-        window.setTimeout(() => {
-          if (modeRef.current !== "light" || Math.abs(SUN - cx.get()) < 20) return;
-          flyBirds();
-          chirps(0.25);
-        }, 650);
+        sfx.note(3136, { dur: 0.7, gain: 0.045, bell: 0.6 });
+        sfx.whoosh(900, 4200, { at: 0.02, dur: 0.5, gain: 0.026 });
       }
-      prev = d;
+      if (prev > 0.3 && t <= 0.3 && once("morning", 900)) {
+        // morning: a rising arpeggio, then the birds
+        [1046.5, 1318.5, 1568, 2093].forEach((f, i) => sfx.note(f, { at: i * 0.075, dur: 0.9, gain: 0.022, bell: 0.3 }));
+        window.setTimeout(() => {
+          if (modeRef.current !== "light" || progress(cx.get()) > 0.3) return;
+          flyBirds();
+          chirps(0.15);
+        }, 350);
+      }
+      prev = t;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── moving the moon ──
+  // ── moving the knob ──
   const travel = (to: Theme) => {
     anim.current?.stop();
-    const end = to === "dark" ? SUN : LEFT;
-    const dist = Math.abs(end - cx.get()) / (SUN - LEFT);
+    const end = to === "dark" ? RIGHT : LEFT;
+    const dist = Math.abs(end - cx.get()) / (RIGHT - LEFT);
     if (reduce || dist === 0) {
       cx.set(end);
       return;
     }
-    // into the sun it creeps the last few pixels, so the diamond ring has its moment; out of it, it starts slowly
-    anim.current =
-      to === "dark"
-        ? animate(cx, end, { duration: 0.5 + 1.5 * dist, ease: [0.22, 0.7, 0.12, 1] })
-        : animate(cx, end, { duration: 0.5 + 1.3 * dist, ease: [0.7, 0, 0.25, 1] });
+    // unhurried, like the real thing: it eases out of the sky and settles gently
+    anim.current = animate(cx, end, { duration: 0.7 + 1.3 * dist, ease: [0.45, 0.05, 0.25, 1] });
   };
 
   const setMode = (next: Theme, fromUser = true) => {
@@ -700,8 +687,8 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
       const fire = () => onThemeChange(next, { fromUser });
       const box = btnRef.current?.getBoundingClientRect();
       if (pageTransition && fromUser && box) {
-        // the eclipse starts at the sun and already covers the switch, so the switch keeps playing while the page changes
-        const sx = box.left + (SUN / W) * box.width, sy = box.top + (CY / H) * box.height;
+        // the change starts where the knob is going and already covers the switch, so the switch keeps playing
+        const sx = box.left + ((next === "dark" ? RIGHT : LEFT) / W) * box.width, sy = box.top + (CY / H) * box.height;
         eclipsePageTransition(next, { x: sx, y: sy }, Math.hypot(Math.max(sx - box.left, box.right - sx), box.height) + 24, fire);
       } else fire();
     }
@@ -716,15 +703,15 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
     travel(next);
   };
 
-  // a controlled theme moves the moon too
+  // a controlled theme moves the knob too
   useEffect(() => {
-    if (theme && Math.abs(cx.get() - (theme === "dark" ? SUN : LEFT)) > 0.5) travel(theme);
+    if (theme && Math.abs(cx.get() - (theme === "dark" ? RIGHT : LEFT)) > 0.5) travel(theme);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [theme]);
 
   useEffect(() => () => padStop.current?.(), []);
 
-  // ── drag the moon to scrub the eclipse; let go past half way and it goes the rest ──
+  // ── drag the knob to scrub the evening; let go past half way and it goes the rest ──
   const drag = useRef<{ id: number; x0: number; c0: number; moved: boolean } | null>(null);
   const suppressClick = useRef(false);
   const onDown = (e: RPointerEvent<HTMLButtonElement>) => {
@@ -744,14 +731,14 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
       g.c0 = cx.get() - dx;
       btnRef.current!.setPointerCapture(e.pointerId);
     }
-    cx.set(clamp(g.c0 + dx, LEFT, SUN));
+    cx.set(clamp(g.c0 + dx, LEFT, RIGHT));
   };
   const onUp = (e: RPointerEvent<HTMLButtonElement>) => {
     const g = drag.current;
     drag.current = null;
     if (!g || g.id !== e.pointerId || !g.moved) return;
     suppressClick.current = true;
-    setMode(cx.get() > (LEFT + SUN) / 2 ? "dark" : "light");
+    setMode(cx.get() > (LEFT + RIGHT) / 2 ? "dark" : "light");
   };
   const onClick = () => {
     if (suppressClick.current) {
@@ -761,6 +748,7 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
     setMode(modeRef.current === "dark" ? "light" : "dark");
   };
   const onKey = (e: RKeyboardEvent) => {
+    setPointerUsed(false);
     if (e.key === "ArrowRight") {
       e.preventDefault();
       setMode("dark");
@@ -770,7 +758,7 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
     }
   };
 
-  // autoplay: an eclipse every few seconds, until someone touches it
+  // autoplay: an evening every few seconds, until someone touches it
   useEffect(() => {
     if (!autoplay || reduce || !inView) return;
     let alive = true;
@@ -793,28 +781,30 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
   const id = (n: string) => `${n}-${uid}`;
   const url = (n: string) => `url(#${n}-${uid})`;
   const pill = `M${H / 2},0 H${W - H / 2} A${H / 2},${H / 2} 0 0 1 ${W - H / 2},${H} H${H / 2} A${H / 2},${H / 2} 0 0 1 ${H / 2},0 Z`;
-  const startDark = defaultTheme === "dark";
+  const s0 = scene(startDark ? 1 : 0);
+  const x0 = startDark ? RIGHT : LEFT;
   const ridges = useMemo(
     () => ({
-      far: "M0,95 C18,91 36,89 58,92 C82,95 100,88 126,89 C150,90 168,94 190,92 C214,90 236,93 260,91 L260,104 L0,104 Z",
-      near: "M0,100 C28,96 52,99 80,98 C110,97 130,101 160,99.5 C190,98 222,96.5 260,98.5 L260,104 L0,104 Z",
+      far: "M0,93 C18,89 36,87 58,90 C82,93 100,86 126,87 C150,88 168,92 190,90 C214,88 236,91 260,89 L260,104 L0,104 Z",
+      near: "M0,99 C28,95 52,98 80,97 C110,96 130,100 160,98.5 C190,97 222,95.5 260,97.5 L260,104 L0,104 Z",
     }),
     [],
   );
+  const top = (d: string) => d.split(" L260")[0];
 
   return (
     <motion.div
       ref={rootRef}
       onPointerDownCapture={() => {
-  touched.current = true;
-}}
+        touched.current = true;
+      }}
       onKeyDownCapture={() => {
-  touched.current = true;
-}}
+        touched.current = true;
+      }}
       className={`w-[340px] max-w-full rounded-[24px] p-5 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_20px_40px_-26px_rgba(0,0,0,.45)] ${className}`}
       style={{ background: cardBg, color: cardInk }}
     >
-      <button
+      <motion.button
         ref={btnRef}
         type="button"
         role="switch"
@@ -822,89 +812,94 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
         aria-label="Dark mode"
         onClick={onClick}
         onKeyDown={onKey}
-        onPointerDown={onDown}
+        onPointerDown={(e) => {
+          setPointerUsed(true);
+          onDown(e);
+        }}
         onPointerMove={onMove}
         onPointerUp={onUp}
         onPointerCancel={() => (drag.current = null)}
-        className="relative block w-full cursor-pointer touch-pan-y select-none rounded-full p-0 outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
-        style={{ aspectRatio: `${W} / ${H}`, WebkitTapHighlightColor: "transparent" }}
+        className={`relative block w-full cursor-pointer touch-pan-y select-none rounded-full p-0 outline-none ${
+          pointerUsed ? "" : "focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+        }`}
+        style={{ aspectRatio: `${W} / ${H}`, WebkitTapHighlightColor: "transparent", boxShadow: switchShadow }}
       >
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 block h-full w-full overflow-visible" aria-hidden="true">
           <defs>
             <clipPath id={id("pill")}>
               <path d={pill} />
             </clipPath>
-            <clipPath id={id("sun")}>
-              <circle cx={SUN} cy={CY} r={RS} />
-            </clipPath>
             <linearGradient id={id("day")} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" stopColor="#2f7fdc" />
               <stop offset="0.55" stopColor="#74b4ef" />
               <stop offset="1" stopColor="#cfe6f8" />
             </linearGradient>
+            {/* golden hour: the blue thins overhead and the low sky turns peach and gold */}
+            <linearGradient id={id("golden")} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#4a6fb3" />
+              <stop offset="0.45" stopColor="#c99a8e" />
+              <stop offset="0.75" stopColor="#f6b679" />
+              <stop offset="1" stopColor="#ffd59a" />
+            </linearGradient>
             <linearGradient id={id("night")} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" stopColor="#03050c" />
-              <stop offset="0.42" stopColor="#0b1430" />
-              <stop offset="0.7" stopColor="#25234a" />
-              <stop offset="0.88" stopColor="#4a3256" />
-              <stop offset="1" stopColor="#6a3d4f" />
+              <stop offset="0.45" stopColor="#0b1430" />
+              <stop offset="0.75" stopColor="#1c2347" />
+              <stop offset="1" stopColor="#2d2c52" />
             </linearGradient>
-            {/* at totality the whole horizon glows, a sunset all the way round */}
-            <linearGradient id={id("rim")} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#ff9a5c" stopOpacity="0" />
-              <stop offset="0.6" stopColor="#ff8f5a" stopOpacity=".38" />
-              <stop offset="0.85" stopColor="#ffb36b" stopOpacity=".8" />
-              <stop offset="1" stopColor="#ffd08a" stopOpacity=".9" />
+            {/* the afterglow: a rosy band low on the horizon after the sun has gone */}
+            <linearGradient id={id("afterglow")} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#ff8a6a" stopOpacity="0" />
+              <stop offset="0.5" stopColor="#e9708a" stopOpacity=".35" />
+              <stop offset="0.85" stopColor="#ff9f7a" stopOpacity=".75" />
+              <stop offset="1" stopColor="#ffc58f" stopOpacity=".85" />
             </linearGradient>
             <radialGradient id={id("glare")} cx="0.5" cy="0.5" r="0.5">
-              <stop offset="0" stopColor="#ffffff" stopOpacity=".95" />
-              <stop offset="0.3" stopColor="#fffbe8" stopOpacity=".6" />
-              <stop offset="0.6" stopColor="#fff4d6" stopOpacity=".18" />
+              <stop offset="0" stopColor="#ffffff" stopOpacity=".9" />
+              <stop offset="0.3" stopColor="#fffbe8" stopOpacity=".5" />
+              <stop offset="0.6" stopColor="#fff4d6" stopOpacity=".15" />
               <stop offset="1" stopColor="#fff4d6" stopOpacity="0" />
             </radialGradient>
-            <radialGradient id={id("disc")} cx="0.5" cy="0.5" r="0.5">
+            <radialGradient id={id("warm")} cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0" stopColor="#ffd28a" stopOpacity=".95" />
+              <stop offset="0.35" stopColor="#ffa25e" stopOpacity=".45" />
+              <stop offset="0.7" stopColor="#ff7a4a" stopOpacity=".12" />
+              <stop offset="1" stopColor="#ff7a4a" stopOpacity="0" />
+            </radialGradient>
+            <radialGradient id={id("moonGlow")} cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0" stopColor="#dfe8ff" stopOpacity=".55" />
+              <stop offset="0.45" stopColor="#b9c9ff" stopOpacity=".16" />
+              <stop offset="1" stopColor="#b9c9ff" stopOpacity="0" />
+            </radialGradient>
+            <radialGradient id={id("sun")} cx="0.5" cy="0.5" r="0.5">
               <stop offset="0" stopColor="#ffffff" />
-              <stop offset="0.78" stopColor="#fffdf4" />
-              <stop offset="0.95" stopColor="#fff4d4" />
-              <stop offset="1" stopColor="#ffe9b4" />
+              <stop offset="0.7" stopColor="#fffbea" />
+              <stop offset="0.92" stopColor="#ffefc0" />
+              <stop offset="1" stopColor="#ffe3a0" />
             </radialGradient>
-            <radialGradient id={id("inner")} gradientUnits="userSpaceOnUse" cx="0" cy="0" r={RS * 3}>
-              <stop offset={r2(RS / (RS * 3))} stopColor="#ffffff" stopOpacity=".95" />
-              <stop offset={r2((RS + 3) / (RS * 3))} stopColor="#f4f6ff" stopOpacity=".55" />
-              <stop offset={r2((RS + 9) / (RS * 3))} stopColor="#e2e9ff" stopOpacity=".2" />
-              <stop offset={r2((RS + 22) / (RS * 3))} stopColor="#c9d4ff" stopOpacity=".07" />
-              <stop offset="1" stopColor="#c9d4ff" stopOpacity="0" />
+            {/* the setting sun: deep orange, redder at the rim */}
+            <radialGradient id={id("sunset")} cx="0.5" cy="0.45" r="0.55">
+              <stop offset="0" stopColor="#ffe3a6" />
+              <stop offset="0.45" stopColor="#ffb05c" />
+              <stop offset="0.85" stopColor="#ff7a3c" />
+              <stop offset="1" stopColor="#f2603a" />
             </radialGradient>
-            <linearGradient id={id("stream")} x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stopColor="#ffffff" stopOpacity=".9" />
-              <stop offset="0.3" stopColor="#f3f5ff" stopOpacity=".45" />
-              <stop offset="0.7" stopColor="#dfe6ff" stopOpacity=".12" />
-              <stop offset="1" stopColor="#dfe6ff" stopOpacity="0" />
-            </linearGradient>
-            <filter id={id("b1")} x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="1" />
-            </filter>
+            <radialGradient id={id("moonBase")} cx="0.42" cy="0.4" r="0.62">
+              <stop offset="0" stopColor="#aeb8cb" />
+              <stop offset="0.8" stopColor="#97a3ba" />
+              <stop offset="1" stopColor="#838fa8" />
+            </radialGradient>
             <radialGradient id={id("spark")} cx="0.5" cy="0.5" r="0.5">
               <stop offset="0" stopColor="#ffffff" />
               <stop offset="0.25" stopColor="#ffffff" stopOpacity=".7" />
               <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
             </radialGradient>
-            <radialGradient id={id("pale")} cx="0.42" cy="0.4" r="0.62">
-              <stop offset="0" stopColor="#ffffff" stopOpacity=".9" />
-              <stop offset="0.75" stopColor="#f3f7fd" stopOpacity=".78" />
-              <stop offset="1" stopColor="#e6eef9" stopOpacity=".6" />
-            </radialGradient>
-            <mask id={id("phase")} maskUnits="userSpaceOnUse" x={-RM - 2} y={-RM - 2} width={RM * 2 + 4} height={RM * 2 + 4}>
-              <path ref={r.phase} d={phasePath(startDark ? 0 : 1)} fill="#ffffff" filter={url("b04")} />
-            </mask>
-            {/* the corona dissolves into the sky before it meets the switch's edge, instead of being cut off by it */}
-            <filter id={id("b5")} x="-20%" y="-50%" width="140%" height="200%">
-              <feGaussianBlur stdDeviation="5" />
-            </filter>
-            <mask id={id("edge")} maskUnits="userSpaceOnUse" x={0} y={0} width={W} height={H}>
-              <path d={pill} fill="#ffffff" />
-              <path d={pill} fill="none" stroke="#000000" strokeWidth={18} filter={url("b5")} />
-            </mask>
+            {/* glass: a soft sheen across the top of the switch */}
+            <linearGradient id={id("gloss")} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#ffffff" stopOpacity=".16" />
+              <stop offset="0.45" stopColor="#ffffff" stopOpacity=".04" />
+              <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
+            </linearGradient>
             <filter id={id("b25")} x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="2.5" />
             </filter>
@@ -914,110 +909,74 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
           </defs>
 
           <g clipPath={url("pill")}>
-            {/* day, and the night that comes in at totality */}
+            {/* the sky: day, golden hour, night, and the afterglow on the horizon */}
             <rect width={W} height={H} fill={url("day")} />
-            <g ref={r.night} opacity={startDark ? 1 : 0}>
+            <g ref={r.golden} opacity={s0.golden}>
+              <rect width={W} height={H} fill={url("golden")} />
+            </g>
+            <g ref={r.night} opacity={s0.night}>
               <rect width={W} height={H} fill={url("night")} />
             </g>
-            <g ref={r.glow} opacity={startDark ? 1 : 0}>
-              <rect y={44} width={W} height={60} fill={url("rim")} />
+            <g ref={r.afterglow} opacity={s0.afterglow}>
+              <rect y={42} width={W} height={62} fill={url("afterglow")} />
             </g>
 
-            {/* stars, in three sets that twinkle out of step, and Venus, first to show */}
+            {/* stars, in three sets that twinkle out of step, and the evening star, first to show */}
             {[0, 1, 2].map((g) => (
-              <g key={g} ref={r.stars[g]} opacity={startDark ? 1 : 0} fill="#ffffff">
+              <g key={g} ref={r.stars[g]} opacity={s0.stars} fill="#ffffff">
                 {STARS.filter((s) => s.g === g).map((s, i) => (
                   <circle key={i} cx={s.x} cy={s.y} r={s.r} />
                 ))}
               </g>
             ))}
-            <g ref={r.venus} opacity={startDark ? 1 : 0}>
-              <circle cx={118} cy={28} r={4} fill={url("spark")} opacity={0.55} />
-              <circle cx={118} cy={28} r={1.25} fill="#fffdf5" />
+            <g ref={r.venus} opacity={s0.venus}>
+              <circle cx={96} cy={24} r={4} fill={url("spark")} opacity={0.55} />
+              <circle cx={96} cy={24} r={1.25} fill="#fffdf5" />
             </g>
 
-            {/* the sun's glare in a daytime sky */}
-            <g ref={r.glare} opacity={startDark ? 0 : 1}>
-              <circle cx={SUN} cy={CY} r={96} fill={url("glare")} />
-            </g>
-
-            {/* the corona, the prominences and the black moon: only at totality */}
-            <g ref={r.corona} opacity={startDark ? 1 : 0} mask={url("edge")}>
-              <g transform={`translate(${SUN} ${CY})`}>
-                <g ref={r.coronaSpin}>
-                  {/* a soft halo, then petal streamers and fine rays, each fading out along its length */}
-                  <circle r={RS * 3} fill={url("inner")} />
-                  <g fill={url("stream")} filter={url("b1")} opacity={0.9}>
-                    {STREAMERS.map(([a, l, w], i) => (
-                      <path key={i} transform={`rotate(${a})`} d={streamer(l, w)} />
-                    ))}
-                  </g>
-                  <g fill={url("stream")} opacity={0.38}>
-                    {RAYS.map((ray, i) => (
-                      <path key={i} transform={`rotate(${r2(ray.a)})`} d={streamer(r2(ray.l), r2(ray.w))} />
-                    ))}
-                  </g>
-                </g>
-                {/* the inner corona: a thin, brilliant ring hugging the moon's edge */}
-                <circle r={RM + 0.8} fill="none" stroke="#ffffff" strokeWidth={3} opacity={0.75} filter={url("b1")} />
-                <circle r={RM + 0.3} fill="none" stroke="#fffaf0" strokeWidth={0.9} />
-                {/* prominences: tongues of pink hydrogen at the limb, seen only while the sun is hidden */}
-                <g fill="#ff6f8e" opacity={0.85} filter={url("b04")}>
-                  <path transform={`rotate(196) translate(${RM - 0.9} 0) rotate(90) scale(.75)`} d="M-2.4,0 C-2.2,-2.6 -0.8,-4.2 0.6,-3.8 C2,-3.2 1.6,-1.4 2.4,0 Z" />
-                  <path transform={`rotate(58) translate(${RM - 0.9} 0) rotate(90) scale(.75)`} d="M-1.2,0 C-1.2,-1.4 -0.2,-2 0.5,-1.7 C1,-1.3 0.9,-0.5 1.2,0 Z" />
-                </g>
+            {/* the light round the knob: the sun's glare by day, a warm glow at sunset, cool moonlight at night */}
+            <g ref={r.lights} transform={`translate(${x0} ${knobY(startDark ? 1 : 0)})`}>
+              <g ref={r.glare} opacity={s0.glare}>
+                <circle r={92} fill={url("glare")} />
+              </g>
+              <g ref={r.warm} opacity={s0.warm}>
+                <circle r={80} fill={url("warm")} />
+              </g>
+              <g ref={r.moonGlow} opacity={s0.moonGlow}>
+                <circle r={50} fill={url("moonGlow")} />
               </g>
             </g>
 
-            {/* the sun */}
-            <circle cx={SUN} cy={CY} r={RS} fill={url("disc")} />
-
-            {/* the moon by day: its real face, the seas letting the blue through, lit from the sun's side and waning to a
-                crescent as it nears the sun */}
-            <g ref={r.pale} transform={`translate(${startDark ? SUN : LEFT} ${CY})`} opacity={startDark ? 0 : 0.86}>
-              <g mask={url("phase")}>
-                {face ? <image href={face.day} x={-RM} y={-RM} width={RM * 2} height={RM * 2} preserveAspectRatio="none" /> : <circle r={RM} fill={url("pale")} />}
+            {/* the knob: the sun, turning orange and red as it sets, and the moon that rises in its place */}
+            <g ref={r.body} transform={`translate(${x0} ${knobY(startDark ? 1 : 0)}) scale(${s0.size})`}>
+              <g ref={r.moon} opacity={s0.moon}>
+                <circle r={RM} fill={url("moonBase")} />
+                {face && <image href={face} x={-RM} y={-RM} width={RM * 2} height={RM * 2} preserveAspectRatio="none" />}
+              </g>
+              <g ref={r.sun} opacity={s0.sun}>
+                <circle r={RS} fill={url("sun")} />
+              </g>
+              <g ref={r.sunset} opacity={s0.sunset}>
+                <circle r={RS} fill={url("sunset")} />
               </g>
             </g>
-            {/* where it is in front of the sun, it is a black bite */}
-            <g clipPath={url("sun")}>
-              <circle ref={r.bite} cx={startDark ? SUN : LEFT} cy={CY} r={RM} fill="#0a0f1d" />
-            </g>
-            <g ref={r.disc} transform={`translate(${startDark ? SUN : LEFT} ${CY})`} opacity={startDark ? 1 : 0}>
-              <circle r={RM} fill="#04060c" />
-              {/* earthshine, just: the same face, faintly lit by the Earth */}
-              {face && <image href={face.earth} x={-RM} y={-RM} width={RM * 2} height={RM * 2} preserveAspectRatio="none" opacity={0.4} />}
-            </g>
 
-            {/* Baily's beads, then the diamond ring, on the edge where the sun goes and comes back */}
-            <g ref={r.beads} opacity={0} fill="#ffffff">
-              {[-27, -13, 11, 24].map((a, i) => (
-                <circle key={a} cx={r2(SUN + (RS - 0.4) * Math.cos((a * Math.PI) / 180))} cy={r2(CY + (RS - 0.4) * Math.sin((a * Math.PI) / 180))} r={[1, 0.8, 1.1, 0.7][i]} />
-              ))}
-            </g>
-            <g ref={r.diamond} opacity={0} transform={`translate(${SUN + RS} ${CY})`}>
-              <circle r={22} fill={url("spark")} opacity={0.5} />
-              <circle r={9} fill={url("spark")} />
-              <g stroke="#ffffff" strokeLinecap="round">
-                <line x1={-26} y1={0} x2={26} y2={0} strokeWidth={0.9} opacity={0.85} />
-                <line x1={0} y1={-18} x2={0} y2={18} strokeWidth={0.7} opacity={0.75} />
-                <line x1={-9} y1={-9} x2={9} y2={9} strokeWidth={0.45} opacity={0.5} />
-                <line x1={-9} y1={9} x2={9} y2={-9} strokeWidth={0.45} opacity={0.5} />
-              </g>
-              <circle r={2.6} fill="#ffffff" />
-            </g>
-
-            {/* the land: hazy green hills by day, black against the glowing horizon at totality */}
+            {/* the land: green hills by day, warm silhouettes at sunset, blue-black under the moon */}
             <path d={ridges.far} fill="#8dbba6" />
             <path d={ridges.near} fill="#5d957a" />
-            <g ref={r.ridgeNight} opacity={startDark ? 1 : 0}>
-              <path d={ridges.far} fill="#121726" />
-              <path d={ridges.far.split(" L260")[0]} fill="none" stroke="#ffb27a" strokeOpacity={0.35} strokeWidth={0.7} />
-              <path d={ridges.near} fill="#05070d" />
-              <path d={ridges.near.split(" L260")[0]} fill="none" stroke="#ff9a6a" strokeOpacity={0.22} strokeWidth={0.6} />
+            <g ref={r.duskLand} opacity={s0.duskLand}>
+              <path d={ridges.far} fill="#6b4f5e" />
+              <path d={top(ridges.far)} fill="none" stroke="#ffc08a" strokeOpacity={0.5} strokeWidth={0.7} />
+              <path d={ridges.near} fill="#3e2c3c" />
+            </g>
+            <g ref={r.nightLand} opacity={s0.nightLand}>
+              <path d={ridges.far} fill="#141a2c" />
+              <path d={top(ridges.far)} fill="none" stroke="#b4c4ff" strokeOpacity={0.22} strokeWidth={0.6} />
+              <path d={ridges.near} fill="#070a12" />
+              <path d={top(ridges.near)} fill="none" stroke="#b4c4ff" strokeOpacity={0.12} strokeWidth={0.5} />
             </g>
 
-            {/* birds, back up when the light returns */}
+            {/* birds, up with the morning */}
             <AnimatePresence>
               {birds.map((b) => (
                 <motion.g
@@ -1044,13 +1003,15 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
             </AnimatePresence>
           </g>
 
-          {/* the switch's well: a hairline edge and a little depth at the top */}
-          <path d={pill} fill="none" stroke="#000000" strokeOpacity={0.14} strokeWidth={1} />
+          {/* the switch's well: a glass sheen, a deeper shadow under the top edge, a faint lit lip at the bottom, a hairline */}
           <g clipPath={url("pill")} pointerEvents="none">
-            <path d={pill} fill="none" stroke="#000000" strokeOpacity={0.16} strokeWidth={6} filter={url("b25")} transform="translate(0 2)" />
+            <rect width={W} height={H * 0.55} fill={url("gloss")} />
+            <path d={pill} fill="none" stroke="#000000" strokeOpacity={0.3} strokeWidth={8} filter={url("b25")} transform="translate(0 3)" />
+            <path d={pill} fill="none" stroke="#ffffff" strokeOpacity={0.18} strokeWidth={3} filter={url("b04")} transform="translate(0 -1.5)" />
           </g>
+          <path d={pill} fill="none" stroke="#000000" strokeOpacity={0.18} strokeWidth={1} />
         </svg>
-      </button>
+      </motion.button>
       <div className="mt-4 flex flex-wrap items-baseline justify-between gap-x-3" aria-live="polite">
         <div className="relative h-[28px] min-w-[130px] flex-1 overflow-hidden">
           <AnimatePresence initial={false} mode="popLayout">
@@ -1067,7 +1028,7 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
           </AnimatePresence>
         </div>
         <motion.span className="text-[13px]" style={{ color: cardSub }}>
-          {isDark ? "Drag the moon back" : "Drag the moon across"}
+          {isDark ? "Drag the moon back" : "Drag the sun across"}
         </motion.span>
       </div>
     </motion.div>

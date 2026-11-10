@@ -37,8 +37,8 @@ export function PreviewBubbleTags({ compact = false }: { compact?: boolean } = {
 }
 
 /**
- * The Eclipse Toggle wired to this site's own theme: flip it and the whole page goes dark (or light) inside an
- * eclipse that spills out of the switch. The site's own theme buttons move the moon too. Autoplay never touches the page.
+ * The Eclipse Toggle wired to this site's own theme: flip it and the whole page goes dark (or light) with dusk (or
+ * sunlight) spilling out of the switch. The site's own theme buttons move the knob too. Autoplay never touches the page.
  */
 export function SiteEclipseToggle({ autoplay = false, enableSound }: { autoplay?: boolean; enableSound?: boolean }) {
   const { resolvedTheme, setTheme } = useTheme();
