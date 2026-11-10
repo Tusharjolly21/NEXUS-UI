@@ -39,6 +39,7 @@ const TEMPLATE_SLUGS = [
   "kiosk",
   "wharf",
   "plotline",
+  "hoopla",
   "last-light",
   "nimbus",
   "margin",
