@@ -4,6 +4,41 @@
  * Search Console shows people actually typing (pages ranking ~5–30 with no clicks yet).
  */
 export const COMPONENT_SEO: Record<string, { title: string; description: string }> = {
+  "eclipse-toggle": {
+    title: "React Dark Mode Toggle: Animated Eclipse Switch",
+    description:
+      "React dark mode toggle: the moon slides over the sun into a total eclipse, with stars, a corona and sound. Drag or tap it. Framer Motion + Tailwind CSS.",
+  },
+  "bubble-tags": {
+    title: "React Tag Input with Animated Bubbles",
+    description:
+      "React tag input component: each tag is a soap bubble that floats up, drifts and pops with sound when removed. Keyboard friendly. Framer Motion + Tailwind.",
+  },
+  "lens-search": {
+    title: "React Search Bar with an Animated Lens",
+    description:
+      "React search bar: the magnifier grows into a lens that glides down the results, magnifies each row and parks on matches. Combobox with sound. Framer Motion.",
+  },
+  "peel-delete": {
+    title: "React Hold to Delete Button with Undo",
+    description:
+      "React hold-to-delete: holding the bin peels the note off like a sticker, with a rasp, a rip and an Undo timer. Keyboard friendly. Framer Motion + Tailwind.",
+  },
+  "upload-morph": {
+    title: "React File Upload Progress Animation",
+    description:
+      "React file upload progress: the cloud icon morphs into a progress ring with a rising arrow, then lands as a check. Real progress and sound. Framer Motion.",
+  },
+  "neon-star-rating": {
+    title: "React Neon Star Rating Component",
+    description:
+      "React star rating in neon: star-shaped tubes flicker on with a buzz and glow amber on a brick wall. Radio group with arrow keys. Framer Motion + Tailwind.",
+  },
+  "voice-morph": {
+    title: "React Voice Message Button Animation",
+    description:
+      "React voice message button: the mic splits into a live waveform, then the bars fold into a send arrow that shoots up. Chat UI with sound. Framer Motion.",
+  },
   "gold-star-rating": {
     title: "React Star Rating: 3D Gold Stars with Sound",
     description:

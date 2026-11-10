@@ -406,6 +406,15 @@ const TINT_OF: Record<string, TileTint> = {
  * are all gathered, newest first, under the wall's New tab (see NEW_TAB_DAYS).
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // twenty-eighth batch (Motion Kit Everyday: Eclipse Toggle, Peel Delete, Bubble Tags, Lens Search, Neon Star Rating, the morphs)
+  "eclipse-toggle",
+  "peel-delete",
+  "bubble-tags",
+  "lens-search",
+  "neon-star-rating",
+  "upload-morph",
+  "voice-morph",
+  "face-scan-morph",
   // twenty-seventh batch (Motion Kit Everyday: Gold Star Rating)
   "gold-star-rating",
   // twenty-sixth batch (Motion Kit Everyday: Murmur, Loupe Lens)
@@ -643,6 +652,14 @@ export const MOTION_KIT_ORDER: string[] = [
 
 /** The homepage set, in order: newest interactions first, then the best of the rest. */
 export const HOME_PICKS: string[] = [
+  "eclipse-toggle",
+  "peel-delete",
+  "bubble-tags",
+  "lens-search",
+  "neon-star-rating",
+  "upload-morph",
+  "voice-morph",
+  "face-scan-morph",
   "frozen-card",
   "seat-crowd",
   "flap-clock",

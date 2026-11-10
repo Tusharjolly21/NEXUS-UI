@@ -1090,6 +1090,14 @@ const BLOCK_REGISTRY_PACKAGES = [
     components: ["blocks/motion-kit/waitlist-cta"],
   },
   {
+    name: "lanyard-signup",
+    title: "Lanyard Signup",
+    description: "A signup form whose member pass hangs beside it on a lanyard and fills itself in as you type. The pass swings on a simulated rope with every keystroke, each password rule you meet stamps it, a mistake shakes it, and you can grab and fling it. Create the account and it flips over to show the finished pass.",
+    premium: true,
+    dependencies: ["framer-motion"],
+    components: ["blocks/motion-kit/lanyard-signup"],
+  },
+  {
     name: "auth-morph",
     title: "Auth Morph",
     description: "One auth card for sign in and sign up whose fields grow and fold as the mode changes, with a magic link option that ends on a check-your-inbox screen and resend timer.",

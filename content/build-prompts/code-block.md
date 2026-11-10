@@ -51,6 +51,8 @@ export type CopyProps = {
   color?: string;
   /** Button colour once copied (custom theme). */
   accentColor?: string;
+  /** Called after the code is on the clipboard. */
+  onCopied?: () => void;
 };
 
 export type CodeAreaProps = {
@@ -685,6 +687,7 @@ export function CodeBlock({
       setCopied(true);
       if (timer.current !== null) window.clearTimeout(timer.current);
       timer.current = window.setTimeout(() => setCopied(false), Math.max(300, header.copy?.copiedDurationMs ?? 1400));
+      header.copy?.onCopied?.();
     } catch {
       /* clipboard can be blocked; nothing to do */
     }

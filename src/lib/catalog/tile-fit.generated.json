@@ -939,6 +939,26 @@
   "bg": null,
   "coverage": 0.06
  },
+ "bubble-tags": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   310,
+   194,
+   342,
+   352
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.99
+ },
  "capsule-toggles": {
   "canvas": [
    960,
@@ -1679,6 +1699,26 @@
   "bg": null,
   "coverage": 0.17
  },
+ "eclipse-toggle": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   308,
+   254,
+   344,
+   234
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "editorial-blog-rail": {
   "canvas": [
    960,
@@ -1818,6 +1858,26 @@
   ],
   "bg": "#ffffff",
   "coverage": 0.27
+ },
+ "face-scan-morph": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   330,
+   206,
+   302,
+   328
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "falloff-accordion": {
   "canvas": [
@@ -2818,6 +2878,26 @@
   ],
   "bg": null,
   "coverage": 0.3
+ },
+ "lens-search": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   310,
+   138,
+   342,
+   464
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "lenticular-pass": {
   "canvas": [
@@ -4599,6 +4679,26 @@
   "bg": null,
   "coverage": 0.02
  },
+ "neon-star-rating": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   310,
+   238,
+   342,
+   264
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "notification-stack": {
   "canvas": [
    960,
@@ -4838,6 +4938,26 @@
   ],
   "bg": "#ffffff",
   "coverage": 0.14
+ },
+ "peel-delete": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   310,
+   200,
+   342,
+   342
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "phone-input": {
   "canvas": [
@@ -6799,6 +6919,26 @@
   "bg": "#f6fcfc",
   "coverage": 0.08
  },
+ "upload-morph": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   310,
+   240,
+   302,
+   260
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "usage-stack": {
   "canvas": [
    1200,
@@ -6878,6 +7018,26 @@
   ],
   "bg": "#ffffff",
   "coverage": 0.25
+ },
+ "voice-morph": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   290,
+   226,
+   382,
+   288
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "voice-orb": {
   "canvas": [
