@@ -1,15 +1,28 @@
 import { NextResponse } from "next/server";
 import { createRouteClient } from "@/lib/supabase/route-client";
+import { PUBLIC_SITE } from "@/lib/mcp/config";
 
 /**
  * Allow / Deny on /oauth/consent. Supabase records the decision for the signed-in user and returns the app's
  * redirect URL (with an authorization code, or an access_denied error), which we send the browser to.
  */
+/**
+ * Only our own consent page may post here, so a form on another site can't approve on someone's behalf.
+ * Browsers mark every request with Sec-Fetch-Site; older ones send only Origin, which is checked against the site's
+ * public address and the address the request came in on.
+ */
+function fromOurSite(request: Request, origin: string) {
+  const site = request.headers.get("sec-fetch-site");
+  if (site) return site === "same-origin";
+  const from = request.headers.get("origin");
+  if (!from) return true;
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  return from === origin || from === PUBLIC_SITE || (!!host && from === `https://${host}`);
+}
+
 export async function POST(request: Request) {
   const { origin } = new URL(request.url);
-  // Only our own consent page may post here: a form on another site can't approve on someone's behalf.
-  const from = request.headers.get("origin");
-  if (from && from !== origin) return new NextResponse("Forbidden", { status: 403 });
+  if (!fromOurSite(request, origin)) return new NextResponse("Forbidden", { status: 403 });
 
   const form = await request.formData();
   const id = form.get("authorization_id");

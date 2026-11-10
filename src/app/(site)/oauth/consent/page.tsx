@@ -16,7 +16,9 @@ import { AuthShell } from "../../login/auth-shell";
 export const metadata: Metadata = {
   title: "Connect an app · Nexus UI",
   robots: { index: false, follow: false },
-  referrer: "no-referrer",
+  // Same-origin only: the browser still tells our Allow handler where the form came from, and no other site
+  // ever sees the authorization id.
+  referrer: "same-origin",
 };
 
 const first = (value: string | string[] | undefined) => (typeof value === "string" ? value : null);
