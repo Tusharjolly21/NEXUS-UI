@@ -524,7 +524,7 @@ function ComponentsBrowserInner() {
                     {freeCount} free · {premiumCount} pro
                   </span>
                   <Link
-                    href="/pricing"
+                    href="/pricing" data-plans-source="components_sidebar"
                     className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/8 px-2.5 py-1 text-[11px] font-semibold text-primary transition hover:bg-primary/14"
                   >
                     <Crown className="size-3" /> Upgrade

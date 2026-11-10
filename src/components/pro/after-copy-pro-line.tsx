@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
-import { useProAccess } from "@/components/pro/pro-access";
+import { COPIED_EVENT, useProAccess } from "@/components/pro/pro-access";
 import { trackEvent } from "@/lib/track";
 
 const DISMISS_KEY = "nx_after_copy_off";
@@ -24,9 +24,18 @@ function wasDismissed(): boolean {
  * `copied` flips to true in the parent once a copy succeeded. The line stays after that (it does not
  * flash away with the "Copied" label) until it is dismissed.
  */
-export function AfterCopyProLine({ slug, copied }: { slug: string; copied: boolean }) {
+export function AfterCopyProLine({ slug, copied: copiedProp, listen = false }: { slug: string; copied?: boolean; listen?: boolean }) {
   const { isPro, proCount } = useProAccess();
   const [closed, setClosed] = React.useState(false);
+  // `listen` shows the line after any free copy on the page (code, prompt) that calls announceCopy().
+  const [heard, setHeard] = React.useState(false);
+  React.useEffect(() => {
+    if (!listen) return;
+    const on = () => setHeard(true);
+    window.addEventListener(COPIED_EVENT, on);
+    return () => window.removeEventListener(COPIED_EVENT, on);
+  }, [listen]);
+  const copied = !!copiedProp || heard;
   const counted = React.useRef(false);
 
   // `copied` only turns true after a click, so reading the session here never differs between server and browser.

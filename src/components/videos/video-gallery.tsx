@@ -111,7 +111,7 @@ function ProTile() {
       <IfPro
         pro={null}
         otherwise={
-          <Link href="/pricing" className="relative w-fit rounded-full bg-white px-5 py-2.5 text-[14px] font-semibold text-[#1d1d1f] transition-opacity hover:opacity-90">
+          <Link href="/pricing" data-plans-source="videos" className="relative w-fit rounded-full bg-white px-5 py-2.5 text-[14px] font-semibold text-[#1d1d1f] transition-opacity hover:opacity-90">
             Compare plans
           </Link>
         }

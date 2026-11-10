@@ -239,7 +239,7 @@ function AccessPanel({
           <p className="mt-5 border-t border-border/60 pt-4 text-[14px] leading-relaxed text-muted-foreground">
             Same access on both plans. Pro renews yearly, lifetime is paid once.
             {pricing.region === "india" ? " India prices are paid with UPI." : ""}{" "}
-            <Link href="/pricing" className="font-semibold text-foreground underline underline-offset-2">
+            <Link href="/pricing" data-plans-source="template_page" className="font-semibold text-foreground underline underline-offset-2">
               Compare plans
             </Link>
           </p>

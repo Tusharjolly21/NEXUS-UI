@@ -55,7 +55,7 @@ export function InstallCard({
     {upsell && didCopy && !isPro ? (
       <p className="mt-2 px-1 text-[13px] text-muted-foreground">
         That one is free.{proCount ? ` Pro adds ${proCount} more components,` : " Pro adds more components,"} every template and every block.{" "}
-        <Link href="/pricing" className="font-medium text-action hover:underline hover:underline-offset-4">
+        <Link href="/pricing" data-plans-source="install_card" className="font-medium text-action hover:underline hover:underline-offset-4">
           See pricing
         </Link>
       </p>

@@ -12,6 +12,7 @@ import { trackEvent } from "@/lib/track";
 export function CheckoutButton({
   plan,
   returnPath,
+  source,
   variant = "ink",
   className,
   children,
@@ -19,6 +20,8 @@ export function CheckoutButton({
   plan: "annual" | "lifetime";
   /** Same-site path to come back to after signing in. Defaults to /pricing. */
   returnPath?: string;
+  /** Where the click happened, for the buy_click event (defaults to the return path). */
+  source?: string;
   variant?: PillVariant;
   className?: string;
   children: React.ReactNode;
@@ -27,7 +30,7 @@ export function CheckoutButton({
 
   async function checkout() {
     setLoading(true);
-    trackEvent("buy_click", { plan, from: returnPath ?? "/pricing" });
+    trackEvent("buy_click", { plan, from: source ?? returnPath ?? "/pricing" });
     try {
       const res = await fetch("/api/dodo/checkout", {
         method: "POST",
