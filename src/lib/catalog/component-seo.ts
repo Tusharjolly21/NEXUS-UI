@@ -4,6 +4,11 @@
  * Search Console shows people actually typing (pages ranking ~5–30 with no clicks yet).
  */
 export const COMPONENT_SEO: Record<string, { title: string; description: string }> = {
+  "gold-star-rating": {
+    title: "React Star Rating: 3D Gold Stars with Sound",
+    description:
+      "React star rating component: five 3D gold stars that spin in one by one with a metallic ting, lean to your pointer and work with arrow keys. Framer Motion.",
+  },
   "milestone-timeline": {
     title: "React Project Timeline Component",
     description:

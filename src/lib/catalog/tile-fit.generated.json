@@ -2379,6 +2379,26 @@
   "bg": "#ffffff",
   "coverage": 0.26
  },
+ "gold-star-rating": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   310,
+   256,
+   342,
+   228
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "goo-reorder": {
   "canvas": [
    960,
