@@ -19,7 +19,7 @@ const FITS: { title: string; body: string; icons: string[] }[] = [
 ];
 
 export const metadata: Metadata = createMetadata({
-  title: "Animated Icons for React",
+  title: `${FREE_ICON_COUNT} Free Animated Icons for React, With Sound`,
   description: `${ICONS.length} animated React icons, each with its own sound, ${FREE_ICON_COUNT} free: loaders, bells, hearts, arrows and more. Built with Framer Motion. Hover to play.`,
   alternates: { canonical: "/icons" },
 });

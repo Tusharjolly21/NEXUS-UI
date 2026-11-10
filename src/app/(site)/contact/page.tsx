@@ -8,8 +8,8 @@ import { createMetadata } from "@/lib/seo";
 import { ContactForm } from "./contact-form";
 
 export const metadata: Metadata = createMetadata({
-  title: "Contact",
-  description: "Questions about installing Nexus UI, your plan, a template, or a component you'd like to see? Write to us.",
+  title: "Contact the Nexus UI team",
+  description: "Questions about installing Nexus UI, your plan, a template or a component you'd like to see? Send us a message or email support@nexus-ui.com.",
   alternates: { canonical: "/contact" },
 });
 

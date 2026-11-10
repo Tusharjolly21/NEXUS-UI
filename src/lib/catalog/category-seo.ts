@@ -29,6 +29,22 @@ const CATEGORY_COPY: Partial<Record<ComponentCategorySlug, CategoryCopy>> = {
     intro:
       "Not every component has to be serious. These ones borrow powers from the comics: sling a web at a button and drag it around, open a portal in a card, freeze an input, send a file into a black hole, feed it to a shredder, catch a deleted file with a web, or smash a jack-o'-lantern for a coupon. Each one works with mouse and touch, and respects prefers-reduced-motion.",
   },
+  dashboards: {
+    title: "React Dashboard Components: Charts, KPIs and Gauges",
+    description:
+      "Animated React dashboard components: KPI cards, line, bar and donut charts, gauges, a 3D activity calendar and live maps. Tailwind CSS and Framer Motion.",
+    heading: "Dashboard Components",
+    intro:
+      "The pieces of a React dashboard, with motion that explains the numbers: KPI cards whose figures roll, a stock line, traffic bars, a spend donut, a liquid gauge, a pulse monitor, a contribution calendar that stands up in 3D, a sortable table and a world map. Each one installs with the shadcn CLI.",
+  },
+  loaders: {
+    title: "React Loading Animations and Progress Bars",
+    description:
+      "React loading animations: dot-matrix loaders, skeleton loaders that morph into content, progress bars, pull to refresh and step loaders, with Framer Motion.",
+    heading: "Loaders and Progress",
+    intro:
+      "Loading states that tell people something is happening: an orbital loader with status messages, skeletons cut to the shape of the content they become, a progress bar that squeezes when paused, a sand timer, pull to refresh and a line of dominoes for a deploy pipeline.",
+  },
   "inputs-controls": {
     title: "Interactive React Input & Control Components",
     description:

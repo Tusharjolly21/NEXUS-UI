@@ -14,8 +14,8 @@ import TemplatesGallery from "./templates-client";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = createMetadata({
-  title: "Next.js Landing Page Templates — SaaS, AI, Agency & Portfolio",
-  description: `${templates.length} animated Next.js landing page templates for SaaS, AI startups, agencies, portfolios and stores. Open each one live, then take the full source. Built with Tailwind CSS and Framer Motion.`,
+  title: "Next.js Landing Page Templates for SaaS",
+  description: `${templates.length} animated Next.js landing page templates for SaaS, AI startups, agencies, portfolios and stores. Open each one live, then take the full source.`,
   alternates: { canonical: "/templates" },
 });
 
@@ -40,7 +40,7 @@ export default async function TemplatesPage() {
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
         <div className="relative mx-auto max-w-[1280px]">
           <h1 className="pg-display max-w-[900px] text-[clamp(48px,8vw,80px)] text-foreground">
-            Whole pages, ready to make <RainbowWord>yours</RainbowWord>
+            Next.js templates, ready to make <RainbowWord>yours</RainbowWord>
           </h1>
           <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">
             {templates.length} Next.js landing pages with the motion already done. Open any of them live, then take the

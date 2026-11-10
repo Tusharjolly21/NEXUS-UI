@@ -160,6 +160,13 @@ const nextConfig = {
       { source: "/icons/sound-kit", destination: "/icons/sounds", permanent: true },
       { source: "/icons/sound-engine", destination: "/icons/sounds", permanent: true },
       { source: "/icons/sounds/:icon", destination: "/icons/sounds", permanent: true },
+      // People type the section in the singular (a buyer on 1 Nov tried /template/kiln and got a 404).
+      // Only the one-level paths: /template on its own is a real page (Halcyon) and stays as it is.
+      { source: "/template/:slug", destination: "/templates/:slug", permanent: true },
+      { source: "/component/:slug", destination: "/components/:slug", permanent: true },
+      { source: "/block/:slug", destination: "/blocks/:slug", permanent: true },
+      { source: "/icon/:slug", destination: "/icons/:slug", permanent: true },
+      { source: "/video/:slug", destination: "/videos/:slug", permanent: true },
       // Components that are really page sections now live on the Blocks pages (moved-sections.ts).
       { source: "/components/cinematic-logo-cloud", destination: "/blocks/block-logo-clouds#cinematic-logo-cloud", permanent: true },
       { source: "/components/step-flow", destination: "/blocks/block-features#step-flow", permanent: true },

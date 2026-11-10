@@ -72,6 +72,14 @@ const TINTS: TileTint[] = ["violet", "sky", "peach", "mint", "butter", "pink"];
 const NEW_TAB_DAYS = 7;
 const day = (iso?: string) => (iso ? Date.parse(iso) || 0 : 0);
 
+/** "4 sections, 1 free" for the list of blocks: a block's sections can be free or Pro one by one. */
+function sectionsLabel(slug: string, blockPremium: boolean) {
+  const vs = blockVariants.filter((v) => v.block === slug);
+  const free = vs.filter((v) => !(v.premium ?? blockPremium)).length;
+  const n = `${vs.length} section${vs.length === 1 ? "" : "s"}`;
+  return free === vs.length ? `${n}, free` : free ? `${n}, ${free} free` : `${n}, Pro`;
+}
+
 export default function BlocksPage() {
   const bySlug = new Map(blocks.map((b) => [b.slug, b]));
   const rank = (slug: string) => {
@@ -157,16 +165,25 @@ export default function BlocksPage() {
         </div>
       </Band>
 
-      {/* every block as a plain link, for crawlers and screen-reader navigation */}
-      <nav aria-label="All blocks" className="sr-only">
-        <ul>
-          {blocks.map((b) => (
-            <li key={b.slug}>
-              <Link href={`/blocks/${b.slug}`}>{b.name}</Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {/* every block with what it is: what crawlers and no-JS visitors read for this page */}
+      <section aria-labelledby="all-blocks" className="px-4 py-20">
+        <div className="mx-auto max-w-[1152px]">
+          <h2 id="all-blocks" className="pg-display text-[clamp(30px,4.2vw,44px)] leading-[1.05] text-foreground">
+            Every block, in one list
+          </h2>
+          <ul className="mt-8 grid gap-x-10 gap-y-6 md:grid-cols-2">
+            {blocks.map((b) => (
+              <li key={b.slug}>
+                <Link href={`/blocks/${b.slug}`} className="text-[17px] font-semibold text-foreground hover:underline">
+                  {b.name}
+                </Link>
+                <span className="ml-2 text-[13px] font-medium text-muted-foreground">{sectionsLabel(b.slug, b.premium)}</span>
+                <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{b.description}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
     </>
   );
 }

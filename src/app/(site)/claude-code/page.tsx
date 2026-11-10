@@ -5,9 +5,9 @@ import { RainbowWord } from "@/components/site";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
-  title: "Nexus UI with Claude Code and AI coding tools",
+  title: "Nexus UI with Claude Code and Cursor",
   description:
-    "Install Nexus UI Tailwind components with one shadcn command from Claude Code, Cursor or any agent that runs a shell, and use build prompts to recreate a component from a written brief.",
+    "Install Nexus UI components with one shadcn command from Claude Code, Cursor or any agent, and use build prompts to recreate a component from a brief.",
   alternates: { canonical: "/claude-code" },
 });
 

@@ -1,0 +1,239 @@
+---
+title: "Framer Motion Examples: 10 Patterns with Code"
+description: "Ten Framer Motion examples for React with copy-ready code: hover springs, layout tabs, exit animations, drag, scroll progress, stagger and more, each with a live component."
+date: "2026-11-10"
+---
+
+The fastest way to learn Framer Motion is to look at small, working examples and change the numbers. This page collects ten patterns that show up in almost every animated interface, each with the shortest code that works and a link to a finished component that uses the same idea, so you can see it running before you copy it. Every example is React with TypeScript and Tailwind CSS, and works in a Next.js App Router project inside a `"use client"` file. For setup and performance advice, see the [Framer Motion and Next.js guide](/blog/framer-motion-nextjs-animations).
+
+All the examples import from `framer-motion`:
+
+```bash
+npm install framer-motion
+```
+
+## 1. Hover and tap with a spring
+
+The smallest useful animation: a button that grows a little on hover and presses in on tap. A spring makes it feel physical instead of timed.
+
+```tsx
+"use client";
+
+import { motion } from "framer-motion";
+
+export function SpringButton({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.04 }}
+      whileTap={{ scale: 0.96 }}
+      transition={{ type: "spring", stiffness: 400, damping: 22 }}
+      className="rounded-full bg-black px-5 py-2.5 text-white"
+    >
+      {children}
+    </motion.button>
+  );
+}
+```
+
+Lower `damping` gives more bounce; higher `stiffness` makes it snappier. The [Glow Button](/components/glow-button) adds a magnetic pull toward the pointer on top of this.
+
+## 2. Fade and rise in on first view
+
+`whileInView` starts an animation when the element scrolls into the viewport. `viewport={{ once: true }}` keeps it from replaying every time.
+
+```tsx
+<motion.div
+  initial={{ opacity: 0, y: 24 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, margin: "-80px" }}
+  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+>
+  Content
+</motion.div>
+```
+
+Keep entrances short. Text that waits half a second to appear is text people cannot read yet.
+
+## 3. A tab indicator that slides with layoutId
+
+Give the active indicator the same `layoutId` in every tab, render it only in the active one, and Framer Motion animates it from the old tab to the new one.
+
+```tsx
+"use client";
+
+import { motion } from "framer-motion";
+import { useState } from "react";
+
+const TABS = ["Overview", "Activity", "Settings"];
+
+export function Tabs() {
+  const [active, setActive] = useState(TABS[0]);
+  return (
+    <div className="flex gap-1 rounded-full bg-neutral-100 p-1">
+      {TABS.map((tab) => (
+        <button key={tab} onClick={() => setActive(tab)} className="relative rounded-full px-4 py-1.5 text-sm">
+          {active === tab && (
+            <motion.span
+              layoutId="tab-pill"
+              className="absolute inset-0 rounded-full bg-white shadow"
+              transition={{ type: "spring", stiffness: 420, damping: 34 }}
+            />
+          )}
+          <span className="relative">{tab}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+```
+
+See it finished in [Animated Tabs](/components/animated-tabs). The same trick opens a card into a full view in [Shared Element Cards](/components/shared-element-cards).
+
+## 4. Exit animations with AnimatePresence
+
+React removes an element immediately, so there is nothing to animate out. Wrap it in `AnimatePresence` and give it an `exit`, and Framer Motion keeps it on screen until the exit finishes.
+
+```tsx
+<AnimatePresence>
+  {open && (
+    <motion.div
+      key="toast"
+      initial={{ opacity: 0, y: 16, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+    >
+      Saved
+    </motion.div>
+  )}
+</AnimatePresence>
+```
+
+Each child needs a stable `key`. [Toast Stack](/components/toast-stack) uses this for notifications that drop in, stack and skid away.
+
+## 5. Drag with constraints and snap back
+
+`drag` makes any element draggable. `dragConstraints` keeps it inside a box, and `dragSnapToOrigin` springs it home when you let go.
+
+```tsx
+<motion.div
+  drag
+  dragConstraints={{ left: -120, right: 120, top: -60, bottom: 60 }}
+  dragElastic={0.2}
+  dragSnapToOrigin
+  className="size-24 rounded-2xl bg-indigo-500"
+/>
+```
+
+For a card you fling to the back of a deck, see [Draggable Card Stack](/components/draggable-card-stack).
+
+## 6. A scroll progress bar
+
+`useScroll` gives a 0 to 1 value for how far the page has scrolled. Put it on `scaleX` and the bar grows without triggering layout.
+
+```tsx
+"use client";
+
+import { motion, useScroll, useSpring } from "framer-motion";
+
+export function ReadingProgress() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 200, damping: 30 });
+  return <motion.div style={{ scaleX }} className="fixed inset-x-0 top-0 h-1 origin-left bg-indigo-500" />;
+}
+```
+
+[Scroll Progress Bar](/components/scroll-progress-bar) adds markers and seeking on top of the same hook.
+
+## 7. Scroll-linked values with useTransform
+
+`useTransform` maps one motion value onto another. Here a heading fades and lifts as its section scrolls through the viewport.
+
+```tsx
+const ref = useRef<HTMLElement>(null);
+const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
+const y = useTransform(scrollYProgress, [0, 1], [40, -40]);
+
+return (
+  <section ref={ref}>
+    <motion.h2 style={{ opacity, y }}>Scroll me</motion.h2>
+  </section>
+);
+```
+
+[Scroll Reveal Text](/components/scroll-reveal-text) uses scroll progress to light up a paragraph word by word.
+
+## 8. Staggered lists with variants
+
+Variants name your animation states. A parent with `staggerChildren` starts each child a little after the one before it.
+
+```tsx
+const list = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
+const item = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } };
+
+<motion.ul variants={list} initial="hidden" animate="show">
+  {items.map((it) => (
+    <motion.li key={it.id} variants={item}>
+      {it.label}
+    </motion.li>
+  ))}
+</motion.ul>;
+```
+
+Cap the stagger for long lists: 0.06 seconds is fine for eight items and slow for eighty. [Text Generate Effect](/components/text-generate-effect) staggers words the same way.
+
+## 9. A 3D tilt that follows the pointer
+
+Motion values update without re-rendering React, which is what you want for something that changes on every pointer move.
+
+```tsx
+"use client";
+
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+
+export function TiltCard({ children }: { children: React.ReactNode }) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [8, -8]), { stiffness: 200, damping: 20 });
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-8, 8]), { stiffness: 200, damping: 20 });
+  return (
+    <motion.div
+      style={{ rotateX, rotateY, transformPerspective: 800 }}
+      onPointerMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        x.set((e.clientX - r.left) / r.width - 0.5);
+        y.set((e.clientY - r.top) / r.height - 0.5);
+      }}
+      onPointerLeave={() => {
+        x.set(0);
+        y.set(0);
+      }}
+      className="rounded-3xl bg-white p-8 shadow-xl"
+    >
+      {children}
+    </motion.div>
+  );
+}
+```
+
+[Vector Tilt Scene](/components/vector-tilt-scene) builds a layered scene on this, with depth and glare.
+
+## 10. Respect reduced motion
+
+`useReducedMotion` tells you when the visitor has asked for less movement. Keep the change of state, drop the travel.
+
+```tsx
+const reduce = useReducedMotion();
+
+<motion.div
+  initial={{ opacity: 0, y: reduce ? 0 : 24 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 26 }}
+/>;
+```
+
+Or wrap your app in `<MotionConfig reducedMotion="user">` and Framer Motion turns transform and layout animations off for those visitors by itself.
+
+## Where to go from here
+
+Each of these patterns is a building block. Put a spring on a layout change and you get tabs; add drag and exit animations and you get a stack of cards you can throw away. If you would rather start from finished pieces, the [Nexus UI components](/components) are all built with Framer Motion and install into your project with one shadcn command, and the [Gold Star Rating](/components/gold-star-rating) shows several of these ideas together: springs, staggered timing and pointer-driven motion values.

@@ -49,6 +49,7 @@ const EXTRA_INTERACTIONS: Record<string, Interaction[]> = {
 
 /** Previews that already play their own demo (they render a DemoCursor themselves). */
 const SELF_DEMO = new Set([
+  "gold-star-rating",
   "loupe-lens",
   "murmur",
   "pixel-atlas",
@@ -405,6 +406,8 @@ const TINT_OF: Record<string, TileTint> = {
  * are all gathered, newest first, under the wall's New tab (see NEW_TAB_DAYS).
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // twenty-seventh batch (Motion Kit Everyday: Gold Star Rating)
+  "gold-star-rating",
   // twenty-sixth batch (Motion Kit Everyday: Murmur, Loupe Lens)
   "murmur",
   "loupe-lens",
@@ -661,6 +664,7 @@ export const HOME_PICKS: string[] = [
   "highlight-popover",
   "pixel-atlas",
   "glass-recorder",
+  "gold-star-rating",
   "murmur",
   "loupe-lens",
   "liquid-smoke",

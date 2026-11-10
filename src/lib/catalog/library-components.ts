@@ -15034,6 +15034,71 @@ export default function Page() {
 }`,
     tailwindSource: tw,
   },
+  {
+    slug: "gold-star-rating",
+    name: "Gold Star Rating",
+    registryCliName: "gold-star-rating",
+    description:
+      "A five-star rating made of real 3D gold stars. Each star is a faceted solid with twenty flat faces, turned, sorted and shaded every frame like polished metal, with a softbox glint that runs across the faces as they move; empty stars are brushed silver. Choose a score and the stars up to it spin round one after another and come out gold, each with a metallic ting a step higher, a little pop and a sparkle, while the rest spin back to silver. The stars lean towards your pointer, lift up to the one you point at as a preview, and turn slightly while they wait so the light keeps moving. It is a radio group with arrow keys, Home and End, and the score in a polite live region.",
+    categorySlug: "inputs-controls",
+    tags: ["rating", "star rating", "stars", "review", "feedback", "score", "3d", "gold", "sound", "input", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 190,
+    createdAt: "2026-11-10",
+    animationKinds: ["hover", "press", "3d", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "value", type: "number", description: "The score, 0 to 5, when you control it. Leave it out to let the component keep its own." },
+      { name: "defaultValue", type: "number", defaultValue: "0", description: "The starting score when the component keeps its own." },
+      { name: "onChange", type: "(value: number) => void", description: "Called with the new score, 0 when a star is clicked again to clear it." },
+      { name: "question", type: "string", defaultValue: "\"Rate your order\"", description: "The line above the stars." },
+      { name: "labels", type: "[string, string, string, string, string]", defaultValue: "[\"Poor\", \"Fair\", \"Good\", \"Great\", \"Excellent\"]", description: "The word shown for each score, 1 to 5." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "The metallic tings, scored to the motion. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Scores four, then two, then five by itself until the visitor touches it. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewGoldStarRating,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { GoldStarRating } from "@/components/gold-star-rating";
+
+// Click a star to score, click it again to clear. Arrow keys move the score.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <GoldStarRating question="Rate your order" onChange={(score) => console.log(score)} />
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Controlled, with your own words",
+        code: `// src/app/page.tsx
+"use client";
+
+import { useState } from "react";
+import { GoldStarRating } from "@/components/gold-star-rating";
+
+export default function Page() {
+  const [score, setScore] = useState(0);
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <GoldStarRating
+        value={score}
+        onChange={setScore}
+        question="How was your stay?"
+        labels={["Awful", "Meh", "Fine", "Lovely", "Perfect"]}
+      />
+    </section>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */

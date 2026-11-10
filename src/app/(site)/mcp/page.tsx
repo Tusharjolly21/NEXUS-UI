@@ -13,9 +13,9 @@ import { MCP_URL } from "@/lib/mcp/config";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
-  title: "Nexus UI MCP server for Claude Code, Cursor and Codex",
+  title: "MCP Server for Claude Code and Cursor",
   description:
-    "Connect your coding agent to Nexus UI: it searches the library and adds animated React components to your project by name. Free components need no key; Pro source comes with your API key.",
+    "Connect Claude Code, Cursor or Codex to Nexus UI and your agent adds animated React components by name. Free ones need no key; Pro needs your API key.",
   alternates: { canonical: "/mcp" },
 });
 
