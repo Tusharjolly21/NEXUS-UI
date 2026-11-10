@@ -24,6 +24,7 @@ import { CodeBlock } from "@/components/code-block/code-block";
 import { GalleryTile, TileCell, TileGrid } from "@/components/gallery/gallery-tile";
 import { TINT_CLASSES, type GalleryItem, type TileTint } from "@/components/gallery/types";
 import { InstallCard } from "@/components/site/install-card";
+import { FullscreenStage } from "@/components/site/fullscreen-stage";
 import { SoundSwitch, TypingSoundSwitch } from "@/components/site/sound-switch";
 import { TYPING_NOTE } from "@/lib/catalog/component-sounds";
 import { ProBadge, ProLock, useCopyBuildPrompt, useProAccess } from "@/components/pro/pro-access";
@@ -385,9 +386,21 @@ function Stage({
   const [view, setView] = React.useState<"preview" | "code">("preview");
   const { requestUpgrade } = useProAccess();
   const [run, setRun] = React.useState(0);
+  const [full, setFull] = React.useState(false);
 
   return (
     <div className={cn("rounded-tile p-3", TINT_CLASSES[tint])}>
+      {locked ? null : (
+        <FullscreenStage open={full} onClose={() => setFull(false)} title={title}>
+          {(n) => (
+            <AutoplaySound allow>
+              <FitPreview key={n}>
+                <DynamicPreview exportName={exportName} compact={false} />
+              </FitPreview>
+            </AutoplaySound>
+          )}
+        </FullscreenStage>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-2 px-1 pb-3">
         <div role="tablist" aria-label={`${title} view`} className="flex gap-1 rounded-full bg-card/80 p-1">
           {(["preview", "code"] as const).map((v) => (
@@ -443,15 +456,15 @@ function Stage({
               </span>
             </button>
           ) : (
-            <Link
-              href={`/live-preview/${slug}${variant ? `?v=${variant.index}` : ""}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Open full-screen preview in a new tab"
+            <button
+              type="button"
+              onClick={() => setFull(true)}
+              aria-label={`Show ${title} full screen`}
+              aria-haspopup="dialog"
               className="pg-glass grid size-9 place-items-center rounded-full bg-card text-foreground"
             >
               <Expand className="size-4" aria-hidden />
-            </Link>
+            </button>
           )}
         </div>
       </div>
@@ -459,11 +472,16 @@ function Stage({
       {view === "preview" ? (
         <div className="flex min-h-[460px] overflow-hidden rounded-[20px] bg-card">
           <PreviewShield active={locked} className="flex w-full">
-            <HeardWhenVisible variantId={variant?.anchor}>
-              <FitPreview key={run}>
-                <DynamicPreview exportName={exportName} compact={false} />
-              </FitPreview>
-            </HeardWhenVisible>
+            {/* while it is full screen the page copy stands aside, so the two never play (or sound) at once */}
+            {full ? (
+              <div className="flex min-h-[460px] w-full items-center justify-center text-[14px] text-muted-foreground">Showing full screen</div>
+            ) : (
+              <HeardWhenVisible variantId={variant?.anchor}>
+                <FitPreview key={run}>
+                  <DynamicPreview exportName={exportName} compact={false} />
+                </FitPreview>
+              </HeardWhenVisible>
+            )}
           </PreviewShield>
         </div>
       ) : (

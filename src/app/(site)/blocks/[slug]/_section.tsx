@@ -3,11 +3,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Check, Code2, Lock, Maximize2, Minimize2, Monitor, RotateCcw, SlidersHorizontal, Sparkles } from "lucide-react";
+import { Check, Code2, Lock, Maximize2, Monitor, RotateCcw, SlidersHorizontal, Sparkles } from "lucide-react";
 import { CodeBlock } from "@/components/code-block/code-block";
 import { UsageSnippet } from "@/components/library/usage-snippet";
 import { ProBadge, useCopyBuildPrompt, useProAccess } from "@/components/pro/pro-access";
 import { InstallCard } from "@/components/site/install-card";
+import { FullscreenStage } from "@/components/site/fullscreen-stage";
 import { SectionCustomizer } from "./_customize";
 import { cn } from "@/lib/utils";
 
@@ -58,17 +59,6 @@ export function BlockSection({
   const [run, setRun] = React.useState(0);
   const [full, setFull] = React.useState(false);
 
-  React.useEffect(() => {
-    if (!full) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setFull(false);
-    window.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [full]);
 
   const tabs: { value: View; label: string; icon: React.ReactNode }[] = [
     { value: "preview", label: "Preview", icon: <Monitor className="size-3.5" aria-hidden /> },
@@ -90,6 +80,13 @@ export function BlockSection({
 
   return (
     <section id={id} aria-labelledby={`${uid}-title`} className="scroll-mt-28">
+      <FullscreenStage open={full} onClose={() => setFull(false)} title={title} layout="page">
+        {(n) => (
+          <div key={`${run}-${n}`} className="relative isolate bg-background [contain:paint]">
+            {children}
+          </div>
+        )}
+      </FullscreenStage>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="flex items-center gap-2 text-[13px] font-medium tabular-nums text-muted-foreground">
@@ -138,7 +135,10 @@ export function BlockSection({
           <IconButton label={`Replay ${title}`} onClick={() => setRun((r) => r + 1)}>
             <RotateCcw className="size-4" aria-hidden />
           </IconButton>
-          <IconButton label={`Show ${title} full screen`} onClick={() => setFull(true)}>
+          <IconButton label={`Show ${title} full screen`} onClick={() => {
+            setView("preview");
+            setFull(true);
+          }}>
             <Maximize2 className="size-4" aria-hidden />
           </IconButton>
         </div>
@@ -154,37 +154,10 @@ export function BlockSection({
               exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
               transition={{ duration: 0.22 }}
             >
-              {full ? (
-                <button
-                  type="button"
-                  aria-label="Close full screen"
-                  onClick={() => setFull(false)}
-                  className="fixed inset-0 z-[70] cursor-default bg-black/40 backdrop-blur-sm"
-                />
-              ) : null}
-              <div
-                className={cn(
-                  "overflow-hidden rounded-[28px] bg-card p-2 shadow-[0_0_0_0.5px_var(--border),0_24px_60px_-36px_rgba(0,0,0,0.35)]",
-                  full && "fixed inset-3 z-[71] flex flex-col sm:inset-6",
-                )}
-              >
-                {full ? (
-                  <div className="flex items-center justify-between px-3 pb-2 pt-1">
-                    <p className="text-[14px] font-semibold text-foreground">{title}</p>
-                    <IconButton label="Close full screen" onClick={() => setFull(false)}>
-                      <Minimize2 className="size-4" aria-hidden />
-                    </IconButton>
-                  </div>
-                ) : null}
-                <div
-                  key={run}
-                  className={cn(
-                    "relative isolate overflow-hidden rounded-[22px] bg-background [contain:paint]",
-                    "[&>*]:min-h-[560px] [&>*]:w-full",
-                    full && "min-h-0 flex-1 overflow-auto",
-                  )}
-                >
-                  {children}
+              <div className="overflow-hidden rounded-[28px] bg-card p-2 shadow-[0_0_0_0.5px_var(--border),0_24px_60px_-36px_rgba(0,0,0,0.35)]">
+                <div key={run} className="relative isolate overflow-hidden rounded-[22px] bg-background [contain:paint] [&>*]:min-h-[560px] [&>*]:w-full">
+                  {/* while it is full screen the page copy stands aside, so the two never play at once */}
+                  {full ? <div className="flex items-center justify-center text-[14px] text-muted-foreground">Showing full screen</div> : children}
                 </div>
               </div>
             </motion.div>
