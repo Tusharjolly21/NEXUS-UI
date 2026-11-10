@@ -14,7 +14,7 @@ export const siteConfig = {
   siteName: "Nexus UI Labs",
   alternateNames: ["Nexus Labs", "Nexus UI"],
   // Shown in the browser tab and Google title link — keep under 60 chars
-  tagline: "Animated React Components & Templates",
+  tagline: "Animated React Component Library & Templates",
   // Shown as Google snippet — keep under 155 chars
   description:
     "Free animated React components and Next.js templates built with Tailwind CSS and Framer Motion. Copy-paste, or install with the shadcn CLI.",
