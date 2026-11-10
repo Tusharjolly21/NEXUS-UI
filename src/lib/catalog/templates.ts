@@ -48,6 +48,52 @@ export type MarketplaceTemplate = {
 
 export const templates: MarketplaceTemplate[] = [
   {
+    slug: "kiosk",
+    title: "Kiosk — magazine and blog",
+    description:
+      "A whole small magazine site about design, technology and the details of a good life, in nine pages: a home page, an articles index, a page for every desk, a story page, about, contact, privacy, terms and a 404. The home page has a news ticker, a hero carousel with a progress bar, the desks with a spotlight that follows the pointer, the latest stories, an editors' picks rail you can drag or fling, most read with a cover that follows the cursor, an about teaser and a newsletter signup. Stories have reading progress, a table of contents that follows you, claps, share buttons and related reading. Search opens with Cmd/Ctrl+K, stories can be saved to a reading list, and a custom cursor names what each link does. Every cover is drawn in SVG, so there are no image files. All names, stories and figures are invented sample content.",
+    category: "Creator Websites",
+    tags: ["magazine", "blog", "news", "editorial", "publication", "articles", "newsletter", "multi-page", "search", "motion-kit"],
+    difficulty: "Advanced",
+    premium: true,
+    trendingScore: 314,
+    createdAt: "2026-11-10",
+    techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
+    pages: ["/", "/articles", "/category/[slug]", "/article/[slug]", "/about", "/contact", "/privacy", "/terms", "/404"],
+    sections: [
+      "News Ticker",
+      "Header with Categories Menu and Search",
+      "Hero Story Carousel",
+      "Desks with Pointer Spotlight",
+      "Latest Stories",
+      "Editors' Picks Rail",
+      "Most Read with Cursor Preview",
+      "About Teaser",
+      "Newsletter Signup",
+      "Footer",
+    ],
+    pageLabels: ["Home", "Articles", "Story", "About"],
+    previewImages: {
+      hero: "/templates/kiosk/hero.webp",
+      sections: [
+        "/templates/kiosk/section-1.webp",
+        "/templates/kiosk/section-2.webp",
+        "/templates/kiosk/section-3.webp",
+        "/templates/kiosk/section-4.webp",
+      ],
+    },
+    features: [
+      "Nine pages in one: home, articles, desks, stories, about, contact, privacy, terms and 404, kept in the URL hash so links and the back button work",
+      "Search over titles, desks and writers with Cmd/Ctrl+K or /, with matched letters highlighted and arrow-key picking",
+      "Articles index with search, desk filters, sort by latest or most read, and grid or list layouts that reflow",
+      "Story pages with reading progress, a table of contents that follows the section you are reading, claps and share buttons",
+      "Save stories to a reading list from any card, with a drawer and toasts",
+      "Editors' picks rail you can drag and fling, most read with a cover that follows the cursor, and a custom cursor that names each link",
+      "Every cover drawn in SVG from eight scenes and eight palettes, so the template ships without image files",
+      "Inter Tight and Newsreader self-hosted (both Open Font Licence), reduced-motion support, all content in one data file",
+    ],
+  },
+  {
     slug: "last-light",
     title: "Last Light — game landing page",
     description:
