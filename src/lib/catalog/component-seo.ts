@@ -160,7 +160,7 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
       "React website footer with link columns, newsletter signup, a status pill and a large wordmark that rises into view. Tailwind CSS and Framer Motion.",
   },
   "phone-input": {
-    title: "React Phone Input with Country Code Picker",
+    title: "React Phone Number Input with Country Picker",
     description:
       "React phone number input with a searchable country code dropdown, flag emoji and a simple length check. Built with Tailwind CSS and Framer Motion.",
   },
@@ -253,5 +253,125 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
     title: "Collapsible Sidebar for React Dashboards",
     description:
       "Collapsible React sidebar for SaaS apps: workspace switcher, search, nav with a sliding active highlight, projects, usage meter and user card. Framer Motion.",
+  },
+  "liquid-pagination": {
+    title: "React Pagination with a Liquid Page Indicator",
+    description:
+      "Animated React pagination: the current page is a drop of water that stretches to the page you pick and pulls itself round. Keyboard friendly. Framer Motion.",
+  },
+  "step-player": {
+    title: "React Stepper: Animated Onboarding Steps",
+    description:
+      "React stepper for onboarding: the current step stretches into a bar that fills as it plays, then eases to the next. Play, pause or jump to any step.",
+  },
+  "elastic-stepper": {
+    title: "React Number Stepper with Spring Animation",
+    description:
+      "React plus and minus number stepper: the value rolls up or down, a dot track stretches to it, and it rubber-bands past either limit. Framer Motion.",
+  },
+  "tick-slider": {
+    title: "React Range Slider with Animated Ticks",
+    description:
+      "React range slider drawn as ticks that fill up to the value, swell around the pointer and tick softly as you drag. Keyboard ready, Tailwind and Framer Motion.",
+  },
+  "travelling-tooltip": {
+    title: "React Tooltip That Glides Between Buttons",
+    description:
+      "Animated React tooltip for toolbars: one tooltip glides from button to button, resizing to each label and showing its shortcut. Tailwind CSS, Framer Motion.",
+  },
+  "standing-calendar": {
+    title: "React Calendar Heatmap in 3D",
+    description:
+      "React calendar heatmap that stands up in 3D: each day of the contribution grid rises as a column as tall as its count. Hover a day to read its value.",
+  },
+  "range-calendar": {
+    title: "React Date Range Picker with a Liquid Ribbon",
+    description:
+      "Animated React date range picker: drag and the selection stretches like a ribbon, snapping day by day, while the nights count rolls. Framer Motion.",
+  },
+  "seek-search": {
+    title: "React Search Bar That Expands, With Suggestions",
+    description:
+      "Animated React search bar: a round button opens into a field as one object, and suggestions drop in underneath and filter as you type. Escape closes it.",
+  },
+  "falloff-accordion": {
+    title: "React Accordion: Animated Image Accordion",
+    description:
+      "React image accordion: the photo strip you point at opens and its neighbours give way on a smooth falloff, with a caption that rises. Framer Motion.",
+  },
+  "goo-reorder": {
+    title: "React Drag and Drop List: Liquid Reorder",
+    description:
+      "React drag and drop list that reorders like ink: rows stay joined by a liquid neck that stretches and pinches off as one moves, with keyboard support.",
+  },
+  "glass-login-stack": {
+    title: "React Login Form: Glass Card with Passkey",
+    description:
+      "Free React login form: a frosted card over a slow aurora that tilts toward the pointer, with passkey sign-in first, then email and password. Tailwind CSS.",
+  },
+  "copy-button": {
+    title: "React Copy to Clipboard Button, Animated",
+    description:
+      "Free React copy to clipboard button: the icon morphs into a check under a ripple with a Copied tooltip, plus a command line copy. Framer Motion.",
+  },
+  "toast-stack": {
+    title: "React Toast Notifications That Stack",
+    description:
+      "Free React toast notifications: new toasts drop onto a stack and spring into shape, hover fans them out, and a fling sends one skidding away. Framer Motion.",
+  },
+  "squeeze-progress": {
+    title: "React Progress Bar with a Springy Pause",
+    description:
+      "Animated React progress bar with a big percentage: pause it and the tip bunches into a springy squiggle as the panel warms; resume and it carries on.",
+  },
+  "upload-dropzone": {
+    title: "React File Upload Dropzone, Animated",
+    description:
+      "React file upload dropzone: a stack of sheets fans out while a file hovers, the tray swallows the drop, and each row fills a progress ring. Framer Motion.",
+  },
+  "consent-dock": {
+    title: "React Cookie Consent Banner",
+    description:
+      "React cookie consent banner that does not nag: choose and it drains into a small corner button, customise and the switches fall in a domino run.",
+  },
+  "aspect-crop": {
+    title: "React Image Crop: Aspect Ratio Picker",
+    description:
+      "React image crop with an aspect ratio picker: the crop frame keeps its area at every ratio and springs to the new shape, with rule-of-thirds lines.",
+  },
+  "skeleton-morph": {
+    title: "React Skeleton Loader That Morphs into Content",
+    description:
+      "React skeleton loader cut to the exact shape of the content, with one light sweep, that dissolves into the real content in reading order. Framer Motion.",
+  },
+  "context-menu": {
+    title: "React Context Menu, Liquid Right-Click Menu",
+    description:
+      "Animated React context menu: right-click, long-press or Shift+F10 and a drop flows out into the menu, with a highlight that glides between rows.",
+  },
+  "vinyl-player": {
+    title: "React Audio Player Styled as a Turntable",
+    description:
+      "React audio player you play like a turntable: the tonearm swings on, grab the record to scrub or fling it to coast, and skipping slides a new record in.",
+  },
+  "mercury-switch": {
+    title: "React Toggle Switch with a Mercury Knob",
+    description:
+      "React toggle switch whose knob is a bead of chrome mercury, shaded per pixel, that reaches across when you flip it. For settings pages. Framer Motion.",
+  },
+  "notification-stack": {
+    title: "React Notification Stack with Swipe to Dismiss",
+    description:
+      "React notifications that pile into a stack, spread out on hover with timers paused, swipe away sideways, and turn a loading toast into a success.",
+  },
+  "todo-list": {
+    title: "React Todo List with Animated Check-Off",
+    description:
+      "Animated React todo list: ticking a task draws a check, strikes it through and drops it into a Completed drawer, with quick add and undo. Framer Motion.",
+  },
+  "otp-input": {
+    title: "React OTP Input with Verify Animation",
+    description:
+      "Free React OTP input: six boxes where digits spring in as you type, ripple while the code is checked, shake on a wrong code and fold into Verified.",
   },
 };
