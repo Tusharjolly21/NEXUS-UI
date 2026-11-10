@@ -1,22 +1,25 @@
 "use client";
 
-import { useRef, type PointerEvent } from "react";
+import { useRef, useSyncExternalStore, type PointerEvent } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { TwentyFirstLogo } from "@/components/home/twenty-first-logo";
+import { CHECKED_LABEL, PROFILE_URL, SNAPSHOT, estimateLifetime, thousands } from "@/lib/twenty-first-stats";
 
 /**
- * Real figures from the nexus-ui profile on 21st.dev. Update these when you re-check the page.
- * `digits` is what the odometer rolls to; `spoken` is what a screen reader hears.
+ * Figures from the nexus-ui profile on 21st.dev, kept in src/lib/twenty-first-stats.ts. The views and
+ * bookmarks roll to today's estimate once the page is open. `digits` is what the odometer rolls to; `spoken`
+ * is what a screen reader hears.
  */
-const PROFILE_URL = "https://21st.dev/@nexus-ui";
-const AS_OF = "November 2026";
-const STATS = [
-  { digits: "939", suffix: "K", label: "views", spoken: "939 thousand views" },
-  { digits: "3.8", suffix: "K", label: "bookmarks", spoken: "3.8 thousand bookmarks" },
-  { digits: "30", suffix: "", label: "components listed", spoken: "30 components listed" },
-] as const;
+function buildStats(views: string, bookmarks: string) {
+  return [
+    { digits: views, suffix: "K", label: "views", spoken: `about ${views} thousand views` },
+    { digits: bookmarks, suffix: "K", label: "bookmarks", spoken: `about ${bookmarks} thousand bookmarks` },
+    { digits: String(SNAPSHOT.components), suffix: "", label: "components listed", spoken: `${SNAPSHOT.components} components listed` },
+  ];
+}
 
+const subscribeNever = () => () => {};
 const EASE = [0.2, 0.8, 0.2, 1] as const;
 const BLUE = "oklch(0.485 0.291 264.121)";
 const GRID = "linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px)";
@@ -74,6 +77,10 @@ export function TwentyFirstMilestone() {
   const inView = useInView(ref, { once: true, margin: "0px 0px -12% 0px" });
   const still = !!useReducedMotion();
   const go = inView || still;
+  // Server and first paint show the last counted value; the browser then switches to today's estimate.
+  const views = useSyncExternalStore(subscribeNever, () => thousands(estimateLifetime().views), () => thousands(SNAPSHOT.views));
+  const bookmarks = useSyncExternalStore(subscribeNever, () => thousands(estimateLifetime().bookmarks), () => thousands(SNAPSHOT.bookmarks));
+  const STATS = buildStats(views, bookmarks);
 
   return (
     <section id="21st" aria-labelledby="milestone-title" className="scroll-mt-20 px-4 pb-24 pt-4 sm:pb-28">
@@ -175,7 +182,7 @@ export function TwentyFirstMilestone() {
               See our profile on 21st.dev
               <ArrowUpRight className="size-4" aria-hidden />
             </a>
-            <p className="text-[13px] text-white/55">Counts from our 21st.dev profile, {AS_OF}.</p>
+            <p className="text-[13px] text-white/55">Estimated from our 21st.dev profile, last checked {CHECKED_LABEL}. <a href="/impact" className="underline underline-offset-2 hover:text-white">See our impact</a>.</p>
           </div>
         </div>
       </div>
