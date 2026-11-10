@@ -170,6 +170,11 @@ const PlotlinePage = nextDynamic(
   { loading: TemplateFallback },
 );
 
+const HooplaPage = nextDynamic(
+  () => import("@/components/templates/hoopla-page").then((m) => ({ default: m.HooplaPage })),
+  { loading: TemplateFallback },
+);
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -225,6 +230,8 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><WharfPage /></ThemeReceiver>;
   } else if (tmpl.slug === "plotline") {
     return <ThemeReceiver><PlotlinePage /></ThemeReceiver>;
+  } else if (tmpl.slug === "hoopla") {
+    return <ThemeReceiver><HooplaPage /></ThemeReceiver>;
   } else if (tmpl.slug === "nexus-ai-launch") {
     return <ThemeReceiver><NexusAiLaunchTemplatePage /></ThemeReceiver>;
   } else if (tmpl.slug === "noir-studio") {

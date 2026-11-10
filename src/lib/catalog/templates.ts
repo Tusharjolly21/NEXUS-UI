@@ -48,6 +48,56 @@ export type MarketplaceTemplate = {
 
 export const templates: MarketplaceTemplate[] = [
   {
+    slug: "hoopla",
+    title: "Hoopla — playful creative studio website",
+    description:
+      "A loud, sticker-covered website for a small social content studio. A sticker intro flies up the screen, then the headline rises in with cartoon eyes that follow the pointer, a rainbow, a looping reel of post formats and stickers you can drag around. Below: an about paragraph that lights up word by word as you scroll with doodles popping in, the crew on a sky, case studies in cloud-shaped cards that tip upright, service cards that stack as you scroll, superpowers, a three-step process, a client marquee, why us on a scalloped sky band, results that count up, testimonials as chat bubbles, a call to action and a footer of wavy pills. A chunky custom cursor names what each link does. Hoopla and every client, person and figure are invented sample content.",
+    category: "Agency",
+    tags: ["agency", "studio", "creative", "social media", "playful", "colorful", "stickers", "portfolio", "landing page", "motion-kit"],
+    difficulty: "Advanced",
+    premium: true,
+    trendingScore: 308,
+    createdAt: "2026-11-10",
+    techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
+    pages: ["/"],
+    sections: [
+      "Sticker Intro",
+      "Navigation",
+      "Hero with Format Reel and Draggable Stickers",
+      "About",
+      "Crew",
+      "Work",
+      "Services",
+      "Superpowers",
+      "Process",
+      "Clients",
+      "Why Us",
+      "Results",
+      "Testimonials",
+      "Call to Action",
+      "Footer",
+    ],
+    pageLabels: ["About", "Work", "Services", "Why us"],
+    previewImages: {
+      hero: "/templates/hoopla/hero.webp",
+      sections: [
+        "/templates/hoopla/section-1.webp",
+        "/templates/hoopla/section-2.webp",
+        "/templates/hoopla/section-3.webp",
+        "/templates/hoopla/section-4.webp",
+      ],
+    },
+    features: [
+      "A sticker intro that flies up the screen before the hero arrives; the logo replays it",
+      "Hero headline that rises line by line, with eyes that follow the pointer, a reel of five post formats and stickers you can drag and fling",
+      "An about paragraph that lights up word by word as you scroll, with doodle stickers popping in for some words",
+      "Case studies in cloud-shaped cards that tip upright as they scroll in, and service cards that stack and settle",
+      "Process cards whose doodles wiggle on hover, a client marquee, results that count up and testimonials as chat bubbles",
+      "A chunky custom cursor that tilts and names what each link does, plus a floating Start a project button whose letters scramble",
+      "Every picture drawn in SVG, so there are no image files; Anton, Inter Tight and Caveat self-hosted (all Open Font Licence)",
+    ],
+  },
+  {
     slug: "plotline",
     title: "Plotline — product planning SaaS landing page",
     description:
