@@ -6,6 +6,7 @@ import { hasPremiumAccess } from "@/lib/entitlements";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { AuthShell } from "../../login/auth-shell";
+import { ConsentForm } from "./consent-form";
 
 /**
  * The consent screen for Supabase Auth's OAuth 2.1 server ("Authorization Path" in the Supabase dashboard).
@@ -95,20 +96,7 @@ export default async function ConsentPage({
         You can disconnect the app at any time from its connector settings.
       </p>
 
-      <form action="/api/oauth/consent" method="post" className="mt-6 grid gap-2">
-        <input type="hidden" name="authorization_id" value={data.authorization_id} />
-        <button type="submit" name="decision" value="approve" className={pillClassName("ink", "md", "w-full")}>
-          Allow
-        </button>
-        <button
-          type="submit"
-          name="decision"
-          value="deny"
-          className="grid h-11 place-items-center rounded-full text-[14.5px] text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-        >
-          Deny
-        </button>
-      </form>
+      <ConsentForm authorizationId={data.authorization_id} />
     </AuthShell>
   );
 }

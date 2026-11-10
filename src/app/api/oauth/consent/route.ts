@@ -44,6 +44,11 @@ export async function POST(request: Request) {
       : await supabase.auth.oauth.denyAuthorization(id, { skipBrowserRedirect: true });
   if (error || !data?.redirect_url) {
     console.error("[oauth/consent] decision failed:", error?.code ?? "", error?.message);
+    // A request that was already answered (a second tap, Back then Allow) may still have its way back to the app.
+    const { data: details } = await supabase.auth.oauth.getAuthorizationDetails(id);
+    if (details && !("authorization_id" in details) && details.redirect_url) {
+      return NextResponse.redirect(details.redirect_url, 303);
+    }
     return NextResponse.redirect(`${origin}/oauth/consent?authorization_id=${id}`, 303);
   }
   return NextResponse.redirect(data.redirect_url, 303);
