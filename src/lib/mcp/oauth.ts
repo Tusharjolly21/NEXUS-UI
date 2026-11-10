@@ -23,6 +23,9 @@ export function authIssuer(): string {
   return `${(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace(/\/$/, "")}/auth/v1`;
 }
 
+/** The scope Claude requests at sign-in (see protectedResourceMetadata). */
+export const MCP_SCOPE = "email";
+
 /** Where Claude reads our protected resource metadata (RFC 9728), path-suffixed for the /api/mcp endpoint. */
 export const RESOURCE_METADATA_URL = `${PUBLIC_SITE}/.well-known/oauth-protected-resource/api/mcp`;
 
@@ -32,6 +35,9 @@ export function protectedResourceMetadata() {
     resource: MCP_URL,
     authorization_servers: [authIssuer()],
     bearer_methods_supported: ["header"],
+    // The one scope Claude should ask for. Without it Claude asks for every scope Supabase lists, including
+    // openid, which needs asymmetric JWT signing keys; the token itself carries the user either way.
+    scopes_supported: [MCP_SCOPE],
     resource_name: "Nexus UI",
     resource_documentation: `${PUBLIC_SITE}/mcp`,
   };
@@ -41,7 +47,7 @@ export function protectedResourceMetadata() {
 export function signInRequired(description: string): Response {
   const challenge =
     `Bearer error="invalid_token", error_description="${description.replace(/"/g, "'")}", ` +
-    `resource_metadata="${RESOURCE_METADATA_URL}"`;
+    `resource_metadata="${RESOURCE_METADATA_URL}", scope="${MCP_SCOPE}"`;
   return Response.json(
     { error: "invalid_token", error_description: description },
     { status: 401, headers: { "WWW-Authenticate": challenge, "Cache-Control": "private, no-store" } },
