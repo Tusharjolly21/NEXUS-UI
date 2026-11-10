@@ -1,0 +1,37 @@
+import { NextResponse } from "next/server";
+import { createRouteClient } from "@/lib/supabase/route-client";
+
+/**
+ * Allow / Deny on /oauth/consent. Supabase records the decision for the signed-in user and returns the app's
+ * redirect URL (with an authorization code, or an access_denied error), which we send the browser to.
+ */
+export async function POST(request: Request) {
+  const { origin } = new URL(request.url);
+  // Only our own consent page may post here: a form on another site can't approve on someone's behalf.
+  const from = request.headers.get("origin");
+  if (from && from !== origin) return new NextResponse("Forbidden", { status: 403 });
+
+  const form = await request.formData();
+  const id = form.get("authorization_id");
+  const decision = form.get("decision");
+  if (typeof id !== "string" || !/^[\w-]{8,128}$/.test(id) || (decision !== "approve" && decision !== "deny")) {
+    return NextResponse.redirect(`${origin}/oauth/consent`, 303);
+  }
+
+  const supabase = await createRouteClient();
+  if (!supabase) return NextResponse.redirect(`${origin}/oauth/consent`, 303);
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) {
+    return NextResponse.redirect(`${origin}/login?next=${encodeURIComponent(`/oauth/consent?authorization_id=${id}`)}`, 303);
+  }
+
+  const { data, error } =
+    decision === "approve"
+      ? await supabase.auth.oauth.approveAuthorization(id, { skipBrowserRedirect: true })
+      : await supabase.auth.oauth.denyAuthorization(id, { skipBrowserRedirect: true });
+  if (error || !data?.redirect_url) {
+    console.error("[oauth/consent] decision failed:", error?.code ?? "", error?.message);
+    return NextResponse.redirect(`${origin}/oauth/consent?authorization_id=${id}`, 303);
+  }
+  return NextResponse.redirect(data.redirect_url, 303);
+}

@@ -11,5 +11,5 @@ export const legalConfig = {
   // Shown on the site (footer, contact page, legal pages) and used as the sender of the contact-form
   // notification. The domain must be verified in Resend for that email to send.
   contactEmail: "support@nexus-ui.com",
-  lastUpdated: "October 19, 2026",
+  lastUpdated: "November 10, 2026",
 } as const;

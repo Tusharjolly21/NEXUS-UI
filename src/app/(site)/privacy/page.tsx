@@ -189,6 +189,15 @@ export default function PrivacyPage() {
           ]}
         />
         <p>
+          <Strong>AI apps you connect.</Strong> If you add the Nexus UI MCP server to an AI app such as Claude,
+          Cursor or Claude Code, that app sends us the search words and the names of the components, blocks and
+          templates it asks for, so we can answer. We use them only to answer that request and don&apos;t store
+          them, and we never receive your conversation. If you sign in to Nexus UI from the app, the app keeps
+          an access token for your account and sends it with requests for Pro source; we check it with Supabase
+          and use it for nothing else. You can disconnect the app at any time in its connector settings. How
+          the app itself handles your data is covered by its own privacy policy.
+        </p>
+        <p>
           We may also disclose information if required by law, to protect our rights or the safety of others,
           or as part of a merger, acquisition, or sale of the business, in which case this policy will continue
           to apply to your data. We do not sell or rent your personal data.
@@ -207,6 +216,7 @@ export default function PrivacyPage() {
         <LegalList
           items={[
             "Account data, bookmarks, and access tokens: for as long as your account is open. Delete your account and we remove them within 30 days.",
+            "Apps you have signed in to Nexus UI from (such as Claude): until you disconnect the app or delete your account.",
             "Order and subscription records: as long as needed to provide access and for the period tax and accounting law requires, even after account deletion.",
             "Contact messages: up to 24 months after our last exchange, unless they form part of a support or legal record we need to keep.",
             "Analytics data: according to the retention settings of Google Analytics and Vercel.",
