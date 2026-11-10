@@ -351,12 +351,13 @@ type Bird = { id: number; y: number; d: number; delay: number; s: number };
 type ViewTransitionDoc = Document & { startViewTransition?: (update: () => void) => { ready: Promise<void>; finished: Promise<void> } };
 
 /**
- * Run `apply` (which should change the page's theme straight away) inside a change of light that starts at `origin`,
- * where the knob is going, in viewport pixels, and only covers `from` pixels to begin with, so the switch itself stays
- * live. To dark, the old page dims as dusk spreads, its edge glowing like a sunset, and stars come out behind it, then
- * fade. To light, sunlight floods out with a golden rim and slow rays.
+ * Run `apply` (which should change the page's theme straight away) inside a change of light that comes out of the sun
+ * or the moon: it starts at `origin`, the knob's centre in viewport pixels, as a circle of `from` pixels (the knob
+ * itself), opens quickly to `cover` pixels (enough to take in the switch, so it never looks frozen), then spreads on
+ * across the page from the same point. To dark, the old page dims as dusk spreads, its edge glowing like a sunset, and
+ * stars come out behind it, then fade. To light, sunlight floods out with a golden rim and slow rays.
  */
-export function eclipsePageTransition(next: Theme, origin: { x: number; y: number }, from: number, apply: () => void) {
+export function eclipsePageTransition(next: Theme, origin: { x: number; y: number }, from: number, apply: () => void, cover: number = from) {
   const doc = document as ViewTransitionDoc;
   if (!doc.startViewTransition || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     apply();
@@ -365,8 +366,15 @@ export function eclipsePageTransition(next: Theme, origin: { x: number; y: numbe
   const { x, y } = origin;
   const far = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y)) + 40;
   const dark = next === "dark";
-  const dur = dark ? 1700 : 1350;
+  const dur = dark ? 1800 : 1450;
   const ease = dark ? "cubic-bezier(.45,0,.2,1)" : "cubic-bezier(.3,0,.15,1)";
+  // the circle's radius over time: out of the knob, quickly across the switch, then slowly over the page
+  const open = Math.min(Math.max(cover, from), far);
+  const radii = [
+    { r: from, offset: 0, easing: "cubic-bezier(.2,.6,.3,1)" },
+    { r: open, offset: 0.2, easing: ease },
+    { r: far, offset: 1, easing: "linear" },
+  ];
 
   // our own keyframes replace the default cross-fade, for this transition only
   const css = document.createElement("style");
@@ -388,7 +396,7 @@ export function eclipsePageTransition(next: Theme, origin: { x: number; y: numbe
     for (let i = 0; i < 70; i++) {
       const sx = Math.random() * window.innerWidth, sy = Math.random() * window.innerHeight;
       // none over the switch, which has its own sky
-      if (Math.hypot(sx - x, sy - y) < from) continue;
+      if (Math.hypot(sx - x, sy - y) < open) continue;
       const st = document.createElement("div");
       const size = 1 + Math.random() * 2.2;
       st.style.cssText = `position:absolute;left:${sx}px;top:${sy}px;width:${size}px;height:${size}px;border-radius:50%;background:#fff;box-shadow:0 0 ${size * 3}px rgba(255,255,255,.8);opacity:0`;
@@ -397,8 +405,8 @@ export function eclipsePageTransition(next: Theme, origin: { x: number; y: numbe
     }
   } else {
     const rays = document.createElement("div");
-    // the rays start outside the switch, so they never cross the moon that is still in front of the sun
-    const inner = Math.round(from), mid = Math.round(Math.max(from + 60, far * 0.42));
+    // the rays start outside the switch and fan out from the sun
+    const inner = Math.round(open), mid = Math.round(Math.max(open + 60, far * 0.42));
     const rayMask = `radial-gradient(circle,transparent 0,transparent ${inner}px,#000 ${inner + 40}px,rgba(0,0,0,.6) ${mid}px,transparent ${Math.round(far)}px)`;
     rays.style.cssText = `position:absolute;left:${x - far}px;top:${y - far}px;width:${far * 2}px;height:${far * 2}px;opacity:0;` +
       "background:repeating-conic-gradient(rgba(255,206,120,.22) 0deg 3deg,transparent 3deg 13deg);" +
@@ -414,12 +422,19 @@ export function eclipsePageTransition(next: Theme, origin: { x: number; y: numbe
   void t.ready
     .then(() => {
       const root = document.documentElement;
-      root.animate({ clipPath: [`circle(${from}px at ${x}px ${y}px)`, `circle(${far}px at ${x}px ${y}px)`] }, { duration: dur, easing: ease, fill: "forwards", pseudoElement: "::view-transition-new(root)" });
+      root.animate(
+        radii.map((k) => ({ clipPath: `circle(${k.r}px at ${x}px ${y}px)`, offset: k.offset, easing: k.easing })),
+        { duration: dur, fill: "forwards", pseudoElement: "::view-transition-new(root)" },
+      );
       root.animate(
         dark ? { filter: ["brightness(1) saturate(1)", "brightness(.62) saturate(.55) hue-rotate(-8deg)"] } : { filter: ["brightness(1)", "brightness(1.35)"] },
         { duration: dur, easing: "ease-in", fill: "forwards", pseudoElement: "::view-transition-old(root)" },
       );
-      rim.animate({ width: [`${from * 2}px`, `${far * 2}px`], height: [`${from * 2}px`, `${far * 2}px`], opacity: [1, 1, 0] }, { duration: dur, easing: ease, fill: "forwards" });
+      // the glowing edge rides the circle out and fades as it leaves the screen
+      rim.animate(
+        radii.map((k, i) => ({ width: `${k.r * 2}px`, height: `${k.r * 2}px`, opacity: i === radii.length - 1 ? 0 : 1, offset: k.offset, easing: k.easing })),
+        { duration: dur, fill: "forwards" },
+      );
       if (dark) {
         stars.forEach((st) => {
           st.animate({ opacity: [0, 0.9, 0.3, 0.8, 0] }, { duration: dur + 1400, delay: Math.random() * 300, easing: "ease-in-out", fill: "forwards" });
@@ -687,9 +702,15 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
       const fire = () => onThemeChange(next, { fromUser });
       const box = btnRef.current?.getBoundingClientRect();
       if (pageTransition && fromUser && box) {
-        // the change starts where the knob is going and already covers the switch, so the switch keeps playing
-        const sx = box.left + ((next === "dark" ? RIGHT : LEFT) / W) * box.width, sy = box.top + (CY / H) * box.height;
-        eclipsePageTransition(next, { x: sx, y: sy }, Math.hypot(Math.max(sx - box.left, box.right - sx), box.height) + 24, fire);
+        // the change comes out of the sun (or the moon) where it is right now, at its own size, opens across this
+        // card, then spreads over the page
+        const k = box.width / W;
+        const tNow = progress(cx.get());
+        const sx = box.left + cx.get() * k, sy = box.top + knobY(tNow) * k;
+        const body = (tNow < 0.5 ? RS : RM) * scene(tNow).size * k;
+        const card = rootRef.current?.getBoundingClientRect() ?? box;
+        const reach = Math.hypot(Math.max(sx - card.left, card.right - sx), Math.max(sy - card.top, card.bottom - sy)) + 8;
+        eclipsePageTransition(next, { x: sx, y: sy }, body, fire, reach);
       } else fire();
     }
     if (next === "dark" && changed) {
