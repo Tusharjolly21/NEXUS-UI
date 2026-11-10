@@ -22,8 +22,8 @@ const freeBlocks = blocksManifest.filter((b) => !b.premium).length;
 export const metadata: Metadata = {
   ...createMetadata(
     {
-      title: { absolute: "Pricing — Nexus UI" },
-      description: `${freeComponents} Nexus UI components are free. Pro (${GLOBAL_PRICING.pro} a year) and All-Access (${GLOBAL_PRICING.allAccess} once) unlock the ${proComponents} Pro components, the source of all ${templates} Next.js templates and the premium blocks.`,
+      title: { absolute: "Nexus UI Pricing: Yearly Pro or Lifetime Access" },
+      description: `${freeComponents} Nexus UI components are free. Pro (${GLOBAL_PRICING.pro} a year) or All-Access (${GLOBAL_PRICING.allAccess} once) unlocks every component, template and block.`,
       alternates: { canonical: "/pricing" },
     },
     { title: "Free to start. Pay once for everything.", kind: "Pricing" },

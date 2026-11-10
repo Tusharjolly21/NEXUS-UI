@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const alt = getAlternative(slug);
   if (!alt) return {};
   return createMetadata({
-    title: `${alt.name} Alternative (2026): Animated React Components`,
+    title: { absolute: `${alt.name} Alternative (2026): Animated React Components` },
     description: `Looking for a ${alt.name} alternative${alt.alsoSpelled ? ` (${alt.alsoSpelled})` : ""}? Try Nexus UI's animated React components live, then compare install, what is free and the price.`,
     alternates: { canonical: `/alternatives/${alt.slug}` },
   });

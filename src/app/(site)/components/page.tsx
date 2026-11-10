@@ -11,9 +11,9 @@ import { alternatives } from "@/lib/alternatives";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
-  title: "Animated React Components for Next.js and Tailwind CSS",
+  title: { absolute: "Animated React Components for Next.js | Nexus UI" },
   description:
-    "Free and Pro animated React components built with Tailwind CSS and Framer Motion, many with sound: buttons, cards, loaders, text effects and more. Install with the shadcn CLI.",
+    "Free and Pro animated React components built with Tailwind CSS and Framer Motion, many with sound. Install any of them with the shadcn CLI.",
   alternates: { canonical: "/components" },
 });
 

@@ -359,7 +359,7 @@ export default function Page() {
     slug: "block-hero",
     registryCliName: "hero-blocks",
     name: "Hero Sections",
-    seoTitle: "React Hero Sections: 12 Animated Hero Blocks for Next.js",
+    seoTitle: "React Hero Sections: Animated Hero Blocks for Next.js",
     description:
       "Landing page heroes with real motion: a pointer-lit dot grid with a rotating last word, copy beside product cards that part as you scroll, and a headline you scroll through as its letters tumble in and the last word turns like a drum.",
     category: "Hero blocks",

@@ -14,8 +14,8 @@ import TemplatesGallery from "./templates-client";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = createMetadata({
-  title: "Next.js Landing Page Templates — SaaS, AI, Agency & Portfolio",
-  description: `${templates.length} animated Next.js landing page templates for SaaS, AI startups, agencies, portfolios and stores. Open each one live, then take the full source. Built with Tailwind CSS and Framer Motion.`,
+  title: "Next.js Landing Page Templates for SaaS",
+  description: `${templates.length} animated Next.js landing page templates for SaaS, AI startups, agencies, portfolios and stores. Open each one live, then take the full source.`,
   alternates: { canonical: "/templates" },
 });
 

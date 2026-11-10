@@ -28,8 +28,8 @@ const RECORDED_COUNT = RECORDED_SOUND_META.length;
 const PRO_COUNT = SYNTH_PRO_COUNT + RECORDED_COUNT;
 
 export const metadata: Metadata = createMetadata({
-  title: "UI Sound Effects for React — Web Audio and Recorded",
-  description: `${COUNT + PRO_COUNT} UI sound effects for React and Next.js, ${COUNT} free and ${PRO_COUNT} Pro, plus a Mac style that re-voices every sound to feel at home on a Mac or iPhone: taps, chimes, glass, paper, arcade, studio, device and gallery sounds synthesised with the Web Audio API, and ${RECORDED_COUNT} recorded sounds for typing, camera, messages, notifications, screenshots, build-ups, landings and stings.`,
+  title: "UI Sound Effects for React and Next.js",
+  description: `${COUNT + PRO_COUNT} UI sound effects for React and Next.js, ${COUNT} of them free: taps, chimes, glass, paper and arcade sounds in Web Audio, plus recorded ones.`,
   alternates: { canonical: "/sounds" },
 });
 const SOUND_COMPONENTS = Object.keys(COMPONENT_SOUNDS).length;

@@ -7,7 +7,7 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = createMetadata({
-  title: "Blog — Framer Motion, Tailwind CSS & Next.js Guides",
+  title: "Blog: Framer Motion & Next.js Guides",
   description: "Guides on Framer Motion, Tailwind CSS, and shipping Next.js SaaS landing pages. Motion design patterns, copy-paste components, and developer tips.",
   alternates: { canonical: "/blog" },
 });

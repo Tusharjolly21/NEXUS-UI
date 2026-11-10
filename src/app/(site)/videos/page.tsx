@@ -8,8 +8,8 @@ import { createMetadata } from "@/lib/seo";
 import { getPricing } from "@/lib/region";
 
 export const metadata: Metadata = createMetadata({
-  title: "Product Video Templates: Launch, Pricing and Update Videos for React and HyperFrames",
-  description: `${videos.length} product videos for launches, pricing, changelogs, app previews and website backgrounds, in the shapes each platform wants. Made as React components or as HTML for HyperFrames: watch one, then take the prompt and the code.`,
+  title: "Product Video Templates for React",
+  description: `${videos.length} product videos for launches, pricing and changelogs, made as React components or HyperFrames HTML. Watch one, then take the prompt and the code.`,
   alternates: { canonical: "/videos" },
 });
 
