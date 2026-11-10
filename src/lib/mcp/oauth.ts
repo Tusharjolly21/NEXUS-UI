@@ -64,10 +64,13 @@ export async function resolveOAuthToken(token: string): Promise<OAuthTokenResolu
     if (error) {
       // 4xx from Supabase: the token is bad or expired. 5xx or a network failure: we could not check it.
       const status = (error as { status?: number }).status ?? 0;
+      // Why a sign-in was turned down, for the logs (never the token itself).
+      console.warn("[mcp/oauth] token rejected:", status, error.code ?? "", error.message);
       return status >= 400 && status < 500 ? { status: "invalid" } : { status: "error" };
     }
     return data.user ? { status: "valid", userId: data.user.id } : { status: "invalid" };
-  } catch {
+  } catch (err) {
+    console.error("[mcp/oauth] token check failed:", err instanceof Error ? err.message : "unknown error");
     return { status: "error" };
   }
 }
