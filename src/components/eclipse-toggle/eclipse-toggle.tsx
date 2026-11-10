@@ -178,8 +178,8 @@ function useSound(enabled: boolean, volume: number, allow: () => boolean = () =>
 const W = 260, H = 104, CY = 52;
 const LEFT = 52; // the moon at rest, light mode
 const SUN = 208; // the sun's centre, and the moon's in dark mode
-const RS = 34; // the sun
-const RM = 35.2; // the moon, a touch larger, as it is when an eclipse is total
+const RS = 27; // the sun: small enough to leave room round it for the corona
+const RM = 27.9; // the moon, a touch larger, as it is when an eclipse is total
 
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 /** a smooth step from a to b; a may be larger than b, for a step down */
@@ -223,12 +223,20 @@ const rand = (i: number) => {
 // rounded, so the server and the browser print the same numbers (their sin() can differ in the last digits)
 const r2 = (n: number) => Math.round(n * 100) / 100;
 const STARS = Array.from({ length: 22 }, (_, i) => ({ x: r2(10 + rand(i) * 150), y: r2(8 + rand(i + 50) * 72), r: r2(0.35 + rand(i + 99) * 0.6), g: i % 3 }));
-/** the corona's streamers: angle in degrees, length, width at the root. Long near the sun's equator, short at its poles */
+/**
+ * The corona's streamers: angle in degrees (0 points right), length and width at the root. Long, petal-like helmet
+ * streamers near the sun's equator reach out across the sky; short fine plumes stand at its poles.
+ */
 const STREAMERS: [number, number, number][] = [
-  [-14, 60, 12], [166, 64, 13], [6, 40, 9], [192, 46, 10], [-36, 30, 7], [146, 36, 8], [26, 28, 6], [212, 30, 7],
-  [-80, 17, 4], [-101, 15, 4], [79, 18, 4], [102, 14, 4], [-58, 22, 5], [122, 24, 5],
+  [174, 74, 11], [188, 64, 10], [160, 48, 8], [202, 46, 8], [181, 96, 3.5], [146, 32, 6], [216, 30, 6],
+  [-6, 52, 11], [9, 46, 10], [-22, 34, 7], [25, 32, 7], [3, 64, 3],
+  [-40, 26, 6], [-140, 28, 6], [40, 25, 6], [140, 27, 6], [-62, 20, 5], [-118, 21, 5], [62, 19, 5], [118, 20, 5],
 ];
-const RAYS = Array.from({ length: 30 }, (_, i) => ({ a: (i / 30) * 360 + rand(i + 7) * 9, l: 8 + rand(i + 21) * 26 }));
+/** fine rays all round, the corona's texture */
+const RAYS = Array.from({ length: 44 }, (_, i) => ({ a: (i / 44) * 360 + rand(i + 7) * 7, l: 7 + rand(i + 21) * (Math.abs(Math.cos(((i / 44) * 360 * Math.PI) / 180)) * 30 + 8), w: 0.5 + rand(i + 3) * 0.5 }));
+/** a streamer or a ray along +x from the sun's edge: wide at the root, curving to a point */
+const streamer = (l: number, w: number) =>
+  `M${RS - 1},${-w / 2} C${RS + l * 0.3},${-w * 0.45} ${RS + l * 0.7},${-w * 0.1} ${RS + l},0 C${RS + l * 0.7},${w * 0.1} ${RS + l * 0.3},${w * 0.45} ${RS - 1},${w / 2} Z`;
 
 // ───────────── the moon's face, painted once into a small bitmap: the real near side, north up ─────────────
 
@@ -391,9 +399,12 @@ export function eclipsePageTransition(next: Theme, origin: { x: number; y: numbe
   const stars: HTMLDivElement[] = [];
   if (dark) {
     for (let i = 0; i < 70; i++) {
+      const sx = Math.random() * window.innerWidth, sy = Math.random() * window.innerHeight;
+      // none over the switch, which has its own sky
+      if (Math.hypot(sx - x, sy - y) < from) continue;
       const st = document.createElement("div");
       const size = 1 + Math.random() * 2.2;
-      st.style.cssText = `position:absolute;left:${Math.random() * 100}%;top:${Math.random() * 100}%;width:${size}px;height:${size}px;border-radius:50%;background:#fff;box-shadow:0 0 ${size * 3}px rgba(255,255,255,.8);opacity:0`;
+      st.style.cssText = `position:absolute;left:${sx}px;top:${sy}px;width:${size}px;height:${size}px;border-radius:50%;background:#fff;box-shadow:0 0 ${size * 3}px rgba(255,255,255,.8);opacity:0`;
       layer.appendChild(st);
       stars.push(st);
     }
@@ -541,8 +552,8 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
       set(r.pale.current, "transform", `translate(${x.toFixed(2)} ${CY})`);
       // by day the moon is lit on its sunward side: full at rest, a thinning crescent as it nears the sun, then gone
       // before it reaches the sun's edge, so all that shows in front of the sun is the black bite
-      r.phase.current?.setAttribute("d", phasePath(step(72, 150, d)));
-      set(r.pale.current, "opacity", 0.86 * step(70, 98, d));
+      r.phase.current?.setAttribute("d", phasePath(step(RS + RM + 3, 150, d)));
+      set(r.pale.current, "opacity", 0.86 * step(RS + RM + 1, RS + RM + 30, d));
       set(r.bite.current, "cx", x);
       set(r.disc.current, "transform", `translate(${x.toFixed(2)} ${CY})`);
       set(r.disc.current, "opacity", corona);
@@ -815,7 +826,7 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
         onPointerMove={onMove}
         onPointerUp={onUp}
         onPointerCancel={() => (drag.current = null)}
-        className="relative block w-full cursor-pointer touch-pan-y select-none rounded-full p-0 outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2"
+        className="relative block w-full cursor-pointer touch-pan-y select-none rounded-full p-0 outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
         style={{ aspectRatio: `${W} / ${H}`, WebkitTapHighlightColor: "transparent" }}
       >
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 block h-full w-full overflow-visible" aria-hidden="true">
@@ -832,10 +843,11 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
               <stop offset="1" stopColor="#cfe6f8" />
             </linearGradient>
             <linearGradient id={id("night")} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#050915" />
-              <stop offset="0.5" stopColor="#101a36" />
-              <stop offset="0.8" stopColor="#2b2a4a" />
-              <stop offset="1" stopColor="#4a3550" />
+              <stop offset="0" stopColor="#03050c" />
+              <stop offset="0.42" stopColor="#0b1430" />
+              <stop offset="0.7" stopColor="#25234a" />
+              <stop offset="0.88" stopColor="#4a3256" />
+              <stop offset="1" stopColor="#6a3d4f" />
             </linearGradient>
             {/* at totality the whole horizon glows, a sunset all the way round */}
             <linearGradient id={id("rim")} x1="0" y1="0" x2="0" y2="1">
@@ -856,13 +868,22 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
               <stop offset="0.95" stopColor="#fff4d4" />
               <stop offset="1" stopColor="#ffe9b4" />
             </radialGradient>
-            <radialGradient id={id("inner")} gradientUnits="userSpaceOnUse" cx="0" cy="0" r="80">
-              <stop offset="0.425" stopColor="#ffffff" stopOpacity="1" />
-              <stop offset="0.47" stopColor="#f6f8ff" stopOpacity=".72" />
-              <stop offset="0.56" stopColor="#e6ecff" stopOpacity=".32" />
-              <stop offset="0.72" stopColor="#cfd9ff" stopOpacity=".1" />
+            <radialGradient id={id("inner")} gradientUnits="userSpaceOnUse" cx="0" cy="0" r={RS * 3}>
+              <stop offset={r2(RS / (RS * 3))} stopColor="#ffffff" stopOpacity=".95" />
+              <stop offset={r2((RS + 3) / (RS * 3))} stopColor="#f4f6ff" stopOpacity=".55" />
+              <stop offset={r2((RS + 9) / (RS * 3))} stopColor="#e2e9ff" stopOpacity=".2" />
+              <stop offset={r2((RS + 22) / (RS * 3))} stopColor="#c9d4ff" stopOpacity=".07" />
               <stop offset="1" stopColor="#c9d4ff" stopOpacity="0" />
             </radialGradient>
+            <linearGradient id={id("stream")} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stopColor="#ffffff" stopOpacity=".9" />
+              <stop offset="0.3" stopColor="#f3f5ff" stopOpacity=".45" />
+              <stop offset="0.7" stopColor="#dfe6ff" stopOpacity=".12" />
+              <stop offset="1" stopColor="#dfe6ff" stopOpacity="0" />
+            </linearGradient>
+            <filter id={id("b1")} x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="1" />
+            </filter>
             <radialGradient id={id("spark")} cx="0.5" cy="0.5" r="0.5">
               <stop offset="0" stopColor="#ffffff" />
               <stop offset="0.25" stopColor="#ffffff" stopOpacity=".7" />
@@ -875,6 +896,14 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
             </radialGradient>
             <mask id={id("phase")} maskUnits="userSpaceOnUse" x={-RM - 2} y={-RM - 2} width={RM * 2 + 4} height={RM * 2 + 4}>
               <path ref={r.phase} d={phasePath(startDark ? 0 : 1)} fill="#ffffff" filter={url("b04")} />
+            </mask>
+            {/* the corona dissolves into the sky before it meets the switch's edge, instead of being cut off by it */}
+            <filter id={id("b5")} x="-20%" y="-50%" width="140%" height="200%">
+              <feGaussianBlur stdDeviation="5" />
+            </filter>
+            <mask id={id("edge")} maskUnits="userSpaceOnUse" x={0} y={0} width={W} height={H}>
+              <path d={pill} fill="#ffffff" />
+              <path d={pill} fill="none" stroke="#000000" strokeWidth={18} filter={url("b5")} />
             </mask>
             <filter id={id("b25")} x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="2.5" />
@@ -913,27 +942,29 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
             </g>
 
             {/* the corona, the prominences and the black moon: only at totality */}
-            <g ref={r.corona} opacity={startDark ? 1 : 0}>
+            <g ref={r.corona} opacity={startDark ? 1 : 0} mask={url("edge")}>
               <g transform={`translate(${SUN} ${CY})`}>
                 <g ref={r.coronaSpin}>
-                  <circle r={80} fill={url("inner")} />
-                  <g fill="#ffffff" opacity={0.5} filter={url("b25")}>
+                  {/* a soft halo, then petal streamers and fine rays, each fading out along its length */}
+                  <circle r={RS * 3} fill={url("inner")} />
+                  <g fill={url("stream")} filter={url("b1")} opacity={0.9}>
                     {STREAMERS.map(([a, l, w], i) => (
-                      <path key={i} transform={`rotate(${a})`} d={`M${RS - 1},${-w / 2} Q${RS + l * 0.45},${-w * 0.2} ${RS + l},0 Q${RS + l * 0.45},${w * 0.2} ${RS - 1},${w / 2} Z`} />
+                      <path key={i} transform={`rotate(${a})`} d={streamer(l, w)} />
                     ))}
                   </g>
-                  <g stroke="#ffffff" strokeWidth={0.45} opacity={0.22} filter={url("b04")}>
-                    {RAYS.map((ray, i) => {
-                      const c = Math.cos((ray.a * Math.PI) / 180), s = Math.sin((ray.a * Math.PI) / 180);
-                      return <line key={i} x1={r2(c * (RS + 1))} y1={r2(s * (RS + 1))} x2={r2(c * (RS + ray.l))} y2={r2(s * (RS + ray.l))} />;
-                    })}
+                  <g fill={url("stream")} opacity={0.38}>
+                    {RAYS.map((ray, i) => (
+                      <path key={i} transform={`rotate(${r2(ray.a)})`} d={streamer(r2(ray.l), r2(ray.w))} />
+                    ))}
                   </g>
                 </g>
+                {/* the inner corona: a thin, brilliant ring hugging the moon's edge */}
+                <circle r={RM + 0.8} fill="none" stroke="#ffffff" strokeWidth={3} opacity={0.75} filter={url("b1")} />
+                <circle r={RM + 0.3} fill="none" stroke="#fffaf0" strokeWidth={0.9} />
                 {/* prominences: tongues of pink hydrogen at the limb, seen only while the sun is hidden */}
-                <g fill="#ff5a86" filter={url("b04")}>
-                  <path transform={`rotate(196) translate(${RM - 0.4} 0) rotate(90)`} d="M-2.4,0 C-2.2,-2.6 -0.8,-4.2 0.6,-3.8 C2,-3.2 1.6,-1.4 2.4,0 Z" />
-                  <path transform={`rotate(-38) translate(${RM - 0.4} 0) rotate(90)`} d="M-1.6,0 C-1.5,-1.8 -0.4,-2.8 0.6,-2.4 C1.4,-1.9 1.1,-0.8 1.6,0 Z" />
-                  <path transform={`rotate(58) translate(${RM - 0.4} 0) rotate(90)`} d="M-1.2,0 C-1.2,-1.4 -0.2,-2 0.5,-1.7 C1,-1.3 0.9,-0.5 1.2,0 Z" opacity={0.85} />
+                <g fill="#ff6f8e" opacity={0.85} filter={url("b04")}>
+                  <path transform={`rotate(196) translate(${RM - 0.9} 0) rotate(90) scale(.75)`} d="M-2.4,0 C-2.2,-2.6 -0.8,-4.2 0.6,-3.8 C2,-3.2 1.6,-1.4 2.4,0 Z" />
+                  <path transform={`rotate(58) translate(${RM - 0.9} 0) rotate(90) scale(.75)`} d="M-1.2,0 C-1.2,-1.4 -0.2,-2 0.5,-1.7 C1,-1.3 0.9,-0.5 1.2,0 Z" />
                 </g>
               </g>
             </g>
@@ -953,7 +984,7 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
               <circle ref={r.bite} cx={startDark ? SUN : LEFT} cy={CY} r={RM} fill="#0a0f1d" />
             </g>
             <g ref={r.disc} transform={`translate(${startDark ? SUN : LEFT} ${CY})`} opacity={startDark ? 1 : 0}>
-              <circle r={RM} fill="#070a14" />
+              <circle r={RM} fill="#04060c" />
               {/* earthshine, just: the same face, faintly lit by the Earth */}
               {face && <image href={face.earth} x={-RM} y={-RM} width={RM * 2} height={RM * 2} preserveAspectRatio="none" opacity={0.4} />}
             </g>
@@ -980,8 +1011,10 @@ export default function EclipseToggle({ theme, defaultTheme = "light", onThemeCh
             <path d={ridges.far} fill="#8dbba6" />
             <path d={ridges.near} fill="#5d957a" />
             <g ref={r.ridgeNight} opacity={startDark ? 1 : 0}>
-              <path d={ridges.far} fill="#141a2a" />
-              <path d={ridges.near} fill="#070a12" />
+              <path d={ridges.far} fill="#121726" />
+              <path d={ridges.far.split(" L260")[0]} fill="none" stroke="#ffb27a" strokeOpacity={0.35} strokeWidth={0.7} />
+              <path d={ridges.near} fill="#05070d" />
+              <path d={ridges.near.split(" L260")[0]} fill="none" stroke="#ff9a6a" strokeOpacity={0.22} strokeWidth={0.6} />
             </g>
 
             {/* birds, back up when the light returns */}
