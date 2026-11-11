@@ -238,7 +238,7 @@ export default async function BlockDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-12 pt-[128px]">
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1152px]">
+        <div className="relative mx-auto max-w-[var(--item-w,1152px)]">
           <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[14px] text-muted-foreground">
             <Link href="/blocks" className="rounded hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
               Blocks

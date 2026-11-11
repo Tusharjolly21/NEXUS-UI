@@ -324,7 +324,7 @@ export function TemplateDetailContent({
     <>
       <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-12 pt-[136px]">
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1152px]">
+        <div className="relative mx-auto max-w-[var(--item-w,1152px)]">
           <nav aria-label="Breadcrumb">
             <ol className="flex items-center gap-1.5 text-[14px] text-muted-foreground">
               <li>
@@ -364,7 +364,7 @@ export function TemplateDetailContent({
       </section>
 
       <section aria-label="Preview" className="px-4 pb-20">
-        <div className="mx-auto grid max-w-[1152px] gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="mx-auto grid max-w-[var(--item-w,1152px)] gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="pg-float relative overflow-hidden rounded-tile bg-card">
             {tmpl.previewImages ? (
               <BrowserFrame
@@ -390,7 +390,7 @@ export function TemplateDetailContent({
 
       {shots.length ? (
         <section aria-labelledby="inside" className="px-4 pb-24">
-          <div className="mx-auto max-w-[1152px]">
+          <div className="mx-auto max-w-[var(--item-w,1152px)]">
             <h2 id="inside" className="pg-display text-[clamp(32px,4.5vw,44px)] text-foreground">
               Inside the page
             </h2>
@@ -429,7 +429,7 @@ export function TemplateDetailContent({
       ) : null}
 
       <section aria-labelledby="contents" className="px-4 pb-24">
-        <div className="mx-auto max-w-[1152px]">
+        <div className="mx-auto max-w-[var(--item-w,1152px)]">
           <h2 id="contents" className="pg-display text-[clamp(32px,4.5vw,44px)] text-foreground">
             What&apos;s in it
           </h2>
@@ -468,7 +468,7 @@ export function TemplateDetailContent({
       </section>
 
       <section aria-labelledby="run" className="px-4 pb-24">
-        <div className="mx-auto max-w-[1152px]">
+        <div className="mx-auto max-w-[var(--item-w,1152px)]">
           <h2 id="run" className="pg-display text-[clamp(32px,4.5vw,44px)] text-foreground">
             Run it on your machine
           </h2>
@@ -497,7 +497,7 @@ export function TemplateDetailContent({
 
       {related.length ? (
         <section aria-labelledby="more" className="px-4 pb-24">
-          <div className="mx-auto max-w-[1152px]">
+          <div className="mx-auto max-w-[var(--item-w,1152px)]">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <h2 id="more" className="pg-display text-[clamp(32px,4.5vw,44px)] text-foreground">
                 More templates

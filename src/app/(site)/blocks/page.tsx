@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import type { TileTint } from "@/components/gallery/types";
 import { Band, PillLink, RainbowWord } from "@/components/site";
 import { blocks } from "@/lib/catalog/blocks";
@@ -8,7 +7,7 @@ import { getTileFit } from "@/lib/catalog/tile-fit";
 import { createMetadata } from "@/lib/seo";
 import { getPricing } from "@/lib/region";
 import { ListingShell } from "@/components/listing/listing-shell";
-import { ListingBrowse, ListingSidebar } from "@/components/listing/listing-sidebar";
+import { ListingGroupChips, ListingSidebar, RESULTS_ID, type SidebarGroup } from "@/components/listing/listing-sidebar";
 import { BLOCK_ORDER as ORDER, BLOCK_SHORT_NAME as CHIP_NAME, blockGroups } from "@/lib/catalog/listing-groups/blocks";
 import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
 import { BlocksGallery, type BlockFilter, type BlockTileItem } from "./_catalog";
@@ -24,14 +23,6 @@ const TINTS: TileTint[] = ["violet", "sky", "peach", "mint", "butter", "pink"];
 /** The wall's New tab lists what was added in the last week of additions, counted back from the newest one (the same rule as the components wall). */
 const NEW_TAB_DAYS = 7;
 const day = (iso?: string) => (iso ? Date.parse(iso) || 0 : 0);
-
-/** "4 sections, 1 free" for the list of blocks: a block's sections can be free or Pro one by one. */
-function sectionsLabel(slug: string, blockPremium: boolean) {
-  const vs = blockVariants.filter((v) => v.block === slug);
-  const free = vs.filter((v) => !(v.premium ?? blockPremium)).length;
-  const n = `${vs.length} section${vs.length === 1 ? "" : "s"}`;
-  return free === vs.length ? `${n}, free` : free ? `${n}, ${free} free` : `${n}, Pro`;
-}
 
 export default async function BlocksPage() {
   const pricing = await getPricing();
@@ -84,7 +75,12 @@ export default async function BlocksPage() {
   const free = items.filter((i) => !i.premium).length;
 
   const pro = items.length - free;
-  const groups = blockGroups();
+  // the same New tab the page always had (the latest additions), first, then every block
+  const fresh = items.filter((i) => i.isRecent);
+  const groups: SidebarGroup[] = [
+    ...(fresh.length ? [{ id: "new", label: "New", items: fresh.map((i) => ({ name: i.name, href: i.href, pro: i.premium })) }] : []),
+    ...blockGroups(),
+  ];
   const copy: PromoCopy = {
     title: ["Every block with ", "Pro", ""],
     body: `${pro} Pro sections across ${blocks.length} blocks: heroes, pricing, checkout, navigation and more. Paste one in and make it yours.`,
@@ -94,17 +90,17 @@ export default async function BlocksPage() {
   return (
     <>
       <ListingShell
-        sidebar={<ListingSidebar title="Blocks" total={items.length} groups={groups} />}
+        sidebar={<ListingSidebar title="Blocks" total={items.length} groups={groups} param="block" />}
         rail={<ProRail copy={copy} pricing={pricing} />}
       >
-        <ListingBrowse title="Blocks" total={items.length} groups={groups} className="mb-8" />
         <h1 className="pg-display text-[clamp(52px,7vw,84px)] text-foreground">Blocks</h1>
         <p className="mt-5 max-w-[640px] text-[18px] leading-[1.55] text-muted-foreground">
           Whole sections that <RainbowWord>drop</RainbowWord> straight into a page: heroes, navigation, pricing,
           testimonials, FAQ and more. {items.length} sections across {blocks.length} blocks, {free} of them free.
         </p>
 
-        <section aria-label="Block gallery" className="mt-10">
+        <section id={RESULTS_ID} aria-label="Block gallery" className="mt-10 scroll-mt-24">
+          <ListingGroupChips groups={groups} total={items.length} param="block" className="mb-4" />
           <BlocksGallery items={items} filters={filters} afterFilters={<ProBand copy={copy} pricing={pricing} className="mt-5" />} />
         </section>
       </ListingShell>
@@ -126,25 +122,6 @@ export default async function BlocksPage() {
         </div>
       </Band>
 
-      {/* every block with what it is: what crawlers and no-JS visitors read for this page */}
-      <section aria-labelledby="all-blocks" className="px-4 py-20">
-        <div className="mx-auto max-w-[1152px]">
-          <h2 id="all-blocks" className="pg-display text-[clamp(30px,4.2vw,44px)] leading-[1.05] text-foreground">
-            Every block, in one list
-          </h2>
-          <ul className="mt-8 grid gap-x-10 gap-y-6 md:grid-cols-2">
-            {blocks.map((b) => (
-              <li key={b.slug}>
-                <Link href={`/blocks/${b.slug}`} className="text-[17px] font-semibold text-foreground hover:underline">
-                  {b.name}
-                </Link>
-                <span className="ml-2 text-[13px] font-medium text-muted-foreground">{sectionsLabel(b.slug, b.premium)}</span>
-                <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{b.description}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
     </>
   );
 }

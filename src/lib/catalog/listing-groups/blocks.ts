@@ -75,6 +75,7 @@ export function blockGroups(): SidebarGroup[] {
           name: v.title,
           href: `/blocks/${slug}#${variantAnchor(v.title)}`,
           isNew: Boolean(v.registryCliName) || slug === "block-checkout-moments",
+          pro: !!v.premium,
         })),
     }));
 }

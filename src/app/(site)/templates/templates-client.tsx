@@ -1,13 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { LayoutGrid, List } from "lucide-react";
 import { InfiniteSentinel, useInfiniteCount } from "@/components/gallery/infinite-scroll";
 import { GallerySearch, matchesWords, searchWords } from "@/components/gallery/gallery-search";
 import { useUrlParam } from "@/components/gallery/use-url-param";
-import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { templateName, templateTagline } from "@/components/templates/template-card";
-import { TemplateRow } from "@/components/templates/template-row";
 import { TemplateTile } from "@/components/templates/template-tile";
 import { templates, type MarketplaceTemplate, type TemplateCategory } from "@/lib/catalog/templates";
 import { cn } from "@/lib/utils";
@@ -71,12 +68,10 @@ function Segmented<T extends string>({
 export default function TemplatesGallery({ isPremium = false, afterFilters }: { isPremium?: boolean; afterFilters?: React.ReactNode }) {
   const [categoryParam, setCategoryParam] = useUrlParam("category");
   const [sortParam, setSortParam] = useUrlParam("sort");
-  const [viewParam, setViewParam] = useUrlParam("view");
   const [query, setQuery] = React.useState("");
 
   const category = CATEGORIES.find(([c]) => c === categoryParam)?.[0] ?? null;
   const sort = sortParam === "new" ? "new" : "popular";
-  const view = viewParam === "index" ? "index" : "wall";
 
   const words = searchWords(query);
   const matches = (sort === "new" ? NEWEST : POPULAR).filter(
@@ -85,8 +80,8 @@ export default function TemplatesGallery({ isPremium = false, afterFilters }: { 
 
   const infinite = useInfiniteCount({
     total: matches.length,
-    batch: view === "wall" ? 9 : 12,
-    storeKey: `templates|${view}|${sort}|${category ?? ""}|${words.join(" ")}`,
+    batch: 9,
+    storeKey: `templates|${sort}|${category ?? ""}|${words.join(" ")}`,
   });
   const shown = matches.slice(0, infinite.count);
 
@@ -111,30 +106,10 @@ export default function TemplatesGallery({ isPremium = false, afterFilters }: { 
                 { value: "new", label: "Newest" },
               ]}
             />
-            <Segmented
-              label="Layout"
-              value={view}
-              onChange={(v) => setViewParam(v === "wall" ? null : v)}
-              options={[
-                { value: "wall", label: "Wall", icon: <LayoutGrid className="size-3.5" aria-hidden /> },
-                { value: "index", label: "List", icon: <List className="size-3.5" aria-hidden /> },
-              ]}
-            />
           </div>
         </div>
 
-        <ChipRail className="mt-3">
-          <Chip active={!category} onClick={() => setCategoryParam(null)}>
-            All
-            <span className="text-[12px] opacity-60">{templates.length}</span>
-          </Chip>
-          {CATEGORIES.map(([c, n]) => (
-            <Chip key={c} active={category === c} onClick={() => setCategoryParam(c)}>
-              {c}
-              <span className="text-[12px] opacity-60">{n}</span>
-            </Chip>
-          ))}
-        </ChipRail>
+        {/* categories are picked in the names column (and the chips above on phones), one choice in the address */}
       </div>
 
       {afterFilters}
@@ -157,19 +132,11 @@ export default function TemplatesGallery({ isPremium = false, afterFilters }: { 
             Show all templates
           </button>
         </div>
-      ) : view === "wall" ? (
+      ) : (
         <ul className="mt-6 grid grid-cols-1 gap-4 @[600px]:grid-cols-2 @[1120px]:grid-cols-3">
           {shown.map((t, i) => (
             <li key={t.slug}>
               <TemplateTile tmpl={t} isPro={isPremium} priority={i < 2} />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <ul className="mt-6 flex flex-col gap-2.5">
-          {shown.map((t, i) => (
-            <li key={t.slug}>
-              <TemplateRow tmpl={t} isPro={isPremium} priority={i < 6} />
             </li>
           ))}
         </ul>

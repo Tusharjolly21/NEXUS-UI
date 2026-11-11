@@ -140,6 +140,7 @@ export function ComponentGallery({
   proRow = false,
   cards = false,
   afterFilters,
+  groupParam,
 }: {
   items: GalleryItem[];
   /** The visitor's regional prices, from the server. */
@@ -172,9 +173,15 @@ export function ComponentGallery({
   cards?: boolean;
   /** Shown under the filters, above the wall (the listing page puts its Pro band here on narrower screens). */
   afterFilters?: React.ReactNode;
+  /** The address value that picks a group (the listing page's names column writes it); without it, the category
+   * chips keep their own choice. */
+  groupParam?: string;
 }) {
   const [interaction, setInteraction] = React.useState<Interaction | "all">("all");
-  const [category, setCategory] = React.useState("all");
+  const [ownCategory, setOwnCategory] = React.useState("all");
+  const [urlCategory, setUrlCategory] = useUrlParam(groupParam ?? "__no_group");
+  const category = groupParam ? (urlCategory ?? "all") : ownCategory;
+  const setCategory = (c: string) => (groupParam ? setUrlCategory(c === "all" ? null : c) : setOwnCategory(c));
   const [query, setQuery] = React.useState("");
   const [openSlug, setOpenSlug] = useUrlParam("c");
   const [accessParam, setAccessParam] = useUrlParam("access");

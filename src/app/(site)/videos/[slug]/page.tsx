@@ -58,7 +58,7 @@ export default async function VideoPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[120px]">
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1152px]">
+        <div className="relative mx-auto max-w-[var(--item-w,1152px)]">
           <nav aria-label="Breadcrumb" className="text-[13.5px] text-muted-foreground">
             <Link href="/videos" className="hover:text-foreground hover:underline hover:underline-offset-4">
               Videos
@@ -75,13 +75,13 @@ export default async function VideoPage({ params }: Props) {
       </section>
 
       <section className="px-4 pb-24 pt-6">
-        <div className="mx-auto max-w-[1152px]">
+        <div className="mx-auto max-w-[var(--item-w,1152px)]">
           <VideoStudio video={video} defaults={videoDefaults(video.slug)} />
         </div>
       </section>
 
       <section aria-label="More videos" className="px-4 pb-24">
-        <div className="mx-auto max-w-[1152px]">
+        <div className="mx-auto max-w-[var(--item-w,1152px)]">
           <div className="flex items-end justify-between gap-4">
             <h2 className="pg-display text-[clamp(30px,4vw,40px)] leading-[1.05] text-foreground">More videos</h2>
             <Link href="/videos" className="shrink-0 text-[15px] text-link hover:underline hover:underline-offset-4">

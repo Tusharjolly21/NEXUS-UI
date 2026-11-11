@@ -1,10 +1,11 @@
 "use client";
 
+import { useUrlParam } from "@/components/gallery/use-url-param";
 import * as React from "react";
 import Link from "next/link";
 import { useInView } from "framer-motion";
 import { Lock, LockOpen, PartyPopper, Search, Volume2, VolumeX, Waves } from "lucide-react";
-import { Chip, ChipRail } from "@/components/site/chip-rail";
+import { Chip } from "@/components/site/chip-rail";
 import { ICONS, ICON_CATEGORIES, type IconCategory, type IconMeta } from "@/lib/icons/catalog";
 import { ProBadge, useLocked, useProAccess } from "@/components/pro/pro-access";
 import { cn } from "@/lib/utils";
@@ -205,7 +206,9 @@ export function IconTile({
 
 export function IconGrid() {
   const [query, setQuery] = React.useState("");
-  const [category, setCategory] = React.useState<IconCategory | "all">("all");
+  // the category lives in the address, shared with the page's names column and the phone chips
+  const [categoryParam] = useUrlParam("category");
+  const category: IconCategory | "all" = ICON_CATEGORIES.some((c) => c.slug === categoryParam) ? (categoryParam as IconCategory) : "all";
   const [material, setMaterial] = React.useState<IconMaterialName>("spark");
   const [color, setColor] = React.useState<string>(SWATCHES[0]);
   const [size, setSize] = React.useState(40);
@@ -259,16 +262,7 @@ export function IconGrid() {
         </div>
       </div>
 
-      <ChipRail wrap className="mt-5">
-        <Chip active={category === "all"} onClick={() => setCategory("all")} className="py-1.5 text-[13px]">
-          All <span className={category === "all" ? "opacity-70" : "text-muted-foreground"}>{ICONS.length}</span>
-        </Chip>
-        {ICON_CATEGORIES.map((c) => (
-          <Chip key={c.slug} active={category === c.slug} onClick={() => setCategory(c.slug)} className="py-1.5 text-[13px]">
-            {c.label} <span className={cn(category === c.slug ? "opacity-70" : "text-muted-foreground")}>{ICONS.filter((i) => i.category === c.slug).length}</span>
-          </Chip>
-        ))}
-      </ChipRail>
+      {/* categories are picked in the names column (and the chips above on phones) */}
 
       {/* play with the whole set */}
       <div className="mt-5 flex flex-col gap-4 rounded-[22px] bg-card p-4 shadow-[0_0_0_1px_rgba(0,0,0,.05)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)] lg:flex-row lg:items-center lg:justify-between">

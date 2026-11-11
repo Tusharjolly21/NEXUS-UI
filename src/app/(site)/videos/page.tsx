@@ -7,7 +7,7 @@ import { videos } from "@/lib/catalog/videos";
 import { createMetadata } from "@/lib/seo";
 import { getPricing } from "@/lib/region";
 import { ListingShell } from "@/components/listing/listing-shell";
-import { ListingBrowse, ListingSidebar } from "@/components/listing/listing-sidebar";
+import { ListingGroupChips, ListingSidebar, RESULTS_ID } from "@/components/listing/listing-sidebar";
 import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
 import { totalOf } from "@/lib/catalog/listing-groups/total";
 import { videoGroups } from "@/lib/catalog/listing-groups/videos";
@@ -36,8 +36,7 @@ export default async function VideosPage() {
   };
   return (
     <>
-      <ListingShell sidebar={<ListingSidebar title="Videos" total={total} groups={groups} />} rail={<ProRail copy={copy} pricing={pricing} />}>
-        <ListingBrowse title="Videos" total={total} groups={groups} className="mb-8" />
+      <ListingShell sidebar={<ListingSidebar title="Videos" total={total} groups={groups} param="for" />} rail={<ProRail copy={copy} pricing={pricing} />}>
         <h1 className="pg-display max-w-[900px] text-[clamp(44px,5.6vw,76px)] text-foreground">
           Product videos, ready to make <RainbowWord>yours</RainbowWord>
         </h1>
@@ -47,7 +46,8 @@ export default async function VideosPage() {
         </p>
         <ProBand copy={copy} pricing={pricing} className="mt-8" />
 
-        <section aria-label="Videos" className="mt-10">
+        <section id={RESULTS_ID} aria-label="Videos" className="mt-10 scroll-mt-24">
+          <ListingGroupChips groups={groups} total={total} param="for" className="mb-4" />
           <VideoGallery
             videos={videos.map(({ slug, title, purpose, motion, app, platforms, formats, duration, loop, premium }) => ({
               slug,

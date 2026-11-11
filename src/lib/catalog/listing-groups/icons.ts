@@ -6,6 +6,6 @@ export function iconGroups(): SidebarGroup[] {
   return ICON_CATEGORIES.map((c) => ({
     id: c.slug,
     label: c.label,
-    items: ICONS.filter((i) => i.category === c.slug).map((i) => ({ name: i.title, href: `/icons/${i.slug}` })),
+    items: ICONS.filter((i) => i.category === c.slug).map((i) => ({ name: i.title, href: `/icons/${i.slug}`, pro: i.premium })),
   })).filter((g) => g.items.length);
 }

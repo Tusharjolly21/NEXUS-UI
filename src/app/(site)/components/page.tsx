@@ -10,7 +10,7 @@ import { alternatives } from "@/lib/alternatives";
 import { createMetadata } from "@/lib/seo";
 import { componentGroups } from "@/lib/catalog/listing-groups/components";
 import { ListingShell } from "@/components/listing/listing-shell";
-import { ListingBrowse, ListingSidebar } from "@/components/listing/listing-sidebar";
+import { ListingGroupChips, ListingSidebar, RESULTS_ID } from "@/components/listing/listing-sidebar";
 import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
 
 export const metadata: Metadata = createMetadata({
@@ -27,10 +27,9 @@ export default async function ComponentsPage() {
   const pricing = await getPricing();
   const all = allGalleryItems();
   const items = all.filter((i) => i.group !== FUN_GROUP);
-  const funCount = all.length - items.length;
 
   const pro = items.filter((i) => i.premium).length;
-  const groups = componentGroups(all);
+  const groups = componentGroups(all, { withFun: false });
   const copy: PromoCopy = {
     title: ["Unlock all ", String(pro), " Pro components"],
     body: "Every one with full source, sound and its own demo, and your coding agent can add any of them by name.",
@@ -40,10 +39,9 @@ export default async function ComponentsPage() {
   return (
     <>
       <ListingShell
-        sidebar={<ListingSidebar title="Components" total={all.length} groups={groups} />}
+        sidebar={<ListingSidebar title="Components" total={items.length} groups={groups} param="group" />}
         rail={<ProRail copy={copy} pricing={pricing} />}
       >
-        <ListingBrowse title="Components" total={all.length} groups={groups} className="mb-8" />
         <h1 className="pg-display max-w-[900px] text-[clamp(42px,5.4vw,72px)] leading-[1.02] text-foreground">
           Animated React components that feel <RainbowWord>alive</RainbowWord>.
         </h1>
@@ -52,24 +50,16 @@ export default async function ComponentsPage() {
           Framer Motion. Play with any of them below, then add it to your Next.js or React app with one command.
         </p>
 
-        <section aria-label="Component gallery" className="mt-10">
+        <section id={RESULTS_ID} aria-label="Component gallery" className="mt-10 scroll-mt-24">
+          <ListingGroupChips groups={groups} total={items.length} param="group" className="mb-4" />
           <ComponentGallery
+            groupParam="group"
             items={items}
             pricing={pricing}
             searchable
             plansLine
             cards
             afterFilters={<ProBand copy={copy} pricing={pricing} className="mt-5" />}
-            aside={
-              funCount ? (
-                <Link
-                  href={getComponentCategoryHref("for-fun")}
-                  className="shrink-0 text-[15px] text-link hover:underline hover:underline-offset-4"
-                >
-                  Just for fun ({funCount}) ›
-                </Link>
-              ) : null
-            }
           />
         </section>
       </ListingShell>

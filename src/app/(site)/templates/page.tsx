@@ -11,7 +11,7 @@ import { IndiaDiscountBadge } from "@/components/pricing/india-discount-badge";
 import { templates } from "@/lib/catalog/templates";
 import TemplatesGallery from "./templates-client";
 import { ListingShell } from "@/components/listing/listing-shell";
-import { ListingBrowse, ListingSidebar } from "@/components/listing/listing-sidebar";
+import { ListingGroupChips, ListingSidebar, RESULTS_ID } from "@/components/listing/listing-sidebar";
 import { templateGroups } from "@/lib/catalog/listing-groups/templates";
 import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
 
@@ -48,10 +48,9 @@ export default async function TemplatesPage() {
   return (
     <>
       <ListingShell
-        sidebar={<ListingSidebar title="Templates" total={templates.length} groups={groups} />}
+        sidebar={<ListingSidebar title="Templates" total={templates.length} groups={groups} param="category" />}
         rail={<ProRail copy={copy} pricing={pricing} />}
       >
-        <ListingBrowse title="Templates" total={templates.length} groups={groups} className="mb-8" />
         <h1 className="pg-display max-w-[860px] text-[clamp(44px,5.6vw,76px)] text-foreground">
           Next.js templates, ready to make <RainbowWord>yours</RainbowWord>
         </h1>
@@ -60,7 +59,8 @@ export default async function TemplatesPage() {
           full source and change whatever you like.
         </p>
 
-        <section aria-label="Templates" className="mt-10">
+        <section id={RESULTS_ID} aria-label="Templates" className="mt-10 scroll-mt-24">
+          <ListingGroupChips groups={groups} total={templates.length} param="category" className="mb-4" />
           <TemplatesGallery isPremium={isPremium} afterFilters={<ProBand copy={copy} pricing={pricing} className="mt-5" />} />
         </section>
       </ListingShell>

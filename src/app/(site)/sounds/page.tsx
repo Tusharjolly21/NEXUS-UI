@@ -17,10 +17,8 @@ import { RECORDED_SOUND_META } from "@/lib/ui-sounds-recorded-meta";
 import { ICONS } from "@/lib/icons/catalog";
 import usage from "@/lib/catalog/sound-usage.generated.json";
 import { ListingShell } from "@/components/listing/listing-shell";
-import { ListingBrowse, ListingSidebar } from "@/components/listing/listing-sidebar";
 import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
-import { totalOf } from "@/lib/catalog/listing-groups/total";
-import { soundGroups } from "@/lib/catalog/listing-groups/sounds";
+
 
 const ICON_PICKS = ["bell", "heart", "coin", "camera", "lock", "send", "trash", "rocket"]
   .map((slug) => ICONS.find((i) => i.slug === slug))
@@ -192,8 +190,6 @@ export default async function SoundsPage() {
     },
   ];
 
-  const groups = soundGroups();
-  const total = totalOf(groups);
   const copy: PromoCopy = {
     title: ["Hear all ", String(PRO_COUNT), " Pro sounds"],
     body: "The full sound set, the recorded ones and the Mac style, plus every component, block and template.",
@@ -204,8 +200,8 @@ export default async function SoundsPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
 
-      <ListingShell sidebar={<ListingSidebar title="Free sounds" total={total} groups={groups} />} rail={<ProRail copy={copy} />}>
-        <ListingBrowse title="Free sounds" total={total} groups={groups} className="mb-8" />
+      {/* no names column: the sound board below is already the full, grouped list of every sound */}
+      <ListingShell rail={<ProRail copy={copy} />}>
         <h1 className="pg-display text-[clamp(52px,7vw,84px)] text-foreground">UI sound effects</h1>
         <p className="mt-5 max-w-[640px] text-[18px] leading-[1.55] text-muted-foreground">
           {COUNT + PRO_COUNT} interface sounds you can <RainbowWord>hear</RainbowWord>, made entirely in code with the

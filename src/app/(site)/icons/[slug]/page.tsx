@@ -150,7 +150,7 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
 
       <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[136px]">
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1152px]">
+        <div className="relative mx-auto max-w-[var(--item-w,1152px)]">
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[14px] text-muted-foreground">
             <Link href="/icons" className="hover:text-foreground">
               Icons
@@ -180,14 +180,14 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
       </section>
 
       <section aria-label="Preview and usage" className="px-4 pb-16">
-        <div className="mx-auto max-w-[1152px]">
+        <div className="mx-auto max-w-[var(--item-w,1152px)]">
           <IconPlayground icon={icon} source={source} locked={locked} />
         </div>
       </section>
 
       {uses.length ? (
         <section id="where-to-use" aria-labelledby="where" className="scroll-mt-24 px-4 pb-16">
-          <div className="mx-auto max-w-[1152px]">
+          <div className="mx-auto max-w-[var(--item-w,1152px)]">
             <h2 id="where" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
               Where to use the {name} icon
             </h2>
@@ -216,7 +216,7 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
       ) : null}
 
       <section aria-labelledby="source" className="px-4 pb-16">
-        <div className="mx-auto max-w-[1152px]">
+        <div className="mx-auto max-w-[var(--item-w,1152px)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 id="source" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
               The code
@@ -246,7 +246,7 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
       </section>
 
       <section aria-labelledby="sound" className="px-4 pb-16">
-        <div className="mx-auto max-w-[1152px]">
+        <div className="mx-auto max-w-[var(--item-w,1152px)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 id="sound" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
               The sound (optional)
@@ -293,7 +293,7 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
       </section>
 
       <section aria-labelledby="props" className="px-4 pb-16">
-        <div className="mx-auto max-w-[1152px]">
+        <div className="mx-auto max-w-[var(--item-w,1152px)]">
           <h2 id="props" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
             Props
           </h2>
@@ -323,7 +323,7 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
       </section>
 
       <section aria-labelledby="looks" className="px-4 pb-16">
-        <div className="mx-auto max-w-[1152px]">
+        <div className="mx-auto max-w-[var(--item-w,1152px)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 id="looks" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
               Looks (optional)
@@ -351,7 +351,7 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
 
       {related.length ? (
         <section aria-labelledby="more" className="px-4 pb-16">
-          <div className="mx-auto max-w-[1152px]">
+          <div className="mx-auto max-w-[var(--item-w,1152px)]">
             <h2 id="more" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
               More {category?.label.toLowerCase() ?? ""} icons
             </h2>
@@ -372,7 +372,7 @@ export function ${icon.component.replace(/Icon$/, "")}Button() {
       ) : null}
 
       <section aria-labelledby="faq" className="px-4 pb-24">
-        <div className="mx-auto max-w-[1152px]">
+        <div className="mx-auto max-w-[var(--item-w,1152px)]">
           <h2 id="faq" className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">
             Questions about the {name} icon
           </h2>

@@ -1239,7 +1239,7 @@ export function ComponentDetailPageClient({
     <>
       <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[128px]">
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1152px]">
+        <div className="relative mx-auto max-w-[var(--item-w,1152px)]">
           <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[14px] text-muted-foreground">
             <Link href="/components" className="hover:text-foreground">
               Components
@@ -1311,7 +1311,7 @@ export function ComponentDetailPageClient({
       </section>
 
       <div className="px-4 pb-24">
-        <div className="mx-auto max-w-[1152px]">
+        <div className="mx-auto max-w-[var(--item-w,1152px)]">
           <div id="preview" className="grid scroll-mt-28 gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
             <div className="grid min-w-0 gap-10">
               {sections.length > 1 ? (

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Sparkles } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { AccessSwitch, type Access } from "@/components/gallery/component-gallery";
 import { FitPreview } from "@/components/gallery/fit-preview";
 import type { GalleryItem } from "@/components/gallery/types";
@@ -9,9 +9,8 @@ import * as React from "react";
 import { GallerySearch, matchesWords, searchWords } from "@/components/gallery/gallery-search";
 import { useUrlParam } from "@/components/gallery/use-url-param";
 import { InfiniteSentinel, useInfiniteCount } from "@/components/gallery/infinite-scroll";
-import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { AccessTag } from "@/components/pro/pro-access";
-import { cn } from "@/lib/utils";
+
 
 /** One section of one block, shown as a tile on the blocks wall. */
 export type BlockTileItem = GalleryItem & {
@@ -29,8 +28,6 @@ const PAGE_SIZE = 12;
 
 export type BlockFilter = { slug: string; name: string; count: number };
 
-/** On a phone only this many filters show until "more" is pressed; wider screens always show them all. */
-const PHONE_FILTERS = 5;
 
 /**
  * A section card: the live section, scaled down so all of it shows inside a frame that is the same shape on every
@@ -133,49 +130,13 @@ export function BlocksGallery({
     setQuery("");
   };
 
-  // The chosen filter always stays visible, even when it is past the phone's short list.
-  const [moreOpen, setMoreOpen] = React.useState(false);
-  const activeIndex = active ? filters.indexOf(active) : -1;
-  const hiddenOnPhone = filters.length - PHONE_FILTERS - (activeIndex >= PHONE_FILTERS ? 1 : 0);
-
   return (
     <div className="scroll-mt-28">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
         <GallerySearch value={query} onChange={setQuery} label="Search blocks" placeholder="Search sections: hero, pricing, FAQ…" className="sm:min-w-0 sm:flex-1 sm:max-w-[420px]" />
         <AccessSwitch value={access} counts={accessCounts} noun="sections" size="md" onChange={(a) => setAccessParam(a === "all" ? null : a)} />
       </div>
-      <ChipRail wrap>
-        <Chip active={!active && !newTab} onClick={() => setParam(null)}>
-          All
-          <span className="text-[12px] opacity-60">{items.length}</span>
-        </Chip>
-        {recentCount ? (
-          <Chip active={newTab} icon={<Sparkles className="size-3.5 text-[#ff9f0a]" strokeWidth={2.4} aria-hidden />} onClick={() => setParam(NEW_TAB)}>
-            New
-            <span className="text-[12px] opacity-60">{recentCount}</span>
-          </Chip>
-        ) : null}
-        {filters.map((f, i) => (
-          // `contents` keeps the wrapper out of the layout; on a phone the folded ones are removed (and cannot be tabbed to).
-          <span key={f.slug} className={cn("contents", !moreOpen && i >= PHONE_FILTERS && f !== active && "max-sm:hidden")}>
-            <Chip active={active?.slug === f.slug} onClick={() => setParam(f.slug)}>
-              {f.name}
-              <span className="text-[12px] opacity-60">{f.count}</span>
-            </Chip>
-          </span>
-        ))}
-        {hiddenOnPhone > 0 ? (
-          <Chip
-            className="sm:hidden"
-            aria-pressed={undefined}
-            aria-expanded={moreOpen}
-            onClick={() => setMoreOpen((v) => !v)}
-          >
-            {moreOpen ? "Show less" : `${hiddenOnPhone} more`}
-          </Chip>
-        ) : null}
-      </ChipRail>
-
+      {/* the blocks themselves are picked in the names column (and the chips above on phones), one choice in the address */}
       <p className="mt-3 text-[13px] text-muted-foreground" aria-live="polite">
         {words.length
           ? `${matches.length} ${kind}${matches.length === 1 ? "section" : "sections"} matching "${query.trim()}"${scope ? ` in ${scope}` : ""}`

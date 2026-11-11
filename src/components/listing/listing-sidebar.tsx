@@ -4,7 +4,10 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight, Search, Volume2, X } from "lucide-react";
+import { ChevronRight, Lock, Search, Volume2, X } from "lucide-react";
+import { useUrlParam } from "@/components/gallery/use-url-param";
+import { useProAccess } from "@/components/pro/pro-access";
+import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { playSound, type SoundName } from "@/lib/ui-sounds";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +18,8 @@ export type SidebarItem = {
   isNew?: boolean;
   /** A sound to play when the name is pressed (the sounds page lists sounds, which have no pages of their own). */
   play?: SoundName;
+  /** Pro: visitors without Pro see a small lock beside the name. */
+  pro?: boolean;
 };
 export type SidebarGroup = {
   id: string;
@@ -27,6 +32,34 @@ export type SidebarGroup = {
 };
 
 const ALL = "all";
+
+/** The listing page's results: picking a group brings them into view if they are off screen. */
+export const RESULTS_ID = "listing-results";
+
+function revealResults() {
+  const el = document.getElementById(RESULTS_ID);
+  if (!el) return;
+  const top = el.getBoundingClientRect().top;
+  if (top < 0 || top > window.innerHeight * 0.7) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  }
+}
+
+/**
+ * The group a listing page is filtered to, kept in the address (`?block=pricing-section`) so the names column, the
+ * phone chips and the page's own results all read and write the same value, and a filtered view can be shared.
+ * Without a `param` (the pages of single items) it is only the column's own choice.
+ */
+function useGroupChoice(param: string | undefined, groups: SidebarGroup[], fallback: string) {
+  const [value, setValue] = useUrlParam(param ?? "__no_param");
+  const [picked, setPicked] = React.useState<string | null>(null);
+  if (param) {
+    const chosen = value && groups.some((g) => g.id === value) ? value : ALL;
+    return [chosen, (id: string) => (setValue(id === ALL ? null : id), revealResults())] as const;
+  }
+  return [picked ?? fallback, (id: string) => setPicked(id)] as const;
+}
 
 /** Chips shown before "N more", so a long set of groups (icons have two dozen) doesn't push the names out of view. */
 const CHIP_PEEK = 9;
@@ -57,6 +90,8 @@ function RailBody({
   scrolls = false,
   listRef,
   closeButton,
+  param,
+  layout = "names",
 }: {
   title: string;
   total: number;
@@ -67,14 +102,22 @@ function RailBody({
   listRef?: React.Ref<HTMLDivElement>;
   /** The sheet's Close, set in the title row after the count so the two never sit on top of each other. */
   closeButton?: React.ReactNode;
+  /** On a listing page: the address value the page filters by. The column then drives the page's results and has no
+   * search of its own (the page's search is the one). */
+  param?: string;
+  /** "groups": the column lists the groups themselves (icons, where names alone say little); "names": chips over names. */
+  layout?: "names" | "groups";
 }) {
   const pathname = usePathname();
-  const activeId = groups.find((g) => g.href === pathname || g.items.some((i) => i.href === pathname))?.id ?? null;
-  const [picked, setPicked] = React.useState<string | null>(null);
-  const chip = picked ?? activeId ?? ALL;
+  const { isPro } = useProAccess();
+  const holds = (g: SidebarGroup) => g.href === pathname || g.items.some((i) => i.href === pathname);
+  // an item's own group, not "New this week", which changes every week
+  const activeId = (groups.find((g) => g.id !== "new" && holds(g)) ?? groups.find(holds))?.id ?? null;
+  const [chip, setChip] = useGroupChoice(param, groups, activeId ?? ALL);
+  const searchable = !param;
   const [allChips, setAllChips] = React.useState(false);
   const [query, setQuery] = React.useState("");
-  const needle = query.trim().toLowerCase();
+  const needle = searchable ? query.trim().toLowerCase() : "";
 
   const chosen = chip === ALL ? groups : groups.filter((g) => g.id === chip);
   const lists: { label: string; id: string; items: SidebarItem[] }[] = needle
@@ -114,6 +157,7 @@ function RailBody({
           <span className="rounded-full bg-foreground/[0.05] px-2 py-0.5 text-[12px] font-semibold tabular-nums text-muted-foreground">{total}</span>
           {closeButton}
         </div>
+        {searchable ? (
         <label className="mt-3 flex h-[38px] items-center gap-2 rounded-full bg-card px-3.5 shadow-[0_0_0_0.5px_var(--border),0_1px_2px_rgba(0,0,0,0.04)] focus-within:outline-2 focus-within:outline-ring">
           <Search className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
           <span className="sr-only">Find {title.toLowerCase()} by name</span>
@@ -129,14 +173,15 @@ function RailBody({
             </button>
           ) : null}
         </label>
+        ) : null}
 
-        {needle ? null : (
+        {needle || layout === "groups" ? null : (
           <div role="group" aria-label={`Show ${title.toLowerCase()} by group`} className="flex flex-wrap gap-1.5 border-b border-foreground/[0.07] pb-3 pt-3.5">
-            <button type="button" aria-pressed={chip === ALL} onClick={() => setPicked(ALL)} className={chipClass(chip === ALL)}>
+            <button type="button" aria-pressed={chip === ALL} onClick={() => setChip(ALL)} className={chipClass(chip === ALL)}>
               All <span className={count(chip === ALL)}>{total}</span>
             </button>
             {chips.map((g) => (
-              <button key={g.id} type="button" aria-pressed={chip === g.id} onClick={() => setPicked(g.id)} title={g.label} className={chipClass(chip === g.id)}>
+              <button key={g.id} type="button" aria-pressed={chip === g.id} onClick={() => setChip(g.id)} title={g.label} className={chipClass(chip === g.id)}>
                 {chipLabel(g)} <span className={count(chip === g.id)}>{g.items.length}</span>
               </button>
             ))}
@@ -164,7 +209,29 @@ function RailBody({
             {found ? `${found} found` : "Nothing by that name"}
           </p>
         ) : null}
-        {lists.map((g) => (
+        {layout === "groups" && !needle ? (
+          <ul className="flex flex-col gap-px pt-1">
+            {[{ id: ALL, label: `All ${title.toLowerCase()}`, items: [] as SidebarItem[], count: total }, ...groups.map((g) => ({ ...g, count: g.items.length }))].map((g) => {
+              const on = chip === g.id;
+              return (
+                <li key={g.id}>
+                  <button
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => setChip(g.id)}
+                    className={cn(row, "gap-2.5", on && "font-semibold text-foreground")}
+                    style={on ? { backgroundColor: `color-mix(in srgb, ${g.id === ALL ? "#8e8e93" : hue(g.id)} 14%, var(--card))` } : undefined}
+                  >
+                    <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ backgroundColor: g.id === ALL ? "currentColor" : hue(g.id), opacity: g.id === ALL ? 0.35 : 1 }} />
+                    <span className="min-w-0 flex-1 break-words">{g.label}</span>
+                    <span className="text-[12px] font-normal tabular-nums text-muted-foreground">{g.count}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
+        {(layout === "groups" && !needle ? [] : lists).map((g) => (
           <section key={g.id} aria-label={g.label || undefined} className="pb-3">
             {g.label ? (
               // the group's heading: its colour, bold, and pinned at the top of the list while you scroll through it
@@ -182,7 +249,12 @@ function RailBody({
             <ul className="flex flex-col gap-px">
               {g.items.map((i) => {
                 const current = i.href === pathname;
-                const tag = i.isNew && g.id !== "new" ? <span className="shrink-0 text-[10.5px] font-semibold text-[#bf4800] dark:text-[#ffb340]">New</span> : null;
+                const tag =
+                  i.pro && !isPro ? (
+                    <Lock className="size-3 shrink-0 text-muted-foreground" aria-label="Pro" />
+                  ) : i.isNew && g.id !== "new" ? (
+                    <span className="shrink-0 text-[10.5px] font-semibold text-[#bf4800] dark:text-[#ffb340]">New</span>
+                  ) : null;
                 return (
                   <li key={i.href}>
                     {i.play ? (
@@ -211,7 +283,20 @@ function RailBody({
  * The names column for wide screens: a frosted panel in the nav's own glass, which stays in view while the page
  * scrolls. Its names scroll inside it, and the page you are on is kept in sight.
  */
-export function ListingSidebar({ title, total, groups }: { title: string; total: number; groups: SidebarGroup[] }) {
+export function ListingSidebar({
+  title,
+  total,
+  groups,
+  param,
+  layout,
+}: {
+  title: string;
+  total: number;
+  groups: SidebarGroup[];
+  /** On a listing page, the address value the page filters by (see RailBody). */
+  param?: string;
+  layout?: "names" | "groups";
+}) {
   const list = React.useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   React.useEffect(() => {
@@ -227,7 +312,7 @@ export function ListingSidebar({ title, total, groups }: { title: string; total:
       aria-label={`${title} by name`}
       className="sticky top-[88px] flex h-[calc(100dvh-104px)] flex-col rounded-[28px] bg-white/65 px-2.5 pt-3.5 shadow-[0_0_0_0.5px_rgba(0,0,0,0.07),inset_0_1px_0_rgba(255,255,255,0.9),0_18px_40px_-22px_rgba(0,0,0,0.32)] backdrop-blur-2xl backdrop-saturate-[1.8] dark:bg-[#1c1c1e]/65 dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.1),0_18px_40px_-22px_rgba(0,0,0,0.8)]"
     >
-      <RailBody title={title} total={total} groups={groups} scrolls listRef={list} />
+      <RailBody title={title} total={total} groups={groups} scrolls listRef={list} param={param} layout={layout} />
     </nav>
   );
 }
@@ -331,5 +416,25 @@ export function ListingBrowse({
           )
         : null}
     </>
+  );
+}
+
+/**
+ * The listing page's groups for phones and tablets, where the names column is hidden: the same choice as the
+ * column (one value in the address), as a row of chips over the results.
+ */
+export function ListingGroupChips({ groups, total, param, className }: { groups: SidebarGroup[]; total: number; param: string; className?: string }) {
+  const [chip, setChip] = useGroupChoice(param, groups, ALL);
+  return (
+    <ChipRail className={cn("lg:hidden", className)}>
+      <Chip active={chip === ALL} onClick={() => setChip(ALL)}>
+        All <span className={cn("text-[12px] tabular-nums", chip === ALL ? "text-background/60" : "text-muted-foreground")}>{total}</span>
+      </Chip>
+      {groups.map((g) => (
+        <Chip key={g.id} active={chip === g.id} onClick={() => setChip(g.id)}>
+          {chipLabel(g)} <span className={cn("text-[12px] tabular-nums", chip === g.id ? "text-background/60" : "text-muted-foreground")}>{g.items.length}</span>
+        </Chip>
+      ))}
+    </ChipRail>
   );
 }

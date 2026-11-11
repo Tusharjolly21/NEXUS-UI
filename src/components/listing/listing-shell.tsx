@@ -19,11 +19,13 @@ export function ListingShell({
   rail,
   children,
 }: {
-  sidebar: React.ReactNode;
+  /** The names column; a page whose content is already the full list (Sounds) leaves it out. */
+  sidebar?: React.ReactNode;
   rail: React.ReactNode;
   children: React.ReactNode;
 }) {
   const { isPro } = useProAccess();
+  const side = !!sidebar;
   return (
     <div className="relative -mt-[64px] pb-24 pt-[112px]">
       <div aria-hidden className="pg-dotgrid pointer-events-none absolute inset-x-0 top-0 h-[620px] [mask-image:linear-gradient(black_55%,transparent)]">
@@ -31,11 +33,13 @@ export function ListingShell({
       </div>
       <div
         className={cn(
-          "relative grid w-full grid-cols-1 gap-6 px-4 sm:px-6 lg:grid-cols-[236px_minmax(0,1fr)] lg:gap-8 2xl:grid-cols-[264px_minmax(0,1fr)] 2xl:gap-10 2xl:px-8",
-          !isPro && "xl:grid-cols-[248px_minmax(0,1fr)_296px] 2xl:grid-cols-[264px_minmax(0,1fr)_312px]",
+          "relative grid w-full grid-cols-1 gap-6 px-4 sm:px-6 2xl:px-8",
+          side && "lg:grid-cols-[236px_minmax(0,1fr)] lg:gap-8 2xl:grid-cols-[264px_minmax(0,1fr)] 2xl:gap-10",
+          side && !isPro && "xl:grid-cols-[248px_minmax(0,1fr)_296px] 2xl:grid-cols-[264px_minmax(0,1fr)_312px]",
+          !side && !isPro && "xl:grid-cols-[minmax(0,1fr)_296px] xl:gap-8 2xl:grid-cols-[minmax(0,1fr)_312px] 2xl:gap-10",
         )}
       >
-        <div className="hidden lg:block">{sidebar}</div>
+        {side ? <div className="hidden lg:block">{sidebar}</div> : null}
         <div className="@container min-w-0">{children}</div>
         {isPro ? null : <div className="hidden xl:block">{rail}</div>}
       </div>

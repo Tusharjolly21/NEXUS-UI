@@ -1,5 +1,7 @@
 "use client";
 
+import { madeFor, VIDEO_PLATFORMS } from "@/lib/catalog/video-platforms";
+import { useUrlParam } from "@/components/gallery/use-url-param";
 import * as React from "react";
 import Link from "next/link";
 import { AccessTag, IfPro } from "@/components/pro/pro-access";
@@ -12,23 +14,10 @@ export type GalleryVideo = Pick<VideoEntry, "slug" | "title" | "purpose" | "moti
 /** Videos that get the big tile. */
 const FEATURED = new Set(["launch-film"]);
 
-/** The filter chips. A video belongs to a chip when it is made for one of the places in `match`. */
-const CHIPS: { id: string; label: string; match?: string[]; free?: boolean }[] = [
-  { id: "all", label: "All" },
-  { id: "free", label: "Free", free: true },
-  { id: "reels", label: "Reels & TikTok", match: ["Reels", "TikTok", "Shorts", "Instagram carousel", "Instagram feed"] },
-  { id: "youtube", label: "YouTube", match: ["YouTube"] },
-  { id: "x", label: "X", match: ["X"] },
-  { id: "linkedin", label: "LinkedIn", match: ["LinkedIn"] },
-  { id: "ph", label: "Product Hunt", match: ["Product Hunt"] },
-  { id: "store", label: "App Store", match: ["App Store", "Play Store"] },
-  { id: "site", label: "Website", match: ["Website"] },
-];
-
-function inChip(v: GalleryVideo, chip: (typeof CHIPS)[number]) {
-  if (chip.id === "all") return true;
-  if (chip.free) return !v.premium;
-  return v.platforms.some((p) => chip.match?.includes(p));
+function inChip(v: GalleryVideo, chip: string) {
+  if (chip === "all") return true;
+  if (chip === "free") return !v.premium;
+  return madeFor(v.platforms, chip);
 }
 
 type Kind = "feature" | "wide" | "tall" | "square" | "portrait";
@@ -196,48 +185,44 @@ function Tile({ video, kind, priority }: { video: GalleryVideo; kind: Kind; prio
 }
 
 export function VideoGallery({ videos }: { videos: GalleryVideo[] }) {
-  const [chip, setChip] = React.useState("all");
+  // the place a video is made for lives in the address, shared with the names column and the phone chips
+  const [forParam, setForParam] = useUrlParam("for");
+  const platform = forParam && VIDEO_PLATFORMS.some((p) => p.id === forParam) ? forParam : "all";
+  const [freeOnly, setFreeOnly] = React.useState(false);
   const [q, setQ] = React.useState("");
-
-  const counts = React.useMemo(() => Object.fromEntries(CHIPS.map((c) => [c.id, videos.filter((v) => inChip(v, c)).length])), [videos]);
+  const freeCount = React.useMemo(() => videos.filter((v) => !v.premium).length, [videos]);
+  const chip = freeOnly ? "free" : platform;
 
   const shown = React.useMemo(() => {
-    const active = CHIPS.find((c) => c.id === chip) ?? CHIPS[0];
     const words = q.toLowerCase().split(/\s+/).filter(Boolean);
     const list = videos.filter((v) => {
-      if (!inChip(v, active)) return false;
+      if (!inChip(v, platform)) return false;
+      if (freeOnly && v.premium) return false;
       if (!words.length) return true;
       const hay = [v.title, v.purpose, v.motion, v.app, ...v.platforms, ...v.formats, v.premium ? "pro" : "free"].join(" ").toLowerCase();
       return words.every((w) => hay.includes(w));
     });
-    return arrange(list, active.id === "all" && words.length === 0);
-  }, [videos, chip, q]);
+    return arrange(list, platform === "all" && !freeOnly && words.length === 0);
+  }, [videos, platform, freeOnly, q]);
 
   const filtered = chip !== "all" || q.trim() !== "";
 
   return (
     <div>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div role="group" aria-label="Filter videos" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden">
-          {CHIPS.filter((c) => counts[c.id] > 0).map((c) => {
-            const on = chip === c.id;
-            return (
-              <button
-                key={c.id}
-                type="button"
-                aria-pressed={on}
-                onClick={() => setChip(c.id)}
-                className={cn(
-                  "inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-[14px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-                  on ? "bg-foreground text-background" : "bg-muted text-foreground/80 hover:bg-foreground/10 hover:text-foreground",
-                )}
-              >
-                {c.label}
-                <span className={cn("text-[12px] tabular-nums", on ? "text-background/60" : "text-muted-foreground")}>{counts[c.id]}</span>
-              </button>
-            );
-          })}
-        </div>
+        {/* the places live in the names column (and the chips above on phones); Free is not a place, so it stays here */}
+        <button
+          type="button"
+          aria-pressed={freeOnly}
+          onClick={() => setFreeOnly((v) => !v)}
+          className={cn(
+            "inline-flex shrink-0 items-center gap-1.5 self-start rounded-full px-4 py-2 text-[14px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring lg:self-auto",
+            freeOnly ? "bg-foreground text-background" : "bg-muted text-foreground/80 hover:bg-foreground/10 hover:text-foreground",
+          )}
+        >
+          Free only
+          <span className={cn("text-[12px] tabular-nums", freeOnly ? "text-background/60" : "text-muted-foreground")}>{freeCount}</span>
+        </button>
         <label className="relative block w-full lg:w-[280px]">
           <span className="sr-only">Search videos</span>
           <svg aria-hidden viewBox="0 0 20 20" className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
@@ -262,7 +247,8 @@ export function VideoGallery({ videos }: { videos: GalleryVideo[] }) {
             <button
               type="button"
               onClick={() => {
-                setChip("all");
+                setForParam(null);
+                setFreeOnly(false);
                 setQ("");
               }}
               className="font-medium text-foreground underline underline-offset-4"

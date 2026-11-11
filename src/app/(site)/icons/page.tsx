@@ -7,7 +7,7 @@ import { ICONS } from "@/lib/icons/catalog";
 import { FREE_ICON_COUNT, PRO_ICON_COUNT } from "@/lib/icons/count";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { ListingShell } from "@/components/listing/listing-shell";
-import { ListingBrowse, ListingSidebar } from "@/components/listing/listing-sidebar";
+import { ListingGroupChips, ListingSidebar, RESULTS_ID } from "@/components/listing/listing-sidebar";
 import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
 import { totalOf } from "@/lib/catalog/listing-groups/total";
 import { iconGroups } from "@/lib/catalog/listing-groups/icons";
@@ -60,8 +60,7 @@ export default function IconsPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <ListingShell sidebar={<ListingSidebar title="Icons" total={total} groups={groups} />} rail={<ProRail copy={copy} />}>
-        <ListingBrowse title="Icons" total={total} groups={groups} className="mb-8" />
+      <ListingShell sidebar={<ListingSidebar title="Icons" total={total} groups={groups} param="category" layout="groups" />} rail={<ProRail copy={copy} />}>
         <h1 className="pg-display max-w-[900px] text-[clamp(42px,5.4vw,76px)] leading-[1.02] text-foreground">
           Animated icons for React that <RainbowWord>move</RainbowWord>.
         </h1>
@@ -71,7 +70,8 @@ export default function IconsPage() {
         </p>
         <ProBand copy={copy} className="mt-8" />
 
-        <section aria-label="Icon library" className="mt-10">
+        <section id={RESULTS_ID} aria-label="Icon library" className="mt-10 scroll-mt-24">
+          <ListingGroupChips groups={groups} total={total} param="category" className="mb-4" />
           <IconGrid />
         </section>
 
