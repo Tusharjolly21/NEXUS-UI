@@ -33,6 +33,9 @@ const CHIP_PEEK = 9;
 
 const subscribeNever = () => () => {};
 
+/** One colour per group, in turn, from the site's spectrum: the dot and soft tint on its heading. */
+const HUES = ["#ff7a1a", "#0a84ff", "#30d158", "#bf5af2", "#ff375f", "#ffb300"];
+
 /** "Inputs & controls" → "Inputs"; short labels stay as they are. */
 function chipLabel(g: SidebarGroup) {
   if (g.short) return g.short;
@@ -84,6 +87,7 @@ function RailBody({
       ]
     : chosen;
   const found = needle ? lists[0].items.length : 0;
+  const hue = (id: string) => HUES[Math.max(0, groups.findIndex((g) => g.id === id)) % HUES.length];
 
   // the chosen chip always shows, even when it is past the first few
   const chosenAt = groups.findIndex((g) => g.id === chip);
@@ -161,8 +165,20 @@ function RailBody({
           </p>
         ) : null}
         {lists.map((g) => (
-          <section key={g.id} aria-label={g.label || undefined} className="pb-2">
-            {g.label ? <p className="px-2.5 pb-1 pt-2 text-[12px] text-muted-foreground">{g.label}</p> : null}
+          <section key={g.id} aria-label={g.label || undefined} className="pb-3">
+            {g.label ? (
+              // the group's heading: its colour, bold, and pinned at the top of the list while you scroll through it
+              <div className="sticky top-0 z-10 bg-[color-mix(in_srgb,var(--card)_96%,transparent)] pb-1 pt-1.5 backdrop-blur-md">
+                <p
+                  className="flex items-center gap-2 rounded-xl px-2.5 py-[7px] text-[13.5px] font-semibold tracking-[-0.01em] text-foreground"
+                  style={{ backgroundColor: `color-mix(in srgb, ${hue(g.id)} 13%, var(--card))` }}
+                >
+                  <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ backgroundColor: hue(g.id), boxShadow: `0 0 0 3px color-mix(in srgb, ${hue(g.id)} 22%, transparent)` }} />
+                  <span className="min-w-0 flex-1 break-words">{g.label}</span>
+                  <span className="text-[12px] font-medium tabular-nums text-muted-foreground">{g.items.length}</span>
+                </p>
+              </div>
+            ) : null}
             <ul className="flex flex-col gap-px">
               {g.items.map((i) => {
                 const current = i.href === pathname;
