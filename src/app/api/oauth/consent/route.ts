@@ -24,19 +24,26 @@ export async function POST(request: Request) {
   const { origin } = new URL(request.url);
   if (!fromOurSite(request, origin)) return new NextResponse("Forbidden", { status: 403 });
 
+  // The consent page asks for JSON and moves the browser itself (see consent-form.tsx); a plain form post without
+  // JavaScript gets redirects.
+  const wantsJson = request.headers.get("accept")?.includes("application/json") ?? false;
+  const go = (url: string, status = 200) =>
+    wantsJson ? NextResponse.json({ redirect_url: url }, { status }) : NextResponse.redirect(url, 303);
+  const fail = (message: string, back: string) =>
+    wantsJson ? NextResponse.json({ error: message }, { status: 400 }) : NextResponse.redirect(back, 303);
+
   const form = await request.formData();
   const id = form.get("authorization_id");
   const decision = form.get("decision");
   if (typeof id !== "string" || !/^[\w-]{8,128}$/.test(id) || (decision !== "approve" && decision !== "deny")) {
-    return NextResponse.redirect(`${origin}/oauth/consent`, 303);
+    return fail("This connection request isn't valid. Go back to the app and connect again.", `${origin}/oauth/consent`);
   }
+  const consentPage = `${origin}/oauth/consent?authorization_id=${id}`;
 
   const supabase = await createRouteClient();
-  if (!supabase) return NextResponse.redirect(`${origin}/oauth/consent`, 303);
+  if (!supabase) return fail("Sign-in isn't available right now. Try again in a minute.", consentPage);
   const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) {
-    return NextResponse.redirect(`${origin}/login?next=${encodeURIComponent(`/oauth/consent?authorization_id=${id}`)}`, 303);
-  }
+  if (!auth.user) return go(`${origin}/login?next=${encodeURIComponent(`/oauth/consent?authorization_id=${id}`)}`, 401);
 
   const { data, error } =
     decision === "approve"
@@ -46,10 +53,8 @@ export async function POST(request: Request) {
     console.error("[oauth/consent] decision failed:", error?.code ?? "", error?.message);
     // A request that was already answered (a second tap, Back then Allow) may still have its way back to the app.
     const { data: details } = await supabase.auth.oauth.getAuthorizationDetails(id);
-    if (details && !("authorization_id" in details) && details.redirect_url) {
-      return NextResponse.redirect(details.redirect_url, 303);
-    }
-    return NextResponse.redirect(`${origin}/oauth/consent?authorization_id=${id}`, 303);
+    if (details && !("authorization_id" in details) && details.redirect_url) return go(details.redirect_url);
+    return fail("This connection request has expired. Go back to the app and connect again.", consentPage);
   }
-  return NextResponse.redirect(data.redirect_url, 303);
+  return go(data.redirect_url);
 }
