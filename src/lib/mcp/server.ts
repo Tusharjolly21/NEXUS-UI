@@ -242,7 +242,40 @@ type Deliverable = {
 };
 
 type RegistryFile = { path?: string; target?: string; content?: string };
-type RegistryItem = { dependencies?: string[]; files?: RegistryFile[] };
+type RegistryItem = { dependencies?: string[]; registryDependencies?: string[]; files?: RegistryFile[] };
+
+/**
+ * The shared items a component imports (for example @/lib/ui-sounds), which the install command adds on its own.
+ * Listed so an agent writing the files by hand knows what else the imports need and how to get it.
+ */
+async function sharedItemsText(reg: RegistryItem | null): Promise<string> {
+  const lines: string[] = [];
+  for (const dep of reg?.registryDependencies ?? []) {
+    const ours = /^https?:\/\//.test(dep);
+    const name = ours ? dep.replace(/\/+$/, "").split("/").pop()! : dep;
+    if (!ours) {
+      lines.push(
+        name === "utils"
+          ? "- utils: imported as @/lib/utils, the cn helper `npx shadcn@latest init` already creates"
+          : `- ${name}: shadcn's own component, imported as @/components/ui/${name} (\`npx shadcn@latest add ${name}\`)`,
+      );
+      continue;
+    }
+    const item = await readRegistry(name);
+    const imports = (item?.files ?? [])
+      .map((f) => f.target ?? f.path)
+      .filter((p): p is string => !!p)
+      .map((p) => `@/${p.replace(/^next-ui\//, "").replace(/\.(tsx?|jsx?)$/, "")}`);
+    const what = imports.length ? `imported as ${imports.join(", ")}` : "theme setup (font and CSS variables), nothing to import";
+    lines.push(`- ${name}: ${what} (\`${installCommand(name)}\`)`);
+  }
+  if (!lines.length) return "";
+  return [
+    "## Shared items",
+    "The install command adds these too. If you create the files by hand, add them with the command shown:",
+    ...lines,
+  ].join("\n");
+}
 
 async function readRegistry(name: string, licensedTo?: string): Promise<RegistryItem | null> {
   try {
@@ -393,12 +426,14 @@ export function createNexusMcpServer({ token, oauth }: { token: string | null; o
         used += size;
       } else held.push(f);
     }
+    const shared = await sharedItemsText(reg);
     const body = [
       ...head,
       "",
       setupText(d.registry, d.premium),
       "",
       `## npm packages\n${deps.length ? deps.join(" ") : "none beyond React"}`,
+      shared ? `\n${shared}` : "",
       files.length ? `\n## Files (${files.length})` : `\n## Files\nThe file list is not available right now; use the install command above.`,
       held.length
         ? `This ${d.kind} is large, so ${sent.length} of its ${files.length} files are below. Get each of the others with ${d.tool} and its path in "file": ${held
