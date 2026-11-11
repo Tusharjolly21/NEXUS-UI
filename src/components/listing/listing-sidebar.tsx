@@ -53,6 +53,7 @@ function RailBody({
   onNavigate,
   scrolls = false,
   listRef,
+  closeButton,
 }: {
   title: string;
   total: number;
@@ -61,6 +62,8 @@ function RailBody({
   /** The names scroll inside a fixed height (the wide-screen column) while the title, search and chips stay put. */
   scrolls?: boolean;
   listRef?: React.Ref<HTMLDivElement>;
+  /** The sheet's Close, set in the title row after the count so the two never sit on top of each other. */
+  closeButton?: React.ReactNode;
 }) {
   const pathname = usePathname();
   const activeId = groups.find((g) => g.href === pathname || g.items.some((i) => i.href === pathname))?.id ?? null;
@@ -102,9 +105,10 @@ function RailBody({
   return (
     <div className={cn("flex flex-col", scrolls && "min-h-0 flex-1")}>
       <div className="shrink-0">
-        <div className="flex items-center justify-between px-2">
-          <p className="text-[15px] font-semibold tracking-[-0.015em] text-foreground">{title}</p>
+        <div className="flex items-center gap-2 px-2">
+          <p className="min-w-0 flex-1 text-[15px] font-semibold tracking-[-0.015em] text-foreground">{title}</p>
           <span className="rounded-full bg-foreground/[0.05] px-2 py-0.5 text-[12px] font-semibold tabular-nums text-muted-foreground">{total}</span>
+          {closeButton}
         </div>
         <label className="mt-3 flex h-[38px] items-center gap-2 rounded-full bg-card px-3.5 shadow-[0_0_0_0.5px_var(--border),0_1px_2px_rgba(0,0,0,0.04)] focus-within:outline-2 focus-within:outline-ring">
           <Search className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
@@ -286,17 +290,24 @@ export function ListingBrowse({
               <button type="button" aria-label="Close" tabIndex={-1} onClick={() => setOpen(false)} className="absolute inset-0 bg-black/30 backdrop-blur-[3px]" />
               <div className="absolute inset-x-0 bottom-0 flex max-h-[86dvh] flex-col rounded-t-[30px] bg-background shadow-[0_-20px_60px_-20px_rgba(0,0,0,0.45)] [padding-bottom:env(safe-area-inset-bottom)]">
                 <span aria-hidden className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-foreground/15" />
-                <button
-                  ref={closeBtn}
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  aria-label="Close"
-                  className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-foreground/[0.06] text-foreground focus-visible:outline-2 focus-visible:outline-ring"
-                >
-                  <X className="size-4" aria-hidden />
-                </button>
                 <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-3">
-                  <RailBody title={title} total={total} groups={groups} onNavigate={() => setOpen(false)} />
+                  <RailBody
+                    title={title}
+                    total={total}
+                    groups={groups}
+                    onNavigate={() => setOpen(false)}
+                    closeButton={
+                      <button
+                        ref={closeBtn}
+                        type="button"
+                        onClick={() => setOpen(false)}
+                        aria-label="Close"
+                        className="-mr-1 ml-1 grid size-9 shrink-0 place-items-center rounded-full bg-foreground/[0.06] text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+                      >
+                        <X className="size-4" aria-hidden />
+                      </button>
+                    }
+                  />
                 </div>
               </div>
             </div>,
