@@ -196,8 +196,10 @@ export default function ImpactPage() {
 
           <p className="mt-8 max-w-[760px] text-[13.5px] leading-relaxed text-muted-foreground">
             21st.dev is a separate site and we are an author on it. These figures come from our own profile and Creator
-            Studio analytics and change every day: the last 30 days and the rank were last checked on {ANALYTICS_CHECKED_LABEL},
-            and the all-time totals on {CHECKED_LABEL}.
+            Studio analytics and change every day.{" "}
+            {ANALYTICS_CHECKED_LABEL === CHECKED_LABEL
+              ? `The last check was ${CHECKED_LABEL}.`
+              : `The last 30 days and the rank were last checked on ${ANALYTICS_CHECKED_LABEL}, and the all-time totals on ${CHECKED_LABEL}.`}
           </p>
         </div>
       </section>

@@ -10,15 +10,15 @@
 export const PROFILE_URL = "https://21st.dev/@nexus-ui";
 
 /** When the lifetime SNAPSHOT was read (UTC), and how that date is written on the page. The estimate counts from here. */
-export const CHECKED_AT = "2026-11-10T04:00:00Z";
-export const CHECKED_LABEL = "10 November 2026";
+export const CHECKED_AT = "2026-11-12T05:49:00Z";
+export const CHECKED_LABEL = "12 November 2026";
 
 /** When the last-30-days figures and the weekly rank were last read. */
 export const ANALYTICS_CHECKED_AT = "2026-11-12T05:40:00Z";
 export const ANALYTICS_CHECKED_LABEL = "12 November 2026";
 
 /** Lifetime counts on the public profile when they were last read. */
-export const SNAPSHOT: { views: number; bookmarks: number; components: number } = { views: 934_900, bookmarks: 3_900, components: 41 };
+export const SNAPSHOT: { views: number; bookmarks: number; components: number } = { views: 957_200, bookmarks: 4_000, components: 41 };
 
 /**
  * Exact figures from the Creator Studio analytics, "Last 30 days", read at ANALYTICS_CHECKED_AT. Installs and
