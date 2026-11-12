@@ -5,7 +5,10 @@
  * (as Holdings Cluster), Swipe Stack (as Draft Stack), Hold to Confirm (as
  * Hold to Send),
  * Folder Peek, Matrix Loaders, Scrub Inputs, Radio Cards and the Price
- * Odometer's rolling number.
+ * Odometer's rolling number. The hero opens with an X-ray: the portfolio
+ * starts as one opaque block, a scan line sweeps across and reveals what's
+ * inside (including the hidden concentration), then the risk dial takes over.
+ * Instrument Serif and Albert Sans.
  */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as RKeyboardEvent } from "react";
 import { AnimatePresence, MotionConfig, animate, motion, useMotionValue, useMotionValueEvent, useSpring, useTransform, type MotionValue } from "framer-motion";
@@ -18,11 +21,18 @@ import HoldingsCluster from "@/components/templates/aureon/HoldingsCluster";
 import DraftStack from "@/components/templates/aureon/DraftStack";
 import HoldToSend from "@/components/templates/aureon/HoldToSend";
 import StickyStory from "@/components/templates/aureon/StickyStory";
+import { fontFaces } from "@/components/templates/kit/fonts";
 import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, Words, card, scrollToId } from "@/components/templates/kit/parts";
 
-const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
-const A = "#4d7c0f"; // olive: 5:1 on white
-const WARN = "#c2410c";
+const SYSTEM_FONT = "'Albert Sans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const A = "#1e4d3a"; // forest: 9.5:1 on white
+const WARN = "#c4501a";
+const INK = "#101418";
+const FONT_CSS =
+  fontFaces("aureon", [
+    { family: "Albert Sans Variable", file: "albert-sans" },
+    { family: "Instrument Serif", file: "instrument-serif", weight: "400", variable: false },
+  ]) + `.ar h1,.ar h2{font-family:${"'Instrument Serif', Georgia, serif"};font-weight:400;letter-spacing:-0.02em}`;
 
 function Logo() {
   return (
@@ -56,10 +66,10 @@ function plan(r: number): Record<Key, number> {
 
 const SEGS: { k: Key; label: string; c: string; ink: string }[] = [
   { k: "us", label: "US stocks", c: A, ink: "#fff" },
-  { k: "intl", label: "International", c: "#8fae4f", ink: "#1d1d1f" },
+  { k: "intl", label: "International", c: "#8fb39a", ink: "#101418" },
   { k: "emp", label: "Employer stock", c: WARN, ink: "#fff" },
-  { k: "bond", label: "Bonds", c: "#d3dcc2", ink: "#1d1d1f" },
-  { k: "cash", label: "Cash", c: "#ebebe6", ink: "#1d1d1f" },
+  { k: "bond", label: "Bonds", c: "#e2d8c3", ink: "#101418" },
+  { k: "cash", label: "Cash", c: "#ececea", ink: "#101418" },
 ];
 
 const KNOB = 40;
@@ -97,6 +107,11 @@ function RiskBand() {
   const [level, setLevel] = useState(6);
   const [planOn, setPlanOn] = useState(false);
   const [touched, setTouched] = useState(false);
+  const scan = useMotionValue(0); // the X-ray sweep across the band, 0 to 1
+  const [scanned, setScanned] = useState(false);
+  const cover = useTransform(scan, (v) => `inset(0 0 0 ${v * 100}%)`);
+  const lineX = useTransform(scan, (v) => `${v * 100}%`);
+  const lineO = useTransform(scan, [0, 0.03, 0.97, 1], [0, 1, 1, 0]);
   const levelRef = useRef(level);
   useEffect(() => { levelRef.current = level; }, [level]);
   useMotionValueEvent(pos, "change", (p) => setLevel(Math.round(1 + p * 9)));
@@ -120,11 +135,12 @@ function RiskBand() {
     animate(mode, on ? 1 : 0, { type: "spring", stiffness: 120, damping: 20 });
   };
 
-  // The band shows today's portfolio first, then drafts a plan by itself once.
+  // First the X-ray: the band starts as one block and a scan reveals what's inside. Then, once, a plan drafts itself.
   useEffect(() => {
-    const t = setTimeout(() => { if (mode.get() === 0) { setPlanOn(true); animate(mode, 1, { type: "spring", stiffness: 120, damping: 20 }); } }, 1600);
-    return () => clearTimeout(t);
-  }, [mode]);
+    const c = animate(scan, 1, { duration: 1.8, delay: 0.7, ease: [0.45, 0, 0.2, 1], onComplete: () => setScanned(true) });
+    const t = setTimeout(() => { if (mode.get() === 0) { setPlanOn(true); animate(mode, 1, { type: "spring", stiffness: 120, damping: 20 }); } }, 5200);
+    return () => { c.stop(); clearTimeout(t); };
+  }, [mode, scan]);
 
   const goLevel = (l: number) => {
     const n = Math.max(1, Math.min(10, l));
@@ -156,10 +172,10 @@ function RiskBand() {
     <div className={`${card} overflow-hidden`}>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-black/[.06] px-5 py-3.5 sm:px-6">
         <span className="text-[13px] font-semibold text-[#1d1d1f]">Sample household</span>
-        <span className="text-[13px] tabular-nums text-[#6e6e73]">4 accounts · ${TOTAL.toLocaleString("en-US")}</span>
+        <span className="text-[13px] tabular-nums text-[#6e6e73]">4 accounts, ${TOTAL.toLocaleString("en-US")}</span>
         <span className="ml-auto flex items-center gap-1.5 text-[12px] font-medium" style={{ color: A }}>
           <motion.span className="h-2 w-2 rounded-full" style={{ background: A }} animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.6, repeat: Infinity }} />
-          Read-only · synced 2 min ago
+          Read-only, synced 2 min ago
         </span>
       </div>
 
@@ -169,7 +185,7 @@ function RiskBand() {
             {["Today", "Aureon plan"].map((l, i) => {
               const on = planOn === (i === 1);
               return (
-                <button key={l} type="button" aria-pressed={on} onClick={() => { setTouched(true); showPlan(i === 1); }} className="relative z-10 h-9 rounded-[9px] px-4 text-[13px] font-medium text-[#1d1d1f] outline-none focus-visible:ring-2 focus-visible:ring-[#4d7c0f]">
+                <button key={l} type="button" aria-pressed={on} onClick={() => { setTouched(true); showPlan(i === 1); }} className="relative z-10 h-9 rounded-[9px] px-4 text-[13px] font-medium text-[#1d1d1f] outline-none focus-visible:ring-2 focus-visible:ring-[#1e4d3a]">
                   {on && <motion.span layoutId="aureon-mode" transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)]" />}
                   {l}
                 </button>
@@ -180,8 +196,26 @@ function RiskBand() {
         </div>
 
         <div>
-          <div className="flex h-[96px] w-full gap-[3px] overflow-hidden rounded-[18px] sm:h-[132px]" role="img" aria-label={`Allocation: ${SEGS.map((s) => `${s.label} ${Math.round(target[s.k] * 100)}%`).join(", ")}`}>
-            {SEGS.map((s) => <Segment key={s.k} s={s} pos={pos} mode={mode} />)}
+          <div className="relative">
+            <div className="flex h-[96px] w-full gap-[3px] overflow-hidden rounded-[18px] sm:h-[148px]" role="img" aria-label={`Allocation: ${SEGS.map((s) => `${s.label} ${Math.round(target[s.k] * 100)}%`).join(", ")}`}>
+              {SEGS.map((s) => <Segment key={s.k} s={s} pos={pos} mode={mode} />)}
+            </div>
+            {/* how it looks from your brokerage app: one number. The scan peels it back. */}
+            <motion.div aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-end justify-between overflow-hidden rounded-[18px] px-4 pb-3 text-white" style={{ background: INK, clipPath: cover }}>
+              <span className="flex flex-col">
+                <span className="text-[12px] text-white/60">4 accounts, as your apps show them</span>
+                <span className="text-[clamp(20px,3vw,34px)] font-semibold tabular-nums tracking-[-0.03em]">${TOTAL.toLocaleString("en-US")}</span>
+              </span>
+              <span className="text-[12px] text-white/60">Scanning inside every fund</span>
+            </motion.div>
+            <motion.span aria-hidden="true" className="pointer-events-none absolute -bottom-2 -top-2 w-[3px] rounded-full" style={{ left: lineX, opacity: lineO, background: "#7fe0c0", boxShadow: "0 0 18px 4px rgba(127,224,192,.65)" }} />
+            <AnimatePresence>
+              {scanned && !planOn ? (
+                <motion.span key="hidden" className="absolute -top-3 rounded-full px-2.5 py-1 text-[12px] font-semibold text-white shadow-[0_8px_18px_-8px_rgba(0,0,0,.5)]" style={{ left: "57%", background: WARN }} initial={{ opacity: 0, y: 8, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0 }} transition={{ type: "spring", stiffness: 420, damping: 24 }}>
+                  31% in one company
+                </motion.span>
+              ) : null}
+            </AnimatePresence>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-[13px] sm:grid-cols-5">
             {SEGS.map((s) => (
@@ -232,7 +266,7 @@ function RiskBand() {
               whileDrag={{ scale: 1.12 }}
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 500, damping: 26 }}
-              className="absolute left-0 top-[2px] flex h-[40px] w-[40px] cursor-grab items-center justify-center rounded-full bg-white text-[14px] font-semibold tabular-nums text-[#1d1d1f] shadow-[0_6px_16px_-6px_rgba(0,0,0,.35),0_0_0_1px_rgba(0,0,0,.06)] outline-none focus-visible:ring-2 focus-visible:ring-[#4d7c0f] active:cursor-grabbing"
+              className="absolute left-0 top-[2px] flex h-[40px] w-[40px] cursor-grab items-center justify-center rounded-full bg-white text-[14px] font-semibold tabular-nums text-[#1d1d1f] shadow-[0_6px_16px_-6px_rgba(0,0,0,.35),0_0_0_1px_rgba(0,0,0,.06)] outline-none focus-visible:ring-2 focus-visible:ring-[#1e4d3a] active:cursor-grabbing"
               style={{ x }}
             >
               {!touched && (
@@ -278,56 +312,34 @@ function RiskBand() {
 function Hero() {
   return (
     <section className="relative overflow-hidden pb-16 pt-14 sm:pt-20">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[640px]" aria-hidden="true" style={{ background: "radial-gradient(50% 55% at 50% 0%, rgba(132,169,60,.20), transparent 70%), radial-gradient(30% 40% at 85% 30%, rgba(194,65,12,.07), transparent 70%)" }} />
-      <div className="relative mx-auto flex max-w-[1180px] flex-col items-center gap-6 px-5 text-center">
-        <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 26 }} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.07)]">
-          <span className="rounded-full px-2 py-0.5 text-[11px] font-semibold text-white" style={{ background: A }}>For DIY investors</span>
-          Read-only links. You approve every trade.
-        </motion.span>
-        <h1 className="m-0 max-w-[920px] text-[clamp(44px,7.6vw,96px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
-          <Words text="Know exactly what you own." className="justify-center" accentWords={["own."]} accent={A} />
-        </h1>
-        <Reveal delay={0.35} y={14}>
-          <p className="m-0 max-w-[640px] text-[clamp(17px,2.1vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
+      <div className="relative mx-auto grid max-w-[1180px] grid-cols-1 items-end gap-8 px-5 lg:grid-cols-[1.25fr_1fr] lg:gap-14">
+        <div className="flex flex-col items-start gap-6">
+          <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 26 }} className="text-[14px] font-medium text-[#4b5560]">
+            For people who manage their own money. Read-only links, and you approve every trade.
+          </motion.span>
+          <h1 className="m-0 text-[clamp(52px,8.4vw,112px)] leading-[0.92] text-[#101418] [text-wrap:balance]">
+            <Words text="Know exactly what you own." />
+          </h1>
+        </div>
+        <motion.div className="flex flex-col items-start gap-6 lg:pb-3" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 160, damping: 24, delay: 0.3 }}>
+          <p className="m-0 text-[clamp(17px,1.9vw,19px)] leading-[1.55] text-[#3f4851]">
             Aureon links your brokerage, 401(k) and stock-plan accounts, looks inside every fund, and shows the risk hiding in plain sight. Then it drafts the trades to fix it, and waits for your yes.
           </p>
-        </Reveal>
-        <Reveal delay={0.45} y={14} className="flex flex-wrap items-center justify-center gap-3">
-          <Magnetic className="text-white shadow-[0_10px_30px_-12px_rgba(77,124,15,.8)] focus-visible:ring-[#4d7c0f]" style={{ background: A }} onClick={() => scrollToId("pricing")}>Get your free X-ray</Magnetic>
-          <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)] focus-visible:ring-[#4d7c0f]" onClick={() => scrollToId("how")}>How it works</Magnetic>
-        </Reveal>
+          <div className="flex flex-wrap items-center gap-3">
+            <Magnetic className="text-white focus-visible:ring-[#1e4d3a]" style={{ background: A }} onClick={() => scrollToId("pricing")}>Get your free X-ray</Magnetic>
+            <Magnetic className="bg-white text-[#101418] shadow-[inset_0_0_0_1px_rgba(16,20,24,.16)] focus-visible:ring-[#1e4d3a]" onClick={() => scrollToId("how")}>How it works</Magnetic>
+          </div>
+        </motion.div>
       </div>
       <motion.div className="relative mx-auto mt-12 max-w-[1180px] px-5" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 140, damping: 22, delay: 0.25 }}>
         <RiskBand />
-        <p className="m-0 mt-3 text-center text-[12px] text-[#6e6e73]">Sample data. Drafts are suggestions for a made-up household, not advice for yours.</p>
+        <p className="m-0 mt-3 text-center text-[12px] text-[#5b646d]">Sample data. Drafts are suggestions for a made-up household, not advice for yours.</p>
       </motion.div>
     </section>
   );
 }
 
 /* ------------------------------------------------------------------ */
-
-function Stats() {
-  const items = [
-    { to: 9, f: (n: number) => `${Math.round(n)} min`, l: "median time from sign-up to first X-ray" },
-    { to: 1120, f: (n: number) => `$${Math.round(n).toLocaleString("en-US")}`, l: "median yearly fund fees found per household" },
-    { to: 34, f: (n: number) => `${Math.round(n)}%`, l: "of households held over 20% in one company" },
-    { to: 0, f: () => "0", l: "trades placed without the owner's approval" },
-  ];
-  return (
-    <section className="mx-auto max-w-[1180px] px-5 py-14" aria-label="Beta numbers">
-      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
-        {items.map((it) => (
-          <div key={it.l} className="flex flex-col gap-2 border-t border-black/[.08] pt-6">
-            <Counter to={it.to} format={it.f} className="text-[clamp(36px,4.6vw,52px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
-            <span className="text-[15px] leading-[1.4] text-[#6e6e73]">{it.l}</span>
-          </div>
-        ))}
-      </Stagger>
-      <p className="m-0 mt-8 text-[12px] text-[#6e6e73]">From 6,214 beta households, January to September 2026. Yours will be different.</p>
-    </section>
-  );
-}
 
 function Xray() {
   const facts = [
@@ -339,11 +351,11 @@ function Xray() {
     <section id="xray" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 lg:grid-cols-[1fr_1.1fr]">
         <div className="flex flex-col gap-8">
-          <SectionHead eyebrow="The X-ray" title="Your accounts, finally in one picture." sub="Most people hold the same few companies three times over and never see it. Aureon packs everything you own into one view, sized by how much of your money it is." accent={A} />
+          <SectionHead title="Your accounts, finally in one picture." sub="Most people hold the same few companies three times over and never see it. Aureon packs everything you own into one view, sized by how much of your money it is." accent={A} />
           <Stagger className="flex flex-col gap-4">
             {facts.map((f) => (
               <div key={f.k} className="flex gap-4">
-                <span className="mt-1 flex h-6 w-6 flex-none items-center justify-center rounded-full" style={{ background: "rgba(77,124,15,.12)", color: A }}>
+                <span className="mt-1 flex h-6 w-6 flex-none items-center justify-center rounded-full" style={{ background: "rgba(30,77,58,.12)", color: A }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
                 </span>
                 <span className="text-[16px] leading-[1.5] text-[#424245]"><b className="font-semibold text-[#1d1d1f]">{f.k}.</b> {f.v}</span>
@@ -367,14 +379,14 @@ function Xray() {
 
 function SyncBoard() {
   const rows = [
-    { p: 0, t: "Linking brokerage", s: "Read-only · 3 accounts" },
-    { p: 2, t: "Reading 401(k)", s: "212 lots · 6 funds" },
-    { p: 3, t: "Pricing stock grants", s: "4 RSU vests · 1 ESPP" },
-    { p: 1, t: "Looking inside funds", s: "9 funds · 3,412 holdings" },
+    { p: 0, t: "Linking brokerage", s: "Read-only, 3 accounts" },
+    { p: 2, t: "Reading 401(k)", s: "212 lots, 6 funds" },
+    { p: 3, t: "Pricing stock grants", s: "4 RSU vests, 1 ESPP" },
+    { p: 1, t: "Looking inside funds", s: "9 funds, 3,412 holdings" },
   ];
   return (
     <div className={`${card} flex w-[420px] flex-col gap-1 p-4`}>
-      <span className="px-3 pb-2 pt-1 text-[12px] font-semibold text-[#6e6e73]">Connecting · about 2 minutes</span>
+      <span className="px-3 pb-2 pt-1 text-[12px] font-semibold text-[#6e6e73]">Connecting, about 2 minutes</span>
       {rows.map((r, i) => (
         <motion.div key={r.t} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", stiffness: 300, damping: 26, delay: i * 0.08 }} className="flex items-center gap-4 rounded-2xl px-3 py-3 hover:bg-[#f5f5f7]">
           <MatrixLoader pattern={r.p} size={32} color={A} />
@@ -409,15 +421,15 @@ function SendBoard() {
 function How() {
   return (
     <section id="how" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="How it works" title="From login to a plan in one sitting." sub="No spreadsheets, no account numbers typed by hand. Aureon never holds your money and can't withdraw it." accent={A} />
+      <SectionHead title="From login to a plan in one sitting." sub="No spreadsheets, no account numbers typed by hand. Aureon never holds your money and can't withdraw it." accent={A} />
       <div className="mt-6">
         <StickyStory
           accent={A}
           steps={[
-            { kicker: "01 · Connect", title: "Link accounts, read-only.", body: "Sign in to your brokerage, 401(k) and stock plan through their own login pages. Aureon gets read access only, and every lot and grant comes across.", visual: <SyncBoard /> },
-            { kicker: "02 · Review", title: "Swipe through what Aureon drafts.", body: "Each draft says what to trade, why, and what it costs in tax. Keep the ones you agree with, skip the rest. Nothing moves yet.", visual: <div className={`${card} flex justify-center px-6 py-8`}><DraftStack accent={A} autoplay /></div> },
-            { kicker: "03 · Approve", title: "Hold to send. Then it's done.", body: "Approved drafts go to your brokerage as ordinary orders in your name. A long press stops a stray tap from trading.", visual: <SendBoard /> },
-            { kicker: "04 · Tax time", title: "Your tax pack, already sorted.", body: "Every harvested loss, every lot sold and the cost basis behind it, filed in one folder for you or your accountant.", visual: <div className={`${card} flex h-[380px] w-[420px] items-center justify-center`}><FolderPeek title="Tax pack 2026" meta="Lot report · harvest log · 8 files" color={A} autoplay /></div> },
+            { kicker: "Step 1", title: "Link accounts, read-only.", body: "Sign in to your brokerage, 401(k) and stock plan through their own login pages. Aureon gets read access only, and every lot and grant comes across.", visual: <SyncBoard /> },
+            { kicker: "Step 2", title: "Swipe through what Aureon drafts.", body: "Each draft says what to trade, why, and what it costs in tax. Keep the ones you agree with, skip the rest. Nothing moves yet.", visual: <div className={`${card} flex justify-center px-6 py-8`}><DraftStack accent={A} autoplay /></div> },
+            { kicker: "Step 3", title: "Hold to send. Then it's done.", body: "Approved drafts go to your brokerage as ordinary orders in your name. A long press stops a stray tap from trading.", visual: <SendBoard /> },
+            { kicker: "At tax time", title: "Your tax pack, already sorted.", body: "Every harvested loss, every lot sold and the cost basis behind it, filed in one folder for you or your accountant.", visual: <div className={`${card} flex h-[380px] w-[420px] items-center justify-center`}><FolderPeek title="Tax pack 2026" meta="Lot report · harvest log · 8 files" color={A} autoplay /></div> },
           ]}
         />
       </div>
@@ -464,7 +476,7 @@ function Planner() {
   return (
     <section id="planner" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Planner" title="Ask “what if” with your real numbers." sub="Drag a label sideways to change it. The projection starts from what you actually hold, in today's dollars, after inflation." accent={A} center />
+        <SectionHead title="Ask “what if” with your real numbers." sub="Drag a label sideways to change it. The projection starts from what you actually hold, in today's dollars, after inflation." accent={A} center />
         <Reveal y={20} amount={0.15} className="mt-12">
           <div className={`${card} grid grid-cols-1 gap-8 p-6 sm:p-8 lg:grid-cols-[280px_1fr]`}>
             <div className="flex flex-col gap-3">
@@ -517,11 +529,11 @@ const PRINCIPLES = [
 function Principles() {
   return (
     <section id="principles" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Ground rules" title="Built so it can't do the scary part." accent={A} />
+      <SectionHead title="Built so it can't do the scary part." accent={A} />
       <Stagger className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {PRINCIPLES.map((p) => (
           <motion.div key={p.t} whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 22 }} className={`${card} flex h-full flex-col gap-4 p-6`}>
-            <span className="flex h-11 w-11 items-center justify-center rounded-[14px]" style={{ background: "rgba(77,124,15,.1)", color: A }}>
+            <span className="flex h-11 w-11 items-center justify-center rounded-[14px]" style={{ background: "rgba(30,77,58,.1)", color: A }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={p.d} /></svg>
             </span>
             <h3 className="m-0 text-[19px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{p.t}</h3>
@@ -542,7 +554,7 @@ function Pricing() {
   return (
     <section id="pricing" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Pricing" title="A flat price. Not a slice of your savings." sub="Start with a free X-ray. Upgrade when you want Aureon to draft trades and run your tax tools." accent={A} center />
+        <SectionHead title="A flat price. Not a slice of your savings." sub="Start with a free X-ray. Upgrade when you want Aureon to draft trades and run your tax tools." accent={A} center />
         <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-2">
           <Reveal y={20} amount={0.15}>
             <div className={`${card} flex h-full flex-col gap-6 p-6 sm:p-7`}>
@@ -594,17 +606,17 @@ function Pricing() {
 export function StartupLandingPage() {
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen overflow-x-clip bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
+      <div className="ar min-h-screen overflow-x-clip bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
+        <style>{FONT_CSS}</style>
         <Nav brand={<Logo />} accent={A} cta="Get started" onCta={() => scrollToId("pricing")} links={[{ label: "X-ray", id: "xray" }, { label: "How it works", id: "how" }, { label: "Planner", id: "planner" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
         <Hero />
-        <Stats />
         <Xray />
         <How />
         <Planner />
         <Principles />
         <Pricing />
         <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-24 lg:grid-cols-[1fr_1.4fr]">
-          <SectionHead eyebrow="FAQ" title="Fair questions." accent={A} />
+          <SectionHead title="Fair questions." accent={A} />
           <Reveal y={16} amount={0.1}>
             <Faq
               accent={A}
