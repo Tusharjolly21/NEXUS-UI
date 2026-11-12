@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { useReducedMotion } from "framer-motion";
 
 /**
@@ -13,8 +14,13 @@ const RIBBONS = [
   { a: "M-80 260 C 300 200, 560 300, 900 220 S 1300 180, 1540 250", b: "M-80 240 C 260 260, 600 240, 880 260 S 1320 200, 1540 230", from: "#2fb7c9", to: "#8a7bff", o: 0.3, d: 22 },
 ];
 
+const noop = () => () => {};
+
 export default function Curtains({ className = "" }: { className?: string }) {
-  const still = useReducedMotion();
+  // false while hydrating (the server can't know the setting), then the visitor's real setting
+  const hydrated = useSyncExternalStore(noop, () => true, () => false);
+  const reduce = useReducedMotion();
+  const still = hydrated && !!reduce;
   return (
     <svg className={`pointer-events-none ${className}`} viewBox="0 0 1440 420" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
       <defs>
