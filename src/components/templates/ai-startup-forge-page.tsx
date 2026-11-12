@@ -15,7 +15,6 @@ import { BASE_CSS, FONT_CSS, FONT_MONO, FONT_SANS, IRON } from "@/components/tem
 import FolderPeek from "@/components/templates/kit/components/FolderPeek";
 import { MatrixLoader } from "@/components/templates/kit/components/MatrixLoaders";
 import StaggerMenu from "@/components/templates/kit/components/StaggerMenu";
-import BeforeAfter from "@/components/templates/kit/components/BeforeAfter";
 import { CopyCommand } from "@/components/templates/kit/components/CopyButton";
 import { CapsuleToggle } from "@/components/templates/kit/components/CapsuleToggle";
 import ElasticStepper from "@/components/templates/kit/components/ElasticStepper";
@@ -537,20 +536,36 @@ const AFTER = [
   `return withTotal(cart, atLeast0(cart.total - off));`,
   ``,
   `// + total.test.ts: 3 new cases`,
-  ``,
 ];
 
-function CodePane({ lines, tone, bg, mark }: { lines: string[]; tone: string; bg: string; mark: number[] }) {
+/** One side of the diff. `mark` lines are tinted: red for what goes, green for what Forge wrote. */
+function DiffPane({ title, note, lines, mark, tone, grow }: { title: string; note: string; lines: string[]; mark: number[]; tone: "del" | "add"; grow?: boolean }) {
+  const bg = tone === "del" ? "rgba(255,59,48,.07)" : "rgba(52,199,89,.09)";
+  const bar = tone === "del" ? "#ff3b30" : "#34c759";
   return (
-    <div className="flex h-full w-full items-center justify-center px-3 py-5 text-[9.5px] leading-[1.75] sm:text-[14px] lg:text-[17px]" style={{ background: bg, fontFamily: MONO }}>
-      <div className="flex w-[34em] max-w-full flex-col">
-      {lines.map((l, i) => (
-        <div key={i} className="relative flex gap-3 sm:gap-5">
-          <span className="w-3 flex-none select-none text-right tabular-nums text-[#86868b] sm:w-5">{i + 1}</span>
-          {mark.includes(i) && <span className="absolute -left-2 top-0 h-full w-[3px] rounded-full sm:-left-4" style={{ background: tone }} aria-hidden="true" />}
-          <code className="whitespace-pre">{hl(l)}{l === "" ? " " : null}</code>
-        </div>
-      ))}
+    <div className="flex min-w-0 flex-col">
+      <div className="flex items-baseline justify-between gap-3 border-b border-black/[.06] px-5 py-3.5">
+        <span className="text-[14px] font-semibold text-[#1d1d1f]">{title}</span>
+        <span className="text-[12.5px] text-[#6e6e73]">{note}</span>
+      </div>
+      <div className="overflow-x-auto py-3 text-[12.5px] leading-[1.85] sm:text-[13.5px]" style={{ fontFamily: MONO }}>
+        {lines.map((l, i) => {
+          const on = mark.includes(i);
+          const row = (
+            <div className="relative flex gap-4 px-5" style={{ background: on ? bg : undefined }}>
+              {on ? <span className="absolute left-0 top-0 h-full w-[3px]" style={{ background: bar }} aria-hidden="true" /> : null}
+              <span className="w-5 flex-none select-none text-right tabular-nums text-[#aeaeb2]">{i + 1}</span>
+              <code className="whitespace-pre">{hl(l)}{l === "" ? " " : null}</code>
+            </div>
+          );
+          return grow && on ? (
+            <motion.div key={i} initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.6 }} transition={{ type: "spring", stiffness: 260, damping: 26, delay: 0.25 + mark.indexOf(i) * 0.18 }}>
+              {row}
+            </motion.div>
+          ) : (
+            <div key={i}>{row}</div>
+          );
+        })}
       </div>
     </div>
   );
@@ -561,19 +576,16 @@ function Review() {
     <section id="review" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
         <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-[1.2fr_1fr]">
-          <SectionHead title="Drag to see what it would change." accent={AD} />
+          <SectionHead title="What it would change, line by line." accent={AD} />
           <Reveal y={14}>
             <p className="m-0 max-w-[460px] text-[17px] leading-[1.5] text-[#6e6e73]">Forge reviews your branch before you open the pull request. It ran your tests on this suggestion, found the missing case, and reused two helpers you already had.</p>
           </Reveal>
         </div>
         <Reveal className="mt-12" y={20} amount={0.15}>
-          <BeforeAfter
-            autoplay
-            beforeLabel="Your draft"
-            afterLabel="Forge"
-            before={<CodePane lines={BEFORE} tone="#ff3b30" bg="#fff" mark={[4, 5, 6, 8]} />}
-            after={<CodePane lines={AFTER} tone="#34c759" bg="#fffaf0" mark={[1, 4, 5, 7]} />}
-          />
+          <div className={`${card} grid grid-cols-1 divide-y divide-black/[.06] overflow-hidden lg:grid-cols-2 lg:divide-x lg:divide-y-0`}>
+            <DiffPane title="Your draft" note="4 lines flagged" lines={BEFORE} mark={[4, 5, 6, 8]} tone="del" />
+            <DiffPane title="Forge's version" note="42 of 42 tests pass" lines={AFTER} mark={[1, 4, 5, 7]} tone="add" grow />
+          </div>
         </Reveal>
         <Stagger className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {[
