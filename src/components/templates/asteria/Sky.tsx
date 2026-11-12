@@ -195,8 +195,8 @@ export function Constellation({ root, run, stage, color, w, h }: { root: RefObje
                   cx={x}
                   cy={y}
                   r={k === 0 ? 3 : 2.3}
-                  initial={{ scale: 0, fill: NIGHT.star }}
-                  animate={{ scale: 1, fill: ink }}
+                  initial={{ scale: 0, opacity: 1, fill: NIGHT.star }}
+                  animate={{ scale: 1, opacity: 1, fill: ink }}
                   exit={{ scale: 2.6, opacity: 0, transition: { duration: 0.4 } }}
                   transition={{ scale: { delay: delay + k * 0.08, type: "spring", stiffness: 520, damping: 16 }, fill: { duration: 0.5 } }}
                   style={{ transformOrigin: `${x}px ${y}px`, filter: night ? "drop-shadow(0 0 4px rgba(238,240,255,.9))" : undefined }}
