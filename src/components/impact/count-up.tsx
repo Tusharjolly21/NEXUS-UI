@@ -13,14 +13,19 @@ export function CountUp({ to, prefix = "", className }: { to: number; prefix?: s
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "0px 0px -10% 0px" });
   const still = !!useReducedMotion();
-  const value = useMotionValue(still ? to : 0);
+  // always 0 at first, as the server renders it (starting at `to` for reduced motion made the two disagree)
+  const value = useMotionValue(0);
   const text = useTransform(value, (n) => `${prefix}${fmt.format(Math.round(n))}`);
 
   useEffect(() => {
+    if (still) {
+      value.set(to);
+      return;
+    }
     if (!inView) return;
     const controls = animate(value, to, { duration: 1.8, ease: [0.2, 0.8, 0.2, 1] });
     return () => controls.stop();
-  }, [inView, to, value]);
+  }, [inView, still, to, value]);
 
   return (
     <>

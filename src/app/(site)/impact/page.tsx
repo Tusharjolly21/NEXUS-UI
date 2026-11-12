@@ -7,7 +7,10 @@ import { CountUp } from "@/components/impact/count-up";
 import { LifetimeCount } from "@/components/impact/lifetime-count";
 import { createMetadata } from "@/lib/seo";
 import {
+  ANALYTICS_CHECKED_LABEL,
   CHECKED_LABEL,
+  EARLIER_LABEL,
+  fmt,
   DAILY,
   LAST_30_DAYS,
   PROFILE_URL,
@@ -19,7 +22,7 @@ import {
 export const metadata: Metadata = createMetadata({
   title: "Nexus UI on 21st.dev: almost 1M views",
   description:
-    "Almost a million views on 21st.dev. Our last 30 days there: 172K views, 1,072 copies and 156 installs, plus the components and searches behind them.",
+    `Almost a million views on 21st.dev. Our last 30 days there: ${Math.round(LAST_30_DAYS.views / 1000)}K views and ${fmt.format(LAST_30_DAYS.copies)} copies, and #${RANK.position} of ${fmt.format(RANK.of)} authors this week.`,
   alternates: { canonical: "/impact" },
 });
 
@@ -30,9 +33,9 @@ const GRID =
 const MONTH_CELLS = [
   { label: "Views", value: LAST_30_DAYS.views },
   { label: "Copies", value: LAST_30_DAYS.copies },
-  { label: "Installs", value: LAST_30_DAYS.installs, note: "from the CLI and MCP" },
+  { label: "Installs", value: LAST_30_DAYS.installs, note: `from the CLI and MCP, as of ${EARLIER_LABEL}` },
   { label: "Bookmarks", value: LAST_30_DAYS.bookmarks },
-  { label: "Profile views", value: LAST_30_DAYS.profileViews },
+  { label: "Profile views", value: LAST_30_DAYS.profileViews, note: `as of ${EARLIER_LABEL}` },
 ] as const;
 
 export default function ImpactPage() {
@@ -121,7 +124,7 @@ export default function ImpactPage() {
               The last 30 days
             </h2>
             <p className="mt-3 max-w-[560px] text-[16px] leading-[1.55] text-white/62">
-              Copied from our Creator Studio analytics on {CHECKED_LABEL}. These are exact, not estimated.
+              Copied from our Creator Studio analytics on {ANALYTICS_CHECKED_LABEL}. These are exact, not estimated.
             </p>
 
             <dl className="mt-10 grid grid-cols-2 overflow-hidden rounded-[20px] shadow-[0_0_0_1px_rgba(255,255,255,0.1)] lg:grid-cols-3">
@@ -151,7 +154,9 @@ export default function ImpactPage() {
                     <ArrowUp className="size-4" aria-hidden />
                     {RANK.up}
                   </span>
-                  <span className="block text-[13px] text-white/50">of {RANK.of} authors, up {RANK.up} places</span>
+                  <span className="block text-[13px] text-white/50">
+                    of {RANK.of} authors, up {RANK.up} places since {RANK.since}
+                  </span>
                 </dd>
               </div>
             </dl>
@@ -191,7 +196,8 @@ export default function ImpactPage() {
 
           <p className="mt-8 max-w-[760px] text-[13.5px] leading-relaxed text-muted-foreground">
             21st.dev is a separate site and we are an author on it. These figures come from our own profile and Creator
-            Studio analytics and change every day, so the last check was {CHECKED_LABEL}.
+            Studio analytics and change every day: the last 30 days and the rank were last checked on {ANALYTICS_CHECKED_LABEL},
+            and the all-time totals on {CHECKED_LABEL}.
           </p>
         </div>
       </section>
