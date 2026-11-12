@@ -55,7 +55,7 @@ export function MemberStack({ className }: { className?: string }) {
   if (MEMBERS.length === 0) return null;
   const shown = MEMBERS.slice(0, 4);
   const rest = MEMBERS.length - 2;
-  // each name carries its flag; with more than two we name the newest two and count the rest
+  // each name carries its flag; with more than three we name the newest two and count the rest
   const tag = (m: (typeof MEMBERS)[number]) => (
     <span className="whitespace-nowrap">
       {m.name} <Flag code={m.code} country={m.country} className="ml-0.5 align-[-1px]" />
@@ -67,6 +67,10 @@ export function MemberStack({ className }: { className?: string }) {
     ) : MEMBERS.length === 2 ? (
       <>
         {tag(MEMBERS[0])} and {tag(MEMBERS[1])}
+      </>
+    ) : MEMBERS.length === 3 ? (
+      <>
+        {tag(MEMBERS[0])}, {tag(MEMBERS[1])} and {tag(MEMBERS[2])}
       </>
     ) : (
       <>

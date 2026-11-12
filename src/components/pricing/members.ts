@@ -12,6 +12,7 @@ import { RAINBOW_HUES } from "@/components/site/rainbow-word";
  * copy `3x2/<CODE>.svg` from the MIT-licensed `country-flag-icons` package (licence kept beside the flags).
  */
 export const MEMBERS: { name: string; country: string; code: string; face?: number }[] = [
+  { name: "Han Wang", country: "Ireland", code: "ie", face: 2 },
   { name: "GoCellar GoWinery", country: "Australia", code: "au", face: 1 },
   { name: "Jon Massey", country: "United Kingdom", code: "gb", face: 0 },
 ];
