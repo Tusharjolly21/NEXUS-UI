@@ -3,7 +3,10 @@
  * TalentHub: landing page template for a staffing agency that places vetted
  * remote professionals with startups. Built on Motion Kit: Bubble Cluster (the
  * talent bench), Stagger Menu, Swipe Stack (a candidate shortlist), Folder
- * Peek, Todo List and Price Odometer, plus the shared template parts.
+ * Peek, Todo List and Price Odometer, plus the shared template parts. The
+ * hero is the time-zone planner in a daylight palette: your day rises from
+ * midnight on load, and the people who share it are counted as it goes.
+ * Schibsted Grotesk.
  */
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, animate, motion, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
@@ -14,11 +17,15 @@ import TalentPool from "@/components/templates/talent-hub/TalentPool";
 import CandidateStack from "@/components/templates/talent-hub/CandidateStack";
 import HireOdometer from "@/components/templates/talent-hub/HireOdometer";
 import { StickyStory } from "@/components/templates/talent-hub/StickyStory";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, card, scrollToId } from "@/components/templates/kit/parts";
+import { fontFaces } from "@/components/templates/kit/fonts";
+import { CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, card, scrollToId } from "@/components/templates/kit/parts";
 
-const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
-const A = "#0369a1"; // sky, 5.9:1 on white
-const TINT = "#e0f2fe";
+const SYSTEM_FONT = "'Schibsted Grotesk Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const A = "#a3480b"; // late-afternoon amber, 6:1 on white
+const TINT = "#fdebd3";
+const INK = "#1b1a17";
+const SUN = "#f5a524";
+const FONT_CSS = fontFaces("talent-hub", [{ family: "Schibsted Grotesk Variable", file: "schibsted-grotesk", weight: "400 900" }]);
 const spring = { type: "spring", stiffness: 320, damping: 28 } as const;
 
 function Logo() {
@@ -77,8 +84,10 @@ function intersect(a: [number, number][], b: [number, number][]) {
 }
 
 function Planner() {
-  const [city, setCity] = useState(1);
-  const [s, setS] = useState(9); // your day starts at this local hour
+  const [city, setCityRaw] = useState(1);
+  const [s, setS] = useState(0); // your day starts at this local hour; it rises to 09:00 on load
+  const touched = useRef(false);
+  const setCity = (i: number) => { touched.current = true; setCityRaw(i); };
   const track = useRef<HTMLDivElement>(null);
   const [tw, setTw] = useState(0);
   const bx = useMotionValue(0);
@@ -107,6 +116,19 @@ function Planner() {
   }, []);
   useLayoutEffect(() => { if (tw) bx.set((s / 24) * tw); }, [tw]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // On load your day rises from midnight to nine, like the sun; then, until someone touches it, it tries other cities.
+  const rose = useRef(false);
+  useEffect(() => {
+    if (!tw || rose.current) return;
+    rose.current = true;
+    const c = animate(bx, (9 / 24) * tw, { duration: 1.8, delay: 0.5, ease: [0.3, 0, 0.2, 1] });
+    return () => c.stop();
+  }, [tw, bx]);
+  useEffect(() => {
+    const t = setInterval(() => { if (!touched.current) setCityRaw((c) => (c + 1) % CITIES.length); }, 4200);
+    return () => clearInterval(t);
+  }, []);
+
   useMotionValueEvent(bx, "change", (v) => {
     if (!tw) return;
     const h = Math.max(0, Math.min(24 - LEN, Math.round((v / tw) * 48) / 2));
@@ -129,15 +151,15 @@ function Planner() {
           <span className="text-[13px] font-semibold text-[#1d1d1f]">Where is your team?</span>
           <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Your city">
             {CITIES.map((c, i) => (
-              <button key={c.name} type="button" role="radio" aria-checked={city === i} onClick={() => setCity(i)} className="relative h-9 rounded-full px-3.5 text-[13px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-[#0369a1] focus-visible:ring-offset-2" style={{ color: city === i ? "#fff" : "#1d1d1f" }}>
-                {city === i ? <motion.span layoutId="th-city" className="absolute inset-0 rounded-full" style={{ background: A }} transition={{ type: "spring", stiffness: 480, damping: 34 }} /> : <span className="absolute inset-0 rounded-full bg-[#f0f0f3]" />}
+              <button key={c.name} type="button" role="radio" aria-checked={city === i} onClick={() => setCity(i)} className="relative h-9 rounded-full px-3.5 text-[13px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-[#1b1a17] focus-visible:ring-offset-2" style={{ color: city === i ? "#fff" : "#1d1d1f" }}>
+                {city === i ? <motion.span layoutId="th-city" className="absolute inset-0 rounded-full" style={{ background: INK }} transition={{ type: "spring", stiffness: 480, damping: 34 }} /> : <span className="absolute inset-0 rounded-full bg-[#f0f0f3]" />}
                 <span className="relative">{c.name}</span>
               </button>
             ))}
           </div>
         </div>
         <div className="flex items-end gap-3" aria-live="polite">
-          <motion.span className="text-[clamp(48px,6vw,68px)] font-semibold leading-[0.9] tracking-[-0.05em] tabular-nums" style={{ color: A }}>{shown}</motion.span>
+          <motion.span className="text-[clamp(48px,6vw,72px)] font-[800] leading-[0.9] tracking-[-0.05em] tabular-nums" style={{ color: INK }}>{shown}</motion.span>
           <span className="max-w-[190px] pb-1 text-[13px] leading-[1.35] text-[#6e6e73]">vetted people share at least 4 hours of your {fmt(s)}–{fmt(s + LEN)} day</span>
         </div>
       </div>
@@ -157,7 +179,7 @@ function Planner() {
         {/* your row */}
         <div className="grid grid-cols-1 items-center gap-1.5 sm:grid-cols-[150px_1fr_64px] sm:gap-4">
           <span className="flex items-baseline justify-between gap-2 sm:flex-col sm:items-start sm:gap-0">
-            <span className="text-[14px] font-semibold text-[#1d1d1f]">You · {CITIES[city].name}</span>
+            <span className="text-[14px] font-semibold text-[#1d1d1f]">You, {CITIES[city].name}</span>
             <span className="text-[12px] text-[#6e6e73]">Drag your day</span>
           </span>
           <div ref={track} className="relative h-11 rounded-[12px] bg-[#f5f5f7]">
@@ -174,13 +196,14 @@ function Planner() {
                 if (e.key === "ArrowRight") { e.preventDefault(); settle(s + 0.5); }
               }}
               drag="x"
+              onDragStart={() => { touched.current = true; }}
               dragConstraints={{ left: 0, right: Math.max(0, tw - (LEN / 24) * tw) }}
               dragElastic={0.06}
               dragMomentum={false}
               onDragEnd={() => settle(s)}
               whileDrag={{ scaleY: 1.08 }}
-              className="absolute inset-y-0 left-0 flex cursor-grab items-center justify-center rounded-[12px] text-[13px] font-semibold tabular-nums text-white shadow-[0_10px_24px_-12px_rgba(3,105,161,.9)] outline-none focus-visible:ring-2 focus-visible:ring-[#0369a1] focus-visible:ring-offset-2 active:cursor-grabbing"
-              style={{ x: bx, width: bw, background: A, opacity: tw ? 1 : 0 }}
+              className="absolute inset-y-0 left-0 flex cursor-grab items-center justify-center rounded-[12px] text-[13px] font-semibold tabular-nums shadow-[0_10px_24px_-12px_rgba(163,72,11,.7)] outline-none focus-visible:ring-2 focus-visible:ring-[#1b1a17] focus-visible:ring-offset-2 active:cursor-grabbing"
+              style={{ x: bx, width: bw, background: `linear-gradient(90deg, #ffd27a, ${SUN} 45%, #f08a3c)`, color: INK, opacity: tw ? 1 : 0 }}
             >
               <span className="pointer-events-none flex items-center gap-1.5">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true"><path d="M9 6l-6 6 6 6M15 6l6 6-6 6" /></svg>
@@ -195,21 +218,21 @@ function Planner() {
         {rows.map((r) => (
           <div key={r.name} className="grid grid-cols-1 items-center gap-1.5 sm:grid-cols-[150px_1fr_64px] sm:gap-4">
             <span className="flex items-baseline justify-between gap-2 sm:flex-col sm:items-start sm:gap-0">
-              <span className="text-[14px] font-medium text-[#1d1d1f]">{r.name}{r.note && <span className="text-[12px] font-normal text-[#6e6e73]"> · {r.note}</span>}</span>
-              <span className="text-[12px] tabular-nums text-[#6e6e73]">{r.people} available<span className="sm:hidden"> · <b className="font-semibold" style={{ color: r.hours >= 4 ? A : "#6e6e73" }}>{r.hours} h shared</b></span></span>
+              <span className="text-[14px] font-medium text-[#1d1d1f]">{r.name}{r.note && <span className="text-[12px] font-normal text-[#6e6e73]">, {r.note}</span>}</span>
+              <span className="text-[12px] tabular-nums text-[#6e6e73]">{r.people} available<span className="sm:hidden">, <b className="font-semibold" style={{ color: r.hours >= 4 ? INK : "#6e6e73" }}>{r.hours} h shared</b></span></span>
             </span>
             <div className="relative h-7 overflow-hidden rounded-[9px] bg-[#f5f5f7]">
-              <motion.div className="pointer-events-none absolute inset-y-0 left-0 bg-[#0369a1]/[.06]" style={{ x: bx, width: bw }} aria-hidden="true" />
+              <motion.div className="pointer-events-none absolute inset-y-0 left-0 bg-[#f5a524]/[.12]" style={{ x: bx, width: bw }} aria-hidden="true" />
               {r.base.map(([a, b], i) => (
-                <motion.div key={`b${i}`} className="absolute inset-y-1 rounded-[6px] bg-[#cfe3f1]" initial={false} animate={{ left: `${(a / 24) * 100}%`, width: `${((b - a) / 24) * 100}%` }} transition={spring} aria-hidden="true" />
+                <motion.div key={`b${i}`} className="absolute inset-y-1 rounded-[6px] bg-[#f6dfb8]" initial={false} animate={{ left: `${(a / 24) * 100}%`, width: `${((b - a) / 24) * 100}%` }} transition={spring} aria-hidden="true" />
               ))}
               <AnimatePresence initial={false}>
                 {r.ov.map(([a, b], i) => (
-                  <motion.div key={`o${i}`} className="absolute inset-y-1 rounded-[6px]" style={{ background: r.hours >= 4 ? A : "#7aa7c7" }} initial={{ opacity: 0 }} animate={{ opacity: 1, left: `${(a / 24) * 100}%`, width: `${((b - a) / 24) * 100}%` }} exit={{ opacity: 0 }} transition={spring} aria-hidden="true" />
+                  <motion.div key={`o${i}`} className="absolute inset-y-1 rounded-[6px]" style={{ background: r.hours >= 4 ? INK : "#b9a88c" }} initial={{ opacity: 0 }} animate={{ opacity: 1, left: `${(a / 24) * 100}%`, width: `${((b - a) / 24) * 100}%` }} exit={{ opacity: 0 }} transition={spring} aria-hidden="true" />
                 ))}
               </AnimatePresence>
             </div>
-            <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: r.hours >= 4 ? A : "#6e6e73" }}>{r.hours} h</span>
+            <span className="hidden text-right text-[14px] font-semibold tabular-nums sm:block" style={{ color: r.hours >= 4 ? INK : "#6e6e73" }}>{r.hours} h</span>
           </div>
         ))}
       </div>
@@ -220,14 +243,13 @@ function Planner() {
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(50% 45% at 15% 10%, rgba(14,165,233,.16), transparent 70%), radial-gradient(40% 40% at 90% 30%, rgba(3,105,161,.10), transparent 70%)" }} />
-      <div className="relative mx-auto max-w-[1180px] px-5 pb-16 pt-12 sm:pt-16">
+    <section className="relative -mt-[76px] overflow-hidden" style={{ background: "linear-gradient(90deg, #fff4e3 0%, #fffaf2 40%, #f4f1ff 100%)" }}>
+      <div className="relative mx-auto max-w-[1180px] px-5 pb-16 pt-[124px] sm:pt-[140px]">
         <div className="grid grid-cols-1 gap-7 lg:grid-cols-[1.35fr_1fr] lg:items-end">
           <div className="flex flex-col items-start gap-5">
-            <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={spring} className="text-[14px] font-semibold" style={{ color: A }}>Remote staffing for startups</motion.span>
-            <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.06 }} className="m-0 text-[clamp(44px,7vw,88px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
-              Great people who share your <span style={{ color: A }}>working day.</span>
+            <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={spring} className="text-[14px] font-semibold text-[#5e564b]">Remote staffing for startups</motion.span>
+            <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.06 }} className="m-0 text-[clamp(44px,7vw,92px)] font-[820] leading-[0.94] tracking-[-0.045em] text-[#1b1a17] [text-wrap:balance]">
+              Great people who share your working day.
             </motion.h1>
           </div>
           <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.14 }} className="flex flex-col gap-5">
@@ -235,8 +257,8 @@ function Hero() {
               TalentHub places vetted engineers, designers and operators from Latin America, Europe, Africa and Asia with startups. We handle contracts, payroll and compliance. You get a shortlist in three days.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Magnetic className="text-white shadow-[0_10px_30px_-12px_rgba(3,105,161,.8)] focus-visible:ring-[#0369a1]" style={{ background: A }} onClick={() => scrollToId("pricing")}>Start hiring</Magnetic>
-              <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.1)] focus-visible:ring-[#0369a1]" onClick={() => scrollToId("process")}>How it works</Magnetic>
+              <Magnetic className="text-white focus-visible:ring-[#1b1a17]" style={{ background: INK }} onClick={() => scrollToId("pricing")}>Start hiring</Magnetic>
+              <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.1)] focus-visible:ring-[#1b1a17]" onClick={() => scrollToId("process")}>How it works</Magnetic>
             </div>
             <span className="text-[13px] text-[#6e6e73]">No fee until your hire starts. Free replacement in the first 90 days.</span>
           </motion.div>
@@ -251,27 +273,6 @@ function Hero() {
 
 /* ------------------------------------------------------------------ numbers + bench */
 
-function Numbers() {
-  const items = [
-    { to: 2140, f: (n: number) => Math.round(n).toLocaleString("en-US"), l: "people applied last month" },
-    { to: 3, f: (n: number) => `${Math.round(n)}%`, l: "made it through vetting" },
-    { to: 72, f: (n: number) => `${Math.round(n)} h`, l: "median time to a shortlist" },
-    { to: 94, f: (n: number) => `${Math.round(n)}%`, l: "still placed after twelve months" },
-  ];
-  return (
-    <section className="mx-auto max-w-[1180px] px-5 py-14" aria-label="TalentHub in numbers">
-      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
-        {items.map((it) => (
-          <div key={it.l} className="flex flex-col gap-2 border-t border-black/[.08] pt-6">
-            <Counter to={it.to} format={it.f} className="text-[clamp(38px,4.6vw,54px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
-            <span className="text-[15px] leading-[1.4] text-[#6e6e73]">{it.l}</span>
-          </div>
-        ))}
-      </Stagger>
-    </section>
-  );
-}
-
 const ROLES = [
   { g: "Engineering", r: ["Full-stack and frontend", "Backend and data", "DevOps and QA"] },
   { g: "Design", r: ["Product design", "Brand and marketing design", "UX research"] },
@@ -283,12 +284,12 @@ function Bench() {
     <section id="talent" className="bg-[#f5f5f7] py-20 sm:py-24">
       <div className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 lg:grid-cols-[1fr_1.1fr]">
         <div className="flex flex-col gap-8">
-          <SectionHead eyebrow="The bench" title="Who's available this month." sub="A live slice of our bench by discipline. Bubble size is years of experience; switch discipline and the team re-forms." accent={A} />
+          <SectionHead title="Who's available this month." sub="A live slice of our bench by discipline. Bubble size is years of experience; switch discipline and the team re-forms." accent={A} />
           <Stagger className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1">
             {ROLES.map((x) => (
               <div key={x.g} className="flex flex-col gap-1 border-t border-black/[.08] pt-3 lg:flex-row lg:items-baseline lg:gap-4">
                 <span className="w-[110px] flex-none text-[15px] font-semibold text-[#1d1d1f]">{x.g}</span>
-                <span className="text-[14px] leading-[1.5] text-[#6e6e73]">{x.r.join(" · ")}</span>
+                <span className="text-[14px] leading-[1.5] text-[#6e6e73]">{x.r.join(", ")}</span>
               </div>
             ))}
           </Stagger>
@@ -321,14 +322,14 @@ function BriefCard() {
   const picked = ROLE_ITEMS.find((r) => r.id === role);
   return (
     <div className={`${card} flex w-[420px] flex-col gap-4 p-6`}>
-      <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">New role brief</span>
+      <span className="text-[13px] font-semibold text-[#6e6e73]">New role brief</span>
       <div className="flex h-[290px] gap-5">
         <StaggerMenu label="Role to fill" items={ROLE_ITEMS} onSelect={setRole} autoplay />
       </div>
       <div className="flex items-center gap-2 rounded-[14px] px-4 py-3 text-[14px]" style={{ background: TINT, color: "#075985" }} aria-live="polite">
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.span key={picked?.id ?? "none"} initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -10, opacity: 0 }} transition={spring}>
-            {picked ? `${picked.label} · full time · 4 h overlap` : "Pick a role and we draft the brief with you."}
+            {picked ? `${picked.label}, full time, 4 h overlap` : "Pick a role and we draft the brief with you."}
           </motion.span>
         </AnimatePresence>
       </div>
@@ -339,15 +340,15 @@ function BriefCard() {
 function Process() {
   return (
     <section id="process" className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
-      <SectionHead eyebrow="How it works" title="From brief to first day in about two weeks." accent={A} />
+      <SectionHead title="From brief to first day in about two weeks." accent={A} />
       <div className="mt-6">
         <StickyStory
           accent={A}
           steps={[
-            { kicker: "Day 1 · Brief", title: "Twenty minutes on the role, not a form.", body: "A talent partner who has hired for startups asks what the person will actually do in month one, the hours you need covered and the budget. You approve the brief before we search.", visual: <BriefCard /> },
-            { kicker: "Day 3 · Shortlist", title: "Three to five people, already vetted.", body: "Every candidate has passed a skills test, a live interview and two reference calls. Swipe through your shortlist: right to book an interview, left to pass and tell us why.", visual: <div className={`${card} p-6`}><CandidateStack accent={A} autoplay /></div> },
-            { kicker: "Day 5 · Interview", title: "See the paper trail, not just a CV.", body: "Each profile opens to the test they took, notes from our interview and what their last two managers said. Hover the folder to look inside.", visual: <div className={`${card} flex h-[380px] w-[420px] items-end justify-center pb-10`}><FolderPeek title="Ana Ribeiro · full-stack" meta="Code test · interview notes · 2 references" color={A} autoplay /></div> },
-            { kicker: "Day 14 · Start", title: "Day one, sorted.", body: "We sign the local contract, run payroll and ship the laptop. Your onboarding list is shared with your new hire and their talent partner, who checks in at 30, 60 and 90 days.", visual: <div className={`${card} w-[420px] p-6`}><TodoList accent={A} autoplay initial={["Contract signed under Portuguese law", "Laptop shipped, arrives Thursday", "Accounts: GitHub, Slack, Linear", "30-day check-in booked"]} /></div> },
+            { kicker: "Day 1: brief", title: "Twenty minutes on the role, not a form.", body: "A talent partner who has hired for startups asks what the person will actually do in month one, the hours you need covered and the budget. You approve the brief before we search.", visual: <BriefCard /> },
+            { kicker: "Day 3: shortlist", title: "Three to five people, already vetted.", body: "Every candidate has passed a skills test, a live interview and two reference calls. Swipe through your shortlist: right to book an interview, left to pass and tell us why.", visual: <div className={`${card} p-6`}><CandidateStack accent={A} autoplay /></div> },
+            { kicker: "Day 5: interview", title: "See the paper trail, not just a CV.", body: "Each profile opens to the test they took, notes from our interview and what their last two managers said. Hover the folder to look inside.", visual: <div className={`${card} flex h-[380px] w-[420px] items-end justify-center pb-10`}><FolderPeek title="Ana Ribeiro, full-stack" meta="Code test, interview notes, 2 references" color={A} autoplay /></div> },
+            { kicker: "Day 14: start", title: "Day one, sorted.", body: "We sign the local contract, run payroll and ship the laptop. Your onboarding list is shared with your new hire and their talent partner, who checks in at 30, 60 and 90 days.", visual: <div className={`${card} w-[420px] p-6`}><TodoList accent={A} autoplay initial={["Contract signed under Portuguese law", "Laptop shipped, arrives Thursday", "Accounts: GitHub, Slack, Linear", "30-day check-in booked"]} /></div> },
           ]}
         />
       </div>
@@ -368,7 +369,7 @@ function Compare() {
   return (
     <section id="why" className="bg-[#f5f5f7] py-20 sm:py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Why a staffing partner" title="Hiring abroad yourself is possible. It's just slow." sub="Here is what changes when we do the parts that aren't interviewing." accent={A} center />
+        <SectionHead title="Hiring abroad yourself is possible. It's just slow." sub="Here is what changes when we do the parts that aren't interviewing." accent={A} center />
         <Reveal y={16}>
           <div className={`${card} mt-12 overflow-hidden`} role="table" aria-label="Hiring directly compared with TalentHub">
             <div className="grid grid-cols-[1.1fr_1fr_1fr] gap-4 border-b border-black/[.06] px-5 py-4 text-[13px] font-semibold text-[#6e6e73] sm:px-8" role="row">
@@ -401,7 +402,7 @@ function Pricing() {
     <section id="pricing" className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
       <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1fr]">
         <div className="flex flex-col gap-8">
-          <SectionHead eyebrow="Pricing" title="One monthly price per person. Everything in it." sub="Shown for a mid-level engineer. Design and operations roles start lower; we quote every role before you interview." accent={A} />
+          <SectionHead title="One monthly price per person. Everything in it." sub="Shown for a mid-level engineer. Design and operations roles start lower; we quote every role before you interview." accent={A} />
           <Stagger className="flex flex-col gap-3.5">
             {inc.map((t) => (
               <span key={t} className="flex items-center gap-3 text-[16px] text-[#1d1d1f]">
@@ -424,7 +425,7 @@ function Pricing() {
 /* ------------------------------------------------------------------ voices */
 
 const VOICES = [
-  { q: "We hired two backend engineers in Buenos Aires in eleven days. They overlap our whole morning, which is all we needed.", n: "Maya Chen", r: "CTO, Brindle Labs · 14 people" },
+  { q: "We hired two backend engineers in Buenos Aires in eleven days. They overlap our whole morning, which is all we needed.", n: "Maya Chen", r: "CTO, Brindle Labs, 14 people" },
   { q: "The reference calls were better than ours. One of them told us exactly how to manage our new designer, and they were right.", n: "Tom Adeyemi", r: "Founder, Quillon Health" },
   { q: "Payroll in four countries used to be my second job. Now it's one invoice on the first of the month.", n: "Sofia Lund", r: "COO, Tessel Analytics" },
 ];
@@ -433,7 +434,7 @@ function Voices() {
   return (
     <section id="voices" className="bg-[#f5f5f7] py-20 sm:py-24" aria-label="What founders say">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="From founders" title="Small teams, long placements." accent={A} />
+        <SectionHead title="Small teams, long placements." accent={A} />
         <Stagger className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">
           {VOICES.map((v) => (
             <motion.figure key={v.n} whileHover={{ y: -4 }} transition={spring} className={`${card} m-0 flex h-full flex-col justify-between gap-6 p-7`}>
@@ -459,16 +460,16 @@ export function TalentHubPage() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen overflow-x-clip bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
-        <Nav brand={<Logo />} accent={A} cta="Start hiring" onCta={() => scrollToId("pricing")} links={[{ label: "Talent", id: "talent" }, { label: "Process", id: "process" }, { label: "Why us", id: "why" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
+        <style>{FONT_CSS}</style>
+        <Nav brand={<Logo />} accent={INK} cta="Start hiring" onCta={() => scrollToId("pricing")} links={[{ label: "Talent", id: "talent" }, { label: "Process", id: "process" }, { label: "Why us", id: "why" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
         <Hero />
-        <Numbers />
         <Bench />
         <Process />
         <Compare />
         <Pricing />
         <Voices />
         <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-20 sm:py-24 lg:grid-cols-[1fr_1.4fr]">
-          <SectionHead eyebrow="FAQ" title="What founders ask first." accent={A} />
+          <SectionHead title="What founders ask first." accent={A} />
           <Reveal y={16}>
             <Faq
               accent={A}
