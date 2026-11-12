@@ -2,24 +2,28 @@
 /**
  * Synapse hero: a live node canvas. Drag the nodes (the wires follow through
  * motion values, no re-renders), drag from the dangling port to connect the
- * missing step, then press Run to send a pulse down the whole flow.
+ * missing step, then press Run to send a pulse down the whole flow. As the
+ * pulse passes each step, that step's real output appears under it. Left
+ * alone, the canvas draws the missing wire itself and runs.
  */
 import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent as RPointerEvent, type ReactNode, type RefObject } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useMotionValueEvent, useTransform, type MotionValue } from "framer-motion";
 
-const A = "#db2777";
-const AD = "#be185d";
+const INK = "#111318";
+const MONO = "'Fragment Mono', ui-monospace, 'SF Mono', Menlo, monospace";
 const NW = 208;
 const NH = 72;
 const PORT = 14;
 
 type Kind = "Trigger" | "Model" | "Knowledge" | "Branch";
-const NODES: { id: string; kind: Kind; title: string; sub: string }[] = [
-  { id: "in", kind: "Trigger", title: "New support email", sub: "inbox: help@" },
-  { id: "cls", kind: "Model", title: "Classify the intent", sub: "billing, bug, how-to" },
-  { id: "kb", kind: "Knowledge", title: "Search help center", sub: "412 articles" },
-  { id: "draft", kind: "Model", title: "Draft a reply", sub: "tone: friendly, brief" },
-  { id: "route", kind: "Branch", title: "Send or hand over", sub: "if confidence < 0.8" },
+/** Each kind of step has its own colour on the canvas, and in the legend above it. */
+export const KIND_TONE: Record<Kind, string> = { Trigger: "#3b4a5c", Model: "#3355e0", Knowledge: "#b86e00", Branch: "#0d7a55" };
+const NODES: { id: string; kind: Kind; title: string; sub: string; out: string }[] = [
+  { id: "in", kind: "Trigger", title: "New support email", sub: "inbox: help@", out: "\u201cCharged twice for March\u201d" },
+  { id: "cls", kind: "Model", title: "Classify the intent", sub: "billing, bug, how-to", out: "billing, 0.93" },
+  { id: "kb", kind: "Knowledge", title: "Search help center", sub: "412 articles", out: "3 articles: Refunds, Duplicate charges, Billing dates" },
+  { id: "draft", kind: "Model", title: "Draft a reply", sub: "tone: friendly, brief", out: "\u201cHi Dana, you were charged twice on 3 March. I\u2019ve refunded \u00a324\u2026\u201d" },
+  { id: "route", kind: "Branch", title: "Send or hand over", sub: "if confidence < 0.8", out: "0.93 is over 0.8: sent" },
 ];
 
 const ICON: Record<Kind, ReactNode> = {
@@ -35,11 +39,11 @@ function layoutFor(w: number): Layout {
   if (w < 720) {
     const cx = (w - NW) / 2;
     const off = Math.min(46, (w - NW) / 2 - 4);
-    return { pts: NODES.map((_, i) => ({ x: cx + (i % 2 ? off : -off), y: 18 + i * 118 })), h: 18 + 4 * 118 + NH + 44, vertical: true };
+    return { pts: NODES.map((_, i) => ({ x: cx + (i % 2 ? off : -off), y: 18 + i * 140 })), h: 18 + 4 * 140 + NH + 60, vertical: true };
   }
   const span = w - NW;
   const ys = [20, 190, 20, 190, 105];
-  return { pts: NODES.map((_, i) => ({ x: (span * i) / 4, y: ys[i] })), h: 300, vertical: false };
+  return { pts: NODES.map((_, i) => ({ x: (span * i) / 4, y: ys[i] })), h: 336, vertical: false };
 }
 
 /** Output port (right or bottom) and input port (left or top) of a node in stage coordinates. */
@@ -55,6 +59,7 @@ function curve(a: { x: number; y: number }, b: { x: number; y: number }, v: bool
 }
 
 function Wire({ ax, ay, bx, by, vertical, index, progress, live }: { ax: MotionValue<number>; ay: MotionValue<number>; bx: MotionValue<number>; by: MotionValue<number>; vertical: boolean; index: number; progress: MotionValue<number>; live: boolean }) {
+  const tone = KIND_TONE[NODES[index + 1].kind];
   const d = useTransform([ax, ay, bx, by], ([x1, y1, x2, y2]: number[]) => curve(outPort(x1, y1, vertical), inPort(x2, y2, vertical), vertical));
   const path = useRef<SVGPathElement>(null);
   const cx = useMotionValue(-100);
@@ -72,17 +77,17 @@ function Wire({ ax, ay, bx, by, vertical, index, progress, live }: { ax: MotionV
   });
   return (
     <g>
-      <motion.path ref={path} d={d} fill="none" stroke="#d6d6dc" strokeWidth={2.5} />
-      <motion.path d={d} fill="none" stroke={A} strokeWidth={2.5} strokeDasharray="6 10" strokeLinecap="round" initial={false} animate={live ? { strokeDashoffset: [0, -32] } : { strokeDashoffset: 0 }} transition={live ? { duration: 1.1, repeat: Infinity, ease: "linear" } : { duration: 0 }} style={{ opacity: 0.55 }} />
-      <motion.circle r={7} cx={cx} cy={cy} fill={A} style={{ opacity: op }} />
-      <motion.circle r={14} cx={cx} cy={cy} fill={A} style={{ opacity: glow }} />
+      <motion.path ref={path} d={d} fill="none" stroke="#c9ccd3" strokeWidth={2} />
+      <motion.path d={d} fill="none" stroke={tone} strokeWidth={2} strokeDasharray="5 9" strokeLinecap="round" initial={false} animate={live ? { strokeDashoffset: [0, -28] } : { strokeDashoffset: 0 }} transition={live ? { duration: 1.1, repeat: Infinity, ease: "linear" } : { duration: 0 }} style={{ opacity: 0.6 }} />
+      <motion.circle r={6} cx={cx} cy={cy} fill={tone} style={{ opacity: op }} />
+      <motion.circle r={14} cx={cx} cy={cy} fill={tone} style={{ opacity: glow }} />
     </g>
   );
 }
 
-function Node({ i, x, y, stage, active, vertical, onDragged }: { i: number; x: MotionValue<number>; y: MotionValue<number>; stage: RefObject<HTMLDivElement | null>; active: boolean; vertical: boolean; onDragged: () => void }) {
+function Node({ i, x, y, stage, active, done, vertical, onDragged }: { i: number; x: MotionValue<number>; y: MotionValue<number>; stage: RefObject<HTMLDivElement | null>; active: boolean; done: boolean; vertical: boolean; onDragged: () => void }) {
   const n = NODES[i];
-  const model = n.kind === "Model";
+  const tone = KIND_TONE[n.kind];
   return (
     <motion.div
       drag
@@ -100,19 +105,35 @@ function Node({ i, x, y, stage, active, vertical, onDragged }: { i: number; x: M
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 rounded-[16px]"
         initial={false}
-        animate={{ boxShadow: active ? `0 0 0 2px ${A}, 0 0 0 7px rgba(219,39,119,.16)` : "0 0 0 0px rgba(219,39,119,0)" }}
+        animate={{ boxShadow: active ? `0 0 0 2px ${tone}, 0 0 0 7px ${tone}29` : `0 0 0 0px ${tone}00` }}
         transition={{ type: "spring", stiffness: 400, damping: 26 }}
       />
-      <span className="flex h-10 w-10 flex-none items-center justify-center rounded-[12px]" style={{ background: model ? A : n.kind === "Trigger" ? "#1d1d1f" : "#f0f0f3", color: model || n.kind === "Trigger" ? "#fff" : "#1d1d1f" }}>
+      <span className="flex h-10 w-10 flex-none items-center justify-center rounded-[12px]" style={{ background: tone, color: "#fff" }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICON[n.kind]}</svg>
       </span>
       <span className="flex min-w-0 flex-col">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: model ? AD : "#6e6e73" }}>{n.kind}</span>
+        <span className="text-[12px] font-semibold" style={{ color: tone }}>{n.kind}</span>
         <span className="truncate text-[14px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">{n.title}</span>
         <span className="truncate text-[12px] text-[#6e6e73]">{n.sub}</span>
       </span>
       {i > 0 && <span aria-hidden="true" className="absolute rounded-full border-2 border-white bg-[#c7c7cc]" style={{ width: PORT - 2, height: PORT - 2, ...(vertical ? { left: NW / 2 - 6, top: -6 } : { left: -6, top: NH / 2 - 6 }) }} />}
-      {i < NODES.length - 1 && <span aria-hidden="true" className="absolute rounded-full border-2 border-white" style={{ background: A, width: PORT - 2, height: PORT - 2, ...(vertical ? { left: NW / 2 - 6, bottom: -6 } : { right: -6, top: NH / 2 - 6 }) }} />}
+      {i < NODES.length - 1 && <span aria-hidden="true" className="absolute rounded-full border-2 border-white" style={{ background: tone, width: PORT - 2, height: PORT - 2, ...(vertical ? { left: NW / 2 - 6, bottom: -6 } : { right: -6, top: NH / 2 - 6 }) }} />}
+      {/* what this step produced on the last run */}
+      <AnimatePresence>
+        {done ? (
+          <motion.span
+            key="out"
+            initial={{ opacity: 0, y: -6, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.15 } }}
+            transition={{ type: "spring", stiffness: 420, damping: 28 }}
+            className="pointer-events-none absolute left-0 top-[calc(100%+10px)] w-full rounded-[10px] px-2.5 py-1.5 text-[11.5px] leading-[1.35]"
+            style={{ background: `${tone}14`, color: tone, boxShadow: `inset 0 0 0 1px ${tone}33`, fontFamily: MONO }}
+          >
+            {n.out}
+          </motion.span>
+        ) : null}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -136,6 +157,8 @@ export default function NodeCanvas() {
   const [runs, setRuns] = useState(0);
   const [running, setRunning] = useState(false);
   const [moved, setMoved] = useState(false);
+  const [reached, setReached] = useState(-1); // the furthest step this run has passed
+  const touched = useRef(false);
   const linkStart = useRef({ x: 0, y: 0 });
   const vertical = lay?.vertical ?? false;
 
@@ -163,6 +186,7 @@ export default function NodeCanvas() {
   useMotionValueEvent(progress, "change", (p) => {
     const n = p < 0 ? -1 : Math.min(NODES.length - 1, Math.floor(p + 0.15));
     setActiveNode((a) => (a === n ? a : n));
+    if (n >= 0) setReached((r) => (n > r ? n : r));
   });
 
   // The temporary wire while linking, from the dangling port to the pointer.
@@ -188,6 +212,7 @@ export default function NodeCanvas() {
 
   const startLink = (e: RPointerEvent<HTMLButtonElement>) => {
     if (connected) return;
+    touched.current = true;
     e.preventDefault();
     stage.current?.setPointerCapture(e.pointerId);
     const s = source();
@@ -220,6 +245,7 @@ export default function NodeCanvas() {
   const run = () => {
     if (!connected || running) return;
     setRunning(true);
+    setReached(-1);
     progress.set(0);
     animate(progress, NODES.length - 0.999, {
       duration: 3.2,
@@ -232,7 +258,20 @@ export default function NodeCanvas() {
     });
   };
 
-  const reset = () => { setConnected(false); setRuns(0); progress.set(-1); };
+  const reset = () => { touched.current = true; setConnected(false); setRuns(0); setReached(-1); progress.set(-1); };
+
+  // Left alone, the canvas draws the missing wire itself after a moment, then runs again every so often.
+  useEffect(() => {
+    const a = window.setTimeout(() => { if (!touched.current && !connected) { const s = source(); lx.set(s.x); ly.set(s.y); snapConnect(); } }, 2600);
+    return () => clearTimeout(a);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (!connected) return;
+    const t = window.setInterval(() => { if (!touched.current) run(); }, 9000);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connected, running]);
 
   useEffect(() => {
     if (!connected) return;
@@ -253,28 +292,28 @@ export default function NodeCanvas() {
               <Wire ax={x1} ay={y1} bx={x2} by={y2} vertical={vertical} index={1} progress={progress} live />
               {connected && <Wire ax={x2} ay={y2} bx={x3} by={y3} vertical={vertical} index={2} progress={progress} live />}
               <Wire ax={x3} ay={y3} bx={x4} by={y4} vertical={vertical} index={3} progress={progress} live />
-              {linking && !connected && <motion.path d={tempD} fill="none" stroke={A} strokeWidth={2.5} strokeLinecap="round" />}
+              {linking && !connected && <motion.path d={tempD} fill="none" stroke={KIND_TONE.Model} strokeWidth={2} strokeLinecap="round" />}
             </svg>
             {NODES.map((n, i) => (
-              <Node key={n.id} i={i} x={X[i]} y={Y[i]} stage={stage} active={activeNode === i} vertical={vertical} onDragged={() => setMoved(true)} />
+              <Node key={n.id} i={i} x={X[i]} y={Y[i]} stage={stage} active={activeNode === i} done={i <= reached} vertical={vertical} onDragged={() => { touched.current = true; setMoved(true); }} />
             ))}
             {!connected && (
               <>
-                <motion.span aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-20 h-9 w-9 rounded-full" style={{ x: targetX, y: targetY, border: `2px dashed ${A}` }} animate={{ scale: [1, 1.15, 1], opacity: [0.9, 0.5, 0.9] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }} />
+                <motion.span aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-20 h-9 w-9 rounded-full" style={{ x: targetX, y: targetY, border: `2px dashed ${KIND_TONE.Model}` }} animate={{ scale: [1, 1.15, 1], opacity: [0.9, 0.5, 0.9] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }} />
                 <motion.button
                   type="button"
                   aria-label="Connect Search help center to Draft a reply"
                   onPointerDown={startLink}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); const s = source(); lx.set(s.x); ly.set(s.y); snapConnect(); } }}
                   className="absolute left-0 top-0 z-30 flex h-9 w-9 cursor-crosshair touch-none items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                  style={{ x: handleX, y: handleY, ["--tw-ring-color" as string]: A }}
+                  style={{ x: handleX, y: handleY, ["--tw-ring-color" as string]: INK }}
                 >
-                  <motion.span className="absolute inset-0 rounded-full" style={{ background: A, opacity: 0.2 }} animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }} />
-                  <span className="relative h-4 w-4 rounded-full border-[3px] border-white shadow-[0_2px_6px_rgba(0,0,0,.3)]" style={{ background: A }} />
+                  <motion.span className="absolute inset-0 rounded-full" style={{ background: KIND_TONE.Knowledge, opacity: 0.2 }} animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }} />
+                  <span className="relative h-4 w-4 rounded-full border-[3px] border-white shadow-[0_2px_6px_rgba(0,0,0,.3)]" style={{ background: KIND_TONE.Knowledge }} />
                 </motion.button>
 <motion.span aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-30" style={{ x: handleX, y: handleY }}>
                   <motion.span
-                    className="absolute whitespace-nowrap rounded-full bg-[#1d1d1f] px-3 py-1.5 text-[12px] font-semibold text-white shadow-[0_8px_20px_-8px_rgba(0,0,0,.5)]"
+                    className="absolute whitespace-nowrap rounded-full bg-[#111318] px-3 py-1.5 text-[12px] font-semibold text-white shadow-[0_8px_20px_-8px_rgba(0,0,0,.5)]"
                     style={vertical ? { left: 46, top: 4 } : { left: -24, top: 46 }}
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: linking ? 0 : 1, y: linking ? 6 : [0, -4, 0] }}
@@ -293,33 +332,33 @@ export default function NodeCanvas() {
         <AnimatePresence mode="popLayout">
           {runs > 0 && !running && (
             <motion.div key={runs} initial={{ opacity: 0, y: 14, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8 }} transition={{ type: "spring", stiffness: 380, damping: 28 }} className="flex max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-[16px] bg-white px-4 py-2.5 text-[13px] text-[#424245] shadow-[0_0_0_1px_rgba(0,0,0,.06),0_14px_30px_-18px_rgba(0,0,0,.35)]" role="status">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full" style={{ background: A }}>
+              <span className="flex h-5 w-5 items-center justify-center rounded-full" style={{ background: KIND_TONE.Branch }}>
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
               </span>
               <span className="font-semibold text-[#1d1d1f]">Test run {runs} passed</span>
-              <span className="tabular-nums">2.4 s · 3 articles cited · confidence 0.92 · reply sent</span>
+              <span className="tabular-nums">2.4 s, 3 articles cited, confidence 0.93, reply sent</span>
             </motion.div>
           )}
         </AnimatePresence>
         <div className="flex items-center gap-1.5 rounded-full bg-white p-1.5 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_14px_30px_-18px_rgba(0,0,0,.35)]">
-          <span className="px-3 text-[13px] font-medium text-[#424245]">support-triage <span className="text-[#6e6e73]">· draft</span></span>
+          <span className="px-3 text-[13px] font-medium text-[#424245]">support-triage <span className="text-[#6e6e73]">(draft)</span></span>
           <motion.button
             type="button"
-            onClick={run}
+            onClick={() => { touched.current = true; run(); }}
             disabled={!connected || running}
             whileTap={{ scale: 0.95 }}
             className="flex h-9 items-center gap-2 rounded-full px-4 text-[13px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed"
-            animate={{ backgroundColor: connected ? A : "#e8e8ed", color: connected ? "#ffffff" : "#6e6e73" }}
-            style={{ ["--tw-ring-color" as string]: A }}
+            animate={{ backgroundColor: connected ? INK : "#e8e8ed", color: connected ? "#ffffff" : "#6e6e73" }}
+            style={{ ["--tw-ring-color" as string]: INK }}
           >
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z" /></svg>
             {running ? "Running…" : connected ? "Run test" : "Connect to run"}
           </motion.button>
           {connected && (
-            <button type="button" onClick={reset} className="h-9 rounded-full px-3 text-[13px] font-medium text-[#424245] outline-none hover:bg-black/5 focus-visible:ring-2" style={{ ["--tw-ring-color" as string]: A }}>Reset</button>
+            <button type="button" onClick={reset} className="h-9 rounded-full px-3 text-[13px] font-medium text-[#424245] outline-none hover:bg-black/5 focus-visible:ring-2" style={{ ["--tw-ring-color" as string]: INK }}>Reset</button>
           )}
         </div>
-        <span className="text-[13px] text-[#6e6e73]">{moved ? "Nice. Wires follow wherever you put a step." : "Every node drags. The missing wire is yours to draw."}</span>
+        <span className="text-[13px] text-[#6e6e73]">{moved ? "Wires follow wherever you put a step." : connected ? "Drag any step around. Reset to draw the wire yourself." : "Every step drags. Draw the missing wire from the amber port."}</span>
       </div>
     </div>
   );
