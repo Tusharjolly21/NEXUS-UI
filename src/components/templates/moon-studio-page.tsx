@@ -27,7 +27,7 @@ const FONT_CSS =
   fontFaces("nova-studio", [
     { family: "Anybody Variable", file: "anybody", stretch: "50% 150%" },
     { family: "DM Sans Variable", file: "dm-sans" },
-  ]) + `.ns h2{font-family:${"'Anybody Variable', sans-serif"};font-stretch:112%;font-weight:760;letter-spacing:-0.03em}`;
+  ]) + `.ns h2{font-family:${"'Anybody Variable', sans-serif"};font-stretch:100%;font-weight:740;letter-spacing:-0.03em;overflow-wrap:anywhere}`;
 const SERIF = 'ui-serif, "New York", "Iowan Old Style", Georgia, serif';
 const A = "#e11d48"; // rose, 4.7:1 on white
 const INK = "#1d1d1f";
