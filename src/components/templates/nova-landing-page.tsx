@@ -16,11 +16,20 @@ import ProgressButton from "@/components/templates/kit/components/ProgressButton
 import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
 import BatteryCalendar from "@/components/templates/nova-one/BatteryCalendar";
 import StickyStory from "@/components/templates/nova-one/StickyStory";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, Words, card, scrollToId } from "@/components/templates/kit/parts";
+import { CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, card, scrollToId } from "@/components/templates/kit/parts";
+import { fontFaces } from "@/components/templates/kit/fonts";
 
-const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
-const A = "#b45309"; // amber text and buttons (5:1 on white)
-const GLOW = "#f59e0b"; // amber graphics
+const SYSTEM_FONT = "'Figtree Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif";
+const SERIF = "'Newsreader Variable', Georgia, serif";
+// Newsreader for headings (its optical sizes sharpen at display sizes), Figtree for everything else
+const FONT_CSS =
+  fontFaces("nova-one", [
+    { family: "Newsreader Variable", file: "newsreader", weight: "200 800" },
+    { family: "Figtree Variable", file: "figtree", weight: "300 900" },
+  ]) + `.n1 h2{font-family:${SERIF};font-weight:500;letter-spacing:-0.025em;font-optical-sizing:auto}`;
+const A = "#7a5410"; // lamp brass, for text and buttons: 6.6:1 on white
+const GLOW = "#f59e0b"; // the lamp itself
+const INK = "#1c1d21";
 
 function Logo() {
   return (
@@ -85,12 +94,12 @@ function HeroScreen({ kelvin, nits }: { kelvin: MotionValue<string>; nits: Motio
     <div className="absolute inset-0 flex flex-col">
       <div className="flex h-[26px] flex-none items-center gap-1.5 bg-white/80 px-3">
         {["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="h-[9px] w-[9px] rounded-full" style={{ background: c }} />)}
-        <span className="ml-3 text-[11px] font-medium text-[#6e6e73]">Dusk, Wadi Rum · edit</span>
+        <span className="ml-3 text-[11px] font-medium text-[#6e6e73]">Dusk, Wadi Rum (edit)</span>
       </div>
       <div className="flex min-h-0 flex-1 gap-3 p-3">
         <div className="relative flex-1 overflow-hidden rounded-[8px]"><Scene /></div>
         <div className="flex w-[30%] flex-col gap-2.5 rounded-[8px] bg-white p-3 text-[#1d1d1f]">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6e6e73]">Ambient</span>
+          <span className="text-[11px] font-semibold text-[#6e6e73]">Matched to the room</span>
           <div className="flex flex-col">
             <span className="text-[11px] text-[#6e6e73]">White point</span>
             <motion.span className="text-[20px] font-semibold tabular-nums tracking-[-0.03em]">{kelvin}</motion.span>
@@ -108,11 +117,16 @@ function HeroScreen({ kelvin, nits }: { kelvin: MotionValue<string>; nits: Motio
   );
 }
 
-function AmbientStage() {
+/**
+ * The hero is the room itself: a wall at dusk, lit by a lamp that wanders until you grab it. Wherever the lamp is,
+ * the wall warms or cools and brightens or dims, the laptop's shadow swings away from it, and the screen retunes its
+ * white point and brightness to match. Arrow keys move the lamp too. It holds still for reduced motion.
+ */
+function Room({ children }: { children: ReactNode }) {
   const stage = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
-  const u = useMotionValue(0.26);
-  const v = useMotionValue(0.3);
+  const u = useMotionValue(0.78);
+  const v = useMotionValue(0.34);
   const us = useSpring(u, { stiffness: 140, damping: 20 });
   const vs = useSpring(v, { stiffness: 140, damping: 20 });
   const touched = useRef(false);
@@ -121,13 +135,13 @@ function AmbientStage() {
   // Until the visitor grabs it, the lamp wanders slowly around the room.
   useAnimationFrame((t) => {
     if (touched.current || reduce) return;
-    u.set(0.5 + 0.3 * Math.sin(t / 2600 - 0.9));
-    v.set(0.34 + 0.16 * Math.sin(t / 1900 + 0.4));
+    u.set(0.58 + 0.32 * Math.sin(t / 3100 + 1.2));
+    v.set(0.4 + 0.2 * Math.sin(t / 2300 + 0.4));
   });
 
   const setFrom = (e: RPointerEvent) => {
     const r = stage.current!.getBoundingClientRect();
-    u.set(Math.max(0.04, Math.min(0.96, (e.clientX - r.left) / r.width)));
+    u.set(Math.max(0.03, Math.min(0.97, (e.clientX - r.left) / r.width)));
     v.set(Math.max(0.06, Math.min(0.94, (e.clientY - r.top) / r.height)));
   };
   const onKey = (e: RKeyboardEvent) => {
@@ -137,7 +151,7 @@ function AmbientStage() {
     if (!m) return;
     e.preventDefault();
     touched.current = true;
-    u.set(Math.max(0.04, Math.min(0.96, u.get() + m[0])));
+    u.set(Math.max(0.03, Math.min(0.97, u.get() + m[0])));
     v.set(Math.max(0.06, Math.min(0.94, v.get() + m[1])));
   };
 
@@ -147,39 +161,34 @@ function AmbientStage() {
   const nits = useTransform(nitsN, (n) => `${Math.round(n / 10) * 10} nits`);
   const lux = useTransform(vs, [0.06, 0.94], [900, 40]);
   const luxText = useTransform(lux, (l) => `${Math.round(l / 10) * 10} lux`);
-  const roomText = useTransform(us, (x): string => (x < 0.35 ? "Warm lamp" : x > 0.65 ? "Daylight" : "Mixed light"));
+  const roomText = useTransform(us, (x): string => (x < 0.35 ? "Warm lamp" : x > 0.65 ? "Daylight lamp" : "Mixed light"));
 
   const lx = useTransform(us, (x) => x * 100);
   const ly = useTransform(vs, (y) => y * 100);
-  const light = useTransform(us, [0, 0.5, 1], ["rgba(255,184,98,0.62)", "rgba(255,236,206,0.55)", "rgba(190,214,255,0.6)"]);
-  const base = useTransform(vs, [0, 1], ["#f4f1ec", "#d8d3cb"]);
-  const bg = useMotionTemplate`radial-gradient(640px circle at ${lx}% ${ly}%, ${light}, rgba(255,255,255,0) 64%), ${base}`;
+  // warm tungsten on the left of the room, a cool daylight bulb on the right
+  const light = useTransform(us, [0, 0.5, 1], ["rgba(255,184,100,0.85)", "rgba(255,236,206,0.8)", "rgba(214,230,255,0.85)"]);
+  const base = useTransform(vs, [0, 1], ["#b4b8bf", "#9a9ea6"]); // the room at dusk, before the lamp
+  const bg = useMotionTemplate`radial-gradient(min(1000px,130vw) circle at ${lx}% ${ly}%, ${light}, rgba(255,255,255,0) 64%), linear-gradient(180deg, rgba(255,255,255,0) 70%, rgba(40,36,30,.10) 100%), ${base}`;
   const tint = useTransform(us, [0, 0.5, 1], ["rgba(255,170,90,0.26)", "rgba(255,255,255,0)", "rgba(160,190,255,0.2)"]);
   const dim = useTransform(vs, [0, 1], [0, 0.22]);
   const gx = useTransform(us, (x) => 100 - x * 100);
   const glare = useMotionTemplate`radial-gradient(60% 80% at ${gx}% -10%, rgba(255,255,255,.28), rgba(255,255,255,0) 60%)`;
-  const shadowX = useTransform(us, [0, 1], [70, -70]);
+  const shadowX = useTransform(us, [0, 1], [90, -90]);
   const left = useMotionTemplate`${lx}%`;
   const top = useMotionTemplate`${ly}%`;
 
   return (
-    <motion.div
-      ref={stage}
-      className="relative mx-auto h-[400px] w-full select-none overflow-hidden rounded-[36px] sm:h-[600px]"
-      style={{ background: bg }}
-    >
-      <div className="absolute inset-x-0 bottom-[8%] flex justify-center sm:bottom-[12%]">
-        <div className="relative">
-          <motion.div className="absolute -bottom-6 left-[6%] right-[6%] h-10 rounded-[50%] bg-black/25 blur-2xl" style={{ x: shadowX }} aria-hidden="true" />
-          <Fit className="!w-[min(86vw,860px)]"><Laptop screen={<HeroScreen kelvin={kelvin} nits={nits} />} tint={tint} dim={dim} glare={glare} /></Fit>
+    <motion.section ref={stage} id="top" className="relative -mt-[76px] select-none overflow-hidden" style={{ background: bg }} aria-label="Nova One">
+      <div className="relative mx-auto grid min-h-[min(100svh,980px)] max-w-[1180px] grid-cols-1 items-center gap-8 px-5 pb-16 pt-[112px] lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-6 lg:pb-12 lg:pt-[96px]">
+        <div className="relative z-10">{children}</div>
+        <div className="relative w-full pb-10">
+          <motion.div className="absolute bottom-5 left-[8%] right-[8%] h-10 rounded-[50%] bg-black/35 blur-2xl" style={{ x: shadowX }} aria-hidden="true" />
+          <Fit><Laptop screen={<HeroScreen kelvin={kelvin} nits={nits} />} tint={tint} dim={dim} glare={glare} /></Fit>
+          <span className="pointer-events-none absolute bottom-0 left-1/2 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap text-[13px] font-medium text-[#2f3136]">
+            <span className="h-2 w-2 rounded-full" style={{ background: GLOW }} />
+            <span><motion.span>{roomText}</motion.span>, <motion.span className="tabular-nums">{luxText}</motion.span>. Drag the lamp.</span>
+          </span>
         </div>
-      </div>
-
-      <div className="pointer-events-none absolute left-4 top-4 flex flex-wrap gap-2 sm:left-6 sm:top-6">
-        <span className="flex items-center gap-2 rounded-full bg-white/85 px-3 py-1.5 text-[12px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06)] backdrop-blur">
-          <span className="h-2 w-2 rounded-full" style={{ background: GLOW }} />
-          <motion.span>{roomText}</motion.span> · <motion.span className="tabular-nums">{luxText}</motion.span>
-        </span>
       </div>
 
       <motion.button
@@ -192,62 +201,37 @@ function AmbientStage() {
         onPointerCancel={() => (dragging.current = false)}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
-        className="absolute z-10 -ml-7 -mt-7 flex h-14 w-14 cursor-grab touch-none items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#b45309] focus-visible:ring-offset-2 active:cursor-grabbing"
-        style={{ left, top, background: "radial-gradient(circle at 40% 35%, #fff 0 18%, #ffe2a8 40%, #f59e0b 100%)", boxShadow: "0 0 0 6px rgba(255,255,255,.55), 0 0 60px 18px rgba(255,190,100,.55)" }}
+        className="absolute z-20 -ml-7 -mt-7 flex h-14 w-14 cursor-grab touch-none items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#1c1d21] focus-visible:ring-offset-2 active:cursor-grabbing"
+        style={{ left, top, background: "radial-gradient(circle at 40% 35%, #fff 0 18%, #ffe2a8 40%, #f59e0b 100%)", boxShadow: "0 0 0 6px rgba(255,255,255,.55), 0 0 70px 22px rgba(255,190,100,.5)" }}
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c2d12" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" /></svg>
       </motion.button>
-
-      <span className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/85 px-3 py-1 text-[12px] font-medium text-[#424245] backdrop-blur sm:bottom-4">Drag the lamp. The display follows the room.</span>
-    </motion.div>
+    </motion.section>
   );
 }
 
 function Hero() {
+  const line = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } };
   return (
-    <section className="relative overflow-hidden pb-10 pt-12 sm:pt-16">
-      <div className="mx-auto flex max-w-[1180px] flex-col items-center gap-5 px-5 text-center">
-        <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 26 }} className="text-[15px] font-semibold" style={{ color: A }}>
-          Nova One · 13.6-inch · fanless
-        </motion.span>
-        <h1 className="m-0 max-w-[900px] text-[clamp(44px,7.4vw,92px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
-          <Words text="A screen that reads the room." className="justify-center" accentWords={["room."]} accent={A} />
-        </h1>
-        <Reveal delay={0.3} y={14}>
-          <p className="m-0 max-w-[600px] text-[clamp(17px,2.1vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
-            0.92 kg, 22 hours on a charge, and not a single fan. Nova One matches its display to the light around you, so a late edit looks the way it will in daylight.
-          </p>
-        </Reveal>
-        <Reveal delay={0.4} y={14} className="flex flex-wrap items-center justify-center gap-3">
-          <Magnetic className="text-white focus-visible:ring-[#b45309]" style={{ background: A }} onClick={() => scrollToId("buy")}>Buy from $1,499</Magnetic>
-          <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)] focus-visible:ring-[#b45309]" onClick={() => scrollToId("display")}>See the display</Magnetic>
-        </Reveal>
-      </div>
-      <motion.div className="mx-auto mt-10 max-w-[1280px] px-3 sm:px-5" initial={{ opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.2 }}>
-        <AmbientStage />
+    <Room>
+      <motion.div
+        className="flex flex-col items-start gap-6"
+        initial="hidden"
+        animate="show"
+        transition={{ staggerChildren: 0.09, delayChildren: 0.1 }}
+      >
+        <motion.h1 variants={line} transition={{ type: "spring", stiffness: 160, damping: 24 }} className="m-0 max-w-[620px] text-[clamp(48px,6.8vw,100px)] font-[460] leading-[0.95] tracking-[-0.035em] [text-wrap:balance]" style={{ fontFamily: SERIF, color: INK }}>
+          A screen that reads the room.
+        </motion.h1>
+        <motion.p variants={line} transition={{ type: "spring", stiffness: 160, damping: 24 }} className="m-0 max-w-[440px] text-[clamp(16px,1.7vw,19px)] leading-[1.5] text-[#3d3f45]">
+          Nova One is a fanless 13.6-inch laptop that matches its display to the light around you, so a late edit looks the way it will in daylight.
+        </motion.p>
+        <motion.div variants={line} transition={{ type: "spring", stiffness: 160, damping: 24 }} className="flex flex-wrap items-center gap-3">
+          <Magnetic className="text-white focus-visible:ring-[#1c1d21]" style={{ background: INK }} onClick={() => scrollToId("buy")}>Buy from $1,499</Magnetic>
+          <Magnetic className="bg-white/70 text-[#1c1d21] shadow-[0_0_0_1px_rgba(0,0,0,.1)] backdrop-blur focus-visible:ring-[#1c1d21]" onClick={() => scrollToId("display")}>See the display</Magnetic>
+        </motion.div>
       </motion.div>
-    </section>
-  );
-}
-
-function Stats() {
-  const items = [
-    { to: 0.92, f: (n: number) => `${n.toFixed(2)} kg`, l: "lighter than most of the bags it goes in" },
-    { to: 22, f: (n: number) => `${Math.round(n)} hrs`, l: "of video playback, or about 15 of real work" },
-    { to: 0, f: () => "0 dB", l: "fan noise, because there is no fan" },
-    { to: 100, f: (n: number) => `${Math.round(n)}%`, l: "recycled aluminium in the case" },
-  ];
-  return (
-    <section className="mx-auto max-w-[1180px] px-5 py-14" aria-label="Key numbers">
-      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
-        {items.map((it) => (
-          <div key={it.l} className="flex flex-col gap-2 border-t border-black/[.08] pt-6">
-            <Counter to={it.to} format={it.f} className="text-[clamp(36px,4.6vw,52px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
-            <span className="text-[15px] leading-[1.4] text-[#6e6e73]">{it.l}</span>
-          </div>
-        ))}
-      </Stagger>
-    </section>
+    </Room>
   );
 }
 
@@ -255,7 +239,7 @@ function Silent() {
   return (
     <section className="bg-[#f5f5f7] px-5 py-24" aria-label="Silent by design">
       <Reveal y={16}>
-        <TextReveal lead="Silent while you're" words={["editing.", "mixing.", "writing.", "grading."]} sub="No fan anywhere. The N2 chip spreads its heat across the whole case, so there's nothing to spin up." accent={A} interval={2200} />
+        <TextReveal lead="Silent while you're" words={["editing.", "mixing.", "writing.", "grading."]} sub="No fan anywhere. The N2 chip spreads its heat across the whole case, so there's nothing to spin up." accent={INK} interval={2200} />
       </Reveal>
     </section>
   );
@@ -266,7 +250,7 @@ function ScreenShot({ cool }: { cool: boolean }) {
     <div className="absolute inset-0">
       <Scene />
       <div className="absolute inset-0" style={{ background: cool ? "rgba(150,190,255,.34)" : "rgba(255,190,120,.10)", mixBlendMode: cool ? "screen" : "multiply" }} />
-      <div className="absolute bottom-4 left-4 rounded-full bg-black/45 px-3 py-1.5 text-[12px] font-semibold tabular-nums text-white backdrop-blur">{cool ? "Fixed at 6,500 K · 500 nits" : "Matched to room · 3,900 K · 210 nits"}</div>
+      <div className="absolute bottom-4 left-4 rounded-full bg-black/45 px-3 py-1.5 text-[12px] font-semibold tabular-nums text-white backdrop-blur">{cool ? "Fixed at 6,500 K, 500 nits" : "Matched to the room: 3,900 K, 210 nits"}</div>
     </div>
   );
 }
@@ -280,7 +264,7 @@ function Display() {
   ];
   return (
     <section id="display" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Display" title="Late-night edits that survive the morning." sub="Most screens stay cold and bright whatever the room is doing, so you overcorrect warm photos at night. Nova One shifts its white point and brightness with the light. Drag the divider to compare." accent={A} />
+      <SectionHead title="Late-night edits that survive the morning." sub="Most screens stay cold and bright whatever the room is doing, so you overcorrect warm photos at night. Nova One shifts its white point and brightness with the light. Drag the divider to compare." accent={A} />
       <div className="mt-12 grid grid-cols-1 items-start gap-10 lg:grid-cols-[1.5fr_1fr]">
         <Reveal y={20} amount={0.15}>
           <BeforeAfter autoplay beforeLabel="Ambient off" afterLabel="Ambient on" before={<ScreenShot cool />} after={<ScreenShot cool={false} />} />
@@ -303,7 +287,7 @@ function Keyboard() {
     <section id="keyboard" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 lg:grid-cols-[1fr_1.2fr]">
         <div className="flex flex-col gap-8">
-          <SectionHead eyebrow="Keyboard" title="Every key, tuned to 38 grams." sub="We weighed each switch by hand until the whole board pressed the same. The backlight dims with the room, and lingers a moment where you typed." accent={A} />
+          <SectionHead title="Every key, tuned to 38 grams." sub="We weighed each switch by hand until the whole board pressed the same. The backlight dims with the room, and lingers a moment where you typed." accent={A} />
           <Stagger className="flex flex-col gap-3">
             {["1.1 mm of travel, with a soft bottom-out", "Backlight follows the same light sensors as the display", "A fingerprint key that wakes and unlocks in one press"].map((t) => (
               <span key={t} className="flex items-center gap-3 text-[16px] text-[#1d1d1f]">
@@ -383,10 +367,10 @@ function QuietVisual() {
 
 function RepairVisual() {
   const layers = [
-    { l: "Lid · recycled aluminium", c: "#d9ccb6" },
-    { l: "Display · swaps in 10 minutes", c: "#26262b" },
-    { l: "Logic board · N2 chip", c: "#3f6b4d" },
-    { l: "Battery · 6 screws, no glue", c: GLOW },
+    { l: "Lid, recycled aluminium", c: "#d9ccb6" },
+    { l: "Display, swaps in 10 minutes", c: "#26262b" },
+    { l: "Logic board, N2 chip", c: "#3f6b4d" },
+    { l: "Battery, 6 screws, no glue", c: GLOW },
   ];
   return (
     <div className={`${card} flex h-[420px] w-[460px] items-center gap-2 px-6`}>
@@ -419,7 +403,7 @@ function RepairVisual() {
 function Design() {
   return (
     <section id="design" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Designed to last" title="Small things you notice every day." accent={A} />
+      <SectionHead title="Small things you notice every day." accent={A} />
       <div className="mt-6">
         <StickyStory
           accent={A}
@@ -440,14 +424,14 @@ function Design() {
 /* ------------------------------------------------------------------ */
 
 const TIERS = [
-  { id: "essential", n: "Essential", s: "N2 · 12-core · 16 GB · 512 GB", p: 1499 },
-  { id: "studio", n: "Studio", s: "N2 · 14-core · 24 GB · 1 TB", p: 1999 },
-  { id: "atelier", n: "Atelier", s: "N2 · 18-core · 32 GB · 2 TB", p: 2799 },
+  { id: "essential", n: "Essential", s: "N2, 12-core, 16 GB, 512 GB", p: 1499 },
+  { id: "studio", n: "Studio", s: "N2, 14-core, 24 GB, 1 TB", p: 1999 },
+  { id: "atelier", n: "Atelier", s: "N2, 18-core, 32 GB, 2 TB", p: 2799 },
 ];
 const ADDONS = [
-  { id: "engrave", l: "Engraving", h: "Free · adds 2 days", p: 0 },
-  { id: "care", l: "NovaCare+ for 3 years", h: "Accidents and a battery swap · $199", p: 199 },
-  { id: "charger", l: "Second 35W charger", h: "One for the bag · $49", p: 49 },
+  { id: "engrave", l: "Engraving", h: "Free, adds 2 days", p: 0 },
+  { id: "care", l: "NovaCare+ for 3 years", h: "Accidents and a battery swap, $199", p: 199 },
+  { id: "charger", l: "Second 35W charger", h: "One for the bag, $49", p: 49 },
 ];
 
 function BuyScreen({ finish }: { finish: (typeof FINISHES)[number] }) {
@@ -469,7 +453,7 @@ function Buy() {
   return (
     <section id="buy" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Buy" title="Make it yours." sub="Three configurations, three finishes. Every Nova One has the same display, keyboard and battery." accent={A} center />
+        <SectionHead title="Make it yours." sub="Three configurations, three finishes. Every Nova One has the same display, keyboard and battery." accent={A} center />
         <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_1fr]">
           <Reveal y={20} amount={0.1}>
             <div className={`${card} flex h-full flex-col items-center justify-center gap-8 px-5 py-10`}>
@@ -479,7 +463,7 @@ function Buy() {
                   {FINISHES.map((f) => {
                     const on = f.id === finish.id;
                     return (
-                      <button key={f.id} type="button" role="radio" aria-checked={on} aria-label={f.n} onClick={() => setFinish(f)} className="relative flex h-11 w-11 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#b45309] focus-visible:ring-offset-2">
+                      <button key={f.id} type="button" role="radio" aria-checked={on} aria-label={f.n} onClick={() => setFinish(f)} className="relative flex h-11 w-11 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#7a5410] focus-visible:ring-offset-2">
                         {on && <motion.span layoutId="nova-finish" className="absolute inset-0 rounded-full" style={{ boxShadow: `inset 0 0 0 2px ${A}` }} transition={{ type: "spring", stiffness: 420, damping: 30 }} />}
                         <span className="h-8 w-8 rounded-full" style={{ background: `linear-gradient(140deg, ${f.c}, ${f.edge})`, boxShadow: "inset 0 0 0 1px rgba(0,0,0,.12)" }} />
                       </button>
@@ -496,7 +480,7 @@ function Buy() {
                 {TIERS.map((x) => {
                   const on = x.id === tier;
                   return (
-                    <button key={x.id} type="button" role="radio" aria-checked={on} onClick={() => setTier(x.id)} className="relative flex items-center justify-between gap-4 rounded-[18px] px-5 py-4 text-left shadow-[0_0_0_1px_rgba(0,0,0,.07)] outline-none focus-visible:ring-2 focus-visible:ring-[#b45309]">
+                    <button key={x.id} type="button" role="radio" aria-checked={on} onClick={() => setTier(x.id)} className="relative flex items-center justify-between gap-4 rounded-[18px] px-5 py-4 text-left shadow-[0_0_0_1px_rgba(0,0,0,.07)] outline-none focus-visible:ring-2 focus-visible:ring-[#7a5410]">
                       {on && <motion.span layoutId="nova-tier" className="absolute inset-0 rounded-[18px]" style={{ boxShadow: `inset 0 0 0 2px ${A}`, background: "rgba(245,158,11,.06)" }} transition={{ type: "spring", stiffness: 420, damping: 32 }} />}
                       <span className="relative flex flex-col">
                         <span className="text-[17px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{x.n}</span>
@@ -548,7 +532,7 @@ function Specs() {
   ];
   return (
     <section id="specs" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Tech specs" title="The short version." accent={A} />
+      <SectionHead title="The short version." accent={A} />
       <Stagger className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {groups.map((g) => (
           <div key={g.k} className={`${card} flex h-full flex-col gap-3 p-6`}>
@@ -567,10 +551,10 @@ function Specs() {
 export function NovaLandingPage() {
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen overflow-x-clip bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
-        <Nav brand={<Logo />} accent={A} cta="Buy" onCta={() => scrollToId("buy")} links={[{ label: "Display", id: "display" }, { label: "Keyboard", id: "keyboard" }, { label: "Design", id: "design" }, { label: "Specs", id: "specs" }, { label: "FAQ", id: "faq" }]} />
+      <div className="n1 min-h-screen overflow-x-clip bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
+        <style>{FONT_CSS}</style>
+        <Nav brand={<Logo />} accent={INK} cta="Buy" onCta={() => scrollToId("buy")} links={[{ label: "Display", id: "display" }, { label: "Keyboard", id: "keyboard" }, { label: "Design", id: "design" }, { label: "Specs", id: "specs" }, { label: "FAQ", id: "faq" }]} />
         <Hero />
-        <Stats />
         <Silent />
         <Display />
         <Keyboard />
@@ -579,7 +563,7 @@ export function NovaLandingPage() {
         <Specs />
         <section id="faq" className="bg-[#f5f5f7]">
           <div className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-24 lg:grid-cols-[1fr_1.4fr]">
-            <SectionHead eyebrow="FAQ" title="Before you order." accent={A} />
+            <SectionHead title="Before you order." accent={A} />
             <Reveal y={16} amount={0.1}>
               <Faq
                 accent={A}
