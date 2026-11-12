@@ -3,7 +3,9 @@
  * Nova Studio: landing page template for an independent creative studio
  * (branding, motion and web). Built on Motion Kit: Curved Reel, Before / After,
  * Fan Deck, Scrub Inputs, Component Layers, Glass Lens, Capsule Toggles and
- * Sign & Seal, plus the shared template parts.
+ * Sign & Seal, plus the shared template parts. The hero is a kinetic type
+ * index: the discipline in focus stretches wide and heavy in Anybody, a
+ * variable font, while a reel of its work follows the pointer.
  */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion, useMotionValue, useSpring, useTransform, useVelocity } from "framer-motion";
@@ -16,9 +18,16 @@ import GlassLens from "@/components/templates/kit/components/GlassLens";
 import { CapsuleToggle } from "@/components/templates/kit/components/CapsuleToggle";
 import SignBadge from "@/components/templates/kit/components/SignBadge";
 import { StickyStory } from "@/components/templates/nova-studio/StickyStory";
+import { fontFaces } from "@/components/templates/kit/fonts";
 import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Marquee, Nav, Reveal, SectionHead, Stagger, card, scrollToId } from "@/components/templates/kit/parts";
 
-const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
+const SYSTEM_FONT = "'DM Sans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const DISPLAY = "'Anybody Variable', 'DM Sans Variable', sans-serif";
+const FONT_CSS =
+  fontFaces("nova-studio", [
+    { family: "Anybody Variable", file: "anybody", stretch: "50% 150%" },
+    { family: "DM Sans Variable", file: "dm-sans" },
+  ]) + `.ns h2{font-family:${"'Anybody Variable', sans-serif"};font-stretch:112%;font-weight:760;letter-spacing:-0.03em}`;
 const SERIF = 'ui-serif, "New York", "Iowan Old Style", Georgia, serif';
 const A = "#e11d48"; // rose, 4.7:1 on white
 const INK = "#1d1d1f";
@@ -52,9 +61,9 @@ function Logo() {
 /* ------------------------------------------------------------------ hero */
 
 const DISCIPLINES = [
-  { word: "Branding", count: 58, line: "Identity, naming, packaging", project: "Halden Coffee · identity refresh" },
-  { word: "Motion", count: 41, line: "Brand motion, launch films, UI motion", project: "Pilot Bikes · launch film" },
-  { word: "Web", count: 47, line: "Marketing sites and design systems", project: "Sora Health · marketing site" },
+  { word: "Branding", count: 58, line: "Identity, naming, packaging", project: "Halden Coffee, identity refresh" },
+  { word: "Motion", count: 41, line: "Brand motion, launch films, UI motion", project: "Pilot Bikes, launch film" },
+  { word: "Web", count: 47, line: "Marketing sites and design systems", project: "Sora Health, marketing site" },
 ];
 
 const PW = 300;
@@ -232,15 +241,14 @@ function Hero() {
 
   return (
     <section className="relative overflow-hidden pb-16 pt-10 sm:pt-14">
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(40% 40% at 88% 20%, rgba(225,29,72,.10), transparent 70%)" }} />
       <div className="relative mx-auto max-w-[1280px] px-5">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_1.4fr] md:items-end">
           <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={spring} className="m-0 flex flex-col gap-1 text-[13px] font-medium text-[#6e6e73]">
             <span className="text-[#1d1d1f]">Independent studio, est. 2016</span>
-            <span>Lisbon and remote · 14 people</span>
+            <span>Lisbon and remote, 14 people</span>
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.05 }} className="m-0 max-w-[680px] text-[clamp(26px,3.2vw,42px)] font-semibold leading-[1.1] tracking-[-0.035em] text-[#1d1d1f] [text-wrap:balance]">
-            We design brands, make them <span style={{ fontFamily: SERIF, color: A }} className="font-normal italic">move</span>, and build the sites they live on.
+            We design brands, make them move, and build the sites they live on.
           </motion.h1>
         </div>
 
@@ -269,14 +277,15 @@ function Hero() {
                 className="grid w-full grid-cols-[40px_1fr] items-center gap-2 border-t border-black/[.08] py-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#e11d48] focus-visible:ring-offset-2 md:grid-cols-[170px_1fr] md:py-2"
               >
                 <span className="flex flex-col gap-1 self-start pt-3 md:pt-6">
-                  <span className="text-[13px] font-semibold tabular-nums" style={{ color: on ? A : "#6e6e73" }}>0{i + 1}</span>
+                  <span className="text-[13px] font-semibold tabular-nums" style={{ color: on ? INK : "#6e6e73" }}>{d.count} projects</span>
                   <span className="hidden text-[13px] leading-[1.35] text-[#6e6e73] md:block">{d.line}</span>
-                  <span className="hidden text-[13px] tabular-nums text-[#6e6e73] md:block">{d.count} projects</span>
                 </span>
                 <motion.span
-                  className="block text-[clamp(60px,11.6vw,172px)] font-semibold leading-[0.9] tracking-[-0.068em]"
-                  animate={{ x: on ? 14 : 0, color: on ? A : INK }}
-                  transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                  className="block whitespace-nowrap text-[clamp(54px,10.4vw,156px)] leading-[0.92] tracking-[-0.045em]"
+                  style={{ fontFamily: DISPLAY, color: INK }}
+                  initial={false}
+                  animate={{ fontStretch: on ? "128%" : "62%", fontWeight: on ? 820 : 420, x: on ? 10 : 0 }}
+                  transition={{ type: "spring", stiffness: 140, damping: 20 }}
                 >
                   {d.word}
                   <motion.span aria-hidden="true" className="ml-3 inline-block align-middle text-[0.32em]" animate={{ opacity: on ? 1 : 0, x: on ? 0 : -20 }} transition={{ type: "spring", stiffness: 300, damping: 24 }}>↘</motion.span>
@@ -301,7 +310,7 @@ function Hero() {
 
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.45 }} className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap gap-3">
-            <Magnetic className="text-white shadow-[0_10px_30px_-12px_rgba(225,29,72,.8)] focus-visible:ring-[#e11d48]" style={{ background: A }} onClick={() => scrollToId("contact")}>Start a project</Magnetic>
+            <Magnetic className="text-white focus-visible:ring-[#1d1d1f]" style={{ background: INK }} onClick={() => scrollToId("contact")}>Start a project</Magnetic>
             <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.1)] focus-visible:ring-[#e11d48]" onClick={() => scrollToId("work")}>Watch the reel</Magnetic>
           </div>
           <span className="flex items-center gap-2 text-[13px] text-[#6e6e73]">
@@ -317,15 +326,15 @@ function Hero() {
 /* ------------------------------------------------------------------ work reel */
 
 const POSTERS = [
-  { bg: "#2b1d14", fg: "#f6e7d4", big: "Halden", small: "Identity · 2026", serif: true },
-  { bg: "#e11d48", fg: "#ffffff", big: "Pilot", small: "Launch film · 2025" },
-  { bg: "#dff3ea", fg: "#0f3d2e", big: "Sora", small: "Website · 2026" },
-  { bg: "#1d1d1f", fg: "#f5f5f7", big: "Ōto", small: "Sonic brand · 2024", serif: true },
-  { bg: "#ffd60a", fg: "#1d1d1f", big: "Kiln", small: "Packaging · 2025" },
-  { bg: "#3a3fd9", fg: "#ffffff", big: "Vela", small: "Motion system · 2024" },
-  { bg: "#f2efe6", fg: "#1d1d1f", big: "Fable", small: "Book series · 2023", serif: true },
-  { bg: "#0b6b50", fg: "#eafff5", big: "Moss", small: "Rebrand · 2025" },
-  { bg: "#ff7a45", fg: "#1d1d1f", big: "Tide", small: "App launch · 2026" },
+  { bg: "#2b1d14", fg: "#f6e7d4", big: "Halden", small: "Identity, 2026", serif: true },
+  { bg: "#e11d48", fg: "#ffffff", big: "Pilot", small: "Launch film, 2025" },
+  { bg: "#dff3ea", fg: "#0f3d2e", big: "Sora", small: "Website, 2026" },
+  { bg: "#1d1d1f", fg: "#f5f5f7", big: "Ōto", small: "Sonic brand, 2024", serif: true },
+  { bg: "#ffd60a", fg: "#1d1d1f", big: "Kiln", small: "Packaging, 2025" },
+  { bg: "#3a3fd9", fg: "#ffffff", big: "Vela", small: "Motion system, 2024" },
+  { bg: "#f2efe6", fg: "#1d1d1f", big: "Fable", small: "Book series, 2023", serif: true },
+  { bg: "#0b6b50", fg: "#eafff5", big: "Moss", small: "Rebrand, 2025" },
+  { bg: "#ff7a45", fg: "#1d1d1f", big: "Tide", small: "App launch, 2026" },
   { bg: "#e5e5ea", fg: "#1d1d1f", big: "N°9", small: "Studio archive" },
 ];
 
@@ -335,7 +344,7 @@ function Work() {
   return (
     <section id="work" className="bg-[#f5f5f7] py-20 sm:py-24">
       <div className="mx-auto flex max-w-[1280px] flex-col gap-6 px-5 sm:flex-row sm:items-end sm:justify-between">
-        <SectionHead eyebrow="Selected work, 2023–2026" title="Ten projects we'd show our parents." accent={A} />
+        <SectionHead title="Ten projects we'd show our parents." accent={A} />
         <Reveal y={12}><p className="m-0 max-w-[340px] text-[15px] leading-[1.5] text-[#6e6e73]">A slice of 146 projects. Every one was designed, animated and built by the same team.</p></Reveal>
       </div>
       <Reveal y={20} amount={0.1} className="mt-10 px-2"><CurvedReel posters={POSTERS} autoplay /></Reveal>
@@ -393,7 +402,7 @@ function CaseStudy() {
           <p className="m-0 mt-3 text-center text-[13px] text-[#6e6e73]">Drag across the image, or use the arrow keys on the handle.</p>
         </Reveal>
         <div className="flex flex-col gap-7">
-          <SectionHead eyebrow="Case study · Halden Coffee" title="A forty-year-old roaster, redrawn for the next forty." accent={A} />
+          <SectionHead title="A forty-year-old roaster, redrawn for the next forty." accent={A} />
           <Reveal y={14}>
             <p className="m-0 text-[17px] leading-[1.55] text-[#6e6e73]">
               Halden&apos;s badge was loved locally and invisible everywhere else. We kept the warmth, dropped the clip art, and drew a wordmark that holds up on a cup lid and a forty-foot truck. Then we built the bag system so their team can launch a new origin in an afternoon.
@@ -434,7 +443,7 @@ function Specimen() {
   return (
     <div className="flex h-full flex-col justify-between bg-[#faf7f2] p-7">
       <div className="flex items-start justify-between">
-        <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#6e6e73]">Halden Grotesk · Specimen</span>
+        <span className="text-[13px] font-semibold text-[#6e6e73]">Halden Grotesk specimen</span>
         <span className="text-[12px] tabular-nums text-[#6e6e73]">v2.3</span>
       </div>
       <span className="text-[112px] font-semibold leading-[0.85] tracking-[-0.07em] text-[#2b1d14]">Rg<span className="text-[#ff6a3d]">.</span></span>
@@ -449,15 +458,15 @@ function Services() {
   return (
     <section id="services" className="bg-[#f5f5f7] py-20 sm:py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="What we do" title="One team from first sketch to last deploy." sub="Most studios hand the brand to a motion shop and the motion to a dev agency. We don't, so the idea survives all three." accent={A} />
+        <SectionHead title="One team from first sketch to last deploy." sub="Most studios hand the brand to a motion shop and the motion to a dev agency. We don't, so the idea survives all three." accent={A} />
         <div className="mt-8">
           <StickyStory
             accent={A}
             steps={[
-              { kicker: "01 · Branding", title: "Systems, not just logos.", body: "Strategy, naming, wordmark, type and colour, written down as rules your team can use. Open the deck: this is Halden's full palette. Click a chip to copy its hex.", visual: <div className={`${card} p-6`}><FanDeck chips={HALDEN_CHIPS} autoplay /></div> },
-              { kicker: "02 · Motion", title: "Every curve, tuned by hand.", body: "Logo animations, launch films and UI motion. We set radius, rotation and timing the way you'd set type: by eye, in small steps. Drag a label to try it.", visual: <div className={`${card} flex justify-center p-8`}><ScrubInput accent={A} autoplay /></div> },
-              { kicker: "03 · Web", title: "Sites built from the brand's own parts.", body: "Design systems in Figma and code, then a fast marketing site on Next.js. Every screen is the same few layers, so new pages stay on-brand without us.", visual: <div className={`${card} p-6`}><ComponentLayers accent={A} autoplay /></div> },
-              { kicker: "04 · Craft", title: "Look closer. We did.", body: "The details nobody asks for are the ones people remember. Drag the lens over Halden's typeface to see the ink traps we drew for tiny sizes.", visual: <GlassLens width={480} height={300} size={150} zoom={1.7} autoplay><Specimen /></GlassLens> },
+              { kicker: "Branding", title: "Systems, not just logos.", body: "Strategy, naming, wordmark, type and colour, written down as rules your team can use. Open the deck: this is Halden's full palette. Click a chip to copy its hex.", visual: <div className={`${card} p-6`}><FanDeck chips={HALDEN_CHIPS} autoplay /></div> },
+              { kicker: "Motion", title: "Every curve, tuned by hand.", body: "Logo animations, launch films and UI motion. We set radius, rotation and timing the way you'd set type: by eye, in small steps. Drag a label to try it.", visual: <div className={`${card} flex justify-center p-8`}><ScrubInput accent={A} autoplay /></div> },
+              { kicker: "Web", title: "Sites built from the brand's own parts.", body: "Design systems in Figma and code, then a fast marketing site on Next.js. Every screen is the same few layers, so new pages stay on-brand without us.", visual: <div className={`${card} p-6`}><ComponentLayers accent={A} autoplay /></div> },
+              { kicker: "Craft", title: "Look closer. We did.", body: "The details nobody asks for are the ones people remember. Drag the lens over Halden's typeface to see the ink traps we drew for tiny sizes.", visual: <GlassLens width={480} height={300} size={150} zoom={1.7} autoplay><Specimen /></GlassLens> },
             ]}
           />
         </div>
@@ -486,7 +495,7 @@ function Studio() {
   ];
   return (
     <section id="studio" className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
-      <SectionHead eyebrow="The studio" title="Small on purpose." sub="Fourteen people in one room in Lisbon, plus a few who join on video. You meet the people doing the work on day one, and they stay until launch." accent={A} />
+      <SectionHead title="Small on purpose." sub="Fourteen people in one room in Lisbon, plus a few who join on video. You meet the people doing the work on day one, and they stay until launch." accent={A} />
       <Stagger className="mt-12 grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
         {stats.map((s) => (
           <div key={s.l} className="flex flex-col gap-2 border-t border-black/[.08] pt-5">
@@ -525,7 +534,7 @@ function Engagements() {
   return (
     <section id="pricing" className="bg-[#f5f5f7] py-20 sm:py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Engagements" title="Three ways to work with us." sub="Fixed scopes with fixed fees. If it grows, we tell you before it costs you anything." accent={A} center />
+        <SectionHead title="Three ways to work with us." sub="Fixed scopes with fixed fees. If it grows, we tell you before it costs you anything." accent={A} center />
         <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3" role="radiogroup" aria-label="Engagement type">
           {PLANS.map((p, i) => {
             const on = sel === p.id;
@@ -593,12 +602,12 @@ function Contact() {
   const [budget, setBudget] = useState(BUDGETS[1]);
   const [when, setWhen] = useState("Q1 2027");
   const picked = NEEDS.filter((n) => needs[n.id]).map((n) => n.label.toLowerCase());
-  const summary = picked.length ? `${picked.join(", ")} · ${budget} · start ${when}` : "Pick at least one thing you need";
+  const summary = picked.length ? `${picked.join(", ")}, ${budget}, start ${when}` : "Pick at least one thing you need";
   return (
     <section id="contact" className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
       <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.05fr_1fr]">
         <div className="flex flex-col gap-8">
-          <SectionHead eyebrow="Start a project" title="Tell us what needs to move." sub="Three questions, then sign the card. A real person replies within two working days with a rough scope and a fee range." accent={A} />
+          <SectionHead title="Tell us what needs to move." sub="Three questions, then sign the card. A real person replies within two working days with a rough scope and a fee range." accent={A} />
           <Reveal y={14}>
             <div className={`${card} flex flex-col gap-6 p-6 sm:p-7`}>
               <div className="flex flex-col gap-1">
@@ -632,7 +641,7 @@ function Contact() {
           </Reveal>
         </div>
         <Reveal y={20} className="flex flex-col items-center gap-4">
-          <Fit><SignBadge name="Your company" title="Project brief · Nova Studio" ink="#9f1239" autoplay /></Fit>
+          <Fit><SignBadge name="Your company" title="Project brief for Nova Studio" ink="#9f1239" autoplay /></Fit>
           <p className="m-0 max-w-[340px] text-center text-[13px] leading-[1.5] text-[#6e6e73]">Sign with your mouse or finger, then pause. It&apos;s a handshake, not a contract. Prefer email? <a href="#contact" onClick={(e) => e.preventDefault()} className="font-medium underline decoration-[#e11d48] underline-offset-2 outline-none focus-visible:ring-2 focus-visible:ring-[#e11d48]" style={{ color: "#9f1239" }}>hello@nova.studio</a></p>
         </Reveal>
       </div>
@@ -645,8 +654,9 @@ function Contact() {
 export default function MoonStudioPage() {
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen overflow-x-clip bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
-        <Nav brand={<Logo />} accent={A} cta="Contact us" onCta={() => scrollToId("contact")} links={[{ label: "Work", id: "work" }, { label: "Case study", id: "case" }, { label: "Services", id: "services" }, { label: "Studio", id: "studio" }, { label: "Contact", id: "contact" }]} />
+      <div className="ns min-h-screen overflow-x-clip bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
+        <style>{FONT_CSS}</style>
+        <Nav brand={<Logo />} accent={INK} cta="Contact us" onCta={() => scrollToId("contact")} links={[{ label: "Work", id: "work" }, { label: "Case study", id: "case" }, { label: "Services", id: "services" }, { label: "Studio", id: "studio" }, { label: "Contact", id: "contact" }]} />
         <Hero />
         <Work />
         <CaseStudy />
@@ -655,7 +665,7 @@ export default function MoonStudioPage() {
         <Engagements />
         <Contact />
         <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 pb-24 lg:grid-cols-[1fr_1.4fr]">
-          <SectionHead eyebrow="FAQ" title="Before you write to us." accent={A} />
+          <SectionHead title="Before you write to us." accent={A} />
           <Reveal y={16}>
             <Faq
               accent={A}
