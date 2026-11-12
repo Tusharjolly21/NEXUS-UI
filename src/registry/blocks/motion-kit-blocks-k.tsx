@@ -11,6 +11,7 @@ import { PostalSignup } from "@/components/blocks/motion-kit/postal-signup";
 import { SpotlightTour } from "@/components/blocks/motion-kit/spotlight-tour";
 import { BrandReveal } from "@/components/blocks/motion-kit/brand-reveal";
 import { LanyardSignup } from "@/components/blocks/motion-kit/lanyard-signup";
+import { InfiniteBranches } from "@/components/blocks/motion-kit/infinite-branches";
 
 export function PreviewBlockVariantMkFluffyFooter() {
   return (
@@ -56,6 +57,14 @@ export function PreviewBlockVariantMkLanyardSignup() {
   return (
     <div className="flex min-h-[860px] w-full items-center bg-[#f5f5f7] dark:bg-black">
       <LanyardSignup autoplay className="w-full" />
+    </div>
+  );
+}
+
+export function PreviewBlockVariantMkInfiniteBranches() {
+  return (
+    <div className="w-full bg-[#010805]">
+      <InfiniteBranches className="w-full" />
     </div>
   );
 }
