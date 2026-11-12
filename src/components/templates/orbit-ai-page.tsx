@@ -1,13 +1,17 @@
 "use client";
 /**
  * Orbit: landing page template for five AI agents that review every pull
- * request (tests, security, performance, style, docs). Motion Kit style:
- * light page, one blue accent.
+ * request (tests, security, performance, style, docs). The hero is an
+ * orrery: the pull request at the centre, each agent on its own tilted orbit,
+ * a scan beam from the selected one. Chivo and Chivo Mono on cool paper.
  * Kit components: Progress Button, Hold to Confirm, Ruler Picker, Switch
  * (from Animated Tabs), Liquid Dial, Standing Calendar and Price Odometer.
  */
-import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
-import { AnimatePresence, MotionConfig, animate, motion, useMotionValue, useMotionValueEvent, useTransform, type MotionValue } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, MotionConfig, motion } from "framer-motion";
+import { ScaleBox } from "@/components/templates/kit/blocks";
+import { fontFaces } from "@/components/templates/kit/fonts";
+import { Orrery, STAGE } from "@/components/templates/orbit-ai/Orrery";
 import ProgressButton from "@/components/templates/kit/components/ProgressButton";
 import HoldToConfirm from "@/components/templates/kit/components/HoldToConfirm";
 import RulerPicker from "@/components/templates/orbit-ai/budget-ruler";
@@ -15,11 +19,18 @@ import { Switch } from "@/components/templates/kit/components/AnimatedTabs";
 import GooeyDial from "@/components/templates/kit/components/GooeyDial";
 import StandingCalendar from "@/components/templates/kit/components/StandingCalendar";
 import PriceOdometer from "@/components/templates/kit/components/PriceOdometer";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, StickyStory, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
+import { CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, StickyStory, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
 
-const A = "#2563eb"; // blue: fills, graphics and text (5.2:1 on white)
-const INK = "#1d1d1f";
-const MONO = "ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace";
+const A = "#2340e0"; // cobalt: fills, graphics and text (6.9:1 on white)
+const INK = "#0e141b";
+const PAPER = "#eceff2";
+const RULE = "#b9c2cb";
+const SANS = "'Chivo Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const MONO = "'Chivo Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace";
+const FONT_CSS = fontFaces("orbit", [
+  { family: "Chivo Variable", file: "chivo" },
+  { family: "Chivo Mono Variable", file: "chivo-mono" },
+]);
 const OK = "#1a7f37";
 const WARN = "#b25000";
 const BLOCK = "#d70015";
@@ -52,9 +63,6 @@ const AGENTS: { id: string; name: string; status: Status; verdict: string; findi
   { id: "docs", name: "Docs", status: "pass", verdict: "Docs drafted", finding: "RETRY_MAX is a new public option. Orbit added it to docs/webhooks.md and the changelog.", where: "docs/webhooks.md", d: "M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5" },
 ];
 
-const TAU = Math.PI * 2;
-const STEP = TAU / AGENTS.length;
-const FRONT = Math.PI / 2; // bottom of the ellipse faces the viewer
 
 const Icon = ({ d, size = 20, color = "currentColor" }: { d: string; size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>
@@ -64,52 +72,18 @@ const Icon = ({ d, size = 20, color = "currentColor" }: { d: string; size?: numb
 /* Hero: the agent ring                                                 */
 /* ------------------------------------------------------------------ */
 
-function AgentNode({ i, rot, geo, selected, onPick, compact = false }: { i: number; rot: MotionValue<number>; geo: { cx: number; cy: number; rx: number; ry: number }; selected: boolean; onPick: (i: number) => void; compact?: boolean }) {
-  const a = AGENTS[i];
-  const theta = useTransform(rot, (r) => r + i * STEP);
-  const x = useTransform(theta, (t) => geo.cx + geo.rx * Math.cos(t) - 36);
-  const y = useTransform(theta, (t) => geo.cy + geo.ry * Math.sin(t) - 36);
-  const depth = useTransform(theta, (t) => Math.sin(t));
-  const k = compact ? 0.74 : 1;
-  const scale = useTransform(depth, [-1, 1], [0.7 * k, 1.08 * k]);
-  const opacity = useTransform(depth, [-1, 0, 1], [0.55, 0.85, 1]);
-  const zIndex = useTransform(depth, (d) => (d > 0.05 ? 30 : 5));
-  const s = STATUS[a.status];
-  return (
-    <motion.div className="absolute left-0 top-0" style={{ x, y, scale, opacity, zIndex }}>
-      <button
-        type="button"
-        onClick={() => onPick(i)}
-        aria-pressed={selected}
-        aria-label={`${a.name} agent: ${a.verdict}`}
-        className="group relative flex h-[72px] w-[72px] flex-col items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-        style={{ ["--tw-ring-color" as string]: A }}
-      >
-        <motion.span
-          className="absolute inset-0 rounded-full"
-          animate={{ backgroundColor: selected ? A : "#ffffff", boxShadow: selected ? "0 0 0 6px rgba(37,99,235,.16), 0 18px 34px -14px rgba(37,99,235,.7)" : "0 0 0 1px rgba(0,0,0,.07), 0 14px 28px -16px rgba(0,0,0,.4)" }}
-          transition={{ type: "spring", stiffness: 300, damping: 24 }}
-        />
-        <span className="relative" style={{ color: selected ? "#fff" : INK }}><Icon d={a.d} size={24} /></span>
-        <span className="absolute -right-0.5 top-0.5 h-3.5 w-3.5 rounded-full ring-[3px] ring-white" style={{ background: s.c }} />
-        {(!compact || selected) && <span className="absolute top-[78px] whitespace-nowrap rounded-full bg-white/90 px-2.5 py-0.5 text-[12px] font-semibold text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06)] backdrop-blur" style={compact ? { fontSize: 15 } : undefined}>{a.name}</span>}
-      </button>
-    </motion.div>
-  );
-}
-
 function PrCard({ sel, onPick }: { sel: number; onPick: (i: number) => void }) {
   const a = AGENTS[sel];
   const blocked = AGENTS.some((x) => x.status === "block");
   return (
     <div className={`${card} flex w-[420px] flex-col gap-4 p-5`}>
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-full" style={{ background: "rgba(37,99,235,.12)", color: A }}>
+        <span className="mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-full" style={{ background: "rgba(35,64,224,.1)", color: A }}>
           <Icon d="M7 5v14M7 5a2 2 0 1 0 0 .1M17 19a2 2 0 1 0 0-.1M17 17V9a3 3 0 0 0-3-3h-3M13 4l-2 2 2 2" size={16} />
         </span>
         <div className="flex min-w-0 flex-col">
           <span className="text-[16px] font-semibold leading-[1.3] tracking-[-0.01em] text-[#1d1d1f]">Retry failed webhook deliveries</span>
-          <span className="text-[12px] text-[#6e6e73]"><span className="tabular-nums">#4127</span> · mara.okafor wants to merge into main · <span className="tabular-nums" style={{ color: OK }}>+184</span> <span className="tabular-nums" style={{ color: BLOCK }}>−37</span></span>
+          <span className="text-[12px] text-[#6e6e73]"><span className="tabular-nums">#4127</span>, mara.okafor wants to merge into main, <span className="tabular-nums" style={{ color: OK }}>+184</span> <span className="tabular-nums" style={{ color: BLOCK }}>−37</span></span>
         </div>
       </div>
       <div className="flex flex-col gap-0.5">
@@ -118,7 +92,7 @@ function PrCard({ sel, onPick }: { sel: number; onPick: (i: number) => void }) {
           const on = i === sel;
           return (
             <button key={g.id} type="button" onClick={() => onPick(i)} className="relative flex items-center gap-3 rounded-xl px-2.5 py-1.5 text-left outline-none focus-visible:ring-2" style={{ ["--tw-ring-color" as string]: A }} aria-pressed={on}>
-              {on && <motion.span layoutId="orbit-row" className="absolute inset-0 rounded-xl bg-[#f0f5ff]" transition={{ type: "spring", stiffness: 480, damping: 36 }} />}
+              {on && <motion.span layoutId="orbit-row" className="absolute inset-0 rounded-xl bg-[#eef1fd]" transition={{ type: "spring", stiffness: 480, damping: 36 }} />}
               <span className="relative" style={{ color: on ? A : "#6e6e73" }}><Icon d={g.d} size={16} /></span>
               <span className="relative flex-1 text-[14px] font-medium text-[#1d1d1f]">{g.name}</span>
               <span className="relative text-[12px] text-[#6e6e73]">{g.verdict}</span>
@@ -145,201 +119,66 @@ function PrCard({ sel, onPick }: { sel: number; onPick: (i: number) => void }) {
   );
 }
 
-function AgentRing() {
-  const stage = useRef<HTMLDivElement>(null);
-  const [w, setW] = useState(1140);
+const TONES = AGENTS.map((g) => STATUS[g.status].c);
+
+function OrbitHero() {
   const [sel, setSel] = useState(1);
-  const rot = useMotionValue(FRONT - 1 * STEP);
-  const vel = useRef(0);
-  const drag = useRef<{ x: number; last: number; t: number; moved: boolean } | null>(null);
   const touched = useRef(0);
-  const ctl = useRef<{ stop: () => void } | null>(null);
-
-  useLayoutEffect(() => {
-    const el = stage.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => setW(el.clientWidth));
-    ro.observe(el);
-    setW(el.clientWidth);
-    return () => ro.disconnect();
-  }, []);
-
-  const wide = w >= 760;
-  const H = wide ? 620 : 262;
-  const geo = wide ? { cx: w / 2, cy: 285, rx: Math.min(w / 2 - 60, 500), ry: 240 } : { cx: w / 2, cy: 112, rx: w / 2 - 40, ry: 74 };
-
-  const frontIndex = (r: number) => {
-    let best = 0, bv = -2;
-    AGENTS.forEach((_, i) => { const v = Math.sin(r + i * STEP); if (v > bv) { bv = v; best = i; } });
-    return best;
-  };
-  useMotionValueEvent(rot, "change", (r) => { const f = frontIndex(r); setSel((s) => (s === f ? s : f)); });
-
-  const settle = (velocity = 0) => {
-    // Coast a little, then snap the nearest agent to the front.
-    const projected = rot.get() + velocity * 0.35;
-    const k = Math.round((FRONT - projected) / STEP);
-    const target = FRONT - k * STEP;
-    ctl.current?.stop();
-    ctl.current = animate(rot, target, { type: "spring", stiffness: 70, damping: 16, velocity });
-  };
-
-  const pick = (i: number) => {
-    touched.current = Date.now();
-    const cur = rot.get();
-    let delta = (FRONT - (cur + i * STEP)) % TAU;
-    if (delta > Math.PI) delta -= TAU;
-    if (delta < -Math.PI) delta += TAU;
-    ctl.current?.stop();
-    ctl.current = animate(rot, cur + delta, { type: "spring", stiffness: 90, damping: 17 });
-  };
-
-  // Autoplay: bring the next agent round every few seconds while nobody is touching.
+  const pick = (i: number) => { touched.current = Date.now(); setSel(i); };
+  // bring the next agent's finding up every few seconds while nobody is choosing
   useEffect(() => {
-    const t = setInterval(() => {
-      if (drag.current || Date.now() - touched.current < 7000) return;
-      ctl.current?.stop();
-      ctl.current = animate(rot, rot.get() - STEP, { type: "spring", stiffness: 60, damping: 15 });
-    }, 3600);
+    const t = setInterval(() => { if (Date.now() - touched.current > 7000) setSel((s) => (s + 1) % AGENTS.length); }, 4200);
     return () => clearInterval(t);
-  }, [rot]);
-
-  const down = (e: RPointerEvent<HTMLDivElement>) => {
-    ctl.current?.stop();
-    vel.current = 0;
-    drag.current = { x: e.clientX, last: e.clientX, t: performance.now(), moved: false };
-    touched.current = Date.now();
-  };
-  const move = (e: RPointerEvent<HTMLDivElement>) => {
-    const d = drag.current;
-    if (!d) return;
-    const dx = e.clientX - d.last;
-    if (!d.moved && Math.abs(e.clientX - d.x) > 6) {
-      d.moved = true;
-      (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
-    }
-    if (!d.moved) return;
-    const now = performance.now();
-    const dr = -dx / geo.rx; // drag right spins the front agent to the right
-    rot.set(rot.get() + dr);
-    vel.current = dr / Math.max(1, now - d.t) * 1000;
-    d.last = e.clientX;
-    d.t = now;
-  };
-  const up = () => {
-    const d = drag.current;
-    drag.current = null;
-    touched.current = Date.now();
-    if (d?.moved) settle(Math.max(-12, Math.min(12, vel.current)));
-  };
-
-  // The ring itself: back half sits behind the card, front half in front of it.
-  const ell = (half: "back" | "front") => {
-    const { cx, cy, rx, ry } = geo;
-    return half === "back" ? `M ${cx - rx} ${cy} A ${rx} ${ry} 0 0 1 ${cx + rx} ${cy}` : `M ${cx + rx} ${cy} A ${rx} ${ry} 0 0 1 ${cx - rx} ${cy}`;
-  };
-
+  }, []);
+  const agents = AGENTS.map((g, i) => ({ id: g.id, name: g.name, tone: TONES[i], icon: g.d }));
   return (
-    <div className="flex flex-col items-center gap-6">
-      <div
-        ref={stage}
-        className="relative w-full cursor-grab select-none active:cursor-grabbing"
-        style={{ height: H, touchAction: "pan-y" }}
-        onPointerDown={down}
-        onPointerMove={move}
-        onPointerUp={up}
-        onPointerCancel={up}
-        role="group"
-        aria-label="Orbit's five review agents. Drag sideways to spin, or press an agent."
-      >
-        <svg className="pointer-events-none absolute inset-0" width={w} height={H} aria-hidden="true" style={{ zIndex: 4 }}>
-          <defs>
-            <radialGradient id="orbit-floor" cx="50%" cy="50%" r="50%"><stop offset="0" stopColor="rgba(37,99,235,.10)" /><stop offset="1" stopColor="rgba(37,99,235,0)" /></radialGradient>
-          </defs>
-          <ellipse cx={geo.cx} cy={geo.cy} rx={geo.rx + 30} ry={geo.ry + 24} fill="url(#orbit-floor)" />
-          <path d={ell("back")} fill="none" stroke="rgba(37,99,235,.28)" strokeWidth="1.5" strokeDasharray="2 7" strokeLinecap="round" />
-        </svg>
-        <svg className="pointer-events-none absolute inset-0" width={w} height={H} aria-hidden="true" style={{ zIndex: 25 }}>
-          <path d={ell("front")} fill="none" stroke="rgba(37,99,235,.45)" strokeWidth="1.5" strokeDasharray="2 7" strokeLinecap="round" />
-        </svg>
-        {wide && (
-          <motion.div className="absolute left-1/2 top-[60px] -translate-x-1/2" style={{ zIndex: 20 }} initial={{ opacity: 0, y: 20, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 140, damping: 22, delay: 0.3 }}>
-            <PrCard sel={sel} onPick={pick} />
-          </motion.div>
-        )}
-        {AGENTS.map((_, i) => (
-          <AgentNode key={`${AGENTS[i].id}-${w}`} i={i} rot={rot} geo={geo} selected={sel === i} onPick={pick} compact={!wide} />
-        ))}
+    <div className="flex flex-col items-center gap-5">
+      <div className="hidden w-full md:block">
+        <ScaleBox w={STAGE.w} h={STAGE.h}>
+          <Orrery agents={agents} sel={sel} onPick={pick} card={<PrCard sel={sel} onPick={pick} />} ink={INK} paper="#ffffff" line={RULE} accent={A} />
+        </ScaleBox>
       </div>
-      {!wide && <Fit><PrCard sel={sel} onPick={pick} /></Fit>}
-      <p className="m-0 text-center text-[13px] text-[#6e6e73]">Drag the ring to spin it. Whoever lands in front reports on the pull request.</p>
+      <div className="w-full md:hidden">
+        <ScaleBox w={STAGE.w} h={STAGE.h}>
+          <Orrery agents={agents} sel={sel} onPick={pick} ink={INK} paper="#ffffff" line={RULE} accent={A} />
+        </ScaleBox>
+        <div className="mt-4"><Fit><PrCard sel={sel} onPick={pick} /></Fit></div>
+      </div>
+      <p className="m-0 text-center text-[13.5px] text-[#4a5561]">Each agent reviews on its own orbit. Press one to read what it found.</p>
     </div>
   );
 }
 
 function Hero() {
   return (
-    <section id="top" className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(50% 40% at 50% 70%, rgba(37,99,235,.12), transparent 70%), radial-gradient(30% 30% at 12% 8%, rgba(90,200,250,.14), transparent 70%)" }} />
-      <div className="relative mx-auto max-w-[1180px] px-5 pt-10 lg:pt-14">
-        <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-[1.25fr_1fr] lg:gap-16">
+    <section id="top" className="relative -mt-[76px] overflow-hidden" style={{ background: PAPER }}>
+      <div className="relative mx-auto max-w-[1180px] px-5 pt-[124px] lg:pt-[140px]">
+        <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-[1.3fr_1fr] lg:gap-16">
           <div className="flex flex-col gap-5">
-            <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="text-[14px] font-semibold" style={{ color: A }}>
-              Code review, five ways at once
+            <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="text-[13px]" style={{ color: "#4a5561", fontFamily: MONO }}>
+              Pull request #4127, under review by five agents
             </motion.span>
-            <h1 className="m-0 text-[clamp(42px,5.6vw,72px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
-              <Words text="Five reviewers on every pull request." accentWords={["Five"]} accent={A} />
+            <h1 className="m-0 text-[clamp(42px,6vw,82px)] font-[640] leading-[0.95] tracking-[-0.045em] text-[#0e141b] [text-wrap:balance]">
+              <Words text="Five reviewers on every pull request." />
             </h1>
           </div>
-          <div className="flex flex-col gap-6 lg:pb-3">
-            <Reveal delay={0.3} y={14}>
-              <p className="m-0 text-[clamp(17px,2vw,20px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
-                Orbit runs a tests, security, performance, style and docs agent on each PR, then posts one combined review. Your human reviewers get to talk about the design.
-              </p>
-            </Reveal>
-            <Reveal delay={0.42} y={14} className="flex flex-wrap gap-3">
-              <Magnetic className="text-white shadow-[0_12px_30px_-12px_rgba(37,99,235,.75)]" style={{ background: A }} onClick={() => scrollToId("pricing")}>Add to GitHub</Magnetic>
-              <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("diff")}>Read a sample review</Magnetic>
-            </Reveal>
-          </div>
+          <motion.div className="flex flex-col gap-6 lg:pb-3" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease, delay: 0.3 }}>
+            <p className="m-0 text-[clamp(17px,1.9vw,19px)] leading-[1.5] text-[#4a5561]">
+              Orbit runs a tests, security, performance, style and docs agent on each PR, then posts one combined review. Your human reviewers get to talk about the design.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Magnetic className="text-white" style={{ background: INK }} onClick={() => scrollToId("pricing")}>Add to GitHub</Magnetic>
+              <Magnetic className="text-[#0e141b] shadow-[inset_0_0_0_1px_rgba(14,20,27,.2)]" style={{ background: "transparent" }} onClick={() => scrollToId("diff")}>Read a sample review</Magnetic>
+            </div>
+          </motion.div>
         </div>
       </div>
-      <div className="relative mx-auto mt-4 max-w-[1240px] px-5 pb-16 lg:-mt-2">
-        <AgentRing />
+      <div className="relative mx-auto mt-8 max-w-[1240px] px-5 pb-16">
+        <OrbitHero />
       </div>
     </section>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/* Stats                                                                */
-/* ------------------------------------------------------------------ */
-
-function Stats() {
-  const items = [
-    { to: 4, f: (n: number) => `${Math.round(n)} min`, l: "median time to a full review" },
-    { to: 31, f: (n: number) => `${Math.round(n)}%`, l: "fewer reverted merges after 90 days" },
-    { to: 0, from: 12, f: (n: number) => `${Math.round(n)}`, l: "comments on a clean PR. It stays quiet." },
-    { to: 1, f: (n: number) => `${Math.round(n)}`, l: "combined review, not five bot threads" },
-  ];
-  return (
-    <section className="mx-auto max-w-[1180px] px-5 pb-6" aria-label="Orbit in numbers">
-      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
-        {items.map((it) => (
-          <div key={it.l} className="flex flex-col gap-2 border-t border-black/[.08] pt-6">
-            <Counter to={it.to} from={it.from ?? 0} format={it.f} className="text-[clamp(36px,4.6vw,52px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
-            <span className="text-[15px] text-[#6e6e73]">{it.l}</span>
-          </div>
-        ))}
-      </Stagger>
-      <p className="m-0 mt-6 text-[12px] text-[#6e6e73]">Across 212 beta teams, compared with their own previous quarter. Placeholder figures.</p>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Agents story visuals                                                 */
-/* ------------------------------------------------------------------ */
 
 function AgentHead({ i }: { i: number }) {
   const a = AGENTS[i];
@@ -465,16 +304,16 @@ function DocsCard() {
 function Agents() {
   return (
     <section id="agents" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="The agents" title="Each one does one job, properly." sub="Specialists beat one generalist bot. Every agent has its own checks, its own config and its own line in the review." accent={A} />
+      <SectionHead title="Each one does one job, properly." sub="Specialists beat one generalist bot. Every agent has its own checks, its own config and its own line in the review." accent={A} />
       <div className="mt-10">
         <StickyStory
           accent={A}
           steps={[
-            { kicker: "01 · Tests", title: "Finds the lines your tests never run.", body: "Orbit runs coverage on the diff, not the repo. New branches with no test get a drafted test that uses your fixtures and naming.", visual: <TestsCard /> },
-            { kicker: "02 · Security", title: "Stops secrets and injections at the door.", body: "Leaked credentials, unsafe queries, risky dependencies. Blocking findings hold the merge until fixed or deliberately overridden.", visual: <SecurityCard /> },
-            { kicker: "03 · Performance", title: "Measures the change against a real budget.", body: "Orbit replays recorded traffic against the branch and compares p95 with main. You set the budget; it tells you when a PR spends it.", visual: <PerfCard /> },
-            { kicker: "04 · Style", title: "Your style guide, not a generic one.", body: "Rules come from your .orbit.yml and your history. Turn one off and its comments disappear from every open PR.", visual: <StyleCard /> },
-            { kicker: "05 · Docs", title: "Docs that ship with the code.", body: "When a PR changes something users can see, the docs agent drafts the update in the same branch, so the docs never lag a release.", visual: <DocsCard /> },
+            { kicker: "Tests agent", title: "Finds the lines your tests never run.", body: "Orbit runs coverage on the diff, not the repo. New branches with no test get a drafted test that uses your fixtures and naming.", visual: <TestsCard /> },
+            { kicker: "Security agent", title: "Stops secrets and injections at the door.", body: "Leaked credentials, unsafe queries, risky dependencies. Blocking findings hold the merge until fixed or deliberately overridden.", visual: <SecurityCard /> },
+            { kicker: "Performance agent", title: "Measures the change against a real budget.", body: "Orbit replays recorded traffic against the branch and compares p95 with main. You set the budget; it tells you when a PR spends it.", visual: <PerfCard /> },
+            { kicker: "Style agent", title: "Your style guide, not a generic one.", body: "Rules come from your .orbit.yml and your history. Turn one off and its comments disappear from every open PR.", visual: <StyleCard /> },
+            { kicker: "Docs agent", title: "Docs that ship with the code.", body: "When a PR changes something users can see, the docs agent drafts the update in the same branch, so the docs never lag a release.", visual: <DocsCard /> },
           ]}
         />
       </div>
@@ -504,7 +343,7 @@ const DIFF: DiffLine[] = [
 
 function DiffPanel() {
   return (
-    <div className="overflow-hidden rounded-[24px] bg-[#16181d] shadow-[0_0_0_1px_rgba(255,255,255,.06),0_40px_80px_-40px_rgba(37,99,235,.45)]">
+    <div className="overflow-hidden rounded-[24px] bg-[#16181d] shadow-[0_0_0_1px_rgba(255,255,255,.06),0_40px_80px_-40px_rgba(35,64,224,.4)]">
       <div className="flex items-center gap-2 border-b border-white/[.08] px-5 py-3.5">
         {["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="h-3 w-3 rounded-full" style={{ background: c }} aria-hidden="true" />)}
         <span className="ml-2 text-[12px] font-medium text-[#a1a1a6]" style={{ fontFamily: MONO }}>webhooks/deliver.ts</span>
@@ -523,7 +362,7 @@ function DiffPanel() {
                 <motion.div initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ type: "spring", stiffness: 260, damping: 24 }} className="sticky left-[68px] my-1.5 ml-[68px] mr-5 flex w-[min(520px,calc(100vw-120px))] items-start gap-2.5 rounded-xl bg-[#22262e] px-3 py-2.5" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
                   <span className="mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-full text-white" style={{ background: A }}><Icon d={AGENTS[d.note.agent].d} size={13} /></span>
                   <span className="flex flex-col whitespace-normal">
-                    <span className="text-[12px] font-semibold text-[#f5f5f7]">Orbit · {AGENTS[d.note.agent].name}</span>
+                    <span className="text-[12px] font-semibold text-[#f5f5f7]">Orbit, {AGENTS[d.note.agent].name} agent</span>
                     <span className="text-[13px] leading-[1.45] text-[#c9d1d9]">{d.note.text}</span>
                   </span>
                 </motion.div>
@@ -542,7 +381,7 @@ function Diff() {
   return (
     <section id="diff" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="The review" title="Comments where the problem is." sub="One review, posted as you'd want a colleague to post it: on the exact line, with the reason, and with a fix when there is one." accent={A} />
+        <SectionHead title="Comments where the problem is." sub="One review, posted as you'd want a colleague to post it: on the exact line, with the reason, and with a fix when there is one." accent={A} />
         <div className="mt-12 grid grid-cols-1 items-center gap-6 lg:grid-cols-[1.5fr_1fr]">
           <Reveal y={18} amount={0.15}><DiffPanel /></Reveal>
           <Reveal y={18} delay={0.1}>
@@ -601,7 +440,7 @@ function Setup() {
     <section id="setup" className="mx-auto max-w-[1180px] px-5 py-24">
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[1fr_1.1fr]">
         <div className="flex flex-col gap-10">
-          <SectionHead eyebrow="Setup" title="Ten minutes, then forget it." accent={A} />
+          <SectionHead title="Ten minutes, then forget it." accent={A} />
           <Stagger className="flex flex-col gap-6">
             {steps.map((s, i) => (
               <div key={s.t} className="flex gap-4">
@@ -645,7 +484,7 @@ function Activity() {
   return (
     <section id="activity" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto flex max-w-[1180px] flex-col items-center gap-12 px-5">
-        <SectionHead eyebrow="Your team's year" title="Every review, standing up." sub="A day's column is as tall as the pull requests Orbit reviewed. Hover a column for the day. Press the button to stand the grid up." accent={A} center />
+        <SectionHead title="Every review, standing up." sub="A day's column is as tall as the pull requests Orbit reviewed. Hover a column for the day. Press the button to stand the grid up." accent={A} center />
         <Reveal y={18} className="w-full">
           <div className={`${card} flex w-full justify-center px-4 py-10`}><Fit><StandingCalendar weeks={30} noun="pull requests reviewed" autoplay /></Fit></div>
         </Reveal>
@@ -659,11 +498,11 @@ function Pricing() {
     <section id="pricing" className="mx-auto max-w-[1180px] px-5 py-24">
       <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1fr]">
         <div className="flex flex-col gap-8">
-          <SectionHead eyebrow="Pricing" title="Pay for the people who open PRs." sub="All five agents on every plan. Reviewers and bots are free. Open-source repositories are free forever." accent={A} />
+          <SectionHead title="Pay for the people who open PRs." sub="All five agents on every plan. Reviewers and bots are free. Open-source repositories are free forever." accent={A} />
           <Stagger className="flex flex-col gap-3">
             {["Unlimited repositories and reviews", "Self-hosted runners for private networks", "SSO, audit log and data residency on Business", "14-day trial with the full product, no card"].map((t) => (
               <span key={t} className="flex items-center gap-3 text-[16px] text-[#1d1d1f]">
-                <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full" style={{ background: "rgba(37,99,235,.12)", color: A }}>
+                <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full" style={{ background: "rgba(35,64,224,.1)", color: A }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
                 </span>
                 {t}
@@ -682,17 +521,17 @@ function Pricing() {
 export default function OrbitAIPage() {
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>
+      <div className="min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SANS }}>
+        <style>{FONT_CSS}</style>
         <Nav brand={<Logo />} accent={A} cta="Add to GitHub" onCta={() => scrollToId("pricing")} links={[{ label: "Agents", id: "agents" }, { label: "Review", id: "diff" }, { label: "Setup", id: "setup" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
         <Hero />
-        <Stats />
         <Agents />
         <Diff />
         <Setup />
         <Activity />
         <Pricing />
         <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-24 lg:grid-cols-[1fr_1.4fr]">
-          <SectionHead eyebrow="FAQ" title="Before you install." accent={A} />
+          <SectionHead title="Before you install." accent={A} />
           <Reveal y={14}>
             <Faq
               accent={A}
