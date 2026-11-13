@@ -3879,6 +3879,26 @@
   "bg": "#f6f6f6",
   "coverage": 1
  },
+ "mk-column-drift-gallery": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   80,
+   96,
+   1120,
+   670
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.88
+ },
  "mk-counting-stats": {
   "canvas": [
    1280,
@@ -3898,6 +3918,26 @@
   ],
   "bg": "#f6f6f6",
   "coverage": 1
+ },
+ "mk-courier-route-tracker": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1281,
+   861
+  ],
+  "content": [
+   0,
+   0,
+   1281,
+   861
+  ],
+  "bg": null,
+  "coverage": 0
  },
  "mk-dot-grid-hero": {
   "canvas": [
@@ -4018,6 +4058,26 @@
   ],
   "bg": "#f6f6f6",
   "coverage": 0.98
+ },
+ "mk-focus-rail-gallery": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   80,
+   136,
+   1120,
+   592
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
  },
  "mk-gravity-404": {
   "canvas": [
@@ -4219,6 +4279,26 @@
   "bg": "#ffffff",
   "coverage": 0.99
  },
+ "mk-model-picker": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1281,
+   861
+  ],
+  "content": [
+   0,
+   0,
+   1281,
+   861
+  ],
+  "bg": null,
+  "coverage": 0
+ },
  "mk-morphing-nav": {
   "canvas": [
    1280,
@@ -4358,6 +4438,26 @@
   ],
   "bg": "#f6f6f6",
   "coverage": 1
+ },
+ "mk-reflow-mosaic": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   80,
+   80,
+   1120,
+   704
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.68
  },
  "mk-scramble-heading": {
   "canvas": [

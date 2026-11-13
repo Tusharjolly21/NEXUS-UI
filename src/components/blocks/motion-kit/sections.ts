@@ -75,6 +75,11 @@ import { SpotlightTour } from "./spotlight-tour";
 import { BrandReveal } from "./brand-reveal";
 import { LanyardSignup } from "./lanyard-signup";
 import { InfiniteBranches } from "./infinite-branches";
+import { CourierRouteTracker } from "./courier-route-tracker";
+import { ColumnDriftGallery } from "./column-drift-gallery";
+import { ReflowMosaic } from "./reflow-mosaic";
+import { FocusRailGallery } from "./focus-rail-gallery";
+import { ModelPickerSection } from "./model-picker";
 import { PreviewBlockVariantMkScrollNavbar } from "@/registry/blocks/nexus-essentials-blocks-c";
 import { MorphMenu } from "./morph-menu";
 import { AnnounceBar } from "./announce-bar";
@@ -108,6 +113,11 @@ export const MOTION_KIT_SECTIONS: Record<string, ComponentType<{ autoplay?: bool
   "mk-brand-reveal": BrandReveal as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-lanyard-signup": LanyardSignup as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-infinite-branches": InfiniteBranches as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-courier-route-tracker": CourierRouteTracker as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-column-drift-gallery": ColumnDriftGallery as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-reflow-mosaic": ReflowMosaic as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-focus-rail-gallery": FocusRailGallery as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-model-picker": ModelPickerSection as unknown as ComponentType<{ autoplay?: boolean }>,
   // The navbar needs a scrolling frame with a page inside it, so the section is its preview.
   "mk-scroll-navbar": asSection(PreviewBlockVariantMkScrollNavbar),
   "mk-morph-menu": MorphMenu as unknown as ComponentType<{ autoplay?: boolean }>,

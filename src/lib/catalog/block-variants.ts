@@ -63,6 +63,7 @@ const ADDED_ON: Record<string, string[]> = {
   "2026-11-05": ["fluffy-footer", "broken-bridge-404", "postal-signup", "spotlight-tour", "brand-reveal"],
   "2026-11-10": ["lanyard-signup"],
   "2026-11-12": ["infinite-branches"],
+  "2026-11-13": ["courier-route-tracker", "column-drift-gallery", "reflow-mosaic", "focus-rail-gallery", "model-picker"],
   "2026-11-02": ["head-to-head-compare", "receipt-hero", "sealed-and-sent", "wall-clock-contact", "wordmark-footer"],
 };
 const ADDED = new Map(Object.entries(ADDED_ON).flatMap(([day, slugs]) => slugs.map((slug) => [slug, day] as const)));
@@ -123,6 +124,7 @@ const baseVariants: BlockVariant[] = [
   v("checkout-verify", "block-checkout-moments", "Verify Payment"),
   v("checkout-tip", "block-checkout-moments", "Tip & Rate"),
   mk("slide-to-pay", "block-checkout-moments", "Slide to Pay", "SlideToPay"),
+  mk("courier-route-tracker", "block-checkout-moments", "Courier Route Tracker", "CourierRouteTracker"),
 
   v("sidebar-simple", "block-sidebar", "Simple Sidebar with Hover"),
   v("sidebar-collapsible", "block-sidebar", "Collapsible Sidebar"),
@@ -166,6 +168,7 @@ const baseVariants: BlockVariant[] = [
   mk("announce-bar", "block-navigation", "Announcement Bar", "AnnounceBar"),
   mk("morph-menu", "block-navigation", "Morphing Mega Menu", "MorphMenu"),
   mk("scroll-navbar", "block-navigation", "Scroll-aware Navbar", "ScrollNavbar"),
+  mk("model-picker", "block-navigation", "Model Picker", "ModelPickerSection"),
 
   mk("spotlight-hero", "block-hero", "Spotlight Hero", "SpotlightHero"),
   mk("parallax-stack-hero", "block-hero", "Parallax Stack Hero", "ParallaxStackHero"),
@@ -200,6 +203,9 @@ const baseVariants: BlockVariant[] = [
   mk("drift-gallery", "block-gallery", "Drift Gallery", "DriftGallery"),
   mk("card-rail", "block-gallery", "Card Rail", "CardRail"),
   mk("parallax-slider", "block-gallery", "Parallax Slider", "ParallaxSlider"),
+  mk("column-drift-gallery", "block-gallery", "Column Drift Gallery", "ColumnDriftGallery"),
+  mk("reflow-mosaic", "block-gallery", "Reflow Mosaic", "ReflowMosaic"),
+  mk("focus-rail-gallery", "block-gallery", "Focus Rail Gallery", "FocusRailGallery"),
   mk("changelog-pile", "block-changelog", "Changelog Pile", "ChangelogPile"),
   mk("gravity-404", "block-404", "Gravity 404", "Gravity404"),
   mk("broken-bridge-404", "block-404", "Broken Bridge 404", "BrokenBridge404"),
