@@ -5,7 +5,7 @@ import { AnimatePresence, MotionConfig, motion, useReducedMotion } from "framer-
 import { cn } from "@/lib/utils";
 import { DROPOFF, MapBase, PICKUP, ROUTE, ROUTE_ARROWS, STOPS } from "./route-map";
 
-export interface CourierRouteStage {
+export interface OrderTrackingStage {
   name: string;
   /** Time shown under the name, for example "Nov 12, 6:48 PM". The last stage gets the arrival time. */
   when?: string;
@@ -13,21 +13,21 @@ export interface CourierRouteStage {
   detail?: string;
 }
 
-export interface CourierRouteUpdate {
+export interface OrderTrackingUpdate {
   text: string;
   /** When it drops into the feed: a fraction of the route (0 to 1), or the index of a drop-off stop. */
   at?: number;
   stop?: number;
 }
 
-export interface CourierRouteTrackerProps {
+export interface OrderTrackingProps {
   orderId?: string;
   orderTitle?: string;
   address?: string;
   courier?: { name: string; initials: string; rating?: string; vehicle?: string };
   /** Stages in order. Every stage but the last starts checked; the last one checks on arrival. */
-  stages?: CourierRouteStage[];
-  updates?: CourierRouteUpdate[];
+  stages?: OrderTrackingStage[];
+  updates?: OrderTrackingUpdate[];
   /** Minutes on the clock when the ride starts. Counts down to arrival. */
   etaMinutes?: number;
   /** Clock time the ride starts at, as [hour 0-23, minute]. Feed and arrival times count on from it. */
@@ -41,7 +41,7 @@ export interface CourierRouteTrackerProps {
   className?: string;
 }
 
-export const DEFAULT_COURIER_STAGES: CourierRouteStage[] = [
+export const DEFAULT_COURIER_STAGES: OrderTrackingStage[] = [
   { name: "Order placed", when: "Nov 12, 6:48 PM", detail: "Paid by card, receipt sent" },
   { name: "Packed", when: "Nov 13, 8:10 AM", detail: "3 items, 1.8 kg, padded box" },
   { name: "Left the hub", when: "9:32 AM", detail: "Eastside hub, bay 6" },
@@ -49,7 +49,7 @@ export const DEFAULT_COURIER_STAGES: CourierRouteStage[] = [
   { name: "Delivered", detail: "Photo proof on arrival" },
 ];
 
-export const DEFAULT_COURIER_UPDATES: CourierRouteUpdate[] = [
+export const DEFAULT_COURIER_UPDATES: OrderTrackingUpdate[] = [
   { at: 0, text: "Mira picked up your parcel at the Eastside hub" },
   { stop: 0, text: "Dropping off nearby, 2 stops before you" },
   { stop: 1, text: "One more stop, then you" },
@@ -132,7 +132,7 @@ type FeedItem = { id: number; text: string; time: string };
  * off, updates drop into a feed, and on arrival a proof-of-delivery card lands. Hover the map for what is
  * at each point; hover or focus a stage for its detail. Under reduced motion it shows the delivered state.
  */
-export function CourierRouteTracker({
+export function OrderTracking({
   orderId = "Order NX-4182",
   orderTitle = "Ceramic pour-over set and 2 more",
   address = "17 Calder Lane, Unit 4",
@@ -146,7 +146,7 @@ export function CourierRouteTracker({
   onMessage,
   onCall,
   className,
-}: CourierRouteTrackerProps) {
+}: OrderTrackingProps) {
   const reduce = useReducedMotion();
   const section = useRef<HTMLElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -297,8 +297,8 @@ export function CourierRouteTracker({
 
   return (
     <MotionConfig reducedMotion="user">
-      <section ref={section} aria-label="Order tracking" className={cn("w-full bg-[#f5f5f7] px-4 py-12 sm:px-6 sm:py-16 dark:bg-black", className)}>
-        <div className="mx-auto grid max-w-[1100px] gap-3.5 rounded-[28px] bg-white p-3.5 shadow-[0_1px_0_rgba(0,0,0,0.03),0_30px_60px_-30px_rgba(20,20,40,0.25)] md:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)] dark:bg-[#141418] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_30px_60px_-30px_rgba(0,0,0,0.8)]">
+      <section ref={section} aria-label="Order tracking" className={cn("@container w-full bg-[#f5f5f7] px-4 py-12 sm:px-6 sm:py-16 dark:bg-black", className)}>
+        <div className="mx-auto grid max-w-[1100px] gap-3.5 rounded-[28px] bg-white p-3.5 shadow-[0_1px_0_rgba(0,0,0,0.03),0_30px_60px_-30px_rgba(20,20,40,0.25)] @[780px]:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)] dark:bg-[#141418] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_30px_60px_-30px_rgba(0,0,0,0.8)]">
           {/* Map */}
           <div ref={mapRef} className="relative aspect-[640/600] max-w-full self-start overflow-hidden rounded-[20px] bg-[#f9f9fb] dark:bg-[#141418]">
             <svg viewBox="0 0 640 600" className="block h-full w-full" onPointerLeave={() => setTip(null)} aria-hidden>

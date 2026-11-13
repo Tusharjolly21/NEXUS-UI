@@ -1,26 +1,27 @@
 # Model Picker
 
-Add the "Model Picker" section from Nexus UI to my project.
+Add the "Model Picker" component from Nexus UI to my project.
 
-A model picker for AI products in one quiet pill: featured models with a one-line note each, an Effort submenu, and More models grouped by provider. The pill springs to the new name and a summary of context and prices crossfades underneath. Submenus become pages on phones; fully keyboard operable.
+A model picker for AI products in one quiet pill. Open it for featured models with a one-line note each, an Effort submenu for models that reason, and More models grouped by provider. Choosing closes the menu, the pill springs to the new name's width, and a summary of context, prices and effort crossfades underneath. Effort snaps to the nearest level the new model accepts. Submenus become pages on phones, and it is fully keyboard operable: arrows, Right for a submenu, Enter to choose, Escape to close, and a letter to jump.
 
 Please:
 
 1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
-2. Install what it needs: `framer-motion` (use this project's package manager).
+2. Install what it needs: `framer-motion`, `clsx`, `tailwind-merge` (use this project's package manager).
 3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
-4. Use it like this: `import { ModelPickerSection } from "@/components/blocks/motion-kit/model-picker";`. The props are typed and documented in the code.
+4. It imports `cn` from `@/lib/utils`. If the project has no such helper, create it from the file below.
+5. Use it like this: `import { DEFAULT_PICKER_MODELS, DEFAULT_PICKER_PROVIDERS, ModelPicker, ModelPickerSection } from "@/components/model-picker";`. The props are typed and documented in the code.
 
 Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
---- components/blocks/motion-kit/model-picker/index.ts ---
+--- components/model-picker/index.ts ---
 
 ```ts
 export { DEFAULT_PICKER_MODELS, DEFAULT_PICKER_PROVIDERS, ModelPicker, ModelPickerSection } from "./model-picker";
 export type { ModelPickerProps, ModelPickerSectionProps, PickerEffort, PickerModel, PickerProvider } from "./model-picker";
 ```
 
---- components/blocks/motion-kit/model-picker/model-picker.tsx ---
+--- components/model-picker/model-picker.tsx ---
 
 ```tsx
 "use client";
@@ -653,5 +654,16 @@ export function ModelPickerSection({ eyebrow = "Choose a model", title = "Pick w
       </div>
     </section>
   );
+}
+```
+
+--- lib/utils.ts ---
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
 ```

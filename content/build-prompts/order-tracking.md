@@ -1,26 +1,27 @@
-# Courier Route Tracker
+# Order Tracking
 
-Add the "Courier Route Tracker" section from Nexus UI to my project.
+Add the "Order Tracking" component from Nexus UI to my project.
 
-A live delivery tracker. A courier rides a street map to the door, pausing at the drop-offs before yours while the route fills in behind them; the arrival time rolls down digit by digit, stages check off, updates drop into a feed, and on arrival a proof-of-delivery card lands. Hover the map for each point, hover a stage for its detail. Shows the delivered state under reduced motion.
+A live delivery tracker on a real-looking city map. A courier puck leaves the Pickup marker and rides a blue route with direction arrows to the Drop-off pin on the door, pausing at the drop-offs before yours while the ridden part fills in behind it; its arrow turns at every corner. The arrival time rolls down digit by digit, stages check off, live updates drop into a feed, and on arrival a proof-of-delivery card lands. Hover the map for what is at each point, and a stage for its detail. Shows the delivered state under reduced motion.
 
 Please:
 
 1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
-2. Install what it needs: `framer-motion` (use this project's package manager).
+2. Install what it needs: `framer-motion`, `clsx`, `tailwind-merge` (use this project's package manager).
 3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
-4. Use it like this: `import { CourierRouteTracker } from "@/components/blocks/motion-kit/courier-route-tracker";`. The props are typed and documented in the code.
+4. It imports `cn` from `@/lib/utils`. If the project has no such helper, create it from the file below.
+5. Use it like this: `import { DEFAULT_COURIER_STAGES, DEFAULT_COURIER_UPDATES, OrderTracking } from "@/components/order-tracking";`. The props are typed and documented in the code.
 
 Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
---- components/blocks/motion-kit/courier-route-tracker/index.ts ---
+--- components/order-tracking/index.ts ---
 
 ```ts
-export { CourierRouteTracker, DEFAULT_COURIER_STAGES, DEFAULT_COURIER_UPDATES } from "./courier-route-tracker";
-export type { CourierRouteStage, CourierRouteTrackerProps, CourierRouteUpdate } from "./courier-route-tracker";
+export { DEFAULT_COURIER_STAGES, DEFAULT_COURIER_UPDATES, OrderTracking } from "./order-tracking";
+export type { OrderTrackingProps, OrderTrackingStage, OrderTrackingUpdate } from "./order-tracking";
 ```
 
---- components/blocks/motion-kit/courier-route-tracker/courier-route-tracker.tsx ---
+--- components/order-tracking/order-tracking.tsx ---
 
 ```tsx
 "use client";
@@ -30,7 +31,7 @@ import { AnimatePresence, MotionConfig, motion, useReducedMotion } from "framer-
 import { cn } from "@/lib/utils";
 import { DROPOFF, MapBase, PICKUP, ROUTE, ROUTE_ARROWS, STOPS } from "./route-map";
 
-export interface CourierRouteStage {
+export interface OrderTrackingStage {
   name: string;
   /** Time shown under the name, for example "Nov 12, 6:48 PM". The last stage gets the arrival time. */
   when?: string;
@@ -38,21 +39,21 @@ export interface CourierRouteStage {
   detail?: string;
 }
 
-export interface CourierRouteUpdate {
+export interface OrderTrackingUpdate {
   text: string;
   /** When it drops into the feed: a fraction of the route (0 to 1), or the index of a drop-off stop. */
   at?: number;
   stop?: number;
 }
 
-export interface CourierRouteTrackerProps {
+export interface OrderTrackingProps {
   orderId?: string;
   orderTitle?: string;
   address?: string;
   courier?: { name: string; initials: string; rating?: string; vehicle?: string };
   /** Stages in order. Every stage but the last starts checked; the last one checks on arrival. */
-  stages?: CourierRouteStage[];
-  updates?: CourierRouteUpdate[];
+  stages?: OrderTrackingStage[];
+  updates?: OrderTrackingUpdate[];
   /** Minutes on the clock when the ride starts. Counts down to arrival. */
   etaMinutes?: number;
   /** Clock time the ride starts at, as [hour 0-23, minute]. Feed and arrival times count on from it. */
@@ -66,7 +67,7 @@ export interface CourierRouteTrackerProps {
   className?: string;
 }
 
-export const DEFAULT_COURIER_STAGES: CourierRouteStage[] = [
+export const DEFAULT_COURIER_STAGES: OrderTrackingStage[] = [
   { name: "Order placed", when: "Nov 12, 6:48 PM", detail: "Paid by card, receipt sent" },
   { name: "Packed", when: "Nov 13, 8:10 AM", detail: "3 items, 1.8 kg, padded box" },
   { name: "Left the hub", when: "9:32 AM", detail: "Eastside hub, bay 6" },
@@ -74,7 +75,7 @@ export const DEFAULT_COURIER_STAGES: CourierRouteStage[] = [
   { name: "Delivered", detail: "Photo proof on arrival" },
 ];
 
-export const DEFAULT_COURIER_UPDATES: CourierRouteUpdate[] = [
+export const DEFAULT_COURIER_UPDATES: OrderTrackingUpdate[] = [
   { at: 0, text: "Mira picked up your parcel at the Eastside hub" },
   { stop: 0, text: "Dropping off nearby, 2 stops before you" },
   { stop: 1, text: "One more stop, then you" },
@@ -157,7 +158,7 @@ type FeedItem = { id: number; text: string; time: string };
  * off, updates drop into a feed, and on arrival a proof-of-delivery card lands. Hover the map for what is
  * at each point; hover or focus a stage for its detail. Under reduced motion it shows the delivered state.
  */
-export function CourierRouteTracker({
+export function OrderTracking({
   orderId = "Order NX-4182",
   orderTitle = "Ceramic pour-over set and 2 more",
   address = "17 Calder Lane, Unit 4",
@@ -171,7 +172,7 @@ export function CourierRouteTracker({
   onMessage,
   onCall,
   className,
-}: CourierRouteTrackerProps) {
+}: OrderTrackingProps) {
   const reduce = useReducedMotion();
   const section = useRef<HTMLElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -645,7 +646,7 @@ export function CourierRouteTracker({
 }
 ```
 
---- components/blocks/motion-kit/courier-route-tracker/route-map.tsx ---
+--- components/order-tracking/route-map.tsx ---
 
 ```tsx
 import { memo } from "react";
@@ -874,4 +875,15 @@ export const MapBase = memo(function MapBase({ canalId }: { canalId: string }) {
     </g>
   );
 });
+```
+
+--- lib/utils.ts ---
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 ```

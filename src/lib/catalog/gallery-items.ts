@@ -406,6 +406,10 @@ const TINT_OF: Record<string, TileTint> = {
  * are all gathered, newest first, under the wall's New tab (see NEW_TAB_DAYS).
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // thirty-first batch (Motion Kit Pro: Order Tracking, Image Galleries, Model Picker)
+  "order-tracking",
+  "image-galleries",
+  "model-picker",
   // thirtieth (Motion Kit Everyday: Magic Calendar)
   "magic-calendar",
   // twenty-ninth batch (Motion Kit Everyday: LED Button, Glass Compare, Silk Print, Glyph Rain, Airmail Globe, Sand Drift Gallery, Diffusion Loader, Warp CTA, Print Styles, Inspect Text, Soap Bubble, Ink Drop Picker, Tear-off Coupon, Breadcrumb Branch)
