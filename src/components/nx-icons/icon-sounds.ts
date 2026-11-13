@@ -507,6 +507,108 @@ import * as s_expand from "./sounds/expand";
 import * as s_collapse from "./sounds/collapse";
 import * as s_import from "./sounds/import";
 
+import * as s_drum from "./sounds/drum";
+import * as s_violin from "./sounds/violin";
+import * as s_trumpet from "./sounds/trumpet";
+import * as s_xylophone from "./sounds/xylophone";
+import * as s_tambourine from "./sounds/tambourine";
+import * as s_harp from "./sounds/harp";
+import * as s_turntable from "./sounds/turntable";
+import * as s_theater_masks from "./sounds/theater-masks";
+import * as s_chess_pawn from "./sounds/chess-pawn";
+import * as s_playing_cards from "./sounds/playing-cards";
+import * as s_camera_lens from "./sounds/camera-lens";
+import * as s_film_reel from "./sounds/film-reel";
+import * as s_easel from "./sounds/easel";
+import * as s_paint_roller from "./sounds/paint-roller";
+import * as s_top_hat from "./sounds/top-hat";
+import * as s_rubiks_cube from "./sounds/rubiks-cube";
+import * as s_slot_machine from "./sounds/slot-machine";
+import * as s_crystal_ball from "./sounds/crystal-ball";
+import * as s_kite from "./sounds/kite";
+import * as s_bow_arrow from "./sounds/bow-arrow";
+import * as s_bucket from "./sounds/bucket";
+import * as s_desk_fan from "./sounds/desk-fan";
+import * as s_hand_mirror from "./sounds/hand-mirror";
+import * as s_candle from "./sounds/candle";
+import * as s_toothbrush from "./sounds/toothbrush";
+import * as s_kettle from "./sounds/kettle";
+import * as s_frying_pan from "./sounds/frying-pan";
+import * as s_blender from "./sounds/blender";
+import * as s_clothes_hanger from "./sounds/clothes-hanger";
+import * as s_diamond_ring from "./sounds/diamond-ring";
+import * as s_bathtub from "./sounds/bathtub";
+import * as s_wardrobe from "./sounds/wardrobe";
+import * as s_chair from "./sounds/chair";
+import * as s_clothes_iron from "./sounds/clothes-iron";
+import * as s_lipstick from "./sounds/lipstick";
+import * as s_perfume from "./sounds/perfume";
+import * as s_necktie from "./sounds/necktie";
+import * as s_houseplant from "./sounds/houseplant";
+import * as s_cooking_pot from "./sounds/cooking-pot";
+import * as s_hair_dryer from "./sounds/hair-dryer";
+import * as s_stop_sign from "./sounds/stop-sign";
+import * as s_parking_sign from "./sounds/parking-sign";
+import * as s_passport from "./sounds/passport";
+import * as s_ticket from "./sounds/ticket";
+import * as s_folded_map from "./sounds/folded-map";
+import * as s_life_buoy from "./sounds/life-buoy";
+import * as s_ferry from "./sounds/ferry";
+import * as s_surfboard from "./sounds/surfboard";
+import * as s_ferris_wheel from "./sounds/ferris-wheel";
+import * as s_camper_van from "./sounds/camper-van";
+import * as s_steering_wheel from "./sounds/steering-wheel";
+import * as s_barrier_gate from "./sounds/barrier-gate";
+import * as s_parachute from "./sounds/parachute";
+import * as s_lantern from "./sounds/lantern";
+import * as s_windsock from "./sounds/windsock";
+import * as s_control_tower from "./sounds/control-tower";
+import * as s_bus_stop from "./sounds/bus-stop";
+import * as s_highway from "./sounds/highway";
+import * as s_pyramid from "./sounds/pyramid";
+import * as s_fishing_rod from "./sounds/fishing-rod";
+import * as s_ear from "./sounds/ear";
+import * as s_footprints from "./sounds/footprints";
+import * as s_bandage from "./sounds/bandage";
+import * as s_id_card from "./sounds/id-card";
+import * as s_shopping_basket from "./sounds/shopping-basket";
+import * as s_thought_bubble from "./sounds/thought-bubble";
+import * as s_chat_bubbles from "./sounds/chat-bubbles";
+import * as s_newspaper from "./sounds/newspaper";
+import * as s_ribbon from "./sounds/ribbon";
+import * as s_walk from "./sounds/walk";
+import * as s_accessibility from "./sounds/accessibility";
+import * as s_contactless_pay from "./sounds/contactless-pay";
+import * as s_cash_register from "./sounds/cash-register";
+import * as s_lungs from "./sounds/lungs";
+import * as s_heart_broken from "./sounds/heart-broken";
+import * as s_kettlebell from "./sounds/kettlebell";
+import * as s_bathroom_scale from "./sounds/bathroom-scale";
+import * as s_face_mask from "./sounds/face-mask";
+import * as s_water_bottle from "./sounds/water-bottle";
+import * as s_money_bag from "./sounds/money-bag";
+
+import * as s_stapler from "./sounds/stapler";
+import * as s_ballpoint_pen from "./sounds/ballpoint-pen";
+import * as s_chart_candle from "./sounds/chart-candle";
+import * as s_chart_radar from "./sounds/chart-radar";
+import * as s_chart_treemap from "./sounds/chart-treemap";
+import * as s_chart_bubble from "./sounds/chart-bubble";
+import * as s_folder_open from "./sounds/folder-open";
+import * as s_sticky_note from "./sounds/sticky-note";
+import * as s_abacus from "./sounds/abacus";
+import * as s_certificate from "./sounds/certificate";
+import * as s_projector_screen from "./sounds/projector-screen";
+import * as s_protractor from "./sounds/protractor";
+import * as s_tape_measure from "./sounds/tape-measure";
+import * as s_shredder from "./sounds/shredder";
+import * as s_pencil_cup from "./sounds/pencil-cup";
+import * as s_address_book from "./sounds/address-book";
+import * as s_tally_marks from "./sounds/tally-marks";
+import * as s_timeline from "./sounds/timeline";
+import * as s_glue_stick from "./sounds/glue-stick";
+import * as s_spirit_level from "./sounds/spirit-level";
+
 type Score = { length: number; level: number; play: (c: AudioContext, o: AudioNode, t: Time) => void };
 
 /** Every icon's score by slug. Each one is timed against that icon's own animation. */
@@ -1011,6 +1113,106 @@ const SCORES: Record<string, Score> = {
   "expand": s_expand,
   "collapse": s_collapse,
   "import": s_import,
+  "drum": s_drum,
+  "violin": s_violin,
+  "trumpet": s_trumpet,
+  "xylophone": s_xylophone,
+  "tambourine": s_tambourine,
+  "harp": s_harp,
+  "turntable": s_turntable,
+  "theater-masks": s_theater_masks,
+  "chess-pawn": s_chess_pawn,
+  "playing-cards": s_playing_cards,
+  "camera-lens": s_camera_lens,
+  "film-reel": s_film_reel,
+  "easel": s_easel,
+  "paint-roller": s_paint_roller,
+  "top-hat": s_top_hat,
+  "rubiks-cube": s_rubiks_cube,
+  "slot-machine": s_slot_machine,
+  "crystal-ball": s_crystal_ball,
+  "kite": s_kite,
+  "bow-arrow": s_bow_arrow,
+  "bucket": s_bucket,
+  "desk-fan": s_desk_fan,
+  "hand-mirror": s_hand_mirror,
+  "candle": s_candle,
+  "toothbrush": s_toothbrush,
+  "kettle": s_kettle,
+  "frying-pan": s_frying_pan,
+  "blender": s_blender,
+  "clothes-hanger": s_clothes_hanger,
+  "diamond-ring": s_diamond_ring,
+  "bathtub": s_bathtub,
+  "wardrobe": s_wardrobe,
+  "chair": s_chair,
+  "clothes-iron": s_clothes_iron,
+  "lipstick": s_lipstick,
+  "perfume": s_perfume,
+  "necktie": s_necktie,
+  "houseplant": s_houseplant,
+  "cooking-pot": s_cooking_pot,
+  "hair-dryer": s_hair_dryer,
+  "stop-sign": s_stop_sign,
+  "parking-sign": s_parking_sign,
+  "passport": s_passport,
+  "ticket": s_ticket,
+  "folded-map": s_folded_map,
+  "life-buoy": s_life_buoy,
+  "ferry": s_ferry,
+  "surfboard": s_surfboard,
+  "ferris-wheel": s_ferris_wheel,
+  "camper-van": s_camper_van,
+  "steering-wheel": s_steering_wheel,
+  "barrier-gate": s_barrier_gate,
+  "parachute": s_parachute,
+  "lantern": s_lantern,
+  "windsock": s_windsock,
+  "control-tower": s_control_tower,
+  "bus-stop": s_bus_stop,
+  "highway": s_highway,
+  "pyramid": s_pyramid,
+  "fishing-rod": s_fishing_rod,
+  "ear": s_ear,
+  "footprints": s_footprints,
+  "bandage": s_bandage,
+  "id-card": s_id_card,
+  "shopping-basket": s_shopping_basket,
+  "thought-bubble": s_thought_bubble,
+  "chat-bubbles": s_chat_bubbles,
+  "newspaper": s_newspaper,
+  "ribbon": s_ribbon,
+  "walk": s_walk,
+  "accessibility": s_accessibility,
+  "contactless-pay": s_contactless_pay,
+  "cash-register": s_cash_register,
+  "lungs": s_lungs,
+  "heart-broken": s_heart_broken,
+  "kettlebell": s_kettlebell,
+  "bathroom-scale": s_bathroom_scale,
+  "face-mask": s_face_mask,
+  "water-bottle": s_water_bottle,
+  "money-bag": s_money_bag,
+  "stapler": s_stapler,
+  "ballpoint-pen": s_ballpoint_pen,
+  "chart-candle": s_chart_candle,
+  "chart-radar": s_chart_radar,
+  "chart-treemap": s_chart_treemap,
+  "chart-bubble": s_chart_bubble,
+  "folder-open": s_folder_open,
+  "sticky-note": s_sticky_note,
+  "abacus": s_abacus,
+  "certificate": s_certificate,
+  "projector-screen": s_projector_screen,
+  "protractor": s_protractor,
+  "tape-measure": s_tape_measure,
+  "shredder": s_shredder,
+  "pencil-cup": s_pencil_cup,
+  "address-book": s_address_book,
+  "tally-marks": s_tally_marks,
+  "timeline": s_timeline,
+  "glue-stick": s_glue_stick,
+  "spirit-level": s_spirit_level,
 };
 
 export function hasIconSound(slug: string) {

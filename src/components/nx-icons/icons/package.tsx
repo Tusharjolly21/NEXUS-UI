@@ -43,16 +43,14 @@ export function PackageIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
         animate={on ? { y: [0, 0, -2, 0] } : { y: 0 }}
         transition={{ duration: 0.8 / speed, times: [0, 0.1, 0.3, 0.6], ease: "easeOut" }}
       >
-        {/* The tape runs edge to edge across the lid, under the outline, with square ends so nothing pokes past it. */}
+        <path d="M12 3 20.5 7.5 12 12 3.5 7.5z" />
         <motion.path
-          d="M7.75 5.25 16.25 9.75"
+          d="M7.8 5.2 16.3 9.8"
           stroke={accent}
-          strokeLinecap="butt"
           initial={false}
           animate={on ? { pathLength: [0, 1] } : { pathLength: 1 }}
           transition={{ duration: 0.3 / speed, delay: (on ? 0.1 : 0) / speed }}
         />
-        <path d="M12 3 20.5 7.5 12 12 3.5 7.5z" />
       </motion.g>
       <motion.g
         initial={false}

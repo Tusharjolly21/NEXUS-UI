@@ -501,6 +501,106 @@ import { CrosshairIcon } from "./icons/crosshair";
 import { ExpandIcon } from "./icons/expand";
 import { CollapseIcon } from "./icons/collapse";
 import { ImportIcon } from "./icons/import";
+import { StaplerIcon } from "./icons/stapler";
+import { BallpointPenIcon } from "./icons/ballpoint-pen";
+import { ChartCandleIcon } from "./icons/chart-candle";
+import { ChartRadarIcon } from "./icons/chart-radar";
+import { ChartTreemapIcon } from "./icons/chart-treemap";
+import { ChartBubbleIcon } from "./icons/chart-bubble";
+import { FolderOpenIcon } from "./icons/folder-open";
+import { StickyNoteIcon } from "./icons/sticky-note";
+import { AbacusIcon } from "./icons/abacus";
+import { CertificateIcon } from "./icons/certificate";
+import { ProjectorScreenIcon } from "./icons/projector-screen";
+import { ProtractorIcon } from "./icons/protractor";
+import { TapeMeasureIcon } from "./icons/tape-measure";
+import { ShredderIcon } from "./icons/shredder";
+import { PencilCupIcon } from "./icons/pencil-cup";
+import { AddressBookIcon } from "./icons/address-book";
+import { TallyMarksIcon } from "./icons/tally-marks";
+import { TimelineIcon } from "./icons/timeline";
+import { GlueStickIcon } from "./icons/glue-stick";
+import { SpiritLevelIcon } from "./icons/spirit-level";
+import { DrumIcon } from "./icons/drum";
+import { ViolinIcon } from "./icons/violin";
+import { TrumpetIcon } from "./icons/trumpet";
+import { XylophoneIcon } from "./icons/xylophone";
+import { TambourineIcon } from "./icons/tambourine";
+import { HarpIcon } from "./icons/harp";
+import { TurntableIcon } from "./icons/turntable";
+import { TheaterMasksIcon } from "./icons/theater-masks";
+import { ChessPawnIcon } from "./icons/chess-pawn";
+import { PlayingCardsIcon } from "./icons/playing-cards";
+import { CameraLensIcon } from "./icons/camera-lens";
+import { FilmReelIcon } from "./icons/film-reel";
+import { EaselIcon } from "./icons/easel";
+import { PaintRollerIcon } from "./icons/paint-roller";
+import { TopHatIcon } from "./icons/top-hat";
+import { RubiksCubeIcon } from "./icons/rubiks-cube";
+import { SlotMachineIcon } from "./icons/slot-machine";
+import { CrystalBallIcon } from "./icons/crystal-ball";
+import { KiteIcon } from "./icons/kite";
+import { BowArrowIcon } from "./icons/bow-arrow";
+import { BucketIcon } from "./icons/bucket";
+import { DeskFanIcon } from "./icons/desk-fan";
+import { HandMirrorIcon } from "./icons/hand-mirror";
+import { CandleIcon } from "./icons/candle";
+import { ToothbrushIcon } from "./icons/toothbrush";
+import { KettleIcon } from "./icons/kettle";
+import { FryingPanIcon } from "./icons/frying-pan";
+import { BlenderIcon } from "./icons/blender";
+import { ClothesHangerIcon } from "./icons/clothes-hanger";
+import { DiamondRingIcon } from "./icons/diamond-ring";
+import { BathtubIcon } from "./icons/bathtub";
+import { WardrobeIcon } from "./icons/wardrobe";
+import { ChairIcon } from "./icons/chair";
+import { ClothesIronIcon } from "./icons/clothes-iron";
+import { LipstickIcon } from "./icons/lipstick";
+import { PerfumeIcon } from "./icons/perfume";
+import { NecktieIcon } from "./icons/necktie";
+import { HouseplantIcon } from "./icons/houseplant";
+import { CookingPotIcon } from "./icons/cooking-pot";
+import { HairDryerIcon } from "./icons/hair-dryer";
+import { StopSignIcon } from "./icons/stop-sign";
+import { ParkingSignIcon } from "./icons/parking-sign";
+import { PassportIcon } from "./icons/passport";
+import { TicketIcon } from "./icons/ticket";
+import { FoldedMapIcon } from "./icons/folded-map";
+import { LifeBuoyIcon } from "./icons/life-buoy";
+import { FerryIcon } from "./icons/ferry";
+import { SurfboardIcon } from "./icons/surfboard";
+import { FerrisWheelIcon } from "./icons/ferris-wheel";
+import { CamperVanIcon } from "./icons/camper-van";
+import { SteeringWheelIcon } from "./icons/steering-wheel";
+import { BarrierGateIcon } from "./icons/barrier-gate";
+import { ParachuteIcon } from "./icons/parachute";
+import { LanternIcon } from "./icons/lantern";
+import { WindsockIcon } from "./icons/windsock";
+import { ControlTowerIcon } from "./icons/control-tower";
+import { BusStopIcon } from "./icons/bus-stop";
+import { HighwayIcon } from "./icons/highway";
+import { PyramidIcon } from "./icons/pyramid";
+import { FishingRodIcon } from "./icons/fishing-rod";
+import { EarIcon } from "./icons/ear";
+import { FootprintsIcon } from "./icons/footprints";
+import { BandageIcon } from "./icons/bandage";
+import { IdCardIcon } from "./icons/id-card";
+import { ShoppingBasketIcon } from "./icons/shopping-basket";
+import { ThoughtBubbleIcon } from "./icons/thought-bubble";
+import { ChatBubblesIcon } from "./icons/chat-bubbles";
+import { NewspaperIcon } from "./icons/newspaper";
+import { RibbonIcon } from "./icons/ribbon";
+import { WalkIcon } from "./icons/walk";
+import { AccessibilityIcon } from "./icons/accessibility";
+import { ContactlessPayIcon } from "./icons/contactless-pay";
+import { CashRegisterIcon } from "./icons/cash-register";
+import { LungsIcon } from "./icons/lungs";
+import { HeartBrokenIcon } from "./icons/heart-broken";
+import { KettlebellIcon } from "./icons/kettlebell";
+import { BathroomScaleIcon } from "./icons/bathroom-scale";
+import { FaceMaskIcon } from "./icons/face-mask";
+import { WaterBottleIcon } from "./icons/water-bottle";
+import { MoneyBagIcon } from "./icons/money-bag";
 
 export type NxIconProps = {
   size?: number;
@@ -1015,4 +1115,104 @@ export const NX_ICONS: Record<string, ComponentType<NxIconProps>> = {
   "expand": ExpandIcon,
   "collapse": CollapseIcon,
   "import": ImportIcon,
+  "stapler": StaplerIcon,
+  "ballpoint-pen": BallpointPenIcon,
+  "chart-candle": ChartCandleIcon,
+  "chart-radar": ChartRadarIcon,
+  "chart-treemap": ChartTreemapIcon,
+  "chart-bubble": ChartBubbleIcon,
+  "folder-open": FolderOpenIcon,
+  "sticky-note": StickyNoteIcon,
+  "abacus": AbacusIcon,
+  "certificate": CertificateIcon,
+  "projector-screen": ProjectorScreenIcon,
+  "protractor": ProtractorIcon,
+  "tape-measure": TapeMeasureIcon,
+  "shredder": ShredderIcon,
+  "pencil-cup": PencilCupIcon,
+  "address-book": AddressBookIcon,
+  "tally-marks": TallyMarksIcon,
+  "timeline": TimelineIcon,
+  "glue-stick": GlueStickIcon,
+  "spirit-level": SpiritLevelIcon,
+  "drum": DrumIcon,
+  "violin": ViolinIcon,
+  "trumpet": TrumpetIcon,
+  "xylophone": XylophoneIcon,
+  "tambourine": TambourineIcon,
+  "harp": HarpIcon,
+  "turntable": TurntableIcon,
+  "theater-masks": TheaterMasksIcon,
+  "chess-pawn": ChessPawnIcon,
+  "playing-cards": PlayingCardsIcon,
+  "camera-lens": CameraLensIcon,
+  "film-reel": FilmReelIcon,
+  "easel": EaselIcon,
+  "paint-roller": PaintRollerIcon,
+  "top-hat": TopHatIcon,
+  "rubiks-cube": RubiksCubeIcon,
+  "slot-machine": SlotMachineIcon,
+  "crystal-ball": CrystalBallIcon,
+  "kite": KiteIcon,
+  "bow-arrow": BowArrowIcon,
+  "bucket": BucketIcon,
+  "desk-fan": DeskFanIcon,
+  "hand-mirror": HandMirrorIcon,
+  "candle": CandleIcon,
+  "toothbrush": ToothbrushIcon,
+  "kettle": KettleIcon,
+  "frying-pan": FryingPanIcon,
+  "blender": BlenderIcon,
+  "clothes-hanger": ClothesHangerIcon,
+  "diamond-ring": DiamondRingIcon,
+  "bathtub": BathtubIcon,
+  "wardrobe": WardrobeIcon,
+  "chair": ChairIcon,
+  "clothes-iron": ClothesIronIcon,
+  "lipstick": LipstickIcon,
+  "perfume": PerfumeIcon,
+  "necktie": NecktieIcon,
+  "houseplant": HouseplantIcon,
+  "cooking-pot": CookingPotIcon,
+  "hair-dryer": HairDryerIcon,
+  "stop-sign": StopSignIcon,
+  "parking-sign": ParkingSignIcon,
+  "passport": PassportIcon,
+  "ticket": TicketIcon,
+  "folded-map": FoldedMapIcon,
+  "life-buoy": LifeBuoyIcon,
+  "ferry": FerryIcon,
+  "surfboard": SurfboardIcon,
+  "ferris-wheel": FerrisWheelIcon,
+  "camper-van": CamperVanIcon,
+  "steering-wheel": SteeringWheelIcon,
+  "barrier-gate": BarrierGateIcon,
+  "parachute": ParachuteIcon,
+  "lantern": LanternIcon,
+  "windsock": WindsockIcon,
+  "control-tower": ControlTowerIcon,
+  "bus-stop": BusStopIcon,
+  "highway": HighwayIcon,
+  "pyramid": PyramidIcon,
+  "fishing-rod": FishingRodIcon,
+  "ear": EarIcon,
+  "footprints": FootprintsIcon,
+  "bandage": BandageIcon,
+  "id-card": IdCardIcon,
+  "shopping-basket": ShoppingBasketIcon,
+  "thought-bubble": ThoughtBubbleIcon,
+  "chat-bubbles": ChatBubblesIcon,
+  "newspaper": NewspaperIcon,
+  "ribbon": RibbonIcon,
+  "walk": WalkIcon,
+  "accessibility": AccessibilityIcon,
+  "contactless-pay": ContactlessPayIcon,
+  "cash-register": CashRegisterIcon,
+  "lungs": LungsIcon,
+  "heart-broken": HeartBrokenIcon,
+  "kettlebell": KettlebellIcon,
+  "bathroom-scale": BathroomScaleIcon,
+  "face-mask": FaceMaskIcon,
+  "water-bottle": WaterBottleIcon,
+  "money-bag": MoneyBagIcon,
 };
