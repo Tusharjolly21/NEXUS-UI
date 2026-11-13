@@ -28,6 +28,8 @@ export type BlockManifestEntry = {
   slug: string;
   registryCliName?: string;
   name: string;
+  /** Page title for search, when the plain "<name> — Next.js UI Block" misses what people type. */
+  seoTitle?: string;
   description: string;
   category: BlockCategory;
   tags: string[];
@@ -357,6 +359,7 @@ export default function Page() {
     slug: "block-hero",
     registryCliName: "hero-blocks",
     name: "Hero Sections",
+    seoTitle: "React Hero Sections: Animated Hero Blocks for Next.js",
     description:
       "Landing page heroes with real motion: a pointer-lit dot grid with a rotating last word, copy beside product cards that part as you scroll, and a headline you scroll through as its letters tumble in and the last word turns like a drum.",
     category: "Hero blocks",

@@ -621,7 +621,7 @@ export function LibraryExplorerSidebarDesktopChrome() {
     <>
       <div className="border-b border-border px-4 py-4">
         <Link
-          href="/pricing"
+          href="/pricing" data-plans-source="components_sidebar"
           className="flex items-center gap-2 rounded-lg border border-primary/25 bg-primary/8 px-3 py-2.5 text-xs font-semibold text-primary transition hover:bg-primary/14"
         >
           <Crown className="size-3.5 shrink-0" />

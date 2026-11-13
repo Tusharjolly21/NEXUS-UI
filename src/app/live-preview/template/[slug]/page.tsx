@@ -155,6 +155,46 @@ const LastLightPage = nextDynamic(
   { loading: TemplateFallback },
 );
 
+const KioskPage = nextDynamic(
+  () => import("@/components/templates/kiosk-page").then((m) => ({ default: m.KioskPage })),
+  { loading: TemplateFallback },
+);
+
+const WharfPage = nextDynamic(
+  () => import("@/components/templates/wharf-page").then((m) => ({ default: m.WharfPage })),
+  { loading: TemplateFallback },
+);
+
+const PlotlinePage = nextDynamic(
+  () => import("@/components/templates/plotline-page").then((m) => ({ default: m.PlotlinePage })),
+  { loading: TemplateFallback },
+);
+
+const HooplaPage = nextDynamic(
+  () => import("@/components/templates/hoopla-page").then((m) => ({ default: m.HooplaPage })),
+  { loading: TemplateFallback },
+);
+
+const OutpostPage = nextDynamic(
+  () => import("@/components/templates/outpost-page").then((m) => ({ default: m.OutpostPage })),
+  { loading: TemplateFallback },
+);
+
+const SurfacedPage = nextDynamic(
+  () => import("@/components/templates/surfaced-page").then((m) => ({ default: m.SurfacedPage })),
+  { loading: TemplateFallback },
+);
+
+const NightwatchPage = nextDynamic(
+  () => import("@/components/templates/nightwatch-page").then((m) => ({ default: m.NightwatchPage })),
+  { loading: TemplateFallback },
+);
+
+const UpdraftPage = nextDynamic(
+  () => import("@/components/templates/updraft-page").then((m) => ({ default: m.UpdraftPage })),
+  { loading: TemplateFallback },
+);
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -204,6 +244,22 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><MarginPage /></ThemeReceiver>;
   } else if (tmpl.slug === "last-light") {
     return <ThemeReceiver><LastLightPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "kiosk") {
+    return <ThemeReceiver><KioskPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "wharf") {
+    return <ThemeReceiver><WharfPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "plotline") {
+    return <ThemeReceiver><PlotlinePage /></ThemeReceiver>;
+  } else if (tmpl.slug === "hoopla") {
+    return <ThemeReceiver><HooplaPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "outpost") {
+    return <ThemeReceiver><OutpostPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "surfaced") {
+    return <ThemeReceiver><SurfacedPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "nightwatch") {
+    return <ThemeReceiver><NightwatchPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "updraft") {
+    return <ThemeReceiver><UpdraftPage /></ThemeReceiver>;
   } else if (tmpl.slug === "nexus-ai-launch") {
     return <ThemeReceiver><NexusAiLaunchTemplatePage /></ThemeReceiver>;
   } else if (tmpl.slug === "noir-studio") {

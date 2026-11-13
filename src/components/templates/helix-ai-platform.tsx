@@ -4,7 +4,9 @@
  * agents do the work and people approve the risky steps.
  * Built from Motion Kit components: Todo List, Matrix Loaders, Stagger Menu,
  * Sign & Seal, Stretch Nav, Switch (Settings Tabs), Hold to Confirm (as a
- * kill switch) and Elastic Stepper. The hero is a live approval queue.
+ * kill switch) and Elastic Stepper. The hero is a live approval queue in
+ * front of a scrolling log of everything the agents finished on their own;
+ * decisions land as rubber stamps. Epilogue and Martian Mono on sage paper.
  */
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
@@ -16,11 +18,20 @@ import StretchNav from "@/components/templates/kit/components/StretchNav";
 import ElasticStepper from "@/components/templates/kit/components/ElasticStepper";
 import { Switch } from "@/components/templates/kit/components/AnimatedTabs";
 import HoldToPause from "@/components/templates/helix/hold-to-pause";
+import WorkWall from "@/components/templates/helix/work-wall";
+import { fontFaces } from "@/components/templates/kit/fonts";
 import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, StickyStory, Words, ease, scrollToId } from "@/components/templates/kit/parts";
 
-const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
-const A = "#4f46e5";
-const INK = "#1d1d1f";
+const FONT = "'Epilogue Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const MONO = "'Martian Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace";
+const A = "#1f6b4f"; // ledger green (6.4:1 on white)
+const STOP = "#b5402a"; // the red of a stop, and of a sent-back stamp
+const INK = "#10201a";
+const PAPER = "#e9eee9";
+const FONT_CSS = fontFaces("helix", [
+  { family: "Epilogue Variable", file: "epilogue" },
+  { family: "Martian Mono Variable", file: "martian-mono" },
+]);
 const C = "rounded-[24px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)]";
 const spring = { type: "spring", stiffness: 420, damping: 34 } as const;
 
@@ -164,13 +175,13 @@ function QueueItem({ r, open, stamp, onDecide }: { r: Req; open: boolean; stamp:
       exit={{ opacity: 0, y: -14, scale: 0.96, transition: { duration: 0.2 } }}
       transition={spring}
       className="relative overflow-hidden rounded-[18px]"
-      style={{ background: open ? "#ffffff" : "#f5f5f7", boxShadow: open ? `0 0 0 1.5px ${A}, 0 18px 36px -24px rgba(79,70,229,.6)` : "none" }}
+      style={{ background: open ? "#ffffff" : "#f5f5f7", boxShadow: open ? `0 0 0 1.5px ${A}, 0 18px 36px -24px rgba(31,107,79,.45)` : "none" }}
     >
       <motion.div layout="position" className={open ? "p-5" : "flex items-center gap-3 px-4 py-3"}>
         <div className="flex min-w-0 items-center gap-2.5">
           <MatrixLoader pattern={r.pattern} size={22} color={A} />
           <span className="flex-none text-[13px] font-semibold text-[#1d1d1f]">{r.agent}</span>
-          {open && <span className="text-[13px] text-[#6e6e73]">· {r.waiting}</span>}
+          {open && <span className="text-[13px] text-[#6e6e73]">{r.waiting}</span>}
         </div>
         {!open && <span className="min-w-0 flex-1 truncate text-[13px] text-[#424245]">{r.title}</span>}
         {open && (
@@ -183,7 +194,7 @@ function QueueItem({ r, open, stamp, onDecide }: { r: Req; open: boolean; stamp:
             <ul className="m-0 mt-4 flex list-none flex-col gap-2 p-0">
               {r.evidence.map((e, i) => (
                 <motion.li key={e.t} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ ...spring, delay: 0.12 + i * 0.06 }} className="flex items-start gap-2.5 text-[14px] leading-[1.4] text-[#424245]">
-                  <span className="mt-[2px] flex h-[18px] w-[18px] flex-none items-center justify-center rounded-full" style={{ background: e.flag ? "#fff4e0" : "#eef0ff" }}>
+                  <span className="mt-[2px] flex h-[18px] w-[18px] flex-none items-center justify-center rounded-full" style={{ background: e.flag ? "#fff4e0" : "#e2eee7" }}>
                     {e.flag ? <span className="text-[11px] font-bold text-[#8a4b00]">!</span> : <Check size={10} color={A} />}
                   </span>
                   {e.t}
@@ -209,8 +220,8 @@ function QueueItem({ r, open, stamp, onDecide }: { r: Req; open: boolean; stamp:
             initial={{ scale: 1.9, opacity: 0, rotate: -18 }}
             animate={{ scale: 1, opacity: 1, rotate: -9 }}
             transition={{ type: "spring", stiffness: 600, damping: 20 }}
-            className="pointer-events-none absolute right-5 top-5 rounded-[10px] border-[2.5px] px-3 py-1 text-[15px] font-bold uppercase tracking-[0.08em]"
-            style={{ color: stamp === "ok" ? A : INK, borderColor: stamp === "ok" ? A : INK, background: "rgba(255,255,255,.85)" }}
+            className="pointer-events-none absolute right-5 top-5 rounded-[8px] border-[3px] px-3.5 py-1 text-[17px] font-[800] uppercase tracking-[0.1em]"
+            style={{ color: stamp === "ok" ? A : STOP, borderColor: stamp === "ok" ? A : STOP, filter: "url(#hx-ink)", mixBlendMode: "multiply", fontFamily: MONO }}
           >
             {stamp === "ok" ? "Approved" : "Sent back"}
           </motion.span>
@@ -277,7 +288,11 @@ function ApprovalQueue() {
   const reset = () => { setDecided([]); setArrived(3); };
 
   return (
-    <div className={`${C} w-full overflow-hidden`} role="region" aria-label="Approval queue demo" onKeyDown={onKey}>
+    <div className={`${C} relative w-full overflow-hidden`} role="region" aria-label="Approval queue demo" onKeyDown={onKey}>
+      {/* rough ink edge for the rubber stamps */}
+      <svg width="0" height="0" className="absolute" aria-hidden="true">
+        <filter id="hx-ink"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="n" /><feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G" /></filter>
+      </svg>
       <div className="flex items-center justify-between gap-3 border-b border-black/[.06] px-5 py-4">
         <span className="flex items-center gap-2.5">
           <span className="whitespace-nowrap text-[15px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">Needs your call</span>
@@ -346,32 +361,29 @@ function ApprovalQueue() {
 
 function Hero() {
   return (
-    <section id="top" className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(48% 55% at 78% 30%, rgba(79,70,229,.16), transparent 70%), radial-gradient(40% 40% at 10% 0%, rgba(165,180,252,.25), transparent 70%)" }} />
-      <div className="relative mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 pb-16 pt-14 lg:grid-cols-[1fr_1.05fr] lg:gap-14 lg:pb-24 lg:pt-20">
-        <div className="flex flex-col items-start gap-7">
-          <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.07)]">
+    <section id="top" className="relative -mt-[76px] overflow-hidden" style={{ background: PAPER }}>
+      <div className="relative mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 pb-16 pt-[128px] lg:grid-cols-[1fr_1.05fr] lg:gap-14 lg:pb-24 lg:pt-[150px]">
+        <div className="relative z-10 flex flex-col items-start gap-7">
+          <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="inline-flex items-center gap-2 text-[12.5px]" style={{ color: "#4a5a52", fontFamily: MONO }}>
             <motion.span className="h-2 w-2 rounded-full" style={{ background: A }} animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.4, repeat: Infinity }} />
-            Live demo: five agents, one of you
+            Live: five agents at work, one of you
           </motion.span>
-          <h1 className="m-0 text-[clamp(44px,7vw,84px)] font-semibold leading-[0.98] tracking-[-0.05em] text-[#1d1d1f] [text-wrap:balance]">
-            <Words text="Agents do the work. You make every call." accentWords={["make", "every", "call."]} accent={A} />
+          <h1 className="m-0 text-[clamp(44px,6.8vw,86px)] font-[720] leading-[0.95] tracking-[-0.045em] text-[#10201a] [text-wrap:balance]">
+            <Words text="Agents do the work. You make every call." />
           </h1>
-          <Reveal delay={0.35} y={14}>
-            <p className="m-0 max-w-[520px] text-[clamp(18px,2vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
-              Helix runs back-office workflows end to end: refunds, renewals, access requests, supplier payments. When a step is risky, the agent stops, attaches the evidence and asks the right person.
-            </p>
-          </Reveal>
-          <Reveal delay={0.45} y={14} className="flex flex-wrap gap-3">
-            <Magnetic className="text-white shadow-[0_12px_30px_-12px_rgba(79,70,229,.8)]" style={{ background: A }} onClick={() => scrollToId("pricing")}>Start free</Magnetic>
-            <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("how")}>See how it works</Magnetic>
-          </Reveal>
-          <Reveal delay={0.55} y={10}>
-            <span className="text-[13px] text-[#6e6e73]">Try the queue: approve or send back each request. With the queue focused, A and R work too.</span>
-          </Reveal>
+          <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease, delay: 0.35 }} className="m-0 max-w-[500px] text-[clamp(17px,1.9vw,19px)] leading-[1.55] text-[#41514a]">
+            Helix runs back-office workflows end to end: refunds, renewals, access requests, supplier payments. When a step is risky, the agent stops, attaches the evidence and asks the right person.
+          </motion.p>
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease, delay: 0.45 }} className="flex flex-wrap gap-3">
+            <Magnetic className="text-white" style={{ background: INK }} onClick={() => scrollToId("pricing")}>Start free</Magnetic>
+            <Magnetic className="text-[#10201a] shadow-[inset_0_0_0_1px_rgba(16,32,26,.22)]" style={{ background: "transparent" }} onClick={() => scrollToId("how")}>See how it works</Magnetic>
+          </motion.div>
+          <span className="text-[13px] text-[#4a5a52]">Try the queue: approve or send back each request. With the queue focused, A and R work too.</span>
         </div>
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 20, delay: 0.2 }} className="w-full">
-          <ApprovalQueue />
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 20, delay: 0.2 }} className="relative w-full">
+          {/* everything the agents did without asking, scrolling behind the few things that need you */}
+          <WorkWall mono={MONO} ink="#3d5248" stop={STOP} className="absolute -bottom-24 -top-24 left-[8%] right-[-40vw] hidden opacity-60 lg:block" />
+          <div className="relative lg:ml-10"><ApprovalQueue /></div>
         </motion.div>
       </div>
     </section>
@@ -379,28 +391,6 @@ function Hero() {
 }
 
 /* ------------------------------------------------------------------ */
-
-function Stats() {
-  const items = [
-    { to: 1.8, f: (n: number) => `${n.toFixed(1)}M`, l: "steps run by agents last month" },
-    { to: 94, f: (n: number) => `${Math.round(n)}%`, l: "of runs finish without a person" },
-    { to: 2.7, f: (n: number) => `${n.toFixed(1)} min`, l: "median wait for an approval" },
-    { to: 100, f: (n: number) => `${Math.round(n)}%`, l: "of decisions signed and logged" },
-  ];
-  return (
-    <section className="mx-auto max-w-[1180px] px-5 py-14" aria-label="Helix in numbers">
-      <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
-        {items.map((it, i) => (
-          <Reveal key={it.l} delay={i * 0.06} y={16} className="flex flex-col gap-2 border-t border-black/[.08] pt-6">
-            <Counter to={it.to} format={it.f} className="text-[clamp(36px,4.6vw,52px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
-            <span className="text-[15px] text-[#6e6e73]">{it.l}</span>
-          </Reveal>
-        ))}
-      </div>
-      <p className="m-0 mt-8 text-[12px] text-[#6e6e73]">Sample figures from a demo workspace. Your numbers depend on which workflows you hand over.</p>
-    </section>
-  );
-}
 
 function AgentGrid() {
   const agents = [
@@ -431,7 +421,7 @@ function RoutePanel() {
   return (
     <div className={`${C} flex w-[420px] flex-col gap-4 p-6`}>
       <span className="flex items-center gap-2 text-[13px] font-semibold text-[#1d1d1f]"><MatrixLoader pattern={2} size={18} color={A} /> Payables agent stopped</span>
-      <span className="text-[19px] font-semibold leading-[1.25] tracking-[-0.02em] text-[#1d1d1f]">INV-2207 · $18,400.00 to a bank account that changed two days ago.</span>
+      <span className="text-[19px] font-semibold leading-[1.25] tracking-[-0.02em] text-[#1d1d1f]">INV-2207: $18,400.00 to a bank account that changed two days ago.</span>
       <span className="text-[13px] text-[#6e6e73]">Helix suggests Finance. You can send it anywhere.</span>
       <StaggerMenu
         label="Route to"
@@ -450,41 +440,41 @@ function RoutePanel() {
 function How() {
   return (
     <section id="how" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="How it works" title="Hand over the busywork. Keep the judgement." sub="Every Helix workflow follows the same four beats. You decide where the line between them sits." accent={A} />
+      <SectionHead title="Hand over the busywork. Keep the judgement." sub="Every Helix workflow follows the same four beats. You decide where the line between them sits." accent={A} />
       <div className="mt-10">
         <StickyStory
           accent={A}
           steps={[
             {
-              kicker: "01 · Plan",
+              kicker: "Step 1",
               title: "Describe the job. The agent writes the plan.",
               body: "Say what a good outcome looks like in a sentence or two. Helix turns it into steps you can read, then works through them and ticks each one off.",
               visual: (
                 <div className={`${C} flex w-[420px] flex-col gap-4 p-6`}>
-                  <span className="text-[13px] font-semibold text-[#6e6e73]">Refund request · ticket #48213</span>
+                  <span className="text-[13px] font-semibold text-[#6e6e73]">Refund request, ticket #48213</span>
                   <TodoList accent={A} autoplay initial={["Pull the order and delivery record", "Check refund policy R-4", "Draft a reply to the customer", "Issue the refund in billing"]} />
                 </div>
               ),
             },
             {
-              kicker: "02 · Work",
+              kicker: "Step 2",
               title: "Agents work in parallel, all day and all night.",
               body: "Each workflow gets its own agent with its own permissions. They read your tools, do the routine steps and write down what they did.",
               visual: <AgentGrid />,
             },
             {
-              kicker: "03 · Stop",
+              kicker: "Step 3",
               title: "Risky steps stop and go to the right person.",
               body: "Money over a limit, production access, bulk sends, anything new. The agent pauses, explains why, and routes the decision to whoever owns it.",
               visual: <RoutePanel />,
             },
             {
-              kicker: "04 · Sign",
+              kicker: "Step 4",
               title: "Every decision is signed into the record.",
               body: "Approvals carry a name, a time and the evidence the approver saw. Auditors get the whole story without anyone digging through chat.",
               visual: (
                 <div className={`${C} flex w-[420px] justify-center px-6 py-8`}>
-                  <SignBadge name="Priya Raman" title="Approved · INV-2207" autoplay />
+                  <SignBadge name="Priya Raman" title="Approved INV-2207" autoplay />
                 </div>
               ),
             },
@@ -530,7 +520,7 @@ function Cases() {
   return (
     <section id="cases" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Use cases" title="Same idea, every team." sub="Pick a team to see a real workflow, which steps run on their own, and where a person signs off." accent={A} center />
+        <SectionHead title="Same idea, every team." sub="Pick a team to see a real workflow, which steps run on their own, and where a person signs off." accent={A} center />
         <Reveal y={16} className="mt-10 flex justify-center overflow-x-auto pb-2">
           <StretchNav items={CASES.map((x) => x.n)} onChange={setI} />
         </Reveal>
@@ -549,7 +539,7 @@ function Cases() {
                   {c.steps.map(([label, gate], k) => (
                     <motion.li key={label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: k * 0.05 }} className="flex flex-1 items-center gap-2">
                       <span className="flex h-full min-h-[64px] w-full flex-col justify-center gap-1 rounded-[16px] px-4 py-3" style={{ background: gate ? A : "#f5f5f7", color: gate ? "#fff" : INK }}>
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: gate ? "rgba(255,255,255,.85)" : "#6e6e73" }}>{gate ? "Approval" : `Step ${k + 1}`}</span>
+                        <span className="text-[12px] font-semibold" style={{ color: gate ? "rgba(255,255,255,.85)" : "#6e6e73" }}>{gate ? "Approval" : `Step ${k + 1}`}</span>
                         <span className="text-[14px] font-semibold leading-[1.25]">{label}</span>
                       </span>
                       {k < c.steps.length - 1 && <span className="hidden text-[#a1a1a6] lg:block" aria-hidden="true">→</span>}
@@ -586,7 +576,7 @@ function Guardrails() {
   const [on, setOn] = useState<Record<string, boolean>>({ money: true, payee: true, prod: true, bulk: true });
   return (
     <section id="guardrails" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Guardrails" title="Rules your auditor can read." sub="Policies are sentences, not code. Turn one off and Helix tells you exactly what the agents will now do on their own." accent={A} />
+      <SectionHead title="Rules your auditor can read." sub="Policies are sentences, not code. Turn one off and Helix tells you exactly what the agents will now do on their own." accent={A} />
       <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-3">
         <Reveal y={20} className="lg:col-span-2">
           <div className={`${C} flex h-full flex-col p-6 sm:p-8`}>
@@ -634,9 +624,9 @@ function Guardrails() {
               <p className="m-0 mt-1.5 text-[15px] leading-[1.5] text-[#6e6e73]">Requests reach people in Slack, email or the Helix app. One tap decides, and the answer flows back to the agent.</p>
             </div>
             <div className="rounded-[18px] bg-[#f5f5f7] p-4">
-              <span className="text-[12px] font-semibold text-[#6e6e73]">#approvals · 09:41</span>
+              <span className="text-[12px] font-semibold text-[#6e6e73]">#approvals, 09:41</span>
               <div className="mt-2 rounded-[14px] bg-white p-4 shadow-[0_0_0_1px_rgba(0,0,0,.05)]">
-                <span className="flex items-center gap-2 text-[13px] font-semibold text-[#1d1d1f]"><span className="h-2 w-2 rounded-full" style={{ background: A }} /> Helix · Access agent</span>
+                <span className="flex items-center gap-2 text-[13px] font-semibold text-[#1d1d1f]"><span className="h-2 w-2 rounded-full" style={{ background: A }} /> Helix, Access agent</span>
                 <p className="m-0 mt-1.5 text-[14px] leading-[1.45] text-[#424245]">Theo Lindqvist needs read access to the production database for 4 hours (INC-2291).</p>
                 <div className="mt-3 flex gap-2">
                   <span className="rounded-full px-3 py-1 text-[12px] font-semibold text-white" style={{ background: A }}>Approve</span>
@@ -663,7 +653,7 @@ function Quotes() {
   return (
     <section className="bg-[#f5f5f7] py-24" aria-label="What teams say">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="From the queue" title="Fewer clicks. Better decisions." accent={A} />
+        <SectionHead title="Fewer clicks. Better decisions." accent={A} />
         <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
           {QUOTES.map((q, i) => (
             <Reveal key={q.n} delay={i * 0.06} y={18}>
@@ -711,7 +701,7 @@ function Pricing() {
   const total = p.p === 0 ? 0 : p.p * seats;
   return (
     <section id="pricing" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Pricing" title="Agents are free. Pay for the people who approve." sub="Every plan includes unlimited agents. You pay per approver, so the bill grows with oversight, not with automation." accent={A} center />
+      <SectionHead title="Agents are free. Pay for the people who approve." sub="Every plan includes unlimited agents. You pay per approver, so the bill grows with oversight, not with automation." accent={A} center />
       <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-[1.2fr_1fr]">
         <Reveal y={20}>
           <div className={`${C} flex h-full flex-col gap-3 p-4 sm:p-6`} role="radiogroup" aria-label="Plan">
@@ -755,16 +745,16 @@ export function HelixAIPlatformPage() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: FONT }}>
+        <style>{FONT_CSS}</style>
         <Nav brand={<Logo />} accent={A} cta="Start free" onCta={() => scrollToId("pricing")} links={[{ label: "How it works", id: "how" }, { label: "Use cases", id: "cases" }, { label: "Guardrails", id: "guardrails" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
         <Hero />
-        <Stats />
         <How />
         <Cases />
         <Guardrails />
         <Quotes />
         <Pricing />
         <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-24 lg:grid-cols-[1fr_1.4fr]">
-          <SectionHead eyebrow="FAQ" title="Questions, answered." accent={A} />
+          <SectionHead title="Questions, answered." accent={A} />
           <Reveal y={16}>
             <Faq
               accent={A}
@@ -779,7 +769,7 @@ export function HelixAIPlatformPage() {
           </Reveal>
         </section>
         <div className="mx-auto max-w-[1180px] px-5 pb-20">
-          <CtaBand title="Clear your first queue this afternoon." sub="Free for one workflow and one approver. No card needed." cta="Start free" secondary="Book a walkthrough" accent={A} glow="rgba(79,70,229,.32)" />
+          <CtaBand title="Clear your first queue this afternoon." sub="Free for one workflow and one approver. No card needed." cta="Start free" secondary="Book a walkthrough" accent={A} glow="rgba(31,107,79,.32)" />
         </div>
         <Footer brand={<Logo />} note="Workflow automation where agents do the work and people approve the risky steps. Helix is a template; the company and figures are placeholders." columns={[{ title: "Product", links: ["Workflows", "Guardrails", "Audit log", "Pricing"] }, { title: "Teams", links: ["Finance", "Support", "IT", "Revenue"] }, { title: "Company", links: ["About", "Security", "Careers", "Contact"] }]} />
       </div>

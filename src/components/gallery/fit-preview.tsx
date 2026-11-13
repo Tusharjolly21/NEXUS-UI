@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { DynamicPreview } from "@/components/library/dynamic-preview";
+import { DynamicPreview, PreviewGuard } from "@/components/library/dynamic-preview";
 import { DemoCursor, type DemoStep } from "@/registry/signature/demo-cursor";
 import { cn } from "@/lib/utils";
+import { scheduleWebGLSweep, watchWebGL } from "./webgl-release";
 
 /** Classes that make a preview's root fill the canvas it is rendered on (shared with the tile lab). */
 export const PREVIEW_FILL_CLASSES =
@@ -55,9 +56,22 @@ export function FitPreview({
     if (!node) return;
     // Mount near the viewport and unmount once well away from it, so scrolling a long wall never
     // leaves hundreds of animated previews running at the same time.
-    const io = new IntersectionObserver(([entry]) => setNear(entry.isIntersecting), { rootMargin: "500px" });
+    // On a phone the window is smaller, so the margin is too: fewer previews alive at once where memory is tightest.
+    watchWebGL();
+    const margin = window.matchMedia("(max-width: 639px)").matches ? "300px" : "500px";
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        setNear(entry.isIntersecting);
+        // one that just left gives its GPU context back; one that just arrived is noted as on the page
+        scheduleWebGLSweep(entry.isIntersecting ? 1500 : 400);
+      },
+      { rootMargin: margin },
+    );
     io.observe(node);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      scheduleWebGLSweep();
+    };
   }, []);
 
   const [cw, ch] = canvas;
@@ -77,8 +91,11 @@ export function FitPreview({
         className={cn("absolute left-0 top-0 origin-top-left", PREVIEW_FILL_CLASSES)}
         style={{ width: cw, height: ch, transform, visibility: box ? "visible" : "hidden" }}
       >
-        {near ? <DynamicPreview exportName={exportName} compact /> : null}
-        {near && demo ? <DemoCursor script={demo} startDelay={1200} /> : null}
+        {/* the guard stays while the preview comes and goes, so an error on the way out stays in this frame */}
+        <PreviewGuard name={exportName} resetKey={near}>
+          {near ? <DynamicPreview exportName={exportName} compact /> : null}
+          {near && demo ? <DemoCursor script={demo} startDelay={1200} /> : null}
+        </PreviewGuard>
       </div>
     </div>
   );

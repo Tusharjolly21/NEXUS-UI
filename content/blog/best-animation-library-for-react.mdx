@@ -1,0 +1,74 @@
+---
+title: "Best Animation Library for React (2026)"
+description: "Motion, React Spring, GSAP, AutoAnimate or plain CSS? How the main React animation libraries differ, what each is best at, and how to choose for your project."
+date: "2026-11-10"
+---
+
+There is no single best animation library for React, but there is usually a best one for the job in front of you. A product UI full of small state changes needs something different from a scroll-driven marketing page or a list that should just stop jumping when items move. This guide compares the libraries React developers actually choose between, says what each one is good at, and ends with a short way to decide. We build [Nexus UI](/components) on Framer Motion, so we say where that shapes our view.
+
+## The short answer
+
+- **Motion (Framer Motion)** for product interfaces: springs, gestures, layout and exit animations, written as props on your components.
+- **GSAP** for long, precisely timed sequences and scroll storytelling, especially on marketing pages.
+- **React Spring** if you think in physics and want hook-based springs with a small API.
+- **AutoAnimate** when you only want lists and containers to animate their changes with one line.
+- **CSS transitions and Tailwind** for hovers, focus states and simple enter effects, with no library at all.
+
+## Motion (Framer Motion)
+
+Motion, published for years as Framer Motion, is the most common choice for animating React UI. You swap a `div` for a `motion.div` and describe the target state with props: `animate`, `whileHover`, `whileTap`, `whileInView`, `exit`. It handles the hard parts of React animation for you: exit animations through `AnimatePresence`, layout animations when an element changes size or position, shared-element transitions with `layoutId`, drag with constraints and momentum, and scroll-linked values with `useScroll` and `useTransform`. Motion values update outside React's render cycle, so pointer-driven effects stay smooth.
+
+**Best for:** dashboards, apps, forms, menus, cards, tabs, anything where the interface reacts to the user.
+
+**Watch out for:** it runs on the client, so in the Next.js App Router animated pieces live in `"use client"` files. The package is now also published as `motion` (imported from `motion/react`); the `framer-motion` package still works.
+
+If you want to see what it can do, our [Framer Motion examples](/blog/framer-motion-examples) cover ten patterns with code.
+
+## GSAP
+
+GSAP is a framework-agnostic animation platform built around timelines: you line up many tweens and control them as one sequence, with fine control over timing and easing. Its ScrollTrigger plugin is a common pick for pinned sections and scroll-scrubbed storytelling. In React you use it through the `@gsap/react` package and its `useGSAP` hook, which handles cleanup. GSAP and its plugins are free to use.
+
+**Best for:** marketing pages, scroll storytelling, complex choreography, SVG and canvas work.
+
+**Watch out for:** it animates the DOM directly rather than through React props, so you work with refs and keep React state and the animation from fighting each other.
+
+## React Spring
+
+React Spring animates with spring physics instead of durations. Its hooks (`useSpring`, `useSprings`, `useTransition`, `useTrail`) return animated values you pass to `animated` elements, which update without re-rendering React.
+
+**Best for:** developers who want physics-first motion and a hooks API, and interactive pieces such as draggable or gesture-driven UI.
+
+**Watch out for:** layout and shared-element transitions take more work than in Motion.
+
+## AutoAnimate
+
+AutoAnimate (`@formkit/auto-animate`) does one thing: when children are added, removed or moved inside a parent, it animates the change. In React you call `useAutoAnimate()` and put the returned ref on the parent.
+
+**Best for:** lists, tables, form fields that appear and disappear, any container that currently jumps.
+
+**Watch out for:** it is not for custom choreography; once you want control over how things move, reach for one of the libraries above.
+
+## CSS transitions and Tailwind
+
+Most hover states, focus rings, colour changes and simple entrances need no JavaScript at all. Tailwind's `transition`, `duration-*` and `ease-*` utilities cover them, and CSS keyframes cover loops such as spinners. Browsers also support the View Transitions API for animating between page states.
+
+**Best for:** the many small effects every interface has.
+
+**Watch out for:** exit animations, springs, drag and anything tied to the pointer or scroll position get awkward fast.
+
+## Lottie for designer-made animation
+
+When a designer hands you an animation made in After Effects, Lottie plays it as a lightweight vector file, in React through packages such as `lottie-react`. It is the right tool for illustrations and empty-state animations, not for interface motion that responds to the user.
+
+## How to choose
+
+1. **Is the motion a response to the user** (hover, tap, drag, open, close, reorder)? Use Motion.
+2. **Is it a long, timed sequence or a scroll story** on a marketing page? Use GSAP.
+3. **Do lists or containers just need to stop jumping?** Add AutoAnimate.
+4. **Is it a hover or a simple fade?** Use CSS or Tailwind and skip the library.
+
+You can mix them: many projects use CSS for small states, Motion for components and GSAP for one scroll-heavy landing page.
+
+## Or skip building it
+
+If what you need is the finished component rather than the library, [Nexus UI](/components) has a few hundred animated React components built with Framer Motion and Tailwind CSS: sliders, toasts, tabs, pagination, ratings, loaders and more, each installable with one shadcn command. To see how it compares with other component libraries, read [Nexus UI next to React Bits, Magic UI, Aceternity UI and shadcn/ui](/alternatives).

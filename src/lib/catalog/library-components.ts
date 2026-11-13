@@ -15034,6 +15034,1027 @@ export default function Page() {
 }`,
     tailwindSource: tw,
   },
+  {
+    slug: "gold-star-rating",
+    name: "Gold Star Rating",
+    registryCliName: "gold-star-rating",
+    description:
+      "A five-star rating made of real 3D gold stars. Each star is a faceted solid with twenty flat faces, turned, sorted and shaded every frame like polished metal, with a softbox glint that runs across the faces as they move; empty stars are brushed silver. Choose a score and the stars up to it spin round one after another and come out gold, each with a metallic ting a step higher, a little pop and a sparkle, while the rest spin back to silver. The stars lean towards your pointer, lift up to the one you point at as a preview, and turn slightly while they wait so the light keeps moving. It is a radio group with arrow keys, Home and End, and the score in a polite live region.",
+    categorySlug: "inputs-controls",
+    tags: ["rating", "star rating", "stars", "review", "feedback", "score", "3d", "gold", "sound", "input", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 190,
+    createdAt: "2026-11-10",
+    animationKinds: ["hover", "press", "3d", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "value", type: "number", description: "The score, 0 to 5, when you control it. Leave it out to let the component keep its own." },
+      { name: "defaultValue", type: "number", defaultValue: "0", description: "The starting score when the component keeps its own." },
+      { name: "onChange", type: "(value: number) => void", description: "Called with the new score, 0 when a star is clicked again to clear it." },
+      { name: "question", type: "string", defaultValue: "\"Rate your order\"", description: "The line above the stars." },
+      { name: "labels", type: "[string, string, string, string, string]", defaultValue: "[\"Poor\", \"Fair\", \"Good\", \"Great\", \"Excellent\"]", description: "The word shown for each score, 1 to 5." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "The metallic tings, scored to the motion. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Scores four, then two, then five by itself until the visitor touches it. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewGoldStarRating,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { GoldStarRating } from "@/components/gold-star-rating";
+
+// Click a star to score, click it again to clear. Arrow keys move the score.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <GoldStarRating question="Rate your order" onChange={(score) => console.log(score)} />
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Controlled, with your own words",
+        code: `// src/app/page.tsx
+"use client";
+
+import { useState } from "react";
+import { GoldStarRating } from "@/components/gold-star-rating";
+
+export default function Page() {
+  const [score, setScore] = useState(0);
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <GoldStarRating
+        value={score}
+        onChange={setScore}
+        question="How was your stay?"
+        labels={["Awful", "Meh", "Fine", "Lovely", "Perfect"]}
+      />
+    </section>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "bubble-tags",
+    name: "Bubble Tags",
+    registryCliName: "bubble-tags",
+    description:
+      "A tag input where every tag is a soap bubble. Type a word and press Enter: a wand in the corner blows a bubble with the word inside, which swells, lets go with a wobble and drifts up to join the others. The bubbles hang in a sunlit garden, turning their colours, pressing softly against each other and leaning away when your pointer passes like a breath of air. Tap a bubble to remove its tag and it pops in a ring of droplets; Backspace in the empty field pops the newest. Every bubble is a real button and the field is a real input, so keyboards and screen readers get a plain list.",
+    categorySlug: "inputs-controls",
+    tags: ["tags", "tag input", "chips", "multi select", "bubbles", "physics", "input", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 196,
+    createdAt: "2026-11-10",
+    animationKinds: ["type", "press", "hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "tags", type: "string[]", description: "The tags, when you control the list. Leave it out to let the component keep its own." },
+      { name: "defaultTags", type: "string[]", defaultValue: "[\"design\", \"coffee\", \"hiking\"]", description: "The starting tags when the component keeps its own." },
+      { name: "onChange", type: "(tags: string[]) => void", description: "Called with the new list whenever a tag is added or popped." },
+      { name: "max", type: "number", defaultValue: "8", description: "The most tags it will hold." },
+      { name: "label", type: "string", defaultValue: "\"Topics\"", description: "The field's label." },
+      { name: "placeholder", type: "string", defaultValue: "\"Add a topic\"", description: "The field's placeholder." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Soft synthesised sounds, scored to the motion. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Adds and pops a few tags by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewBubbleTags,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { BubbleTags } from "@/components/bubble-tags";
+
+// Type a word and press Enter to blow a bubble. Tap a bubble to pop it.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <BubbleTags defaultTags={["design", "music"]} onChange={(tags) => console.log(tags)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "eclipse-toggle",
+    name: "Eclipse Toggle",
+    registryCliName: "eclipse-toggle",
+    description:
+      "A light and dark switch played as an evening going by, that can change the whole page with it. The switch is a strip of sky over low hills, and the knob is the sun. Switch to dark and the sun sinks towards the hills: the light turns golden, the sun grows larger and goes orange and then red as it nears the horizon, and it sets behind the hills while a silver moon rises in its place. A rosy afterglow lingers, the evening star comes out first and then the stars, and the hills turn to silhouettes in the moonlight. Switch back and it plays as a sunrise, and a few birds fly off singing. Tap it, use Space, Enter or the arrow keys, or drag the knob to scrub the evening by hand. Turn on pageTransition and the page changes with it: dusk spreads out of the switch across the page as the stars come out, and switching back floods it with sunlight.",
+    categorySlug: "inputs-controls",
+    tags: ["theme toggle", "dark mode toggle", "light dark switch", "switch", "toggle", "sunset", "sun", "moon", "eclipse", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 198,
+    createdAt: "2026-11-10",
+    animationKinds: ["press", "drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "theme", type: "\"light\" | \"dark\"", description: "The theme, when you control it. Leave it out to let the switch keep its own." },
+      { name: "defaultTheme", type: "\"light\" | \"dark\"", defaultValue: "\"light\"", description: "The starting theme when the switch keeps its own." },
+      { name: "onThemeChange", type: "(theme: \"light\" | \"dark\", detail: { fromUser: boolean }) => void", description: "Called with the new theme. Apply it to your page here. fromUser is false while autoplay runs, so you can leave the page alone then." },
+      { name: "pageTransition", type: "boolean", defaultValue: "false", description: "Changes the page with the switch when the visitor flips it: dusk spreads out of the switch across the page with a glowing edge as the stars come out, and switching back floods it with sunlight. Uses the View Transitions API; elsewhere the theme just changes." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A low swell as the light drains, a soft bell as the sun sets, a glassy chord when night falls, and a bright ting and birdsong at sunrise. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Runs the evening back and forth by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewEclipseToggle,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { EclipseToggle } from "@/components/eclipse-toggle";
+
+// Tap the switch, or drag the sun across.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      {/* pageTransition: the whole page changes theme inside an eclipse that spills out of the switch */}
+      <EclipseToggle
+        pageTransition
+        onThemeChange={(theme, { fromUser }) => {
+          if (fromUser) document.documentElement.classList.toggle("dark", theme === "dark");
+        }}
+      />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "neon-star-rating",
+    name: "Neon Star Rating",
+    registryCliName: "neon-star-rating",
+    description:
+      "A star rating in neon: five star-shaped glass tubes on a brick wall, each bent round ten corners and held off the bricks by two small brackets. Off, they are grey glass. Choose a score and the tubes up to it strike one after another: a click from the transformer, a stutter of flickers with a crackle on each and a short buzz, then a steady amber glow that washes over the bricks around it. Lower the score and the rest drop out with a fading afterglow. Pointing at a star warms the tubes up to it, and now and then a lit tube stutters the way old neon does. It is a radio group with arrow keys, and the score is read out in a polite live region.",
+    categorySlug: "inputs-controls",
+    tags: ["rating", "star rating", "stars", "neon", "review", "feedback", "score", "glow", "sound", "input", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 194,
+    createdAt: "2026-11-10",
+    animationKinds: ["hover", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "value", type: "number", description: "The score, 0 to 5, when you control it. Leave it out to let the component keep its own." },
+      { name: "defaultValue", type: "number", defaultValue: "0", description: "The starting score when the component keeps its own." },
+      { name: "onChange", type: "(value: number) => void", description: "Called with the new score." },
+      { name: "question", type: "string", defaultValue: "\"How was dinner?\"", description: "The line above the stars." },
+      { name: "labels", type: "[string, string, string, string, string]", description: "The word shown for each score, 1 to 5." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Transformer clicks, crackles and a short buzz as each tube strikes. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Scores by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewNeonStarRating,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { NeonStarRating } from "@/components/neon-star-rating";
+
+// Click a star to light the tubes up to it. Arrow keys move the score.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <NeonStarRating question="How was dinner?" onChange={(score) => console.log(score)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "lens-search",
+    name: "Lens Search",
+    registryCliName: "lens-search",
+    description:
+      "A search box whose magnifying glass is a real lens. Type, and the magnifier lifts out of the field and grows into a glass lens over the list. It looks down the rows, magnifying each as it passes and dimming the ones that do not match, and parks on the first match with a chime, the matched letters in blue under the glass. Arrow keys glide it between matches, and Enter or a click opens one. When nothing matches it reaches the bottom, shakes its head and goes home. Clear the field or press Escape and it drops back in as the icon. The field is a combobox over a listbox, with the result count in a polite live region.",
+    categorySlug: "inputs-controls",
+    tags: ["search", "search bar", "combobox", "autocomplete", "command menu", "filter", "magnifier", "lens", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 195,
+    createdAt: "2026-11-10",
+    animationKinds: ["type", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "{ id: string; title: string; caption?: string; keywords?: string; color?: string }[]", description: "The rows to search. Keywords are extra words a row answers to, not shown; color is the icon tile's colour." },
+      { name: "placeholder", type: "string", defaultValue: "\"Search settings\"", description: "The field's placeholder." },
+      { name: "onSelect", type: "(item) => void", description: "Called with the row that is opened with Enter or a click." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A lift as the lens comes out, soft ticks as it passes rows and a chime on a match. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a few searches by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewLensSearch,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { LensSearch } from "@/components/lens-search";
+
+// Type to send the lens down the list. Arrow keys move it, Enter opens a row.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <LensSearch onSelect={(item) => console.log(item.title)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "peel-delete",
+    name: "Peel Delete",
+    registryCliName: "peel-delete",
+    description:
+      "Hold to delete, where holding peels the note off like a sticker. Press and hold the bin and the note's corner lifts, then the fold runs in across it, the paper back of the curl showing and its shadow falling on the note, with a rasp that follows the speed of the peel. Let go early and it sticks back down with a pat. Hold all the way and it rips off like a plaster in one continuous pull, leaving the patch where it was stuck. The bin turns into Undo with the time left drawn round it, and Undo slides the note back and smooths it flat. Space or Enter holds from the keyboard, and the bin's label says to press and hold.",
+    categorySlug: "inputs-controls",
+    tags: ["delete", "hold to delete", "undo", "destructive action", "confirm", "sticker", "peel", "list", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 197,
+    createdAt: "2026-11-10",
+    animationKinds: ["press", "3d", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "{ id: string; title: string; text?: string; time?: string; color?: string }[]", description: "The notes. Color is the sticker's paper colour." },
+      { name: "onDelete", type: "(item) => void", description: "Called when a note is really gone, after the undo window closes." },
+      { name: "holdMs", type: "number", defaultValue: "1000", description: "How long to hold the bin, in milliseconds." },
+      { name: "undoSeconds", type: "number", defaultValue: "5", description: "How long Undo stays." },
+      { name: "title", type: "string", defaultValue: "\"Notes\"", description: "The card's heading." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A rasp that follows the peel, a pat when it sticks back and a rip when it comes free. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Peels a note and undoes it by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewPeelDelete,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { PeelDelete } from "@/components/peel-delete";
+
+// Press and hold a bin to peel the note off. Undo puts it back.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <PeelDelete onDelete={(note) => console.log("deleted", note.id)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "upload-morph",
+    name: "Upload Morph",
+    registryCliName: "upload-morph",
+    description:
+      "An upload status that takes itself apart to do the job. Tap it and the cloud's puffs smooth out, from the top round to the bottom, into a ring that becomes the progress track; a glowing head leads the progress round it while the arrow keeps rising up through the ring like a conveyor. When it lands the ring gives a soft pulse and a ripple, puffs back out into the cloud, and the arrow's head folds into a check. If the upload fails the ring turns red and shakes, and the cloud comes back with its arrow. Its sounds follow the picture: a tap, air as the cloud rounds, a note for each tenth that climbs the scale, a chime as it lands.",
+    categorySlug: "inputs-controls",
+    tags: ["upload", "file upload", "progress", "progress ring", "cloud", "morph", "icon morph", "status", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 193,
+    createdAt: "2026-11-10",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "fileName", type: "string", defaultValue: "\"Q3-report.pdf\"", description: "The file name under the glyph." },
+      { name: "fileSize", type: "string", defaultValue: "\"2.4 MB\"", description: "The file size under the glyph." },
+      { name: "onUpload", type: "(report: (progress: number) => void) => Promise<void>", description: "Upload the file yourself: call report with 0 to 1 as it goes and resolve when it is done, or throw to show the failure. Without it the demo fills over about three seconds." },
+      { name: "size", type: "number", defaultValue: "300", description: "Width of the card in pixels." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A tap, air as the cloud rounds, a rising note per tenth and a landing chime. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Uploads by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewUploadMorph,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { UploadMorph } from "@/components/upload-morph";
+
+// Tap to upload. Report real progress from onUpload, or leave it out for the demo.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <UploadMorph
+        fileName="Q3-report.pdf"
+        fileSize="2.4 MB"
+        onUpload={async (report) => {
+          for (let i = 1; i <= 10; i++) {
+            await new Promise((r) => setTimeout(r, 250));
+            report(i / 10);
+          }
+        }}
+      />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "voice-morph",
+    name: "Voice Morph",
+    registryCliName: "voice-morph",
+    description:
+      "A voice-message button whose glyph takes itself apart to do the job. Tap the mic and its head splits into five bars that spread into a live waveform while the stand folds away; the button turns red and a timer runs. Tap again and the bars pack themselves into the send arrow: three become its shaft and wings, the other two fold away, the button turns blue and the arrow shoots up out of it as the message lands in the thread. Then the mic rises back into place. Escape cancels a recording. The loudness is simulated, so it needs no microphone; it is decoration over a plain button.",
+    categorySlug: "ai-components",
+    tags: ["voice message", "voice note", "record button", "microphone", "waveform", "chat", "send", "morph", "icon morph", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 192,
+    createdAt: "2026-11-10",
+    animationKinds: ["press", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "placeholder", type: "string", defaultValue: "\"Message\"", description: "What the field says before anyone records." },
+      { name: "incoming", type: "string", defaultValue: "\"Running five minutes late, save me a seat?\"", description: "A message already in the thread, from the other person." },
+      { name: "onSend", type: "(seconds: number, levels: number[]) => void", description: "Called with the length and a loudness trace (0 to 1, ten a second) when a voice message is sent." },
+      { name: "maxSeconds", type: "number", defaultValue: "60", description: "Recording stops and sends by itself at this length." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A rising bloop as the mic opens and a whoosh as the arrow sends. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Records and sends a message by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewVoiceMorph,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { VoiceMorph } from "@/components/voice-morph";
+
+// Tap the mic to record, tap again to send. Escape cancels.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <VoiceMorph onSend={(seconds) => console.log("sent", seconds, "s")} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "face-scan-morph",
+    name: "Face Scan Morph",
+    registryCliName: "face-scan-morph",
+    description:
+      "A pay-with-your-face confirmation whose glyph takes itself apart to check you. Tap it and the four scan corners curl inward into the arcs of a ring that spins while the face glances about and blinks. A match closes the ring into one green circle as the eyes fade and the smile straightens into a check. No match stops the spin, the arcs straighten back into corners, and the face shakes its head with a flat mouth and waits for another go. The glyph is a plain button with each state spoken in a live region.",
+    categorySlug: "inputs-controls",
+    tags: ["face id", "payment", "checkout", "confirm", "biometric", "scan", "morph", "icon morph", "status", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 191,
+    createdAt: "2026-11-10",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "merchant", type: "string", defaultValue: "\"Little Fern Café\"", description: "Who is being paid." },
+      { name: "amount", type: "string", defaultValue: "\"$24.00\"", description: "The amount, as shown." },
+      { name: "onConfirm", type: "() => Promise<boolean>", description: "Check the face yourself and resolve true to pay. Without it the demo fails the first try and passes the next." },
+      { name: "onPaid", type: "() => void", description: "Called once the payment goes through." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Soft ticks while it scans, a chime on a match and a low note on a miss. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Scans by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewFaceScanMorph,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { FaceScanMorph } from "@/components/face-scan-morph";
+
+// Tap to scan. Resolve onConfirm with your own check.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <FaceScanMorph merchant="Little Fern Café" amount="$24.00" onPaid={() => console.log("paid")} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "led-button",
+    name: "LED Button",
+    registryCliName: "led-button",
+    description:
+      "A button made of hundreds of tiny LEDs that spell its label like a dot-matrix sign, each lamp throwing a little glow onto its neighbours. A pool of blue light follows your pointer across the lamps. Press it and a ripple runs out from your finger, the label dissolves lamp by lamp into a scrolling marquee while sparks twinkle, and it settles into a green check. By default it copies a prompt to the clipboard; give it onPress and the marquee runs until your promise settles. The lamps are drawn in WebGL, with a plain button underneath for keyboards and screen readers.",
+    categorySlug: "inputs-controls",
+    tags: ["button", "led", "dot matrix", "copy button", "marquee", "webgl", "glow", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 199,
+    createdAt: "2026-11-12",
+    animationKinds: ["hover", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "label", type: "string", defaultValue: "\"Copy prompt\"", description: "What the button says, in lights." },
+      { name: "working", type: "string", defaultValue: "\"Writing your prompt\"", description: "What scrolls past while it works." },
+      { name: "done", type: "string", defaultValue: "\"Copied\"", description: "What it says when it's done." },
+      { name: "copyText", type: "string | null", description: "Copied to the clipboard on press. Set it to null to copy nothing." },
+      { name: "onPress", type: "() => Promise<unknown> | void", description: "Runs on press. If it returns a promise, the marquee runs until it settles (at least 1.4 s)." },
+      { name: "title", type: "string", defaultValue: "\"Use this component\"", description: "The card's heading." },
+      { name: "description", type: "string", defaultValue: "\"Copy a ready-made prompt for your AI editor.\"", description: "The line under the heading." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A click, relays ticking while it works and a chime when it's done. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Presses itself now and then until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewLEDButton,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { LEDButton } from "@/components/led-button";
+
+// Move over the lights, then press.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <LEDButton label="Copy prompt" onPress={() => console.log("pressed")} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "glass-compare",
+    name: "Glass Compare",
+    registryCliName: "glass-compare",
+    description:
+      "A before-and-after slider whose divider is a bar of glass. It bends the picture behind it like a lens, with a bright rim, a streak of light and a faint rainbow fringe. Flick it and the bar bends like a ribbon and springs straight, the side it sweeps toward smears with motion blur, and droplets of glass spray off and fall. Drag the bar or anywhere on the picture, or focus it and use the arrow keys. Without your own images it paints a harbour street by day and by night.",
+    categorySlug: "cards",
+    tags: ["before after", "image compare", "comparison slider", "slider", "glass", "refraction", "webgl", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 198,
+    createdAt: "2026-11-12",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "before", type: "string", description: "The left image (it must allow cross-origin use). Leave both out for the painted demo." },
+      { name: "after", type: "string", description: "The right image." },
+      { name: "beforeLabel", type: "string", defaultValue: "\"2 PM\"", description: "Label on the left image." },
+      { name: "afterLabel", type: "string", defaultValue: "\"10 PM\"", description: "Label on the right image." },
+      { name: "title", type: "string", defaultValue: "\"Harbour Street, day and night\"", description: "The card's heading." },
+      { name: "defaultValue", type: "number", defaultValue: "0.5", description: "Where the divider starts, 0 to 1." },
+      { name: "onChange", type: "(value: number) => void", description: "Called with the divider's position as it moves." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "The glass sliding and droplets falling. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps the glass across by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewGlassCompare,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { GlassCompare } from "@/components/glass-compare";
+
+// Drag the glass or anywhere on the picture. Arrow keys move it.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <GlassCompare beforeLabel="Before" afterLabel="After" onChange={(v) => console.log(v)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "silk-print",
+    name: "Silk Print",
+    registryCliName: "silk-print",
+    description:
+      "A silk scarf hanging from a rod on a product card, drawn as a real cloth mesh in WebGL. Waves roll down it in a soft draught and its sheen runs along the threads and slides across the folds. Your pointer is a breath of air that ripples the silk, and dragging turns it on the rod so you can see the print through the back. Pick a colourway and the print changes. The name, details, price and colourway buttons are ordinary HTML.",
+    categorySlug: "three-d-components",
+    tags: ["product card", "cloth", "fabric", "silk", "webgl", "3d", "colour picker", "e-commerce", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 196,
+    createdAt: "2026-11-12",
+    animationKinds: ["hover", "drag"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "name", type: "string", defaultValue: "\"Tidewater scarf\"", description: "The product's name." },
+      { name: "detail", type: "string", defaultValue: "\"Mulberry silk twill, 90 × 90 cm, hand-rolled hem\"", description: "The line under the name." },
+      { name: "price", type: "string", defaultValue: "\"$185\"", description: "The price shown." },
+      { name: "colourways", type: "SilkColourway[]", description: "The colourways to choose from: { id, name, ground, mid, ink, accent }." },
+      { name: "defaultColourway", type: "string", defaultValue: "\"indigo\"", description: "The id of the colourway shown first." },
+      { name: "onChange", type: "(id: string) => void", description: "Called with the chosen colourway's id." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A rustle when the wind or your hand moves the silk. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Turns the scarf and changes colourway by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewSilkPrint,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { SilkPrint } from "@/components/silk-print";
+
+// Move over the silk to stir it. Drag to turn it. Pick a colourway.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <SilkPrint onChange={(id) => console.log(id)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "glyph-rain",
+    name: "Glyph Rain",
+    registryCliName: "glyph-rain",
+    description:
+      "A 404 hero of falling characters that hides a message. Columns of letters rain down at their own speeds with bright heads and fading tails, and your pointer lights them as it passes. Linger and the rain around you stops changing and settles into the words of a hidden message, which stays a while before melting back into the rain. The title, description and button are plain HTML over the canvas.",
+    categorySlug: "background-effects",
+    tags: ["404", "not found", "matrix", "digital rain", "hidden message", "webgl", "hero", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 195,
+    createdAt: "2026-11-12",
+    animationKinds: ["hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "message", type: "string[]", defaultValue: "[\"THIS PAGE\", \"WANDERED OFF\"]", description: "What the rain spells where you linger: one string per line of letters, digits and spaces." },
+      { name: "code", type: "string", defaultValue: "\"404\"", description: "The big code." },
+      { name: "title", type: "string", defaultValue: "\"Nothing at this address\"", description: "The heading." },
+      { name: "description", type: "string", description: "The line under the heading." },
+      { name: "action", type: "string", defaultValue: "\"Back to home\"", description: "The button's label." },
+      { name: "onAction", type: "() => void", description: "Called when the button is pressed." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A faint ticking as the letters settle. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Moves a pointer through the rain by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewGlyphRain,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { GlyphRain } from "@/components/glyph-rain";
+
+// Move slowly over the rain, and stay a moment.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <div className="w-full max-w-[960px]">
+        <GlyphRain message={["THIS PAGE", "WANDERED OFF"]} onAction={() => (window.location.href = "/")} />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "airmail-globe",
+    name: "Airmail Globe",
+    registryCliName: "airmail-globe",
+    description:
+      "A postcard composer that sends by airmail across a real globe. Press send and the card folds itself into a paper plane right where it lies, in one smooth movement, then is thrown onto the globe and becomes the plane you watch fly. It sets off away from them, goes the long way round behind the earth trailing a contrail, and comes down on the person you chose, the only place marked on the globe. The globe is lit by the sun where it is right now, and on landing it tells you the time there. The recipients are a radio group with arrow keys and the message is a real text field.",
+    categorySlug: "three-d-components",
+    tags: ["globe", "postcard", "send", "message", "paper plane", "earth", "time zones", "webgl", "3d", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 197,
+    createdAt: "2026-11-12",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "from", type: "AirmailPlace", description: "Where the card is sent from: { id, name, city, lat, lon, tz }." },
+      { name: "to", type: "AirmailPlace[]", description: "The people it can go to." },
+      { name: "defaultTo", type: "string", defaultValue: "\"mia\"", description: "The id of the person chosen first." },
+      { name: "defaultMessage", type: "string", description: "The message already written on the card." },
+      { name: "onSend", type: "(to: AirmailPlace, message: string) => void", description: "Called when the card is sent." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "The card folding, the take-off, wind on the way and a chime on landing. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sends a card by itself now and then until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewAirmailGlobe,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { AirmailGlobe } from "@/components/airmail-globe";
+
+// Choose who it's for, write a line, and send it. Arrow keys move between people.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <AirmailGlobe onSend={(to, message) => console.log(to.name, message)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "magic-calendar",
+    name: "Magic Calendar",
+    registryCliName: "magic-calendar",
+    description:
+      "A month calendar that knows the world's festivals, about fifty of them, and celebrates each one when you open it. Christmas snows into a drift along the bottom, New Year's Eve fires fireworks, Lunar New Year hangs red lanterns, Eid brings a crescent moon and swinging lanterns, Hanukkah and Kwanzaa light their candles one by one, Diwali strings lights, Holi bursts colour, Easter drops painted eggs, Songkran splashes water, Makar Sankranti flies kites, a birthday sends up balloons and April Fools' Day turns the calendar upside down. Every effect is drawn on one canvas over the card with its own small sound. Marked days carry a dot and an icon, and the panel below names the day or counts down to the next one. The days are a real grid you can move through with the arrow keys.",
+    categorySlug: "inputs-controls",
+    tags: ["calendar", "date picker", "holidays", "festivals", "celebration", "fireworks", "snow", "confetti", "canvas", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 198,
+    createdAt: "2026-11-13",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "birthday", type: "{ month: number; day: number; name?: string } | null", defaultValue: "{ month: 11, day: 21, name: \"Maya\" }", description: "Someone's birthday, celebrated with balloons. Month is 1 to 12; null for none." },
+      { name: "moments", type: "CalendarMoment[]", defaultValue: "[]", description: "More days to celebrate, added to the built-in festivals: { month, day, year?, title, effect, color? }." },
+      { name: "weekStart", type: "0 | 1", defaultValue: "0", description: "0 starts weeks on Sunday, 1 on Monday." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A small sound for each celebration. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Tours the year's festivals by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewMagicCalendar,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { MagicCalendar } from "@/components/magic-calendar";
+
+// Open 25 and 31 December, or step into next year for Lunar New Year, Eid and Easter.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <MagicCalendar birthday={{ month: 6, day: 12, name: "Sam" }} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "sand-drift-gallery",
+    name: "Sand Drift Gallery",
+    registryCliName: "sand-drift-gallery",
+    description:
+      "An endless strip of pictures that turn to sand at the edges. A wind takes the grains, swirling them outward and up, and packs them back into a picture as it returns; fling the strip and the sand trails behind, blown harder the faster you throw it. Tens of thousands of WebGL points meet a crisp card in the middle, and the strip drifts on its own while nobody is touching it. Focus it and the arrow keys step through the pictures.",
+    categorySlug: "cards",
+    tags: ["carousel", "gallery", "slider", "sand", "particles", "webgl", "infinite", "drag", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 196,
+    createdAt: "2026-11-12",
+    animationKinds: ["drag", "scroll"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "DriftItem[]", description: "Captions for the five painted pictures: { title, note }." },
+      { name: "title", type: "string", defaultValue: "\"Field notes\"", description: "The heading above the strip." },
+      { name: "scatter", type: "number", defaultValue: "150", description: "How far the sand flies at the edges, in px." },
+      { name: "drift", type: "number", defaultValue: "22", description: "How fast the strip drifts while nobody is touching it, in px per second." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Sand hissing as you fling the strip. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flings the strip now and then until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewSandDriftGallery,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { SandDriftGallery } from "@/components/sand-drift-gallery";
+
+// Drag or fling the strip. Focus it and use the arrow keys to step through.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <div className="w-full max-w-[960px]">
+        <SandDriftGallery title="Field notes" />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "diffusion-loader",
+    name: "Diffusion Loader",
+    registryCliName: "diffusion-loader",
+    description:
+      "An image-generation placeholder that resolves the way a diffusion model does. A fine film grain sits over a soft wash of colour that flows like ink, then firms into shapes, edges and texture step by step as the noise drains away, with a glow of colour breathing round the frame. At the end a soft focus front sweeps down and brings the sharp picture in. The step count is read out, and Regenerate starts again with a new seed.",
+    categorySlug: "loaders",
+    tags: ["loader", "image generation", "ai", "diffusion", "placeholder", "skeleton", "progress", "webgl", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 195,
+    createdAt: "2026-11-12",
+    animationKinds: ["gradient"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "prompt", type: "string", description: "The prompt shown above the picture." },
+      { name: "steps", type: "number", defaultValue: "30", description: "How many denoising steps the preview counts through." },
+      { name: "duration", type: "number", defaultValue: "5.2", description: "Seconds for the whole run." },
+      { name: "src", type: "string", description: "An image to resolve into instead of the painted demo (it must allow cross-origin use)." },
+      { name: "onDone", type: "(seed: number) => void", description: "Called with the seed when the picture is done." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A tick each step and a chime when it's done. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Regenerates by itself now and then until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewDiffusionLoader,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { DiffusionLoader } from "@/components/diffusion-loader";
+
+// Watch it generate, then press Regenerate for a new seed.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <DiffusionLoader prompt="A lighthouse on a sea cliff at dusk" onDone={(seed) => console.log(seed)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "warp-cta",
+    name: "Warp CTA",
+    registryCliName: "warp-cta",
+    description:
+      "A deploy button that goes to warp. Hover and the drive spools up on a smooth spring: stars drifting toward you draw out into streaks of true motion blur from a vanishing point that eases after your pointer, and a hairline of light on the rim follows you round. Click and the streaks run long into a bloom while the deploy runs, then draw back into stars when it lands. Give it onDeploy and the jump lasts until your promise settles.",
+    categorySlug: "inputs-controls",
+    tags: ["button", "cta", "deploy", "warp", "stars", "hyperspace", "motion blur", "webgl", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 197,
+    createdAt: "2026-11-12",
+    animationKinds: ["hover", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: "\"Ready to ship\"", description: "The heading above the button." },
+      { name: "detail", type: "string", defaultValue: "\"main is 3 commits ahead of production\"", description: "The line under the heading." },
+      { name: "label", type: "string", defaultValue: "\"Deploy at warp speed\"", description: "The words on the button." },
+      { name: "onDeploy", type: "() => Promise<unknown> | void", description: "Runs on press. If it returns a promise, the jump lasts until it settles (at least a second)." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "The drive spooling up, the jump and the arrival. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Spools up and jumps by itself now and then until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewWarpCTA,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { WarpCTA } from "@/components/warp-cta";
+
+// Move over the button to spool up, then click it.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <WarpCTA onDeploy={() => new Promise((r) => setTimeout(r, 2000))} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "print-styles",
+    name: "Print Styles",
+    registryCliName: "print-styles",
+    description:
+      "A cover-image style picker that prints the picture as you choose. There is 1-bit, four handheld greens, newsprint with four inks at their real screen angles, or a two-ink risograph slightly off register. A print head runs across to lay each style down, and a printer's loupe magnifies the dots under your pointer; press and hold to see the original. The styles are a radio group with arrow keys.",
+    categorySlug: "inputs-controls",
+    tags: ["image filter", "picker", "halftone", "dither", "risograph", "newsprint", "print", "loupe", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 194,
+    createdAt: "2026-11-12",
+    animationKinds: ["press", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "defaultStyle", type: "\"original\" | \"mac\" | \"pocket\" | \"newsprint\" | \"riso\"", defaultValue: "\"newsprint\"", description: "The style chosen first." },
+      { name: "onChange", type: "(style: PrintStyle) => void", description: "Called with the chosen style." },
+      { name: "src", type: "string", description: "An image to print instead of the painted demo scene (it must allow cross-origin use)." },
+      { name: "title", type: "string", defaultValue: "\"Cover style\"", description: "The card's heading." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "The print head running across. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Picks styles by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewPrintStyles,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { PrintStyles } from "@/components/print-styles";
+
+// Pick a style. Move over the picture for the loupe; press to see the original.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <PrintStyles defaultStyle="riso" onChange={(style) => console.log(style)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "inspect-text",
+    name: "Inspect Text",
+    registryCliName: "inspect-text",
+    description:
+      "An intro paragraph where every word, logo and photo is its own layer, like in a design tool. A selection frame with handles and a live size tag springs between the layers as you point, and logos fill with colour from the edge you came in by. Click a layer to inspect its real styles, then point at another for red measurement lines between the two; drag a handle to resize. In autoplay a collaborator's cursor wanders in and does it for you.",
+    categorySlug: "motion-effects",
+    tags: ["text effect", "design tool", "selection", "inspector", "about", "intro", "hover", "figma", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 193,
+    createdAt: "2026-11-12",
+    animationKinds: ["hover", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "text", type: "string", description: "The sentence: plain words, with layers in braces by id, for example \"Hi, I'm {lena}.\"" },
+      { name: "layers", type: "InspectLayer[]", description: "The layers the braces refer to." },
+      { name: "collaborator", type: "{ name: string; color: string }", defaultValue: "{ name: \"Noah\", color: \"#ff375f\" }", description: "The collaborator whose cursor wanders in during autoplay." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Ticks as the frame moves and a tock when you select. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Lets a collaborator's cursor inspect layers until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewInspectText,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { InspectText } from "@/components/inspect-text";
+
+// Point at a name, click to inspect, then point at another. Drag a handle to resize.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <InspectText />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "soap-bubble",
+    name: "Soap Bubble",
+    registryCliName: "soap-bubble",
+    description:
+      "A kudos button you blow like a soap bubble. Hold the wand and a bubble swells and wobbles; let go and it floats off, its skin swirling with thin-film colours as the soap drains, then pops into droplets at the top and leaves the message behind. Hold too long and it bursts. The bubble is a WebGL shader, and Space or Enter works the wand the same way as a press.",
+    categorySlug: "inputs-controls",
+    tags: ["kudos", "reaction", "button", "hold to send", "bubble", "shader", "webgl", "thin film", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 195,
+    createdAt: "2026-11-12",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "to", type: "string", defaultValue: "\"Priya\"", description: "Who the kudos go to." },
+      { name: "onSend", type: "(size: number) => void", description: "Called when a bubble is sent, with how big it was, 0 to 1." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Breath through the wand, the bubble letting go and the pop. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Blows bubbles by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewSoapBubble,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { SoapBubble } from "@/components/soap-bubble";
+
+// Hold the ring to blow, let go to send. Space or Enter works the same.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <SoapBubble to="Priya" onSend={(size) => console.log(size)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "ink-drop-picker",
+    name: "Ink Drop Picker",
+    registryCliName: "ink-drop-picker",
+    description:
+      "An accent colour picker that drops your colour into a glass of water. A pipette squeezes a drop in; it rings the surface, then rolls into a vortex ring that sinks, hits the floor and curls back up. It is run by a fluid simulation on the GPU and seen through the glass like a lens, and you can stir the water by dragging in it. Inks mix the way dyes do, and once the water settles the colour flows into the interface below. The inks are a radio group with arrow keys.",
+    categorySlug: "inputs-controls",
+    tags: ["color picker", "colour picker", "accent colour", "theme", "ink", "fluid", "simulation", "webgl", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 196,
+    createdAt: "2026-11-12",
+    animationKinds: ["press", "drag"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "colors", type: "Ink[]", description: "The inks to choose from: { id, name, hex }." },
+      { name: "defaultValue", type: "string", description: "The id of the ink chosen at the start." },
+      { name: "onChange", type: "(hex: string, id: string) => void", description: "Called with the chosen ink's hex and id." },
+      { name: "label", type: "string", defaultValue: "\"Accent colour\"", description: "The card's heading." },
+      { name: "description", type: "string", defaultValue: "\"Drop a colour in and watch it take.\"", description: "The line under the heading." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "The pipette, the drop landing and the water. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Drops inks in by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewInkDropPicker,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { InkDropPicker } from "@/components/ink-drop-picker";
+
+// Pick an ink to drop it in. Drag in the water to stir. Arrow keys move between inks.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <InkDropPicker onChange={(hex) => document.documentElement.style.setProperty("--accent", hex)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "tear-off-coupon",
+    name: "Tear-off Coupon",
+    registryCliName: "tear-off-coupon",
+    description:
+      "A promo code you claim by tearing off the stub. The ticket tilts under your hand and its holographic foil shifts colour as it moves. Pull the stub and it peels up and tears hole by hole, each bridge of paper snapping in turn; once free it swings from your finger in 3D, then drops into the tray and flips to show the code, ready to copy. A Tear off button does it for you.",
+    categorySlug: "cards",
+    tags: ["coupon", "promo code", "discount", "ticket", "tear", "holographic", "3d", "drag", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 197,
+    createdAt: "2026-11-12",
+    animationKinds: ["drag", "hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "code", type: "string", defaultValue: "\"LMN-20X4\"", description: "The code printed on the back of the stub." },
+      { name: "offer", type: "string", defaultValue: "\"20% off\"", description: "The offer, big." },
+      { name: "detail", type: "string", defaultValue: "\"your first order\"", description: "The line under the offer." },
+      { name: "brand", type: "string", defaultValue: "\"Lumen\"", description: "The brand on the ticket." },
+      { name: "validity", type: "string", defaultValue: "\"Valid until 31 Dec\"", description: "When the offer ends." },
+      { name: "colors", type: "[string, string]", defaultValue: "[\"#0a84ff\", \"#5e5ce6\"]", description: "The coupon's colours, top left to bottom right." },
+      { name: "onClaim", type: "(code: string) => void", description: "Called once the stub is torn off." },
+      { name: "onCopy", type: "(code: string) => void", description: "Called when the code is copied." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Paper tearing, the stub landing and the flip. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Tears the stub off by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewTearOffCoupon,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { TearOffCoupon } from "@/components/tear-off-coupon";
+
+// Pull the stub away from the ticket, swing it about, then let go. Tear off does it for you.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <TearOffCoupon code="WELCOME20" offer="20% off" onCopy={(code) => console.log(code)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "breadcrumb-branch",
+    name: "Breadcrumb Branch",
+    registryCliName: "breadcrumb-branch",
+    description:
+      "Breadcrumb navigation grown as a living branch. Your path is the wood, twigs carry the places beside each step and buds at the tip are the places inside. Tap a bud and the branch grows into it; go back and the old wood turns to autumn and its leaves tumble down. A sparrow, which is you, hops to the tip and the springy limb dips under it. Gusts run through the leaves, your pointer rustles them and sunlight dapples it all. Every place is also a real button, so the path works with a keyboard and a screen reader.",
+    categorySlug: "inputs-controls",
+    tags: ["breadcrumb", "navigation", "tree", "branch", "leaves", "path", "nature", "canvas", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 194,
+    createdAt: "2026-11-12",
+    animationKinds: ["press", "hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "root", type: "Place", description: "The places you can go, as a tree: { name, children }." },
+      { name: "defaultPath", type: "string[]", defaultValue: "[\"Work\", \"Projects\", \"Q3 launch\"]", description: "Where you start, as names below the root." },
+      { name: "onNavigate", type: "(path: string[]) => void", description: "Called with the names from the root down whenever you move." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Wood creaking, leaves rustling and the sparrow. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Walks the branch by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewBreadcrumbBranch,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { BreadcrumbBranch } from "@/components/breadcrumb-branch";
+
+// Tap a bud to grow into it, a twig to step aside, or a name on the branch to go back.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <div className="w-full max-w-[960px]">
+        <BreadcrumbBranch onNavigate={(path) => console.log(path.join(" / "))} />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */

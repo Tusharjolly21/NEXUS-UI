@@ -402,7 +402,7 @@ export function ClockPicker({
   const move = useCallback(
     (cx: number, cy: number) => {
       const d = drag.current;
-      if (!d) return;
+      if (!d || !faceRef.current) return;
       if (!d.moved && Math.hypot(cx - d.sx, cy - d.sy) > 5) d.moved = true;
       if (!d.moved) return;
       const { a } = where(cx, cy);
@@ -548,13 +548,17 @@ export function ClockPicker({
         running.add(c);
       });
     // finger position on the dial, in root coordinates, from an angle and a radius fraction
+    // null once the dial has gone (an animation can finish while the clock is being taken off the page)
     const centre = () => {
-      const f = faceRef.current!.getBoundingClientRect();
+      const face = faceRef.current;
+      if (!face || !alive) return null;
+      const f = face.getBoundingClientRect();
       const b = root.getBoundingClientRect();
       return { x: f.left - b.left + f.width / 2, y: f.top - b.top + f.height / 2, R: f.width / 2, bx: b.left, by: b.top };
     };
     const put = (deg: number, rr: number) => {
       const c = centre();
+      if (!c) return;
       const rad = (deg * Math.PI) / 180;
       gx.set(c.x + Math.sin(rad) * c.R * rr);
       gy.set(c.y - Math.cos(rad) * c.R * rr);
@@ -587,6 +591,7 @@ export function ClockPicker({
     const sweep = async (from: number, to: number, rr: number, dur: number, ease: [number, number, number, number]) => {
       phi.set(from);
       const off = phi.on("change", (p) => {
+        if (!alive) return; // stopping the demo settles its animations, after the clock may be gone
         put(p, rr);
         move(...client());
       });

@@ -75,9 +75,15 @@ export function rateLimit(
 
 /**
  * Extract a client identifier from a request for rate limiting.
- * Uses X-Forwarded-For (Vercel/proxy), falls back to a generic key.
+ *
+ * nexus-ui.com sits behind Cloudflare, so the address Vercel puts in X-Forwarded-For is a Cloudflare server, and
+ * Cloudflare spreads one visitor's requests over many of them: keyed on that, every request looked like a new
+ * visitor and no limit was ever reached. CF-Connecting-IP is the visitor's own address, set by Cloudflare. Someone
+ * who skips Cloudflare could fake it, but they could already change addresses at will, so it costs nothing.
  */
 export function getClientIp(req: Request): string {
+  const cloudflare = req.headers.get("cf-connecting-ip")?.trim();
+  if (cloudflare) return cloudflare;
   const forwarded = req.headers.get("x-forwarded-for");
   if (forwarded) {
     return forwarded.split(",")[0].trim();

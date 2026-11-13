@@ -61,6 +61,8 @@ const ADDED_ON: Record<string, string[]> = {
   ],
   "2026-10-30": ["bento-features"],
   "2026-11-05": ["fluffy-footer", "broken-bridge-404", "postal-signup", "spotlight-tour", "brand-reveal"],
+  "2026-11-10": ["lanyard-signup"],
+  "2026-11-12": ["infinite-branches"],
   "2026-11-02": ["head-to-head-compare", "receipt-hero", "sealed-and-sent", "wall-clock-contact", "wordmark-footer"],
 };
 const ADDED = new Map(Object.entries(ADDED_ON).flatMap(([day, slugs]) => slugs.map((slug) => [slug, day] as const)));
@@ -174,6 +176,7 @@ const baseVariants: BlockVariant[] = [
   mk("flip-dot-hero", "block-hero", "Flip-dot Hero", "FlipDotHero"),
   mk("receipt-hero", "block-hero", "Receipt Hero", "ReceiptHero"),
   mk("brand-reveal", "block-hero", "Brand Reveal", "BrandReveal"),
+  mk("infinite-branches", "block-hero", "Infinite Branches", "InfiniteBranches"),
 
   mk("auto-advancing-tabs", "block-features", "Auto-advancing Tabs", "AutoAdvancingTabs"),
   mk("drawn-timeline", "block-features", "Drawn Timeline", "DrawnTimeline"),
@@ -222,6 +225,7 @@ export const blockVariants: BlockVariant[] = (() => {
   for (const extra of [
     mk("waitlist-cta", "block-cta", "Waitlist CTA", "WaitlistCta"),
     mk("auth-morph", "block-signup", "Sign In / Sign Up", "AuthMorph"),
+    mk("lanyard-signup", "block-signup", "Lanyard Signup", "LanyardSignup"),
     mk("wordmark-footer", "block-footer", "Wordmark Footer", "WordmarkFooter"),
     mk("fluffy-footer", "block-footer", "Fluffy Footer", "FluffyFooter"),
   ]) {

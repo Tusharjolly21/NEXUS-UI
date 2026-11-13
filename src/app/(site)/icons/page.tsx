@@ -6,6 +6,11 @@ import { RainbowWord } from "@/components/site";
 import { ICONS } from "@/lib/icons/catalog";
 import { FREE_ICON_COUNT, PRO_ICON_COUNT } from "@/lib/icons/count";
 import { createMetadata, siteConfig } from "@/lib/seo";
+import { ListingShell } from "@/components/listing/listing-shell";
+import { ListingGroupChips, ListingSidebar, RESULTS_ID } from "@/components/listing/listing-sidebar";
+import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
+import { totalOf } from "@/lib/catalog/listing-groups/total";
+import { iconGroups } from "@/lib/catalog/listing-groups/icons";
 
 const FITS: { title: string; body: string; icons: string[] }[] = [
   { title: "Toolbars and editors", body: "Undo, edit, link, attach, crop and code buttons for rich-text editors, note apps and CMS screens.", icons: ["undo", "pencil", "link", "paperclip", "scissors", "code"] },
@@ -19,7 +24,7 @@ const FITS: { title: string; body: string; icons: string[] }[] = [
 ];
 
 export const metadata: Metadata = createMetadata({
-  title: "Animated Icons for React",
+  title: `${FREE_ICON_COUNT} Free Animated Icons for React, With Sound`,
   description: `${ICONS.length} animated React icons, each with its own sound, ${FREE_ICON_COUNT} free: loaders, bells, hearts, arrows and more. Built with Framer Motion. Hover to play.`,
   alternates: { canonical: "/icons" },
 });
@@ -43,27 +48,34 @@ export default function IconsPage() {
     },
   };
 
+  const groups = iconGroups();
+  const total = totalOf(groups);
+  const copy: PromoCopy = {
+    title: ["Unlock all ", String(PRO_ICON_COUNT), " Pro icons"],
+    body: "Every icon with its own sound and every style, ready to copy, plus every component, block and template.",
+    band: `Unlock all ${PRO_ICON_COUNT} Pro icons`,
+  };
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[136px]">
-        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1152px]">
-          <h1 className="pg-display max-w-[900px] text-[clamp(44px,7.4vw,80px)] leading-[1.02] text-foreground">
-            Animated icons for React that <RainbowWord>move</RainbowWord>.
-          </h1>
-          <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">
-            Loaders that loop, bells that ring, planes that fly off and come back. Hover any icon to play it, restyle the whole set with the
-            controls below, switch Sound on to hear each one, then open one to drag it and copy its file. Want the sounds in your own app? Read the <Link href="/icons/sounds" className="text-foreground underline underline-offset-4">sound guide</Link>.
-          </p>
-        </div>
-      </section>
+      <ListingShell sidebar={<ListingSidebar title="Icons" total={total} groups={groups} param="category" layout="groups" />} rail={<ProRail copy={copy} />}>
+        <h1 className="pg-display max-w-[900px] text-[clamp(42px,5.4vw,76px)] leading-[1.02] text-foreground">
+          Animated icons for React that <RainbowWord>move</RainbowWord>.
+        </h1>
+        <p className="mt-5 max-w-[620px] text-[18px] leading-[1.55] text-muted-foreground">
+          Loaders that loop, bells that ring, planes that fly off and come back. Hover any icon to play it, restyle the whole set with the
+          controls below, switch Sound on to hear each one, then open one to drag it and copy its file. Want the sounds in your own app? Read the <Link href="/icons/sounds" className="text-foreground underline underline-offset-4">sound guide</Link>.
+        </p>
+        <ProBand copy={copy} className="mt-8" />
 
-      <section aria-label="Icon library" className="px-4 pb-24">
-        <div className="mx-auto max-w-[1152px]">
+        <section id={RESULTS_ID} aria-label="Icon library" className="mt-10 scroll-mt-24">
+          <ListingGroupChips groups={groups} total={total} param="category" className="mb-4" />
           <IconGrid />
+        </section>
 
+        <div>
           <section aria-labelledby="real-interfaces" className="mt-24">
             <h2 id="real-interfaces" className="pg-display text-[clamp(30px,4.4vw,48px)] leading-[1.05] text-foreground">Made for real interfaces</h2>
             <p className="mt-4 max-w-[680px] text-[18px] leading-[1.55] text-muted-foreground">
@@ -104,7 +116,7 @@ export default function IconsPage() {
             ))}
           </div>
         </div>
-      </section>
+      </ListingShell>
     </>
   );
 }

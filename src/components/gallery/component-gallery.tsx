@@ -6,7 +6,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Lock, LockOpen, Search, Sparkles, X } from "lucide-react";
 import { ProBadge, useProAccess } from "@/components/pro/pro-access";
 import { PillLink } from "@/components/site/pill-link";
-import { PRICES, formatPrice } from "@/lib/pricing";
+import { GLOBAL_PRICING, type DisplayPricing } from "@/lib/pricing";
 import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { cn } from "@/lib/utils";
 import { ComponentModal } from "./component-modal";
@@ -15,6 +15,7 @@ import { INTERACTION_FILTERS, type GalleryItem, type Interaction } from "./types
 import { useUrlParam } from "./use-url-param";
 import { InfiniteSentinel, useInfiniteCount } from "./infinite-scroll";
 import { ProPreviewRow, pickProPreviews } from "./pro-preview-row";
+import { CardGrid, ComponentCard } from "./component-card";
 
 export type CategoryFilter = { id: string; label: string };
 
@@ -32,7 +33,7 @@ const PRO_ROW_AFTER = 8;
  * cost. It scrolls away like any tile. It never pops up, never comes back after you pass it, and
  * everything on the wall stays previewable.
  */
-function PlansCard({ proCount }: { proCount: number }) {
+function PlansCard({ proCount, pricing }: { proCount: number; pricing: DisplayPricing }) {
   return (
     <li className="[grid-row-end:span_3] sm:[grid-column-end:span_2] sm:[grid-row-end:span_2]">
       <div className="pg-float flex h-full flex-col justify-between gap-4 rounded-tile bg-card p-6">
@@ -51,7 +52,7 @@ function PlansCard({ proCount }: { proCount: number }) {
             See plans
           </PillLink>
           <span className="text-[13px] text-muted-foreground">
-            From {formatPrice(PRICES.pro)} a year, or {formatPrice(PRICES.allAccess)} once
+            From {pricing.pro} a year, or {pricing.allAccess} once
           </span>
         </div>
       </div>
@@ -125,6 +126,7 @@ export function AccessSwitch({
  */
 export function ComponentGallery({
   items,
+  pricing = GLOBAL_PRICING,
   categories,
   searchable = false,
   limit,
@@ -136,8 +138,13 @@ export function ComponentGallery({
   interlude,
   interludeAfter = 20,
   proRow = false,
+  cards = false,
+  afterFilters,
+  groupParam,
 }: {
   items: GalleryItem[];
+  /** The visitor's regional prices, from the server. */
+  pricing?: DisplayPricing;
   /** Category chips; omit to hide them. */
   categories?: CategoryFilter[];
   searchable?: boolean;
@@ -159,9 +166,22 @@ export function ComponentGallery({
   interludeAfter?: number;
   /** For visitors without Pro: a row of the newest Pro components, live, early in the wall. Off while any filter or search is active. */
   proRow?: boolean;
+  /**
+   * The listing page's even card grid instead of the bento: every card the same shape, the component whole inside
+   * it. The in-wall Pro row, plans card and interlude are left out, since the page's Pro column does that job.
+   */
+  cards?: boolean;
+  /** Shown under the filters, above the wall (the listing page puts its Pro band here on narrower screens). */
+  afterFilters?: React.ReactNode;
+  /** The address value that picks a group (the listing page's names column writes it); without it, the category
+   * chips keep their own choice. */
+  groupParam?: string;
 }) {
   const [interaction, setInteraction] = React.useState<Interaction | "all">("all");
-  const [category, setCategory] = React.useState("all");
+  const [ownCategory, setOwnCategory] = React.useState("all");
+  const [urlCategory, setUrlCategory] = useUrlParam(groupParam ?? "__no_group");
+  const category = groupParam ? (urlCategory ?? "all") : ownCategory;
+  const setCategory = (c: string) => (groupParam ? setUrlCategory(c === "all" ? null : c) : setOwnCategory(c));
   const [query, setQuery] = React.useState("");
   const [openSlug, setOpenSlug] = useUrlParam("c");
   const [accessParam, setAccessParam] = useUrlParam("access");
@@ -223,7 +243,7 @@ export function ComponentGallery({
           <ProPreviewRow picks={proPicks} proCount={proCount} />
         </li>
       ) : null}
-      {paged && !isPro && !needle && access !== "pro" && i === PLANS_CARD_AFTER ? <PlansCard proCount={proCount} /> : null}
+      {paged && !isPro && !needle && access !== "pro" && i === PLANS_CARD_AFTER ? <PlansCard proCount={proCount} pricing={pricing} /> : null}
       {interlude && paged && !isPro && !needle && i === interludeAfter - 1 ? (
         // a full-width cell (three rows on a phone, two above); the grid packs densely, so the tiles after it fill any gap above it
         <li className="col-span-full [grid-row-end:span_3] sm:[grid-row-end:span_2]">{interlude}</li>
@@ -335,8 +355,8 @@ export function ComponentGallery({
 
         {plansLine && !isPro ? (
           <p className="text-[14px] leading-[1.5] text-muted-foreground">
-            {accessCounts.free} are free, with full source. {accessCounts.pro} more come with Pro: {formatPrice(PRICES.pro)} a year,
-            or {formatPrice(PRICES.allAccess)} once.{" "}
+            {accessCounts.free} are free, with full source. {accessCounts.pro} more come with Pro: {pricing.pro} a year,
+            or {pricing.allAccess} once.{" "}
             <Link href="/pricing" data-plans-source="plans_line" className="text-link hover:underline hover:underline-offset-4">
               See plans
             </Link>
@@ -344,7 +364,17 @@ export function ComponentGallery({
         ) : null}
       </div>
 
-      {shown.length ? (
+      {afterFilters}
+
+      {shown.length && cards ? (
+        <CardGrid className="mt-6">
+          {shown.map((item, i) => (
+            <li key={item.slug}>
+              <ComponentCard item={item} eager={i < 3} />
+            </li>
+          ))}
+        </CardGrid>
+      ) : shown.length ? (
         <TileGrid className="mt-6">{shown.map((item, i) => renderTile(item, i))}</TileGrid>
       ) : null}
       {shown.length && paged && !infinite.done ? (

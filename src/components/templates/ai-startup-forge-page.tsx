@@ -1,33 +1,35 @@
 "use client";
 /**
  * Forge: landing page template for an AI coding copilot that has read the
- * whole repository. Motion Kit style: light page, one amber accent.
- * Kit components: Folder Peek, Matrix Loader, Stagger Menu, Before / After,
- * Dock, Copy Command, Capsule Toggle, Elastic Stepper and the Rolling Number
- * from Price Odometer.
+ * whole repository. The hero is dark iron: an editor with an X-ray lens beside
+ * a heat map of the whole repo, one square per file, and lines that run from
+ * the code under the lens to the files it's about. Archivo, set wide, for
+ * headings; JetBrains Mono for code.
  */
-import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
-import { AnimatePresence, MotionConfig, motion, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
+import { AnimatePresence, MotionConfig, animate, motion, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
+import { ScaleBox } from "@/components/templates/kit/blocks";
+import { HeatLegend, RepoMap } from "@/components/templates/forge/RepoMap";
+import Terminal from "@/components/templates/forge/Terminal";
+import { BASE_CSS, FONT_CSS, FONT_MONO, FONT_SANS, IRON } from "@/components/templates/forge/theme";
 import FolderPeek from "@/components/templates/kit/components/FolderPeek";
 import { MatrixLoader } from "@/components/templates/kit/components/MatrixLoaders";
 import StaggerMenu from "@/components/templates/kit/components/StaggerMenu";
-import BeforeAfter from "@/components/templates/kit/components/BeforeAfter";
-import Dock from "@/components/templates/kit/components/Dock";
 import { CopyCommand } from "@/components/templates/kit/components/CopyButton";
 import { CapsuleToggle } from "@/components/templates/kit/components/CapsuleToggle";
 import ElasticStepper from "@/components/templates/kit/components/ElasticStepper";
 import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, StickyStory, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
+import { CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, StickyStory, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
 
 const A = "#d97706"; // amber, for fills and graphics
 const AD = "#b45309"; // darker amber for text and buttons on white (5:1)
 const INK = "#1d1d1f";
-const MONO = "ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace";
+const MONO = FONT_MONO;
 
 function Logo() {
   return (
     <span className="flex items-center gap-2 text-[19px] font-semibold tracking-[-0.03em]">
-      <span className="relative flex h-[26px] w-[26px] items-center justify-center rounded-[8px]" style={{ background: INK }} aria-hidden="true">
+      <span className="relative flex h-[26px] w-[26px] items-center justify-center rounded-[8px]" style={{ background: IRON.raise, boxShadow: "inset 0 0 0 1px rgba(255,255,255,.14)" }} aria-hidden="true">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
           <path d="M5 15h14l-2 4H7z" fill="#fff" />
           <motion.path d="M12 3c2 3 3.5 4.6 3.5 7a3.5 3.5 0 0 1-7 0c0-1.2.5-2.2 1.3-3 .2 1.3.9 2 1.7 2.2C11 7.6 11.2 5.4 12 3z" fill={A} animate={{ scaleY: [1, 1.08, 1] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }} style={{ originY: "12px" }} />
@@ -44,14 +46,20 @@ function Logo() {
 
 const KW = /^(import|from|export|async|function|const|await|if|return|switch|case|throw|new|type)$/;
 
-function hl(line: string, dim = false) {
+const LIGHT = { text: INK, str: "#2f7d32", com: "#6e6e73", kw: "#9b2c9b" };
+const LIGHT_DIM = { text: "#a1a1a6", str: "#b8c9b0", com: "#c7c7cc", kw: "#c9b3d9" };
+const DARK = { text: "#dcd9d2", str: "#b5d98a", com: "#6c717a", kw: "#ff9a5c" };
+const DARK_DIM = { text: "#6a665f", str: "#5f6b4f", com: "#4a4e55", kw: "#80533a" };
+
+function hl(line: string, dim = false, dark = false) {
+  const pal = dark ? (dim ? DARK_DIM : DARK) : dim ? LIGHT_DIM : LIGHT;
   const parts = line.split(/("[^"]*"|'[^']*'|\/\/.*$|\b(?:import|from|export|async|function|const|await|if|return|switch|case|throw|new|type)\b)/g);
   return parts.map((p, i) => {
     if (!p) return null;
-    let c = dim ? "#a1a1a6" : INK;
-    if (/^["']/.test(p)) c = dim ? "#b8c9b0" : "#2f7d32";
-    else if (/^\/\//.test(p)) c = dim ? "#c7c7cc" : "#6e6e73";
-    else if (KW.test(p)) c = dim ? "#c9b3d9" : "#9b2c9b";
+    let c = pal.text;
+    if (/^["']/.test(p)) c = pal.str;
+    else if (/^\/\//.test(p)) c = pal.com;
+    else if (KW.test(p)) c = pal.kw;
     return <span key={i} style={{ color: c }}>{p}</span>;
   });
 }
@@ -81,10 +89,10 @@ const CODE = [
 
 /** What Forge knows about a symbol. line / col / len locate it in CODE. */
 const NOTES = [
-  { key: "Callers", line: 3, col: 22, len: 13, tone: A, title: "14 callers in 3 packages", short: "Two callers ignore the result.", body: "Two of them, in cart/ and pos/, ignore the returned cart." },
-  { key: "Throws", line: 7, col: 21, len: 10, tone: "#c2410c", title: "rules.find can throw", short: "RuleExpired, for codes past their end date.", body: "RuleExpired, for codes past their end date. pricing/rules.ts:41" },
-  { key: "Missing case", line: 10, col: 6, len: 9, tone: "#7c3aed", title: "'bogo' isn't handled", short: "Added to RuleKind last week.", body: "Added to RuleKind in #2291 last week. Falls through to fixed." },
-  { key: "Untested", line: 14, col: 25, len: 22, tone: "#0369a1", title: "Can go below zero", short: "Only percent discounts are tested.", body: "total.test.ts only covers percent. No test for fixed > total." },
+  { key: "Callers", line: 3, col: 22, len: 13, tone: IRON.ember, title: "14 callers in 3 packages", short: "Two callers ignore the result.", body: "Two of them, in cart/ and pos/, ignore the returned cart." },
+  { key: "Throws", line: 7, col: 21, len: 10, tone: "#ff6b6b", title: "rules.find can throw", short: "RuleExpired, for codes past their end date.", body: "RuleExpired, for codes past their end date. pricing/rules.ts:41" },
+  { key: "Missing case", line: 10, col: 6, len: 9, tone: "#f5c542", title: "'bogo' isn't handled", short: "Added to RuleKind last week.", body: "Added to RuleKind in #2291 last week. Falls through to fixed." },
+  { key: "Untested", line: 14, col: 25, len: 22, tone: "#5cc8ff", title: "Can go below zero", short: "Only percent discounts are tested.", body: "total.test.ts only covers percent. No test for fixed > total." },
 ];
 
 /** Coverage per line in the X-ray layer: 2 covered, 1 partly, 0 not, -1 no code. */
@@ -96,8 +104,21 @@ const PADY = 18;
 const GUT = 34; // gutter width
 const PANEL_W = 556;
 const R = 124; // lens radius
+const HEAD = 46; // editor title bar height
+const PANEL_H = PADY * 2 + CODE.length * LH;
 
-function XrayEditor() {
+/** Counts the files read as the map lights up. */
+function FilesRead() {
+  const n = useMotionValue(0);
+  const text = useTransform(n, (v) => `${Math.round(v).toLocaleString("en-US")} files read`);
+  useEffect(() => {
+    const c = animate(n, 4812, { duration: 1.9, delay: 0.35, ease: [0.22, 1, 0.36, 1] });
+    return () => c.stop();
+  }, [n]);
+  return <motion.span className="tabular-nums">{text}</motion.span>;
+}
+
+function XrayEditor({ onActive }: { onActive?: (i: number) => void }) {
   const panel = useRef<HTMLDivElement>(null);
   const meter = useRef<HTMLSpanElement>(null);
   const [cw, setCw] = useState(7.8);
@@ -112,10 +133,15 @@ function XrayEditor() {
   const clip = useMotionTemplate`circle(${R}px at ${sx}px ${sy}px)`;
   const ringX = useTransform(sx, (v) => v - R);
   const ringY = useTransform(sy, (v) => v - R);
-  const panelH = PADY * 2 + CODE.length * LH;
+  const panelH = PANEL_H;
+  const pillId = `forge-note-pill-${useId()}`; // one per editor, so the phone and desktop copies don't share a pill
+  useEffect(() => { onActive?.(active); }, [active, onActive]);
 
   useLayoutEffect(() => {
-    if (meter.current) setCw(meter.current.getBoundingClientRect().width / 20);
+    // offsetWidth ignores the stage's scale, which is 0 on the first paint; re-measure once the web font is in
+    const m = () => { if (meter.current && meter.current.offsetWidth) setCw(meter.current.offsetWidth / 20); };
+    m();
+    document.fonts?.ready.then(m);
   }, []);
 
   const centre = (i: number) => {
@@ -184,13 +210,13 @@ function XrayEditor() {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className={`${card} overflow-hidden`} style={{ width: PANEL_W }}>
-        <div className="flex items-center gap-2 border-b border-black/[.06] px-4 py-3">
+      <div className="overflow-hidden rounded-[20px]" style={{ width: PANEL_W, background: IRON.panel, boxShadow: "0 0 0 1px rgba(255,255,255,.08), 0 40px 80px -30px rgba(0,0,0,.7)" }}>
+        <div className="flex items-center gap-2 border-b px-4" style={{ height: HEAD, borderColor: IRON.line }}>
           {["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="h-3 w-3 rounded-full" style={{ background: c }} aria-hidden="true" />)}
-          <span className="ml-2 text-[12px] font-medium text-[#6e6e73]" style={{ fontFamily: MONO }}>checkout/applyDiscount.ts</span>
-          <span className="ml-auto flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: "rgba(217,119,6,.12)", color: AD }}>
-            <MatrixLoader pattern={1} size={12} color={AD} />
-            4,812 files read
+          <span className="ml-2 text-[12px] font-medium" style={{ fontFamily: MONO, color: IRON.muted }}>checkout/applyDiscount.ts</span>
+          <span className="ml-auto flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: "rgba(255,122,26,.14)", color: "#ffb27a" }}>
+            <MatrixLoader pattern={1} size={12} color={IRON.ember} />
+            <FilesRead />
           </span>
         </div>
         <div
@@ -207,18 +233,18 @@ function XrayEditor() {
           {/* Plain editor */}
           <CodeLayer />
           {/* What Forge sees: only inside the lens */}
-          <motion.div className="pointer-events-none absolute inset-0" style={{ clipPath: clip, WebkitClipPath: clip, background: "#fffaf0" }} aria-hidden="true">
-            <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(rgba(180,83,9,.16) 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
+          <motion.div className="pointer-events-none absolute inset-0" style={{ clipPath: clip, WebkitClipPath: clip, background: "#1f1912" }} aria-hidden="true">
+            <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(rgba(255,122,26,.2) 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
             <CodeLayer xray cw={cw} active={active} />
           </motion.div>
           {/* Lens ring, draggable on touch */}
           <motion.div
             className="absolute left-0 top-0 cursor-grab rounded-full active:cursor-grabbing"
-            style={{ x: ringX, y: ringY, width: R * 2, height: R * 2, touchAction: "none", boxShadow: `0 0 0 2px ${A}, 0 0 0 7px rgba(217,119,6,.14), 0 24px 50px -20px rgba(180,83,9,.45)` }}
+            style={{ x: ringX, y: ringY, width: R * 2, height: R * 2, touchAction: "none", boxShadow: `0 0 0 2px ${IRON.ember}, 0 0 0 7px rgba(255,122,26,.16), 0 0 60px -10px rgba(255,122,26,.45)` }}
             onPointerDown={(e) => { dragging.current = true; hold(); (e.target as Element).setPointerCapture?.(e.pointerId); }}
             aria-hidden="true"
           >
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white" style={{ background: AD, fontFamily: "inherit" }}>Forge sees</span>
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold" style={{ background: IRON.ember, color: IRON.emberInk, fontFamily: FONT_SANS }}>What Forge sees</span>
           </motion.div>
         </div>
       </div>
@@ -228,21 +254,21 @@ function XrayEditor() {
             key={n.key}
             type="button"
             onClick={() => jump(i)}
-            className="relative h-9 rounded-full px-3.5 text-[13px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-            style={{ color: active === i ? "#fff" : INK, ["--tw-ring-color" as string]: AD }}
+            className="relative h-9 rounded-full px-3.5 text-[13.5px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#131416]"
+            style={{ color: active === i ? IRON.emberInk : IRON.text, ["--tw-ring-color" as string]: IRON.ember }}
             aria-pressed={active === i}
           >
             {active === i ? (
-              <motion.span layoutId="forge-note-pill" className="absolute inset-0 rounded-full" style={{ background: AD }} transition={{ type: "spring", stiffness: 480, damping: 34 }} />
+              <motion.span layoutId={pillId} className="absolute inset-0 rounded-full" style={{ background: n.tone }} transition={{ type: "spring", stiffness: 480, damping: 34 }} />
             ) : (
-              <span className="absolute inset-0 rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,.08)]" />
+              <span className="absolute inset-0 rounded-full" style={{ background: "rgba(255,255,255,.06)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,.12)" }} />
             )}
             <span className="relative">{n.key}</span>
           </button>
         ))}
       </div>
-      <p className="m-0 h-5 text-center text-[13px] text-[#6e6e73]" aria-live="polite">
-        {active >= 0 ? <><span className="font-semibold text-[#1d1d1f]">{NOTES[active].title}.</span> {NOTES[active].short}</> : "Move the lens over the code to see what Forge knows."}
+      <p className="m-0 h-5 text-center text-[13.5px]" style={{ color: IRON.muted }} aria-live="polite">
+        {active >= 0 ? <><span className="font-semibold" style={{ color: IRON.text }}>{NOTES[active].title}.</span> {NOTES[active].short}</> : "Move the lens over the code to see what Forge knows."}
       </p>
     </div>
   );
@@ -253,13 +279,13 @@ function CodeLayer({ xray = false, cw = 7.8, active = -1 }: { xray?: boolean; cw
     <div className="absolute inset-0" style={{ padding: `${PADY}px ${PADX}px` }}>
       {CODE.map((l, i) => (
         <div key={i} className="relative flex text-[13.5px]" style={{ height: LH, lineHeight: `${LH}px` }}>
-          <span className="flex-none select-none pr-3 text-right tabular-nums" style={{ width: GUT, color: xray ? "#b45309" : "#aeaeb2" }}>
+          <span className="flex-none select-none pr-3 text-right tabular-nums" style={{ width: GUT, color: xray ? "#a65a24" : "#4b4f57" }}>
             {xray && COVER[i] >= 0 ? (
               <span className="absolute left-[-12px] top-[5px] h-4 w-[3px] rounded-full" style={{ background: COVER[i] === 2 ? "#34c759" : COVER[i] === 1 ? "#ff9f0a" : "#ff3b30" }} />
             ) : null}
             {i + 1}
           </span>
-          <code className="whitespace-pre">{hl(l, xray)}{l === "" ? " " : null}</code>
+          <code className="whitespace-pre">{hl(l, xray, true)}{l === "" ? " " : null}</code>
         </div>
       ))}
       {xray && NOTES.map((n, k) => {
@@ -269,12 +295,12 @@ function CodeLayer({ xray = false, cw = 7.8, active = -1 }: { xray?: boolean; cw
         const boxLeft = Math.max(8, Math.min(PANEL_W - boxW - 8, left + (n.len * cw) / 2 - boxW / 2));
         return (
           <div key={n.key}>
-            <span className="absolute rounded-[5px]" style={{ left: left - 2, top: top + 3, width: n.len * cw + 4, height: LH - 6, background: `${n.tone}22`, boxShadow: `inset 0 -2px 0 ${n.tone}` }} />
+            <span className="absolute rounded-[5px]" style={{ left: left - 2, top: top + 3, width: n.len * cw + 4, height: LH - 6, background: `${n.tone}2e`, boxShadow: `inset 0 -2px 0 ${n.tone}` }} />
             <AnimatePresence>
               {active === k && (
-                <motion.div key="c" className="absolute rounded-[12px] bg-white px-3 py-2 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_10px_24px_-12px_rgba(0,0,0,.35)]" style={{ left: boxLeft, top: top + LH + 2, width: boxW, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif" }} initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: 0.98 }} transition={{ type: "spring", stiffness: 420, damping: 30 }}>
-                  <span className="flex items-center gap-1.5 text-[12px] font-semibold text-[#1d1d1f]"><span className="h-1.5 w-1.5 rounded-full" style={{ background: n.tone }} />{n.title}</span>
-                  <span className="mt-0.5 block text-[11.5px] leading-[1.35] text-[#515154]">{n.body}</span>
+                <motion.div key="c" className="absolute rounded-[12px] px-3 py-2" style={{ left: boxLeft, top: n.line > CODE.length - 4 ? top - 64 : top + LH + 2, width: boxW, fontFamily: FONT_SANS, background: IRON.raise, boxShadow: "0 0 0 1px rgba(255,255,255,.1), 0 14px 30px -12px rgba(0,0,0,.7)" }} initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: 0.98 }} transition={{ type: "spring", stiffness: 420, damping: 30 }}>
+                  <span className="flex items-center gap-1.5 text-[12.5px] font-semibold" style={{ color: IRON.text }}><span className="h-1.5 w-1.5 rounded-full" style={{ background: n.tone }} />{n.title}</span>
+                  <span className="mt-0.5 block text-[12px] leading-[1.4]" style={{ color: IRON.muted }}>{n.body}</span>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -285,63 +311,56 @@ function CodeLayer({ xray = false, cw = 7.8, active = -1 }: { xray?: boolean; cw
   );
 }
 
-function Hero() {
+/** Stage pixels: the editor at the left, the repo map filling the right. */
+const STAGE = { w: 1180, h: 650, ex: 30, ey: 24 };
+
+function HeroStage() {
+  const [active, setActive] = useState(-1);
+  const origin = (i: number): [number, number] => [STAGE.ex + PANEL_W, STAGE.ey + HEAD + PADY + NOTES[i].line * LH + LH / 2];
   return (
-    <section id="top" className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(45% 55% at 22% 45%, rgba(217,119,6,.14), transparent 70%), radial-gradient(30% 40% at 90% 10%, rgba(255,204,0,.12), transparent 70%)" }} />
-      <div className="relative mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 pb-16 pt-12 lg:grid-cols-[1.12fr_1fr] lg:gap-14 lg:pb-24 lg:pt-20">
-        <motion.div className="order-2 min-w-0 lg:order-1" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.15 }}>
-          <Fit><XrayEditor /></Fit>
-        </motion.div>
-        <div className="order-1 flex min-w-0 flex-col items-start gap-6 lg:order-2">
-          <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.07)]">
-            <span className="h-2 w-2 rounded-full" style={{ background: A }} aria-hidden="true" />
-            Reads monorepos up to 4 million lines
-          </motion.span>
-          <h1 className="m-0 text-[clamp(44px,6.6vw,84px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
-            <Words text="It already read the rest of your code." accentWords={["read"]} accent={AD} />
-          </h1>
-          <Reveal delay={0.35} y={14}>
-            <p className="m-0 max-w-[500px] text-[clamp(17px,2vw,20px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
-              Forge indexes every file, commit and open pull request in your repo. So its suggestions call the helpers you already wrote, and it warns you about the caller three packages away before you break it.
-            </p>
-          </Reveal>
-          <Reveal delay={0.45} y={14} className="flex flex-wrap gap-3">
-            <Magnetic className="text-white shadow-[0_12px_30px_-12px_rgba(180,83,9,.8)]" style={{ background: AD }} onClick={() => scrollToId("pricing")}>Install Forge</Magnetic>
-            <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("review")}>See a review</Magnetic>
-          </Reveal>
-          <Reveal delay={0.55} y={10} className="w-full max-w-[360px]">
-            <CopyCommand command="npx forge init" />
-            <span className="mt-2.5 block text-[13px] text-[#6e6e73]">Indexing a 1M-line repo takes about six minutes, then stays in sync on every push.</span>
-          </Reveal>
-        </div>
+    <div className="relative" style={{ width: STAGE.w, height: STAGE.h }}>
+      <RepoMap active={active} w={STAGE.w} h={STAGE.h - 40} origin={origin} />
+      <div className="absolute" style={{ left: STAGE.ex, top: STAGE.ey }}>
+        <XrayEditor onActive={setActive} />
       </div>
-    </section>
+      <div className="absolute bottom-0 right-[30px]"><HeatLegend /></div>
+    </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Stats                                                                */
-/* ------------------------------------------------------------------ */
-
-function Stats() {
-  const items = [
-    { to: 71, f: (n: number) => `${Math.round(n)}%`, l: "of suggestions merged without edits" },
-    { to: 6, f: (n: number) => `${Math.round(n)} min`, l: "to index a million lines" },
-    { to: 14, f: (n: number) => `${Math.round(n)}`, l: "files read, on average, per answer" },
-    { to: 0, from: 30, f: (n: number) => `${Math.round(n)} days`, l: "of your code kept after a request" },
-  ];
+function Hero() {
   return (
-    <section className="mx-auto max-w-[1180px] px-5 pb-8 pt-4" aria-label="Forge in numbers">
-      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
-        {items.map((it) => (
-          <div key={it.l} className="flex flex-col gap-2 border-t border-black/[.08] pt-6">
-            <Counter to={it.to} from={it.from ?? 0} format={it.f} className="text-[clamp(36px,4.6vw,52px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
-            <span className="text-[15px] text-[#6e6e73]">{it.l}</span>
+    <section id="top" className="relative -mt-[76px] overflow-hidden" style={{ background: IRON.bg, color: IRON.text }}>
+      {/* heat rising off the map, kept low and to the right */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[70%]" aria-hidden="true" style={{ background: "radial-gradient(60% 50% at 75% 85%, rgba(255,122,26,.10), transparent 70%)" }} />
+      <div className="relative mx-auto max-w-[1180px] px-5 pb-16 pt-[132px] sm:pt-[156px] lg:pb-20">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.3fr_1fr] lg:items-end lg:gap-14">
+          <div className="flex min-w-0 flex-col items-start gap-6">
+            <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[13.5px] font-medium" style={{ background: "rgba(255,255,255,.06)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,.12)" }}>
+              <span className="h-2 w-2 rounded-full" style={{ background: IRON.ember }} aria-hidden="true" />
+              Reads monorepos up to 4 million lines
+            </motion.span>
+            <h1 className="m-0 text-[clamp(40px,6vw,78px)] leading-[0.98] tracking-[-0.03em] [text-wrap:balance]">
+              <Words text="It already read the rest of your code." />
+            </h1>
           </div>
-        ))}
-      </Stagger>
-      <p className="m-0 mt-6 text-[12px] text-[#6e6e73]">Measured on our own 1.2M-line monorepo over the last 90 days. Your numbers will differ.</p>
+          <motion.div className="flex min-w-0 flex-col items-start gap-6" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease, delay: 0.35 }}>
+            <p className="m-0 max-w-[460px] text-[clamp(16px,1.7vw,18px)] leading-[1.55]" style={{ color: IRON.muted }}>
+              Forge indexes every file, commit and open pull request in your repo. Its suggestions call the helpers you already wrote, and it warns you about the caller three packages away before you break it.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Magnetic className="font-semibold" style={{ background: IRON.ember, color: IRON.emberInk }} onClick={() => scrollToId("pricing")}>Install Forge</Magnetic>
+              <Magnetic className="text-[#eceae4] shadow-[inset_0_0_0_1px_rgba(255,255,255,.16)]" style={{ background: "rgba(255,255,255,.05)" }} onClick={() => scrollToId("review")}>See a review</Magnetic>
+            </div>
+            <div className="w-full max-w-[360px]"><CopyCommand command="npx forge init" /></div>
+          </motion.div>
+        </div>
+
+        <motion.div className="mt-14 hidden md:block" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 110, damping: 22, delay: 0.2 }}>
+          <ScaleBox w={STAGE.w} h={STAGE.h}><HeroStage /></ScaleBox>
+        </motion.div>
+        <div className="mt-12 md:hidden"><Fit><XrayEditor /></Fit></div>
+      </div>
     </section>
   );
 }
@@ -358,7 +377,7 @@ function IndexCard() {
   ];
   return (
     <div className={`${card} flex w-[440px] flex-col items-center gap-2 px-6 pb-6`}>
-      <FolderPeek title="northwind/checkout" meta="4,812 files · 1.2M lines" color={A} autoplay />
+      <FolderPeek title="northwind/checkout" meta="4,812 files, 1.2M lines" color={A} autoplay />
       <div className="mt-2 flex w-full flex-col gap-1">
         {rows.map((r, i) => (
           <div key={r.t} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 hover:bg-[#f5f5f7]">
@@ -417,7 +436,7 @@ function SuggestCard() {
   return (
     <div className={`${card} flex w-[480px] flex-col gap-5 p-6`}>
       <div className="flex items-center justify-between">
-        <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Suggestion</span>
+        <span className="text-[14px] font-semibold text-[#1d1d1f]">Suggestion</span>
         <span className="flex items-center gap-1.5 text-[12px] text-[#6e6e73]">
           <kbd className="rounded-md bg-[#f5f5f7] px-1.5 py-0.5 text-[11px] font-semibold text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]">Tab</kbd> to accept
         </span>
@@ -476,15 +495,15 @@ function LearnCard() {
 function Story() {
   return (
     <section id="how" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="How Forge knows" title="Context is the whole product." sub="Most assistants see the file you have open. Forge sees the package that imports it, the test that covers it, and the pull request that changed it last week." accent={AD} />
+      <SectionHead title="Context is the whole product." sub="Most assistants see the file you have open. Forge sees the package that imports it, the test that covers it, and the pull request that changed it last week." accent={AD} />
       <div className="mt-10">
         <StickyStory
           accent={AD}
           steps={[
-            { kicker: "01 · Index", title: "It reads the whole repo, not the open tab.", body: "Point Forge at a repository and it builds a map of every symbol, import, test and commit. Pushes update the map in seconds, so it never answers from last month's code.", visual: <IndexCard /> },
-            { kicker: "02 · Ask", title: "Ask about any symbol, from where you are.", body: "Select something and ask. Forge answers with the callers, the tests and the history it found, and links each claim to the line it came from.", visual: <AskCard /> },
-            { kicker: "03 · Suggest", title: "Suggestions that use your helpers.", body: "Instead of inventing a new rounding function, Forge calls the one in money/. Every suggestion lists the files it read, so you can check its homework.", visual: <SuggestCard /> },
-            { kicker: "04 · Learn", title: "It picks up how your team writes.", body: "Naming, error handling, where tests live. Forge learns the conventions from your history and follows them. When the codebase disagrees with itself, it tells you.", visual: <LearnCard /> },
+            { kicker: "Step 1", title: "It reads the whole repo, not the open tab.", body: "Point Forge at a repository and it builds a map of every symbol, import, test and commit. Pushes update the map in seconds, so it never answers from last month's code.", visual: <IndexCard /> },
+            { kicker: "Step 2", title: "Ask about any symbol, from where you are.", body: "Select something and ask. Forge answers with the callers, the tests and the history it found, and links each claim to the line it came from.", visual: <AskCard /> },
+            { kicker: "Step 3", title: "Suggestions that use your helpers.", body: "Instead of inventing a new rounding function, Forge calls the one in money/. Every suggestion lists the files it read, so you can check its homework.", visual: <SuggestCard /> },
+            { kicker: "Step 4", title: "It picks up how your team writes.", body: "Naming, error handling, where tests live. Forge learns the conventions from your history and follows them. When the codebase disagrees with itself, it tells you.", visual: <LearnCard /> },
           ]}
         />
       </div>
@@ -497,7 +516,7 @@ function Story() {
 /* ------------------------------------------------------------------ */
 
 const BEFORE = [
-  `// checkout/applyDiscount.ts · your draft`,
+  `// checkout/applyDiscount.ts, your draft`,
   `const rule = await rules.find(code);`,
   `if (!rule) return cart;`,
   ``,
@@ -517,20 +536,36 @@ const AFTER = [
   `return withTotal(cart, atLeast0(cart.total - off));`,
   ``,
   `// + total.test.ts: 3 new cases`,
-  ``,
 ];
 
-function CodePane({ lines, tone, bg, mark }: { lines: string[]; tone: string; bg: string; mark: number[] }) {
+/** One side of the diff. `mark` lines are tinted: red for what goes, green for what Forge wrote. */
+function DiffPane({ title, note, lines, mark, tone, grow }: { title: string; note: string; lines: string[]; mark: number[]; tone: "del" | "add"; grow?: boolean }) {
+  const bg = tone === "del" ? "rgba(255,59,48,.07)" : "rgba(52,199,89,.09)";
+  const bar = tone === "del" ? "#ff3b30" : "#34c759";
   return (
-    <div className="flex h-full w-full items-center justify-center px-3 py-5 text-[9.5px] leading-[1.75] sm:text-[14px] lg:text-[17px]" style={{ background: bg, fontFamily: MONO }}>
-      <div className="flex w-[34em] max-w-full flex-col">
-      {lines.map((l, i) => (
-        <div key={i} className="relative flex gap-3 sm:gap-5">
-          <span className="w-3 flex-none select-none text-right tabular-nums text-[#86868b] sm:w-5">{i + 1}</span>
-          {mark.includes(i) && <span className="absolute -left-2 top-0 h-full w-[3px] rounded-full sm:-left-4" style={{ background: tone }} aria-hidden="true" />}
-          <code className="whitespace-pre">{hl(l)}{l === "" ? " " : null}</code>
-        </div>
-      ))}
+    <div className="flex min-w-0 flex-col">
+      <div className="flex items-baseline justify-between gap-3 border-b border-black/[.06] px-5 py-3.5">
+        <span className="text-[14px] font-semibold text-[#1d1d1f]">{title}</span>
+        <span className="text-[12.5px] text-[#6e6e73]">{note}</span>
+      </div>
+      <div className="overflow-x-auto py-3 text-[12.5px] leading-[1.85] sm:text-[13.5px]" style={{ fontFamily: MONO }}>
+        {lines.map((l, i) => {
+          const on = mark.includes(i);
+          const row = (
+            <div className="relative flex gap-4 px-5" style={{ background: on ? bg : undefined }}>
+              {on ? <span className="absolute left-0 top-0 h-full w-[3px]" style={{ background: bar }} aria-hidden="true" /> : null}
+              <span className="w-5 flex-none select-none text-right tabular-nums text-[#aeaeb2]">{i + 1}</span>
+              <code className="whitespace-pre">{hl(l)}{l === "" ? " " : null}</code>
+            </div>
+          );
+          return grow && on ? (
+            <motion.div key={i} initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.6 }} transition={{ type: "spring", stiffness: 260, damping: 26, delay: 0.25 + mark.indexOf(i) * 0.18 }}>
+              {row}
+            </motion.div>
+          ) : (
+            <div key={i}>{row}</div>
+          );
+        })}
       </div>
     </div>
   );
@@ -541,19 +576,16 @@ function Review() {
     <section id="review" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
         <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-[1.2fr_1fr]">
-          <SectionHead eyebrow="Review" title="Drag to see what it would change." accent={AD} />
+          <SectionHead title="What it would change, line by line." accent={AD} />
           <Reveal y={14}>
             <p className="m-0 max-w-[460px] text-[17px] leading-[1.5] text-[#6e6e73]">Forge reviews your branch before you open the pull request. It ran your tests on this suggestion, found the missing case, and reused two helpers you already had.</p>
           </Reveal>
         </div>
         <Reveal className="mt-12" y={20} amount={0.15}>
-          <BeforeAfter
-            autoplay
-            beforeLabel="Your draft"
-            afterLabel="Forge"
-            before={<CodePane lines={BEFORE} tone="#ff3b30" bg="#fff" mark={[4, 5, 6, 8]} />}
-            after={<CodePane lines={AFTER} tone="#34c759" bg="#fffaf0" mark={[1, 4, 5, 7]} />}
-          />
+          <div className={`${card} grid grid-cols-1 divide-y divide-black/[.06] overflow-hidden lg:grid-cols-2 lg:divide-x lg:divide-y-0`}>
+            <DiffPane title="Your draft" note="4 lines flagged" lines={BEFORE} mark={[4, 5, 6, 8]} tone="del" />
+            <DiffPane title="Forge's version" note="42 of 42 tests pass" lines={AFTER} mark={[1, 4, 5, 7]} tone="add" grow />
+          </div>
         </Reveal>
         <Stagger className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {[
@@ -576,25 +608,12 @@ function Review() {
 /* Editors: Dock                                                        */
 /* ------------------------------------------------------------------ */
 
-const G = (d: string) => (
-  <svg width="56%" height="56%" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>
-);
-
-const EDITORS = [
-  { id: "vscode", label: "VS Code", bg: "linear-gradient(180deg,#4fa8ff,#0a66d6)", glyph: G("M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14") },
-  { id: "jetbrains", label: "JetBrains IDEs", bg: "linear-gradient(180deg,#a78bfa,#6d28d9)", glyph: G("M5 5h14v14H5zM8 15h5") },
-  { id: "neovim", label: "Neovim", bg: "linear-gradient(180deg,#6ee7a8,#15803d)", glyph: G("M6 18V6l12 12V6") },
-  { id: "terminal", label: "Terminal", bg: "linear-gradient(180deg,#48484a,#1d1d1f)", glyph: G("M5 8l4 4-4 4M12 16h7") },
-  { id: "github", label: "Pull requests", bg: "linear-gradient(180deg,#fbbf24,#d97706)", glyph: G("M7 5v14M7 5a2 2 0 1 0 0 .1M17 19a2 2 0 1 0 0-.1M17 17V9a3 3 0 0 0-3-3h-3M13 4l-2 2 2 2") },
-  { id: "chat", label: "Team chat", bg: "linear-gradient(180deg,#fb7185,#e11d48)", glyph: G("M5 6h14v9H9l-4 3z") },
-];
-
 function Editors() {
   return (
     <section id="editors" className="mx-auto max-w-[1180px] px-5 py-24">
       <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
         <div className="flex flex-col gap-6">
-          <SectionHead eyebrow="Everywhere you write code" title="Same brain in every editor." sub="One index, shared by the extension, the CLI and the pull request bot. Ask in your terminal, pick it up in the IDE, see the review on the PR." accent={AD} />
+          <SectionHead title="Same index in every editor." sub="One index, shared by the extension, the CLI and the pull request bot. Ask in your terminal, pick it up in the IDE, see the review on the pull request." accent={AD} />
           <Reveal y={12}>
             <ul className="m-0 flex list-none flex-col gap-3 p-0">
               {["Extensions for VS Code, JetBrains IDEs and Neovim", "A CLI for scripts and CI: forge ask, forge review", "Review comments on every pull request, if you want them"].map((t) => (
@@ -609,10 +628,7 @@ function Editors() {
           </Reveal>
         </div>
         <Reveal y={18}>
-          <div className={`${card} relative flex flex-col items-center gap-3 overflow-hidden px-6 pb-8 pt-10`} style={{ background: "linear-gradient(180deg,#fff,#fff7ed)" }}>
-            <span className="text-[13px] font-medium text-[#6e6e73]">Hover the dock. Click an editor to start it.</span>
-            <Fit><Dock apps={EDITORS} autoplay /></Fit>
-          </div>
+          <Terminal />
         </Reveal>
       </div>
     </section>
@@ -635,7 +651,7 @@ function Privacy() {
   return (
     <section id="privacy" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 lg:grid-cols-[1fr_1.1fr]">
-        <SectionHead eyebrow="Privacy" title="Your code stays your code." sub="Every setting is visible and every default is the strict one. Admins can lock them for the whole organisation." accent={AD} />
+        <SectionHead title="Your code stays your code." sub="Every setting is visible and every default is the strict one. Admins can lock them for the whole organisation." accent={AD} />
         <Reveal y={18}>
           <div className={`${card} flex flex-col divide-y divide-black/[.06] px-6`}>
             {rows.map((r) => (
@@ -676,7 +692,7 @@ function Pricing() {
   ];
   return (
     <section id="pricing" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Pricing" title="Priced per seat. Repos are free." sub="Index as many repositories as you like on any plan. Try Team free for 14 days, no card." accent={AD} center />
+      <SectionHead title="Priced per seat. Repos are free." sub="Index as many repositories as you like on any plan. Try Team free for 14 days, no card." accent={AD} center />
       <Stagger className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-3">
         {plans.map((p) => (
           <div key={p.n} className={`${card} relative flex h-full flex-col gap-5 p-7`} style={p.hot ? { boxShadow: `0 0 0 2px ${A}, 0 24px 48px -32px rgba(180,83,9,.5)` } : undefined}>
@@ -717,17 +733,17 @@ function Pricing() {
 export default function AiStartupForgePage() {
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>
-        <Nav brand={<Logo />} accent={AD} cta="Install Forge" onCta={() => scrollToId("pricing")} links={[{ label: "How it works", id: "how" }, { label: "Review", id: "review" }, { label: "Editors", id: "editors" }, { label: "Privacy", id: "privacy" }, { label: "Pricing", id: "pricing" }]} />
+      <div className="fg min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: FONT_SANS }}>
+        <style>{FONT_CSS + BASE_CSS}</style>
+        <Nav dark brand={<Logo />} accent={AD} cta="Install Forge" onCta={() => scrollToId("pricing")} links={[{ label: "How it works", id: "how" }, { label: "Review", id: "review" }, { label: "Editors", id: "editors" }, { label: "Privacy", id: "privacy" }, { label: "Pricing", id: "pricing" }]} />
         <Hero />
-        <Stats />
         <Story />
         <Review />
         <Editors />
         <Privacy />
         <Pricing />
         <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-24 lg:grid-cols-[1fr_1.4fr]">
-          <SectionHead eyebrow="FAQ" title="Fair questions." accent={AD} />
+          <SectionHead title="Fair questions." accent={AD} />
           <Reveal y={14}>
             <Faq
               accent={AD}

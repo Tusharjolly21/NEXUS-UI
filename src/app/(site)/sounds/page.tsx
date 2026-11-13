@@ -16,6 +16,9 @@ import { PRO_SOUND_META } from "@/lib/ui-sounds-pro-meta";
 import { RECORDED_SOUND_META } from "@/lib/ui-sounds-recorded-meta";
 import { ICONS } from "@/lib/icons/catalog";
 import usage from "@/lib/catalog/sound-usage.generated.json";
+import { ListingShell } from "@/components/listing/listing-shell";
+import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
+
 
 const ICON_PICKS = ["bell", "heart", "coin", "camera", "lock", "send", "trash", "rocket"]
   .map((slug) => ICONS.find((i) => i.slug === slug))
@@ -28,8 +31,8 @@ const RECORDED_COUNT = RECORDED_SOUND_META.length;
 const PRO_COUNT = SYNTH_PRO_COUNT + RECORDED_COUNT;
 
 export const metadata: Metadata = createMetadata({
-  title: "UI Sound Effects for React — Web Audio and Recorded",
-  description: `${COUNT + PRO_COUNT} UI sound effects for React and Next.js, ${COUNT} free and ${PRO_COUNT} Pro, plus a Mac style that re-voices every sound to feel at home on a Mac or iPhone: taps, chimes, glass, paper, arcade, studio, device and gallery sounds synthesised with the Web Audio API, and ${RECORDED_COUNT} recorded sounds for typing, camera, messages, notifications, screenshots, build-ups, landings and stings.`,
+  title: "UI Sound Effects for React and Next.js",
+  description: `${COUNT + PRO_COUNT} UI sound effects for React and Next.js, ${COUNT} of them free: taps, chimes, glass, paper and arcade sounds in Web Audio, plus recorded ones.`,
   alternates: { canonical: "/sounds" },
 });
 const SOUND_COMPONENTS = Object.keys(COMPONENT_SOUNDS).length;
@@ -187,25 +190,28 @@ export default async function SoundsPage() {
     },
   ];
 
+  const copy: PromoCopy = {
+    title: ["Hear all ", String(PRO_COUNT), " Pro sounds"],
+    body: "The full sound set, the recorded ones and the Mac style, plus every component, block and template.",
+    band: `Unlock all ${PRO_COUNT} Pro sounds`,
+  };
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
 
-      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[136px]">
-        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1152px]">
-          <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">Sounds</h1>
-          <p className="mt-5 max-w-[640px] text-[19px] leading-[1.55] text-muted-foreground">
-            {COUNT + PRO_COUNT} interface sounds you can <RainbowWord>hear</RainbowWord>, made entirely in code with the
-            Web Audio API, apart from {RECORDED_COUNT} recorded ones. {COUNT} are free and {PRO_COUNT} are Pro, and every one plays here. Switch to the Mac style to
-            hear the free ones re-voiced for a Mac or iPhone, across every component on the site. Tap an orb, then copy
-            the line that does the same in your app.
-          </p>
-        </div>
-      </section>
+      {/* no names column: the sound board below is already the full, grouped list of every sound */}
+      <ListingShell rail={<ProRail copy={copy} />}>
+        <h1 className="pg-display text-[clamp(52px,7vw,84px)] text-foreground">UI sound effects</h1>
+        <p className="mt-5 max-w-[640px] text-[18px] leading-[1.55] text-muted-foreground">
+          {COUNT + PRO_COUNT} interface sounds you can <RainbowWord>hear</RainbowWord>, made entirely in code with the
+          Web Audio API, apart from {RECORDED_COUNT} recorded ones. {COUNT} are free and {PRO_COUNT} are Pro, and every one plays here. Switch to the Mac style to
+          hear the free ones re-voiced for a Mac or iPhone, across every component on the site. Tap an orb, then copy
+          the line that does the same in your app.
+        </p>
+        <ProBand copy={copy} className="mt-8" />
 
-      <section aria-label="Sound board" className="px-4 pb-20">
-        <div className="mx-auto max-w-[1152px]">
+        <section aria-label="Sound board" className="mt-10">
           <SoundBoard
             source={source}
             usedBy={usage as Record<string, { slug: string; name: string }[]>}
@@ -214,8 +220,8 @@ export default async function SoundsPage() {
             installMac={INSTALL_MAC}
             installRecorded={INSTALL_RECORDED}
           />
-        </div>
-      </section>
+        </section>
+      </ListingShell>
 
       <section aria-labelledby="scored-heading" className="px-4 pb-20">
         <div className="mx-auto max-w-[1152px]">

@@ -1,10 +1,21 @@
 ---
-title: "React Timeline Component: Animated Project Roadmaps"
-description: "Build an accessible React timeline for roadmaps and milestones: semantic list markup, a scroll-linked progress line, and a vertical-to-horizontal layout."
+title: "React Timeline Component: Examples and Code"
+description: "Build an accessible React timeline component for roadmaps, or copy a ready-made one: semantic markup, a scroll-linked line and a responsive layout."
 date: "2026-10-20"
 ---
 
 A timeline is one of the few UI patterns where the markup matters as much as the visuals. It shows order, it shows status (done, in progress, planned), and on a roadmap page it is often the main content. This guide builds a React timeline component from the data model up: semantic HTML, a vertical layout with a status rail, a progress line that fills as you scroll, and a responsive version that turns horizontal on wide screens. The code uses React, Tailwind CSS, and Framer Motion. If you want a finished version, the [milestone timeline component](/components/milestone-timeline) implements the same ideas.
+
+## Ready-made React timeline components
+
+If you need a timeline on a page today rather than a tutorial, start from one of these. Each is a React component built with Tailwind CSS and Framer Motion that you install with the shadcn CLI or copy from its page:
+
+- **[Milestone Timeline](/components/milestone-timeline):** a roadmap with done, current and upcoming milestones. A glowing bead runs down the rail as it scrolls into view, and clicking a milestone or using the arrow keys opens it. The rest of this guide builds the same ideas from scratch.
+- **[Drawn Timeline](/blocks/block-features#drawn-timeline):** a how-it-works section whose line draws itself as you scroll, filling each numbered step as it reaches it.
+- **[Beam Timeline](/blocks/block-features#beam-timeline):** a timeline where a line of light follows your reading down the rail and lights up each milestone as it arrives.
+- **[Scroll Progress Bar](/components/scroll-progress-bar):** not a timeline, but the same scroll-linked fill on a single bar, for long articles.
+
+General-purpose libraries exist too. MUI ships a `Timeline` in `@mui/lab` if your app already uses Material UI, and packages such as `react-chrono` and `react-vertical-timeline-component` render a timeline from an array of items. They are quick to drop in; the trade-off is that their markup and motion are theirs, not yours. Building it yourself, as below, takes about a hundred lines and gives you full control.
 
 ## What data does a timeline component need?
 
@@ -213,3 +224,13 @@ This works up to around five milestones. Beyond that, let the horizontal list sc
 - **Stagger by index, capped.** A delay of `0.1 + i * 0.08` seconds is fine for five items and slow for twenty. Clamp it.
 
 For multi-step flows that the user moves through, rather than a record of progress, a stepper fits better than a timeline. The [step flow component](/blocks/block-features#step-flow) shows that pattern.
+
+## Common questions
+
+**What is the best React timeline component?** It depends on how much control you want. For a styled, animated timeline you own the code for, use a copy-in component such as [Milestone Timeline](/components/milestone-timeline). If you already use Material UI, its `@mui/lab` Timeline matches the rest of your app. If you want full control, the vertical version in this guide is short enough to write yourself.
+
+**How do I make a vertical timeline in React?** Render an ordered list (`<ol>`) of milestones, give each item a node and a connector, and draw the rail with a pseudo-element or an absolutely positioned line. The vertical timeline section above has the full component.
+
+**How do I animate a timeline line on scroll?** Track scroll progress with Framer Motion's `useScroll` on the list, smooth it with `useSpring`, pass it to `scaleY` on the rail and set the origin to the top. The scroll section above shows the code, including the reduced-motion version.
+
+**How do I make a timeline responsive?** Keep it vertical on mobile and switch to a row from the `md` breakpoint up, with the connector running horizontally between nodes. Past about five milestones, let the row scroll sideways with scroll snapping.

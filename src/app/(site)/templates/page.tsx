@@ -10,12 +10,16 @@ import { getPricing } from "@/lib/region";
 import { IndiaDiscountBadge } from "@/components/pricing/india-discount-badge";
 import { templates } from "@/lib/catalog/templates";
 import TemplatesGallery from "./templates-client";
+import { ListingShell } from "@/components/listing/listing-shell";
+import { ListingGroupChips, ListingSidebar, RESULTS_ID } from "@/components/listing/listing-sidebar";
+import { templateGroups } from "@/lib/catalog/listing-groups/templates";
+import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = createMetadata({
-  title: "Next.js Landing Page Templates — SaaS, AI, Agency & Portfolio",
-  description: `${templates.length} animated Next.js landing page templates for SaaS, AI startups, agencies, portfolios and stores. Open each one live, then take the full source. Built with Tailwind CSS and Framer Motion.`,
+  title: "Next.js Landing Page Templates for SaaS",
+  description: `${templates.length} animated Next.js landing page templates for SaaS, AI startups, agencies, portfolios and stores. Open each one live, then take the full source.`,
   alternates: { canonical: "/templates" },
 });
 
@@ -34,26 +38,32 @@ export default async function TemplatesPage() {
     }
   }
 
+  const groups = templateGroups();
+  const copy: PromoCopy = {
+    title: ["Launch with every ", "template", ""],
+    body: `All ${templates.length} templates with full source, plus every component and block, and everything we release next.`,
+    band: "Launch with every template",
+  };
+
   return (
     <>
-      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-6 pt-[136px]">
-        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1280px]">
-          <h1 className="pg-display max-w-[900px] text-[clamp(48px,8vw,80px)] text-foreground">
-            Whole pages, ready to make <RainbowWord>yours</RainbowWord>
-          </h1>
-          <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">
-            {templates.length} Next.js landing pages with the motion already done. Open any of them live, then take the
-            full source and change whatever you like.
-          </p>
-        </div>
-      </section>
+      <ListingShell
+        sidebar={<ListingSidebar title="Templates" total={templates.length} groups={groups} param="category" />}
+        rail={<ProRail copy={copy} pricing={pricing} />}
+      >
+        <h1 className="pg-display max-w-[860px] text-[clamp(44px,5.6vw,76px)] text-foreground">
+          Next.js templates, ready to make <RainbowWord>yours</RainbowWord>
+        </h1>
+        <p className="mt-5 max-w-[620px] text-[18px] leading-[1.55] text-muted-foreground">
+          {templates.length} Next.js landing pages with the motion already done. Open any of them live, then take the
+          full source and change whatever you like.
+        </p>
 
-      <section aria-label="Templates" className="px-4 pb-24">
-        <div className="mx-auto max-w-[1280px]">
-          <TemplatesGallery isPremium={isPremium} />
-        </div>
-      </section>
+        <section id={RESULTS_ID} aria-label="Templates" className="mt-10 scroll-mt-24">
+          <ListingGroupChips groups={groups} total={templates.length} param="category" className="mb-4" />
+          <TemplatesGallery isPremium={isPremium} afterFilters={<ProBand copy={copy} pricing={pricing} className="mt-5" />} />
+        </section>
+      </ListingShell>
 
       <Band tint="butter">
         <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">

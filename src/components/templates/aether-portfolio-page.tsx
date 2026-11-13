@@ -16,9 +16,19 @@ import { CopyChip } from "@/components/templates/kit/components/CopyButton";
 import SignBadge from "@/components/templates/kit/components/SignBadge";
 import WorkLayout, { type WorkTile } from "@/components/templates/aether-portfolio/WorkLayout";
 import { Story } from "@/components/templates/aether-portfolio/Story";
-import { CtaBand, Faq, Fit, Footer, Magnetic, Marquee, Nav, Reveal, SectionHead, Stagger, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
+import Noise from "@/components/templates/aether-portfolio/Noise";
+import { CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, card, ease, scrollToId } from "@/components/templates/kit/parts";
+import { fontFaces } from "@/components/templates/kit/fonts";
 
-const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
+const SYSTEM_FONT = "'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif";
+const SERIF = "'Bodoni Moda Variable', 'Didot', Georgia, serif";
+// Bodoni Moda for headings, with its optical sizes doing the work at display sizes; Geist for everything else
+const FONT_CSS =
+  fontFaces("aether", [
+    { family: "Bodoni Moda Variable", file: "bodoni", weight: "400 900" },
+    { family: "Geist Variable", file: "geist", weight: "100 900" },
+  ]) + `.ae h2{font-family:${SERIF};font-weight:520;letter-spacing:-0.02em;font-optical-sizing:auto}`;
+const INK = "#18161a";
 const R = "#9d174d"; // rose: text, buttons and graphics (8:1 on white)
 const RT = "#fdf2f8"; // rose tint for washes
 
@@ -47,7 +57,7 @@ const WORK: (WorkTile & { client: string; role: string; year: string; note: stri
     role: "iOS app, design system",
     year: "2026",
     note: "Shipped in 11 weeks with two engineers.",
-    meta: "Banking for freelancers · iOS app and design system · 2026",
+    meta: "Banking for freelancers, iOS app and design system, 2026",
     art: "radial-gradient(70% 60% at 25% 20%, rgba(94,156,132,.55), rgba(94,156,132,0) 60%), linear-gradient(160deg,#0f3d33,#1f6f5c 70%,#2c8a6f)",
     ui: (
       <svg viewBox="0 0 200 150" preserveAspectRatio="xMidYMid meet" className={svgBox}>
@@ -65,7 +75,7 @@ const WORK: (WorkTile & { client: string; role: string; year: string; note: stri
     role: "Web app, writing tools",
     year: "2025",
     note: "Daily writers up from 9% to 31%.",
-    meta: "A journal that writes back · Web app · 2025",
+    meta: "A journal that writes back, Web app, 2025",
     art: "radial-gradient(60% 60% at 80% 20%, rgba(253,230,138,.45), rgba(253,230,138,0) 60%), linear-gradient(165deg,#a16207,#713f12)",
     ui: (
       <svg viewBox="0 0 200 150" preserveAspectRatio="xMidYMid meet" className={svgBox}>
@@ -81,7 +91,7 @@ const WORK: (WorkTile & { client: string; role: string; year: string; note: stri
     role: "Brand, storefront",
     year: "2025",
     note: "Sold out the spring firing in four days.",
-    meta: "A ceramics studio's shop · Brand and storefront · 2025",
+    meta: "A ceramics studio's shop, Brand and storefront, 2025",
     art: "radial-gradient(60% 50% at 70% 25%, rgba(253,186,116,.75), rgba(253,186,116,0) 60%), linear-gradient(160deg,#c2410c,#7c2d12)",
     ui: (
       <svg viewBox="0 0 200 150" preserveAspectRatio="xMidYMid meet" className={svgBox}>
@@ -99,7 +109,7 @@ const WORK: (WorkTile & { client: string; role: string; year: string; note: stri
     role: "Signage, journey app",
     year: "2024",
     note: "Twelve stations, one colour, zero arrows.",
-    meta: "Wayfinding for a city tram line · Signage and app · 2024",
+    meta: "Wayfinding for a city tram line, Signage and app, 2024",
     art: "linear-gradient(160deg,#2c2c2e,#1d1d1f)",
     ui: (
       <svg viewBox="0 0 200 150" preserveAspectRatio="xMidYMid meet" className={svgBox}>
@@ -115,7 +125,7 @@ const WORK: (WorkTile & { client: string; role: string; year: string; note: stri
     role: "Type design",
     year: "2024",
     note: "Three weights, one file, 41 KB.",
-    meta: "A variable monospace typeface · Type design · 2024",
+    meta: "A variable monospace typeface, Type design, 2024",
     art: "radial-gradient(60% 60% at 30% 25%, rgba(244,114,182,.45), rgba(244,114,182,0) 60%), linear-gradient(160deg,#9d174d,#500724)",
     ui: (
       <svg viewBox="0 0 200 150" preserveAspectRatio="xMidYMid meet" className={svgBox}>
@@ -131,7 +141,7 @@ const WORK: (WorkTile & { client: string; role: string; year: string; note: stri
     role: "Data dashboard",
     year: "2023",
     note: "Read by 140 town councils.",
-    meta: "Sea-level data for coastal towns · Dashboard · 2023",
+    meta: "Sea-level data for coastal towns, Dashboard, 2023",
     art: "radial-gradient(60% 60% at 75% 20%, rgba(125,211,252,.4), rgba(125,211,252,0) 60%), linear-gradient(170deg,#075985,#0c4a6e 60%,#082f49)",
     ui: (
       <svg viewBox="0 0 200 150" preserveAspectRatio="xMidYMid meet" className={svgBox}>
@@ -162,9 +172,9 @@ function ContactSheet({ w, h }: { w: number; h: number }) {
   const cols = w >= 900 ? 6 : 3;
   return (
     <div className="relative h-full w-full bg-[#fbfaf8] p-5 sm:p-7" style={{ width: w, height: h }}>
-      <div className="flex items-center justify-between pb-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6e6e73]">
-        <span>Contact sheet · Selected work 2023–2026</span>
-        <span className="hidden sm:inline">Aether / J. Vale</span>
+      <div className="flex items-center justify-between pb-4 text-[12px] font-medium text-[#6e6e73]">
+        <span>Selected work, 2023 to 2026</span>
+        <span className="hidden sm:inline">Drag the lens to read the small print</span>
       </div>
       <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
         {WORK.map((p, i) => (
@@ -193,32 +203,30 @@ function Hero() {
   const h = w >= 900 ? 390 : w >= 520 ? 640 : 560;
   return (
     <section className="relative overflow-hidden pb-14 pt-8 sm:pt-10">
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: `radial-gradient(40% 40% at 85% 10%, ${RT}, transparent 70%)` }} />
       <div className="relative mx-auto max-w-[1180px] px-5">
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="flex flex-wrap items-center justify-between gap-3 border-b border-black/[.08] pb-4 text-[13px] text-[#6e6e73]">
-          <span className="font-semibold text-[#1d1d1f]">Issue 07 · Autumn 2026</span>
-          <span className="hidden sm:inline">Jordan Vale, independent designer and developer, Lisbon</span>
-          <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.07)]">
-            <span className="relative flex h-2 w-2">
-              <motion.span className="absolute inset-0 rounded-full" style={{ background: R }} animate={{ scale: [1, 2.2], opacity: [0.5, 0] }} transition={{ duration: 1.8, repeat: Infinity }} />
-              <span className="relative h-2 w-2 rounded-full" style={{ background: R }} />
+        <div className="relative">
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="flex flex-wrap items-center justify-between gap-3 border-b border-black/[.08] pb-4 text-[13px] text-[#6e6e73]">
+            <span>Jordan Vale, independent designer and developer in Lisbon</span>
+            <span className="inline-flex items-center gap-2 font-medium text-[#18161a]">
+              <span className="h-2 w-2 rounded-full" style={{ background: R }} />
+              Booking from January
             </span>
-            Booking from January
-          </span>
-        </motion.div>
-        <h1 className="m-0 mt-7 max-w-[1100px] text-[clamp(48px,8vw,112px)] font-semibold leading-[0.95] tracking-[-0.06em] text-[#1d1d1f] [text-wrap:balance]">
-          <Words text="I design and build quiet software." accentWords={["quiet"]} accent={R} />
-        </h1>
-        <div className="mt-6 grid grid-cols-1 items-end gap-6 md:grid-cols-[1.2fr_1fr]">
-          <Reveal delay={0.3} y={14}>
-            <p className="m-0 max-w-[560px] text-[clamp(17px,2vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
+          </motion.div>
+          <h1 className="m-0 mt-8 max-w-[1000px] text-[clamp(52px,8.6vw,124px)] font-[580] leading-[0.94] tracking-[-0.028em] text-[#18161a] [text-wrap:balance]" style={{ fontFamily: SERIF }}>
+            I design and build quiet software.
+          </h1>
+          <div className="mt-7 grid grid-cols-1 items-end gap-6 md:grid-cols-[1.2fr_1fr]">
+            <p className="m-0 max-w-[540px] text-[clamp(17px,1.9vw,20px)] leading-[1.5] text-[#55525a]">
               Aether is a studio of one. I take a product from a rough idea to shipped code: the research, the screens, the design system and the front end. Six projects below, all still in use.
             </p>
-          </Reveal>
-          <Reveal delay={0.4} y={14} className="flex flex-wrap gap-3 md:justify-end">
-            <Magnetic className="text-white" style={{ background: R }} onClick={() => scrollToId("work")}>See the work</Magnetic>
-            <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("services")}>Book a call</Magnetic>
-          </Reveal>
+            <div className="flex flex-col items-start gap-4 md:items-end">
+              <div className="flex flex-wrap gap-3">
+                <Magnetic className="text-white" style={{ background: INK }} onClick={() => scrollToId("work")}>See the work</Magnetic>
+                <Magnetic className="bg-white text-[#18161a] shadow-[0_0_0_1px_rgba(0,0,0,.1)]" onClick={() => scrollToId("services")}>Book a call</Magnetic>
+              </div>
+              <Noise ink={INK} accent={R} />
+            </div>
+          </div>
         </div>
       </div>
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.35 }} className="relative mx-auto mt-10 max-w-[1320px] px-3 sm:px-5">
@@ -231,26 +239,7 @@ function Hero() {
             </div>
           )}
         </div>
-        <p className="m-0 mt-4 text-center text-[13px] text-[#6e6e73]">Drag the lens across the contact sheet. Every project is on it, in miniature.</p>
-      </motion.div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ disciplines */
-
-function Disciplines() {
-  const items = ["Product design", "Design systems", "Front-end in React", "Interaction and motion", "Type", "Prototypes you can test"];
-  return (
-    <section className="border-y border-black/[.06] bg-white py-7" aria-label="What I do">
-      <Marquee speed={34}>
-        {items.map((t) => (
-          <span key={t} className="mx-8 flex items-center gap-8 text-[clamp(22px,3vw,32px)] font-semibold tracking-[-0.03em] text-[#1d1d1f]">
-            {t}
-            <span className="h-2 w-2 rounded-full" style={{ background: R }} aria-hidden="true" />
-          </span>
-        ))}
-      </Marquee>
+              </motion.div>
     </section>
   );
 }
@@ -261,7 +250,7 @@ function Work() {
   const [open, setOpen] = useState<string | null>(null);
   return (
     <section id="work" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Selected work" title="Six projects, all still shipping." sub="Pick a layout to browse, or open one from the index. Each line says what changed, not just what I made." accent={R} />
+      <SectionHead title="Six projects, all still shipping." sub="Pick a layout to browse, or open one from the index. Each line says what changed, not just what I made." accent={R} />
       <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-[1.25fr_1fr]">
         <Reveal y={20} className="min-w-0">
           <div className={`${card} flex h-full items-center justify-center px-4 py-8`}>
@@ -280,7 +269,7 @@ function Work() {
                     <span className="relative h-9 w-9 flex-none rounded-[10px]" style={{ background: p.art }} aria-hidden="true" />
                     <span className="relative flex min-w-0 flex-1 flex-col">
                       <span className="text-[16px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">{p.title}</span>
-                      <span className="truncate text-[13px] text-[#6e6e73]">{p.role} · {p.note}</span>
+                      <span className="truncate text-[13px] text-[#6e6e73]">{p.role}. {p.note}</span>
                     </span>
                     <span className="relative text-[13px] tabular-nums text-[#6e6e73]">{p.year}</span>
                   </button>
@@ -305,7 +294,7 @@ const PALETTE = [
 const NOTE_FRONT = (
   <div className="flex h-full flex-col justify-between bg-[#fffdf8] p-7">
     <div className="flex flex-col gap-2">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6e6e73]">Halden · review, week 3</span>
+      <span className="text-[12px] font-medium text-[#6e6e73]">Halden review, week 3</span>
       <span className="text-[24px] font-semibold leading-[1.12] tracking-[-0.03em] text-[#1d1d1f]">Put the balance first. Freelancers check it before anything else.</span>
       <span className="max-w-[300px] text-[14px] leading-[1.5] text-[#6e6e73]">Invoices move below the fold. Taxes get their own tab, not a banner.</span>
     </div>
@@ -350,14 +339,14 @@ function Process() {
   return (
     <section id="process" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="How I work" title="Paper, then pixels, then production." accent={R} />
+        <SectionHead title="Paper, then pixels, then production." accent={R} />
         <div className="mt-6">
           <Story
             accent={R}
             steps={[
-              { kicker: "01 · Colour", title: "Chosen on paper before a screen exists.", body: "Every brand starts as a deck of chips I can hold up to the client's actual office light. Fan it out, hover a chip, click to copy the hex.", visual: <div className={`${card} flex justify-center px-6 py-10`}><FanDeck chips={PALETTE} autoplay /></div> },
-              { kicker: "02 · Critique", title: "Notes in the margin, sketches underneath.", body: "Reviews are written, short and specific. The sketch that started the idea is still under the page, so we never forget why a screen looks the way it does.", visual: <div className={`${card} p-6`}><PageCurl width={420} height={270} front={NOTE_FRONT} back={NOTE_BACK} autoplay /></div> },
-              { kicker: "03 · Code", title: "Shipped by the same hands.", body: "I build the front end myself in React and TypeScript, so nothing gets lost between the design file and the pull request. Six tools on the desk, no more.", visual: <div className={`${card} flex flex-col items-center gap-2 px-8 pb-8 pt-4`}><Dock apps={DESK} autoplay /><span className="text-[13px] text-[#6e6e73]">Hover the dock, click a tool to open it.</span></div> },
+              { kicker: "Colour", title: "Chosen on paper before a screen exists.", body: "Every brand starts as a deck of chips I can hold up to the client's actual office light. Fan it out, hover a chip, click to copy the hex.", visual: <div className={`${card} flex justify-center px-6 py-10`}><FanDeck chips={PALETTE} autoplay /></div> },
+              { kicker: "Critique", title: "Notes in the margin, sketches underneath.", body: "Reviews are written, short and specific. The sketch that started the idea is still under the page, so we never forget why a screen looks the way it does.", visual: <div className={`${card} p-6`}><PageCurl width={420} height={270} front={NOTE_FRONT} back={NOTE_BACK} autoplay /></div> },
+              { kicker: "Code", title: "Shipped by the same hands.", body: "I build the front end myself in React and TypeScript, so nothing gets lost between the design file and the pull request. Six tools on the desk, no more.", visual: <div className={`${card} flex flex-col items-center gap-2 px-8 pb-8 pt-4`}><Dock apps={DESK} autoplay /><span className="text-[13px] text-[#6e6e73]">Hover the dock, click a tool to open it.</span></div> },
             ]}
           />
         </div>
@@ -378,7 +367,7 @@ function Writing() {
   return (
     <section id="writing" className="mx-auto max-w-[1180px] px-5 py-24">
       <div className="flex flex-wrap items-end justify-between gap-6">
-        <SectionHead eyebrow="Writing" title="Notes from the desk." accent={R} />
+        <SectionHead title="Notes from the desk." accent={R} />
         <Reveal y={12}><span className="text-[15px] text-[#6e6e73]">One essay a quarter. No newsletter pop-ups.</span></Reveal>
       </div>
       <Stagger className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
@@ -408,7 +397,7 @@ function KindWords() {
   return (
     <section className="bg-[#f5f5f7] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Kind words" title="From people I've shipped with." accent={R} center />
+        <SectionHead title="From people I've shipped with." accent={R} center />
         <Stagger className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
           {WORDS.map((w) => (
             <figure key={w.n} className={`${card} m-0 flex h-full flex-col gap-6 p-7`}>
@@ -441,7 +430,7 @@ function Services() {
     <section id="services" className="mx-auto max-w-[1180px] px-5 py-24">
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[1.1fr_1fr]">
         <div className="flex flex-col gap-8">
-          <SectionHead eyebrow="Work together" title="Three ways in. Fixed prices." sub="Two projects at a time, never more. Next openings: January for sprints, March for partnerships." accent={R} />
+          <SectionHead title="Three ways in. Fixed prices." sub="Two projects at a time, never more. Next openings: January for sprints, March for partnerships." accent={R} />
           <div className="flex flex-col gap-3" role="radiogroup" aria-label="Engagement">
             {OFFERS.map((o) => {
               const on = pick === o.id;
@@ -475,7 +464,7 @@ function Services() {
               <h3 className="m-0 text-[22px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">One page, one signature.</h3>
               <p className="m-0 max-w-[340px] text-[15px] leading-[1.5] text-[#6e6e73]">The agreement fits on a single page. Sign it with your pointer and I countersign within a day.</p>
             </div>
-            <Fit><SignBadge name="Your studio" title={`${offer.n} · ${offer.p}`} ink={R} autoplay /></Fit>
+            <Fit><SignBadge name="Your studio" title={`${offer.n}, ${offer.p}`} ink={R} autoplay /></Fit>
             <div className="flex w-full flex-col items-center gap-2 border-t border-black/[.06] pt-6">
               <span className="text-[13px] text-[#6e6e73]">Rather write first?</span>
               <CopyChip value="hello@aether.studio" label="Copy email" accent={R} />
@@ -492,17 +481,17 @@ function Services() {
 export function AetherPortfolioPage() {
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
+      <div className="ae min-h-screen overflow-x-clip bg-white text-[#18161a] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
+        <style>{FONT_CSS}</style>
         <Nav brand={<Logo />} accent={R} cta="Book a call" onCta={() => scrollToId("services")} links={[{ label: "Work", id: "work" }, { label: "Process", id: "process" }, { label: "Writing", id: "writing" }, { label: "Services", id: "services" }]} />
         <Hero />
-        <Disciplines />
         <Work />
         <Process />
         <Writing />
         <KindWords />
         <Services />
         <section className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 pb-24 lg:grid-cols-[1fr_1.4fr]">
-          <SectionHead eyebrow="FAQ" title="Before we talk." accent={R} />
+          <SectionHead title="Before we talk." accent={R} />
           <Reveal y={16}>
             <Faq
               accent={R}

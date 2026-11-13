@@ -7,7 +7,7 @@
  * The hero is a real redesign: drag the divider across a checkout and the
  * results beside it move from the old numbers to the new ones.
  */
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion, useMotionValue, useScroll, useSpring, useTransform, type MotionValue } from "framer-motion";
 import FolderPeek from "@/components/templates/kit/components/FolderPeek";
 import StretchNav from "@/components/templates/kit/components/StretchNav";
@@ -16,10 +16,18 @@ import ComponentLayers from "@/components/templates/kit/components/ComponentLaye
 import ScrubInput from "@/components/templates/kit/components/ScrubInput";
 import AnimatedTabs from "@/components/templates/kit/components/AnimatedTabs";
 import StaggerMenu, { type MenuItem } from "@/components/templates/kit/components/StaggerMenu";
-import BeforeAfter from "@/components/templates/launchfolio-portfolio/BeforeAfter";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
+import RedesignReel from "@/components/templates/launchfolio-portfolio/RedesignReel";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, card, ease, scrollToId } from "@/components/templates/kit/parts";
+import { fontFaces } from "@/components/templates/kit/fonts";
 
-const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
+const SYSTEM_FONT = "'Manrope Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif";
+const DISPLAY = "'Bricolage Grotesque Variable', 'Manrope Variable', sans-serif";
+// Bricolage Grotesque for headings, Manrope for everything else
+const FONT_CSS =
+  fontFaces("launchfolio", [
+    { family: "Bricolage Grotesque Variable", file: "bricolage", weight: "200 800", stretch: "75% 100%" },
+    { family: "Manrope Variable", file: "manrope", weight: "200 800" },
+  ]) + `.lf h2,.lf h3{font-family:${DISPLAY};font-weight:640;letter-spacing:-0.03em;font-variation-settings:"opsz" 72}`;
 const O = "#ea580c"; // graphics
 const OD = "#c2410c"; // orange text and buttons (5.2:1 on white)
 const OT = "#fff4ec"; // orange wash
@@ -38,92 +46,7 @@ function Logo() {
   );
 }
 
-/* ------------------------------------------------------------------ hero: the checkout, before and after */
-
-function Chrome({ children, tone = "#fff" }: { children: ReactNode; tone?: string }) {
-  return (
-    <div className="isolate flex h-full w-full flex-col" style={{ background: tone }}>
-      {/* Tall bar with a centred address, so the Before / After chips can sit on its ends. */}
-      <div className="flex h-[52px] flex-none items-center justify-center border-b border-black/[.06] bg-[#f5f5f7] px-3">
-        <span className="hidden truncate rounded-full bg-white px-3 py-1 text-[10px] sm:inline text-[#6e6e73] shadow-[0_0_0_1px_rgba(0,0,0,.05)]">fernway.shop/checkout</span>
-      </div>
-      <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
-    </div>
-  );
-}
-
-const Field = ({ l, w = "100%", tiny = false }: { l: string; w?: string; tiny?: boolean }) => (
-  <span className="flex flex-col gap-0.5" style={{ width: w }}>
-    <span className={`${tiny ? "text-[8px]" : "text-[10px]"} font-medium text-[#6e6e73]`}>{l}</span>
-    <span className={`${tiny ? "h-[14px]" : "h-[26px]"} rounded-[4px] border border-[#c7c7cc] bg-white`} />
-  </span>
-);
-
-function CheckoutBefore() {
-  return (
-    <Chrome tone="#fafafa">
-      <div className="flex h-full flex-col">
-        <div className="bg-[#dc2626] px-3 py-1 text-center text-[9px] font-bold uppercase tracking-wide text-white">Free shipping over $80! Use code SAVE10 · Ends tonight</div>
-        <div className="flex items-center justify-between px-4 py-2">
-          <span className="text-[12px] font-bold text-[#1d1d1f]">FERNWAY</span>
-          <span className="flex gap-1 text-[8px] text-[#6e6e73]"><span className="rounded bg-[#1d1d1f] px-1.5 py-0.5 text-white">1 Details</span><span className="rounded bg-[#e5e5ea] px-1.5 py-0.5">2 Shipping</span><span className="rounded bg-[#e5e5ea] px-1.5 py-0.5">3 Payment</span></span>
-        </div>
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 px-4 pb-3 sm:grid-cols-[1.4fr_1fr]">
-          <div className="flex flex-col gap-1.5 overflow-hidden">
-            <span className="flex gap-1.5"><Field tiny l="First name*" /><Field tiny l="Last name*" /></span>
-            <span className="flex gap-1.5"><Field tiny l="Email*" /><Field tiny l="Confirm email*" /></span>
-            <Field tiny l="Phone (for delivery updates)*" />
-            <Field tiny l="Address line 1*" />
-            <span className="flex gap-1.5"><Field tiny l="Address line 2" /><Field tiny l="City*" /></span>
-            <span className="flex gap-1.5"><Field tiny l="Postcode*" /><Field tiny l="Country*" /></span>
-            <Field tiny l="Create a password to save your details*" />
-            <span className="flex items-center gap-1 text-[8px] text-[#6e6e73]"><span className="h-2 w-2 rounded-sm border border-[#86868b]" />Sign me up for deals (unticking may delay your order)</span>
-          </div>
-          <div className="hidden flex-col gap-1.5 rounded-[6px] bg-white p-2 shadow-[0_0_0_1px_rgba(0,0,0,.08)] sm:flex">
-            <span className="text-[9px] font-bold text-[#1d1d1f]">Order summary (3)</span>
-            {["Trail mug", "Wool socks", "Map case"].map((x) => <span key={x} className="flex justify-between text-[8px] text-[#6e6e73]"><span>{x}</span><span>$—</span></span>)}
-            <span className="mt-1 text-[8px] font-bold text-[#1d1d1f]">You may also like</span>
-            <span className="grid grid-cols-3 gap-1">{[0, 1, 2].map((i) => <span key={i} className="aspect-square rounded bg-[#fde68a]" />)}</span>
-            <span className="flex gap-1"><span className="h-[14px] flex-1 rounded border border-[#c7c7cc]" /><span className="rounded bg-[#e5e5ea] px-1.5 text-[8px] leading-[14px]">Apply code</span></span>
-            <span className="mt-auto self-end rounded bg-[#d2d2d7] px-2 py-1 text-[8px] text-[#6e6e73]">Continue to shipping ›</span>
-          </div>
-        </div>
-      </div>
-    </Chrome>
-  );
-}
-
-function CheckoutAfter() {
-  return (
-    <Chrome>
-      <div className="flex h-full flex-col">
-        <div className="flex items-center justify-between px-5 py-3">
-          <span className="text-[13px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Fernway</span>
-          <span className="flex items-center gap-1 text-[10px] text-[#6e6e73]"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>Secure checkout</span>
-        </div>
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-5 px-5 pb-4 sm:grid-cols-[1.25fr_1fr]">
-          <div className="flex flex-col gap-2.5">
-            <span className="flex h-[30px] items-center justify-center rounded-[8px] bg-[#1d1d1f] text-[11px] font-semibold text-white">Express pay</span>
-            <span className="flex items-center gap-2 text-[9px] text-[#86868b]"><span className="h-px flex-1 bg-[#e5e5ea]" />or pay by card<span className="h-px flex-1 bg-[#e5e5ea]" /></span>
-            <Field l="Email" />
-            <span className="relative flex flex-col gap-0.5">
-              <Field l="Delivery address" />
-              <span className="absolute left-2 right-2 top-[38px] z-10 rounded-[6px] bg-white px-2 py-1 text-[9px] text-[#1d1d1f] shadow-[0_6px_16px_-6px_rgba(0,0,0,.3),0_0_0_1px_rgba(0,0,0,.06)]">12 Larch Road, Bristol BS6 · <span style={{ color: OD }}>Use this</span></span>
-            </span>
-            <Field l="Card number" />
-            <span className="flex gap-2"><Field l="Expiry" /><Field l="CVC" /></span>
-          </div>
-          <div className="hidden flex-col gap-2 rounded-[10px] bg-[#f5f5f7] p-3 sm:flex">
-            <span className="text-[11px] font-semibold text-[#1d1d1f]">3 items</span>
-            {[["Trail mug", "$24.00"], ["Wool socks", "$18.00"], ["Map case", "$22.20"]].map(([a, b]) => <span key={a} className="flex justify-between text-[10px] text-[#424245]"><span>{a}</span><span className="tabular-nums">{b}</span></span>)}
-            <span className="flex justify-between border-t border-black/[.08] pt-1.5 text-[10px] text-[#424245]"><span>Delivery Thu, 8–10 am</span><span>Free</span></span>
-            <span className="mt-auto flex h-[30px] items-center justify-center rounded-[8px] text-[11px] font-semibold text-white" style={{ background: OD }}>Pay $64.20</span>
-          </div>
-        </div>
-      </div>
-    </Chrome>
-  );
-}
+/* ------------------------------------------------------------------ hero: the redesign, played out */
 
 /** A number that eases between the old and new result as the divider moves. */
 function Live({ pos, from, to, format }: { pos: MotionValue<number>; from: number; to: number; format: (n: number) => string }) {
@@ -131,91 +54,46 @@ function Live({ pos, from, to, format }: { pos: MotionValue<number>; from: numbe
   return <motion.span className="tabular-nums">{text}</motion.span>;
 }
 
-function Metric({ pos, label, from, to, format, better }: { pos: MotionValue<number>; label: string; from: number; to: number; format: (n: number) => string; better: string }) {
-  const fill = useTransform(pos, (p) => (from + (to - from) * (1 - p / 100)) / Math.max(from, to));
+function Metric({ pos, label, from, to, format }: { pos: MotionValue<number>; label: string; from: number; to: number; format: (n: number) => string }) {
   return (
-    <div className="flex flex-col gap-2 border-t border-black/[.08] py-3.5">
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="text-[14px] text-[#6e6e73]">{label}</span>
-        <span className="text-[26px] font-semibold tracking-[-0.035em] text-[#1d1d1f]"><Live pos={pos} from={from} to={to} format={format} /></span>
-      </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-[#f0f0f3]">
-        <motion.div className="h-full origin-left rounded-full" style={{ scaleX: fill, background: O }} />
-      </div>
-      <span className="text-[12px] text-[#6e6e73]">{better}</span>
+    <div className="flex flex-col gap-1 border-t border-black/[.1] pt-3">
+      <span className="text-[30px] font-[620] leading-none tracking-[-0.03em] text-[#1d1d1f]" style={{ fontFamily: DISPLAY }}><Live pos={pos} from={from} to={to} format={format} /></span>
+      <span className="text-[13px] leading-[1.35] text-[#6e6e73]">{label}</span>
     </div>
   );
 }
 
 function Hero() {
-  const pos = useMotionValue(50);
-  const smooth = useSpring(pos, { stiffness: 380, damping: 34, mass: 0.6 });
+  const pos = useMotionValue(100);
   const sec = (n: number) => `${Math.floor(n / 60)}:${String(Math.round(n % 60)).padStart(2, "0")}`;
+  const rise = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
   return (
-    <section className="relative overflow-hidden pb-16 pt-8 sm:pt-12">
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: `radial-gradient(45% 50% at 20% 30%, ${OT}, transparent 70%), radial-gradient(30% 30% at 90% 10%, rgba(234,88,12,.08), transparent 70%)` }} />
-      <div className="relative mx-auto grid max-w-[1240px] grid-cols-1 items-start gap-10 px-5 lg:grid-cols-[1.35fr_1fr] lg:gap-14">
-        <motion.div className="order-2 lg:order-1" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.2 }}>
-          <div className="mb-3 flex items-center justify-between text-[13px]">
-            <span className="font-semibold text-[#1d1d1f]">Case 01 · Fernway checkout</span>
-            <span className="text-[#6e6e73]">Shipped March 2026</span>
-          </div>
-          <BeforeAfter before={<CheckoutBefore />} after={<CheckoutAfter />} beforeLabel="Before · 3 steps" afterLabel="After · 1 page" value={pos} autoplay aspect="aspect-[4/5] sm:aspect-[16/10]" accent={OD} />
-          <div className="mt-6 flex flex-wrap justify-center gap-2">
-            {["7 fields removed", "Guest checkout by default", "Address lookup", "One obvious button"].map((t) => (
-              <span key={t} className="rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#424245] shadow-[0_0_0_1px_rgba(0,0,0,.07)]">{t}</span>
-            ))}
-          </div>
-          <p className="m-0 mt-4 text-center text-[13px] text-[#6e6e73]">Numbers between the ends are blended as you drag; the ends are the measured before and after.</p>
+    <section className="relative -mt-[76px] overflow-hidden pb-24 pt-[116px] sm:pt-[140px]" style={{ background: "radial-gradient(circle, #c9ced6 1px, transparent 1.3px) 0 0 / 22px 22px, #eef0f3" }}>
+      {/* the page sits on a design canvas, which fades into the case studies below */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-white" aria-hidden="true" />
+      <div className="relative mx-auto grid max-w-[1240px] grid-cols-1 items-center gap-12 px-5 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-14">
+        <motion.div className="flex flex-col gap-6" initial="hidden" animate="show" transition={{ staggerChildren: 0.08 }}>
+          <motion.span variants={rise} className="text-[14px] font-medium text-[#6e6e73]">Maya Okafor, product designer</motion.span>
+          <motion.h1 variants={rise} className="m-0 text-[clamp(42px,5.2vw,74px)] font-[640] leading-[0.98] tracking-[-0.04em] text-[#1d1d1f] [text-wrap:balance]" style={{ fontFamily: DISPLAY, fontVariationSettings: '"opsz" 96' }}>
+            I redesign the screens where customers give up.
+          </motion.h1>
+          <motion.p variants={rise} className="m-0 max-w-[460px] text-[clamp(16px,1.6vw,18px)] leading-[1.55] text-[#55555b]">
+            Checkouts, onboarding, uploads. Here is one: watch a shopper abandon Fernway&rsquo;s old checkout, then the same order on the page I shipped.
+          </motion.p>
+          <motion.div variants={rise} className="grid max-w-[460px] grid-cols-3 gap-4">
+            <Metric pos={pos} label="checkout completion" from={58} to={81} format={(n) => `${Math.round(n)}%`} />
+            <Metric pos={pos} label="median time to pay" from={161} to={52} format={sec} />
+            <Metric pos={pos} label="fields to fill" from={11} to={4} format={(n) => `${Math.round(n)}`} />
+          </motion.div>
+          <motion.div variants={rise} className="flex flex-wrap gap-3">
+            <Magnetic className="text-white" style={{ background: INK }} onClick={() => scrollToId("work")}>Read the case studies</Magnetic>
+            <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.1)]" onClick={() => scrollToId("contact")}>Book a call</Magnetic>
+          </motion.div>
         </motion.div>
-        <div className="order-1 flex flex-col gap-5 lg:order-2">
-          <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="text-[14px] font-semibold" style={{ color: OD }}>
-            Maya Okafor · Product designer
-          </motion.span>
-          <h1 className="m-0 text-[clamp(40px,4.4vw,62px)] font-semibold leading-[1] tracking-[-0.045em] text-[#1d1d1f] [text-wrap:balance]">
-            <Words text="I redesign the screens where customers give up." accentWords={["give", "up."]} accent={OD} />
-          </h1>
-          <Reveal delay={0.3} y={14}>
-            <p className="m-0 max-w-[480px] text-[clamp(17px,1.8vw,19px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
-              Checkouts, onboarding, uploads. Each case study shows the screen, what I learned and the number that moved. Drag the divider to see this one change.
-            </p>
-          </Reveal>
-          <Reveal delay={0.4} y={14}>
-            <div className="flex flex-col">
-              <Metric pos={smooth} label="Checkout completion" from={58} to={81} format={(n) => `${Math.round(n)}%`} better="Up 23 points in the first 30 days" />
-              <Metric pos={smooth} label="Median time to pay" from={161} to={52} format={sec} better="From 2:41 to 0:52" />
-              <Metric pos={smooth} label="Fields to fill" from={11} to={4} format={(n) => `${Math.round(n)}`} better="Address lookup does the rest" />
-            </div>
-          </Reveal>
-          <Reveal delay={0.5} y={12} className="flex flex-wrap gap-3">
-            <Magnetic className="text-white" style={{ background: OD }} onClick={() => scrollToId("work")}>Read the case studies</Magnetic>
-            <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("contact")}>Book a call</Magnetic>
-          </Reveal>
-        </div>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.25 }} className="min-w-0">
+          <Fit><RedesignReel progress={pos} accent={OD} /></Fit>
+        </motion.div>
       </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ proof */
-
-function Proof() {
-  const items = [
-    { to: 14, f: (n: number) => `${Math.round(n)}`, l: "products shipped since 2017" },
-    { to: 19, f: (n: number) => `+${Math.round(n)} pts`, l: "average lift on the flow I redesigned" },
-    { to: 3, f: (n: number) => `${Math.round(n)}`, l: "design systems still in production" },
-    { to: 6, f: (n: number) => `${Math.round(n)} wks`, l: "typical time from kickoff to shipped" },
-  ];
-  return (
-    <section className="mx-auto max-w-[1180px] px-5 py-10">
-      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
-        {items.map((it) => (
-          <div key={it.l} className="flex flex-col gap-1 border-t border-black/[.08] pt-5">
-            <Counter to={it.to} format={it.f} className="text-[clamp(32px,4.2vw,46px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
-            <span className="text-[15px] text-[#6e6e73]">{it.l}</span>
-          </div>
-        ))}
-      </Stagger>
     </section>
   );
 }
@@ -223,26 +101,26 @@ function Proof() {
 /* ------------------------------------------------------------------ case index */
 
 const CASES = [
-  { id: "fernway", n: "01", title: "Fernway", what: "Checkout redesign", meta: "41 files · 6 weeks", color: "#c2410c", result: "+23 pts completion" },
-  { id: "ledgerly", n: "02", title: "Ledgerly", what: "Receipt uploads", meta: "28 files · 4 weeks", color: "#334155", result: "−74% cancelled uploads" },
-  { id: "tidepool", n: "03", title: "Tidepool", what: "Design system", meta: "212 files · 5 months", color: "#0f766e", result: "41 one-offs → 1 pattern" },
+  { id: "fernway", n: "01", title: "Fernway", what: "Checkout redesign", meta: "41 files, 6 weeks", color: "#c2410c", result: "+23 pts completion" },
+  { id: "ledgerly", n: "02", title: "Ledgerly", what: "Receipt uploads", meta: "28 files, 4 weeks", color: "#334155", result: "−74% cancelled uploads" },
+  { id: "tidepool", n: "03", title: "Tidepool", what: "Design system", meta: "212 files, 5 months", color: "#0f766e", result: "41 one-offs → 1 pattern" },
 ];
 
 function CaseIndex() {
   return (
     <section id="work" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Case studies" title="Three folders. One problem each." sub="Every case opens with the number that was wrong and ends with the number after launch. Peek inside a folder, then read the whole thing." accent={OD} />
+        <SectionHead title="Three folders. One problem each." sub="Every case opens with the number that was wrong and ends with the number after launch. Peek inside a folder, then read the whole thing." accent={OD} />
         <Stagger className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
           {CASES.map((c) => (
             <div key={c.id} className={`${card} flex h-full flex-col items-center gap-2 px-6 pb-7 pt-2`}>
-              <FolderPeek title={`${c.n} · ${c.title}`} meta={c.meta} color={c.color} autoplay />
+              <FolderPeek title={c.title} meta={c.meta} color={c.color} autoplay />
               <div className="mt-2 flex w-full flex-col gap-1 border-t border-black/[.06] pt-4">
                 <span className="text-[13px] text-[#6e6e73]">{c.what}</span>
                 <span className="text-[20px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{c.result}</span>
               </div>
               <button type="button" onClick={() => scrollToId(c.id)} className="mt-2 inline-flex items-center gap-1.5 self-start rounded-full text-[14px] font-semibold outline-none focus-visible:ring-2" style={{ color: OD, ["--tw-ring-color" as string]: OD }}>
-                Read case {c.n} <span aria-hidden="true">→</span>
+                Read the {c.title} case
               </button>
             </div>
           ))}
@@ -353,7 +231,7 @@ function CaseFernway() {
   return (
     <section id="fernway" className="mx-auto max-w-[1180px] px-5 py-24">
       <div className="flex flex-wrap items-end justify-between gap-6">
-        <SectionHead eyebrow="Case 01 · Fernway" title="A checkout people actually finish." accent={OD} />
+        <SectionHead title="A checkout people actually finish." accent={OD} />
         <Reveal y={12}><span className="text-[15px] text-[#6e6e73]">Role: lead designer, with two engineers and a PM.</span></Reveal>
       </div>
       <Reveal y={20} className="mt-10">
@@ -381,7 +259,7 @@ function CaseLedgerly() {
     <section id="ledgerly" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 lg:grid-cols-[1fr_1.05fr]">
         <div className="flex flex-col gap-8">
-          <SectionHead eyebrow="Case 02 · Ledgerly" title="Receipts in, dread out." sub="Ledgerly does the books for freelancers. A third of receipt uploads were cancelled halfway, because one slow file froze the whole batch with no sign of life." accent={OD} />
+          <SectionHead title="Receipts in, dread out." sub="Ledgerly does the books for freelancers. A third of receipt uploads were cancelled halfway, because one slow file froze the whole batch with no sign of life." accent={OD} />
           <Stagger className="flex flex-col gap-4">
             {[
               ["What I changed", "Every file became its own chip with its own progress. Drop more while the first ones are still going; remove one without cancelling the rest."],
@@ -399,7 +277,7 @@ function CaseLedgerly() {
           <div className={`${card} flex flex-col gap-6 p-7`}>
             <div className="flex items-center justify-between">
               <span className="flex flex-col">
-                <span className="text-[12px] font-semibold text-[#6e6e73]">Ledgerly · Expenses</span>
+                <span className="text-[12px] font-semibold text-[#6e6e73]">Ledgerly expenses</span>
                 <span className="text-[20px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">October receipts</span>
               </span>
               <span className="rounded-full px-3 py-1 text-[12px] font-semibold" style={{ background: OT, color: OD }}>The shipped component</span>
@@ -418,7 +296,7 @@ function CaseLedgerly() {
 function CaseTidepool() {
   return (
     <section id="tidepool" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Case 03 · Tidepool" title="Four apps, one system, five months." sub="Tidepool runs clinic bookings across four apps that had drifted apart: three button styles, 41 one-off settings screens. I built the system they share now, with the engineers who use it." accent={OD} />
+      <SectionHead title="Four apps, one system, five months." sub="Tidepool runs clinic bookings across four apps that had drifted apart: three button styles, 41 one-off settings screens. I built the system they share now, with the engineers who use it." accent={OD} />
       <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Reveal y={20}>
           <div className={`${card} flex h-full flex-col p-7`}>
@@ -469,7 +347,7 @@ function Process() {
   return (
     <section id="process" className="bg-[#1d1d1f] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Process" title="Seven weeks, one number." sub="The same shape for every engagement, so you always know what Friday brings." accent="#fdba74" dark />
+        <SectionHead title="Seven weeks, one number." sub="The same shape for every engagement, so you always know what Friday brings." accent="#fdba74" dark />
         <div ref={ref} className="relative mt-14">
           <div className="absolute left-[11px] top-2 h-[calc(100%-16px)] w-[2px] rounded-full bg-white/10 lg:hidden">
             <motion.div className="h-full w-full origin-top rounded-full" style={{ scaleY: fill, background: O }} />
@@ -513,7 +391,7 @@ const WORDS = [
 function Words3() {
   return (
     <section className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="From the teams" title="What they said after launch." accent={OD} center />
+      <SectionHead title="What they said after launch." accent={OD} center />
       <Stagger className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
         {WORDS.map((w) => (
           <figure key={w.n} className={`${card} m-0 flex h-full flex-col gap-6 p-7`}>
@@ -552,7 +430,7 @@ function Contact() {
   return (
     <section id="contact" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto grid max-w-[1180px] grid-cols-1 items-start gap-12 px-5 lg:grid-cols-[1fr_1.1fr]">
-        <SectionHead eyebrow="Contact" title="Tell me which screen is costing you." sub="Two engagements a quarter. I reply within two working days with a yes, a no, or a better person to ask." accent={OD} />
+        <SectionHead title="Tell me which screen is costing you." sub="Two engagements a quarter. I reply within two working days with a yes, a no, or a better person to ask." accent={OD} />
         <Reveal y={20}>
           <div className={`${card} flex flex-col gap-6 p-7`}>
             <AnimatePresence mode="wait" initial={false}>
@@ -610,10 +488,10 @@ function Contact() {
 export function LaunchfolioPortfolioPage() {
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
+      <div className="lf min-h-screen overflow-x-clip bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
+        <style>{FONT_CSS}</style>
         <Nav brand={<Logo />} accent={OD} cta="Book a call" onCta={() => scrollToId("contact")} links={[{ label: "Case studies", id: "work" }, { label: "Fernway", id: "fernway" }, { label: "Process", id: "process" }, { label: "Contact", id: "contact" }]} />
         <Hero />
-        <Proof />
         <CaseIndex />
         <CaseFernway />
         <CaseLedgerly />
@@ -622,7 +500,7 @@ export function LaunchfolioPortfolioPage() {
         <Words3 />
         <Contact />
         <section className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-24 lg:grid-cols-[1fr_1.4fr]">
-          <SectionHead eyebrow="FAQ" title="Questions teams ask first." accent={OD} />
+          <SectionHead title="Questions teams ask first." accent={OD} />
           <Reveal y={16}>
             <Faq
               accent={OD}

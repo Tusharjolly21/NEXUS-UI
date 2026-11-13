@@ -1,65 +1,72 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ComponentGallery } from "@/components/gallery/component-gallery";
-import { ComponentsProofRow } from "@/components/gallery/components-proof-row";
+import { getPricing } from "@/lib/region";
 import { Band, PillLink, RainbowWord } from "@/components/site";
 import { getPopulatedCategories, isIndexableCategory } from "@/lib/catalog/category-seo";
-import { allGalleryItems, galleryCategories } from "@/lib/catalog/gallery-items";
+import { allGalleryItems } from "@/lib/catalog/gallery-items";
 import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
+import { alternatives } from "@/lib/alternatives";
 import { createMetadata } from "@/lib/seo";
+import { componentGroups } from "@/lib/catalog/listing-groups/components";
+import { ListingShell } from "@/components/listing/listing-shell";
+import { ListingGroupChips, ListingSidebar, RESULTS_ID } from "@/components/listing/listing-sidebar";
+import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
 
 export const metadata: Metadata = createMetadata({
-  title: "Animated React Components with Tailwind CSS",
+  title: { absolute: "Animated React Components for Next.js | Nexus UI" },
   description:
-    "Free animated React components for Next.js, built with Tailwind CSS and Framer Motion: text effects, backgrounds, sidebars, cards and more. Copy-paste or install with the shadcn CLI.",
+    "Free and Pro animated React components built with Tailwind CSS and Framer Motion, many with sound. Install any of them with the shadcn CLI.",
   alternates: { canonical: "/components" },
 });
 
 /** The "For fun" group (web slingers, portals, black holes, a shredder). Heavy canvas and WebGL, so it lives on its own page instead of in the wall. */
 const FUN_GROUP = "fun";
 
-export default function ComponentsPage() {
+export default async function ComponentsPage() {
+  const pricing = await getPricing();
   const all = allGalleryItems();
   const items = all.filter((i) => i.group !== FUN_GROUP);
-  const funCount = all.length - items.length;
+
+  const pro = items.filter((i) => i.premium).length;
+  const groups = componentGroups(all, { withFun: false });
+  const copy: PromoCopy = {
+    title: ["Unlock all ", String(pro), " Pro components"],
+    body: "Every one with full source, sound and its own demo, and your coding agent can add any of them by name.",
+    band: `Unlock all ${pro} Pro components`,
+  };
 
   return (
     <>
-      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[136px]">
-        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1152px]">
-          <h1 className="pg-display max-w-[900px] text-[clamp(48px,8vw,84px)] leading-[1.02] text-foreground">
-            Components that feel <RainbowWord>alive</RainbowWord>.
-          </h1>
-          <p className="mt-5 max-w-[600px] text-[19px] leading-[1.55] text-muted-foreground">
-            Springs, physics and the small details that usually take a week to get right. Play with any of them below, then add it
-            to your React app with one command.
-          </p>
-        </div>
-      </section>
+      <ListingShell
+        sidebar={<ListingSidebar title="Components" total={items.length} groups={groups} param="group" />}
+        rail={<ProRail copy={copy} pricing={pricing} />}
+      >
+        <h1 className="pg-display max-w-[900px] text-[clamp(42px,5.4vw,72px)] leading-[1.02] text-foreground">
+          Animated React components that feel <RainbowWord>alive</RainbowWord>.
+        </h1>
+        <p className="mt-5 max-w-[600px] text-[18px] leading-[1.55] text-muted-foreground">
+          Springs, physics, sound and the small details that usually take a week to get right, built with Tailwind CSS and
+          Framer Motion. Play with any of them below, then add it to your Next.js or React app with one command.
+        </p>
 
-      <section aria-label="Component gallery" className="px-4 pb-24">
-        <div className="mx-auto max-w-[1152px]">
+        <section id={RESULTS_ID} aria-label="Component gallery" className="mt-10 scroll-mt-24">
+          <ListingGroupChips groups={groups} total={items.length} param="group" className="mb-4" />
           <ComponentGallery
+            groupParam="group"
             items={items}
-            categories={galleryCategories(items)}
+            pricing={pricing}
             searchable
             plansLine
-            proRow
-            interlude={<ComponentsProofRow />}
-            aside={
-              funCount ? (
-                <Link
-                  href={getComponentCategoryHref("for-fun")}
-                  className="shrink-0 text-[15px] text-link hover:underline hover:underline-offset-4"
-                >
-                  Just for fun ({funCount}) ›
-                </Link>
-              ) : null
-            }
+            cards
+            afterFilters={<ProBand copy={copy} pricing={pricing} className="mt-5" />}
           />
+        </section>
+      </ListingShell>
 
-          <nav aria-labelledby="by-category" className="mt-20">
+      <section className="px-4 pb-24">
+        <div className="mx-auto max-w-[1152px]">
+          <nav aria-labelledby="by-category">
             <h2 id="by-category" className="text-[17px] font-semibold text-foreground">
               Browse by category
             </h2>
@@ -74,6 +81,18 @@ export default function ComponentsPage() {
                   </li>
                 ))}
             </ul>
+            <p className="mt-8 text-[15px] leading-relaxed text-muted-foreground">
+              Comparing libraries? See Nexus UI next to{" "}
+              {alternatives.map((a, i) => (
+                <span key={a.slug}>
+                  {i > 0 ? (i === alternatives.length - 1 ? " and " : ", ") : ""}
+                  <Link href={`/alternatives/${a.slug}`} className="text-link hover:underline hover:underline-offset-4">
+                    {a.name}
+                  </Link>
+                </span>
+              ))}
+              .
+            </p>
           </nav>
         </div>
       </section>

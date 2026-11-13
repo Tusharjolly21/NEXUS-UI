@@ -7,8 +7,8 @@
  * The hero is a depth gauge: drag it down the reef and the water, the colours,
  * the readouts and the recommended kit all change with depth.
  */
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { AnimatePresence, MotionConfig, animate, motion, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform, type MotionValue } from "framer-motion";
+import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { AnimatePresence, MotionConfig, animate, motion, useMotionTemplate, useMotionValue, useMotionValueEvent, useReducedMotion, useSpring, useTransform, type MotionValue } from "framer-motion";
 import RadioCards from "@/components/templates/ocean-flow/RadioCards";
 import ElasticStepper from "@/components/templates/kit/components/ElasticStepper";
 import { CapsuleToggle } from "@/components/templates/kit/components/CapsuleToggle";
@@ -18,12 +18,21 @@ import FlightTracker from "@/components/templates/kit/components/FlightTracker";
 import ReceiptUnfold from "@/components/templates/ocean-flow/ReceiptUnfold";
 import RulerPicker from "@/components/templates/ocean-flow/RulerPicker";
 import { Story } from "@/components/templates/ocean-flow/Story";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
+import { CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, card, scrollToId } from "@/components/templates/kit/parts";
+import { fontFaces } from "@/components/templates/kit/fonts";
 
-const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
+const SYSTEM_FONT = "'Atkinson Hyperlegible Next Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif";
+const DISPLAY = "'Saira Variable', 'Atkinson Hyperlegible Next Variable', sans-serif";
+// Saira, set semi-condensed like the face of a dive computer, for headings; Atkinson Hyperlegible for reading
+const FONT_CSS =
+  fontFaces("ocean-flow", [
+    { family: "Saira Variable", file: "saira", weight: "100 900", stretch: "50% 125%" },
+    { family: "Atkinson Hyperlegible Next Variable", file: "atkinson", weight: "200 800" },
+  ]) + `.of h2,.of h3{font-family:${DISPLAY};font-stretch:88%;font-weight:640;letter-spacing:-0.02em}`;
 const A = "#0284c7"; // graphics
-const AD = "#0369a1"; // blue text and buttons (5.9:1 on white)
-const INK = "#1d1d1f";
+const AD = "#0b4a74"; // deep water, for text and buttons: 9.4:1 on white
+const INK = "#0b2233";
+const HIVIS = "#ffd21f"; // the high-visibility yellow on fins and snorkels
 const money = (n: number) => `$${n.toLocaleString("en-US")}`;
 
 /* ------------------------------------------------------------------ cart */
@@ -417,7 +426,7 @@ function Packed({ d }: { d: number }) {
         className="mt-1 flex h-11 items-center justify-center gap-2 rounded-full text-[14px] font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         style={{ background: AD }}
       >
-        Add this kit · <span className="tabular-nums">{money(total)}</span>
+        Add this kit, <span className="tabular-nums">{money(total)}</span>
       </motion.button>
     </div>
   );
@@ -426,114 +435,132 @@ function Packed({ d }: { d: number }) {
 /** The hero's depth, shared as a motion value so the page never re-renders while you drag. */
 const DepthCtx = createContext<MotionValue<number> | null>(null);
 
+/** Where the surface sits, as a share of the hero's height, for a given depth: the water closes over the headline as you go down. */
+const surfaceAt = (d: number) => Math.max(-0.12, 0.62 - d * 0.075);
+
+function HeroCopy({ tone }: { tone: "air" | "water" }) {
+  const air = tone === "air";
+  return (
+    <>
+      <h1 className="m-0 max-w-[760px] text-[clamp(46px,7.4vw,104px)] font-[680] leading-[0.92] tracking-[-0.025em] [font-stretch:86%] [text-wrap:balance]" style={{ fontFamily: DISPLAY, color: air ? INK : "#ffffff" }}>
+        Gear for the depth you actually dive.
+      </h1>
+      <p className="m-0 mt-5 max-w-[470px] text-[clamp(16px,1.7vw,19px)] leading-[1.5]" style={{ color: air ? "#33505f" : "rgba(235,246,252,.88)" }}>
+        Drag the gauge down the reef. The reds go first, the water cools, the no-stop time shrinks, and we pack the kit that suits that dive.
+      </p>
+    </>
+  );
+}
+
+/**
+ * The hero is the water. It opens at the surface with the headline in the air; then the gauge sinks to 18 m on its
+ * own and the sea rises over the words, which turn white as they go under. Drag the gauge and the surface, light,
+ * colours, readouts and packed kit all follow the depth. Reduced motion starts at 18 m without the descent.
+ */
+const noop = () => () => {};
+
 function Hero({ shared }: { shared: MotionValue<number> }) {
-  const depth = useMotionValue(4);
+  // false while hydrating (the server can't know the setting), then the visitor's real setting
+  const hydrated = useSyncExternalStore(noop, () => true, () => false);
+  const prefersReduced = useReducedMotion();
+  const reduce = hydrated && !!prefersReduced;
+  const depth = useMotionValue(0);
   const ds = useSpring(depth, { stiffness: 110, damping: 22, mass: 0.8 });
-  const [d, setD] = useState(4);
+  const [d, setD] = useState(0);
   const touched = useRef(false);
+  const sec = useRef<HTMLElement>(null);
+  const copy = useRef<HTMLDivElement>(null);
+  const secH = useMotionValue(900);
+  const copyTop = useMotionValue(140);
   useMotionValueEvent(depth, "change", (v) => {
     const r = Math.round(v);
     setD(r);
     shared.set(r);
   });
   useEffect(() => {
+    if (reduce) { depth.set(18); ds.jump(18); return; }
     const t = setTimeout(() => {
-      if (!touched.current) animate(depth, 18, { type: "spring", stiffness: 26, damping: 14 });
-    }, 900);
+      if (!touched.current) animate(depth, 18, { type: "spring", stiffness: 14, damping: 11 });
+    }, 1300);
     return () => clearTimeout(t);
-  }, [depth]);
-  const top = useTransform(ds, [0, 10, 25, 40], ["#bdeafe", "#38bdf8", "#0369a1", "#062437"]);
-  const bottom = useTransform(ds, [0, 10, 25, 40], ["#38bdf8", "#0284c7", "#074b70", "#03131f"]);
+  }, [depth, ds, reduce]);
+  useLayoutEffect(() => {
+    const measure = () => {
+      if (sec.current) secH.set(sec.current.offsetHeight);
+      if (copy.current) copyTop.set(copy.current.offsetTop);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (sec.current) ro.observe(sec.current);
+    return () => ro.disconnect();
+  }, [secH, copyTop]);
+
+  // the surface, in px from the top of the hero, and again relative to the headline block
+  // it never rises past the bar, so the nav stays in the air and readable
+  const line = useTransform([ds, secH], ([v, h]: number[]) => Math.max(84, Math.round(surfaceAt(v) * h)));
+  const rel = useTransform([line, copyTop], ([l, t]: number[]) => l - t);
+  const airClip = useMotionTemplate`inset(0px 0px calc(100% - ${rel}px) 0px)`;
+  const waterClip = useMotionTemplate`inset(${rel}px 0px 0px 0px)`;
+
+  const top = useTransform(ds, [0, 10, 25, 40], ["#5cc8f0", "#1d9bd6", "#0a5d8e", "#062437"]);
+  const bottom = useTransform(ds, [0, 10, 25, 40], ["#1a8fcc", "#0b6aa6", "#063f63", "#03131f"]);
   const bg = useMotionTemplate`linear-gradient(180deg, ${top}, ${bottom})`;
-  const rays = useTransform(ds, [0, 22], [0.55, 0]);
-  const surfaceY = useTransform(ds, [0, 8], [0, -170]);
+  const rays = useTransform(ds, [0, 22], [0.5, 0]);
   const dark = useTransform(ds, [20, 40], [0, 0.35]);
-  return (
-    <section id="top" className="relative overflow-hidden pb-16 pt-10 sm:pt-12">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px]" aria-hidden="true" style={{ background: "radial-gradient(55% 60% at 50% 0%, rgba(56,189,248,.20), transparent 70%)" }} />
-      <div className="relative mx-auto flex max-w-[1180px] flex-col items-center gap-5 px-5 text-center">
-        <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.07)]">
-          <span className="h-2 w-2 rounded-full" style={{ background: A }} />
-          Fitted and pressure-tested before it ships
-        </motion.span>
-        <h1 className="m-0 max-w-[900px] text-[clamp(42px,6.4vw,84px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
-          <Words text="Gear for the depth you actually dive." className="justify-center" accentWords={["depth"]} accent={AD} />
-        </h1>
-        <Reveal delay={0.3} y={14}>
-          <p className="m-0 max-w-[620px] text-[clamp(17px,2.1vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
-            Drag the gauge down the reef. Watch the reds go, the water cool and the no-stop time shrink, and we&apos;ll pack the kit that suits that dive.
-          </p>
-        </Reveal>
-        <Reveal delay={0.4} y={12} className="flex flex-wrap justify-center gap-3">
-          <Magnetic className="text-white" style={{ background: AD }} onClick={() => scrollToId("gear")}>Shop the gear</Magnetic>
-          <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("fit")}>Find my size</Magnetic>
-        </Reveal>
-      </div>
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.25 }}
-        className="relative mx-auto mt-8 max-w-[1240px] px-3 sm:px-5"
-      >
-        <div className="relative h-[700px] overflow-hidden rounded-[32px] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_40px_80px_-40px_rgba(3,105,161,.55)] sm:h-[620px]" onPointerDown={() => (touched.current = true)}>
-          <motion.div className="absolute inset-0" style={{ background: bg }} aria-hidden="true" />
-          <motion.div className="pointer-events-none absolute inset-0" style={{ opacity: rays }} aria-hidden="true">
-            {[12, 30, 52, 70, 86].map((l, i) => (
-              <motion.span
-                key={l}
-                className="absolute -top-10 h-[120%] w-[70px] origin-top bg-gradient-to-b from-white/70 to-transparent blur-[6px]"
-                style={{ left: `${l}%`, rotate: 14 - i * 3 }}
-                animate={{ opacity: [0.5, 1, 0.5], x: [0, 14, 0] }}
-                transition={{ duration: 5 + i, repeat: Infinity, ease: "easeInOut" }}
-              />
-            ))}
-          </motion.div>
-          <motion.div className="pointer-events-none absolute inset-x-0 top-0" style={{ y: surfaceY }} aria-hidden="true">
-            <svg viewBox="0 0 1200 60" preserveAspectRatio="none" className="block h-[44px] w-full">
-              <path d="M0 30 Q50 14 100 30 T200 30 T300 30 T400 30 T500 30 T600 30 T700 30 T800 30 T900 30 T1000 30 T1100 30 T1200 30 V0 H0Z" fill="rgba(255,255,255,.85)" />
-            </svg>
-          </motion.div>
-          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-            <Fish ds={ds} color="#ef4444" fade={[2, 8]} y="30%" dur={14} />
-            <Fish ds={ds} color="#facc15" fade={[14, 30]} y="44%" scale={0.8} dur={11} delay={1.5} flip />
-            <Fish ds={ds} color="#38bdf8" fade={[38, 40]} y="22%" scale={0.7} dur={16} delay={3} flip />
-          </div>
-          <Reef ds={ds} />
-          <motion.div className="pointer-events-none absolute inset-0 bg-[#020c14]" style={{ opacity: dark }} aria-hidden="true" />
-          <Bubbles />
-          <div className="absolute left-3 top-3 sm:left-5 sm:top-5">
-            <Readout d={d} ds={ds} />
-          </div>
-          <div className="absolute bottom-3 left-3 right-[92px] sm:bottom-5 sm:left-auto sm:right-[100px]">
-            <Packed d={d} />
-          </div>
-          <Gauge depth={depth} onTouch={() => (touched.current = true)} />
-        </div>
-        <p className="m-0 mt-4 text-center text-[13px] text-[#6e6e73]">Drag the depth gauge, or focus it and use the arrow keys. Red light is gone by about 6 m, orange by 15 m.</p>
-      </motion.div>
-    </section>
-  );
-}
 
-/* ------------------------------------------------------------------ promise strip */
-
-function Promises() {
-  const items = [
-    { to: 150, f: (n: number) => `$${Math.round(n)}`, l: "free shipping from" },
-    { to: 60, f: (n: number) => `${Math.round(n)} days`, l: "to return it, even wet" },
-    { to: 3, f: (n: number) => `${Math.round(n)} pm`, l: "order by, ships today" },
-    { to: 4.8, f: (n: number) => n.toFixed(1), l: "from 3,214 diver reviews" },
-  ];
   return (
-    <section className="mx-auto max-w-[1180px] px-5 pb-8 pt-4">
-      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
-        {items.map((it) => (
-          <div key={it.l} className="flex flex-col gap-1 border-t border-black/[.08] pt-5">
-            <Counter to={it.to} format={it.f} className="text-[clamp(32px,4.2vw,46px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
-            <span className="text-[15px] text-[#6e6e73]">{it.l}</span>
-          </div>
+    <section ref={sec} id="top" className="relative -mt-[76px] min-h-[1120px] overflow-hidden sm:min-h-[min(100svh,980px)] lg:min-h-[880px]" onPointerDown={() => (touched.current = true)} aria-label="Ocean Flow">
+      <motion.div className="absolute inset-0" style={{ background: bg }} aria-hidden="true" />
+      <motion.div className="pointer-events-none absolute inset-0" style={{ opacity: rays }} aria-hidden="true">
+        {[12, 30, 52, 70, 86].map((l, i) => (
+          <motion.span
+            key={l}
+            className="absolute top-0 h-[120%] w-[90px] origin-top bg-gradient-to-b from-white/60 to-transparent blur-[8px]"
+            style={{ left: `${l}%`, rotate: 14 - i * 3 }}
+            animate={{ opacity: [0.5, 1, 0.5], x: [0, 14, 0] }}
+            transition={{ duration: 5 + i, repeat: Infinity, ease: "easeInOut" }}
+          />
         ))}
-      </Stagger>
+      </motion.div>
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <Fish ds={ds} color="#ef4444" fade={[2, 8]} y="58%" dur={14} />
+        <Fish ds={ds} color="#facc15" fade={[14, 30]} y="66%" scale={0.8} dur={11} delay={1.5} flip />
+        <Fish ds={ds} color="#38bdf8" fade={[38, 40]} y="50%" scale={0.7} dur={16} delay={3} flip />
+      </div>
+      <Reef ds={ds} />
+      <motion.div className="pointer-events-none absolute inset-0 bg-[#020c14]" style={{ opacity: dark }} aria-hidden="true" />
+      <Bubbles />
+
+      {/* the air above the surface, with the surface itself moving along its lower edge */}
+      <motion.div className="pointer-events-none absolute inset-x-0 top-0" style={{ height: line, background: "linear-gradient(180deg,#f3f8f9 0%,#e3f0f4 100%)" }} aria-hidden="true">
+        <svg className="absolute left-0 top-full block h-[28px] w-full -translate-y-[2px]" viewBox="0 0 1440 28" preserveAspectRatio="none">
+          <path d="M0 0 H1440 V10 C1320 22 1200 2 1080 12 C960 22 840 4 720 12 C600 20 480 2 360 12 C240 22 120 4 0 12 Z" fill="#e3f0f4">
+            {reduce ? null : <animate attributeName="d" dur="5s" repeatCount="indefinite" values="M0 0 H1440 V10 C1320 22 1200 2 1080 12 C960 22 840 4 720 12 C600 20 480 2 360 12 C240 22 120 4 0 12 Z;M0 0 H1440 V14 C1320 2 1200 22 1080 10 C960 2 840 20 720 10 C600 2 480 22 360 10 C240 2 120 20 0 10 Z;M0 0 H1440 V10 C1320 22 1200 2 1080 12 C960 22 840 4 720 12 C600 20 480 2 360 12 C240 22 120 4 0 12 Z" />}
+          </path>
+        </svg>
+      </motion.div>
+
+      <div className="relative mx-auto max-w-[1180px] px-5 pt-[128px] sm:pt-[150px]">
+        {/* the headline twice, cut at the surface: ink in the air, white under water */}
+        <div ref={copy} className="relative">
+          <motion.div style={{ clipPath: airClip }}><HeroCopy tone="air" /></motion.div>
+          <motion.div className="absolute inset-0" style={{ clipPath: waterClip }} aria-hidden="true"><HeroCopy tone="water" /></motion.div>
+        </div>
+        <div className="relative mt-7 flex flex-wrap gap-3">
+          <Magnetic className="text-[#0b2233] shadow-[0_10px_24px_-12px_rgba(0,0,0,.5)] focus-visible:ring-[#0b2233]" style={{ background: HIVIS }} onClick={() => scrollToId("gear")}>Shop the gear</Magnetic>
+          <Magnetic className="bg-white text-[#0b2233] shadow-[0_0_0_1px_rgba(11,34,51,.12)] focus-visible:ring-[#0b2233]" onClick={() => scrollToId("fit")}>Find my size</Magnetic>
+        </div>
+      </div>
+
+      <div className="absolute inset-x-0 bottom-0">
+        <div className="relative mx-auto flex max-w-[1180px] flex-col items-start gap-3 px-5 pb-6 pr-[96px] sm:flex-row sm:items-end sm:justify-between sm:pb-8 sm:pr-[108px]">
+          <Readout d={d} ds={ds} />
+          <Packed d={d} />
+        </div>
+      </div>
+      <div className="absolute bottom-6 right-0 top-[52%] w-[86px] sm:bottom-8 sm:right-2 sm:top-[44%] sm:w-[92px]">
+        <Gauge depth={depth} onTouch={() => (touched.current = true)} />
+      </div>
     </section>
   );
 }
@@ -626,7 +653,7 @@ function Gear() {
   const ndl = ndlAt(depth);
   return (
     <section id="gear" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Featured gear" title="Five things every diver ends up buying." sub="We stock fewer models and test every one in the pool before it ships. Pick a colour, add it, keep scrolling." accent={AD} />
+      <SectionHead title="Five things every diver ends up buying." sub="We stock fewer models and test every one in the pool before it ships. Pick a colour, add it, keep scrolling." accent={AD} />
       <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-3">
         <Reveal y={20} className="lg:col-span-2">
           <div className={`${card} grid h-full grid-cols-1 items-center gap-8 overflow-hidden p-7 sm:grid-cols-[1fr_1.1fr] sm:p-9`}>
@@ -670,7 +697,7 @@ function Gear() {
             price={149}
             art={<motion.div key={fin} initial={{ rotate: -4 }} animate={{ rotate: 0 }} transition={{ type: "spring", stiffness: 300, damping: 12 }}><FinsArt color={f.hex} w={150} /></motion.div>}
             swatches={<Swatches options={FIN_COLOURS} value={fin} onChange={setFin} group="fin" />}
-            onAdd={() => add([{ key: `glide-${fin}`, name: "Glide fins", variant: `${f.name} · M`, price: 149, tint: f.hex }])}
+            onAdd={() => add([{ key: `glide-${fin}`, name: "Glide fins", variant: `${f.name}, M`, price: 149, tint: f.hex }])}
           />
         </Reveal>
         <Reveal y={20} delay={0.08}>
@@ -733,7 +760,7 @@ function Sizing() {
   return (
     <section id="fit" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Sizing" title="Measured once, fitted for good." sub="Most returns are fins that pinch and suits that flush. Two quick choices here prevent both." accent={AD} center />
+        <SectionHead title="Measured once, fitted for good." sub="Most returns are fins that pinch and suits that flush. Two quick choices here prevent both." accent={AD} center />
         <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-2">
           <Reveal y={20}>
             <div className={`${card} flex h-full flex-col p-7`}>
@@ -837,7 +864,7 @@ function KitBuilder() {
           </div>
         </Reveal>
         <div className="flex flex-col gap-8">
-          <SectionHead eyebrow="Build a kit" title="Your first kit, priced honestly." sub="Four pieces or more and we take 10% off the lot. No bundles padded with things you won't use." accent={AD} />
+          <SectionHead title="Your first kit, priced honestly." sub="Four pieces or more and we take 10% off the lot. No bundles padded with things you won't use." accent={AD} />
           <Reveal y={16}>
             <div className={`${card} flex flex-col p-2`}>
               {KIT.map((k) => (
@@ -899,7 +926,7 @@ function Delivery() {
   return (
     <section id="delivery" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Delivery and returns" title="From our pool to your dive bag." accent={AD} />
+        <SectionHead title="From our pool to your dive bag." accent={AD} />
         <div className="mt-6">
           <Story
             accent={AD}
@@ -942,11 +969,11 @@ function Reviews() {
     <section id="reviews" className="mx-auto max-w-[1180px] px-5 py-24">
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.8fr_1.6fr]">
         <div className="flex flex-col gap-8">
-          <SectionHead eyebrow="Reviews" title="Divers who came back up happy." accent={AD} />
+          <SectionHead title="Divers who came back up happy." accent={AD} />
           <Reveal y={16}>
             <div className={`${card} flex flex-col gap-4 p-6`}>
               <div className="flex items-baseline gap-3">
-                <Counter to={4.8} format={(n) => n.toFixed(1)} className="text-[52px] font-semibold leading-none tracking-[-0.045em] text-[#1d1d1f]" />
+                <span className="text-[52px] font-semibold leading-none tracking-[-0.03em] text-[#1d1d1f] [font-stretch:88%]" style={{ fontFamily: DISPLAY }}>4.8</span>
                 <span className="flex flex-col gap-1"><Stars /><span className="text-[13px] text-[#6e6e73]">3,214 verified orders</span></span>
               </div>
               <div className="flex flex-col gap-2">
@@ -1043,7 +1070,7 @@ function CartDrawer({ open, onClose, lines, setLines }: { open: boolean; onClose
                   <span className="text-[17px] font-semibold">Order OF-20419 is in.</span>
                   <span className="text-[14px] text-[#6e6e73]">This is a demo store, so nothing was charged.</span>
                 </div>
-                <Fit><ReceiptUnfold lines={receipt.lines} total={receipt.total} number="Order OF-20419" from="Ocean Flow" billedTo="Shipped to your saved address" paidWith="Demo order · no card charged" /></Fit>
+                <Fit><ReceiptUnfold lines={receipt.lines} total={receipt.total} number="Order OF-20419" from="Ocean Flow" billedTo="Shipped to your saved address" paidWith="Demo order, no card charged" /></Fit>
                 <button type="button" onClick={() => { setPlaced(null); onClose(); }} className="mt-auto h-11 rounded-full bg-black/5 px-6 text-[14px] font-semibold outline-none focus-visible:ring-2">Keep shopping</button>
               </div>
             ) : (
@@ -1132,17 +1159,17 @@ export function OceanFlowPage() {
     <MotionConfig reducedMotion="user">
       <CartCtx.Provider value={ctx}>
         <DepthCtx.Provider value={depth}>
-          <div className="min-h-screen bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
-            <Nav brand={<Logo />} accent={AD} cta={count ? `Bag · ${count}` : "Bag"} onCta={() => setOpen(true)} links={[{ label: "Gear", id: "gear" }, { label: "Sizing", id: "fit" }, { label: "Kits", id: "kit" }, { label: "Delivery", id: "delivery" }, { label: "Reviews", id: "reviews" }]} />
+          <div className="of min-h-screen overflow-x-clip bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
+            <style>{FONT_CSS}</style>
+            <Nav brand={<Logo />} accent={AD} cta={count ? `Bag (${count})` : "Bag"} onCta={() => setOpen(true)} links={[{ label: "Gear", id: "gear" }, { label: "Sizing", id: "fit" }, { label: "Kits", id: "kit" }, { label: "Delivery", id: "delivery" }, { label: "Reviews", id: "reviews" }]} />
             <Hero shared={depth} />
-            <Promises />
             <Gear />
             <Sizing />
             <KitBuilder />
             <Delivery />
             <Reviews />
             <section className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 pb-24 lg:grid-cols-[1fr_1.4fr]">
-              <SectionHead eyebrow="FAQ" title="Before you get wet." accent={AD} />
+              <SectionHead title="Before you get wet." accent={AD} />
               <Reveal y={16}>
                 <Faq
                   accent={AD}
@@ -1157,7 +1184,7 @@ export function OceanFlowPage() {
               </Reveal>
             </section>
             <div className="mx-auto max-w-[1180px] px-5 pb-20">
-              <CtaBand title="Your next dive starts at the door." sub="Order by 3 pm and it ships today, checked by someone who dives." cta="Shop the gear" secondary="Book a pool try-on" accent={A} glow="rgba(56,189,248,.32)" />
+              <CtaBand title="Your next dive starts at the door." sub="Order by 3 pm and it ships today, checked by someone who dives." cta="Shop the gear" secondary="Book a pool try-on" accent={A} glow="rgba(255,210,31,.22)" />
             </div>
             <Footer brand={<Logo />} note="Dive gear, fitted and pressure-tested before it ships." columns={[{ title: "Shop", links: ["Masks", "Fins", "Suits", "Computers", "Kits"] }, { title: "Help", links: ["Sizing", "Returns", "Servicing", "Shipping"] }, { title: "Visit", links: ["San Diego store", "Pool try-ons", "Dive trips", "Contact"] }]} />
 

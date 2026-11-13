@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import type { TileTint } from "@/components/gallery/types";
 import { Band, PillLink, RainbowWord } from "@/components/site";
 import { blocks } from "@/lib/catalog/blocks";
 import { blockVariants, variantAnchor } from "@/lib/catalog/block-variants";
 import { getTileFit } from "@/lib/catalog/tile-fit";
 import { createMetadata } from "@/lib/seo";
+import { getPricing } from "@/lib/region";
+import { ListingShell } from "@/components/listing/listing-shell";
+import { ListingGroupChips, ListingSidebar, RESULTS_ID, type SidebarGroup } from "@/components/listing/listing-sidebar";
+import { BLOCK_ORDER as ORDER, BLOCK_SHORT_NAME as CHIP_NAME, blockGroups } from "@/lib/catalog/listing-groups/blocks";
+import { ProBand, ProRail, type PromoCopy } from "@/components/listing/pro-promo";
 import { BlocksGallery, type BlockFilter, type BlockTileItem } from "./_catalog";
 
 export const metadata: Metadata = createMetadata({
@@ -14,65 +18,14 @@ export const metadata: Metadata = createMetadata({
   alternates: { canonical: "/blocks" },
 });
 
-/** Wall order: the liveliest blocks first. */
-const ORDER = [
-  "block-hero",
-  "block-gallery",
-  "block-pricing-section",
-  "block-features",
-  "block-checkout-moments",
-  "block-why-choose-us",
-  "block-social-proof",
-  "block-changelog",
-  "block-logo-clouds",
-  "block-navigation",
-  "block-faq-folder-card",
-  "block-newsletter",
-  "block-signup",
-  "block-comparison",
-  "block-cta",
-  "block-footer",
-  "block-404",
-  "block-sidebar",
-  "block-contact-page",
-  "block-interactive-dots",
-  "block-text-animations",
-  "block-blog-content-sections",
-];
-
-/** Shorter chip labels than the block names. */
-const CHIP_NAME: Record<string, string> = {
-  "block-hero": "Heroes",
-  "block-navigation": "Navigation",
-  "block-features": "Features",
-  "block-social-proof": "Social proof",
-  "block-newsletter": "Newsletter",
-  "block-pricing-section": "Pricing",
-  "block-checkout-moments": "Checkout",
-  "block-why-choose-us": "Feature bentos",
-  "block-logo-clouds": "Logo clouds",
-  "block-faq-folder-card": "FAQ",
-  "block-sidebar": "Sidebars",
-  "block-contact-page": "Contact",
-  "block-interactive-dots": "Backgrounds",
-  "block-text-animations": "Text animations",
-  "block-blog-content-sections": "Blog",
-  "block-gallery": "Gallery",
-  "block-changelog": "Changelog",
-  "block-404": "404 pages",
-  "block-comparison": "Comparison",
-  "block-cta": "CTA",
-  "block-footer": "Footers",
-  "block-signup": "Sign-up",
-};
-
 const TINTS: TileTint[] = ["violet", "sky", "peach", "mint", "butter", "pink"];
 
 /** The wall's New tab lists what was added in the last week of additions, counted back from the newest one (the same rule as the components wall). */
 const NEW_TAB_DAYS = 7;
 const day = (iso?: string) => (iso ? Date.parse(iso) || 0 : 0);
 
-export default function BlocksPage() {
+export default async function BlocksPage() {
+  const pricing = await getPricing();
   const bySlug = new Map(blocks.map((b) => [b.slug, b]));
   const rank = (slug: string) => {
     const i = ORDER.indexOf(slug);
@@ -121,24 +74,36 @@ export default function BlocksPage() {
   }));
   const free = items.filter((i) => !i.premium).length;
 
+  const pro = items.length - free;
+  // the same New tab the page always had (the latest additions), first, then every block
+  const fresh = items.filter((i) => i.isRecent);
+  const groups: SidebarGroup[] = [
+    ...(fresh.length ? [{ id: "new", label: "New", items: fresh.map((i) => ({ name: i.name, href: i.href, pro: i.premium })) }] : []),
+    ...blockGroups(),
+  ];
+  const copy: PromoCopy = {
+    title: ["Every block with ", "Pro", ""],
+    body: `${pro} Pro sections across ${blocks.length} blocks: heroes, pricing, checkout, navigation and more. Paste one in and make it yours.`,
+    band: "Every block with Pro",
+  };
+
   return (
     <>
-      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[136px]">
-        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1152px]">
-          <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">Blocks</h1>
-          <p className="mt-5 max-w-[640px] text-[19px] leading-[1.55] text-muted-foreground">
-            Whole sections that <RainbowWord>drop</RainbowWord> straight into a page: heroes, navigation, pricing,
-            testimonials, FAQ and more. {items.length} sections across {blocks.length} blocks, {free} of them free.
-          </p>
-        </div>
-      </section>
+      <ListingShell
+        sidebar={<ListingSidebar title="Blocks" total={items.length} groups={groups} param="block" />}
+        rail={<ProRail copy={copy} pricing={pricing} />}
+      >
+        <h1 className="pg-display text-[clamp(52px,7vw,84px)] text-foreground">Blocks</h1>
+        <p className="mt-5 max-w-[640px] text-[18px] leading-[1.55] text-muted-foreground">
+          Whole sections that <RainbowWord>drop</RainbowWord> straight into a page: heroes, navigation, pricing,
+          testimonials, FAQ and more. {items.length} sections across {blocks.length} blocks, {free} of them free.
+        </p>
 
-      <section aria-label="Block gallery" className="px-4 pb-24">
-        <div className="mx-auto max-w-[1152px]">
-          <BlocksGallery items={items} filters={filters} />
-        </div>
-      </section>
+        <section id={RESULTS_ID} aria-label="Block gallery" className="mt-10 scroll-mt-24">
+          <ListingGroupChips groups={groups} total={items.length} param="block" className="mb-4" />
+          <BlocksGallery items={items} filters={filters} afterFilters={<ProBand copy={copy} pricing={pricing} className="mt-5" />} />
+        </section>
+      </ListingShell>
 
       <Band tint="sky">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -157,16 +122,6 @@ export default function BlocksPage() {
         </div>
       </Band>
 
-      {/* every block as a plain link, for crawlers and screen-reader navigation */}
-      <nav aria-label="All blocks" className="sr-only">
-        <ul>
-          {blocks.map((b) => (
-            <li key={b.slug}>
-              <Link href={`/blocks/${b.slug}`}>{b.name}</Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
     </>
   );
 }

@@ -1,0 +1,4 @@
+The faces in this folder are from the "Notionists" illustration set by Zoe Reding (https://www.zoereding.com),
+released under CC0 1.0 Universal (public domain): https://creativecommons.org/publicdomain/zero/1.0/
+They were generated with DiceBear (https://www.dicebear.com, MIT) and minified. No attribution is required;
+it is given here as thanks. They are generic illustrations, not likenesses of anyone.

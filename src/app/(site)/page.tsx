@@ -28,7 +28,8 @@ import { SOUNDS } from "@/lib/ui-sounds";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { homeGalleryItems } from "@/lib/catalog/gallery-items";
 import { templates } from "@/lib/catalog/templates";
-import { PRICES, formatPrice } from "@/lib/pricing";
+import { GLOBAL_PRICING, type DisplayPricing } from "@/lib/pricing";
+import { getPricing } from "@/lib/region";
 import { createMetadata, siteConfig } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -41,34 +42,36 @@ export const metadata: Metadata = {
 const HOME_VIDEOS = ["launch-reel", "feature-drop", "brand-film", "whats-new"];
 
 // Dark and light alternate across the grid so the wall reads as a mix, not a single look.
-const WALL_SLUGS = ["kiln", "cairn", "strata", "wayfare", "afterglow", "side-b"];
+const WALL_SLUGS = ["kiosk", "wharf", "plotline", "kiln", "cairn", "strata"];
 
-const FAQ = [
-  {
-    q: "Are the components free?",
-    a: `${CATALOG_COUNTS.freeComponents} of the ${CATALOG_COUNTS.components} are free, with their full source. Pro unlocks the other ${CATALOG_COUNTS.proComponents}, the full source of every template and the premium blocks.`,
-  },
-  {
-    q: "What does Pro cost?",
-    a: `${formatPrice(PRICES.pro)} a year, or ${formatPrice(PRICES.allAccess)} once for lifetime access. Both unlock the same things: every Pro component, the source of every template, the premium blocks and everything we release next.`,
-  },
-  {
-    q: "Can I ask for a component?",
-    a: "Yes. Pro and All-Access members can request components, blocks and templates from the contact page. The most-asked-for ones get built next.",
-  },
-  {
-    q: "Do they work with the Next.js App Router?",
-    a: "Yes. They're written for the App Router, with client directives only where the motion needs them.",
-  },
-  {
-    q: "Can I change them?",
-    a: "Yes. The JSX, Tailwind classes and animation timings land in your repo, so you can edit anything.",
-  },
-  {
-    q: "Do they follow light and dark mode?",
-    a: "Yes. They use theme tokens, so they follow your site's theme.",
-  },
-];
+function buildFaq(pricing: DisplayPricing) {
+  return [
+    {
+      q: "Are the components free?",
+      a: `${CATALOG_COUNTS.freeComponents} of the ${CATALOG_COUNTS.components} are free, with their full source. Pro unlocks the other ${CATALOG_COUNTS.proComponents}, the full source of every template and the premium blocks.`,
+    },
+    {
+      q: "What does Pro cost?",
+      a: `${pricing.pro} a year, or ${pricing.allAccess} once for lifetime access. Both unlock the same things: every Pro component, the source of every template, the premium blocks and everything we release next.`,
+    },
+    {
+      q: "Can I ask for a component?",
+      a: "Yes. Pro and All-Access members can request components, blocks and templates from the contact page. The most-asked-for ones get built next.",
+    },
+    {
+      q: "Do they work with the Next.js App Router?",
+      a: "Yes. They're written for the App Router, with client directives only where the motion needs them.",
+    },
+    {
+      q: "Can I change them?",
+      a: "Yes. The JSX, Tailwind classes and animation timings land in your repo, so you can edit anything.",
+    },
+    {
+      q: "Do they follow light and dark mode?",
+      a: "Yes. They use theme tokens, so they follow your site's theme.",
+    },
+  ];
+}
 
 const STEPS = [
   { title: "Find it", body: "Search by name, or filter the gallery by how a component moves." },
@@ -76,7 +79,9 @@ const STEPS = [
   { title: "Add it", body: "One shadcn command drops the source into your project. It's yours to edit." },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const pricing = await getPricing();
+  const faq = buildFaq(pricing);
   const items = homeGalleryItems();
   const wall = WALL_SLUGS.map((slug) => templates.find((t) => t.slug === slug)).filter(
     (t): t is (typeof templates)[number] => !!t?.previewImages?.hero,
@@ -141,7 +146,7 @@ export default function Home() {
     {
       "@context": "https://schema.org",
       "@type": "FAQPage",
-      mainEntity: FAQ.map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+      mainEntity: buildFaq(GLOBAL_PRICING).map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
     },
     {
       "@context": "https://schema.org",
@@ -220,8 +225,8 @@ export default function Home() {
             pro={null}
             otherwise={
               <p className="mx-auto mt-5 max-w-[520px] text-[14px] leading-[1.5] text-muted-foreground">
-                Free to start. Pro unlocks everything and every new release: {formatPrice(PRICES.pro)} a year, or{" "}
-                {formatPrice(PRICES.allAccess)} once.
+                Free to start. Pro unlocks everything and every new release: {pricing.pro} a year, or{" "}
+                {pricing.allAccess} once.
               </p>
             }
           />
@@ -233,6 +238,7 @@ export default function Home() {
         <div className="mx-auto max-w-[1152px]">
           <ComponentGallery
             items={items}
+            pricing={pricing}
             limit={13}
             mobileLimit={8}
             aside={
@@ -384,7 +390,7 @@ export default function Home() {
       {/* Plans */}
       <section className="px-4 py-24 sm:py-28">
         <div className="mx-auto max-w-[1152px]">
-          <PricingTeaser />
+          <PricingTeaser pricing={pricing} />
         </div>
       </section>
 
@@ -402,7 +408,7 @@ export default function Home() {
             </p>
           </div>
           <div className="border-t border-border">
-            {FAQ.map((f) => (
+            {faq.map((f) => (
               <details key={f.q} className="group border-b border-border">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[17px] font-semibold tracking-[-0.3px] text-foreground [&::-webkit-details-marker]:hidden">
                   {f.q}
@@ -424,7 +430,7 @@ export default function Home() {
           <p className="mx-auto mt-5 max-w-[460px] text-[17px] text-white/60">
             <IfPro
               pro={`All ${CATALOG_COUNTS.components} components, every template and every block are yours.`}
-              otherwise={`${CATALOG_COUNTS.freeComponents} are free. Pro unlocks the rest, from ${formatPrice(PRICES.pro)} a year.`}
+              otherwise={`${CATALOG_COUNTS.freeComponents} are free. Pro unlocks the rest, from ${pricing.pro} a year.`}
             />
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">

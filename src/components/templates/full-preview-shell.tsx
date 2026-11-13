@@ -230,7 +230,7 @@ export function FullPreviewShell({ tmpl, isPremium = false }: { tmpl: Marketplac
                           Upgrade to access the full source code for this template.
                         </p>
                         <Link
-                          href="/pricing"
+                          href="/pricing" data-plans-source="template_preview"
                           className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-semibold text-zinc-950 transition hover:bg-zinc-200"
                         >
                           <Sparkles className="size-3.5 text-amber-500" />
@@ -355,7 +355,7 @@ export function FullPreviewShell({ tmpl, isPremium = false }: { tmpl: Marketplac
               </button>
             ) : (
               <Link
-                href="/pricing"
+                href="/pricing" data-plans-source="template_preview"
                 title="Get Pro"
                 className="hidden rounded-full p-1.5 text-muted-foreground transition hover:bg-muted/50 hover:text-foreground dark:hover:bg-white/5 sm:inline-flex"
               >
@@ -378,7 +378,7 @@ export function FullPreviewShell({ tmpl, isPremium = false }: { tmpl: Marketplac
           {codeIsLocked && (
             <div className="pl-1">
               <Link
-                href="/pricing"
+                href="/pricing" data-plans-source="template_preview"
                 className="inline-flex items-center gap-1 rounded-full bg-zinc-950 px-3 py-1.5 text-xs font-semibold text-white shadow transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 sm:gap-1.5 sm:px-4"
               >
                 <Sparkles className="size-3 fill-current text-amber-400 dark:text-amber-500 sm:size-3.5" />

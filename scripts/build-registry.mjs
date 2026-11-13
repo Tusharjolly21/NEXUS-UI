@@ -1090,6 +1090,22 @@ const BLOCK_REGISTRY_PACKAGES = [
     components: ["blocks/motion-kit/waitlist-cta"],
   },
   {
+    name: "lanyard-signup",
+    title: "Lanyard Signup",
+    description: "A signup form whose member pass hangs beside it on a lanyard and fills itself in as you type. The pass swings on a simulated rope with every keystroke, each password rule you meet stamps it, a mistake shakes it, and you can grab and fling it. Create the account and it flips over to show the finished pass.",
+    premium: true,
+    dependencies: ["framer-motion"],
+    components: ["blocks/motion-kit/lanyard-signup"],
+  },
+  {
+    name: "infinite-branches",
+    title: "Infinite Branches",
+    description: "A homepage hero where strands of light pour out of one point forever. On load they shoot out of the source; then twisted, rope-like strands fan out from behind the headline in wings to either side, over a web of thin crooked twigs far back in a cold teal haze, their surface always flowing outward with green light running inside a few of them. Every few seconds a surge floods them all with light and streaks fly out. Drawn in WebGL, with a flat canvas fallback and a still frame under reduced motion.",
+    premium: true,
+    dependencies: ["framer-motion"],
+    components: ["blocks/motion-kit/infinite-branches"],
+  },
+  {
     name: "auth-morph",
     title: "Auth Morph",
     description: "One auth card for sign in and sign up whose fields grow and fold as the mode changes, with a magic link option that ends on a check-your-inbox screen and resend timer.",

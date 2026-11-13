@@ -15,6 +15,7 @@ import {
 } from "@/lib/catalog/taxonomy";
 import { ChevronRight } from "lucide-react";
 import { ComponentGallery } from "@/components/gallery/component-gallery";
+import { getPricing } from "@/lib/region";
 import { Band, PillLink } from "@/components/site";
 import { allGalleryItems } from "@/lib/catalog/gallery-items";
 
@@ -40,6 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ComponentCategoryPage({ params }: Props) {
+  const pricing = await getPricing();
   const { category } = await params;
   if (!isComponentCategory(category)) notFound();
   const items = getCategoryComponents(category);
@@ -116,7 +118,7 @@ export default async function ComponentCategoryPage({ params }: Props) {
       <section aria-label={`${label} gallery`} className="px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
           {/* the For fun group is heavy (canvas, WebGL): its tiles start as posters and run when played */}
-          <ComponentGallery items={galleryItems} playOnClick={category === "for-fun"} />
+          <ComponentGallery items={galleryItems} pricing={pricing} playOnClick={category === "for-fun"} />
         </div>
       </section>
 

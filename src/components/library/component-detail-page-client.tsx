@@ -1,6 +1,7 @@
 "use client";
 
 import { AfterCopyProLine } from "@/components/pro/after-copy-pro-line";
+import { announceCopy } from "@/components/pro/pro-access";
 import { ProNudge, type ProPick } from "@/components/pro/pro-nudge";
 import { AutoplaySound } from "@/lib/ui-sounds";
 import * as React from "react";
@@ -23,6 +24,7 @@ import { CodeBlock } from "@/components/code-block/code-block";
 import { GalleryTile, TileCell, TileGrid } from "@/components/gallery/gallery-tile";
 import { TINT_CLASSES, type GalleryItem, type TileTint } from "@/components/gallery/types";
 import { InstallCard } from "@/components/site/install-card";
+import { FullscreenStage } from "@/components/site/fullscreen-stage";
 import { SoundSwitch, TypingSoundSwitch } from "@/components/site/sound-switch";
 import { TYPING_NOTE } from "@/lib/catalog/component-sounds";
 import { ProBadge, ProLock, useCopyBuildPrompt, useProAccess } from "@/components/pro/pro-access";
@@ -384,9 +386,21 @@ function Stage({
   const [view, setView] = React.useState<"preview" | "code">("preview");
   const { requestUpgrade } = useProAccess();
   const [run, setRun] = React.useState(0);
+  const [full, setFull] = React.useState(false);
 
   return (
     <div className={cn("rounded-tile p-3", TINT_CLASSES[tint])}>
+      {locked ? null : (
+        <FullscreenStage open={full} onClose={() => setFull(false)} title={title}>
+          {(n) => (
+            <AutoplaySound allow>
+              <FitPreview key={n}>
+                <DynamicPreview exportName={exportName} compact={false} />
+              </FitPreview>
+            </AutoplaySound>
+          )}
+        </FullscreenStage>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-2 px-1 pb-3">
         <div role="tablist" aria-label={`${title} view`} className="flex gap-1 rounded-full bg-card/80 p-1">
           {(["preview", "code"] as const).map((v) => (
@@ -442,15 +456,15 @@ function Stage({
               </span>
             </button>
           ) : (
-            <Link
-              href={`/live-preview/${slug}${variant ? `?v=${variant.index}` : ""}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Open full-screen preview in a new tab"
+            <button
+              type="button"
+              onClick={() => setFull(true)}
+              aria-label={`Show ${title} full screen`}
+              aria-haspopup="dialog"
               className="pg-glass grid size-9 place-items-center rounded-full bg-card text-foreground"
             >
               <Expand className="size-4" aria-hidden />
-            </Link>
+            </button>
           )}
         </div>
       </div>
@@ -458,11 +472,16 @@ function Stage({
       {view === "preview" ? (
         <div className="flex min-h-[460px] overflow-hidden rounded-[20px] bg-card">
           <PreviewShield active={locked} className="flex w-full">
-            <HeardWhenVisible variantId={variant?.anchor}>
-              <FitPreview key={run}>
-                <DynamicPreview exportName={exportName} compact={false} />
-              </FitPreview>
-            </HeardWhenVisible>
+            {/* while it is full screen the page copy stands aside, so the two never play (or sound) at once */}
+            {full ? (
+              <div className="flex min-h-[460px] w-full items-center justify-center text-[14px] text-muted-foreground">Showing full screen</div>
+            ) : (
+              <HeardWhenVisible variantId={variant?.anchor}>
+                <FitPreview key={run}>
+                  <DynamicPreview exportName={exportName} compact={false} />
+                </FitPreview>
+              </HeardWhenVisible>
+            )}
           </PreviewShield>
         </div>
       ) : (
@@ -475,7 +494,7 @@ function Stage({
               enabled: true,
               showDots: true,
               title: "Usage example",
-              copy: { enabled: true, label: "Copy code", copiedLabel: "Copied", copiedDurationMs: 1400 },
+              copy: { enabled: true, label: "Copy code", copiedLabel: "Copied", copiedDurationMs: 1400, onCopied: announceCopy },
             }}
             codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
             border={{ radius: "20px" }}
@@ -492,6 +511,8 @@ function Stage({
           .
         </p>
       ) : null}
+      {/* Under the first preview, where the code and prompt buttons are: the free-copy note shows here too */}
+      {!locked && (!variant || variant.index === 0) ? <AfterCopyProLine slug={slug} listen /> : null}
     </div>
   );
 }
@@ -578,7 +599,7 @@ function InstallPanel({
 }) {
   const command = installCommand(registryCliName ?? slug);
   const extra = getExtraLibraries(dependencies);
-  const { requestUpgrade } = useProAccess();
+  const { requestUpgrade, pricing } = useProAccess();
 
   if (locked) {
     return (
@@ -588,6 +609,15 @@ function InstallPanel({
         <p className="mt-1.5 text-[14px] leading-relaxed text-muted-foreground">
           Preview it as much as you like. The source, the one-line install and the playground come with Pro.
         </p>
+        {pricing ? (
+          <p className="mt-3 text-[14px] leading-relaxed text-foreground">
+            <span className="font-semibold tabular-nums">{pricing.pro}</span>
+            <span className="text-muted-foreground"> a year, or </span>
+            <span className="font-semibold tabular-nums">{pricing.allAccess}</span>
+            <span className="text-muted-foreground"> once for </span>
+            <span className="whitespace-nowrap text-muted-foreground">All-Access.</span>
+          </p>
+        ) : null}
         <button
           type="button"
           onClick={() => requestUpgrade(name)}
@@ -598,6 +628,7 @@ function InstallPanel({
         </button>
         <Link
           href="/pricing"
+          data-plans-source="component_card"
           className="mt-2 inline-flex h-9 w-full items-center justify-center text-[14px] font-medium text-link hover:underline hover:underline-offset-4"
         >
           See what Pro includes
@@ -1208,7 +1239,7 @@ export function ComponentDetailPageClient({
     <>
       <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[128px]">
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1152px]">
+        <div className="relative mx-auto max-w-[var(--item-w,1152px)]">
           <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[14px] text-muted-foreground">
             <Link href="/components" className="hover:text-foreground">
               Components
@@ -1280,7 +1311,7 @@ export function ComponentDetailPageClient({
       </section>
 
       <div className="px-4 pb-24">
-        <div className="mx-auto max-w-[1152px]">
+        <div className="mx-auto max-w-[var(--item-w,1152px)]">
           <div id="preview" className="grid scroll-mt-28 gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
             <div className="grid min-w-0 gap-10">
               {sections.length > 1 ? (

@@ -93,7 +93,7 @@ export function LaunchBanner({ isPro = false }: { isPro?: boolean }) {
             <span aria-hidden className="hidden text-white/30 md:inline">|</span>
             {left || loading ? (
               <Link
-                href="/pricing"
+                href="/pricing" data-plans-source="banner"
                 className="inline-flex items-center gap-1.5 rounded-full bg-[#ff9f0a]/[0.16] px-2.5 py-0.5 text-[#ffd60a] ring-1 ring-inset ring-[#ff9f0a]/35"
               >
                 <span aria-hidden className="relative flex size-1.5 shrink-0">
@@ -108,7 +108,7 @@ export function LaunchBanner({ isPro = false }: { isPro?: boolean }) {
             ) : (
               "Pro unlocks the rest."
             )}
-            <Link href="/pricing" className="hidden whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4 md:inline">
+            <Link href="/pricing" data-plans-source="banner" className="hidden whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4 md:inline">
               See plans ›
             </Link>
           </span>

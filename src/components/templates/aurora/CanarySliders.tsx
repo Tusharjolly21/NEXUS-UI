@@ -152,7 +152,7 @@ export default function CanarySliders({ accent = "#047857", autoplay = false, se
 
   return (
     <div className="flex flex-col gap-5 rounded-[24px] bg-white px-7 py-6 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)]" onPointerDown={() => (touched.current = true)}>
-      <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">{title}</span>
+      <span className="text-[13px] font-semibold text-[#6e6e73]">{title}</span>
       {SETTINGS_.map((s, i) => <BoltSlider key={s.id} s={s} accent={accent} demo={demo[i]} />)}
       <span className="text-[12px] text-[#6e6e73]">{hint}</span>
     </div>

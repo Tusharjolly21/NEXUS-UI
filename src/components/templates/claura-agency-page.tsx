@@ -4,7 +4,9 @@
  * runs custom AI agents for businesses. Built on Motion Kit: Upload Chips,
  * Matrix Loaders, Swipe Stack (as a draft review queue), Standing Calendar,
  * Expanding Card, Elastic Stepper, Ruler Picker, Price Odometer digits and
- * Progress Button, plus the shared template parts.
+ * Progress Button, plus the shared template parts. The hero is one person's
+ * working week: the repetitive blocks lift out, one job at a time, into the
+ * agents' lane, and leave free time behind. Familjen Grotesk.
  */
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, animate, motion, motionValue, useReducedMotion, useTransform, type MotionValue } from "framer-motion";
@@ -18,11 +20,16 @@ import ReviewStack from "@/components/templates/lumis/ReviewStack";
 import StandingCalendar from "@/components/templates/lumis/StandingCalendar";
 import BookButton from "@/components/templates/lumis/BookButton";
 import { StickyStory } from "@/components/templates/lumis/StickyStory";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Spotlight, Stagger, card, scrollToId } from "@/components/templates/kit/parts";
+import WeekHandover from "@/components/templates/lumis/WeekHandover";
+import { fontFaces } from "@/components/templates/kit/fonts";
+import { CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Spotlight, Stagger, card, scrollToId } from "@/components/templates/kit/parts";
 
-const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
-const A = "#a21caf"; // fuchsia, 6.3:1 on white
-const SOFT = "#fdf4ff";
+const SYSTEM_FONT = "'Familjen Grotesk Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const A = "#c2441d"; // brick, 5.6:1 on white
+const INK = "#1f1b16";
+const SOFT = "#fff1ea";
+const FREE = "#ffe27a"; // highlighter yellow: time handed back
+const FONT_CSS = fontFaces("lumis", [{ family: "Familjen Grotesk Variable", file: "familjen-grotesk", weight: "400 700" }]);
 const spring = { type: "spring", stiffness: 320, damping: 28 } as const;
 
 function useMq(q: string) {
@@ -60,8 +67,8 @@ const TASKS: { label: string; hours: number; who: string; steps: Step[] }[] = [
     label: "Answer support email", hours: 26, who: "Ana",
     steps: [
       { k: "trigger", t: "New email arrives at support@", s: "Trigger" },
-      { k: "agent", t: "Reads it and finds the order", s: "Agent · 2 s" },
-      { k: "agent", t: "Drafts a reply from your help docs", s: "Agent · 6 s" },
+      { k: "agent", t: "Reads it and finds the order", s: "Agent, 2 s" },
+      { k: "agent", t: "Drafts a reply from your help docs", s: "Agent, 6 s" },
       { k: "human", t: "Your team checks the draft", s: "Human" },
       { k: "done", t: "Sends it and tags the ticket", s: "Done" },
     ],
@@ -70,8 +77,8 @@ const TASKS: { label: string; hours: number; who: string; steps: Step[] }[] = [
     label: "Chase unpaid invoices", hours: 9, who: "Rui",
     steps: [
       { k: "trigger", t: "Invoice is 7 days overdue", s: "Trigger" },
-      { k: "agent", t: "Checks the bank feed for payment", s: "Agent · 1 s" },
-      { k: "agent", t: "Writes a nudge in your tone", s: "Agent · 4 s" },
+      { k: "agent", t: "Checks the bank feed for payment", s: "Agent, 1 s" },
+      { k: "agent", t: "Writes a nudge in your tone", s: "Agent, 4 s" },
       { k: "human", t: "Finance approves the batch", s: "Human" },
       { k: "done", t: "Sends and books the next reminder", s: "Done" },
     ],
@@ -80,8 +87,8 @@ const TASKS: { label: string; hours: number; who: string; steps: Step[] }[] = [
     label: "Qualify new leads", hours: 14, who: "Sam",
     steps: [
       { k: "trigger", t: "Someone fills in your contact form", s: "Trigger" },
-      { k: "agent", t: "Researches the company", s: "Agent · 20 s" },
-      { k: "agent", t: "Scores it against your best customers", s: "Agent · 3 s" },
+      { k: "agent", t: "Researches the company", s: "Agent, 20 s" },
+      { k: "agent", t: "Scores it against your best customers", s: "Agent, 3 s" },
       { k: "human", t: "Sales lead reviews the score", s: "Human" },
       { k: "done", t: "Books a call or sends a guide", s: "Done" },
     ],
@@ -90,8 +97,8 @@ const TASKS: { label: string; hours: number; who: string; steps: Step[] }[] = [
     label: "Book jobs from calls", hours: 18, who: "Lena",
     steps: [
       { k: "trigger", t: "Missed call leaves a voicemail", s: "Trigger" },
-      { k: "agent", t: "Transcribes it and finds the job", s: "Agent · 5 s" },
-      { k: "agent", t: "Finds a free slot on the crew rota", s: "Agent · 2 s" },
+      { k: "agent", t: "Transcribes it and finds the job", s: "Agent, 5 s" },
+      { k: "agent", t: "Finds a free slot on the crew rota", s: "Agent, 2 s" },
       { k: "human", t: "Dispatcher confirms the slot", s: "Human" },
       { k: "done", t: "Texts the customer their booking", s: "Done" },
     ],
@@ -260,7 +267,7 @@ function WorkflowCanvas() {
                     )}
                   </AnimatePresence>
                 ) : (
-                  <span className="text-[12px] tabular-nums text-[#6e6e73]">{done && s > 4 ? `Done · ${T.hours} h a week back` : st.s}</span>
+                  <span className="text-[12px] tabular-nums text-[#6e6e73]">{done && s > 4 ? `Done, ${T.hours} h a week back` : st.s}</span>
                 )}
               </motion.div>
             </motion.div>
@@ -297,67 +304,48 @@ function WorkflowCanvas() {
 
 function Hero() {
   return (
-    <section className="relative px-3 pb-10 pt-4 sm:px-5 sm:pt-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.985 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: "spring", stiffness: 120, damping: 22 }}
-        className="relative mx-auto max-w-[1280px] overflow-hidden rounded-[32px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_40px_80px_-50px_rgba(162,28,175,.45)]"
-      >
-        <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ backgroundImage: "radial-gradient(rgba(0,0,0,.09) 1px, transparent 1px)", backgroundSize: "22px 22px", maskImage: "linear-gradient(180deg,#000,rgba(0,0,0,.5))" }} />
-        <div className="pointer-events-none absolute -right-40 -top-40 h-[520px] w-[520px] rounded-full" aria-hidden="true" style={{ background: "radial-gradient(closest-side, rgba(217,70,239,.20), transparent)" }} />
-        <div className="relative flex flex-col gap-8 p-5 sm:p-8 lg:p-10">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.25fr_1fr] lg:items-end">
-            <div className="flex flex-col items-start gap-5">
-              <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.1 }} className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]">
-                <motion.span className="h-2 w-2 rounded-full" style={{ background: A }} animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.4, repeat: Infinity }} />
-                AI automation agency<span className="hidden sm:inline"> · 61 agents in production</span>
-              </motion.span>
-              <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.15 }} className="m-0 text-[clamp(40px,6.4vw,84px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
-                AI agents for the <span style={{ color: A }}>boring half</span> of your business.
-              </motion.h1>
-            </div>
-            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.25 }} className="flex flex-col gap-5">
-              <p className="m-0 text-[clamp(17px,1.6vw,19px)] leading-[1.45] tracking-[-0.01em] text-[#6e6e73]">
-                We design, build and run custom agents for companies with 10 to 500 people. They work inside the tools you already use, and they ask a person before anything important goes out.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Magnetic className="text-white shadow-[0_10px_30px_-12px_rgba(162,28,175,.8)]" style={{ background: A, ["--tw-ring-color" as string]: A }} onClick={() => scrollToId("book")}>Book a 30-min call</Magnetic>
-                <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.1)]" style={{ ["--tw-ring-color" as string]: A }} onClick={() => scrollToId("work")}>See client results</Magnetic>
-              </div>
-            </motion.div>
+    <section id="top" className="relative overflow-hidden">
+      <div className="relative mx-auto max-w-[1180px] px-5 pb-16 pt-12 sm:pt-16">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.3fr_1fr] lg:items-end lg:gap-14">
+          <div className="flex flex-col items-start gap-5">
+            <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.1 }} className="text-[14px] font-medium text-[#6b6660]">
+              AI automation agency for teams of 10 to 500
+            </motion.span>
+            <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.15 }} className="m-0 text-[clamp(42px,6.6vw,88px)] font-[680] leading-[0.95] tracking-[-0.045em] [text-wrap:balance]" style={{ color: INK }}>
+              AI agents for the boring half of your business.
+            </motion.h1>
           </div>
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.35 }}>
-            <WorkflowCanvas />
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.25 }} className="flex flex-col gap-5 lg:pb-2">
+            <p className="m-0 text-[clamp(17px,1.7vw,19px)] leading-[1.5] text-[#57524b]">
+              We design, build and run custom agents that take the repetitive work off your team&rsquo;s week. They work inside the tools you already use, and they ask a person before anything important goes out.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Magnetic className="text-white" style={{ background: INK, ["--tw-ring-color" as string]: INK }} onClick={() => scrollToId("book")}>Book a 30-min call</Magnetic>
+              <Magnetic className="bg-white text-[#1f1b16] shadow-[inset_0_0_0_1px_rgba(31,27,22,.18)]" style={{ ["--tw-ring-color" as string]: INK }} onClick={() => scrollToId("work")}>See client results</Magnetic>
+            </div>
           </motion.div>
         </div>
-      </motion.div>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.3 }} className="mt-12 rounded-[28px] bg-white p-4 shadow-[0_0_0_1px_rgba(31,27,22,.08),0_40px_80px_-50px_rgba(31,27,22,.45)] sm:p-7">
+          <WeekHandover ink={INK} accent="#ff8a5c" free={FREE} line="rgba(31,27,22,.08)" />
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/** How one handed-over job runs, step by step, with a person approving before it goes out. */
+function Flow() {
+  return (
+    <section id="flow" className="mx-auto max-w-[1180px] px-5 py-20">
+      <SectionHead title="Inside one of those jobs." sub="Every agent runs the same way: it reads, it drafts, a person on your team approves, then it finishes. Pick a job and watch it run." accent={A} />
+      <div className="mt-10 rounded-[28px] bg-white p-5 shadow-[0_0_0_1px_rgba(31,27,22,.08)] sm:p-8">
+        <WorkflowCanvas />
+      </div>
     </section>
   );
 }
 
 /* ------------------------------------------------------------------ proof + services */
-
-function Proof() {
-  const items = [
-    { to: 61, f: (n: number) => `${Math.round(n)}`, l: "agents running for clients today" },
-    { to: 38, f: (n: number) => `${Math.round(n)}k`, l: "hours handed back in 2026 so far" },
-    { to: 6, f: (n: number) => `${Math.round(n)} wks`, l: "median from first call to live" },
-    { to: 100, f: (n: number) => `${Math.round(n)}%`, l: "of outbound messages checked by a rule you set" },
-  ];
-  return (
-    <section className="mx-auto max-w-[1180px] px-5 py-14" aria-label="Lumis in numbers">
-      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
-        {items.map((it) => (
-          <div key={it.l} className="flex flex-col gap-2 border-t border-black/[.08] pt-6">
-            <Counter to={it.to} format={it.f} className="text-[clamp(38px,4.6vw,54px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
-            <span className="text-[15px] leading-[1.4] text-[#6e6e73]">{it.l}</span>
-          </div>
-        ))}
-      </Stagger>
-    </section>
-  );
-}
 
 const SERVICES = [
   { p: 0, t: "Support agents", d: "Triage the inbox, answer the routine questions from your docs, and hand the tricky ones to a person with a summary.", n: "Typically 20–30 h a week back" },
@@ -370,10 +358,10 @@ function Services() {
   return (
     <section id="services" className="bg-[#f5f5f7] py-20 sm:py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="What we build" title="Four kinds of agent cover most of the dull work." sub="Every agent is built for one job in one company. We don't sell a platform, we hand you working software and stay to look after it." accent={A} />
+        <SectionHead title="Four kinds of agent cover most of the dull work." sub="Every agent is built for one job in one company. We don't sell a platform, we hand you working software and stay to look after it." accent={A} />
         <Stagger className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2">
           {SERVICES.map((s) => (
-            <Spotlight key={s.t} className={`${card} h-full p-7`} color="rgba(217,70,239,.10)">
+            <Spotlight key={s.t} className={`${card} h-full p-7`} color="rgba(194,68,29,.10)">
               <div className="flex h-full flex-col gap-4">
                 <div className="flex items-center gap-3">
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl" style={{ background: SOFT }}><MatrixLoader pattern={s.p} size={30} color={A} /></span>
@@ -394,14 +382,14 @@ function Services() {
 
 function TestBoard() {
   const rows = [
-    { p: 0, t: "Replaying 1,240 past tickets", s: "Week 3 · 82% matched your best replies" },
+    { p: 0, t: "Replaying 1,240 past tickets", s: "Week 3: 82% matched your best replies" },
     { p: 3, t: "Checking every refund rule", s: "14 of 14 policies covered" },
     { p: 5, t: "Red-teaming angry customers", s: "60 hostile emails, 0 promises made" },
     { p: 2, t: "Load test, Monday-morning volume", s: "p95 reply drafted in 7.4 s" },
   ];
   return (
     <div className={`${card} flex w-[440px] flex-col gap-1 p-4`}>
-      <span className="px-3 pb-2 pt-1 text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Test runs before launch</span>
+      <span className="px-3 pb-2 pt-1 text-[13px] font-semibold text-[#6e6e73]">Test runs before launch</span>
       {rows.map((r, i) => (
         <motion.div key={r.t} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ ...spring, delay: i * 0.08 }} className="flex items-center gap-4 rounded-2xl px-3 py-3 hover:bg-[#f5f5f7]">
           <MatrixLoader pattern={r.p} size={32} color={A} />
@@ -418,15 +406,15 @@ function TestBoard() {
 function Process() {
   return (
     <section id="process" className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
-      <SectionHead eyebrow="How a project runs" title="Live in about six weeks, with you in the loop the whole way." accent={A} />
+      <SectionHead title="Live in about six weeks, with you in the loop the whole way." accent={A} />
       <div className="mt-6">
         <StickyStory
           accent={A}
           steps={[
-            { kicker: "Week 1 · Audit", title: "We sit with the people doing the work.", body: "Two days of shadowing and a pile of real examples. Send us macros, exports and screen recordings; we come back with the three jobs worth automating first, and the ones that aren't.", visual: <div className={`${card} w-[440px] p-6`}><UploadChips accent={A} autoplay /></div> },
-            { kicker: "Weeks 2–4 · Build", title: "Agents trained on your history, tested on it too.", body: "We build against your real data, then replay months of past work through the agent before a customer ever sees it. You get the scores, not a demo.", visual: <TestBoard /> },
-            { kicker: "Week 5 · Approve", title: "Nothing goes out until a person says so.", body: "Every draft lands in a review queue in Slack or the browser. Swipe right to send, left to hold. As trust builds, you choose which kinds of message can skip the queue.", visual: <div className={`${card} p-6`}><ReviewStack accent={A} autoplay /></div> },
-            { kicker: "Week 6 on · Run", title: "We run it, watch it, and send you the numbers.", body: "Monitoring, fixes and monthly tuning are part of the deal. Each column is a day of work your agents handled; stand the grid up to see the busy weeks.", visual: <div className={`${card} w-[600px] p-6`}><StandingCalendar weeks={26} noun="tasks handled" autoplay /></div> },
+            { kicker: "Week 1: audit", title: "We sit with the people doing the work.", body: "Two days of shadowing and a pile of real examples. Send us macros, exports and screen recordings; we come back with the three jobs worth automating first, and the ones that aren't.", visual: <div className={`${card} w-[440px] p-6`}><UploadChips accent={A} autoplay /></div> },
+            { kicker: "Weeks 2 to 4: build", title: "Agents trained on your history, tested on it too.", body: "We build against your real data, then replay months of past work through the agent before a customer ever sees it. You get the scores, not a demo.", visual: <TestBoard /> },
+            { kicker: "Week 5: approve", title: "Nothing goes out until a person says so.", body: "Every draft lands in a review queue in Slack or the browser. Swipe right to send, left to hold. As trust builds, you choose which kinds of message can skip the queue.", visual: <div className={`${card} p-6`}><ReviewStack accent={A} autoplay /></div> },
+            { kicker: "Week 6 on: run", title: "We run it, watch it, and send you the numbers.", body: "Monitoring, fixes and monthly tuning are part of the deal. Each column is a day of work your agents handled; stand the grid up to see the busy weeks.", visual: <div className={`${card} w-[600px] p-6`}><StandingCalendar weeks={26} noun="tasks handled" autoplay /></div> },
           ]}
         />
       </div>
@@ -441,13 +429,13 @@ function Work() {
     <section id="work" className="bg-[#f5f5f7] py-20 sm:py-24">
       <div className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 lg:grid-cols-[1fr_1.05fr]">
         <div className="flex flex-col gap-8">
-          <SectionHead eyebrow="Client results" title="Small teams, real hours back." sub="Open a card to read the story. Numbers are measured over the first three months after launch." accent={A} />
+          <SectionHead title="Small teams, real hours back." sub="Open a card to read the story. Numbers are measured over the first three months after launch." accent={A} />
           <Reveal y={14}>
             <figure className={`${card} m-0 flex flex-col gap-4 p-7`}>
               <blockquote className="m-0 text-[19px] leading-[1.45] tracking-[-0.01em] text-[#1d1d1f]">&ldquo;I expected a chatbot. We got three agents that do the work my team dreaded, and a monthly report that tells me exactly how much.&rdquo;</blockquote>
               <figcaption className="flex items-center gap-3 text-[14px] text-[#6e6e73]">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-semibold text-white" style={{ background: A }} aria-hidden="true">PM</span>
-                <span><span className="font-semibold text-[#1d1d1f]">Priya Menon</span> · COO, Kestrel Freight</span>
+                <span><span className="font-semibold text-[#1d1d1f]">Priya Menon</span>, COO, Kestrel Freight</span>
               </figcaption>
             </figure>
           </Reveal>
@@ -456,8 +444,8 @@ function Work() {
           <ExpandableCard
             autoplay
             cards={[
-              { id: "brightline", eyebrow: "Dental · 12 clinics", title: "The front desk got its afternoons back", art: "radial-gradient(120% 90% at 20% 10%,#fae8ff 0%,rgba(250,232,255,0) 60%),radial-gradient(90% 80% at 90% 90%,#f0abfc 0%,rgba(240,171,252,0) 60%),#fdf4ff", body: ["Receptionists at Brightline spent half of every afternoon on reschedules and insurance emails. A phone agent now handles reschedules by text, and an inbox agent answers insurance questions from each clinic's own policy sheet.", "31 hours a week back across 12 clinics, and no-shows down 18% because reminders now go out on time, every time."] },
-              { id: "kestrel", eyebrow: "Freight · 40 people", title: "Invoices that chase themselves", art: "radial-gradient(120% 90% at 20% 10%,#ffe4e6 0%,rgba(255,228,230,0) 60%),radial-gradient(90% 80% at 90% 90%,#e9d5ff 0%,rgba(233,213,255,0) 60%),#faf5ff", body: ["Kestrel's two-person finance team was a month behind on chasing. Their finance agent checks the bank feed each morning, drafts reminders in their tone and queues them for one batch approval.", "Average days to get paid fell from 47 to 29, and the team closed the month on the 3rd instead of the 12th."] },
+              { id: "brightline", eyebrow: "Dental, 12 clinics", title: "The front desk got its afternoons back", art: "linear-gradient(180deg,#ffe27a 0 55%,transparent 55%),repeating-linear-gradient(-45deg,#e6e2dc 0 8px,#ece9e4 8px 16px)", body: ["Receptionists at Brightline spent half of every afternoon on reschedules and insurance emails. A phone agent now handles reschedules by text, and an inbox agent answers insurance questions from each clinic's own policy sheet.", "31 hours a week back across 12 clinics, and no-shows down 18% because reminders now go out on time, every time."] },
+              { id: "kestrel", eyebrow: "Freight, 40 people", title: "Invoices that chase themselves", art: "linear-gradient(180deg,transparent 45%,#ffe27a 45%),repeating-linear-gradient(-45deg,#e6e2dc 0 8px,#ece9e4 8px 16px)", body: ["Kestrel's two-person finance team was a month behind on chasing. Their finance agent checks the bank feed each morning, drafts reminders in their tone and queues them for one batch approval.", "Average days to get paid fell from 47 to 29, and the team closed the month on the 3rd instead of the 12th."] },
             ]}
           />
         </Reveal>
@@ -476,7 +464,7 @@ function Roi() {
   const payback = value ? Math.max(1, Math.round(18000 / (value / 4.33))) : 0;
   return (
     <section id="pricing" className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
-      <SectionHead eyebrow="Is it worth it?" title="Do the maths before you call us." sub="Tell us how many people do the work and for how long. We assume the agent takes 60% of it, which is our median across 2026 projects." accent={A} center />
+      <SectionHead title="Do the maths before you call us." sub="Tell us how many people do the work and for how long. We assume the agent takes 60% of it, which is our median across 2026 projects." accent={A} center />
       <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Reveal y={16}>
           <div className={`${card} flex h-full flex-col gap-8 p-7`}>
@@ -549,7 +537,7 @@ function Book() {
     <section id="book" className="bg-[#f5f5f7] py-20 sm:py-24">
       <div className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 lg:grid-cols-[1fr_1.1fr]">
         <div className="flex flex-col gap-8">
-          <SectionHead eyebrow="Book a call" title="Thirty minutes, no slides." sub="Bring one job that eats your team's week. You'll talk to an engineer, not a salesperson, and leave knowing whether an agent can do it." accent={A} />
+          <SectionHead title="Thirty minutes, no slides." sub="Bring one job that eats your team's week. You'll talk to an engineer, not a salesperson, and leave knowing whether an agent can do it." accent={A} />
           <Stagger className="flex flex-col gap-4">
             {["We ask how the work is done today", "We tell you honestly if it's a fit", "You get a written follow-up within a day"].map((t) => (
               <span key={t} className="flex items-center gap-3 text-[16px] text-[#1d1d1f]">
@@ -590,9 +578,9 @@ function Book() {
             </div>
             <div className="flex flex-col items-start gap-4 border-t border-black/[.06] pt-5 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-[14px] text-[#1d1d1f]" aria-live="polite">
-                {free ? <><span className="font-semibold">{D.d} {D.n}, {SLOTS[slot]}</span> · 30 min video call</> : "That slot just went. Pick another."}
+                {free ? <><span className="font-semibold">{D.d} {D.n}, {SLOTS[slot]}</span>, 30 min video call</> : "That slot just went. Pick another."}
               </span>
-              <BookButton key={`${day}-${slot}`} label="Book the call" doneLabel="Booked · see invite" accent={A} />
+              <BookButton key={`${day}-${slot}`} label="Book the call" doneLabel="Booked, see the invite" accent={A} />
             </div>
           </div>
         </Reveal>
@@ -606,17 +594,18 @@ function Book() {
 export function ClauraAgencyPage() {
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
-        <Nav brand={<Logo />} accent={A} cta="Book a call" onCta={() => scrollToId("book")} links={[{ label: "Services", id: "services" }, { label: "Process", id: "process" }, { label: "Results", id: "work" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
+      <div className="min-h-screen overflow-x-clip bg-[#f7f7f5] text-[#1f1b16] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
+        <style>{FONT_CSS}</style>
+        <Nav brand={<Logo />} accent={INK} cta="Book a call" onCta={() => scrollToId("book")} links={[{ label: "Services", id: "services" }, { label: "Process", id: "process" }, { label: "Results", id: "work" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
         <Hero />
-        <Proof />
+        <Flow />
         <Services />
         <Process />
         <Work />
         <Roi />
         <Book />
         <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-20 sm:py-24 lg:grid-cols-[1fr_1.4fr]">
-          <SectionHead eyebrow="FAQ" title="The questions everyone asks." accent={A} />
+          <SectionHead title="The questions everyone asks." accent={A} />
           <Reveal y={16}>
             <Faq
               accent={A}
@@ -631,7 +620,7 @@ export function ClauraAgencyPage() {
           </Reveal>
         </section>
         <div className="mx-auto max-w-[1180px] px-5 pb-20">
-          <CtaBand title="Give the boring half to an agent." sub="Book a 30-minute call. If we can't save your team at least ten hours a week, we'll say so." cta="Book a call" secondary="Read client results" accent={A} glow="rgba(217,70,239,.32)" />
+          <CtaBand title="Give the boring half to an agent." sub="Book a 30-minute call. If we can't save your team at least ten hours a week, we'll say so." cta="Book a call" secondary="Read client results" accent={A} glow="rgba(194,68,29,.32)" />
         </div>
         <Footer brand={<Logo />} note="Custom AI agents, built and run for small and mid-sized companies. Based in Lisbon, working across Europe." columns={[{ title: "Agents", links: ["Support", "Finance", "Sales", "Phone"] }, { title: "Company", links: ["Process", "Results", "Careers", "Contact"] }, { title: "Trust", links: ["Security", "Data processing", "Status"] }]} />
       </div>
