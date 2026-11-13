@@ -9,7 +9,7 @@ import { trackEvent } from "@/lib/track";
 /** Time a visitor without Pro spends browsing (tab visible, summed across pages) before the Pro offer shows itself. */
 export const AUTO_PROMPT_AFTER_MS = 45_000;
 /** The offer shows itself at most once in this many days, closed or not. */
-const AUTO_PROMPT_EVERY_DAYS = 7;
+const AUTO_PROMPT_EVERY_DAYS = 3;
 
 const BROWSED_KEY = "nx:pro-auto-browsed-ms"; // sessionStorage: browsing time this visit
 const LAST_SHOWN_KEY = "nx:pro-auto-last-shown"; // localStorage: when it last showed itself
