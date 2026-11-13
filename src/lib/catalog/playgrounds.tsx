@@ -253,6 +253,21 @@ import { PeelDelete } from "@/components/peel-delete";
 import { UploadMorph } from "@/components/upload-morph";
 import { VoiceMorph } from "@/components/voice-morph";
 import { FaceScanMorph } from "@/components/face-scan-morph";
+import { LEDButton } from "@/components/led-button";
+import { GlassCompare } from "@/components/glass-compare";
+import { SilkPrint } from "@/components/silk-print";
+import { GlyphRain } from "@/components/glyph-rain";
+import { AirmailGlobe } from "@/components/airmail-globe";
+import { MagicCalendar } from "@/components/magic-calendar";
+import { SandDriftGallery } from "@/components/sand-drift-gallery";
+import { DiffusionLoader } from "@/components/diffusion-loader";
+import { WarpCTA } from "@/components/warp-cta";
+import { PrintStyles } from "@/components/print-styles";
+import { InspectText } from "@/components/inspect-text";
+import { SoapBubble } from "@/components/soap-bubble";
+import { InkDropPicker } from "@/components/ink-drop-picker";
+import { TearOffCoupon } from "@/components/tear-off-coupon";
+import { BreadcrumbBranch } from "@/components/breadcrumb-branch";
 import { ClockPicker } from "@/components/clock-picker";
 import { VineProgress } from "@/components/vine-progress";
 import { BloomGiftCard } from "@/components/bloom-gift-card";
@@ -4916,7 +4931,326 @@ export const playgrounds: Record<string, Playground> = {
         />
       </div>
     ),
+  },  "led-button": {
+    lightOnly: true,
+    componentName: "LEDButton",
+    importPath: "@/components/led-button",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "label", label: "Label", options: ["Copy prompt", "Download", "Subscribe"], defaultValue: "Copy prompt" },
+      { kind: "select", prop: "done", label: "Done text", options: ["Copied", "Done", "Sent"], defaultValue: "Copied" },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[420px] justify-center">
+        <LEDButton
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          label={v.label as string}
+          done={v.done as string}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
   },
+  "glass-compare": {
+    lightOnly: true,
+    componentName: "GlassCompare",
+    importPath: "@/components/glass-compare",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "range", prop: "defaultValue", label: "Starting position", min: 0.1, max: 0.9, step: 0.05, defaultValue: 0.5 },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[520px] justify-center">
+        <GlassCompare
+          key={`${String(v.autoplay)}-${String(v.defaultValue)}`}
+          autoplay={v.autoplay as boolean}
+          defaultValue={v.defaultValue as number}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "silk-print": {
+    lightOnly: true,
+    componentName: "SilkPrint",
+    importPath: "@/components/silk-print",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "defaultColourway", label: "Colourway", options: ["indigo", "saffron", "moss"], defaultValue: "indigo" },
+      { kind: "select", prop: "price", label: "Price", options: ["$185", "$120", "$240"], defaultValue: "$185" },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <SilkPrint
+          key={`${String(v.autoplay)}-${String(v.defaultColourway)}`}
+          autoplay={v.autoplay as boolean}
+          defaultColourway={v.defaultColourway as string}
+          price={v.price as string}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "glyph-rain": {
+    lightOnly: true,
+    componentName: "GlyphRain",
+    importPath: "@/components/glyph-rain",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "code", label: "Code", options: ["404", "500", "410"], defaultValue: "404" },
+      { kind: "select", prop: "title", label: "Title", options: ["Nothing at this address", "This page wandered off", "Lost in the rain"], defaultValue: "Nothing at this address" },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[880px] justify-center">
+        <GlyphRain
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          code={v.code as string}
+          title={v.title as string}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "airmail-globe": {
+    lightOnly: true,
+    componentName: "AirmailGlobe",
+    importPath: "@/components/airmail-globe",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <AirmailGlobe
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "magic-calendar": {
+    lightOnly: true,
+    componentName: "MagicCalendar",
+    importPath: "@/components/magic-calendar",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[400px] justify-center">
+        <MagicCalendar
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "sand-drift-gallery": {
+    lightOnly: true,
+    componentName: "SandDriftGallery",
+    importPath: "@/components/sand-drift-gallery",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "range", prop: "scatter", label: "Sand scatter", min: 40, max: 260, step: 10, defaultValue: 150 },
+      { kind: "range", prop: "drift", label: "Drift speed", min: 0, max: 60, step: 2, defaultValue: 22 },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[900px] justify-center">
+        <SandDriftGallery
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          scatter={v.scatter as number}
+          drift={v.drift as number}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "diffusion-loader": {
+    lightOnly: true,
+    componentName: "DiffusionLoader",
+    importPath: "@/components/diffusion-loader",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "range", prop: "steps", label: "Steps", min: 10, max: 50, step: 1, defaultValue: 30 },
+      { kind: "range", prop: "duration", label: "Duration", min: 2, max: 10, step: 0.2, defaultValue: 5.2 },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[440px] justify-center">
+        <DiffusionLoader
+          key={`${String(v.autoplay)}-${String(v.steps)}-${String(v.duration)}`}
+          autoplay={v.autoplay as boolean}
+          steps={v.steps as number}
+          duration={v.duration as number}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "warp-cta": {
+    lightOnly: true,
+    componentName: "WarpCTA",
+    importPath: "@/components/warp-cta",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "label", label: "Label", options: ["Deploy at warp speed", "Launch", "Ship it"], defaultValue: "Deploy at warp speed" },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[440px] justify-center">
+        <WarpCTA
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          label={v.label as string}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "print-styles": {
+    lightOnly: true,
+    componentName: "PrintStyles",
+    importPath: "@/components/print-styles",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "defaultStyle", label: "Starting style", options: ["original", "mac", "pocket", "newsprint", "riso"], defaultValue: "newsprint" },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <PrintStyles
+          key={`${String(v.autoplay)}-${String(v.defaultStyle)}`}
+          autoplay={v.autoplay as boolean}
+          defaultStyle={v.defaultStyle as "original" | "mac" | "pocket" | "newsprint" | "riso"}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "inspect-text": {
+    lightOnly: true,
+    componentName: "InspectText",
+    importPath: "@/components/inspect-text",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[520px] justify-center">
+        <InspectText
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "soap-bubble": {
+    lightOnly: true,
+    componentName: "SoapBubble",
+    importPath: "@/components/soap-bubble",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "to", label: "Kudos to", options: ["Priya", "Sam", "the team"], defaultValue: "Priya" },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[440px] justify-center">
+        <SoapBubble
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          to={v.to as string}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "ink-drop-picker": {
+    lightOnly: true,
+    componentName: "InkDropPicker",
+    importPath: "@/components/ink-drop-picker",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "label", label: "Label", options: ["Accent colour", "Brand colour", "Theme"], defaultValue: "Accent colour" },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[340px] justify-center">
+        <InkDropPicker
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          label={v.label as string}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "tear-off-coupon": {
+    lightOnly: true,
+    componentName: "TearOffCoupon",
+    importPath: "@/components/tear-off-coupon",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "offer", label: "Offer", options: ["20% off", "Free shipping", "$10 off"], defaultValue: "20% off" },
+      { kind: "select", prop: "brand", label: "Brand", options: ["Lumen", "Northwind", "Kite"], defaultValue: "Lumen" },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[380px] justify-center">
+        <TearOffCoupon
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          offer={v.offer as string}
+          brand={v.brand as string}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "breadcrumb-branch": {
+    lightOnly: true,
+    componentName: "BreadcrumbBranch",
+    importPath: "@/components/breadcrumb-branch",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[900px] justify-center">
+        <BreadcrumbBranch
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+
   "gold-star-rating": {
     lightOnly: true,
     componentName: "GoldStarRating",

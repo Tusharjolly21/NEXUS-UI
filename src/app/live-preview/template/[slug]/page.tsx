@@ -175,6 +175,26 @@ const HooplaPage = nextDynamic(
   { loading: TemplateFallback },
 );
 
+const OutpostPage = nextDynamic(
+  () => import("@/components/templates/outpost-page").then((m) => ({ default: m.OutpostPage })),
+  { loading: TemplateFallback },
+);
+
+const SurfacedPage = nextDynamic(
+  () => import("@/components/templates/surfaced-page").then((m) => ({ default: m.SurfacedPage })),
+  { loading: TemplateFallback },
+);
+
+const NightwatchPage = nextDynamic(
+  () => import("@/components/templates/nightwatch-page").then((m) => ({ default: m.NightwatchPage })),
+  { loading: TemplateFallback },
+);
+
+const UpdraftPage = nextDynamic(
+  () => import("@/components/templates/updraft-page").then((m) => ({ default: m.UpdraftPage })),
+  { loading: TemplateFallback },
+);
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -232,6 +252,14 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><PlotlinePage /></ThemeReceiver>;
   } else if (tmpl.slug === "hoopla") {
     return <ThemeReceiver><HooplaPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "outpost") {
+    return <ThemeReceiver><OutpostPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "surfaced") {
+    return <ThemeReceiver><SurfacedPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "nightwatch") {
+    return <ThemeReceiver><NightwatchPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "updraft") {
+    return <ThemeReceiver><UpdraftPage /></ThemeReceiver>;
   } else if (tmpl.slug === "nexus-ai-launch") {
     return <ThemeReceiver><NexusAiLaunchTemplatePage /></ThemeReceiver>;
   } else if (tmpl.slug === "noir-studio") {

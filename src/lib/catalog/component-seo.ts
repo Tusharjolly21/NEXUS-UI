@@ -4,6 +4,81 @@
  * Search Console shows people actually typing (pages ranking ~5–30 with no clicks yet).
  */
 export const COMPONENT_SEO: Record<string, { title: string; description: string }> = {
+  "led-button": {
+    title: "React LED Button: Dot-Matrix Copy Button",
+    description:
+      "React LED button whose label is spelled in tiny glowing lamps, with a pointer glow, ripple press and scrolling marquee. WebGL + Framer Motion + Tailwind CSS.",
+  },
+  "glass-compare": {
+    title: "React Before After Image Slider with Glass",
+    description:
+      "React before/after image comparison slider whose divider is a bar of refracting glass that bends, smears and sprays droplets. Framer Motion + Tailwind CSS.",
+  },
+  "silk-print": {
+    title: "React 3D Product Card: Animated Silk Cloth",
+    description:
+      "React product card with a WebGL silk scarf that ripples in the breeze, turns on its rod and changes colourway. Framer Motion + Tailwind CSS.",
+  },
+  "glyph-rain": {
+    title: "React 404 Page: Matrix-style Glyph Rain",
+    description:
+      "React 404 hero of falling characters that settle into a hidden message where your pointer lingers. WebGL + Framer Motion + Tailwind CSS.",
+  },
+  "magic-calendar": {
+    title: "React Calendar Component: Festival Celebrations",
+    description:
+      "React month calendar that celebrates about fifty world festivals with snow, fireworks, lanterns and candles. Canvas + Framer Motion + Tailwind CSS.",
+  },
+  "airmail-globe": {
+    title: "React Globe Message Composer: Airmail Plane",
+    description:
+      "React message composer that folds a postcard into a paper plane and flies it round a real sunlit globe. WebGL + Framer Motion + Tailwind CSS.",
+  },
+  "sand-drift-gallery": {
+    title: "React Image Carousel: Sand Particle Gallery",
+    description:
+      "React infinite image carousel whose pictures blow away into sand at the edges as you drag and fling it. WebGL + Framer Motion + Tailwind CSS.",
+  },
+  "diffusion-loader": {
+    title: "React AI Image Loader: Diffusion Placeholder",
+    description:
+      "React image-generation loader that resolves from noise to a sharp picture step by step, like a diffusion model. WebGL + Framer Motion + Tailwind CSS.",
+  },
+  "warp-cta": {
+    title: "React Warp Speed Button: Animated Deploy CTA",
+    description:
+      "React CTA button that spools up a starfield into warp streaks on hover and jumps on click. WebGL + Framer Motion + Tailwind CSS.",
+  },
+  "print-styles": {
+    title: "React Image Filter Picker: Halftone and Riso",
+    description:
+      "React image style picker that prints a picture as 1-bit, newsprint halftone or risograph, with a print head and loupe. Framer Motion + Tailwind CSS.",
+  },
+  "inspect-text": {
+    title: "React Text Effect: Design Tool Inspector",
+    description:
+      "React intro paragraph where every word is a layer with a selection frame, size tags and red measurement lines. Framer Motion + Tailwind CSS.",
+  },
+  "soap-bubble": {
+    title: "React Kudos Button: Hold to Blow a Soap Bubble",
+    description:
+      "React kudos button you hold to blow a thin-film soap bubble that floats off and pops. WebGL shader + Framer Motion + Tailwind CSS.",
+  },
+  "ink-drop-picker": {
+    title: "React Color Picker: Ink Drop Fluid Simulation",
+    description:
+      "React accent colour picker that drops ink into water with a GPU fluid simulation, then flows the colour into the UI. Framer Motion + Tailwind CSS.",
+  },
+  "tear-off-coupon": {
+    title: "React Coupon Component: Tear-off Promo Code",
+    description:
+      "React promo code coupon with a holographic ticket and a stub you tear off hole by hole to reveal the code. Framer Motion + Tailwind CSS.",
+  },
+  "breadcrumb-branch": {
+    title: "React Breadcrumb Navigation: Animated Branch",
+    description:
+      "React breadcrumb that grows as a living tree branch with leaves, buds and a hopping sparrow. Framer Motion + Tailwind CSS.",
+  },
   "eclipse-toggle": {
     title: "React Dark Mode Toggle: Animated Sunset Switch",
     description:

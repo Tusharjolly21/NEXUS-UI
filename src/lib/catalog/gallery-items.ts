@@ -406,6 +406,23 @@ const TINT_OF: Record<string, TileTint> = {
  * are all gathered, newest first, under the wall's New tab (see NEW_TAB_DAYS).
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // thirtieth (Motion Kit Everyday: Magic Calendar)
+  "magic-calendar",
+  // twenty-ninth batch (Motion Kit Everyday: LED Button, Glass Compare, Silk Print, Glyph Rain, Airmail Globe, Sand Drift Gallery, Diffusion Loader, Warp CTA, Print Styles, Inspect Text, Soap Bubble, Ink Drop Picker, Tear-off Coupon, Breadcrumb Branch)
+  "led-button",
+  "glass-compare",
+  "silk-print",
+  "glyph-rain",
+  "airmail-globe",
+  "sand-drift-gallery",
+  "diffusion-loader",
+  "warp-cta",
+  "print-styles",
+  "inspect-text",
+  "soap-bubble",
+  "ink-drop-picker",
+  "tear-off-coupon",
+  "breadcrumb-branch",
   // twenty-eighth batch (Motion Kit Everyday: Eclipse Toggle, Peel Delete, Bubble Tags, Lens Search, Neon Star Rating, the morphs)
   "eclipse-toggle",
   "peel-delete",
@@ -652,6 +669,21 @@ export const MOTION_KIT_ORDER: string[] = [
 
 /** The homepage set, in order: newest interactions first, then the best of the rest. */
 export const HOME_PICKS: string[] = [
+  "magic-calendar",
+  "led-button",
+  "glass-compare",
+  "silk-print",
+  "glyph-rain",
+  "airmail-globe",
+  "sand-drift-gallery",
+  "diffusion-loader",
+  "warp-cta",
+  "print-styles",
+  "inspect-text",
+  "soap-bubble",
+  "ink-drop-picker",
+  "tear-off-coupon",
+  "breadcrumb-branch",
   "eclipse-toggle",
   "peel-delete",
   "bubble-tags",
