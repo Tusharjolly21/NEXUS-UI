@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /** Drawn rather than an emoji: flag emoji render as the letters "IN" on Windows. */
-function IndiaFlag() {
+export function IndiaFlag() {
   return (
     <svg viewBox="0 0 18 12" aria-hidden className="h-3 w-[18px] shrink-0 overflow-hidden rounded-[2px]">
       <rect width="18" height="4" fill="#FF9933" />

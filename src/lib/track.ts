@@ -16,6 +16,8 @@ export type FunnelEvent =
   | "after_copy_shown"
   | "pro_row_click"
   | "pro_wall_hit"
+  | "pro_auto_prompt"
+  | "pro_auto_prompt_action"
   | "plans_click"
   | "login_completed";
 
