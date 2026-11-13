@@ -4,7 +4,9 @@
  * run runbooks and incidents inside guardrails, with a full audit trail.
  * Built from Motion Kit components: Capsule Toggles, Folder Peek, Copy Buttons
  * (command line), Page Curl, Standing Calendar (teal copy), Radio Cards and
- * Matrix Loaders. The hero is an incident console with an autonomy dial.
+ * Matrix Loaders. The hero is a 2am control room: a live p95 latency chart
+ * whose outage gets shorter or longer as you move the autonomy dial on the
+ * incident console beneath it. Red Hat Display and Red Hat Mono.
  */
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent as RPointerEvent } from "react";
 import { AnimatePresence, MotionConfig, animate, motion, useMotionValue, useSpring, useTransform, useVelocity } from "framer-motion";
@@ -15,10 +17,18 @@ import PageCurl from "@/components/templates/kit/components/PageCurl";
 import RadioCards from "@/components/templates/kit/components/RadioCards";
 import { MatrixLoader } from "@/components/templates/kit/components/MatrixLoaders";
 import IncidentCalendar from "@/components/templates/orion/incident-calendar";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, StickyStory, Words, ease, scrollToId } from "@/components/templates/kit/parts";
+import { LatencyChart } from "@/components/templates/orion/latency-chart";
+import { ScaleBox } from "@/components/templates/kit/blocks";
+import { fontFaces } from "@/components/templates/kit/fonts";
+import { CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, StickyStory, Words, ease, scrollToId } from "@/components/templates/kit/parts";
 
-const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
-const MONO = "ui-monospace, 'SF Mono', Menlo, monospace";
+const FONT = "'Red Hat Display Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const MONO = "'Red Hat Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace";
+const NIGHT = { bg: "#0a1517", line: "#1c2b2e", text: "#e4efee", muted: "#8ea6a6", teal: "#5cd0c3", hot: "#ff7a5c", warn: "#f2b84b" };
+const FONT_CSS = fontFaces("orion", [
+  { family: "Red Hat Display Variable", file: "red-hat-display" },
+  { family: "Red Hat Mono Variable", file: "red-hat-mono" },
+]);
 const A = "#0e7490";
 const AMBER = "#8a4b00";
 const C = "rounded-[24px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)]";
@@ -193,22 +203,12 @@ function AutonomyDial({ value, onChange }: { value: number; onChange: (v: number
   );
 }
 
-function Console() {
+/** The replay both the chart and the console follow. */
+function useReplay() {
   const [level, setLevel] = useState(3);
   const [cap, setCap] = useState(50);
   const [run, setRun] = useState(0);
   const [step, setStep] = useState(0);
-  const { ev, mttr, paged } = script(level, cap);
-  const cur = ev[Math.min(step, ev.length - 1)];
-  const finished = step >= ev.length - 1;
-  const pos = useSpring(0, { stiffness: 120, damping: 20 });
-  const packet = useTransform(pos, (v) => `${(v / 5) * 100}%`);
-  const fill = useTransform(pos, (v) => v / 5);
-
-  useEffect(() => {
-    pos.set(cur.s);
-  }, [cur.s, pos]);
-
   // Replay the incident whenever the policy changes, one event at a time.
   useEffect(() => {
     const ts: number[] = [];
@@ -221,6 +221,23 @@ function Console() {
     }
     return () => ts.forEach(clearTimeout);
   }, [level, cap, run]);
+  return { level, setLevel, cap, setCap, run, setRun, step };
+}
+
+type Replay = ReturnType<typeof useReplay>;
+
+function Console({ r }: { r: Replay }) {
+  const { level, setLevel, cap, setCap, run, setRun, step } = r;
+  const { ev, mttr, paged } = script(level, cap);
+  const cur = ev[Math.min(step, ev.length - 1)];
+  const finished = step >= ev.length - 1;
+  const pos = useSpring(0, { stiffness: 120, damping: 20 });
+  const packet = useTransform(pos, (v) => `${(v / 5) * 100}%`);
+  const fill = useTransform(pos, (v) => v / 5);
+
+  useEffect(() => {
+    pos.set(cur.s);
+  }, [cur.s, pos]);
 
   const shownEv = ev.slice(0, step + 1);
   const agentActs = ev.filter((e) => e.who === "agent" && e.s >= 3).length;
@@ -238,7 +255,7 @@ function Console() {
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr]">
         <div className="flex flex-col gap-7 border-b border-black/[.06] bg-[#f7f8f9] p-6 lg:border-b-0 lg:border-r">
           <div>
-            <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#6e6e73]">Policy for checkout-api</span>
+            <span className="text-[13px] font-semibold text-[#6e6e73]">Policy for checkout-api</span>
             <p className="m-0 mt-2 min-h-[42px] text-[14px] leading-[1.45] text-[#424245]">{LEVELS[level].d}</p>
           </div>
           <AutonomyDial value={level} onChange={setLevel} />
@@ -259,7 +276,7 @@ function Console() {
         <div className="flex min-w-0 flex-col gap-6 p-5 sm:p-7">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <span className="text-[12px] font-semibold text-[#6e6e73]">Sev 2 · started 02:14 · checkout-api</span>
+              <span className="text-[12px] font-semibold text-[#6e6e73]">Sev 2, started 02:14, checkout-api</span>
               <h3 className="m-0 mt-1 text-[clamp(18px,2.2vw,22px)] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Checkout is slow after a deploy</h3>
             </div>
             <div className="flex gap-5">
@@ -316,7 +333,7 @@ function Console() {
                   {shownEv.map((e, i) => (
                     <motion.li key={`${run}-${level}-${cap}-${i}`} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={spring} className="flex min-w-0 items-start gap-2.5 text-[12.5px] leading-[1.4]">
                       <span className="flex-none tabular-nums text-[#6e6e73]" style={{ fontFamily: MONO }}>{e.t}</span>
-                      <span className="mt-[1px] flex-none rounded px-1.5 text-[10.5px] font-bold uppercase tracking-[0.04em]" style={{ background: e.who === "agent" ? "#e0f2f6" : e.who === "gate" ? "#fff4e0" : "#ececf0", color: e.who === "agent" ? A : e.who === "gate" ? AMBER : "#1d1d1f" }}>
+                      <span className="mt-[1px] flex-none rounded px-1.5 text-[11px] font-bold" style={{ background: e.who === "agent" ? "#e0f2f6" : e.who === "gate" ? "#fff4e0" : "#ececf0", color: e.who === "agent" ? A : e.who === "gate" ? AMBER : "#1d1d1f" }}>
                         {e.who === "agent" ? "Orion" : e.who === "gate" ? "Policy" : "Human"}
                       </span>
                       <span className="min-w-0 text-[#1d1d1f]">{e.text}</span>
@@ -346,38 +363,48 @@ function Console() {
 }
 
 function Hero() {
+  const r = useReplay();
+  const { ev, mttr } = script(r.level, r.cap);
+  const finished = r.step >= ev.length - 1;
   return (
-    <section id="top" className="relative overflow-hidden pb-16 pt-12 lg:pb-24 lg:pt-14">
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(50% 45% at 20% 0%, rgba(165,219,230,.45), transparent 70%), radial-gradient(40% 40% at 90% 30%, rgba(14,116,144,.10), transparent 70%)" }} />
+    <section id="top" className="relative -mt-[76px] overflow-hidden pb-16 pt-[128px] lg:pb-24 lg:pt-[150px]" style={{ background: NIGHT.bg, color: NIGHT.text }}>
       <div className="relative mx-auto max-w-[1180px] px-5">
         <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-[1.45fr_1fr] lg:gap-14">
           <div className="flex flex-col items-start gap-6">
-            <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.07)]" style={{ fontFamily: MONO }}>
-              <span className="h-2 w-2 rounded-full" style={{ background: A }} />
-              INC-2291 is replaying below
+            <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="inline-flex items-center gap-2 text-[13px]" style={{ fontFamily: MONO, color: NIGHT.muted }}>
+              <motion.span className="h-2 w-2 rounded-full" style={{ background: finished ? NIGHT.teal : NIGHT.hot }} animate={finished ? { opacity: 1 } : { opacity: [1, 0.3, 1] }} transition={{ duration: 1.2, repeat: finished ? 0 : Infinity }} />
+              {finished ? `INC-2291 resolved in ${mttr}` : "INC-2291 is replaying, 02:14 checkout-api"}
             </motion.span>
-            <h1 className="m-0 text-[clamp(40px,5.8vw,74px)] font-semibold leading-[1] tracking-[-0.05em] text-[#1d1d1f] [text-wrap:balance]">
-              <Words text="Incidents fixed at machine speed, inside your rules." accentWords={["inside", "your", "rules."]} accent={A} />
+            <h1 className="m-0 text-[clamp(40px,6vw,80px)] font-[680] leading-[0.98] tracking-[-0.04em] [text-wrap:balance]">
+              <Words text="Incidents fixed at machine speed, inside your rules." />
             </h1>
           </div>
-          <div className="flex flex-col items-start gap-6 lg:pb-3">
-            <Reveal delay={0.35} y={14}>
-              <p className="m-0 text-[clamp(17px,1.8vw,20px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
-                Orion agents run your runbooks when alerts fire: diagnose, plan, act, verify. How far they go on their own is a policy you set per service, and every step lands in an audit trail you can hand to a regulator.
-              </p>
-            </Reveal>
-            <Reveal delay={0.45} y={14} className="flex flex-wrap gap-3">
-              <Magnetic className="text-white shadow-[0_12px_30px_-12px_rgba(14,116,144,.8)]" style={{ background: A }} onClick={() => scrollToId("pricing")}>Book a pilot</Magnetic>
-              <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("governance")}>How governance works</Magnetic>
-            </Reveal>
-          </div>
+          <motion.div className="flex flex-col items-start gap-6 lg:pb-3" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease, delay: 0.35 }}>
+            <p className="m-0 text-[clamp(16px,1.7vw,18px)] leading-[1.55]" style={{ color: NIGHT.muted }}>
+              Orion agents run your runbooks when alerts fire: diagnose, plan, act, verify. How far they go on their own is a policy you set per service, and every step lands in an audit trail you can hand to a regulator.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Magnetic className="font-semibold" style={{ background: NIGHT.teal, color: "#04201d" }} onClick={() => scrollToId("pricing")}>Book a pilot</Magnetic>
+              <Magnetic className="text-[#e4efee] shadow-[inset_0_0_0_1px_rgba(228,239,238,.2)]" style={{ background: "transparent" }} onClick={() => scrollToId("governance")}>How governance works</Magnetic>
+            </div>
+          </motion.div>
         </div>
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 110, damping: 20, delay: 0.25 }} className="mt-10">
-          <Console />
+
+        {/* the outage itself: its length is set by the dial below */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.3 }} className="mt-12" style={{ fontFamily: MONO }}>
+          <div className="mb-2 flex items-baseline justify-between text-[12.5px]" style={{ color: NIGHT.muted }}>
+            <span><span style={{ color: NIGHT.text }}>checkout-api</span> p95 latency, 02:00 to 02:42</span>
+            <span className="hidden sm:inline">Move the dial. The outage changes shape.</span>
+          </div>
+          <ScaleBox w={1180} h={240}>
+            <LatencyChart events={ev} step={r.step} ink={NIGHT.teal} muted={NIGHT.muted} line={NIGHT.line} hot={NIGHT.hot} warn={NIGHT.warn} />
+          </ScaleBox>
         </motion.div>
-        <Reveal y={10} delay={0.2} className="mt-4">
-          <p className="m-0 text-center text-[13px] text-[#6e6e73]">Drag the autonomy dial or change the host limit. The same 02:14 incident replays under your rule.</p>
-        </Reveal>
+
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 110, damping: 20, delay: 0.25 }} className="mt-8">
+          <Console r={r} />
+        </motion.div>
+        <p className="m-0 mt-4 text-center text-[13px]" style={{ color: NIGHT.muted }}>Drag the autonomy dial or change the host limit. The same 02:14 incident replays under your rule.</p>
       </div>
     </section>
   );
@@ -385,33 +412,12 @@ function Hero() {
 
 /* ------------------------------------------------------------------ */
 
-function Proof() {
-  const items = [
-    { to: 71, f: (n: number) => `${Math.round(n)}%`, l: "of Sev 2 and Sev 3 incidents closed without paging anyone" },
-    { to: 4.6, f: (n: number) => `${n.toFixed(1)} min`, l: "median time to resolve with autonomy on" },
-    { to: 0, f: () => "0", l: "actions taken outside a written policy" },
-  ];
-  return (
-    <section className="border-y border-black/[.06] bg-white" aria-label="Orion in numbers">
-      <div className="mx-auto grid max-w-[1180px] grid-cols-1 gap-8 px-5 py-12 md:grid-cols-3">
-        {items.map((it, i) => (
-          <Reveal key={it.l} delay={i * 0.06} y={14} className="flex items-baseline gap-4">
-            <Counter to={it.to} format={it.f} className="flex-none text-[clamp(36px,4.4vw,48px)] font-semibold tracking-[-0.045em]" />
-            <span className="text-[15px] leading-[1.4] text-[#6e6e73]">{it.l}</span>
-          </Reveal>
-        ))}
-      </div>
-      <p className="mx-auto mb-0 mt-0 max-w-[1180px] px-5 pb-8 text-[12px] text-[#6e6e73]">Figures from a sample pilot of 40 services over 90 days. Placeholder data.</p>
-    </section>
-  );
-}
-
 function Runbooks() {
   return (
     <section id="runbooks" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
         <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-[1.3fr_1fr]">
-          <SectionHead eyebrow="Runbooks" title="The runbooks you already wrote, finally executable." sub="Import Markdown, wiki pages or scripts. Orion turns each one into steps, marks which are reversible, and runs them in a dry run before anything is live." accent={A} />
+          <SectionHead title="The runbooks you already wrote, finally executable." sub="Import Markdown, wiki pages or scripts. Orion turns each one into steps, marks which are reversible, and runs them in a dry run before anything is live." accent={A} />
           <Reveal y={16} className="flex flex-col gap-3">
             <CopyCommand command="orion import ./runbooks --dry-run" />
             <span className="text-[13px] text-[#6e6e73]">Read-only by default. Nothing runs until a policy says it may.</span>
@@ -419,9 +425,9 @@ function Runbooks() {
         </div>
         <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-3">
           {[
-            { t: "Deploys", m: "14 runbooks · 9 reversible", c: A },
-            { t: "Databases", m: "8 runbooks · 2 reversible", c: "#155e75" },
-            { t: "Capacity", m: "11 runbooks · 11 reversible", c: "#0891b2" },
+            { t: "Deploys", m: "14 runbooks, 9 reversible", c: A },
+            { t: "Databases", m: "8 runbooks, 2 reversible", c: "#155e75" },
+            { t: "Capacity", m: "11 runbooks, all reversible", c: "#0891b2" },
           ].map((f, i) => (
             <Reveal key={f.t} delay={i * 0.06} y={18}>
               <div className={`${C} flex h-full flex-col items-center px-6 pb-6`}>
@@ -438,9 +444,9 @@ function Runbooks() {
 /* ------------------------------------------------------------------ */
 
 const SCOPES = [
-  { id: "restart", l: "Restart pods", h: "Reversible · used 212 times" },
-  { id: "scale", l: "Scale up to 2x", h: "Reversible · used 87 times" },
-  { id: "rollback", l: "Roll back a deploy", h: "Reversible · needs 38+ hosts check" },
+  { id: "restart", l: "Restart pods", h: "Reversible, used 212 times" },
+  { id: "scale", l: "Scale up to 2x", h: "Reversible, used 87 times" },
+  { id: "rollback", l: "Roll back a deploy", h: "Reversible, checks the host limit" },
   { id: "dns", l: "Change DNS", h: "Slow to undo" },
   { id: "db", l: "Fail over a database", h: "Not reversible" },
 ];
@@ -451,7 +457,7 @@ function ScopeCard() {
   return (
     <div className={`${C} w-[420px] overflow-hidden`}>
       <div className="flex items-center justify-between px-5 pb-2 pt-5">
-        <span className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#6e6e73]">Scope · checkout-api</span>
+        <span className="text-[13px] font-semibold text-[#6e6e73]">Scope for checkout-api</span>
         <span className="text-[13px] font-semibold tabular-nums" style={{ color: A }}>{count} of 5 allowed</span>
       </div>
       <ul className="m-0 list-none divide-y divide-[#f0f0f3] p-0">
@@ -475,7 +481,7 @@ function PauseCard() {
   return (
     <div className={`${C} flex w-[420px] flex-col gap-5 p-6`}>
       <div className="flex items-center justify-between">
-        <span className="text-[13px] font-semibold text-[#1d1d1f]">RB-12 · Roll back a bad deploy</span>
+        <span className="text-[13px] font-semibold text-[#1d1d1f]">RB-12: Roll back a bad deploy</span>
         <span className="text-[12px] font-semibold" style={{ color: paused ? AMBER : A }}>{paused ? "Paused at step 3" : "Running"}</span>
       </div>
       <ol className="m-0 flex list-none flex-col gap-2 p-0">
@@ -506,7 +512,7 @@ function TwoPersonCard() {
   ];
   return (
     <div className={`${C} flex w-[420px] flex-col gap-5 p-6`}>
-      <span className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#6e6e73]">Needs two people</span>
+      <span className="text-[13px] font-semibold text-[#6e6e73]">Needs two people</span>
       <span className="text-[19px] font-semibold leading-[1.3] tracking-[-0.02em] text-[#1d1d1f]">Fail over the orders database to us-east-2</span>
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
         {people.map((p, i) => (
@@ -533,7 +539,7 @@ function ChainCard() {
   return (
     <div className={`${C} flex w-[440px] flex-col gap-3 p-6`}>
       <div className="flex items-center justify-between">
-        <span className="text-[13px] font-semibold text-[#1d1d1f]">Audit trail · INC-2291</span>
+        <span className="text-[13px] font-semibold text-[#1d1d1f]">Audit trail for INC-2291</span>
         <span className="flex items-center gap-2 text-[12px] font-semibold" style={{ color: A }}><MatrixLoader pattern={5} size={16} color={A} /> Chain verified</span>
       </div>
       <ul className="m-0 flex list-none flex-col p-0" style={{ fontFamily: MONO }}>
@@ -553,15 +559,15 @@ function ChainCard() {
 function Governance() {
   return (
     <section id="governance" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Governance" title="Autonomy you can explain to your auditor." sub="Every agent works inside a scope, can be stopped mid-step, and leaves a record that cannot be quietly edited." accent={A} />
+      <SectionHead title="Autonomy you can explain to your auditor." sub="Every agent works inside a scope, can be stopped mid-step, and leaves a record that cannot be quietly edited." accent={A} />
       <div className="mt-10">
         <StickyStory
           accent={A}
           steps={[
-            { kicker: "01 · Scope", title: "Each service gets a scope.", body: "List what an agent may do on its own. Anything outside the list becomes a request to a person, with the plan and the evidence attached.", visual: <ScopeCard /> },
-            { kicker: "02 · Pause", title: "Stop any run mid-step.", body: "Every runbook checkpoints between steps. Pause from the console, Slack or the API, and Orion resumes from exactly where it stopped.", visual: <PauseCard /> },
-            { kicker: "03 · Two people", title: "Two people for the big moves.", body: "Database failovers, region moves and anything irreversible need two approvers from different teams. Orion enforces it, nobody has to remember.", visual: <TwoPersonCard /> },
-            { kicker: "04 · Record", title: "A trail nobody can quietly edit.", body: "Alerts, decisions, approvals and commands are chained by hash and streamed to your SIEM. Export a full incident as one file.", visual: <ChainCard /> },
+            { kicker: "Scope", title: "Each service gets a scope.", body: "List what an agent may do on its own. Anything outside the list becomes a request to a person, with the plan and the evidence attached.", visual: <ScopeCard /> },
+            { kicker: "Pause", title: "Stop any run mid-step.", body: "Every runbook checkpoints between steps. Pause from the console, Slack or the API, and Orion resumes from exactly where it stopped.", visual: <PauseCard /> },
+            { kicker: "Two people", title: "Two people for the big moves.", body: "Database failovers, region moves and anything irreversible need two approvers from different teams. Orion enforces it, nobody has to remember.", visual: <TwoPersonCard /> },
+            { kicker: "Record", title: "A trail nobody can quietly edit.", body: "Alerts, decisions, approvals and commands are chained by hash and streamed to your SIEM. Export a full incident as one file.", visual: <ChainCard /> },
           ]}
         />
       </div>
@@ -573,7 +579,7 @@ function Governance() {
 
 const PM_FRONT = (
   <div className="flex h-full flex-col gap-3 p-6">
-    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6e6e73]">Postmortem draft · INC-2291</span>
+    <span className="text-[13px] font-semibold text-[#6e6e73]">Postmortem draft for INC-2291</span>
     <span className="text-[20px] font-semibold leading-[1.2] tracking-[-0.025em] text-[#1d1d1f]">Checkout slowed for 4 minutes after deploy 4f2a1c.</span>
     <span className="text-[13px] leading-[1.5] text-[#424245]">A config change doubled database connections per pod. Orion rolled back in 4 waves; p95 recovered by 02:17. No orders were lost.</span>
     <span className="mt-auto text-[12px] text-[#6e6e73]">Grab the corner to see the raw evidence.</span>
@@ -597,7 +603,7 @@ function Postmortem() {
     <section id="audit" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-14 px-5 lg:grid-cols-[1fr_1.1fr]">
         <div className="flex flex-col gap-8">
-          <SectionHead eyebrow="Postmortems" title="It writes the postmortem. The evidence stays underneath." sub="Orion drafts the summary from the audit trail, so the story and the facts never drift apart. Peel back the page to see what it was written from." accent={A} />
+          <SectionHead title="It writes the postmortem. The evidence stays underneath." sub="Orion drafts the summary from the audit trail, so the story and the facts never drift apart. Peel back the page to see what it was written from." accent={A} />
           <ul className="m-0 flex list-none flex-col gap-3 p-0">
             {["Timeline built from the chained trail", "Root cause linked to the change that caused it", "Follow-ups filed as tickets in your tracker"].map((t) => (
               <li key={t} className="flex items-center gap-3 text-[16px] text-[#1d1d1f]">
@@ -620,7 +626,7 @@ function Postmortem() {
 function History() {
   return (
     <section className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="History" title="Thirty weeks of incidents, standing up." sub="Every column is a day. Taller means busier. Hover a day for the count, switch to Standing for the shape of the quarter." accent={A} center />
+      <SectionHead title="Thirty weeks of incidents, standing up." sub="Every column is a day. Taller means busier. Hover a day for the count, switch to Standing for the shape of the quarter." accent={A} center />
       <Reveal y={20} className="mt-12">
         <div className={`${C} px-4 py-10 sm:px-10`}>
           <Fit><IncidentCalendar weeks={30} noun="incidents handled" autoplay /></Fit>
@@ -644,7 +650,7 @@ function Quotes() {
           <Reveal key={q.n} delay={i * 0.06} y={18}>
             <figure className={`${C} m-0 flex h-full flex-col justify-between gap-6 p-7`}>
               <blockquote className="m-0 text-[18px] leading-[1.45] tracking-[-0.01em] text-[#1d1d1f]">“{q.q}”</blockquote>
-              <figcaption className="text-[14px] text-[#6e6e73]"><span className="font-semibold text-[#1d1d1f]">{q.n}</span> · {q.r}</figcaption>
+              <figcaption className="text-[14px] text-[#6e6e73]"><span className="font-semibold text-[#1d1d1f]">{q.n}</span>, {q.r}</figcaption>
             </figure>
           </Reveal>
         ))}
@@ -656,7 +662,7 @@ function Quotes() {
 function Pricing() {
   return (
     <section id="pricing" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Pricing" title="Priced per protected service." sub="Agents, runbooks and seats are unlimited on every plan. Start with a 30-day pilot on up to 10 services." accent={A} center />
+      <SectionHead title="Priced per protected service." sub="Agents, runbooks and seats are unlimited on every plan. Start with a 30-day pilot on up to 10 services." accent={A} center />
       <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_1fr]">
         <Reveal y={20}>
           <div className={`${C} flex h-full flex-col gap-6 p-6 sm:p-8`}>
@@ -680,7 +686,7 @@ function Pricing() {
         <Reveal y={20} delay={0.08}>
           <div className="flex h-full flex-col justify-between gap-8 rounded-[24px] p-8 text-white" style={{ background: "linear-gradient(160deg,#0b3b48,#0e7490)" }}>
             <div className="flex flex-col gap-3">
-              <span className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#bfe6ee]">Every plan includes</span>
+              <span className="text-[13px] font-semibold text-[#bfe6ee]">Every plan includes</span>
               <ul className="m-0 flex list-none flex-col gap-3 p-0">
                 {["Unlimited agents and runbooks", "Dry runs before anything goes live", "SSO, SCIM and role-based scopes", "Hash-chained audit trail export", "EU or US data residency"].map((f) => (
                   <li key={f} className="flex items-center gap-3 text-[16px]"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 text-[11px] font-bold">✓</span>{f}</li>
@@ -702,9 +708,9 @@ export function OrionAIPage() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: FONT }}>
-        <Nav brand={<Logo />} accent={A} cta="Book a pilot" onCta={() => scrollToId("pricing")} links={[{ label: "Runbooks", id: "runbooks" }, { label: "Governance", id: "governance" }, { label: "Audit", id: "audit" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
+        <style>{FONT_CSS}</style>
+        <Nav dark brand={<Logo />} accent={A} cta="Book a pilot" onCta={() => scrollToId("pricing")} links={[{ label: "Runbooks", id: "runbooks" }, { label: "Governance", id: "governance" }, { label: "Audit", id: "audit" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
         <Hero />
-        <Proof />
         <Runbooks />
         <Governance />
         <Postmortem />
@@ -712,7 +718,7 @@ export function OrionAIPage() {
         <Quotes />
         <Pricing />
         <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 pb-24 lg:grid-cols-[1fr_1.4fr]">
-          <SectionHead eyebrow="FAQ" title="Questions from operators." accent={A} />
+          <SectionHead title="Questions from operators." accent={A} />
           <Reveal y={16}>
             <Faq
               accent={A}

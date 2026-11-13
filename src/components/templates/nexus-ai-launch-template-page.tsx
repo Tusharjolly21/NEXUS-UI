@@ -1,30 +1,33 @@
 "use client";
 /**
  * Asteria: landing page template for an AI tool that turns a rough product
- * idea into a launch page. Motion Kit style: light page, one violet accent.
+ * idea into a launch page. The hero is a night sky: every build starts as a
+ * constellation in the shape of the page, and each part lights up where its
+ * stars were. Fraunces for headings, Hanken Grotesk for text, one indigo.
  * Built from Motion Kit components: Upload Chips, Pixel Select (as a tone
  * picker), Fan Deck, Scrub Inputs, Before / After, Progress Button, Copy
  * Buttons, Matrix Loaders, the Switch from Animated Tabs and the rolling
  * number from Price Odometer.
  */
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { NightSky, Constellation } from "@/components/templates/asteria/Sky";
+import { BASE_CSS, FONT_CSS, FONT_SANS, NIGHT } from "@/components/templates/asteria/theme";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import UploadChips from "@/components/templates/kit/components/UploadChips";
 import FanDeck from "@/components/templates/kit/components/FanDeck";
 import { ScrubField } from "@/components/templates/kit/components/ScrubInput";
-import BeforeAfter from "@/components/templates/kit/components/BeforeAfter";
 import ProgressButton from "@/components/templates/kit/components/ProgressButton";
 import { CopyChip, CopyCommand } from "@/components/templates/kit/components/CopyButton";
 import { MatrixLoader } from "@/components/templates/kit/components/MatrixLoaders";
 import { Switch } from "@/components/templates/kit/components/AnimatedTabs";
 import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
 import ToneSelect from "@/components/templates/asteria/ToneSelect";
-import { Counter, CtaBand, Faq, Fit, Footer, Marquee, Nav, Reveal, SectionHead, Stagger, Words, card, scrollToId } from "@/components/templates/kit/parts";
+import { CtaBand, Faq, Fit, Footer, Marquee, Nav, Reveal, SectionHead, Stagger, Words, card, scrollToId } from "@/components/templates/kit/parts";
 import StickyStory from "@/components/templates/asteria/StickyStory";
+import NotesToPage from "@/components/templates/asteria/NotesToPage";
 
-const A = "#7c3aed"; // violet: buttons, graphics and accent text (5.7:1 on white)
+const A = "#3f3cbb"; // indigo: buttons, graphics and accent text (8.4:1 on white)
 const INK = "#1d1d1f";
-const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
 const MONO = "ui-monospace, 'SF Mono', Menlo, Consolas, monospace";
 const spring = { type: "spring", stiffness: 260, damping: 24 } as const;
 
@@ -148,10 +151,11 @@ function useAssembler() {
     setRun((r) => r + 1);
     const at = (ms: number, fn: () => void) => timers.current.push(window.setTimeout(fn, ms));
     const L = next.headline.length;
-    at(380, () => setStage(1));
-    at(820, () => setStage(2));
-    for (let i = 1; i <= L; i++) at(820 + i * 24, () => setTyped(i));
-    const t = 820 + L * 24 + 260;
+    const c = 1500; // the constellation draws first
+    at(c, () => setStage(1));
+    at(c + 440, () => setStage(2));
+    for (let i = 1; i <= L; i++) at(c + 440 + i * 24, () => setTyped(i));
+    const t = c + 440 + L * 24 + 260;
     at(t, () => setStage(3));
     at(t + 480, () => setStage(4));
     at(t + 960, () => setStage(5));
@@ -162,9 +166,9 @@ function useAssembler() {
 }
 
 /** Swaps a grey placeholder for the real block with a spring when its stage arrives. */
-function Slot({ show, k, skel, children, className = "" }: { show: boolean; k: string; skel: ReactNode; children: ReactNode; className?: string }) {
+function Slot({ show, k, skel, children, className = "", block }: { show: boolean; k: string; skel: ReactNode; children: ReactNode; className?: string; block: string }) {
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className}`} data-block={block}>
       <AnimatePresence mode="popLayout" initial={false}>
         {show ? (
           <motion.div key={`r${k}`} initial={{ opacity: 0, y: 14, scale: 0.97, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }} transition={spring}>
@@ -180,7 +184,8 @@ function Slot({ show, k, skel, children, className = "" }: { show: boolean; k: s
   );
 }
 
-const Bar = ({ w, h = 12, c = "#e9e7f0" }: { w: number | string; h?: number; c?: string }) => <span className="block rounded-full" style={{ width: w, height: h, background: c }} />;
+/** A placeholder's footprint. It draws nothing itself: the constellation puts stars on it. */
+const Bar = ({ w, h = 12, box = false }: { w: number | string; h?: number; box?: boolean }) => <span className="block" data-star={box ? "box" : "bar"} style={{ width: w, height: h }} />;
 
 function Artwork({ idea }: { idea: Idea }) {
   const [ink, pri, hi, bg] = idea.p;
@@ -227,9 +232,20 @@ function PagePreview({ idea, stage, typed, run }: { idea: Idea; stage: number; t
   const [ink, pri, hi, bg] = idea.p;
   const big = idea.headline.length > 46;
   const k = `${run}`;
+  const root = useRef<HTMLDivElement>(null);
   return (
-    <motion.div className="flex h-[560px] w-[880px] flex-col gap-7 px-10 pb-8 pt-6 text-left" animate={{ backgroundColor: stage >= 4 ? bg : "#ffffff" }} transition={{ duration: 0.5 }}>
-      <Slot show={stage >= 1} k={`nav${k}`} skel={<div className="flex h-9 items-center justify-between"><Bar w={120} h={16} /><span className="flex gap-6"><Bar w={54} /><Bar w={54} /><Bar w={54} /></span><Bar w={110} h={34} /></div>}>
+    <div ref={root} className="ast-page relative h-[560px] w-[880px] overflow-hidden text-left" style={{ background: NIGHT.mid }}>
+      {/* the page's own background floods in from the top-left once the constellation has drawn */}
+      <motion.div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{ background: bg }}
+        initial={false}
+        animate={{ clipPath: stage >= 1 ? "circle(150% at 6% 4%)" : "circle(0% at 6% 4%)" }}
+        transition={{ duration: stage >= 1 ? 0.9 : 0, ease: [0.22, 1, 0.36, 1] }}
+      />
+    <div className="relative flex h-full flex-col gap-7 px-10 pb-8 pt-6">
+      <Slot block="nav" show={stage >= 1} k={`nav${k}`} skel={<div className="flex h-9 items-center justify-between"><Bar w={120} h={16} /><span className="flex gap-6"><Bar w={54} /><Bar w={54} /><Bar w={54} /></span><Bar w={110} h={34} box /></div>}>
         <div className="flex h-9 items-center justify-between">
           <span className="flex items-center gap-2 text-[17px] font-semibold tracking-[-0.02em]" style={{ color: ink }}>
             <span className="h-6 w-6 rounded-[7px]" style={{ background: pri }} />
@@ -241,13 +257,13 @@ function PagePreview({ idea, stage, typed, run }: { idea: Idea; stage: number; t
       </Slot>
       <div className="grid flex-1 grid-cols-[1.15fr_1fr] gap-9">
         <div className="flex flex-col justify-center gap-5">
-          <Slot show={stage >= 2} k={`h${k}`} skel={<div className="flex flex-col gap-3"><Bar w="92%" h={34} /><Bar w="70%" h={34} /></div>}>
+          <Slot block="headline" show={stage >= 2} k={`h${k}`} skel={<div className="flex flex-col gap-3"><Bar w="92%" h={34} /><Bar w="70%" h={34} /></div>}>
             <h3 className={`m-0 font-semibold leading-[1.05] tracking-[-0.04em] ${big ? "text-[34px]" : "text-[44px]"}`} style={{ color: ink }}>
               {idea.headline.slice(0, typed)}
               {stage === 2 && <motion.span className="ml-0.5 inline-block h-[0.9em] w-[3px] translate-y-[0.12em] rounded-full" style={{ background: pri }} animate={{ opacity: [1, 0, 1] }} transition={{ duration: 0.8, repeat: Infinity }} />}
             </h3>
           </Slot>
-          <Slot show={stage >= 3} k={`s${k}`} skel={<div className="flex flex-col gap-2.5"><Bar w="96%" /><Bar w="84%" /><span className="mt-3 flex gap-3"><Bar w={150} h={42} /><Bar w={110} h={42} /></span></div>}>
+          <Slot block="pitch" show={stage >= 3} k={`s${k}`} skel={<div className="flex flex-col gap-2.5"><Bar w="96%" /><Bar w="84%" /><span className="mt-3 flex gap-3"><Bar w={150} h={42} box /><Bar w={110} h={42} box /></span></div>}>
             <p className="m-0 max-w-[400px] text-[16px] leading-[1.5]" style={{ color: ink, opacity: 0.78 }}>{idea.sub}</p>
             <span className="mt-5 flex items-center gap-3">
               <span className="rounded-full px-5 py-3 text-[14px] font-semibold text-white" style={{ background: pri }}>{idea.cta}</span>
@@ -256,11 +272,11 @@ function PagePreview({ idea, stage, typed, run }: { idea: Idea; stage: number; t
             {idea.guessed && <span className="mt-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[12px] font-medium" style={{ background: "#fef3c7", color: "#92400e" }}>2 lines guessed. Check before publishing.</span>}
           </Slot>
         </div>
-        <Slot show={stage >= 4} k={`a${k}`} className="h-[270px]" skel={<span className="block h-[270px] w-full rounded-[22px] bg-[#efedf5]" />}>
+        <Slot block="art" show={stage >= 4} k={`a${k}`} className="h-[270px]" skel={<Bar w="100%" h={270} box />}>
           <div className="h-[270px]"><Artwork idea={idea} /></div>
         </Slot>
       </div>
-      <Slot show={stage >= 5} k={`f${k}`} skel={<div className="grid grid-cols-3 gap-4">{[0, 1, 2].map((i) => <span key={i} className="block h-[76px] rounded-2xl bg-[#f3f2f8]" />)}</div>}>
+      <Slot block="features" show={stage >= 5} k={`f${k}`} skel={<div className="grid grid-cols-3 gap-4">{[0, 1, 2].map((i) => <Bar key={i} w="100%" h={76} box />)}</div>}>
         <div className="grid grid-cols-3 gap-4">
           {idea.features.map(([t, d], i) => (
             <motion.div key={t} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: i * 0.07 }} className="flex h-[76px] items-center gap-3 rounded-2xl bg-white px-4 shadow-[0_0_0_1px_rgba(0,0,0,.05)]">
@@ -273,13 +289,15 @@ function PagePreview({ idea, stage, typed, run }: { idea: Idea; stage: number; t
           ))}
         </div>
       </Slot>
-      <Slot show={stage >= 6} k={`p${k}`} skel={<Bar w="100%" h={44} c="#f3f2f8" />}>
+      <Slot block="price" show={stage >= 6} k={`p${k}`} skel={<Bar w="100%" h={44} box />}>
         <div className="flex h-11 items-center justify-between rounded-2xl px-5" style={{ background: ink }}>
           <span className="text-[14px] font-semibold text-white">{idea.price}</span>
           <span className="flex items-center gap-2 text-[13px] font-medium" style={{ color: hi }}>{idea.cta} <span aria-hidden="true">→</span></span>
         </div>
       </Slot>
-    </motion.div>
+    </div>
+      <Constellation root={root} run={run} stage={stage} color={pri} w={880} h={560} />
+    </div>
   );
 }
 
@@ -290,7 +308,7 @@ function StepRail({ stage, running }: { stage: number; running: boolean }) {
         const done = stage === 6 || stage >= i + 2;
         const active = !done && running && stage === i + 1;
         return (
-          <li key={s} className="flex h-10 items-center gap-3 rounded-xl px-3" style={{ background: active ? "#f5f3ff" : "transparent" }}>
+          <li key={s} className="flex h-10 items-center gap-3 rounded-xl px-3" style={{ background: active ? "#f0f0fc" : "transparent" }}>
             <span className="flex h-5 w-5 flex-none items-center justify-center">
               {done ? (
                 <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 600, damping: 18 }} className="flex h-5 w-5 items-center justify-center rounded-full" style={{ background: A }}>
@@ -344,86 +362,88 @@ function Hero() {
   };
 
   const host = `${idea.brand.toLowerCase().replace(/[^a-z0-9]+/g, "")}.asteria.page`;
+  const glass = "bg-white/[.07] shadow-[inset_0_0_0_1px_rgba(255,255,255,.14)] backdrop-blur-md";
 
   return (
-    <section id="top" className="relative overflow-hidden pb-16 pt-14 sm:pt-20">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[760px]" aria-hidden="true" style={{ background: "radial-gradient(55% 45% at 50% 0%, rgba(124,58,237,.16), transparent 70%), radial-gradient(30% 30% at 85% 30%, rgba(251,191,36,.12), transparent 70%)" }} />
-      <div className="relative mx-auto flex max-w-[1180px] flex-col items-center gap-6 px-5 text-center">
-        <motion.button
-          type="button"
-          onClick={() => scrollToId("publish")}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 200, damping: 24 }}
-          className="inline-flex h-9 items-center gap-2 rounded-full bg-white px-4 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.07)] outline-none focus-visible:ring-2 focus-visible:ring-[#7c3aed]"
-        >
-          <span className="rounded-full px-2 py-0.5 text-[11px] font-semibold text-white" style={{ background: A }}>New</span>
-          Export any page as Next.js code
-          <span aria-hidden="true" style={{ color: A }}>→</span>
-        </motion.button>
-        <h1 className="m-0 max-w-[940px] text-[clamp(42px,7.6vw,96px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
-          <Words text="A rough idea in. A launch page out." className="justify-center" accentWords={["launch", "page"]} accent={A} />
-        </h1>
-        <Reveal delay={0.35} y={14}>
-          <p className="m-0 max-w-[620px] text-[clamp(17px,2.1vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
+    <section id="top" className="relative -mt-[76px]">
+      <div className="relative overflow-hidden pb-[230px] pt-[136px] sm:pb-[290px] sm:pt-[168px]">
+        <NightSky />
+        <div className="relative mx-auto flex max-w-[1180px] flex-col items-center gap-6 px-5 text-center">
+          <motion.button
+            type="button"
+            onClick={() => scrollToId("publish")}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 200, damping: 24 }}
+            className={`inline-flex h-9 items-center gap-2 rounded-full px-4 text-[13.5px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-[#ffb648] ${glass}`}
+            style={{ color: NIGHT.star }}
+          >
+            <span className="rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ background: NIGHT.lamp, color: NIGHT.lampInk }}>New</span>
+            Export any page as Next.js code
+          </motion.button>
+          <h1 className="m-0 max-w-[980px] text-[clamp(46px,7.8vw,108px)] font-[560] leading-[0.94] tracking-[-0.035em] [text-wrap:balance]" style={{ color: NIGHT.star }}>
+            <Words text="A rough idea in. A launch page out." className="justify-center" />
+          </h1>
+          <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.35 }} className="m-0 max-w-[600px] text-[clamp(17px,2.1vw,20px)] leading-[1.5]" style={{ color: NIGHT.mist }}>
             Describe what you are making in one sentence. Asteria writes the copy, picks a palette and lays out a page you can edit, publish or export tonight.
-          </p>
-        </Reveal>
+          </motion.p>
+        </div>
+
+        <motion.div initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 160, damping: 22, delay: 0.25 }} className="relative mx-auto mt-9 max-w-[760px] px-5" onPointerDown={touch} onFocus={touch}>
+          <form onSubmit={submit} className={`flex flex-col gap-2 rounded-[24px] p-2.5 sm:flex-row sm:items-center ${glass}`}>
+            <label htmlFor="asteria-idea" className="sr-only">Describe your product idea</label>
+            <input
+              id="asteria-idea"
+              ref={input}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Describe your idea, e.g. a tea club for night owls"
+              maxLength={72}
+              autoComplete="off"
+              className="h-12 min-w-0 flex-1 rounded-[16px] bg-transparent px-4 text-[17px] text-white outline-none placeholder:text-[#a9aed6] focus-visible:bg-white/[.05]"
+            />
+            <motion.button type="submit" whileTap={{ scale: 0.95 }} className="inline-flex h-12 flex-none items-center justify-center gap-2 rounded-[16px] px-6 text-[15px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#141a4a]" style={{ background: NIGHT.lamp, color: NIGHT.lampInk }}>
+              {running ? "Building…" : "Build my page"}
+            </motion.button>
+          </form>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            <span className="text-[13.5px]" style={{ color: NIGHT.mist }}>Or try</span>
+            {IDEAS.map((i) => {
+              const on = idea.id === i.id;
+              return (
+                <motion.button
+                  key={i.id}
+                  type="button"
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => { touch(); setText(i.idea); build(i); }}
+                  className="h-8 rounded-full px-3.5 text-[13.5px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#ffb648]"
+                  style={{ background: on ? "rgba(255,182,72,.16)" : "rgba(255,255,255,.06)", color: on ? "#ffd9a0" : "#d9dbf5", boxShadow: `inset 0 0 0 1px ${on ? "rgba(255,182,72,.45)" : "rgba(255,255,255,.12)"}` }}
+                  aria-pressed={on}
+                >
+                  {i.brand}
+                </motion.button>
+              );
+            })}
+          </div>
+        </motion.div>
       </div>
 
-      <motion.div initial={{ y: 14 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 160, damping: 22, delay: 0.25 }} className="relative mx-auto mt-9 max-w-[780px] px-5" onPointerDown={touch} onFocus={touch}>
-        <form onSubmit={submit} className={`${card} flex flex-col gap-2 p-2.5 sm:flex-row sm:items-center`}>
-          <label htmlFor="asteria-idea" className="sr-only">Describe your product idea</label>
-          <span className="hidden h-10 w-10 flex-none items-center justify-center rounded-full sm:flex" style={{ background: "#f5f3ff", color: A }} aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.2 6.8L21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2z" /></svg>
-          </span>
-          <input
-            id="asteria-idea"
-            ref={input}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Describe your idea, e.g. a tea club for night owls"
-            maxLength={72}
-            autoComplete="off"
-            className="h-12 min-w-0 flex-1 rounded-[18px] bg-transparent px-3 text-[17px] text-[#1d1d1f] outline-none placeholder:text-[#6e6e73] focus-visible:bg-[#faf9fd]"
-          />
-          <motion.button type="submit" whileTap={{ scale: 0.95 }} className="inline-flex h-12 flex-none items-center justify-center gap-2 rounded-[18px] px-6 text-[15px] font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-[#7c3aed] focus-visible:ring-offset-2" style={{ background: A }}>
-            {running ? "Building…" : "Build my page"}
-          </motion.button>
-        </form>
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-          <span className="text-[13px] text-[#6e6e73]">Or try:</span>
-          {IDEAS.map((i) => (
-            <motion.button
-              key={i.id}
-              type="button"
-              whileTap={{ scale: 0.95 }}
-              onClick={() => { touch(); setText(i.idea); build(i); }}
-              className="h-8 rounded-full px-3.5 text-[13px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-[#7c3aed]"
-              style={{ background: idea.id === i.id ? "#ede9fe" : "#fff", color: idea.id === i.id ? "#5b21b6" : INK, boxShadow: "0 0 0 1px rgba(0,0,0,.07)" }}
-              aria-pressed={idea.id === i.id}
-            >
-              {i.brand}
-            </motion.button>
-          ))}
-        </div>
-      </motion.div>
-
-      <div className="relative mx-auto mt-10 grid max-w-[1180px] grid-cols-1 gap-5 px-5 lg:grid-cols-[250px_1fr]">
-        <motion.aside initial={{ x: -12 }} animate={{ x: 0 }} transition={{ type: "spring", stiffness: 160, damping: 22, delay: 0.4 }} className={`${card} hidden flex-col gap-3 self-start p-3 lg:flex`} aria-label="Build progress">
-          <span className="px-3 pt-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Assembling</span>
+      {/* the build, rising out of the horizon */}
+      <div className="relative mx-auto -mt-[170px] grid max-w-[1180px] grid-cols-1 gap-5 px-5 sm:-mt-[220px] lg:grid-cols-[250px_1fr]">
+        <motion.aside initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 140, damping: 22, delay: 0.45 }} className={`${card} hidden flex-col gap-3 self-start p-3 lg:flex`} aria-label="Build progress">
+          <span className="px-3 pt-2 text-[13px] font-semibold text-[#6e6e73]">Building your page</span>
           <StepRail stage={stage} running={running} />
           <div className="mx-1 mb-1 mt-1 rounded-2xl bg-[#f5f5f7] p-3 text-[13px] leading-[1.45] text-[#6e6e73]" aria-live="polite">
-            {stage === 6 ? "Draft ready. Every word, colour and section is editable." : running ? "Writing from your sentence. Nothing is published yet." : "Type an idea or pick one above."}
+            {stage === 6 ? "Draft ready. Every word, colour and section is editable." : stage === 0 && running ? "Reading your sentence and sketching the page." : running ? "Writing from your sentence. Nothing is published yet." : "Type an idea or pick one above."}
           </div>
         </motion.aside>
-        <motion.div initial={{ y: 18 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 140, damping: 22, delay: 0.3 }} className={`${card} min-w-0 overflow-hidden`}>
+        <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.35 }} className={`${card} min-w-0 overflow-hidden shadow-[0_0_0_1px_rgba(0,0,0,.06),0_40px_80px_-40px_rgba(20,26,74,.55)]`}>
           <div className="flex items-center gap-2 border-b border-black/[.06] px-4 py-3 sm:px-5">
             {["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="h-3 w-3 flex-none rounded-full" style={{ background: c }} />)}
             <span className="ml-2 min-w-0 truncate rounded-full bg-[#f5f5f7] px-3 py-1 text-[12px] font-medium text-[#6e6e73] tabular-nums">{host}</span>
             <span className="ml-auto flex flex-none items-center gap-1.5 text-[12px] font-medium" style={{ color: stage === 6 ? "#1a7f42" : A }}>
               <motion.span className="h-2 w-2 rounded-full" style={{ background: stage === 6 ? "#30d158" : A }} animate={running ? { opacity: [1, 0.3, 1] } : { opacity: 1 }} transition={{ duration: 1, repeat: running ? Infinity : 0 }} />
-              {stage === 6 ? "Draft ready" : running ? `Step ${Math.max(1, stage)} of 6` : "Waiting"}
+              {stage === 6 ? "Draft ready" : running && stage === 0 ? "Sketching" : running ? `Step ${Math.max(1, stage)} of 6` : "Waiting"}
             </span>
           </div>
           <Fit><PagePreview idea={idea} stage={stage} typed={typed} run={run} /></Fit>
@@ -435,55 +455,12 @@ function Hero() {
 
 /* ------------------------------------------------------------------ */
 
-const BRANDS = [
-  { n: "Kettle & Fox", c: "font-serif italic" },
-  { n: "TIDEWATER", c: "tracking-[0.28em] font-semibold" },
-  { n: "plainsong", c: "font-bold lowercase" },
-  { n: "Loop Kitchen", c: "font-medium" },
-  { n: "MOSSGROVE", c: "font-black tracking-tight" },
-  { n: "brightpaw", c: "font-serif" },
-  { n: "Ferrous", c: "font-semibold italic" },
-  { n: "NORTH ROW", c: "tracking-[0.2em]" },
-];
-
-function Logos() {
-  return (
-    <section className="py-10" aria-label="Recent launches">
-      <Reveal y={10}><p className="m-0 mb-6 text-center text-[13px] font-medium text-[#6e6e73]">Pages launched on Asteria this month</p></Reveal>
-      <Marquee speed={34}>
-        {BRANDS.map((b) => <span key={b.n} className={`mx-10 text-[24px] text-[#6e6e73] transition-colors hover:text-[#1d1d1f] ${b.c}`}>{b.n}</span>)}
-      </Marquee>
-    </section>
-  );
-}
-
-function Stats() {
-  const items = [
-    { to: 48210, f: (n: number) => Math.round(n).toLocaleString("en-US"), l: "pages published since launch" },
-    { to: 7, f: (n: number) => `${Math.round(n)} min`, l: "median time from idea to live page" },
-    { to: 31, f: (n: number) => `${Math.round(n)}%`, l: "of drafts go live with no edits" },
-    { to: 14, f: (n: number) => `${Math.round(n)}`, l: "languages it writes in" },
-  ];
-  return (
-    <section className="mx-auto max-w-[1180px] px-5 py-14">
-      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
-        {items.map((it) => (
-          <div key={it.l} className="flex flex-col gap-2 border-t border-black/[.08] pt-6">
-            <Counter to={it.to} format={it.f} className="text-[clamp(36px,5vw,56px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
-            <span className="text-[15px] text-[#6e6e73]">{it.l}</span>
-          </div>
-        ))}
-      </Stagger>
-    </section>
-  );
-}
-
 /* --------------------------- How it works --------------------------- */
 
 const TONES = [
   { id: "plain", label: "Plain", color: "#94a3b8" },
   { id: "warm", label: "Warm", color: "#fb923c" },
-  { id: "bold", label: "Bold", color: "#7c3aed" },
+  { id: "bold", label: "Bold", color: "#3f3cbb" },
   { id: "playful", label: "Playful", color: "#f472b6" },
   { id: "calm", label: "Calm", color: "#38bdf8" },
   { id: "technical", label: "Technical", color: "#22c55e" },
@@ -503,11 +480,11 @@ function ToneDemo() {
   return (
     <div className={`${card} flex w-[520px] items-start gap-6 p-6`}>
       <div className="flex flex-col gap-2">
-        <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Voice</span>
+        <span className="text-[13px] font-semibold text-[#6e6e73]">Voice</span>
         <ToneSelect options={TONES} defaultValue="warm" onChange={setTone} autoplay label="Tone of voice" accent={A} />
       </div>
-      <div className="mt-7 flex min-h-[230px] flex-1 flex-col justify-between rounded-[20px] bg-[#f5f3ff] p-5">
-        <span className="flex items-center gap-2 text-[12px] font-semibold text-[#5b21b6]"><motion.span className="h-2.5 w-2.5 rounded-[3px]" animate={{ backgroundColor: t.color }} />Nightpaws headline</span>
+      <div className="mt-7 flex min-h-[230px] flex-1 flex-col justify-between rounded-[20px] bg-[#f0f0fc] p-5">
+        <span className="flex items-center gap-2 text-[12px] font-semibold text-[#312e9c]"><motion.span className="h-2.5 w-2.5 rounded-[3px]" animate={{ backgroundColor: t.color }} />Nightpaws headline</span>
         <div className="relative min-h-[110px]">
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.p key={tone} initial={{ opacity: 0, y: 12, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} exit={{ opacity: 0, y: -10, filter: "blur(6px)" }} transition={spring} className="m-0 text-[24px] font-semibold leading-[1.12] tracking-[-0.03em] text-[#1e1b4b]">
@@ -515,7 +492,7 @@ function ToneDemo() {
             </motion.p>
           </AnimatePresence>
         </div>
-        <span className="text-[12px] text-[#5b21b6]">Same facts, different voice.</span>
+        <span className="text-[12px] text-[#312e9c]">Same facts, different voice.</span>
       </div>
     </div>
   );
@@ -539,7 +516,7 @@ const PALETTE = [
 function PaletteDemo() {
   return (
     <div className={`${card} flex w-[500px] flex-col items-center gap-2 px-6 pb-6 pt-6`}>
-      <span className="self-start text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Nightpaws palette · 12 colours</span>
+      <span className="self-start text-[13px] font-semibold text-[#6e6e73]">Nightpaws palette, 12 colours</span>
       <FanDeck chips={PALETTE} autoplay />
       <span className="text-[13px] text-[#6e6e73]">Click a chip to copy its hex.</span>
     </div>
@@ -552,8 +529,8 @@ function TweakDemo() {
   const [gap, setGap] = useState(16);
   return (
     <div className={`${card} flex w-[520px] flex-col gap-5 p-6`}>
-      <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Fine-tune the hero</span>
-      <div className="flex h-[230px] items-center justify-center overflow-hidden rounded-[20px] bg-[#f5f3ff] px-6">
+      <span className="text-[13px] font-semibold text-[#6e6e73]">Fine-tune the hero</span>
+      <div className="flex h-[230px] items-center justify-center overflow-hidden rounded-[20px] bg-[#f0f0fc] px-6">
         <motion.div layout transition={spring} className="flex w-full flex-col bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_18px_36px_-24px_rgba(30,27,75,.5)]" style={{ borderRadius: radius, gap }}>
           <motion.span layout transition={spring} className="font-semibold leading-[1.04] tracking-[-0.04em] text-[#1e1b4b]" style={{ fontSize: size }}>Walks at 2am.</motion.span>
           <motion.span layout transition={spring} className="text-[14px] text-[#4b5563]">By people who are awake anyway.</motion.span>
@@ -573,15 +550,15 @@ function TweakDemo() {
 function HowItWorks() {
   return (
     <section id="how" className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
-      <SectionHead eyebrow="How it works" title="It drafts. You decide." sub="Asteria does the first ninety percent in minutes. You keep the say over every word, colour and claim before anything goes live." accent={A} />
+      <SectionHead title="It drafts. You decide." sub="Asteria does the first ninety percent in minutes. You keep the say over every word, colour and claim before anything goes live." accent={A} />
       <div className="mt-6">
         <StickyStory
           accent={A}
           steps={[
-            { kicker: "01 · Feed it", title: "Start with whatever you have.", body: "A sentence is enough. Notes, a pitch deck, screenshots or a price list make it better. Asteria pulls out names, prices and real quotes, and never invents a testimonial.", visual: <div className={`${card} flex w-[460px] flex-col gap-4 p-6`}><span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Your material</span><UploadChips accent={A} autoplay /></div> },
-            { kicker: "02 · Voice", title: "Pick how it should sound.", body: "Six voices from plain to playful. Switching voice rewrites the copy but keeps the facts, so the price and the promise stay the same.", visual: <ToneDemo /> },
-            { kicker: "03 · Palette", title: "A palette that fits the idea.", body: "Asteria proposes twelve colours from your notes and any logo you dropped in, all checked for readable contrast. Fan them out and copy any hex.", visual: <PaletteDemo /> },
-            { kicker: "04 · Tweak", title: "Nudge it like a design tool.", body: "Scrub type size, corner radius and spacing directly on the page. Every section is a real component, not a screenshot.", visual: <TweakDemo /> },
+            { kicker: "Step 1", title: "Start with whatever you have.", body: "A sentence is enough. Notes, a pitch deck, screenshots or a price list make it better. Asteria pulls out names, prices and real quotes, and never invents a testimonial.", visual: <div className={`${card} flex w-[460px] flex-col gap-4 p-6`}><span className="text-[13px] font-semibold text-[#6e6e73]">Your material</span><UploadChips accent={A} autoplay /></div> },
+            { kicker: "Step 2", title: "Pick how it should sound.", body: "Six voices from plain to playful. Switching voice rewrites the copy but keeps the facts, so the price and the promise stay the same.", visual: <ToneDemo /> },
+            { kicker: "Step 3", title: "A palette that fits the idea.", body: "Asteria proposes twelve colours from your notes and any logo you dropped in, all checked for readable contrast. Fan them out and copy any hex.", visual: <PaletteDemo /> },
+            { kicker: "Step 4", title: "Nudge it like a design tool.", body: "Scrub type size, corner radius and spacing directly on the page. Every section is a real component, not a screenshot.", visual: <TweakDemo /> },
           ]}
         />
       </div>
@@ -591,69 +568,15 @@ function HowItWorks() {
 
 /* --------------------------- Before / After --------------------------- */
 
-function NotesBefore() {
-  return (
-    <div className="absolute inset-0 flex flex-col gap-[1.4cqw] bg-[#fdfbf3] p-[4cqw] text-left text-[#3f3a2e]" style={{ fontFamily: MONO, containerType: "inline-size" }}>
-      <span className="text-[1.8cqw] text-[#857a5b]">notes.txt · last edited 01:12</span>
-      <span className="text-[2.1cqw]">dog walking but at NIGHT??</span>
-      <span className="text-[2.1cqw]">- nurses, warehouse ppl, bakers</span>
-      <span className="text-[2.1cqw] line-through decoration-[#b45309]">- just an app for dogs??</span>
-      <span className="text-[2.1cqw]">- walkers who are up anyway (students? night owls)</span>
-      <span className="text-[2.1cqw]">- send a photo when dog is home!!</span>
-      <span className="text-[2.1cqw]">price ~18/walk?? ask the dog park group</span>
-      <span className="text-[2.1cqw]">name: nightpaws / moonwalk / owl&amp;dog</span>
-      <span className="absolute bottom-[5cqw] right-[5cqw] rotate-[4deg] rounded-[1cqw] bg-[#fde68a] px-[2cqw] py-[1.4cqw] text-[2.3cqw] shadow-[0_8px_16px_-8px_rgba(0,0,0,.3)]">launch before xmas</span>
-    </div>
-  );
-}
-
-function PageAfter() {
-  const idea = IDEAS[0];
-  const [ink, pri, hi, bg] = idea.p;
-  return (
-    <div className="absolute inset-0 flex flex-col gap-[3cqw] p-[4cqw] text-left" style={{ background: bg, containerType: "inline-size" }}>
-      <div className="flex items-center justify-between">
-        <span className="flex items-center gap-[1cqw] text-[2.2cqw] font-semibold" style={{ color: ink }}><span className="h-[2.6cqw] w-[2.6cqw] rounded-[0.8cqw]" style={{ background: pri }} />Nightpaws</span>
-        <span className="rounded-full px-[2cqw] py-[1cqw] text-[1.6cqw] font-semibold text-white" style={{ background: ink }}>Book a night walk</span>
-      </div>
-      <div className="grid flex-1 grid-cols-[1.15fr_1fr] gap-[3cqw]">
-        <div className="flex flex-col justify-center gap-[2cqw]">
-          <span className="text-[4.6cqw] font-semibold leading-[1.04] tracking-[-0.04em]" style={{ color: ink }}>{idea.headline}</span>
-          <span className="text-[1.8cqw] leading-[1.45]" style={{ color: ink, opacity: 0.78 }}>{idea.sub}</span>
-          <span className="w-fit rounded-full px-[2.4cqw] py-[1.3cqw] text-[1.7cqw] font-semibold text-white" style={{ background: pri }}>{idea.cta}</span>
-        </div>
-        <div className="relative overflow-hidden rounded-[2.4cqw]" style={{ background: `linear-gradient(140deg, ${pri}, ${ink})` }}>
-          <span className="absolute left-[44%] top-[16%] h-[11cqw] w-[11cqw] rounded-full" style={{ background: hi }} />
-          <span className="absolute left-[52%] top-[11%] h-[11cqw] w-[11cqw] rounded-full" style={{ background: pri }} />
-        </div>
-      </div>
-      <div className="grid grid-cols-3 gap-[1.6cqw]">
-        {idea.features.map(([t]) => <span key={t} className="rounded-[1.6cqw] bg-white px-[1.8cqw] py-[1.6cqw] text-[1.7cqw] font-semibold" style={{ color: ink }}>{t}</span>)}
-      </div>
-    </div>
-  );
-}
-
+/** Notes to page: as you scroll, each phrase in the founder's notes draws a line to the part of the page it became. */
 function Compare() {
   return (
-    <section id="compare" className="bg-[#f5f5f7] py-20 sm:py-24">
+    <section id="compare" className="bg-[#f5f5f7] pt-20 sm:pt-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Before and after" title="From a notes file to a page people trust." sub="These are the real notes behind the Nightpaws sample. Drag across to see what Asteria made of them, and what it left out." accent={A} center />
-        <Reveal y={16} className="mx-auto mt-12 max-w-[1000px]">
-          <BeforeAfter before={<NotesBefore />} after={<PageAfter />} beforeLabel="Your notes" afterLabel="Asteria draft" autoplay />
-        </Reveal>
-        <Stagger className="mx-auto mt-10 grid max-w-[1000px] grid-cols-1 gap-4 sm:grid-cols-3">
-          {[
-            ["Kept your words", "“Up anyway” and “a photo when your dog is home” came straight from the notes."],
-            ["Dropped the comparison", "Asteria does not name competitors or copy their pricing. It asked you to set the price."],
-            ["Flagged the guesses", "The $18 price stays marked until you confirm it."],
-          ].map(([t, d]) => (
-            <div key={t} className={`${card} flex h-full flex-col gap-1.5 p-6`}>
-              <span className="text-[17px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{t}</span>
-              <span className="text-[15px] leading-[1.5] text-[#6e6e73]">{d}</span>
-            </div>
-          ))}
-        </Stagger>
+        <SectionHead title="From a notes file to a page people trust." sub="These are the real notes behind the Nightpaws sample. Follow each line to the part of the page it became, and see what Asteria left out." accent={A} center />
+      </div>
+      <div className="mt-10 pb-20 sm:pb-24">
+        <NotesToPage />
       </div>
     </section>
   );
@@ -670,7 +593,7 @@ const publishTask = (onProgress: (p: number) => void) =>
 function Publish() {
   return (
     <section id="publish" className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
-      <SectionHead eyebrow="Publish" title="Go live, or take the code with you." sub="Host on an asteria.page address or your own domain. Or export clean Next.js and Tailwind and never come back. We would rather you stayed because you like it." accent={A} />
+      <SectionHead title="Go live, or take the code with you." sub="Host on an asteria.page address or your own domain. Or export clean Next.js and Tailwind and never come back. We would rather you stayed because you like it." accent={A} />
       <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Reveal y={16}>
           <div className={`${card} flex h-full flex-col gap-8 p-7 sm:p-8`}>
@@ -678,10 +601,10 @@ function Publish() {
               <h3 className="m-0 text-[24px] font-semibold tracking-[-0.03em] text-[#1d1d1f]">One button to publish.</h3>
               <p className="m-0 mt-1.5 max-w-[420px] text-[15px] leading-[1.5] text-[#6e6e73]">HTTPS, a waitlist form and privacy-friendly analytics are switched on for you. Unpublish whenever you like.</p>
             </div>
-            <div className="flex flex-1 flex-col items-center justify-center gap-8 rounded-[22px] bg-[#f5f3ff] px-4 py-10">
+            <div className="flex flex-1 flex-col items-center justify-center gap-8 rounded-[22px] bg-[#f0f0fc] px-4 py-10">
               <ProgressButton label="Publish page" doneLabel="Live" accent={A} task={publishTask} autoplay />
               <div className="flex flex-col items-center gap-2">
-                <span className="text-[12px] font-medium text-[#5b21b6]">Your address</span>
+                <span className="text-[12px] font-medium text-[#312e9c]">Your address</span>
                 <CopyChip value="https://nightpaws.asteria.page" display="nightpaws.asteria.page" label="Copy address" accent={A} />
               </div>
             </div>
@@ -722,11 +645,11 @@ function Pricing() {
   return (
     <section id="pricing" className="bg-[#f5f5f7] py-20 sm:py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Pricing" title="Free until it is worth paying for." sub="Your first page is free for good. Upgrade when you want your own domain or the source code." accent={A} center />
+        <SectionHead title="Free until it is worth paying for." sub="Your first page is free for good. Upgrade when you want your own domain or the source code." accent={A} center />
         <Reveal y={12} className="mt-10 flex items-center justify-center gap-3">
           <span className="text-[15px] font-medium text-[#1d1d1f]">Billed yearly</span>
           <Switch checked={yearly} onChange={setYearly} label="Billed yearly" accent={A} />
-          <span className="rounded-full bg-[#ede9fe] px-2.5 py-1 text-[12px] font-semibold text-[#5b21b6]">Save about 25%</span>
+          <span className="rounded-full bg-[#e7e8fb] px-2.5 py-1 text-[12px] font-semibold text-[#312e9c]">Save about 25%</span>
         </Reveal>
         <Stagger className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
           {PLANS.map((p) => (
@@ -743,14 +666,14 @@ function Pricing() {
               <ul className="m-0 flex list-none flex-col gap-3 p-0">
                 {p.features.map((f) => (
                   <li key={f} className="flex items-center gap-3 text-[15px] text-[#1d1d1f]">
-                    <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#ede9fe]" style={{ color: A }}>
+                    <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#e7e8fb]" style={{ color: A }}>
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
                     </span>
                     {f}
                   </li>
                 ))}
               </ul>
-              <motion.button type="button" whileTap={{ scale: 0.96 }} onClick={() => scrollToId("top")} className="mt-auto h-12 rounded-full text-[15px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-[#7c3aed] focus-visible:ring-offset-2" style={p.featured ? { background: A, color: "#fff" } : { background: "#f5f5f7", color: INK }}>
+              <motion.button type="button" whileTap={{ scale: 0.96 }} onClick={() => scrollToId("top")} className="mt-auto h-12 rounded-full text-[15px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-[#3f3cbb] focus-visible:ring-offset-2" style={p.featured ? { background: A, color: "#fff" } : { background: "#f5f5f7", color: INK }}>
                 {p.cta}
               </motion.button>
             </div>
@@ -789,19 +712,18 @@ function Quotes() {
 export function NexusAiLaunchTemplatePage() {
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: FONT }}>
-        <Nav brand={<Logo />} accent={A} cta="Build a page" onCta={() => scrollToId("top")} links={[{ label: "How it works", id: "how" }, { label: "Examples", id: "compare" }, { label: "Publish", id: "publish" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
+      <div className="ast min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: FONT_SANS }}>
+        <style>{FONT_CSS + BASE_CSS}</style>
+        <Nav dark brand={<Logo />} accent={A} cta="Build a page" onCta={() => scrollToId("top")} links={[{ label: "How it works", id: "how" }, { label: "From notes", id: "compare" }, { label: "Publish", id: "publish" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
         <main>
           <Hero />
-          <Logos />
-          <Stats />
           <HowItWorks />
           <Compare />
           <Publish />
           <Pricing />
           <Quotes />
           <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-20 sm:py-24 lg:grid-cols-[1fr_1.4fr]">
-            <SectionHead eyebrow="FAQ" title="Fair questions." accent={A} />
+            <SectionHead title="Fair questions." accent={A} />
             <Reveal y={16}>
               <Faq
                 accent={A}
@@ -816,7 +738,7 @@ export function NexusAiLaunchTemplatePage() {
             </Reveal>
           </section>
           <div className="mx-auto max-w-[1180px] px-5 pb-20">
-            <CtaBand title="Your idea deserves a page tonight." sub="Your first page is free. No card, and you can export it whenever you like." cta="Build my page" secondary="See examples" accent={A} glow="rgba(124,58,237,.35)" />
+            <CtaBand title="Your idea deserves a page tonight." sub="Your first page is free. No card, and you can export it whenever you like." cta="Build my page" secondary="See examples" accent={A} glow="rgba(63,60,187,.35)" />
           </div>
         </main>
         <Footer brand={<Logo />} note="The AI page builder for people with more ideas than evenings. Draft, check, publish." columns={[{ title: "Product", links: ["How it works", "Examples", "Pricing", "Changelog"] }, { title: "Makers", links: ["Guides", "Templates", "Export docs", "Community"] }, { title: "Company", links: ["About", "Privacy", "Terms", "Contact"] }]} />

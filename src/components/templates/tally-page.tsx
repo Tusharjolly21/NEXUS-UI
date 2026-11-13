@@ -3,11 +3,12 @@
  * Tally: landing page template for a personal finance / payments app.
  * Built from Motion Kit components: Tilt Card, Money Goo, Swipe Stack,
  * Receipt Unfold, Hold to Confirm, Streak Counter, Ruler Picker, OTP Input,
- * Password Strength and the Switch from Animated Tabs.
+ * Password Strength and the Switch from Animated Tabs. The hero is cobalt,
+ * with a dinner bill settling itself: each friend's share arcs into your
+ * phone as they pay you back. Rethink Sans.
  */
 import { useState } from "react";
-import { AnimatePresence, MotionConfig, motion, useScroll, useSpring, useTransform } from "framer-motion";
-import TiltCard from "@/components/templates/kit/components/TiltCard";
+import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import MoneyGoo from "@/components/templates/kit/components/MoneyGoo";
 import SwipeStack from "@/components/templates/kit/components/SwipeStack";
 import ReceiptUnfold from "@/components/templates/kit/components/ReceiptUnfold";
@@ -17,9 +18,14 @@ import RulerPicker from "@/components/templates/kit/components/RulerPicker";
 import OtpInput from "@/components/templates/kit/components/OtpInput";
 import PasswordStrength from "@/components/templates/kit/components/PasswordStrength";
 import { Switch } from "@/components/templates/kit/components/AnimatedTabs";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Marquee, Nav, Phone, Reveal, SectionHead, Stagger, Words, card, ease, scrollToId, useParallax } from "@/components/templates/kit/parts";
+import SplitScene from "@/components/templates/tally/SplitScene";
+import { fontFaces } from "@/components/templates/kit/fonts";
+import { ScaleBox } from "@/components/templates/kit/blocks";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Phone, Reveal, SectionHead, Stagger, Words, card, ease, scrollToId, useParallax } from "@/components/templates/kit/parts";
 
-const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
+const SYSTEM_FONT = "'Rethink Sans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const COBALT = "#2442f5";
+const FONT_CSS = fontFaces("tally", [{ family: "Rethink Sans Variable", file: "rethink-sans", weight: "400 800" }]);
 const G = "#30d158"; // fills and graphics
 const GD = "#1a7f42"; // green text on white (5:1)
 const INK = "#1d1d1f";
@@ -85,69 +91,30 @@ function PhoneApp() {
 }
 
 function Hero() {
-  const { scrollY } = useScroll();
-  const cardY = useSpring(useTransform(scrollY, [0, 600], [0, -120]), { stiffness: 100, damping: 20 });
-  const phoneY = useSpring(useTransform(scrollY, [0, 600], [0, 40]), { stiffness: 100, damping: 20 });
-  const cardR = useTransform(scrollY, [0, 600], [12, 4]);
   return (
-    <section className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(50% 50% at 75% 40%, rgba(48,209,88,.18), transparent 70%), radial-gradient(40% 40% at 90% 80%, rgba(10,132,255,.12), transparent 70%)" }} />
-      <div className="relative mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 pb-20 pt-16 lg:grid-cols-[1.1fr_1fr] lg:pt-24">
-        <div className="flex flex-col items-start gap-7">
-          <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease }} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06)]">
-            <span className="flex gap-0.5" aria-hidden="true">{[0, 1, 2, 3, 4].map((i) => <motion.svg key={i} width="12" height="12" viewBox="0 0 24 24" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5 + i * 0.08, type: "spring", stiffness: 500, damping: 14 }}><path fill="#ff9f0a" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18.3 5.5 22l1.7-7.4L1.5 9.6 9 8.9z" /></motion.svg>)}</span>
-            4.9 from 120,000 reviews
+    <section className="relative -mt-[76px] overflow-hidden pt-[76px]" style={{ background: COBALT }}>
+      <div className="relative mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-6 px-5 pb-10 pt-12 lg:grid-cols-[1fr_620px] lg:gap-8 lg:pt-16">
+        <div className="flex flex-col items-start gap-7 text-white">
+          <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease }} className="text-[14px] font-medium text-white/75">
+            Free to open. No monthly fee on the Free plan.
           </motion.span>
-          <h1 className="m-0 text-[clamp(48px,7.6vw,92px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
-            <Words text="Money that moves like you do." accentWords={["moves"]} accent={GD} />
+          <h1 className="m-0 text-[clamp(48px,7.4vw,96px)] font-[740] leading-[0.95] tracking-[-0.03em] [text-wrap:balance]">
+            <Words text="Money that moves like you do." />
           </h1>
-          <Reveal delay={0.4} y={14}>
-            <p className="m-0 max-w-[520px] text-[clamp(18px,2.1vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
-              Split a dinner with a flick, sort a week of spending in a minute, and save without thinking about it. Tally is the money app that feels like the rest of your phone.
-            </p>
-          </Reveal>
-          <Reveal delay={0.55} y={14} className="flex flex-wrap gap-3">
-            <Magnetic className="text-white" style={{ background: INK }} onClick={() => scrollToId("pricing")}>Get Tally free</Magnetic>
-            <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("send")}>See how it works</Magnetic>
-          </Reveal>
-          <Reveal delay={0.7} y={10}>
-            <span className="text-[13px] text-[#86868b]">No monthly fee on the Free plan. Takes about three minutes to open.</span>
-          </Reveal>
-        </div>
-        <div className="relative flex h-[680px] items-center justify-center">
-          <motion.div className="relative z-10" initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.1, ease, delay: 0.2 }}>
-            <motion.div style={{ y: phoneY }}><Phone><PhoneApp /></Phone></motion.div>
-          </motion.div>
-          <motion.div className="absolute -right-10 bottom-12 z-0 hidden sm:block" initial={{ opacity: 0, x: -60, rotate: 24 }} animate={{ opacity: 1, x: 0, rotate: 0 }} transition={{ duration: 1.2, ease, delay: 0.5 }}>
-            <motion.div style={{ y: cardY, rotate: cardR }} className="scale-[.78] drop-shadow-[0_40px_40px_rgba(0,0,0,.25)]">
-              <TiltCard name="Sam Alvarez" title="Tally Black" number="•••• 4021" autoplay />
-            </motion.div>
-          </motion.div>
-          <motion.div className="absolute left-0 top-24 z-20 hidden rounded-2xl bg-white px-4 py-3 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-20px_rgba(0,0,0,.3)] sm:block" initial={{ opacity: 0, scale: 0.6, y: 20 }} animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }} transition={{ opacity: { delay: 1.1 }, scale: { delay: 1.1, type: "spring", stiffness: 300, damping: 16 }, y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.6 } }}>
-            <span className="flex items-center gap-2.5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full" style={{ background: G }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
-              </span>
-              <span className="flex flex-col">
-                <span className="text-[13px] font-semibold text-[#1d1d1f]">Maya paid you</span>
-                <span className="text-[12px] tabular-nums text-[#6e6e73]">$32.50 · Dinner</span>
-              </span>
-            </span>
+          <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease, delay: 0.4 }} className="m-0 max-w-[500px] text-[clamp(17px,2vw,20px)] leading-[1.5] text-white/80">
+            Split a dinner with a flick, sort a week of spending in a minute, and save without thinking about it. Tally is the money app that feels like the rest of your phone.
+          </motion.p>
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease, delay: 0.5 }} className="flex flex-wrap gap-3">
+            <Magnetic className="bg-white font-semibold text-[#1a2a8f]" onClick={() => scrollToId("pricing")}>Get Tally free</Magnetic>
+            <Magnetic className="text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,.4)]" style={{ background: "transparent" }} onClick={() => scrollToId("send")}>See how it works</Magnetic>
           </motion.div>
         </div>
+        <motion.div className="w-full" initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, ease, delay: 0.2 }}>
+          <ScaleBox w={620} h={680}>
+            <SplitScene><Phone><PhoneApp /></Phone></SplitScene>
+          </ScaleBox>
+        </motion.div>
       </div>
-    </section>
-  );
-}
-
-function Press() {
-  return (
-    <section className="border-y border-black/[.05] bg-white py-8" aria-label="Press">
-      <Marquee speed={30}>
-        {["The Ledger", "MONEYWEEK", "Daily Byte", "fintech/now", "The Saver", "PAYMENTS TODAY", "Hearth"].map((n, i) => (
-          <span key={n} className={`mx-10 text-[22px] text-[#6e6e73] ${i % 2 ? "font-serif italic" : "font-semibold tracking-tight"}`}>{n}</span>
-        ))}
-      </Marquee>
     </section>
   );
 }
@@ -164,7 +131,7 @@ function Send() {
         </Reveal>
       </motion.div>
       <div className="order-1 flex flex-col gap-8 lg:order-2">
-        <SectionHead eyebrow="Send" title="Pay a friend with a flick." sub="Drag the amount out of your avatar and drop it on theirs. It lands instantly, even if they bank somewhere else." accent={GD} />
+        <SectionHead title="Pay a friend with a flick." sub="Drag the amount out of your avatar and drop it on theirs. It lands instantly, even if they bank somewhere else." accent={GD} />
         <Stagger className="grid grid-cols-3 gap-4">
           {[["0s", "to arrive"], ["$0", "in fees"], ["40+", "currencies"]].map(([a, b]) => (
             <div key={b} className="flex flex-col gap-1 border-t border-black/[.08] pt-4">
@@ -182,7 +149,7 @@ function Spend() {
   return (
     <section id="spend" className="bg-[#f5f5f7] py-28">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Spend" title="A week of spending, sorted in a minute." sub="Tally lines up anything unusual as a deck. Swipe right to approve, left to flag. Every receipt is one tap away." accent={GD} center />
+        <SectionHead title="A week of spending, sorted in a minute." sub="Tally lines up anything unusual as a deck. Swipe right to approve, left to flag. Every receipt is one tap away." accent={GD} center />
         <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-[1.2fr_1fr]">
           <Reveal>
             <div className={`${card} flex h-full flex-col p-8`}>
@@ -197,7 +164,7 @@ function Spend() {
               <p className="m-0 mt-1.5 text-[15px] text-[#6e6e73]">Every payment keeps its itemised receipt, ready for taxes or splitting.</p>
               <div className="flex min-h-[380px] flex-1 items-center justify-center py-6">
                 <Fit>
-                  <ReceiptUnfold autoplay total="$58.24" lines={[{ label: "Groceries · Grocer", amount: "$41.20" }, { label: "Household", amount: "$9.80" }, { label: "Bag", amount: "$0.20" }, { label: "Tax", amount: "$7.04" }]} />
+                  <ReceiptUnfold autoplay total="$58.24" lines={[{ label: "Groceries, Grocer", amount: "$41.20" }, { label: "Household", amount: "$9.80" }, { label: "Bag", amount: "$0.20" }, { label: "Tax", amount: "$7.04" }]} />
                 </Fit>
               </div>
             </div>
@@ -215,7 +182,7 @@ function BigTransfer() {
         <div className="relative overflow-hidden rounded-[36px] bg-white px-6 py-20 text-center shadow-[0_0_0_1px_rgba(0,0,0,.05)]">
           <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(50% 60% at 50% 100%, rgba(48,209,88,.16), transparent 70%)" }} />
           <div className="relative flex flex-col items-center gap-8">
-            <SectionHead eyebrow="Peace of mind" title="Big transfers need a real yes." sub="Anything over your limit asks you to hold, not tap. No more sending rent to the wrong person by accident." accent={GD} center />
+            <SectionHead title="Big transfers need a real yes." sub="Anything over your limit asks you to hold, not tap. No more sending rent to the wrong person by accident." accent={GD} center />
             <HoldToConfirm autoplay label="Hold to send $2,400" holdingLabel="Keep holding…" doneLabel="Sent to Jordan" color={GD} holdMs={1600} />
           </div>
         </div>
@@ -247,7 +214,7 @@ function GoalRing({ pct = 68 }: { pct?: number }) {
 function Save() {
   return (
     <section id="save" className="mx-auto max-w-[1180px] px-5 pb-28">
-      <SectionHead eyebrow="Save" title="Saving that runs in the background." sub="Pick a weekly amount, give it a goal, and let streaks keep you honest." accent={GD} />
+      <SectionHead title="Saving that runs in the background." sub="Pick a weekly amount, give it a goal, and let streaks keep you honest." accent={GD} />
       <Stagger className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
         <div className={`${card} flex h-full flex-col items-center gap-6 p-7`}>
           <span className="self-start text-[18px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Weekly auto-save</span>
@@ -267,7 +234,7 @@ function Security() {
   return (
     <section id="security" className="bg-[#000] py-28 text-white">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Security" title="Locked down, never locked out." sub="Every sign-in is checked, every card can be frozen in a tap, and your password gets graded before you use it." accent="#30d158" dark />
+        <SectionHead title="Locked down, never locked out." sub="Every sign-in is checked, every card can be frozen in a tap, and your password gets graded before you use it." accent="#30d158" dark />
         <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-3">
           <Reveal className="lg:col-span-2">
             <div className="flex h-full flex-col gap-6 rounded-[28px] bg-[#f5f5f7] p-8 text-[#1d1d1f]">
@@ -339,10 +306,10 @@ function Pricing() {
   const [yearly, setYearly] = useState(true);
   return (
     <section id="pricing" className="mx-auto max-w-[1180px] px-5 py-28">
-      <SectionHead eyebrow="Plans" title="Start free. Upgrade when it pays for itself." accent={GD} center />
+      <SectionHead title="Start free. Upgrade when it pays for itself." accent={GD} center />
       <Reveal className="mt-8 flex justify-center">
         <div className="relative flex rounded-full bg-[#f0f0f3] p-1" role="radiogroup" aria-label="Billing period">
-          {[["Monthly", false], ["Yearly · save 20%", true]].map(([l, v]) => (
+          {[["Monthly", false], ["Yearly, save 20%", true]].map(([l, v]) => (
             <button key={String(l)} type="button" role="radio" aria-checked={yearly === v} onClick={() => setYearly(v as boolean)} className="relative h-10 rounded-full px-5 text-[14px] font-medium outline-none focus-visible:ring-2" style={{ color: yearly === v ? "#1d1d1f" : "#6e6e73" }}>
               {yearly === v && <motion.span layoutId="tally-period" className="absolute inset-0 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,.12)]" transition={{ type: "spring", stiffness: 500, damping: 34 }} />}
               <span className="relative">{l as string}</span>
@@ -383,9 +350,9 @@ export function TallyPage() {
   return (
     <MotionConfig reducedMotion="user">
     <div className="min-h-screen bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
-      <Nav brand={<Logo />} accent={INK} cta="Get the app" onCta={() => scrollToId("pricing")} links={[{ label: "Send", id: "send" }, { label: "Spend", id: "spend" }, { label: "Save", id: "save" }, { label: "Security", id: "security" }, { label: "Plans", id: "pricing" }]} />
+      <style>{FONT_CSS}</style>
+      <Nav dark brand={<Logo />} accent={INK} cta="Get the app" onCta={() => scrollToId("pricing")} links={[{ label: "Send", id: "send" }, { label: "Spend", id: "spend" }, { label: "Save", id: "save" }, { label: "Security", id: "security" }, { label: "Plans", id: "pricing" }]} />
       <Hero />
-      <Press />
       <Send />
       <Spend />
       <BigTransfer />
@@ -393,7 +360,7 @@ export function TallyPage() {
       <Security />
       <Pricing />
       <section className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 pb-24 lg:grid-cols-[1fr_1.4fr]">
-        <SectionHead eyebrow="FAQ" title="Good questions." accent={GD} />
+        <SectionHead title="Good questions." accent={GD} />
         <Reveal>
           <Faq
             accent={INK}

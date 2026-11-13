@@ -2,7 +2,9 @@
 /**
  * Simplistic: landing page template for AI agents that run routine workflows
  * overnight and leave a short report for the morning. Deliberately calm.
- * Motion Kit style: light page, one cyan accent.
+ * The whole hero is the night: the sky runs from dusk to sunrise as the
+ * agents work through their jobs, the town's windows go out one by one, and
+ * you can scrub the night yourself. Instrument Sans.
  * Built from Motion Kit components: Stagger Menu, Dock, Capsule Toggles,
  * Todo List, Liquid Dial (as agent actions), Elastic Stepper and the rolling
  * number from Price Odometer.
@@ -17,12 +19,14 @@ import ElasticStepper from "@/components/templates/kit/components/ElasticStepper
 import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
 import AgentDial from "@/components/templates/simplistic/AgentDial";
 import StickyStory from "@/components/templates/simplistic/StickyStory";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Marquee, Nav, Reveal, SectionHead, Stagger, Words, card, scrollToId } from "@/components/templates/kit/parts";
+import { fontFaces } from "@/components/templates/kit/fonts";
+import { CtaBand, Faq, Fit, Footer, Magnetic, Marquee, Nav, Reveal, SectionHead, Stagger, card, scrollToId } from "@/components/templates/kit/parts";
 
-const C = "#0891b2"; // cyan for fills and graphics
-const CT = "#0e7490"; // cyan for text and buttons (5.4:1 on white)
-const INK = "#1d1d1f";
-const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+const C = "#3d5bd9"; // night blue for fills and graphics
+const CT = "#1f3a8a"; // night blue for text and buttons (10:1 on white)
+const INK = "#141a2b";
+const FONT = "'Instrument Sans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const FONT_CSS = fontFaces("simplistic", [{ family: "Instrument Sans Variable", file: "instrument-sans", weight: "400 700" }]);
 const spring = { type: "spring", stiffness: 260, damping: 26 } as const;
 
 function Logo() {
@@ -57,30 +61,39 @@ const clock = (t: number) => {
   return `${String(h).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
 };
 
-function NightPanel() {
+/** Windows in the town on the horizon: x, y, and when in the night (0 to 1) each light goes out. */
+const WINDOWS = [[52, 58, 0.12], [64, 58, 0.3], [64, 50, 0.22], [180, 54, 0.4], [192, 54, 0.18], [204, 46, 0.55], [300, 50, 0.35], [312, 50, 0.62], [324, 50, 0.08], [324, 42, 0.48], [430, 56, 0.26], [442, 48, 0.7], [560, 52, 0.15], [572, 52, 0.5], [690, 58, 0.33], [702, 50, 0.6], [820, 54, 0.2], [832, 46, 0.44], [944, 52, 0.38], [956, 52, 0.66], [1080, 56, 0.28], [1092, 48, 0.52], [1200, 54, 0.1], [1212, 54, 0.58], [1330, 50, 0.42]];
+
+function Hero() {
   const target = useMotionValue(0.02);
   const t = useSpring(target, { stiffness: 90, damping: 22 });
   const [shown, setShown] = useState(0);
+  const [now, setNow] = useState(0); // the night's progress, in steps of 2%, for the town's windows
   const clockRef = useRef<HTMLSpanElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const touched = useRef(false);
   const dragging = useRef(false);
 
-  // Sky colours and the moon's arc are driven straight from the motion value.
-  const top = useTransform(t, [0, 0.2, 0.7, 0.9, 1], ["#33415c", "#0b1430", "#0b1430", "#3b4f80", "#7cc4dd"]);
-  const bottom = useTransform(t, [0, 0.2, 0.7, 0.9, 1], ["#b4546b", "#14244a", "#14244a", "#e9a17c", "#fde3b5"]);
-  const sky = useMotionTemplate`linear-gradient(180deg, ${top}, ${bottom})`;
-  const stars = useTransform(t, [0, 0.18, 0.78, 0.92], [0.2, 1, 1, 0]);
-  const orbX = useTransform(t, (v) => `${8 + v * 84}%`);
-  const orbY = useTransform(t, (v) => 118 - Math.sin(v * Math.PI) * 86);
+  // The sky, the moon and sun, and the headline's colour all run from the same clock.
+  const top = useTransform(t, [0, 0.2, 0.7, 0.88, 1], ["#33415c", "#070d22", "#070d22", "#33467a", "#8fcbe2"]);
+  const bottom = useTransform(t, [0, 0.2, 0.7, 0.88, 1], ["#b4546b", "#142047", "#142047", "#e59a78", "#fde8c2"]);
+  const sky = useMotionTemplate`linear-gradient(180deg, ${top} 0%, ${bottom} 100%)`;
+  const stars = useTransform(t, [0, 0.18, 0.78, 0.92], [0.15, 1, 1, 0]);
+  const orbX = useTransform(t, (v) => `${6 + v * 88}%`);
+  const orbY = useTransform(t, (v) => `${72 - Math.sin(v * Math.PI) * 58}%`);
   const moon = useTransform(t, [0.78, 0.92], [1, 0]);
   const sun = useTransform(t, [0.8, 0.95], [0, 1]);
+  // the text stays light until the sky is bright enough, then flips quickly
+  const ink = useTransform(t, [0.94, 0.975], ["#f3f5fb", "#141a2b"]);
+  const soft = useTransform(t, [0.94, 0.975], ["rgba(233,237,247,.8)", "rgba(20,26,43,.75)"]);
   const fill = useTransform(t, (v) => `${v * 100}%`);
 
   useMotionValueEvent(t, "change", (v) => {
     if (clockRef.current) clockRef.current.textContent = clock(v);
     const n = LOG.filter((l) => v * NIGHT_HOURS >= l.at).length;
     setShown((s) => (s === n ? s : n));
+    const q = Math.round(v * 50) / 50;
+    setNow((s) => (s === q ? s : q));
   });
 
   // Until the visitor grabs the timeline, the night plays by itself.
@@ -91,10 +104,10 @@ function NightPanel() {
       if (touched.current) return;
       target.jump(0.02);
       t.jump(0.02);
-      ctl = animate(target, 1, { duration: 13, ease: "linear" });
+      ctl = animate(target, 1, { duration: 14, ease: "linear" });
     };
     ts.push(window.setTimeout(play, 900));
-    const loop = window.setInterval(play, 17500);
+    const loop = window.setInterval(play, 19000);
     return () => { ctl?.stop(); ts.forEach(clearTimeout); clearInterval(loop); };
   }, [target, t]);
 
@@ -116,148 +129,106 @@ function NightPanel() {
   const morning = shown === LOG.length;
 
   return (
-    <div className={`${card} w-full overflow-hidden`}>
-      <motion.div className="relative h-[200px] overflow-hidden sm:h-[220px]" style={{ background: sky }} aria-hidden="true">
-        <motion.div className="absolute inset-0" style={{ opacity: stars }}>
-          {[[8, 20], [18, 46], [27, 14], [36, 34], [48, 18], [57, 50], [66, 12], [74, 36], [83, 22], [91, 44], [12, 66], [62, 70], [42, 60]].map(([x, y], i) => (
-            <motion.span key={i} className="absolute h-[3px] w-[3px] rounded-full bg-white" style={{ left: `${x}%`, top: `${y}%` }} animate={{ opacity: [0.35, 1, 0.35] }} transition={{ duration: 2.4 + (i % 4) * 0.7, repeat: Infinity, ease: "easeInOut" }} />
-          ))}
-        </motion.div>
-        <motion.span className="absolute -ml-6 -mt-6 h-12 w-12 rounded-full" style={{ left: orbX, top: orbY, opacity: moon, background: "#f1f5f9", boxShadow: "0 0 40px 6px rgba(241,245,249,.35), inset -10px -4px 0 #cbd5e1" }} />
-        <motion.span className="absolute -ml-7 -mt-7 h-14 w-14 rounded-full" style={{ left: orbX, top: orbY, opacity: sun, background: "#fbbf24", boxShadow: "0 0 60px 14px rgba(251,191,36,.45)" }} />
-        <svg className="absolute bottom-0 left-0 h-[70px] w-full" viewBox="0 0 520 70" preserveAspectRatio="none">
-          <path d="M0 52 C 60 30, 110 40, 170 46 S 280 20, 340 38 S 450 50, 520 30 V70 H0 Z" fill="rgba(15,23,42,.55)" />
-          <path d="M0 62 C 80 50, 150 58, 230 56 S 390 44, 520 56 V70 H0 Z" fill="#0f172a" />
-          {[[60, 54], [72, 54], [300, 50], [312, 50], [324, 50]].map(([x, y], i) => <motion.rect key={i} x={x} y={y} width="5" height="5" rx="1" fill="#fde68a" animate={{ opacity: [1, 0.55, 1] }} transition={{ duration: 3 + i, repeat: Infinity }} />)}
-        </svg>
+    <motion.section id="top" className="relative -mt-[76px] overflow-hidden pt-[76px]" style={{ background: sky }}>
+      {/* the sky */}
+      <motion.div className="pointer-events-none absolute inset-0" style={{ opacity: stars }} aria-hidden="true">
+        {[[6, 12], [14, 30], [22, 8], [31, 22], [40, 10], [47, 34], [55, 16], [63, 28], [71, 9], [79, 24], [86, 14], [93, 32], [10, 44], [36, 46], [60, 42], [84, 46], [27, 58], [68, 56]].map(([x, y], i) => (
+          <motion.span key={i} className="absolute h-[2px] w-[2px] rounded-full bg-white" style={{ left: `${x}%`, top: `${y}%` }} animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 2.6 + (i % 5) * 0.6, repeat: Infinity, ease: "easeInOut" }} />
+        ))}
       </motion.div>
+      <motion.span className="pointer-events-none absolute -ml-8 -mt-8 hidden h-16 w-16 rounded-full sm:block" style={{ left: orbX, top: orbY, opacity: moon, background: "#eef2f9", boxShadow: "0 0 60px 10px rgba(238,242,249,.3), inset -12px -5px 0 #c3ccdb" }} aria-hidden="true" />
+      <motion.span className="pointer-events-none absolute -ml-10 -mt-10 hidden h-20 w-20 rounded-full sm:block" style={{ left: orbX, top: orbY, opacity: sun, background: "#fbbf24", boxShadow: "0 0 90px 24px rgba(251,191,36,.45)" }} aria-hidden="true" />
+      {/* the town, its lights going out as the night goes on */}
+      <svg className="pointer-events-none absolute inset-x-0 bottom-0 h-[110px] w-full" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 50 C 120 30, 230 44, 360 40 S 600 22, 760 36 S 1040 48, 1200 30 S 1380 34, 1440 38 V80 H0 Z" fill="rgba(10,16,34,.45)" />
+        <path d="M0 64 H40 V52 H76 V44 H88 V64 H170 V48 H216 V40 H228 V64 H290 V44 H336 V36 H348 V64 H420 V50 H454 V42 H466 V64 H550 V46 H584 V64 H680 V52 H714 V44 H726 V64 H810 V48 H844 V40 H856 V64 H934 V46 H968 V64 H1070 V50 H1104 V42 H1116 V64 H1190 V48 H1224 V64 H1320 V44 H1354 V64 H1440 V80 H0 Z" fill="#0a1022" />
+        {WINDOWS.map(([x, y, off], i) => <rect key={i} x={x} y={y} width="6" height="5" rx="1" fill="#ffd98a" opacity={now < off ? 0.95 : 0} style={{ transition: "opacity .4s" }} />)}
+      </svg>
 
-      <div className="flex flex-col gap-4 p-5 sm:p-6">
-        <div className="flex items-center justify-between gap-3">
-          <span className="flex items-baseline gap-2">
-            <span ref={clockRef} className="text-[30px] font-semibold tabular-nums tracking-[-0.04em] text-[#1d1d1f]">22:00</span>
-            <span className="text-[13px] text-[#6e6e73]">tonight</span>
-          </span>
-          <AnimatePresence mode="popLayout" initial={false}>
-            <motion.span key={morning ? "m" : "n"} initial={{ opacity: 0, y: 8, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8 }} transition={spring} className="rounded-full px-3 py-1.5 text-[13px] font-semibold" style={morning ? { background: "#fef3c7", color: "#92400e" } : { background: "#ecfeff", color: CT }} aria-live="polite">
-              {morning ? `Good morning. ${waiting} things need you.` : `${shown} of ${LOG.length} jobs done`}
-            </motion.span>
-          </AnimatePresence>
-        </div>
-
-        <div
-          ref={track}
-          role="slider"
-          tabIndex={0}
-          aria-label="Time of night"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={Math.round((shown / LOG.length) * 100)}
-          aria-valuetext={`${shown} of ${LOG.length} jobs done`}
-          onKeyDown={onKey}
-          onPointerDown={(e) => { touched.current = true; dragging.current = true; e.currentTarget.setPointerCapture(e.pointerId); fromPointer(e); }}
-          onPointerMove={(e) => dragging.current && fromPointer(e)}
-          onPointerUp={() => (dragging.current = false)}
-          onPointerCancel={() => (dragging.current = false)}
-          className="group relative h-10 cursor-ew-resize touch-none select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#0e7490] focus-visible:ring-offset-2"
-        >
-          <span className="absolute inset-x-0 top-1/2 h-[6px] -translate-y-1/2 rounded-full bg-[#e8e8ed]" />
-          <motion.span className="absolute left-0 top-1/2 h-[6px] -translate-y-1/2 rounded-full" style={{ width: fill, background: C }} />
-          {LOG.map((l) => (
-            <span key={l.agent} className="absolute top-1/2 h-2.5 w-[2px] -translate-y-1/2 rounded-full bg-white/90" style={{ left: `${(l.at / NIGHT_HOURS) * 100}%` }} />
-          ))}
-          <motion.span className="absolute top-1/2 -ml-[13px] -mt-[13px] h-[26px] w-[26px] rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,.25),0_0_0_.5px_rgba(0,0,0,.1)] transition-transform group-active:scale-110" style={{ left: fill }} />
-        </div>
-        <div className="-mt-2 flex justify-between text-[12px] tabular-nums text-[#6e6e73]" aria-hidden="true">
-          <span>22:00</span><span>01:00</span><span>04:00</span><span>07:00</span>
-        </div>
-
-        <ol className="m-0 flex h-[300px] list-none sm:h-[244px] flex-col justify-end gap-2 overflow-hidden p-0" aria-live="polite" aria-label="Overnight log">
-          <AnimatePresence initial={false}>
-            {visible.length === 0 && (
-              <motion.li key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex h-full items-center justify-center rounded-2xl bg-[#f5f5f7] text-[14px] text-[#6e6e73]">
-                Drag the timeline. Agents start at 22:30.
-              </motion.li>
-            )}
-            {visible.slice(-3).map((l) => (
-              <motion.li key={l.agent} layout initial={{ opacity: 0, y: 14, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.97, transition: { duration: 0.2 } }} transition={spring} className="flex items-start gap-3 rounded-2xl bg-[#f5f5f7] px-4 py-3">
-                <span className="mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-full" style={{ background: l.waits ? "#fef3c7" : "#cffafe" }}>
-                  {l.waits ? (
-                    <span className="h-2 w-2 rounded-full bg-[#d97706]" />
-                  ) : (
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={CT} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
-                  )}
-                </span>
-                <span className="flex min-w-0 flex-col">
-                  <span className="text-[14px] font-semibold text-[#1d1d1f]">{l.agent} <span className="font-normal tabular-nums text-[#6e6e73]">· {clock(l.at / NIGHT_HOURS)}</span></span>
-                  <span className="text-[13px] leading-[1.4] text-[#424245]">{l.body}</span>
-                </span>
-              </motion.li>
-            ))}
-          </AnimatePresence>
-        </ol>
-      </div>
-    </div>
-  );
-}
-
-function Hero() {
-  return (
-    <section id="top" className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(45% 55% at 78% 40%, rgba(8,145,178,.14), transparent 70%), radial-gradient(30% 35% at 8% 12%, rgba(30,41,59,.06), transparent 70%)" }} />
-      <div className="relative mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 pb-16 pt-14 lg:grid-cols-[1fr_520px] lg:gap-16 lg:pt-20">
+      <div className="relative mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-10 px-5 pb-[150px] pt-14 lg:grid-cols-[1fr_480px] lg:gap-16 lg:pt-20">
         <div className="flex flex-col items-start gap-7">
-          <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={spring} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06)]">
-            <span className="h-2 w-2 rounded-full" style={{ background: C }} />
-            AI agents for the work nobody wants at 6pm
-          </motion.span>
-          <h1 className="m-0 text-[clamp(46px,7.2vw,88px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
-            <Words text="Go to bed. The work gets done." accentWords={["done."]} accent={CT} />
-          </h1>
-          <Reveal delay={0.35} y={14}>
-            <p className="m-0 max-w-[500px] text-[clamp(18px,2.1vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
-              Simplistic runs your routine workflows overnight: inbox triage, invoice reminders, stock sheets, the weekly numbers. Anything risky waits for you, with a short note in the morning.
-            </p>
-          </Reveal>
-          <Reveal delay={0.5} y={14} className="flex flex-wrap gap-3">
-            <Magnetic className="text-white" style={{ background: CT }} onClick={() => scrollToId("pricing")}>Start with one agent</Magnetic>
-            <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("how")}>How it works</Magnetic>
-          </Reveal>
-          <Reveal delay={0.6} y={10}>
-            <span className="text-[13px] text-[#6e6e73]">Your first agent is free. Drag the timeline to scrub through a real night.</span>
-          </Reveal>
+          <motion.span ref={clockRef} className="text-[clamp(44px,5vw,64px)] font-[560] leading-none tabular-nums tracking-[-0.04em]" style={{ color: ink }} aria-hidden="true">22:00</motion.span>
+          <motion.h1 className="m-0 text-[clamp(44px,6.6vw,84px)] font-[640] leading-[0.98] tracking-[-0.045em] [text-wrap:balance]" style={{ color: ink }}>
+            Go to bed. The work gets done.
+          </motion.h1>
+          <motion.p className="m-0 max-w-[500px] text-[clamp(17px,1.9vw,19px)] leading-[1.55]" style={{ color: soft }}>
+            Simplistic runs your routine workflows overnight: inbox triage, invoice reminders, stock sheets, the weekly numbers. Anything risky waits for you, with a short note in the morning.
+          </motion.p>
+          <div className="flex flex-wrap gap-3">
+            <Magnetic className="bg-white text-[#141a2b]" onClick={() => scrollToId("pricing")}>Start with one agent</Magnetic>
+            <Magnetic className="text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,.35)]" style={{ background: "rgba(20,26,43,.35)" }} onClick={() => scrollToId("how")}>How it works</Magnetic>
+          </div>
         </div>
-        <motion.div initial={{ y: 18 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.2 }} className="w-full">
-          <NightPanel />
-        </motion.div>
+
+        <div className="w-full overflow-hidden rounded-[24px] bg-white/80 shadow-[0_0_0_1px_rgba(255,255,255,.4),0_40px_80px_-40px_rgba(0,0,0,.6)] backdrop-blur-xl">
+          <div className="flex flex-col gap-4 p-5 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[14px] font-semibold text-[#141a2b]">Tonight&rsquo;s log</span>
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span key={morning ? "m" : "n"} initial={{ opacity: 0, y: 8, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8 }} transition={spring} className="rounded-full px-3 py-1.5 text-[13px] font-semibold" style={morning ? { background: "#fef3c7", color: "#92400e" } : { background: "#eef1fb", color: CT }} aria-live="polite">
+                  {morning ? `Good morning. ${waiting} things need you.` : `${shown} of ${LOG.length} jobs done`}
+                </motion.span>
+              </AnimatePresence>
+            </div>
+            <ol className="m-0 flex h-[258px] list-none flex-col justify-end gap-2 overflow-hidden p-0" aria-live="polite" aria-label="Overnight log">
+              <AnimatePresence initial={false}>
+                {visible.length === 0 && (
+                  <motion.li key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex h-full items-center justify-center rounded-2xl bg-[#f2f4f9] text-[14px] text-[#5a6276]">
+                    Agents start at 22:30.
+                  </motion.li>
+                )}
+                {visible.slice(-3).map((l) => (
+                  <motion.li key={l.agent} layout initial={{ opacity: 0, y: 14, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.97, transition: { duration: 0.2 } }} transition={spring} className="flex items-start gap-3 rounded-2xl bg-[#f2f4f9] px-4 py-3">
+                    <span className="mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-full" style={{ background: l.waits ? "#fef3c7" : "#e0e6fb" }}>
+                      {l.waits ? (
+                        <span className="h-2 w-2 rounded-full bg-[#d97706]" />
+                      ) : (
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={CT} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                      )}
+                    </span>
+                    <span className="flex min-w-0 flex-col">
+                      <span className="text-[14px] font-semibold text-[#141a2b]">{l.agent} <span className="font-normal tabular-nums text-[#5a6276]">at {clock(l.at / NIGHT_HOURS)}</span></span>
+                      <span className="text-[13px] leading-[1.4] text-[#3b4256]">{l.body}</span>
+                    </span>
+                  </motion.li>
+                ))}
+              </AnimatePresence>
+            </ol>
+            <div
+              ref={track}
+              role="slider"
+              tabIndex={0}
+              aria-label="Time of night"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round((shown / LOG.length) * 100)}
+              aria-valuetext={`${shown} of ${LOG.length} jobs done`}
+              onKeyDown={onKey}
+              onPointerDown={(e) => { touched.current = true; dragging.current = true; e.currentTarget.setPointerCapture(e.pointerId); fromPointer(e); }}
+              onPointerMove={(e) => dragging.current && fromPointer(e)}
+              onPointerUp={() => (dragging.current = false)}
+              onPointerCancel={() => (dragging.current = false)}
+              className="group relative h-10 cursor-ew-resize touch-none select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a8a] focus-visible:ring-offset-2"
+            >
+              <span className="absolute inset-x-0 top-1/2 h-[6px] -translate-y-1/2 rounded-full bg-[#e3e6ef]" />
+              <motion.span className="absolute left-0 top-1/2 h-[6px] -translate-y-1/2 rounded-full" style={{ width: fill, background: C }} />
+              {LOG.map((l) => (
+                <span key={l.agent} className="absolute top-1/2 h-2.5 w-[2px] -translate-y-1/2 rounded-full bg-white/90" style={{ left: `${(l.at / NIGHT_HOURS) * 100}%` }} />
+              ))}
+              <motion.span className="absolute top-1/2 -ml-[13px] -mt-[13px] h-[26px] w-[26px] rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,.25),0_0_0_.5px_rgba(0,0,0,.1)] transition-transform group-active:scale-110" style={{ left: fill }} />
+            </div>
+            <div className="-mt-2 flex justify-between text-[12px] tabular-nums text-[#5a6276]" aria-hidden="true">
+              <span>22:00</span><span>01:00</span><span>04:00</span><span>07:00</span>
+            </div>
+            <span className="text-[12.5px] text-[#5a6276]">Drag the timeline to scrub through a real night. Your first agent is free.</span>
+          </div>
+        </div>
       </div>
-    </section>
+    </motion.section>
   );
 }
 
 /* ------------------------------------------------------------------ */
-
-const TEAMS = [
-  { n: "Halden Freight", c: "font-semibold" },
-  { n: "copperleaf", c: "font-serif italic" },
-  { n: "BIRCH & VALE", c: "tracking-[0.24em] font-medium" },
-  { n: "Ostrander", c: "font-black tracking-tight" },
-  { n: "pinewood supply", c: "font-bold lowercase" },
-  { n: "Marlow Studio", c: "font-serif" },
-  { n: "QUAYSIDE", c: "tracking-[0.3em]" },
-  { n: "Tern Analytics", c: "font-medium italic" },
-];
-
-function Teams() {
-  return (
-    <section className="border-y border-black/[.05] bg-white py-9" aria-label="Customers">
-      <p className="m-0 mb-5 text-center text-[13px] font-medium text-[#6e6e73]">Working the night shift for 2,300 small teams, including</p>
-      <Marquee speed={28}>
-        {TEAMS.map((b) => <span key={b.n} className={`mx-10 text-[22px] text-[#6e6e73] ${b.c}`}>{b.n}</span>)}
-      </Marquee>
-    </section>
-  );
-}
 
 function Principles() {
   const items = [
@@ -267,7 +238,7 @@ function Principles() {
   ];
   return (
     <section id="principles" className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
-      <SectionHead eyebrow="Calm by design" title="Fewer features. Fewer surprises." sub="Simplistic does one thing: routine work, done overnight, checked by you in the morning." accent={CT} />
+      <SectionHead title="Fewer features. Fewer surprises." sub="Simplistic does one thing: routine work, done overnight, checked by you in the morning." accent={CT} />
       <Stagger className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
         {items.map((it) => (
           <div key={it.t} className={`${card} flex h-full flex-col gap-4 p-7`}>
@@ -314,7 +285,7 @@ function TriggerVisual() {
   return (
     <div className={`${card} flex w-[440px] flex-col gap-5 p-7`}>
       <div className="flex items-center justify-between">
-        <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Invoice chaser · Trigger</span>
+        <span className="text-[13px] font-semibold text-[#6e6e73]">Invoice chaser trigger</span>
         <span className="rounded-full bg-[#ecfeff] px-2.5 py-1 text-[12px] font-semibold" style={{ color: CT }}>Step 1 of 4</span>
       </div>
       <div className="flex justify-center"><StaggerMenu label="Choose a trigger" items={TRIGGERS} autoplay /></div>
@@ -325,7 +296,7 @@ function TriggerVisual() {
 function ToolsVisual() {
   return (
     <div className={`${card} flex w-[520px] flex-col gap-2 p-7`}>
-      <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Connected tools</span>
+      <span className="text-[13px] font-semibold text-[#6e6e73]">Connected tools</span>
       <p className="m-0 text-[15px] leading-[1.5] text-[#424245]">The agent can only see what is in this dock. Click a tool to connect it.</p>
       <Dock apps={TOOLS} autoplay />
     </div>
@@ -353,7 +324,7 @@ function RulesVisual() {
   return (
     <div className={`${card} w-[460px] overflow-hidden`} onPointerDown={() => (touched.current = true)}>
       <div className="flex items-center justify-between px-6 pb-2 pt-5">
-        <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Rules</span>
+        <span className="text-[13px] font-semibold text-[#6e6e73]">Rules</span>
         <span className="text-[12px] tabular-nums text-[#6e6e73]">{Object.values(state).filter(Boolean).length} of {RULES.length} on</span>
       </div>
       <ul className="m-0 list-none divide-y divide-[#f0f0f3] p-0">
@@ -375,7 +346,7 @@ function ReviewVisual() {
   return (
     <div className={`${card} flex w-[440px] flex-col gap-4 p-6`}>
       <div className="flex items-center justify-between">
-        <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Waiting for you · 07:00</span>
+        <span className="text-[13px] font-semibold text-[#6e6e73]">Waiting for you at 07:00</span>
         <span className="text-[12px] text-[#6e6e73]">About 4 minutes</span>
       </div>
       <TodoList accent={CT} initial={["Approve 38 drafted replies", "OK two invoices over $5,000", "Reorder 4 low-stock items", "Skim the Monday numbers"]} autoplay />
@@ -387,15 +358,15 @@ function HowItWorks() {
   return (
     <section id="how" className="bg-[#f5f5f7] py-20 sm:py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="How it works" title="Four steps. No diagrams." sub="Every agent is the same four questions. When does it run, what can it touch, what must it ask about, and what do you see in the morning." accent={CT} />
+        <SectionHead title="Four steps. No diagrams." sub="Every agent is the same four questions. When does it run, what can it touch, what must it ask about, and what do you see in the morning." accent={CT} />
         <div className="mt-6">
           <StickyStory
             accent={CT}
             steps={[
-              { kicker: "01 · When", title: "Pick a trigger.", body: "A time of night, a new file, an incoming email or the end of the shipping day. One trigger per agent keeps it predictable.", visual: <TriggerVisual /> },
-              { kicker: "02 · What", title: "Connect only what it needs.", body: "Agents get read or write access tool by tool. An invoice chaser never sees your calendar.", visual: <ToolsVisual /> },
-              { kicker: "03 · Limits", title: "Set the rules once.", body: "Plain switches, not prompt engineering. Rules are checked before every step, and a broken rule stops the run.", visual: <RulesVisual /> },
-              { kicker: "04 · Morning", title: "Review over coffee.", body: "Everything that needed a yes is in one short list. Tick it off, or open any item to see exactly what the agent did and why.", visual: <ReviewVisual /> },
+              { kicker: "When", title: "Pick a trigger.", body: "A time of night, a new file, an incoming email or the end of the shipping day. One trigger per agent keeps it predictable.", visual: <TriggerVisual /> },
+              { kicker: "What", title: "Connect only what it needs.", body: "Agents get read or write access tool by tool. An invoice chaser never sees your calendar.", visual: <ToolsVisual /> },
+              { kicker: "Limits", title: "Set the rules once.", body: "Plain switches, not prompt engineering. Rules are checked before every step, and a broken rule stops the run.", visual: <RulesVisual /> },
+              { kicker: "Morning", title: "Review over coffee.", body: "Everything that needed a yes is in one short list. Tick it off, or open any item to see exactly what the agent did and why.", visual: <ReviewVisual /> },
             ]}
           />
         </div>
@@ -415,25 +386,20 @@ const ACTIONS = [
 
 function Control() {
   const [status, setStatus] = useState("Scheduled for 02:00");
-  const pick = (id: string) => setStatus({ run: "Running now · 1 of 6 steps", skip: "Skipping tonight, back tomorrow", pause: "Paused until you resume it", rules: "Editing rules" }[id] ?? "Scheduled for 02:00");
+  const pick = (id: string) => setStatus({ run: "Running now, 1 of 6 steps", skip: "Skipping tonight, back tomorrow", pause: "Paused until you resume it", rules: "Editing rules" }[id] ?? "Scheduled for 02:00");
   return (
     <section id="agents" className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
       <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
         <div className="flex flex-col gap-10">
-          <SectionHead eyebrow="In control" title="Change tonight's plan in one tap." sub="Run an agent now, skip a night or pause it while you are on holiday. No settings pages." accent={CT} />
-          <Stagger className="grid grid-cols-2 gap-x-6 gap-y-8">
-            {[
-              { to: 11.4, f: (n: number) => `${n.toFixed(1)}h`, l: "saved per person each week, median" },
-              { to: 92, f: (n: number) => `${Math.round(n)}%`, l: "of overnight runs need no edits" },
-              { to: 4, f: (n: number) => `${Math.round(n)} min`, l: "to set up a typical agent" },
-              { to: 24, f: (n: number) => `${Math.round(n)}h`, l: "undo window on every run" },
-            ].map((s) => (
-              <div key={s.l} className="flex flex-col gap-1.5 border-t border-black/[.08] pt-5">
-                <Counter to={s.to} format={s.f} className="text-[clamp(32px,4vw,44px)] font-semibold tracking-[-0.04em] text-[#1d1d1f]" />
-                <span className="text-[14px] text-[#6e6e73]">{s.l}</span>
-              </div>
+          <SectionHead title="Change tonight's plan in one tap." sub="Run an agent now, skip a night or pause it while you are on holiday. No settings pages." accent={CT} />
+          <ul className="m-0 flex list-none flex-col gap-3 p-0">
+            {["Every run can be undone for 24 hours.", "Skipping a night loses nothing. The work runs tomorrow.", "Pausing holds the queue until you are back."].map((t) => (
+              <li key={t} className="flex items-start gap-3 border-t border-black/[.08] pt-3 text-[16px] leading-[1.45] text-[#141a2b]">
+                <span className="mt-[9px] h-1.5 w-1.5 flex-none rounded-full" style={{ background: C }} aria-hidden="true" />
+                {t}
+              </li>
             ))}
-          </Stagger>
+          </ul>
         </div>
         <Reveal y={16}>
           <div className={`${card} flex flex-col items-center gap-2 px-6 pb-8 pt-7`}>
@@ -468,7 +434,7 @@ function Pricing() {
   return (
     <section id="pricing" className="bg-[#f5f5f7] py-20 sm:py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Pricing" title="One plan. Pay per agent." sub="Your first agent is free for good. Every agent after that is $12 a month, with model usage included up to a fair limit." accent={CT} center />
+        <SectionHead title="One plan. Pay per agent." sub="Your first agent is free for good. Every agent after that is $12 a month, with model usage included up to a fair limit." accent={CT} center />
         <Reveal y={16} className="mx-auto mt-12 max-w-[880px]">
           <div className={`${card} grid grid-cols-1 overflow-hidden md:grid-cols-[1.1fr_1fr]`}>
             <div className="flex flex-col items-center gap-7 px-6 py-10 sm:px-10">
@@ -522,7 +488,7 @@ function Quotes() {
         {QUOTES.map((q) => (
           <figure key={q.n} className={`${card} m-0 mx-2.5 flex w-[340px] flex-none flex-col gap-5 p-7 sm:w-[380px]`}>
             <blockquote className="m-0 text-[18px] leading-[1.45] tracking-[-0.01em] text-[#1d1d1f]">“{q.q}”</blockquote>
-            <figcaption className="text-[14px] text-[#6e6e73]"><span className="font-semibold text-[#1d1d1f]">{q.n}</span> · {q.c}</figcaption>
+            <figcaption className="text-[14px] text-[#6e6e73]"><span className="font-semibold text-[#1d1d1f]">{q.n}</span>, {q.c}</figcaption>
           </figure>
         ))}
       </Marquee>
@@ -534,17 +500,17 @@ export function SimplisticSaaSPage() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: FONT }}>
-        <Nav brand={<Logo />} accent={CT} cta="Start free" onCta={() => scrollToId("pricing")} links={[{ label: "How it works", id: "how" }, { label: "Agents", id: "agents" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
+        <style>{FONT_CSS}</style>
+        <Nav dark brand={<Logo />} accent={CT} cta="Start free" onCta={() => scrollToId("pricing")} links={[{ label: "How it works", id: "how" }, { label: "Agents", id: "agents" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
         <main>
           <Hero />
-          <Teams />
-          <Principles />
+            <Principles />
           <HowItWorks />
           <Control />
           <Pricing />
           <Quotes />
           <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-20 sm:py-24 lg:grid-cols-[1fr_1.4fr]">
-            <SectionHead eyebrow="FAQ" title="Good questions." accent={CT} />
+            <SectionHead title="Good questions." accent={CT} />
             <Reveal y={16}>
               <Faq
                 accent={CT}

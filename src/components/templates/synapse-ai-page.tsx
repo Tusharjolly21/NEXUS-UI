@@ -1,7 +1,9 @@
 "use client";
 /**
  * Synapse: landing page template for a visual builder that designs, tests and
- * deploys AI agents without code. The hero is a live node canvas.
+ * deploys AI agents without code. The hero is the product: a framed node
+ * canvas whose steps show their real output as a test run passes through.
+ * Gabarito and Fragment Mono, steps colour-coded by kind.
  * Built from Motion Kit components: Before / After, Liquid Dial, Scrub Inputs,
  * Upload Chips, Voice Orb, Dock and Copy Buttons.
  */
@@ -14,16 +16,23 @@ import UploadChips from "@/components/templates/kit/components/UploadChips";
 import VoiceOrb from "@/components/templates/kit/components/VoiceOrb";
 import Dock, { type DockApp } from "@/components/templates/kit/components/Dock";
 import { CopyChip } from "@/components/templates/kit/components/CopyButton";
-import NodeCanvas from "@/components/templates/synapse/node-canvas";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, StickyStory, Words, ease, scrollToId } from "@/components/templates/kit/parts";
+import NodeCanvas, { KIND_TONE } from "@/components/templates/synapse/node-canvas";
+import { fontFaces } from "@/components/templates/kit/fonts";
+import { CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, StickyStory, Words, ease, scrollToId } from "@/components/templates/kit/parts";
 
-const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
-const MONO = "ui-monospace, 'SF Mono', Menlo, monospace";
-const A = "#db2777"; // fills and graphics
-const AD = "#be185d"; // accent text on light backgrounds
+const FONT = "'Gabarito Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const MONO = "'Fragment Mono', ui-monospace, 'SF Mono', Menlo, monospace";
+const A = "#b86e00"; // amber: fills and graphics
+const AD = "#8a5200"; // amber text on light backgrounds (6.2:1)
+const INK = "#111318";
+const CANVAS = "#eef0f3";
+const FONT_CSS = fontFaces("synapse", [
+  { family: "Gabarito Variable", file: "gabarito", weight: "400 900" },
+  { family: "Fragment Mono", file: "fragment-mono", weight: "400", variable: false },
+]);
 const C = "rounded-[24px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)]";
 const spring = { type: "spring", stiffness: 420, damping: 34 } as const;
-const DOTS = "radial-gradient(circle, #cfcfd6 1.2px, transparent 1.3px)";
+const DOTS = "radial-gradient(circle, #c3c7cf 1.1px, transparent 1.2px)";
 
 function Logo() {
   return (
@@ -40,29 +49,47 @@ function Logo() {
 
 function Hero() {
   return (
-    <section id="top" className="relative overflow-hidden pb-16 pt-10 sm:pt-12">
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ backgroundImage: DOTS, backgroundSize: "22px 22px", maskImage: "radial-gradient(80% 70% at 50% 45%, #000 40%, transparent 100%)", WebkitMaskImage: "radial-gradient(80% 70% at 50% 45%, #000 40%, transparent 100%)" }} />
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(40% 35% at 50% 8%, rgba(249,168,212,.35), transparent 70%)" }} />
-      <div className="relative mx-auto flex max-w-[1180px] flex-col items-center gap-5 px-5 text-center">
-        <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.07)]">
-          <span className="rounded-full px-2 py-0.5 text-[11px] font-semibold text-white" style={{ background: A }}>New</span>
-          Branching on confidence is here
-        </motion.span>
-        <h1 className="m-0 max-w-[900px] text-[clamp(42px,6.4vw,82px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
-          <Words text="Draw your agent. Test it live. Ship it." className="justify-center" accentWords={["Ship", "it."]} accent={AD} />
-        </h1>
-        <Reveal delay={0.35} y={14}>
-          <p className="m-0 max-w-[640px] text-[clamp(18px,2.1vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
+    <section id="top" className="relative -mt-[76px] overflow-hidden pb-16 pt-[124px] sm:pt-[140px]" style={{ background: CANVAS }}>
+      {/* the whole hero is canvas */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ backgroundImage: DOTS, backgroundSize: "20px 20px" }} />
+      <div className="relative mx-auto grid max-w-[1180px] grid-cols-1 items-end gap-8 px-5 lg:grid-cols-[1.25fr_1fr] lg:gap-14">
+        <div className="flex flex-col items-start gap-5">
+          <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13.5px] font-medium text-[#111318] shadow-[0_0_0_1px_rgba(17,19,24,.1)]">
+            <span className="h-2 w-2 rounded-full" style={{ background: KIND_TONE.Branch }} aria-hidden="true" />
+            New: branch on how confident the agent is
+          </motion.span>
+          <h1 className="m-0 text-[clamp(44px,6.6vw,88px)] font-[760] leading-[0.94] tracking-[-0.04em] text-[#111318] [text-wrap:balance]">
+            <Words text="Draw your agent. Test it live. Ship it." />
+          </h1>
+        </div>
+        <motion.div className="flex flex-col items-start gap-6 lg:pb-2" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease, delay: 0.3 }}>
+          <p className="m-0 max-w-[460px] text-[clamp(17px,1.9vw,19px)] leading-[1.5] text-[#4a4f59]">
             Synapse is a visual builder for AI agents. Connect steps on a canvas, try them on real inputs, and deploy to your site, inbox or API without writing glue code.
           </p>
-        </Reveal>
-        <Reveal delay={0.45} y={14} className="flex flex-wrap justify-center gap-3">
-          <Magnetic className="text-white shadow-[0_12px_30px_-12px_rgba(219,39,119,.8)]" style={{ background: A }} onClick={() => scrollToId("pricing")}>Start building free</Magnetic>
-          <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("build")}>See the builder</Magnetic>
-        </Reveal>
+          <div className="flex flex-wrap gap-3">
+            <Magnetic className="text-white" style={{ background: INK }} onClick={() => scrollToId("pricing")}>Start building free</Magnetic>
+            <Magnetic className="bg-white text-[#111318] shadow-[0_0_0_1px_rgba(17,19,24,.12)]" onClick={() => scrollToId("build")}>See the builder</Magnetic>
+          </div>
+        </motion.div>
       </div>
-      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 110, damping: 20, delay: 0.3 }} className="relative mx-auto mt-4 max-w-[1180px] px-5">
-        <NodeCanvas />
+
+      {/* the builder, framed like the app */}
+      <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 110, damping: 20, delay: 0.3 }} className="relative mx-auto mt-12 max-w-[1180px] px-5">
+        <div className="overflow-hidden rounded-[22px] bg-white/55 shadow-[0_0_0_1px_rgba(17,19,24,.1),0_40px_80px_-40px_rgba(17,19,24,.35)] backdrop-blur-[2px]">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-black/[.07] bg-white/80 px-4 py-2.5 sm:px-5">
+            <span className="text-[13.5px] font-semibold text-[#111318]">support-triage</span>
+            <span className="text-[12.5px] text-[#6b707a]" style={{ fontFamily: MONO }}>v13, draft</span>
+            <span className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] text-[#4a4f59]">
+              {(Object.keys(KIND_TONE) as (keyof typeof KIND_TONE)[]).map((k) => (
+                <span key={k} className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-[3px]" style={{ background: KIND_TONE[k] }} aria-hidden="true" />{k}</span>
+              ))}
+            </span>
+          </div>
+          <div className="relative px-4 pb-6 pt-8 sm:px-8">
+            <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ backgroundImage: DOTS, backgroundSize: "20px 20px", opacity: 0.6 }} />
+            <NodeCanvas />
+          </div>
+        </div>
       </motion.div>
     </section>
   );
@@ -109,7 +136,7 @@ function After() {
         {steps.map(([k, t], i) => (
           <div key={t} className="flex items-center gap-2 sm:gap-3">
             <span className="flex flex-col rounded-[12px] bg-white px-3 py-2 text-left shadow-[0_0_0_1px_rgba(0,0,0,.06),0_10px_20px_-14px_rgba(0,0,0,.35)] sm:rounded-[14px] sm:px-4 sm:py-3">
-              <span className="text-[9px] font-semibold uppercase tracking-[0.08em] sm:text-[10px]" style={{ color: k === "Model" ? AD : "#6e6e73" }}>{k}</span>
+              <span className="text-[10px] font-semibold sm:text-[11px]" style={{ color: k === "Model" ? AD : "#6e6e73" }}>{k}</span>
               <span className="text-[11px] font-semibold text-[#1d1d1f] sm:text-[13px]">{t}</span>
             </span>
             {i < steps.length - 1 && <span className="h-[2px] w-3 rounded-full sm:w-6" style={{ background: A }} aria-hidden="true" />}
@@ -123,7 +150,7 @@ function After() {
 function Compare() {
   return (
     <section id="why" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Why a canvas" title="Same agent. One of these you can hand to a teammate." sub="Drag the divider. On the left, the prompt-and-glue file most agents start as. On the right, the same logic as steps anyone on the team can read and change." accent={AD} center />
+      <SectionHead title="Same agent. One of these you can hand to a teammate." sub="Drag the divider. On the left, the prompt-and-glue file most agents start as. On the right, the same logic as steps anyone on the team can read and change." accent={AD} center />
       <Reveal y={20} className="mx-auto mt-12 max-w-[980px]">
         <BeforeAfter before={<Before />} after={<After />} beforeLabel="Glue code" afterLabel="Synapse" autoplay />
       </Reveal>
@@ -148,7 +175,7 @@ function Build() {
   return (
     <section id="build" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto max-w-[1180px] px-5">
-        <SectionHead eyebrow="Build" title="Everything an agent needs, one drag away." sub="Models, tools, branches and memory are blocks. Settings feel like a design tool. Knowledge is a folder you drop in." accent={AD} />
+        <SectionHead title="Everything an agent needs, one drag away." sub="Models, tools, branches and memory are blocks. Settings feel like a design tool. Knowledge is a folder you drop in." accent={AD} />
         <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-3">
           <Reveal y={20}>
             <div className={`${C} flex h-full flex-col p-7`}>
@@ -216,8 +243,8 @@ function TraceCard() {
   return (
     <div className={`${C} flex w-[440px] flex-col gap-4 p-6`}>
       <div className="flex items-baseline justify-between">
-        <span className="text-[14px] font-semibold text-[#1d1d1f]">Run 1,204 · billing question</span>
-        <span className="text-[13px] tabular-nums text-[#6e6e73]">2.41 s · $0.004</span>
+        <span className="text-[14px] font-semibold text-[#1d1d1f]">Run 1,204: billing question</span>
+        <span className="text-[13px] tabular-nums text-[#6e6e73]">2.41 s, $0.004</span>
       </div>
       <div className="flex flex-col gap-2.5">
         {spans.map((s, i) => (
@@ -246,7 +273,7 @@ function EvalCard() {
   return (
     <div className={`${C} flex w-[440px] flex-col gap-4 p-6`}>
       <div className="flex items-center justify-between">
-        <span className="text-[14px] font-semibold text-[#1d1d1f]">200 saved emails · v12 vs v13</span>
+        <span className="text-[14px] font-semibold text-[#1d1d1f]">200 saved emails, v12 against v13</span>
         <span className="flex items-center gap-3 text-[12px] text-[#6e6e73]"><span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#c7c7cc]" />v12</span><span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: A }} />v13</span></span>
       </div>
       {rows.map((r, i) => (
@@ -271,7 +298,7 @@ function VersionCard() {
   ];
   return (
     <div className={`${C} flex w-[420px] flex-col gap-2 p-4`}>
-      <span className="px-2 pb-1 pt-1 text-[13px] font-semibold text-[#6e6e73]">support-triage · versions</span>
+      <span className="px-2 pb-1 pt-1 text-[13px] font-semibold text-[#6e6e73]">support-triage versions</span>
       {versions.map((x) => {
         const on = live === x.v;
         return (
@@ -295,15 +322,15 @@ function VersionCard() {
 function Test() {
   return (
     <section id="test" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Test" title="Know it works before your customers find out." sub="Talk to the agent, read every step it took, and score new versions against real conversations before you publish." accent={AD} />
+      <SectionHead title="Know it works before your customers find out." sub="Talk to the agent, read every step it took, and score new versions against real conversations before you publish." accent={AD} />
       <div className="mt-10">
         <StickyStory
           accent={A}
           steps={[
-            { kicker: "01 · Talk", title: "Test it out loud.", body: "Hold the orb and ask your agent a question the way a customer would. It listens, thinks and answers with the voice you picked.", visual: <div className={`${C} flex h-[400px] w-[420px] items-center justify-center`}><VoiceOrb accent={A} autoplay /></div> },
-            { kicker: "02 · Trace", title: "See every step it took.", body: "Each run is a timeline: which step ran, how long it took, what it cost and which documents it read.", visual: <TraceCard /> },
-            { kicker: "03 · Score", title: "Score versions on real conversations.", body: "Save tricky emails as test cases. Every new version runs against all of them, so you see what got better and what slipped.", visual: <EvalCard /> },
-            { kicker: "04 · Version", title: "Publish, then roll back in one click.", body: "Every publish is a version with a note. If something feels off, put the last one back live while you look.", visual: <VersionCard /> },
+            { kicker: "Step 1", title: "Test it out loud.", body: "Hold the orb and ask your agent a question the way a customer would. It listens, thinks and answers with the voice you picked.", visual: <div className={`${C} flex h-[400px] w-[420px] items-center justify-center`}><VoiceOrb accent={A} autoplay /></div> },
+            { kicker: "Step 2", title: "See every step it took.", body: "Each run is a timeline: which step ran, how long it took, what it cost and which documents it read.", visual: <TraceCard /> },
+            { kicker: "Step 3", title: "Score versions on real conversations.", body: "Save tricky emails as test cases. Every new version runs against all of them, so you see what got better and what slipped.", visual: <EvalCard /> },
+            { kicker: "Step 4", title: "Publish, then roll back in one click.", body: "Every publish is a version with a note. If something feels off, put the last one back live while you look.", visual: <VersionCard /> },
           ]}
         />
       </div>
@@ -335,7 +362,7 @@ function Deploy() {
     <section id="deploy" className="bg-[#f5f5f7] py-24">
       <div className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 lg:grid-cols-[1fr_1.1fr]">
         <div className="flex flex-col gap-8">
-          <SectionHead eyebrow="Deploy" title="One agent. Every place your customers are." sub="Publish once and switch channels on from the dock. The same version answers on your site, in email, in team chat and over the API." accent={AD} />
+          <SectionHead title="One agent. Every place your customers are." sub="Publish once and switch channels on from the dock. The same version answers on your site, in email, in team chat and over the API." accent={AD} />
           <Reveal y={16} className="flex flex-col gap-3">
             <span className="text-[13px] font-semibold text-[#6e6e73]">Agent ID</span>
             <div><CopyChip value="agt_7Hq2Lx9PwR" display="agt_7Hq2…9PwR" label="Copy agent ID" accent={A} /></div>
@@ -365,27 +392,6 @@ function Deploy() {
           </div>
         </Reveal>
       </div>
-    </section>
-  );
-}
-
-function Numbers() {
-  const items = [
-    { to: 38, f: (n: number) => `${Math.round(n)} min`, l: "median time from blank canvas to first deploy" },
-    { to: 61, f: (n: number) => `${Math.round(n)}%`, l: "of builders on the Team plan have never written code" },
-    { to: 1.4, f: (n: number) => `${n.toFixed(1)}M`, l: "test runs scored last month" },
-  ];
-  return (
-    <section className="mx-auto max-w-[1180px] px-5 py-20" aria-label="Synapse in numbers">
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
-        {items.map((it, i) => (
-          <Reveal key={it.l} delay={i * 0.06} y={14} className="flex flex-col gap-2 border-t border-black/[.08] pt-6">
-            <Counter to={it.to} format={it.f} className="text-[clamp(38px,4.6vw,54px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
-            <span className="text-[15px] text-[#6e6e73]">{it.l}</span>
-          </Reveal>
-        ))}
-      </div>
-      <p className="m-0 mt-8 text-[12px] text-[#6e6e73]">Placeholder figures for this template.</p>
     </section>
   );
 }
@@ -439,10 +445,10 @@ function Pricing() {
   const [yearly, setYearly] = useState(true);
   return (
     <section id="pricing" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Pricing" title="Free to draw. Pay when it goes to work." sub="Model usage is passed through at cost, or bring your own keys." accent={AD} center />
+      <SectionHead title="Free to draw. Pay when it goes to work." sub="Model usage is passed through at cost, or bring your own keys." accent={AD} center />
       <Reveal y={12} className="mt-8 flex justify-center">
         <div className="relative flex rounded-full bg-[#ececf0] p-1" role="radiogroup" aria-label="Billing period">
-          {([["Monthly", false], ["Yearly · save 20%", true]] as const).map(([l, v]) => (
+          {([["Monthly", false], ["Yearly, save 20%", true]] as const).map(([l, v]) => (
             <button key={l} type="button" role="radio" aria-checked={yearly === v} onClick={() => setYearly(v)} className="relative h-10 rounded-full px-5 text-[14px] font-medium outline-none focus-visible:ring-2" style={{ color: yearly === v ? "#1d1d1f" : "#6e6e73", ["--tw-ring-color" as string]: A }}>
               {yearly === v && <motion.span layoutId="syn-period" className="absolute inset-0 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,.12)]" transition={{ type: "spring", stiffness: 500, damping: 34 }} />}
               <span className="relative">{l}</span>
@@ -485,17 +491,17 @@ export function SynapseAIPage() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: FONT }}>
+        <style>{FONT_CSS}</style>
         <Nav brand={<Logo />} accent={A} cta="Start building" onCta={() => scrollToId("pricing")} links={[{ label: "Why", id: "why" }, { label: "Build", id: "build" }, { label: "Test", id: "test" }, { label: "Deploy", id: "deploy" }, { label: "Pricing", id: "pricing" }]} />
         <Hero />
         <Compare />
         <Build />
         <Test />
         <Deploy />
-        <Numbers />
         <Quotes />
         <Pricing />
         <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 pb-24 lg:grid-cols-[1fr_1.4fr]">
-          <SectionHead eyebrow="FAQ" title="Good questions." accent={AD} />
+          <SectionHead title="Good questions." accent={AD} />
           <Reveal y={16}>
             <Faq
               accent={A}
