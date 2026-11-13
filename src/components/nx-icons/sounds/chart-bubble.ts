@@ -4,7 +4,7 @@ import { blip, swish, type Time } from "../sound-kit";
 export const length = 0.7;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.39;
 
 /** A quick suck of air as the bubbles collapse, then three wet bloops, a low one for the big bubble, a middle one and a high one for the small bubble, as each swells out and settles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

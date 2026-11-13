@@ -38,10 +38,10 @@ export function KettleIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <g transform="translate(1.33 -0.54)">
+      <g transform="translate(1 -0.75)">
 
       <motion.path
-        d="M2.82 12.08C2.62 14.68 2.32 16.48 2.02 21"
+        d="M3.03 12.48C2.83 15.08 2.53 16.88 2.23 21"
         stroke={accent}
         initial={false}
         animate={on ? { pathLength: [0, 1, 1, 0], opacity: [0, 1, 1, 0] } : { pathLength: 0, opacity: 0 }}
@@ -54,11 +54,10 @@ export function KettleIcon({ size = 24, strokeWidth = 2, className, speed = 1, a
         transition={{ duration: 1.1 / speed, times: [0, 0.28, 0.7, 1], ease: "easeInOut" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="M5.1 18.44A1.8 1.8 0 0 0 6.88 20.5L15.12 20.5A1.8 1.8 0 0 0 16.9 18.44L15.7 10.09A0.8 0.8 0 0 0 14.91 9.4L7.09 9.4A0.8 0.8 0 0 0 6.3 10.09Z" />
-        <path d="M7.4 9.4C7.4 4.9 14.6 4.9 14.6 9.4" />
-        <path d="M11 6.03V4.6" />
-        <path d="M15.92 11.6H18A2 2 0 0 1 20 13.6V16.2A2 2 0 0 1 18 18.2H16.87" />
-        <path d="M5.13 18.2Q1.4 13.89 1.4 8.6L5.2 8.6Q5.2 12.91 5.79 13.6" />
+        <path d="M6.12 12.4L6.28 11.26A1 1 0 0 1 7.27 10.4L14.95 10.4A1 1 0 0 1 15.93 11.24L17.07 18.42A1.8 1.8 0 0 1 15.29 20.5L7.07 20.5A1.8 1.8 0 0 1 5.28 18.45L5.57 16.4Q2.4 16.4 2 9.4L4.9 8.3Q3.9 12.4 6.12 12.4Z" />
+        <path d="M7.6 10.4C7.6 5.8 14.6 5.8 14.6 10.4" />
+        <path d="M11 6.95V5" />
+        <path d="M16.05 12H18A2 2 0 0 1 20 14V16.4A2 2 0 0 1 18 18.4H17.07" />
       </motion.g>
 
       </g>

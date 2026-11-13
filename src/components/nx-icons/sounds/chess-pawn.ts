@@ -4,7 +4,7 @@ import { swish, tick, thud, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.93;
 
 /** A wooden chess piece lifting with a faint breath of air, a firm wooden knock as it lands on the board, and a lighter tock as it settles from its small second bounce. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

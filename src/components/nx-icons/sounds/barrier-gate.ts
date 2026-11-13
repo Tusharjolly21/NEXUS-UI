@@ -4,7 +4,7 @@ import { blip, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.22;
 
 /** An electric motor whine rises as the boom lifts, a latch click at the top, then the whine falls and the arm lands with a thud. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

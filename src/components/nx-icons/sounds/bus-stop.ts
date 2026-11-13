@@ -4,7 +4,7 @@ import { ding, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.26;
 
 /** An air-brake pssht and a diesel thump as the little bus bounces on its wheels, with a metal rattle from the sign. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

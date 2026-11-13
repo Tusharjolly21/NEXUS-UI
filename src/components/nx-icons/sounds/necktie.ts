@@ -4,7 +4,7 @@ import { thud, puff, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 6.3;
 
 /** Soft silky rustles as the tie swings from its knot, one on each pass and each quieter than the last, with a faint cloth thump as it hangs still. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

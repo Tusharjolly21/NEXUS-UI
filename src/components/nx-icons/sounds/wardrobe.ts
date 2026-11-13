@@ -4,7 +4,7 @@ import { ding, blip, tick, thud, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.35;
 
 /** A wooden creak as the two doors swing open and a dull knock when they stop, a faint clink of hangers inside, then a creak back and a latch click as they shut. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

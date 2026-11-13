@@ -4,7 +4,7 @@ import { ding, blip, tick, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.1;
 
 /** A soft sonar sweep for each of the three reshapes, rising, falling, then rising again, each ending in a fine tick and a small glassy ping where the shape locks in. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

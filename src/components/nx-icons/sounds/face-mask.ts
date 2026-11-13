@@ -4,7 +4,7 @@ import { blip, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 0.6;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.93;
 
 /** An elastic stretch that rises in pitch, a thwack as the loops snap back, and a quiet paper rustle as the pleats open. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

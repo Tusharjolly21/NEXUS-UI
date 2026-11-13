@@ -4,7 +4,7 @@ import { ding, puff, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 3.76;
 
 /** A soft whoomp as the flame catches, tiny metal clinks of the handle on each sway, and crackles at the flame's biggest flickers. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

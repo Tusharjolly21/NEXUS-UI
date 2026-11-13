@@ -4,7 +4,7 @@ import { swish, tick, puff, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.69;
 
 /** A crisp pump click as the cap is pressed, a fine hissing spray that swells and fades, and a softer click as the cap springs back. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

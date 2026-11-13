@@ -4,7 +4,7 @@ import { ding, blip, swish, thud, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.65;
 
 /** A watery slosh and a small metal clink of the handle at each extreme of the swing, the sloshes getting softer as the bucket settles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

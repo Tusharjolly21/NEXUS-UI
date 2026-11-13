@@ -4,7 +4,7 @@ import { blip, swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 0.6;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.4;
 
 /** A dull press and a little paper tick as the bandage sticks down, then a bright pop as the four pad dots swell. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

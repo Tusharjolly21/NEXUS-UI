@@ -17,7 +17,7 @@ export type FerrisWheelIconProps = {
   play?: boolean;
 };
 
-/** A ferris wheel that turns a sixth of a revolution, its gondolas riding round the rim. */
+/** A ferris wheel that turns a sixth of a revolution, its gondolas hanging from the rim. */
 export function FerrisWheelIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: FerrisWheelIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -38,32 +38,25 @@ export function FerrisWheelIcon({ size = 24, strokeWidth = 2, className, speed =
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-<g transform="translate(0 -0.27)">
+<g transform="translate(0 0.12)">
+      <path d="M13 13.43L17.66 21.5M11 13.43L6.34 21.5" strokeWidth={strokeWidth * 0.75} />
       <motion.g
-        style={{ originX: "50%", originY: "41.67%" }}
+        style={{ originX: "50%", originY: "48.75%" }}
         initial={false}
         animate={on ? { rotate: [0, 60] } : { rotate: 0, transition: { duration: 0 / speed } }}
         transition={{ duration: 0.9 / speed, ease: "easeInOut" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <circle cx="15.1" cy="4.63" r="2.4" fill={accent} stroke="none" />
-        <circle cx="18.2" cy="10" r="2.4" fill={accent} stroke="none" />
-        <circle cx="15.1" cy="15.37" r="2.4" fill={accent} stroke="none" />
-        <circle cx="8.9" cy="15.37" r="2.4" fill={accent} stroke="none" />
-        <circle cx="5.8" cy="10" r="2.4" fill={accent} stroke="none" />
-        <circle cx="8.9" cy="4.63" r="2.4" fill={accent} stroke="none" />
-      </motion.g>
-      <path d="M18.64 21.5L12 10L5.36 21.5" strokeWidth={strokeWidth * 0.75} />
-      <motion.g
-        style={{ originX: "50%", originY: "41.67%" }}
-        initial={false}
-        animate={on ? { rotate: [0, 60] } : { rotate: 0, transition: { duration: 0 / speed } }}
-        transition={{ duration: 0.9 / speed, ease: "easeInOut" }}
-      >
-        <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="M12 10L15.1 4.63M12 10L18.2 10M12 10L15.1 15.37M12 10L8.9 15.37M12 10L5.8 10M12 10L8.9 4.63" strokeWidth={strokeWidth * 0.75} />
-        <circle cx="12" cy="10" r="6.2" />
-        <circle cx="12" cy="10" r="2.1" fill="currentColor" stroke="none" />
+        <circle cx="19.62" cy="16.1" r="1.4" fill={accent} stroke="none" />
+        <circle cx="12" cy="20.5" r="1.4" fill={accent} stroke="none" />
+        <circle cx="4.38" cy="16.1" r="1.4" fill={accent} stroke="none" />
+        <circle cx="4.38" cy="7.3" r="1.4" fill={accent} stroke="none" />
+        <circle cx="12" cy="2.9" r="1.4" fill={accent} stroke="none" />
+        <circle cx="19.62" cy="7.3" r="1.4" fill={accent} stroke="none" />
+        <path d="M17.07 14.62L18.6 15.51M12 17.55L12 19.32M6.93 14.62L5.4 15.51M6.93 8.77L5.4 7.89M12 5.85L12 4.08M17.07 8.77L18.6 7.89" strokeWidth={strokeWidth * 0.75} strokeLinecap="butt" />
+        <path d="M14 11.7L17.85 11.7M13 13.43L14.93 16.77M11 13.43L9.08 16.77M10 11.7L6.15 11.7M11 9.97L9.07 6.63M13 9.97L14.93 6.63" strokeWidth={strokeWidth * 0.5} />
+        <circle cx="12" cy="11.7" r="5.85" strokeWidth={strokeWidth * 0.75} />
+        <circle cx="12" cy="11.7" r="2" strokeWidth={strokeWidth * 0.75} />
       </motion.g>
 </g>
     </svg>

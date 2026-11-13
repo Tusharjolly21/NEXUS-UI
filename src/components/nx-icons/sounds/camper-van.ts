@@ -4,7 +4,7 @@ import { blip, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.24;
 
 /** A sputtering diesel engine and tyre hiss while the van bounces: dull thumps when the body drops, and small rattles when it rises. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

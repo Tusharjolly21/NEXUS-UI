@@ -4,7 +4,7 @@ import { blip, swish, type Time } from "../sound-kit";
 export const length = 0.7;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.8;
 
 /** A low engine hum that rises as the car speeds up, with a tyre rush that swells and fades as the dashes stream past. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

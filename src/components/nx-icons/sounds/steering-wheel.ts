@@ -4,7 +4,7 @@ import { blip, tick, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.04;
 
 /** Leather squeaks as the wheel is cranked left, right and back, each turn a pitch glide, with a soft tock at every end and a click when it centres. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

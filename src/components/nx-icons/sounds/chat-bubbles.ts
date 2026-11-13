@@ -4,7 +4,7 @@ import { blip, tick, type Time } from "../sound-kit";
 export const length = 0.7;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.76;
 
 /** Two message pops, a lower one for the first bubble and a higher one for the reply, then a tiny keystroke as its line is written. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

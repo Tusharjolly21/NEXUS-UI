@@ -4,7 +4,7 @@ import { ding, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 1.6;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.26;
 
 /** Three clicky key taps, then a ka-ching: a thump of the drawer shooting out with a ringing bell on top, and a rattle as it shuts. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

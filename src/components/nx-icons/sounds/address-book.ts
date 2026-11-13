@@ -4,7 +4,7 @@ import { blip, swish, tick, type Time } from "../sound-kit";
 export const length = 0.7;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.96;
 
 /** Three bright flicks as the index tabs are thumbed out and snap back, each a little higher than the last, then two soft bubbly pops as the contact portrait swells and relaxes. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

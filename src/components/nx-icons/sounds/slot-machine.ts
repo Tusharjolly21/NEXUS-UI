@@ -4,7 +4,7 @@ import { blip, tick, thud, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.13;
 
 /** A casino slot machine: ratchet clicks as the lever is pulled down, a clunk at the bottom, a rapid rattle of reels, then three heavier clacks as the reels stop one after another, each a little higher. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

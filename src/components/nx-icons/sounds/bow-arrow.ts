@@ -4,7 +4,7 @@ import { blip, swish, tick, type Time } from "../sound-kit";
 export const length = 1.5;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.36;
 
 /** An archer's draw and release: a creaking bow that tightens in pitch, a click at full draw, a sharp string twang as the arrow is let go with a rising whoosh as it flies off, then a gentle slide and a tap as a fresh arrow nocks. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

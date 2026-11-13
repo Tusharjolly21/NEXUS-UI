@@ -4,7 +4,7 @@ import { ding, blip, swish, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.74;
 
 /** Two bubbly pops, a small one then a bigger one, a soft puff as the cloud swells, and three light hops of the dots. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

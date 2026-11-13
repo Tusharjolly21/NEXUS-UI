@@ -4,7 +4,7 @@ import { swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.42;
 
 /** A low rumble of little wheels rolling across the floor, a gas-lift hiss and a click as the backrest reclines, then the rumble again as it rolls back and a click as it locks upright. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

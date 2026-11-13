@@ -4,7 +4,7 @@ import { ding, blip, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.85;
 
 /** A short swish as the arm swings down, a hard metal clack with a small ring where it lands, a fine crunch as the staple folds, then a spring twang as the arm lifts and a soft stop at the top. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

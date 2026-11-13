@@ -4,7 +4,7 @@ import { thud, puff, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.48;
 
 /** Two soft footsteps: a faint scuff as each print lifts, then a dull shoe thud as it lands, the second a little higher than the first. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

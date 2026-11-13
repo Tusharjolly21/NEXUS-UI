@@ -4,7 +4,7 @@ import { swish, tick, thud, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.11;
 
 /** A soft whoosh while the crest star turns, then a rubber stamp thumps and a scratch writes the line back in. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

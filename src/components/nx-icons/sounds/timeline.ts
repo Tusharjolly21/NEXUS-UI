@@ -4,7 +4,7 @@ import { blip, swish, tick, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.37;
 
 /** Three soft bloops climbing in pitch as each node swells into place, a small drip sweep down each connector, and a light tick as each line of text finishes. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

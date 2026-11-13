@@ -4,7 +4,7 @@ import { ding, swish, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 6.8;
 
 /** Two silky fabric swishes as the tails flutter out and back, and a faint high shimmer as the loop settles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

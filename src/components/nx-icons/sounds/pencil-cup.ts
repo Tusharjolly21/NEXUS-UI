@@ -4,7 +4,7 @@ import { blip, tick, type Time } from "../sound-kit";
 export const length = 0.7;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.77;
 
 /** A dry wooden rattle: nine soft knocks as the pencils swing against each other and the cup, three for each pencil in turn, each round a little quieter than the last. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

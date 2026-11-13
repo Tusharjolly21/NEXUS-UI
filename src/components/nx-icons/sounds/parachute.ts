@@ -4,7 +4,7 @@ import { blip, swish, puff, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 4.55;
 
 /** Canopy cloth flaps on each swing of the pendulum, with a rope creak at the widest point and a thin wind running underneath. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

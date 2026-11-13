@@ -4,7 +4,7 @@ import { ding, blip, swish, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.5;
 
 /** A soft rocking swish as the level tips, a wet gloop of the bubble running to each end with a small glassy tap, four times, shorter each time, until it settles in the middle with a last tap. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

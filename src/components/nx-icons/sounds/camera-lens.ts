@@ -4,7 +4,7 @@ import { ding, blip, tick, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.83;
 
 /** A tiny zoom motor whirring up as the glass pulls focus and shrinks, a click at the stop, the motor whirring back down as the glass opens, a glassy tinkle and a click as it lands. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

@@ -4,7 +4,7 @@ import { tick, thud, puff, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.78;
 
 /** Four dry wooden stick hits on a snare, left, right, left, right, each with a soft skin thump and a short rattle of the snare wires, the last one ringing out slightly longer. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

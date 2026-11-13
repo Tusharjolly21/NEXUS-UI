@@ -4,7 +4,7 @@ import { swish, tick, thud, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.82;
 
 /** A low motor hum and five ratchet clicks as the wheel moves a step, finished by a soft clunk when the gondolas stop. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

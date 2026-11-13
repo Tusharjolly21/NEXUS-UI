@@ -4,7 +4,7 @@ import { swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.11;
 
 /** A pen scratching twice as two lines are written, a descending whoosh, then a heavy wax stamp thump with a papery thwack as the seal lands, a small bounce and a soft settle. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

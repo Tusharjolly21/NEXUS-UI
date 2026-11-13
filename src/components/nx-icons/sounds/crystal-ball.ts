@@ -4,7 +4,7 @@ import { ding, swish, type Time } from "../sound-kit";
 export const length = 1.3;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.19;
 
 /** Something mystical: a breathy rising whoosh as the star is drawn in, a bright glassy chime as it blooms, a fine shimmer sweeping across the glass and a tiny high twinkle at the end. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

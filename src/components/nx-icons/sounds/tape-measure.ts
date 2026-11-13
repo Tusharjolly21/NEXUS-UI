@@ -4,7 +4,7 @@ import { swish, tick, thud, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.0;
 
 /** A fast zip as the tape snaps back into the case, a metal knock when the hook hits it, then a ratchet of clicks that slow down as the tape is drawn out, ending with a firm click of the hook at full length. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

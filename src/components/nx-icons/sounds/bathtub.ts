@@ -4,7 +4,7 @@ import { ding, plink, blip, swish, tick, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.77;
 
 /** A tiny tick as the drop lets go of the tap, a round watery plop as it hits the bath, and a soft ripple wash that spreads and dies away. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

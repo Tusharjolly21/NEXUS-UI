@@ -4,7 +4,7 @@ import { blip, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.77;
 
 /** A needle dropping onto a record with a soft thump and a click, a low platter hum that rises as it spins up and falls as it slows, light vinyl crackle between, and a small click when the arm lifts and parks. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

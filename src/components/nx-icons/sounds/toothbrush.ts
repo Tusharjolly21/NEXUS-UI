@@ -4,7 +4,7 @@ import { blip, puff, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 4.33;
 
 /** Five dry friction strokes of bristles as the brush scrubs back and forth, then three small wet pops as the foam bubbles burst. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

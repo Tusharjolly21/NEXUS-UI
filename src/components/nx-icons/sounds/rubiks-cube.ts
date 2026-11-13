@@ -4,7 +4,7 @@ import { swish, tick, thud, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.71;
 
 /** A plastic puzzle cube turning: a whirr that peaks mid-turn with three quick ratchet clicks as the layers pass, and a firm snap as the cube locks into its new position. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

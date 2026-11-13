@@ -4,7 +4,7 @@ import { thud, puff, type Time } from "../sound-kit";
 export const length = 0.5;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 3.01;
 
 /** A wet roller rolling onto a wall: a damp low squelch that starts loud and fades as the roller slows, with a lighter sizzle over it and a soft pat as it touches down. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

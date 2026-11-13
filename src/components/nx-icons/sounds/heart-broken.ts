@@ -4,7 +4,7 @@ import { ding, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.38;
 
 /** Three fast glassy cracks as the zigzag opens, a pause while the halves hang apart, then a whoosh, a dull knock and a thin ring as they meet. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

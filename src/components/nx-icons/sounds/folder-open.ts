@@ -4,7 +4,7 @@ import { swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.53;
 
 /** A soft cardboard slap as the folder flap swings shut, a papery rustle as it lifts again, a small flick as a sheet pops up out of it and a soft stop when it is fully open. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

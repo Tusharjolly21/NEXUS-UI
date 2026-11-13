@@ -4,7 +4,7 @@ import { ding, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 1.2;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.66;
 
 /** A soft sack thump as the bag squashes, then coin dings that follow the dollar sign as it flips: one at the far side of the flip and a higher one when it faces front again. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

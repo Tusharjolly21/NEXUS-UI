@@ -4,7 +4,7 @@ import { swish, tick, puff, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.7;
 
 /** Paper rustles as the note flutters on its sticky edge while a marker squeaks across it twice, once for each line, with a small tick as each line ends. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

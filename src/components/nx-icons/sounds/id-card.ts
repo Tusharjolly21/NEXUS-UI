@@ -4,7 +4,7 @@ import { blip, swish, tick, type Time } from "../sound-kit";
 export const length = 0.7;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.62;
 
 /** A card flick as it lifts, then three quick pen-like blips as the lines are rewritten, and a tiny tick as it settles. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

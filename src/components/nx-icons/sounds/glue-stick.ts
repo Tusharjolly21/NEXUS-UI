@@ -4,7 +4,7 @@ import { tick, thud, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.42;
 
 /** A plastic ratchet clicks as the glue is twisted up, a soft thunk when it reaches the top, a small tick at each end of its wobble, then the clicks run back down at a lower pitch and a thud closes it. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

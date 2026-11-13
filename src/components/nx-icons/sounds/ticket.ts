@@ -4,7 +4,7 @@ import { tick, thud, puff, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.04;
 
 /** A paper rustle as the ticket tilts, then three sharp punch clicks that rise in pitch, one per perforation dot. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

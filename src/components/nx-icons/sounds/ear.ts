@@ -4,7 +4,7 @@ import { ding, swish, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.22;
 
 /** A soft air swish as the ear leans toward the sound, then two clear sonar-like pings as the inner and the outer wave slide back in beside it. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

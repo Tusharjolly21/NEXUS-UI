@@ -4,7 +4,7 @@ import { blip, swish, tick, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.92;
 
 /** A thin line-tension zing as the rod flexes, a bubbly bloop each time the bobber dives and pops back, and a reel click at the end. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

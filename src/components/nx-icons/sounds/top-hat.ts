@@ -4,7 +4,7 @@ import { blip, tick, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.74;
 
 /** Four rubbery boings, one per rabbit ear flick, each sliding up in pitch, left ear then right, then again, ending with two tiny taps as the ears flop back down. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

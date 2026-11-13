@@ -4,7 +4,7 @@ import { ding, blip, swish, tick, thud, puff, type Time } from "../sound-kit";
 export const length = 1.3;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.35;
 
 /** A metal flick as the pan jerks up, a soft whoop while the egg flies, a hollow pan clank as it lands and a sizzle that crackles and fades. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

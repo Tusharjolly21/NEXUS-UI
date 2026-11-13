@@ -4,7 +4,7 @@ import { ding, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 0.95;
 
 /** Deep stone grinding as the pyramid rises, three chisel scratches as the hatching of the shaded face is drawn in, a heavy block thump as it settles and a warm sun tone. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

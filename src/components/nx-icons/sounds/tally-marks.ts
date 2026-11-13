@@ -4,7 +4,7 @@ import { swish, tick, type Time } from "../sound-kit";
 export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.81;
 
 /** Four short chalk scratches, one for each downstroke, each ending in a tiny tick, then a longer rising scratch and a firmer tick as the slash is struck through them. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

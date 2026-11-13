@@ -4,7 +4,7 @@ import { blip, swish, tick, puff, type Time } from "../sound-kit";
 export const length = 1.1;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 2.0;
 
 /** A paper feed whoosh and quick cutting ticks as the sheet is pulled in, a low motor growl under the shudder, soft papery puffs as the red strips drop into the bin, and a swish as a fresh sheet slides in from above. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

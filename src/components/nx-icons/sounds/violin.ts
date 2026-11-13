@@ -4,7 +4,7 @@ import { blip, swish, type Time } from "../sound-kit";
 export const length = 1.0;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 3.65;
 
 /** A bowed string: a rough rosin-edged tone that changes pitch with each bow stroke, down, up, down, up, with a soft rubbing hiss of horsehair under it. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

@@ -4,7 +4,7 @@ import { blip, swish, thud, puff, type Time } from "../sound-kit";
 export const length = 0.7;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1;
+export const level = 1.38;
 
 /** A short whistle of the fruit falling, a wooden thud as it lands in the basket, and a creak of wicker as the basket springs back. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
