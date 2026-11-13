@@ -2739,6 +2739,26 @@
   "bg": null,
   "coverage": 0.01
  },
+ "image-galleries": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   24,
+   28,
+   912,
+   668
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.88
+ },
  "image-press": {
   "canvas": [
    960,
@@ -4699,6 +4719,26 @@
   "bg": "#ffffff",
   "coverage": 0.31
  },
+ "model-picker": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   24,
+   72,
+   912,
+   598
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
  "molten-hold": {
   "canvas": [
    960,
@@ -4978,6 +5018,26 @@
   ],
   "bg": null,
   "coverage": 0
+ },
+ "order-tracking": {
+  "canvas": [
+   1200,
+   820
+  ],
+  "surface": [
+   0,
+   0,
+   1200,
+   820
+  ],
+  "content": [
+   54,
+   116,
+   1096,
+   632
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "origami-pricing": {
   "canvas": [

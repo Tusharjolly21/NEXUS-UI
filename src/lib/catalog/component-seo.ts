@@ -34,6 +34,21 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
     description:
       "React message composer that folds a postcard into a paper plane and flies it round a real sunlit globe. WebGL + Framer Motion + Tailwind CSS.",
   },
+  "order-tracking": {
+    title: "React Order Tracking: Live Delivery Map",
+    description:
+      "React delivery tracker with a courier riding a city map from pickup to drop-off, a rolling ETA, stages and a live feed. Framer Motion + Tailwind CSS.",
+  },
+  "image-galleries": {
+    title: "React Image Gallery: Drift, Mosaic and Focus Rail",
+    description:
+      "Three animated React image galleries: drifting columns with a lightbox, a reflowing mosaic and an expanding focus rail. Framer Motion + Tailwind CSS.",
+  },
+  "model-picker": {
+    title: "React AI Model Picker: Model and Effort Menu",
+    description:
+      "React model picker for AI apps: featured models, an effort submenu and more models by provider in one animated pill. Framer Motion + Tailwind CSS.",
+  },
   "sand-drift-gallery": {
     title: "React Image Carousel: Sand Particle Gallery",
     description:

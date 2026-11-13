@@ -15732,6 +15732,159 @@ export default function Page() {
     tailwindSource: tw,
   },
   {
+    slug: "order-tracking",
+    name: "Order Tracking",
+    registryCliName: "order-tracking",
+    description:
+      "A live delivery tracker on a real-looking city map. A courier puck leaves the Pickup marker and rides a blue route with direction arrows to the Drop-off pin on the door, pausing at the drop-offs before yours while the ridden part fills in behind it; its arrow turns at every corner. The arrival time rolls down digit by digit, stages check off, live updates drop into a feed, and on arrival a proof-of-delivery card lands. Hover the map for what is at each point, and a stage for its detail. Shows the delivered state under reduced motion.",
+    categorySlug: "dashboards",
+    tags: ["order tracking", "delivery", "map", "route", "courier", "timeline", "eta", "ecommerce", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 199,
+    createdAt: "2026-11-13",
+    animationKinds: ["scroll", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "orderId", type: "string", defaultValue: "\"Order NX-4182\"", description: "Small line at the top of the panel." },
+      { name: "orderTitle", type: "string", description: "What is being delivered." },
+      { name: "address", type: "string", description: "Delivery address, shown in the live chip and on the drop-off pin." },
+      { name: "courier", type: "{ name; initials; rating?; vehicle? }", description: "Who is riding." },
+      { name: "stages", type: "OrderTrackingStage[]", description: "Stages in order, each { name, when?, detail? }. The last one checks on arrival." },
+      { name: "updates", type: "OrderTrackingUpdate[]", description: "Feed lines, each dropping in at a fraction of the route (at) or at a stop (stop)." },
+      { name: "etaMinutes", type: "number", defaultValue: "14", description: "Minutes on the clock when the ride starts." },
+      { name: "startTime", type: "[hour, minute]", defaultValue: "[12, 2]", description: "Clock time the ride starts at." },
+      { name: "durationMs", type: "number", defaultValue: "19000", description: "How long the ride takes on screen, not counting the stops." },
+      { name: "autoplay", type: "boolean", defaultValue: "true", description: "Rides when it scrolls into view and starts over a few seconds after arriving." },
+      { name: "onMessage", type: "() => void", description: "Message button. Without it a sample note shows." },
+      { name: "onCall", type: "() => void", description: "Call button. Without it a sample note shows." },
+      { name: "className", type: "string", description: "Classes for the section." },
+    ],
+    Preview: Previews.PreviewOrderTracking,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { OrderTracking } from "@/components/order-tracking";
+
+export default function Page() {
+  return (
+    <OrderTracking
+      orderId="Order NX-4182"
+      orderTitle="Ceramic pour-over set and 2 more"
+      address="17 Calder Lane, Unit 4"
+      courier={{ name: "Mira Okafor", initials: "MO", rating: "4.9", vehicle: "Cargo e-bike" }}
+      etaMinutes={14}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "image-galleries",
+    name: "Image Galleries",
+    registryCliName: "image-galleries",
+    description:
+      "Three image-first galleries in one install. Column Drift is an editorial wall whose columns drift up and down at their own pace, holds on hover and opens any frame in a lightbox. Reflow Mosaic puts five frames in one grid: pick any frame, or its number, and it springs into the lead spot while the others glide to new places without stretching. Focus Rail opens the focused panel wide while the rest fold in, moving on by itself with a progress line, holding on hover and taking the arrow keys.",
+    categorySlug: "cards",
+    tags: ["gallery", "image gallery", "masonry", "mosaic", "carousel", "lightbox", "portfolio", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 198,
+    createdAt: "2026-11-13",
+    animationKinds: ["hover", "scroll"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "images", type: "{ src; alt; title; meta? }[]", description: "The pictures. Reflow Mosaic uses the first five; Focus Rail works best with four to eight." },
+      { name: "eyebrow / title / description", type: "string", description: "The heading above the gallery (description on Column Drift and Focus Rail)." },
+      { name: "autoplay", type: "boolean", defaultValue: "true", description: "Drift, step or advance on its own. Off under reduced motion." },
+      { name: "columns", type: "3 | 4 | 5", defaultValue: "4", description: "Column Drift only: columns on wide screens. Phones show two." },
+      { name: "speed", type: "number", defaultValue: "44", description: "Column Drift only: seconds per loop." },
+      { name: "interval", type: "number", description: "Reflow Mosaic and Focus Rail: milliseconds between autoplay steps." },
+      { name: "onSelect / onChange", type: "(index) => void", description: "Reflow Mosaic reports the picked frame; Focus Rail reports the open panel." },
+      { name: "className", type: "string", description: "Classes for the section." },
+    ],
+    Preview: Previews.PreviewImageGalleries,
+    previewShell: "plain",
+    previewSections: [
+      {
+        title: "Column Drift Gallery",
+        Preview: Previews.PreviewImageGalleries,
+        reactSource: `// src/app/page.tsx
+"use client";
+
+import { ColumnDriftGallery } from "@/components/image-galleries";
+
+export default function Page() {
+  return <ColumnDriftGallery title="Built to be looked at, made to be lived in" columns={4} />;
+}`,
+      },
+      {
+        title: "Reflow Mosaic",
+        Preview: Previews.PreviewImageGalleriesMosaic,
+        reactSource: `// src/app/page.tsx
+"use client";
+
+import { ReflowMosaic } from "@/components/image-galleries";
+
+export default function Page() {
+  return <ReflowMosaic title="One frame leads, the rest make room" interval={3400} />;
+}`,
+      },
+      {
+        title: "Focus Rail Gallery",
+        Preview: Previews.PreviewImageGalleriesRail,
+        reactSource: `// src/app/page.tsx
+"use client";
+
+import { FocusRailGallery } from "@/components/image-galleries";
+
+export default function Page() {
+  return <FocusRailGallery title="Step through the work at your own pace" interval={3600} />;
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "model-picker",
+    name: "Model Picker",
+    registryCliName: "model-picker",
+    description:
+      "A model picker for AI products in one quiet pill. Open it for featured models with a one-line note each, an Effort submenu for models that reason, and More models grouped by provider. Choosing closes the menu, the pill springs to the new name's width, and a summary of context, prices and effort crossfades underneath. Effort snaps to the nearest level the new model accepts. Submenus become pages on phones, and it is fully keyboard operable: arrows, Right for a submenu, Enter to choose, Escape to close, and a letter to jump.",
+    categorySlug: "ai-components",
+    tags: ["model picker", "ai", "llm", "dropdown", "menu", "select", "effort", "chat", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 197,
+    createdAt: "2026-11-13",
+    animationKinds: ["hover", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "models", type: "PickerModel[]", description: "The catalog: id, name, provider, blurb, description, context, price?, effort?. The default is a sample with placeholder prices." },
+      { name: "providers", type: "PickerProvider[]", description: "Providers in the order More models groups them, each with a colour and a small glyph." },
+      { name: "featured", type: "string[]", description: "Model ids at the top of the menu. The rest go under More models." },
+      { name: "value / defaultValue", type: "string", description: "The chosen model id, controlled or not." },
+      { name: "onValueChange", type: "(id, model) => void", description: "Called when someone picks a model." },
+      { name: "effort / onEffortChange", type: "\"low\" | \"medium\" | \"high\" | \"max\"", description: "Effort, controlled or not. Snaps to a level the model accepts." },
+      { name: "defaultOpen", type: "boolean", defaultValue: "false", description: "Opens the menu on first render." },
+      { name: "showSummary", type: "boolean", defaultValue: "true", description: "The description, context, prices and effort under the pill." },
+      { name: "footnote", type: "string", description: "Line under the summary. Say here when prices are samples." },
+      { name: "className", type: "string", description: "Classes for the wrapper." },
+    ],
+    Preview: Previews.PreviewModelPicker,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { useState } from "react";
+import { ModelPicker, type PickerEffort } from "@/components/model-picker";
+
+export default function Page() {
+  const [model, setModel] = useState("claude-opus-5-5");
+  const [effort, setEffort] = useState<PickerEffort>("medium");
+  return <ModelPicker value={model} onValueChange={(id) => setModel(id)} effort={effort} onEffortChange={setEffort} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
     slug: "diffusion-loader",
     name: "Diffusion Loader",
     registryCliName: "diffusion-loader",
