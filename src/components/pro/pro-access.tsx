@@ -1,14 +1,12 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { Check, Lock, LockOpen } from "lucide-react";
+import { Lock, LockOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FREE_ICON_COUNT } from "@/lib/icons/count";
 import { trackEvent } from "@/lib/track";
 import type { DisplayPricing } from "@/lib/pricing";
-import { CheckoutButton } from "@/components/pricing/checkout-button";
+import { UpgradeDialog } from "@/components/pro/upgrade-dialog";
+import { AutoProPrompt, PRO_SEEN_KEY } from "@/components/pro/auto-pro-prompt";
 
 type ProAccess = {
   /** The visitor has Pro (an active plan or All-Access). */
@@ -74,11 +72,19 @@ export function ProAccessProvider({
   pricing?: DisplayPricing;
   children: React.ReactNode;
 }) {
-  const [target, setTarget] = React.useState<{ name?: string; feature?: string } | null>(null);
+  const [target, setTarget] = React.useState<{ name?: string; feature?: string; source?: string } | null>(null);
+  // The timed offer (see AutoProPrompt) opens the same dialog, with its own source for the checkout count.
+  const openAuto = React.useCallback(() => setTarget({ source: "auto_prompt" }), []);
   const value = React.useMemo<ProAccess>(
     () => ({ isPro, plan, proCount, pricing, requestUpgrade: (name, feature) => {
         // Which locked thing, and which part of it ("build prompt", "icon code"...), made someone want Pro.
         trackEvent("pro_wall_hit", { item: name ?? "", feature: feature ?? "" });
+        // Someone who has seen the offer by clicking something locked doesn't need it to show itself as well.
+        try {
+          window.sessionStorage.setItem(PRO_SEEN_KEY, "1");
+        } catch {
+          // storage blocked: the timed offer may still show once
+        }
         setTarget({ name, feature });
       },
     }),
@@ -88,12 +94,14 @@ export function ProAccessProvider({
   return (
     <ProAccessContext.Provider value={value}>
       {children}
+      {isPro ? null : <AutoProPrompt proCount={proCount} onOpen={openAuto} />}
       <UpgradeDialog
         open={!!target}
         name={target?.name}
         feature={target?.feature}
         proCount={proCount}
         pricing={pricing}
+        source={target?.source}
         onClose={() => setTarget(null)}
       />
     </ProAccessContext.Provider>
@@ -175,180 +183,6 @@ export function useCopyBuildPrompt(
   }, [isPro, requestUpgrade, name, endpoint]);
 
   return [state, copy];
-}
-
-const PERKS = [
-  "The full source, yours to edit",
-  "One-line install with the shadcn CLI",
-  "The live playground and copy-ready code",
-  "Build prompts to recreate them with your AI agent",
-];
-
-/** One plan in the upgrade dialog: its price, what the price covers, and a button straight to checkout. */
-function PlanChoice({
-  plan,
-  name,
-  price,
-  original,
-  discount,
-  term,
-  cta,
-  primary = false,
-}: {
-  plan: "annual" | "lifetime";
-  name: string;
-  price: string;
-  original: string | null;
-  discount: number | null;
-  term: string;
-  cta: string;
-  primary?: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        "flex flex-col rounded-[20px] p-4 text-left",
-        primary ? "bg-foreground/[0.04] ring-2 ring-action dark:bg-white/[0.06]" : "bg-foreground/[0.04] ring-1 ring-border dark:bg-white/[0.06]",
-      )}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-[14px] font-semibold text-foreground">{name}</span>
-        {discount ? (
-          <span className="rounded-full bg-[#34c759]/15 px-2 py-0.5 text-[11px] font-semibold text-[#248a3d] dark:text-[#30d158]">{discount}% off</span>
-        ) : null}
-      </div>
-      <p className="mt-2 flex items-baseline gap-1.5">
-        <span className="text-[26px] font-semibold tracking-[-0.03em] text-foreground tabular-nums">{price}</span>
-        {original ? <span className="text-[13px] text-muted-foreground line-through tabular-nums">{original}</span> : null}
-      </p>
-      <p className="text-[12.5px] text-muted-foreground">{term}</p>
-      <CheckoutButton plan={plan} source="upgrade_dialog" variant={primary ? "ink" : "white"} className="mt-3 !h-10 !text-[14px]">
-        {cta}
-      </CheckoutButton>
-    </div>
-  );
-}
-
-function UpgradeDialog({
-  open,
-  name,
-  feature,
-  proCount,
-  pricing,
-  onClose,
-}: {
-  open: boolean;
-  name?: string;
-  feature?: string;
-  proCount: number;
-  pricing?: DisplayPricing;
-  onClose: () => void;
-}) {
-  const title = feature ? `The ${name ? `${name} ` : ""}${feature} comes with Pro` : name ? `${name} comes with Pro` : "This comes with Pro";
-  const lead = feature?.startsWith("icon")
-    ? `You can preview and play every icon, and the ${FREE_ICON_COUNT} free ones are yours to copy. Pro unlocks the code and sound of every Pro icon, every Pro component, every template and the premium blocks.`
-    : `${feature === "full-screen preview" ? "You can still try it on the page." : "You can preview every component."} Pro unlocks ${proCount ? `all ${proCount} Pro components` : "every Pro component"}, every template and the premium blocks.`;
-  return (
-    <DialogPrimitive.Root open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Backdrop className="fixed inset-0 z-[90] bg-black/50 sm:bg-black/30 sm:backdrop-blur-md transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none dark:bg-black/60 sm:dark:bg-black/60" />
-        <DialogPrimitive.Popup
-          className={cn(
-            "fixed left-1/2 top-1/2 z-[91] max-h-[calc(100dvh-24px)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[28px] bg-card text-center shadow-[0_0_0_0.5px_rgba(0,0,0,0.08),0_40px_80px_-30px_rgba(0,0,0,0.45)] outline-none transition-[opacity,transform,scale] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[ending-style]:duration-150 data-[starting-style]:scale-90 data-[starting-style]:opacity-0 motion-reduce:transition-none dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.1),0_40px_80px_-30px_rgba(0,0,0,0.8)]",
-            pricing ? "w-[min(480px,calc(100vw-24px))] p-5 sm:p-7" : "w-[min(420px,calc(100vw-32px))] p-7",
-          )}
-        >
-          <span
-            aria-hidden
-            className={cn(
-              "mx-auto grid place-items-center rounded-[20px] bg-[conic-gradient(from_210deg,#0071e3,#bf5af2,#ff375f,#ff9f0a,#0071e3)] text-white shadow-[0_12px_28px_-10px_rgba(0,113,227,0.55)]",
-              pricing ? "size-14" : "size-16",
-            )}
-          >
-            <span className={cn("grid place-items-center rounded-[17px] bg-[#1d1d1f]/15 backdrop-blur-sm", pricing ? "size-[50px]" : "size-[58px]")}>
-              <Lock className={pricing ? "size-6" : "size-7"} strokeWidth={2.2} />
-            </span>
-          </span>
-          <DialogPrimitive.Title className="mt-4 text-[22px] font-semibold leading-tight tracking-[-0.025em] text-foreground sm:text-[24px]">
-            {title}
-          </DialogPrimitive.Title>
-          <DialogPrimitive.Description className="mx-auto mt-2 max-w-[360px] text-[14.5px] leading-[1.5] text-muted-foreground">
-            {lead}
-          </DialogPrimitive.Description>
-
-          {pricing ? (
-            <>
-              {/* The price, right where someone decided they want it, and a way straight to checkout */}
-              <div className="mt-5 grid grid-cols-1 gap-2.5 min-[400px]:grid-cols-2">
-                <PlanChoice
-                  plan="annual"
-                  name="Pro"
-                  price={pricing.pro}
-                  original={pricing.proOriginal}
-                  discount={pricing.proDiscount}
-                  term="per year, cancel any time"
-                  cta="Get Pro"
-                />
-                <PlanChoice
-                  plan="lifetime"
-                  name="All-Access"
-                  price={pricing.allAccess}
-                  original={pricing.allAccessOriginal}
-                  discount={pricing.allAccessDiscount}
-                  term="one payment, yours for good"
-                  cta="Get All-Access"
-                  primary
-                />
-              </div>
-              <p className="mx-auto mt-4 max-w-[380px] text-[13px] leading-relaxed text-muted-foreground">
-                Both unlock the same things: the source, one-line install, playground and build prompts for everything.
-              </p>
-              <div className="mt-3 flex items-center justify-center gap-1">
-                <Link
-                  href="/pricing"
-                  data-plans-source="upgrade_dialog"
-                  onClick={onClose}
-                  className="inline-flex h-10 items-center rounded-full px-4 text-[14px] font-medium text-link transition-colors hover:bg-foreground/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                >
-                  Compare plans
-                </Link>
-                <DialogPrimitive.Close className="inline-flex h-10 items-center rounded-full px-4 text-[14px] font-medium text-muted-foreground transition-colors hover:bg-foreground/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
-                  Not now
-                </DialogPrimitive.Close>
-              </div>
-            </>
-          ) : (
-            <>
-              <ul className="mx-auto mt-6 grid max-w-[300px] gap-2.5 text-left">
-                {PERKS.map((p) => (
-                  <li key={p} className="flex items-start gap-2.5 text-[14px] text-foreground">
-                    <span className="mt-[1px] grid size-[18px] shrink-0 place-items-center rounded-full bg-action text-white">
-                      <Check className="size-3" strokeWidth={3} aria-hidden />
-                    </span>
-                    {p}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-7 grid gap-2">
-                <Link
-                  href="/pricing"
-                  data-plans-source="upgrade_dialog"
-                  onClick={onClose}
-                  className="inline-flex h-12 items-center justify-center rounded-full bg-action text-[16px] font-semibold text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                >
-                  Upgrade to Pro
-                </Link>
-                <DialogPrimitive.Close className="inline-flex h-11 items-center justify-center rounded-full text-[15px] font-medium text-link transition-colors hover:bg-foreground/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
-                  Not now
-                </DialogPrimitive.Close>
-              </div>
-            </>
-          )}
-        </DialogPrimitive.Popup>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
-  );
 }
 
 /** Shows `pro` to members and `otherwise` to everyone else, for copy that should change with the plan. */
