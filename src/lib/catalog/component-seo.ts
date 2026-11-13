@@ -24,6 +24,11 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
     description:
       "React 404 hero of falling characters that settle into a hidden message where your pointer lingers. WebGL + Framer Motion + Tailwind CSS.",
   },
+  "magic-calendar": {
+    title: "React Calendar Component: Festival Celebrations",
+    description:
+      "React month calendar that celebrates about fifty world festivals with snow, fireworks, lanterns and candles. Canvas + Framer Motion + Tailwind CSS.",
+  },
   "airmail-globe": {
     title: "React Globe Message Composer: Airmail Plane",
     description:

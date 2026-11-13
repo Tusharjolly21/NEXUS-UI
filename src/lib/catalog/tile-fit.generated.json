@@ -57,7 +57,7 @@
    632
   ],
   "bg": "#f6f6f6",
-  "coverage": 0.98
+  "coverage": 0.94
  },
  "animated-bento-grid": {
   "canvas": [
@@ -3418,6 +3418,26 @@
   ],
   "bg": null,
   "coverage": 0.23
+ },
+ "magic-calendar": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   274,
+   110,
+   412,
+   540
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "magnet-select": {
   "canvas": [

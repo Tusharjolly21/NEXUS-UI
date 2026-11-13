@@ -15614,7 +15614,7 @@ export default function Page() {
     name: "Airmail Globe",
     registryCliName: "airmail-globe",
     description:
-      "A postcard composer that sends by airmail across a real globe. Choose who it's for, write a line and press send: the card stands upright and folds itself into a paper plane, crease by crease, then is thrown up to the globe. It flies once all the way round the earth, behind it and back again, trailing a contrail, and comes down on the person you chose. The globe is lit by the sun where it is right now, and on landing it tells you the time there. The recipients are a radio group with arrow keys and the message is a real text field.",
+      "A postcard composer that sends by airmail across a real globe. Press send and the card folds itself into a paper plane right where it lies, in one smooth movement, then is thrown onto the globe and becomes the plane you watch fly. It sets off away from them, goes the long way round behind the earth trailing a contrail, and comes down on the person you chose, the only place marked on the globe. The globe is lit by the sun where it is right now, and on landing it tells you the time there. The recipients are a radio group with arrow keys and the message is a real text field.",
     categorySlug: "three-d-components",
     tags: ["globe", "postcard", "send", "message", "paper plane", "earth", "time zones", "webgl", "3d", "sound", "motion kit", "framer-motion"],
     premium: true,
@@ -15645,6 +15645,45 @@ export default function Page() {
   return (
     <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
       <AirmailGlobe onSend={(to, message) => console.log(to.name, message)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "magic-calendar",
+    name: "Magic Calendar",
+    registryCliName: "magic-calendar",
+    description:
+      "A month calendar that knows the world's festivals, about fifty of them, and celebrates each one when you open it. Christmas snows into a drift along the bottom, New Year's Eve fires fireworks, Lunar New Year hangs red lanterns, Eid brings a crescent moon and swinging lanterns, Hanukkah and Kwanzaa light their candles one by one, Diwali strings lights, Holi bursts colour, Easter drops painted eggs, Songkran splashes water, Makar Sankranti flies kites, a birthday sends up balloons and April Fools' Day turns the calendar upside down. Every effect is drawn on one canvas over the card with its own small sound. Marked days carry a dot and an icon, and the panel below names the day or counts down to the next one. The days are a real grid you can move through with the arrow keys.",
+    categorySlug: "inputs-controls",
+    tags: ["calendar", "date picker", "holidays", "festivals", "celebration", "fireworks", "snow", "confetti", "canvas", "sound", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 198,
+    createdAt: "2026-11-13",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "birthday", type: "{ month: number; day: number; name?: string } | null", defaultValue: "{ month: 11, day: 21, name: \"Maya\" }", description: "Someone's birthday, celebrated with balloons. Month is 1 to 12; null for none." },
+      { name: "moments", type: "CalendarMoment[]", defaultValue: "[]", description: "More days to celebrate, added to the built-in festivals: { month, day, year?, title, effect, color? }." },
+      { name: "weekStart", type: "0 | 1", defaultValue: "0", description: "0 starts weeks on Sunday, 1 on Monday." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "A small sound for each celebration. They also follow the site-wide sound switch." },
+      { name: "volume", type: "number", defaultValue: "0.8", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Tours the year's festivals by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewMagicCalendar,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { MagicCalendar } from "@/components/magic-calendar";
+
+// Open 25 and 31 December, or step into next year for Lunar New Year, Eid and Easter.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <MagicCalendar birthday={{ month: 6, day: 12, name: "Sam" }} />
     </section>
   );
 }`,

@@ -2,7 +2,7 @@
 
 Add the "Airmail Globe" component from Nexus UI to my project.
 
-A postcard composer that sends by airmail across a real globe. Choose who it's for, write a line and press send: the card stands upright and folds itself into a paper plane, crease by crease, then is thrown up to the globe. It flies once all the way round the earth, behind it and back again, trailing a contrail, and comes down on the person you chose. The globe is lit by the sun where it is right now, and on landing it tells you the time there. The recipients are a radio group with arrow keys and the message is a real text field.
+A postcard composer that sends by airmail across a real globe. Press send and the card folds itself into a paper plane right where it lies, in one smooth movement, then is thrown onto the globe and becomes the plane you watch fly. It sets off away from them, goes the long way round behind the earth trailing a contrail, and comes down on the person you chose, the only place marked on the globe. The globe is lit by the sun where it is right now, and on landing it tells you the time there. The recipients are a radio group with arrow keys and the message is a real text field.
 
 Please:
 
@@ -19,14 +19,30 @@ Copy the code exactly as it is. Do not restyle, simplify or rename anything, and
 ```tsx
 "use client";
 
-/* eslint-disable react-hooks/refs, react-hooks/purity -- these rules assume code runs while rendering; here refs, timers, clocks and setState are used in handlers, effects and animation frames, the animation state lives in refs on purpose */
+/* eslint-disable react-hooks/refs -- these rules assume code runs while rendering; here refs, timers, clocks and setState are used in handlers, effects and animation frames, the animation state lives in refs on purpose */
 
-
-import { AnimatePresence, type MotionValue, animate, motion, useAnimationControls, useInView, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
+import {
+  AnimatePresence,
+  type MotionValue,
+  animate,
+  motion,
+  useAnimationControls,
+  useInView,
+  useMotionValue,
+  useReducedMotion,
+  useTransform,
+} from "framer-motion";
 import { type KeyboardEvent as RKeyboardEvent, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useAutoplaySoundAllowed, useSoundsEnabled } from "@/lib/ui-sounds";
 
-export type AirmailPlace = { id: string; name: string; city: string; lat: number; lon: number; tz: string };
+export type AirmailPlace = {
+  id: string;
+  name: string;
+  city: string;
+  lat: number;
+  lon: number;
+  tz: string;
+};
 
 export type AirmailGlobeProps = {
   from?: AirmailPlace;
@@ -55,7 +71,8 @@ function unlockAudio() {
     if (e.ctx.state === "suspended") void e.ctx.resume();
     return;
   }
-  const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  const AC =
+    window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AC) return;
   const ctx = new AC();
   const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
@@ -64,7 +81,14 @@ function unlockAudio() {
   g[ENGINE_KEY] = { ctx, noise };
 }
 
-type NoteOpts = { at?: number; dur?: number; gain?: number; type?: OscillatorType; glide?: number; bell?: number };
+type NoteOpts = {
+  at?: number;
+  dur?: number;
+  gain?: number;
+  type?: OscillatorType;
+  glide?: number;
+  bell?: number;
+};
 type Sound = {
   /** a soft glassy note: a sine with a faint bell partial above it */
   note: (freq: number, o?: NoteOpts) => void;
@@ -179,19 +203,60 @@ function useSound(enabled: boolean, volume: number, allow: () => boolean = () =>
   }, []);
 }
 
-const ICON_SEND = "M231.4 44.34v.15l-58.2 191.94a15.88 15.88 0 0 1-14 11.51q-.69.06-1.38.06a15.86 15.86 0 0 1-14.42-9.15l-36.4-74.7a4 4 0 0 1 .77-4.58l57.92-57.92a8 8 0 0 0-11.31-11.31l-57.95 57.92a4 4 0 0 1-4.58.77l-74.77-36.39a16 16 0 0 1 2.49-29.8l191.94-58.2h.15a16 16 0 0 1 19.74 19.7";
-const ICON_PIN = "M128 16a88.1 88.1 0 0 0-88 88c0 75.3 80 132.17 83.41 134.55a8 8 0 0 0 9.18 0C136 236.17 216 179.3 216 104a88.1 88.1 0 0 0-88-88m0 56a32 32 0 1 1-32 32a32 32 0 0 1 32-32";
-const ICON_CHECK = "M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24m45.66 85.66l-56 56a8 8 0 0 1-11.32 0l-24-24a8 8 0 0 1 11.32-11.32L112 148.69l50.34-50.35a8 8 0 0 1 11.32 11.32";
-const ICON_AGAIN = "M224 128a96 96 0 0 1-94.71 96H128a95.38 95.38 0 0 1-65.9-26.2a8 8 0 0 1 11-11.63a80 80 0 1 0-1.67-114.78a3 3 0 0 1-.26.25L44.59 96H72a8 8 0 0 1 0 16H24a8 8 0 0 1-8-8V56a8 8 0 0 1 16 0v29.8L60.25 60A96 96 0 0 1 224 128";
-const ICON_MOON = "M235.54 150.21a104.84 104.84 0 0 1-37 52.91A104 104 0 0 1 32 120a103.1 103.1 0 0 1 20.88-62.52a104.84 104.84 0 0 1 52.91-37a8 8 0 0 1 10 10a88.08 88.08 0 0 0 109.8 109.8a8 8 0 0 1 10 10Z";
-const ICON_SUN = "M120 40V16a8 8 0 0 1 16 0v24a8 8 0 0 1-16 0m8 24a64 64 0 1 0 64 64a64.07 64.07 0 0 0-64-64m-69.66 5.66a8 8 0 0 0 11.32-11.32l-16-16a8 8 0 0 0-11.32 11.32Zm0 116.68l-16 16a8 8 0 0 0 11.32 11.32l16-16a8 8 0 0 0-11.32-11.32M192 72a8 8 0 0 0 5.66-2.34l16-16a8 8 0 0 0-11.32-11.32l-16 16A8 8 0 0 0 192 72m5.66 114.34a8 8 0 0 0-11.32 11.32l16 16a8 8 0 0 0 11.32-11.32ZM48 128a8 8 0 0 0-8-8H16a8 8 0 0 0 0 16h24a8 8 0 0 0 8-8m80 80a8 8 0 0 0-8 8v24a8 8 0 0 0 16 0v-24a8 8 0 0 0-8-8m112-88h-24a8 8 0 0 0 0 16h24a8 8 0 0 0 0-16";
+const ICON_SEND =
+  "M231.4 44.34v.15l-58.2 191.94a15.88 15.88 0 0 1-14 11.51q-.69.06-1.38.06a15.86 15.86 0 0 1-14.42-9.15l-36.4-74.7a4 4 0 0 1 .77-4.58l57.92-57.92a8 8 0 0 0-11.31-11.31l-57.95 57.92a4 4 0 0 1-4.58.77l-74.77-36.39a16 16 0 0 1 2.49-29.8l191.94-58.2h.15a16 16 0 0 1 19.74 19.7";
+const ICON_PIN =
+  "M128 16a88.1 88.1 0 0 0-88 88c0 75.3 80 132.17 83.41 134.55a8 8 0 0 0 9.18 0C136 236.17 216 179.3 216 104a88.1 88.1 0 0 0-88-88m0 56a32 32 0 1 1-32 32a32 32 0 0 1 32-32";
+const ICON_CHECK =
+  "M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24m45.66 85.66l-56 56a8 8 0 0 1-11.32 0l-24-24a8 8 0 0 1 11.32-11.32L112 148.69l50.34-50.35a8 8 0 0 1 11.32 11.32";
+const ICON_AGAIN =
+  "M224 128a96 96 0 0 1-94.71 96H128a95.38 95.38 0 0 1-65.9-26.2a8 8 0 0 1 11-11.63a80 80 0 1 0-1.67-114.78a3 3 0 0 1-.26.25L44.59 96H72a8 8 0 0 1 0 16H24a8 8 0 0 1-8-8V56a8 8 0 0 1 16 0v29.8L60.25 60A96 96 0 0 1 224 128";
+const ICON_MOON =
+  "M235.54 150.21a104.84 104.84 0 0 1-37 52.91A104 104 0 0 1 32 120a103.1 103.1 0 0 1 20.88-62.52a104.84 104.84 0 0 1 52.91-37a8 8 0 0 1 10 10a88.08 88.08 0 0 0 109.8 109.8a8 8 0 0 1 10 10Z";
+const ICON_SUN =
+  "M120 40V16a8 8 0 0 1 16 0v24a8 8 0 0 1-16 0m8 24a64 64 0 1 0 64 64a64.07 64.07 0 0 0-64-64m-69.66 5.66a8 8 0 0 0 11.32-11.32l-16-16a8 8 0 0 0-11.32 11.32Zm0 116.68l-16 16a8 8 0 0 0 11.32 11.32l16-16a8 8 0 0 0-11.32-11.32M192 72a8 8 0 0 0 5.66-2.34l16-16a8 8 0 0 0-11.32-11.32l-16 16A8 8 0 0 0 192 72m5.66 114.34a8 8 0 0 0-11.32 11.32l16 16a8 8 0 0 0 11.32-11.32ZM48 128a8 8 0 0 0-8-8H16a8 8 0 0 0 0 16h24a8 8 0 0 0 8-8m80 80a8 8 0 0 0-8 8v24a8 8 0 0 0 16 0v-24a8 8 0 0 0-8-8m112-88h-24a8 8 0 0 0 0 16h24a8 8 0 0 0 0-16";
 
-const FROM: AirmailPlace = { id: "you", name: "You", city: "Kyoto", lat: 35.01, lon: 135.77, tz: "Asia/Tokyo" };
+const FROM: AirmailPlace = {
+  id: "you",
+  name: "You",
+  city: "Kyoto",
+  lat: 35.01,
+  lon: 135.77,
+  tz: "Asia/Tokyo",
+};
 const PEOPLE: AirmailPlace[] = [
-  { id: "mia", name: "Mia", city: "Lisbon", lat: 38.72, lon: -9.14, tz: "Europe/Lisbon" },
-  { id: "theo", name: "Theo", city: "Reykjavík", lat: 64.15, lon: -21.94, tz: "Atlantic/Reykjavik" },
-  { id: "ana", name: "Ana", city: "São Paulo", lat: -23.55, lon: -46.63, tz: "America/Sao_Paulo" },
-  { id: "kai", name: "Kai", city: "Honolulu", lat: 21.31, lon: -157.86, tz: "Pacific/Honolulu" },
+  {
+    id: "mia",
+    name: "Mia",
+    city: "Lisbon",
+    lat: 38.72,
+    lon: -9.14,
+    tz: "Europe/Lisbon",
+  },
+  {
+    id: "theo",
+    name: "Theo",
+    city: "Reykjavík",
+    lat: 64.15,
+    lon: -21.94,
+    tz: "Atlantic/Reykjavik",
+  },
+  {
+    id: "ana",
+    name: "Ana",
+    city: "São Paulo",
+    lat: -23.55,
+    lon: -46.63,
+    tz: "America/Sao_Paulo",
+  },
+  {
+    id: "kai",
+    name: "Kai",
+    city: "Honolulu",
+    lat: 21.31,
+    lon: -157.86,
+    tz: "Pacific/Honolulu",
+  },
 ];
 
 // The land, from Natural Earth (public domain) at 1:50m: a 1440 by 720 map of the world, one bit per quarter of a
@@ -229,7 +294,11 @@ const GH = 300; // the globe's window, css px
 const D2R = Math.PI / 180;
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 type V3 = [number, number, number];
-const vec = (lat: number, lon: number): V3 => [Math.cos(lat * D2R) * Math.sin(lon * D2R), Math.sin(lat * D2R), Math.cos(lat * D2R) * Math.cos(lon * D2R)];
+const vec = (lat: number, lon: number): V3 => [
+  Math.cos(lat * D2R) * Math.sin(lon * D2R),
+  Math.sin(lat * D2R),
+  Math.cos(lat * D2R) * Math.cos(lon * D2R),
+];
 const dot = (a: V3, b: V3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const norm = (a: V3): V3 => {
   const l = Math.hypot(a[0], a[1], a[2]) || 1;
@@ -252,27 +321,43 @@ const tripAxes = (A: V3, B: V3) => {
   return { n, T: norm(cross(n, A)), w: Math.acos(clamp(dot(A, B), -1, 1)) };
 };
 /**
- * Where the plane is at u (0 to 1): it climbs off A, goes once all the way round the earth along the trip's great
- * circle (out past B, behind the earth and back round), and comes down on B.
+ * Where the plane is at u (0 to 1): handed over already in the air above A and moving, it sets off away from B and goes
+ * the long way round the earth along the trip's great circle (behind the earth and back round), and comes down on B.
  */
 const flightAt = (A: V3, B: V3, u: number): { p: V3; ground: V3; alt: number } => {
   const { T, w } = tripAxes(A, B);
-  const e = u - Math.sin(2 * Math.PI * u) / (2 * Math.PI); // gentle at both ends
-  const th = (Math.PI * 2 + w) * e;
-  const g: V3 = [A[0] * Math.cos(th) + T[0] * Math.sin(th), A[1] * Math.cos(th) + T[1] * Math.sin(th), A[2] * Math.cos(th) + T[2] * Math.sin(th)];
-  const s1 = clamp(u / 0.14),
-    s2 = clamp((u - 0.78) / 0.22);
-  const alt = 0.42 * s1 * s1 * (3 - 2 * s1) * (1 - s2 * s2 * (3 - 2 * s2));
-  return { p: [g[0] * (1 + alt), g[1] * (1 + alt), g[2] * (1 + alt)], ground: g, alt };
+  // it joins already in the air and moving (the thrown sheet hands it over at speed), and slows only to come down
+  const e = 1 - Math.pow(1 - u, 1.7);
+  // it sets off away from them and goes the long way round the earth, so the first time it reaches them is to land
+  const th = -(Math.PI * 2 - w) * e;
+  const g: V3 = [
+    A[0] * Math.cos(th) + T[0] * Math.sin(th),
+    A[1] * Math.cos(th) + T[1] * Math.sin(th),
+    A[2] * Math.cos(th) + T[2] * Math.sin(th),
+  ];
+  const s2 = clamp((u - 0.78) / 0.22);
+  const alt = 0.42 * (1 - s2 * s2 * (3 - 2 * s2));
+  return {
+    p: [g[0] * (1 + alt), g[1] * (1 + alt), g[2] * (1 + alt)],
+    ground: g,
+    alt,
+  };
 };
 /** the view for the flight: looking at the middle of the trip, raised 32 degrees out of the orbit's plane */
 const orbitView = (A: V3, B: V3): V3 => {
   const { n } = tripAxes(A, B);
   const mid = slerp(A, B, 0.5);
   const a = 32 * D2R;
-  return norm([mid[0] * Math.cos(a) + n[0] * Math.sin(a), mid[1] * Math.cos(a) + n[1] * Math.sin(a), mid[2] * Math.cos(a) + n[2] * Math.sin(a)]);
+  return norm([
+    mid[0] * Math.cos(a) + n[0] * Math.sin(a),
+    mid[1] * Math.cos(a) + n[1] * Math.sin(a),
+    mid[2] * Math.cos(a) + n[2] * Math.sin(a),
+  ]);
 };
-const latLon = (v: V3) => ({ lat: Math.asin(clamp(v[1], -1, 1)) / D2R, lon: Math.atan2(v[0], v[2]) / D2R });
+const latLon = (v: V3) => ({
+  lat: Math.asin(clamp(v[1], -1, 1)) / D2R,
+  lon: Math.atan2(v[0], v[2]) / D2R,
+});
 /** world to view: turn the globe so (lat, lon) faces you */
 const viewMatrix = (lat: number, lon: number) => {
   const cy = Math.cos(-lon * D2R),
@@ -282,7 +367,11 @@ const viewMatrix = (lat: number, lon: number) => {
   // Rx(lat) · Ry(-lon), rows
   return [cy, 0, sy, -sx * -sy, cx, -sx * cy, cx * -sy, sx, cx * cy];
 };
-const apply = (m: number[], v: V3): V3 => [m[0] * v[0] + m[1] * v[1] + m[2] * v[2], m[3] * v[0] + m[4] * v[1] + m[5] * v[2], m[6] * v[0] + m[7] * v[1] + m[8] * v[2]];
+const apply = (m: number[], v: V3): V3 => [
+  m[0] * v[0] + m[1] * v[1] + m[2] * v[2],
+  m[3] * v[0] + m[4] * v[1] + m[5] * v[2],
+  m[6] * v[0] + m[7] * v[1] + m[8] * v[2],
+];
 /** where the sun is overhead right now */
 const sunNow = (d = new Date()): V3 => {
   const start = Date.UTC(d.getUTCFullYear(), 0, 0);
@@ -291,12 +380,32 @@ const sunNow = (d = new Date()): V3 => {
   const hours = d.getUTCHours() + d.getUTCMinutes() / 60;
   return vec(decl, (12 - hours) * 15);
 };
-const km = (a: AirmailPlace, b: AirmailPlace) => Math.round((Math.acos(clamp(dot(vec(a.lat, a.lon), vec(b.lat, b.lon)), -1, 1)) * 6371) / 10) * 10;
+const km = (a: AirmailPlace, b: AirmailPlace) =>
+  Math.round((Math.acos(clamp(dot(vec(a.lat, a.lon), vec(b.lat, b.lon)), -1, 1)) * 6371) / 10) * 10;
 const localTime = (tz: string, d = new Date()) => {
   try {
-    return { text: d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", timeZone: tz }), hour: Number(new Intl.DateTimeFormat("en-GB", { hour: "numeric", hourCycle: "h23", timeZone: tz }).format(d)) };
+    return {
+      text: d.toLocaleTimeString(undefined, {
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: tz,
+      }),
+      hour: Number(
+        new Intl.DateTimeFormat("en-GB", {
+          hour: "numeric",
+          hourCycle: "h23",
+          timeZone: tz,
+        }).format(d),
+      ),
+    };
   } catch {
-    return { text: d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }), hour: d.getHours() };
+    return {
+      text: d.toLocaleTimeString(undefined, {
+        hour: "numeric",
+        minute: "2-digit",
+      }),
+      hour: d.getHours(),
+    };
   }
 };
 
@@ -304,10 +413,10 @@ const localTime = (tz: string, d = new Date()) => {
  * A postcard that travels by airmail, across a real globe.
  *
  * Write a few lines and choose who it's for; the globe turns to show the route, a great circle from you to them.
- * Send it and the card stands itself upright and folds into a paper plane, nose up, crease by crease (corners in,
- * edges in, in half, wings out); it dips and is thrown straight up to the globe, which turns to watch its flight from a
- * little above. The plane climbs, goes once all the way round the earth along the trip's great circle (out past them,
- * behind the earth and back round) trailing a fading contrail, then comes down on them. The globe is lit by the
+ * Send it and the card folds itself into a paper plane where it lies, in one continuous movement (corners in, edges in,
+ * in half, wings out); it pulls back and is thrown in an arc onto the globe, landing at the exact spot, size and heading
+ * where its flight begins, so the plane you folded is the one that flies. The globe turns to watch from a little above. It sets off away from them and goes the long way round the earth along the trip's great circle
+ * (behind the earth and back round), trailing a fading contrail, and the first time it reaches them is to land. The globe is lit by the
  * sun where it is right now, so one end of the trip may be in daylight and the other at night under city lights. It
  * lands with ripples spreading over the curve of the earth, and tells you what time it is there and whether they're
  * likely asleep. The globe is a WebGL shader (the land is Natural Earth's coastline as a dotted grid, oceans with a sun
@@ -365,6 +474,9 @@ export default function AirmailGlobe({
     landT: -1, // seconds since landing
     windAt: 0,
     dest: dest,
+    // where the flight begins on screen right now, so the thrown sheet can land exactly on it
+    launch: { x: 0, y: 0, ang: 0, len: PLANE_LEN, v: 200 },
+    asp: 0.33,
   });
   sim.current.dest = dest;
 
@@ -391,21 +503,13 @@ export default function AirmailGlobe({
     sfx.tick({ freq: 2000, gain: 0.02 });
   };
   const onKey = (e: RKeyboardEvent, i: number) => {
-    const d = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+    const d =
+      e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
     if (!d) return;
     e.preventDefault();
     const n = (i + d + to.length) % to.length;
     btnRefs.current[n]?.focus();
     choose(to[n]);
-  };
-
-  /** where a place sits on screen right now, relative to the globe window */
-  const screenOf = (p: AirmailPlace) => {
-    const s = sim.current;
-    const m = viewMatrix(s.view.lat, s.view.lon);
-    const v = apply(m, vec(p.lat, p.lon));
-    const R = Math.min(width, GH) * 0.4;
-    return { x: width / 2 + v[0] * R, y: GH / 2 - v[1] * R, front: v[2] > 0 };
   };
 
   const send = async (user: boolean) => {
@@ -421,53 +525,117 @@ export default function AirmailGlobe({
     sfx.whoosh(900, 300, { dur: 0.25, gain: 0.04 });
     if (reduce) card.set({ opacity: 0 });
     else {
-      // fold: the card is swapped for a sheet of the same size that folds itself into a paper plane, crease by crease
+      // fold: the card is swapped for a sheet of the same size that folds itself into a paper plane, flat where it lies,
+      // in one continuous movement (corners in, edges in, in half, wings out) while it lifts and draws in
       const cardEl = cardRef.current,
         win = winRef.current;
       const cr = cardEl?.getBoundingClientRect();
+      const fw = cr?.width ?? 400,
+        fh = cr?.height ?? 130;
+      s.asp = fh / fw;
       fold.set(0);
-      setFolding({ w: cr?.width ?? 400, h: cr?.height ?? 130 });
+      setFolding({ w: fw, h: fh });
       plane.set({ x: 0, y: 0, rotate: 0, scale: 1, opacity: 1 });
       card.set({ opacity: 0 });
       await new Promise((r) => requestAnimationFrame(() => r(null)));
-      const crease = (to: number, dur: number) => {
-        sfx.whoosh(1400, 500, { dur: 0.16, gain: 0.03 });
-        window.setTimeout(() => sfx.tick({ freq: 700 + to * 120, gain: 0.04 }), dur * 900);
-        return animate(fold, to, { duration: dur, ease: [0.65, 0, 0.35, 1] });
-      };
-      // first the sheet is stood upright, so the plane will be folded nose up
-      sfx.whoosh(600, 1100, { dur: 0.3, gain: 0.025 });
-      await plane.start({ rotate: -90, scale: 0.5, y: -34, transition: { type: "spring", stiffness: 210, damping: 22 } });
-      await crease(1, 0.32); // the two top corners fold in to the centre line
-      await crease(2, 0.3); // the new edges fold in again, to a point
-      await crease(3, 0.28); // it folds in half down the middle
-      await crease(4, 0.3); // and the wings fold out
-      // then it's thrown: a little dip, and straight up and away toward where the trip begins
-      let dx = 0,
-        dy = -200;
-      if (cr && win) {
-        const wr = win.getBoundingClientRect();
-        const a = screenOf(from);
-        dx = wr.left + a.x - (cr.left + cr.width / 2);
-        dy = wr.top + a.y - (cr.top + cr.height / 2);
-      }
-      const ang = (Math.atan2(dy, dx) * 180) / Math.PI;
-      await plane.start({ y: -24, scale: 0.48, transition: { duration: 0.16, ease: "easeOut" } });
-      sfx.whoosh(250, 1500, { dur: 0.7, gain: 0.06 });
-      await plane.start({
-        x: [0, dx * 0.3, dx],
-        y: [-24, dy * 0.55 - 40, dy],
-        rotate: [-90, -90 + (ang + 90) * 0.4, ang],
-        scale: [0.48, 0.28, 0.06],
-        opacity: [1, 1, 1, 0],
-        transition: { duration: 0.7, ease: [0.4, 0, 0.6, 1], opacity: { duration: 0.7, times: [0, 0.5, 0.85, 1] } },
-      });
+      const FOLD = 1.5;
+      [0.3, 0.64, 0.96, 1.28].forEach((at, i) =>
+        window.setTimeout(() => {
+          sfx.whoosh(1400, 500, { dur: 0.16, gain: 0.03 });
+          sfx.tick({ freq: 820 + i * 120, gain: 0.04 });
+        }, at * 1000),
+      );
+      await Promise.all([
+        plane.start({
+          y: -8,
+          scale: 0.6,
+          transition: { duration: FOLD, ease: [0.45, 0, 0.25, 1] },
+        }),
+        animate(fold, 4, { duration: FOLD, ease: [0.5, 0, 0.3, 1] }),
+      ]);
+      // then it's thrown: a small pull back, and away in an arc to the exact spot, size and heading where its flight
+      // round the globe begins (read live, as the globe is still turning), so it simply carries on from there
+      if (cr && win) await throwTo(cr, win);
       setFolding(null);
     }
     setPhase("fly");
     phaseRef.current = "fly";
     s.flying = true;
   };
+
+  const throwTo = (cr: DOMRect, win: HTMLElement) =>
+    new Promise<void>((done) => {
+      const T0 = performance.now(),
+        PULL = 170,
+        FLY = 950;
+      const sx = -10,
+        sy = -4,
+        k0 = 0.6;
+      sfx.whoosh(250, 1500, { at: PULL / 1000, dur: 0.8, gain: 0.06 });
+      const ss = (a: number, b: number, x: number) => {
+        const k = clamp((x - a) / (b - a));
+        return k * k * (3 - 2 * k);
+      };
+      const turn = (a: number, b: number, k: number) => a + (((b - a + 540) % 360) - 180) * k;
+      const tick = (now: number) => {
+        const e = now - T0;
+        if (e < PULL) {
+          const k = Math.sin(((e / PULL) * Math.PI) / 2);
+          plane.set({
+            x: sx * k,
+            y: -8 + (sy + 8) * k,
+            rotate: -7 * k,
+            scale: k0,
+          });
+          requestAnimationFrame(tick);
+          return;
+        }
+        const L = sim.current.launch,
+          wr = win.getBoundingClientRect();
+        const tx = wr.left + L.x - (cr.left + cr.width / 2),
+          ty = wr.top + L.y - (cr.top + cr.height / 2);
+        const u = Math.min(1, (e - PULL) / FLY);
+        // one curve: it leaves the hand rising toward the globe, then banks into the flight's own heading, arriving
+        // along it, so the turn is a single smooth sweep with no hook
+        const a = (L.ang * Math.PI) / 180,
+          S = Math.max(1, Math.hypot(tx - sx, ty - sy));
+        let ux = (tx - sx) / S,
+          uy = (ty - sy) / S - 0.9;
+        const un = Math.hypot(ux, uy) || 1;
+        ux /= un;
+        uy /= un;
+        const p1x = sx + ux * S * 0.45,
+          p1y = sy + uy * S * 0.45,
+          p2x = tx - Math.cos(a) * S * 0.38,
+          p2y = ty - Math.sin(a) * S * 0.38;
+        // from rest, speeding up so it's going exactly as fast as the flight when it joins it
+        const len = S * 1.2;
+        const pw = clamp((L.v * (FLY / 1000)) / len, 1.25, 3.2);
+        const q = Math.pow(u, pw),
+          r = 1 - q;
+        const x = r * r * r * sx + 3 * r * r * q * p1x + 3 * r * q * q * p2x + q * q * q * tx,
+          y = r * r * r * sy + 3 * r * r * q * p1y + 3 * r * q * q * p2y + q * q * q * ty;
+        const dx = 3 * r * r * (p1x - sx) + 6 * r * q * (p2x - p1x) + 3 * q * q * (tx - p2x),
+          dy = 3 * r * r * (p1y - sy) + 6 * r * q * (p2y - p1y) + 3 * q * q * (ty - p2y);
+        const along = (Math.atan2(dy, dx) * 180) / Math.PI;
+        const rotate = turn(-7, along, ss(0, 0.22, u));
+        plane.set({
+          x,
+          y,
+          rotate,
+          scale: k0 + (L.len / cr.width - k0) * q,
+          opacity: 1,
+        });
+        if (u >= 1) {
+          // gone the instant the flight takes over, so there's never a second plane
+          plane.set({ opacity: 0 });
+          done();
+          return;
+        }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
 
   const again = async (user: boolean) => {
     if (user) touched.current = true;
@@ -476,7 +644,12 @@ export default function AirmailGlobe({
     phaseRef.current = "write";
     setFolding(null);
     card.set({ x: 0, y: 24, scale: 0.96, rotate: 0, opacity: 0 });
-    await card.start({ y: 0, scale: 1, opacity: 1, transition: { type: "spring", stiffness: 260, damping: 24 } });
+    await card.start({
+      y: 0,
+      scale: 1,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 260, damping: 24 },
+    });
   };
   // ── the loop: the camera, the flight, the drawing ──
   useEffect(() => {
@@ -496,7 +669,7 @@ export default function AirmailGlobe({
     let raf = 0,
       last = performance.now();
     const t0 = last;
-    const FLIGHT = reduce ? 0.01 : 5.6;
+    const FLIGHT = reduce ? 0.01 : FLIGHT_S;
     const frame = (nowT: number) => {
       raf = requestAnimationFrame(frame);
       const dt = Math.min(0.05, (nowT - last) / 1000);
@@ -547,8 +720,26 @@ export default function AirmailGlobe({
       const sun = sunNow(now);
       if (globe) globe.render({ W, H: GH, dpr, R, m, sun, t: (nowT - t0) / 1000 });
       else if (flat) drawFlatGlobe(flat, cv, W, dpr, R, m, sun, land);
+      // where the flight begins on screen, for the hand-off from the thrown sheet
+      {
+        const f0 = flightAt(A, B, 0);
+        const p0 = apply(m, f0.p),
+          p1 = apply(m, flightAt(A, B, 0.004).p);
+        const x0 = W / 2 + p0[0] * R,
+          y0 = GH / 2 - p0[1] * R,
+          x1 = W / 2 + p1[0] * R,
+          y1 = GH / 2 - p1[1] * R;
+        // its heading, size and speed on screen at that moment, so the sheet can arrive matching all three
+        s.launch = {
+          x: x0,
+          y: y0,
+          ang: (Math.atan2(y1 - y0, x1 - x0) * 180) / Math.PI,
+          len: PLANE_LEN * (1 + f0.alt * 1.2) * (1 + 0.2 * clamp(p0[2], -1.5, 1.5)),
+          v: Math.hypot(x1 - x0, y1 - y0) / (0.004 * FLIGHT_S),
+        };
+      }
       // the route, the plane, the ripples
-      drawOverlay(fctx, W, dpr, R, m, A, B, ph, s.t, s.landT, reduce);
+      drawOverlay(fctx, W, dpr, R, m, A, B, ph, s.t, s.landT, reduce, s.asp);
     };
     raf = requestAnimationFrame(frame);
     return () => {
@@ -561,7 +752,10 @@ export default function AirmailGlobe({
   // ── autoplay: pick someone, send, watch it land, start again ──
   useEffect(() => {
     if (!autoplay || reduce || !inView) return;
-    let k = Math.max(0, to.findIndex((p) => p.id === dest.id));
+    let k = Math.max(
+      0,
+      to.findIndex((p) => p.id === dest.id),
+    );
     let t = 0;
     const loop = () => {
       if (touched.current) return;
@@ -587,7 +781,10 @@ export default function AirmailGlobe({
   const dist = km(from, dest);
 
   return (
-    <div ref={rootRef} className={`w-full max-w-[460px] rounded-[24px] bg-white p-5 text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] ${className}`}>
+    <div
+      ref={rootRef}
+      className={`w-full max-w-[460px] rounded-[24px] bg-white p-5 text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] ${className}`}
+    >
       <div className="flex items-baseline justify-between gap-3">
         <div className="text-[17px] font-semibold tracking-[-0.02em]">Send a postcard</div>
         <div className="text-[12px] tabular-nums text-[#86868b]">
@@ -595,7 +792,14 @@ export default function AirmailGlobe({
         </div>
       </div>
       {/* the globe */}
-      <div ref={winRef} className="relative mt-3 overflow-hidden rounded-[18px]" style={{ height: GH, background: "radial-gradient(120% 90% at 50% 40%, #0e1530 0%, #060912 70%)" }}>
+      <div
+        ref={winRef}
+        className="relative mt-3 overflow-hidden rounded-[18px]"
+        style={{
+          height: GH,
+          background: "radial-gradient(120% 90% at 50% 40%, #0e1530 0%, #060912 70%)",
+        }}
+      >
         <canvas ref={glRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />
         <canvas ref={cvRef} aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full" />
         <canvas ref={fxRef} aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full" />
@@ -609,7 +813,12 @@ export default function AirmailGlobe({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              transition={{ delay: reduce ? 0 : 0.5, type: "spring", stiffness: 300, damping: 26 }}
+              transition={{
+                delay: reduce ? 0 : 0.5,
+                type: "spring",
+                stiffness: 300,
+                damping: 26,
+              }}
               className="absolute inset-x-3 bottom-3 flex items-center gap-2.5 rounded-[14px] bg-white/12 px-3 py-2.5 text-white backdrop-blur-md"
               role="status"
             >
@@ -631,15 +840,19 @@ export default function AirmailGlobe({
         </AnimatePresence>
       </div>
       {/* who it's for */}
-      <div role="radiogroup" aria-label="Send to" className="mt-3 flex gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        role="radiogroup"
+        aria-label="Send to"
+        className="mt-3 flex gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         {to.map((p, i) => {
           const on = p.id === dest.id;
           return (
             <button
               key={p.id}
               ref={(el) => {
-            btnRefs.current[i] = el;
-          }}
+                btnRefs.current[i] = el;
+              }}
               type="button"
               role="radio"
               aria-checked={on}
@@ -648,7 +861,11 @@ export default function AirmailGlobe({
               onKeyDown={(e) => onKey(e, i)}
               className={`relative flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] outline-none transition-colors focus-visible:shadow-[0_0_0_2px_#0071e3] ${on ? "bg-[#1d1d1f] font-semibold text-white" : "bg-[#f5f5f7] font-medium text-[#424245] hover:bg-[#ebebef]"}`}
             >
-              <svg viewBox="0 0 256 256" className={`h-3 w-3 ${on ? "text-[#ff375f]" : "text-[#86868b]"}`} aria-hidden="true">
+              <svg
+                viewBox="0 0 256 256"
+                className={`h-3 w-3 ${on ? "text-[#ff375f]" : "text-[#86868b]"}`}
+                aria-hidden="true"
+              >
                 <path fill="currentColor" d={ICON_PIN} />
               </svg>
               {p.name}, {p.city}
@@ -668,14 +885,33 @@ export default function AirmailGlobe({
               exit={{ opacity: 0 }}
               className="absolute inset-0 flex flex-col items-center justify-center rounded-[6px] border border-dashed border-black/15 text-center"
             >
-              <div className="text-[13px] font-medium text-[#1d1d1f]">{phase === "landed" ? `${dest.name} has your postcard` : "Your postcard is in the air"}</div>
+              <div className="text-[13px] font-medium text-[#1d1d1f]">
+                {phase === "landed" ? `${dest.name} has your postcard` : "Your postcard is in the air"}
+              </div>
               <div className="mt-0.5 max-w-[80%] truncate font-mono text-[11.5px] text-[#86868b]">{message}</div>
             </motion.div>
           )}
         </AnimatePresence>
-        <motion.div ref={cardRef} animate={card} initial={false} className={`relative rounded-[6px] ${folding ? "invisible" : ""} bg-[#fbf8f1] p-3.5 shadow-[0_0_0_1px_rgba(0,0,0,.07),0_10px_24px_-14px_rgba(0,0,0,.4)]`} style={{ transformOrigin: "50% 50%" }}>
+        <motion.div
+          ref={cardRef}
+          animate={card}
+          initial={false}
+          className={`relative rounded-[6px] ${folding ? "invisible" : ""} bg-[#fbf8f1] p-3.5 shadow-[0_0_0_1px_rgba(0,0,0,.07),0_10px_24px_-14px_rgba(0,0,0,.4)]`}
+          style={{ transformOrigin: "50% 50%" }}
+        >
           {/* the airmail edge */}
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-[6px]" style={{ padding: 4, background: "repeating-linear-gradient(135deg,#d6303a 0 10px,#fbf8f1 10px 15px,#1f5fbf 15px 25px,#fbf8f1 25px 30px)", WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)", WebkitMaskComposite: "xor", maskComposite: "exclude" }} />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 rounded-[6px]"
+            style={{
+              padding: 4,
+              background:
+                "repeating-linear-gradient(135deg,#d6303a 0 10px,#fbf8f1 10px 15px,#1f5fbf 15px 25px,#fbf8f1 25px 30px)",
+              WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+              WebkitMaskComposite: "xor",
+              maskComposite: "exclude",
+            }}
+          />
           <div className="relative flex gap-3">
             <label className="min-w-0 flex-1">
               <span className="sr-only">Message</span>
@@ -689,12 +925,17 @@ export default function AirmailGlobe({
                 rows={4}
                 maxLength={220}
                 className="h-[92px] w-full resize-none bg-transparent font-mono text-[12.5px] leading-[1.45] text-[#2c2a26] outline-none placeholder:text-[#a9a49a]"
-                style={{ backgroundImage: "repeating-linear-gradient(transparent 0 17.1px, rgba(60,50,30,.12) 17.1px 18.1px)" }}
+                style={{
+                  backgroundImage: "repeating-linear-gradient(transparent 0 17.1px, rgba(60,50,30,.12) 17.1px 18.1px)",
+                }}
                 placeholder="Write a postcard"
               />
             </label>
             <div className="flex w-[104px] shrink-0 flex-col border-l border-dashed border-black/15 pl-3">
-              <div className="ml-auto grid h-[46px] w-[38px] place-items-center rounded-[2px] bg-[#ff375f] text-white shadow-[0_0_0_2px_#fbf8f1,0_0_0_3px_rgba(0,0,0,.12)]" aria-hidden="true">
+              <div
+                className="ml-auto grid h-[46px] w-[38px] place-items-center rounded-[2px] bg-[#ff375f] text-white shadow-[0_0_0_2px_#fbf8f1,0_0_0_3px_rgba(0,0,0,.12)]"
+                aria-hidden="true"
+              >
                 <svg viewBox="0 0 256 256" className="h-5 w-5">
                   <path fill="currentColor" d={ICON_SEND} />
                 </svg>
@@ -708,17 +949,31 @@ export default function AirmailGlobe({
         </motion.div>
         {/* the sheet that folds into a paper plane and is thrown */}
         {folding && (
-          <motion.div aria-hidden="true" animate={plane} className="pointer-events-none absolute left-0 top-0 z-10" style={{ width: folding.w, height: folding.h }}>
-            <PaperPlane w={folding.w} h={folding.h} fold={fold} message={message} />
+          <motion.div
+            aria-hidden="true"
+            animate={plane}
+            className="pointer-events-none absolute left-0 top-0 z-10"
+            style={{ width: folding.w, height: folding.h }}
+          >
+            <PaperPlane w={folding.w} h={folding.h} fold={fold} message={message} to={dest} />
           </motion.div>
         )}
       </div>
       <div className="mt-3 flex items-center justify-between gap-3">
         <div className="min-w-0 truncate text-[12px] text-[#86868b]">
-          {phase === "fly" ? `On its way to ${dest.city}` : phase === "landed" ? "Delivered" : `It's ${there.text} in ${dest.city}`}
+          {phase === "fly"
+            ? `On its way to ${dest.city}`
+            : phase === "landed"
+              ? "Delivered"
+              : `It's ${there.text} in ${dest.city}`}
         </div>
         {phase === "landed" ? (
-          <button key="again" type="button" onClick={() => again(true)} className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-[#f5f5f7] px-4 py-2 text-[14px] font-medium text-[#1d1d1f] outline-none hover:bg-[#ebebef] focus-visible:shadow-[0_0_0_2px_#0071e3]">
+          <button
+            key="again"
+            type="button"
+            onClick={() => again(true)}
+            className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-[#f5f5f7] px-4 py-2 text-[14px] font-medium text-[#1d1d1f] outline-none hover:bg-[#ebebef] focus-visible:shadow-[0_0_0_2px_#0071e3]"
+          >
             <svg viewBox="0 0 256 256" className="h-4 w-4" aria-hidden="true">
               <path fill="currentColor" d={ICON_AGAIN} />
             </svg>
@@ -744,39 +999,153 @@ export default function AirmailGlobe({
 }
 
 type Pts = number[][];
-const lerpPts = (a: Pts, b: Pts, t: number) => a.map((p, i) => [p[0] + (b[i][0] - p[0]) * t, p[1] + (b[i][1] - p[1]) * t]);
+const lerpPts = (a: Pts, b: Pts, t: number) =>
+  a.map((p, i) => [p[0] + (b[i][0] - p[0]) * t, p[1] + (b[i][1] - p[1]) * t]);
 const at = (stages: Pts[], f: number) => {
   const i = Math.min(stages.length - 2, Math.floor(f));
   return lerpPts(stages[i], stages[i + 1], f - i);
 };
 const pathOf = (pts: Pts) => "M" + pts.map((p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" L") + " Z";
 
+/** the folded plane, as fractions of the sheet: the same shape is drawn on the globe, so the one you folded is the one that flies */
+const PLANE = {
+  tipT: [0.06, -0.2],
+  backT: [0.32, 0.36],
+  nose: [1, 0.5],
+  backB: [0.32, 0.64],
+  tipB: [0.06, 1.2],
+  tail: [0.14, 0.5],
+} as const;
+/** its length on the globe, in px, before depth and altitude */
+const PLANE_LEN = 34;
+/** the flight round the earth, seconds */
+const FLIGHT_S = 5.6;
+
 /** the postcard's sheet folding into a paper plane: nose to the right, one stage per crease */
-function PaperPlane({ w, h, fold, message }: { w: number; h: number; fold: MotionValue<number>; message: string }) {
-  const clip = `pp${useId().replace(/:/g, "")}`;
+function PaperPlane({
+  w,
+  h,
+  fold,
+  message,
+  to,
+}: {
+  w: number;
+  h: number;
+  fold: MotionValue<number>;
+  message: string;
+  to: { name: string; city: string };
+}) {
+  const id = useId().replace(/:/g, "");
+  const clip = `pp${id}`,
+    stripes = `ps${id}`;
   const S = useMemo(() => {
     const m = h / 2;
     const outline: Pts[] = [
-      [[0, 0], [w, 0], [w, 0], [w, m], [w, h], [w, h], [0, h], [0, m]],
-      [[0, 0], [w - m, 0], [w - m, 0], [w, m], [w - m, h], [w - m, h], [0, h], [0, m]],
-      [[0, h * 0.2], [w * 0.5, h * 0.31], [w * 0.5, h * 0.31], [w, m], [w * 0.5, h * 0.69], [w * 0.5, h * 0.69], [0, h * 0.8], [0, m]],
-      [[w * 0.04, h * 0.44], [w * 0.5, h * 0.47], [w * 0.5, h * 0.47], [w, m], [w * 0.5, h * 0.55], [w * 0.25, h * 0.6], [w * 0.04, h * 0.64], [w * 0.04, m]],
-      [[w * 0.06, h * 0.06], [w * 0.32, h * 0.36], [w * 0.32, h * 0.36], [w, m], [w * 0.32, h * 0.64], [w * 0.32, h * 0.64], [w * 0.06, h * 0.94], [w * 0.14, m]],
+      [
+        [0, 0],
+        [w, 0],
+        [w, 0],
+        [w, m],
+        [w, h],
+        [w, h],
+        [0, h],
+        [0, m],
+      ],
+      [
+        [0, 0],
+        [w - m, 0],
+        [w - m, 0],
+        [w, m],
+        [w - m, h],
+        [w - m, h],
+        [0, h],
+        [0, m],
+      ],
+      [
+        [0, h * 0.2],
+        [w * 0.5, h * 0.31],
+        [w * 0.5, h * 0.31],
+        [w, m],
+        [w * 0.5, h * 0.69],
+        [w * 0.5, h * 0.69],
+        [0, h * 0.8],
+        [0, m],
+      ],
+      [
+        [w * 0.04, h * 0.44],
+        [w * 0.5, h * 0.47],
+        [w * 0.5, h * 0.47],
+        [w, m],
+        [w * 0.5, h * 0.55],
+        [w * 0.25, h * 0.6],
+        [w * 0.04, h * 0.64],
+        [w * 0.04, m],
+      ],
+      [
+        [w * PLANE.tipT[0], h * PLANE.tipT[1]],
+        [w * PLANE.backT[0], h * PLANE.backT[1]],
+        [w * PLANE.backT[0], h * PLANE.backT[1]],
+        [w, m],
+        [w * PLANE.backB[0], h * PLANE.backB[1]],
+        [w * PLANE.backB[0], h * PLANE.backB[1]],
+        [w * PLANE.tipB[0], h * PLANE.tipB[1]],
+        [w * PLANE.tail[0], m],
+      ],
     ];
     // the folded-over parts, a shade darker: the corners, then the long flaps, then one wing in shadow
     const top: Pts[] = [
-      [[w, 0], [w, 0], [w, 0]],
-      [[w - m, 0], [w, m], [w - m, m]],
-      [[0, h * 0.2], [w, m], [0, m]],
-      [[w * 0.04, h * 0.44], [w, m], [w * 0.04, m]],
-      [[w * 0.06, h * 0.06], [w, m], [w * 0.14, m]],
+      [
+        [w, 0],
+        [w, 0],
+        [w, 0],
+      ],
+      [
+        [w - m, 0],
+        [w, m],
+        [w - m, m],
+      ],
+      [
+        [0, h * 0.2],
+        [w, m],
+        [0, m],
+      ],
+      [
+        [w * 0.04, h * 0.44],
+        [w, m],
+        [w * 0.04, m],
+      ],
+      [
+        [w * PLANE.tipT[0], h * PLANE.tipT[1]],
+        [w, m],
+        [w * PLANE.tail[0], m],
+      ],
     ];
     const bottom: Pts[] = [
-      [[w, h], [w, h], [w, h]],
-      [[w - m, h], [w, m], [w - m, m]],
-      [[0, h * 0.8], [w, m], [0, m]],
-      [[w * 0.04, h * 0.64], [w, m], [w * 0.04, m]],
-      [[w * 0.06, h * 0.94], [w, m], [w * 0.14, m]],
+      [
+        [w, h],
+        [w, h],
+        [w, h],
+      ],
+      [
+        [w - m, h],
+        [w, m],
+        [w - m, m],
+      ],
+      [
+        [0, h * 0.8],
+        [w, m],
+        [0, m],
+      ],
+      [
+        [w * 0.04, h * 0.64],
+        [w, m],
+        [w * 0.04, m],
+      ],
+      [
+        [w * PLANE.tipB[0], h * PLANE.tipB[1]],
+        [w, m],
+        [w * PLANE.tail[0], m],
+      ],
     ];
     return { outline, top, bottom };
   }, [w, h]);
@@ -786,26 +1155,106 @@ function PaperPlane({ w, h, fold, message }: { w: number; h: number; fold: Motio
   // the top flap is lit until the last stage, where it becomes the sunny wing; the bottom one ends as the wing in shade
   const topFill = useTransform(fold, [0, 3, 4], ["#efe8da", "#ece5d6", "#fffdf8"]);
   const botFill = useTransform(fold, [0, 3, 4], ["#efe8da", "#e4dccb", "#ddd3c0"]);
-  const shadow = useTransform(fold, [0, 4], [0.18, 0.32]);
-  const filt = useTransform(shadow, (a) => `drop-shadow(0 10px 14px rgba(0,0,0,${a}))`);
+  // starts as the card's own soft shadow and deepens as the plane lifts
+  const filt = useTransform(fold, (f) => {
+    const k = clamp(f / 4);
+    return `drop-shadow(0 ${4 + 6 * k}px ${7 + 8 * k}px rgba(0,0,0,${0.13 + 0.17 * k}))`;
+  });
   const ink = useTransform(fold, [0, 0.9, 1.6], [1, 0.6, 0]);
+  // the edge starts exactly as the card's 4 px striped border and thins a little as the paper closes
+  const edgeW = useTransform(fold, [0, 4], [8, 5]);
   return (
     <motion.svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="overflow-visible" style={{ filter: filt }}>
       <defs>
         <clipPath id={clip}>
           <motion.path d={d} />
         </clipPath>
+        {/* the same diagonal red and blue stripes as the card's airmail border */}
+        <pattern id={stripes} patternUnits="userSpaceOnUse" width={30} height={30} patternTransform="rotate(45)">
+          <rect width={30} height={30} fill="#fbf8f1" />
+          <rect width={10} height={30} fill="#d6303a" />
+          <rect x={15} width={10} height={30} fill="#1f5fbf" />
+        </pattern>
       </defs>
       <motion.path d={d} fill="#fbf8f1" stroke="rgba(60,50,30,.18)" strokeWidth={1} strokeLinejoin="round" />
-      {/* the words, still on the paper as the first creases go in */}
+      {/* the card's own face, still on the paper as the first creases go in: the message on its ruled lines, the stamp, the address */}
       <motion.g clipPath={`url(#${clip})`} style={{ opacity: ink }}>
         <foreignObject x={0} y={0} width={w} height={h}>
-          <div style={{ padding: "14px 132px 14px 14px", font: "12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace", color: "#2c2a26", overflow: "hidden", height: h }}>{message}</div>
+          <div
+            style={{
+              display: "flex",
+              gap: 12,
+              padding: 14,
+              height: h,
+              boxSizing: "border-box",
+            }}
+          >
+            <div
+              style={{
+                flex: 1,
+                minWidth: 0,
+                height: 92,
+                font: "12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace",
+                color: "#2c2a26",
+                overflow: "hidden",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+                backgroundImage: "repeating-linear-gradient(transparent 0 17.1px, rgba(60,50,30,.12) 17.1px 18.1px)",
+              }}
+            >
+              {message}
+            </div>
+            <div
+              style={{
+                width: 104,
+                flexShrink: 0,
+                display: "flex",
+                flexDirection: "column",
+                borderLeft: "1px dashed rgba(0,0,0,.15)",
+                paddingLeft: 12,
+              }}
+            >
+              <div
+                style={{
+                  marginLeft: "auto",
+                  width: 38,
+                  height: 46,
+                  borderRadius: 2,
+                  background: "#ff375f",
+                  boxShadow: "0 0 0 2px #fbf8f1, 0 0 0 3px rgba(0,0,0,.12)",
+                  display: "grid",
+                  placeItems: "center",
+                  color: "#fff",
+                }}
+              >
+                <svg viewBox="0 0 256 256" width={20} height={20}>
+                  <path fill="currentColor" d={ICON_SEND} />
+                </svg>
+              </div>
+              <div
+                style={{
+                  marginTop: "auto",
+                  fontSize: 11,
+                  lineHeight: 1.25,
+                  color: "#2c2a26",
+                }}
+              >
+                <div style={{ fontWeight: 600 }}>{to.name}</div>
+                <div style={{ color: "#6e6e73" }}>{to.city}</div>
+              </div>
+            </div>
+          </div>
         </foreignObject>
       </motion.g>
-      {/* the airmail edge, still on the paper as it folds */}
-      <motion.path d={d} fill="none" stroke="#d6303a" strokeWidth={3} strokeDasharray="9 18" strokeLinejoin="round" opacity={0.85} />
-      <motion.path d={d} fill="none" stroke="#1f5fbf" strokeWidth={3} strokeDasharray="9 18" strokeDashoffset={13.5} strokeLinejoin="round" opacity={0.85} />
+      {/* the airmail edge: the striped border, clipped inside the paper so it folds with it */}
+      <motion.path
+        d={d}
+        fill="none"
+        stroke={`url(#${stripes})`}
+        style={{ strokeWidth: edgeW }}
+        strokeLinejoin="round"
+        clipPath={`url(#${clip})`}
+      />
       <motion.path d={dt} fill={topFill} stroke="rgba(60,50,30,.22)" strokeWidth={1} strokeLinejoin="round" />
       <motion.path d={db} fill={botFill} stroke="rgba(60,50,30,.22)" strokeWidth={1} strokeLinejoin="round" />
     </motion.svg>
@@ -813,14 +1262,32 @@ function PaperPlane({ w, h, fold, message }: { w: number; h: number; fold: Motio
 }
 
 /** the route, the plane in flight with its shadow and contrail, and the ripples where it lands */
-function drawOverlay(g: CanvasRenderingContext2D, W: number, dpr: number, R: number, m: number[], A: V3, B: V3, ph: string, t: number, landT: number, reduce: boolean) {
+function drawOverlay(
+  g: CanvasRenderingContext2D,
+  W: number,
+  dpr: number,
+  R: number,
+  m: number[],
+  A: V3,
+  B: V3,
+  ph: string,
+  t: number,
+  landT: number,
+  reduce: boolean,
+  asp: number,
+) {
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, W, GH);
   const cx = W / 2,
     cy = GH / 2;
   const proj = (v: V3) => {
     const p = apply(m, v);
-    return { x: cx + p[0] * R, y: cy - p[1] * R, z: p[2], vis: p[2] > 0 || Math.hypot(p[0], p[1]) > 1.0 };
+    return {
+      x: cx + p[0] * R,
+      y: cy - p[1] * R,
+      z: p[2],
+      vis: p[2] > 0 || Math.hypot(p[0], p[1]) > 1.0,
+    };
   };
   const arcAt = (u: number): V3 => {
     const d = slerp(A, B, u);
@@ -828,34 +1295,35 @@ function drawOverlay(g: CanvasRenderingContext2D, W: number, dpr: number, R: num
     return [d[0] * h, d[1] * h, d[2] * h];
   };
   const N = 90;
-  // the planned route: a dashed great circle, hidden where it passes behind the earth
-  g.lineWidth = 1.6;
-  g.setLineDash([4, 5]);
-  g.shadowColor = "rgba(120,180,255,.9)";
-  g.shadowBlur = ph === "write" ? 6 : 0;
-  g.strokeStyle = ph === "write" ? "rgba(255,255,255,.9)" : "rgba(255,255,255,.22)";
-  g.beginPath();
-  let pen = false;
-  for (let i = 0; i <= N; i++) {
-    const q = proj(arcAt(i / N));
-    if (!q.vis) {
-      pen = false;
-      continue;
+  // the planned route, only while you're writing: a dashed great circle, hidden where it passes behind the earth.
+  // Once it's sent, the only place marked is where it's going
+  if (ph === "write") {
+    g.lineWidth = 1.6;
+    g.setLineDash([4, 5]);
+    g.shadowColor = "rgba(120,180,255,.9)";
+    g.shadowBlur = ph === "write" ? 6 : 0;
+    g.strokeStyle = ph === "write" ? "rgba(255,255,255,.9)" : "rgba(255,255,255,.22)";
+    g.beginPath();
+    let pen = false;
+    for (let i = 0; i <= N; i++) {
+      const q = proj(arcAt(i / N));
+      if (!q.vis) {
+        pen = false;
+        continue;
+      }
+      if (!pen) g.moveTo(q.x, q.y);
+      else g.lineTo(q.x, q.y);
+      pen = true;
     }
-    if (!pen) g.moveTo(q.x, q.y);
-    else g.lineTo(q.x, q.y);
-    pen = true;
+    g.stroke();
+    g.setLineDash([]);
+    g.shadowBlur = 0;
   }
-  g.stroke();
-  g.setLineDash([]);
-  g.shadowBlur = 0;
-  // the two ends
-  for (const [v, col] of [
-    [A, "#ffffff"],
-    [B, "#ff375f"],
-  ] as const) {
+  // the one place marked: where it's going
+  for (const [v, col] of [[B, "#ff375f"]] as const) {
     const q = proj(v);
-    if (q.z <= 0) continue;
+    // once it lands, the pin takes the dot's place, so there's only ever one mark
+    if (q.z <= 0 || landT >= 0) continue;
     g.fillStyle = col;
     g.beginPath();
     g.arc(q.x, q.y, 3, 0, Math.PI * 2);
@@ -890,7 +1358,7 @@ function drawOverlay(g: CanvasRenderingContext2D, W: number, dpr: number, R: num
       g.stroke();
     }
   }
-  if (ph === "fly" && !reduce) {
+  if (ph === "fly" && !reduce && landT < 0) {
     const F = flightAt(A, B, t),
       Fn = flightAt(A, B, Math.min(1, t + 0.004));
     const q = proj(F.p),
@@ -908,47 +1376,70 @@ function drawOverlay(g: CanvasRenderingContext2D, W: number, dpr: number, R: num
       // nearer looks bigger, and it dims a touch while it's round the back
       g.globalAlpha = q.z < 0 ? 0.7 : 1;
       const depthScale = 1 + 0.2 * clamp(q.z, -1.5, 1.5);
-      // the paper plane, turned along its course, its wings rocking a little as it banks
+      // the same folded plane that was thrown, turned along its course, its wings rocking a little as it banks
       const ang = Math.atan2(qn.y - q.y, qn.x - q.x);
-      const s = (1 + alt * 1.2) * depthScale;
-      const bank = Math.sin(t * 22) * 0.35;
+      const Lp = PLANE_LEN * (1 + alt * 1.2) * depthScale,
+        Hp = Lp * asp;
+      const bank = Math.sin(t * 22) * 0.18;
+      const P = (pt: readonly number[], lift = 0): [number, number] => [
+        (pt[0] - 0.5) * Lp,
+        (pt[1] - 0.5) * Hp * (1 + lift),
+      ];
+      const [tipT, backT, nose, backB, tipB, tail] = [
+        P(PLANE.tipT, -bank),
+        P(PLANE.backT),
+        P(PLANE.nose),
+        P(PLANE.backB),
+        P(PLANE.tipB, bank),
+        P(PLANE.tail),
+      ];
       g.save();
       g.translate(q.x, q.y);
       g.rotate(ang);
-      g.scale(s, s);
+      const shape = () => {
+        g.beginPath();
+        g.moveTo(tipT[0], tipT[1]);
+        g.lineTo(backT[0], backT[1]);
+        g.lineTo(nose[0], nose[1]);
+        g.lineTo(backB[0], backB[1]);
+        g.lineTo(tipB[0], tipB[1]);
+        g.lineTo(tail[0], tail[1]);
+        g.closePath();
+      };
       g.shadowColor = "rgba(255,225,170,.55)";
       g.shadowBlur = 10;
-      // the wing toward the light
-      g.fillStyle = "#fffdf8";
-      g.beginPath();
-      g.moveTo(12, 0);
-      g.lineTo(-10, -9 * (1 - bank * 0.4));
-      g.lineTo(-6, 0);
-      g.closePath();
+      shape();
+      g.fillStyle = "#fbf8f1";
       g.fill();
       g.shadowBlur = 0;
-      // the wing in shade
-      g.fillStyle = "#d9cfbb";
-      g.beginPath();
-      g.moveTo(12, 0);
-      g.lineTo(-10, 9 * (1 + bank * 0.4));
-      g.lineTo(-6, 0);
-      g.closePath();
-      g.fill();
-      // the keel under the centre crease
-      g.fillStyle = "#c7bca6";
-      g.beginPath();
-      g.moveTo(12, 0);
-      g.lineTo(-7, 0);
-      g.lineTo(-5, 2.6);
-      g.closePath();
-      g.fill();
-      g.strokeStyle = "rgba(60,50,30,.35)";
-      g.lineWidth = 0.6;
-      g.beginPath();
-      g.moveTo(12, 0);
-      g.lineTo(-6, 0);
+      // the airmail edge, as on the paper
+      g.lineWidth = 0.9;
+      g.setLineDash([2, 4]);
+      g.strokeStyle = "rgba(214,48,58,.85)";
+      shape();
       g.stroke();
+      g.lineDashOffset = 3;
+      g.strokeStyle = "rgba(31,95,191,.85)";
+      shape();
+      g.stroke();
+      g.setLineDash([]);
+      g.lineDashOffset = 0;
+      // the wing toward the light, and the wing in shade
+      for (const [tip, col] of [
+        [tipT, "#fffdf8"],
+        [tipB, "#ddd3c0"],
+      ] as const) {
+        g.fillStyle = col;
+        g.beginPath();
+        g.moveTo(tip[0], tip[1]);
+        g.lineTo(nose[0], nose[1]);
+        g.lineTo(tail[0], tail[1]);
+        g.closePath();
+        g.fill();
+        g.strokeStyle = "rgba(60,50,30,.25)";
+        g.lineWidth = 0.6;
+        g.stroke();
+      }
       g.restore();
       g.globalAlpha = 1;
     }
@@ -958,7 +1449,11 @@ function drawOverlay(g: CanvasRenderingContext2D, W: number, dpr: number, R: num
     const q0 = proj(B);
     if (q0.z > 0) {
       const tang = norm([-B[2], 0, B[0]]);
-      const bit = norm([B[1] * tang[2] - B[2] * tang[1], B[2] * tang[0] - B[0] * tang[2], B[0] * tang[1] - B[1] * tang[0]]);
+      const bit = norm([
+        B[1] * tang[2] - B[2] * tang[1],
+        B[2] * tang[0] - B[0] * tang[2],
+        B[0] * tang[1] - B[1] * tang[0],
+      ]);
       for (let k = 0; k < 3; k++) {
         const age = landT - k * 0.35;
         if (age < 0 || age > 1.8) continue;
@@ -968,7 +1463,11 @@ function drawOverlay(g: CanvasRenderingContext2D, W: number, dpr: number, R: num
         g.beginPath();
         for (let i = 0; i <= 48; i++) {
           const a = (i / 48) * Math.PI * 2;
-          const v: V3 = norm([B[0] + (tang[0] * Math.cos(a) + bit[0] * Math.sin(a)) * rho, B[1] + (tang[1] * Math.cos(a) + bit[1] * Math.sin(a)) * rho, B[2] + (tang[2] * Math.cos(a) + bit[2] * Math.sin(a)) * rho]);
+          const v: V3 = norm([
+            B[0] + (tang[0] * Math.cos(a) + bit[0] * Math.sin(a)) * rho,
+            B[1] + (tang[1] * Math.cos(a) + bit[1] * Math.sin(a)) * rho,
+            B[2] + (tang[2] * Math.cos(a) + bit[2] * Math.sin(a)) * rho,
+          ]);
           const p = proj(v);
           if (i === 0) g.moveTo(p.x, p.y);
           else g.lineTo(p.x, p.y);
@@ -993,7 +1492,16 @@ function drawOverlay(g: CanvasRenderingContext2D, W: number, dpr: number, R: num
 }
 
 /** without WebGL: the globe as a disc with land dots */
-function drawFlatGlobe(g: CanvasRenderingContext2D, cv: HTMLCanvasElement, W: number, dpr: number, R: number, m: number[], sun: V3, land: Uint8Array) {
+function drawFlatGlobe(
+  g: CanvasRenderingContext2D,
+  cv: HTMLCanvasElement,
+  W: number,
+  dpr: number,
+  R: number,
+  m: number[],
+  sun: V3,
+  land: Uint8Array,
+) {
   if (cv.width !== Math.round(W * dpr)) {
     cv.width = Math.round(W * dpr);
     cv.height = Math.round(GH * dpr);
@@ -1092,7 +1600,10 @@ void main(){
   gl_FragColor = vec4(col * aa, aa);
 }`;
 function makeGlobe(canvas: HTMLCanvasElement, land: Uint8Array) {
-  const gl = canvas.getContext("webgl", { premultipliedAlpha: true, antialias: false });
+  const gl = canvas.getContext("webgl", {
+    premultipliedAlpha: true,
+    antialias: false,
+  });
   if (!gl) return null;
   const sh = (t: number, s: string) => {
     const x = gl.createShader(t)!;
@@ -1126,7 +1637,14 @@ function makeGlobe(canvas: HTMLCanvasElement, land: Uint8Array) {
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, LAND_W, LAND_H, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, land);
   const u = (n: string) => gl.getUniformLocation(prog, n);
   gl.uniform1i(u("uLand"), 0);
-  const U = { res: u("uRes"), dpr: u("uDpr"), r: u("uR"), t: u("uT"), rot: u("uRot"), sun: u("uSun") };
+  const U = {
+    res: u("uRes"),
+    dpr: u("uDpr"),
+    r: u("uR"),
+    t: u("uT"),
+    rot: u("uRot"),
+    sun: u("uSun"),
+  };
   return {
     render(o: { W: number; H: number; dpr: number; R: number; m: number[]; sun: V3; t: number }) {
       const w = Math.round(o.W * o.dpr),

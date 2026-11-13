@@ -47,6 +47,7 @@ export const COMPONENT_SOUNDS: Record<string, string> = {
   "glass-compare": "A soft glassy slide that follows the bar, and little ticks as the droplets fall.",
   "silk-print": "A soft rustle whenever the draught or your hand moves the silk.",
   "glyph-rain": "A faint ticking as the letters settle into the hidden message.",
+  "magic-calendar": "Soft bell notes as the snow falls, a whoosh, boom and crackle for each firework, a pop and a rising chime for confetti, wing flaps for the bats, and a short phrase of its own for every other celebration.",
   "airmail-globe": "Paper creasing as the card folds, a whoosh on take-off, wind on the way round and a chime when it lands.",
   "sand-drift-gallery": "Sand hissing behind the strip when you fling it, louder the harder you throw.",
   "diffusion-loader": "A soft tick on each denoising step and a chime when the picture comes into focus.",

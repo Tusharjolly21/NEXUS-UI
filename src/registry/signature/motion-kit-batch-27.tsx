@@ -3,7 +3,7 @@
 /**
  * Motion Kit previews (batch 27): LED Button, Glass Compare, Silk Print, Glyph Rain, Airmail Globe, Sand Drift Gallery,
  * Diffusion Loader, Warp CTA, Print Styles, Inspect Text, Soap Bubble, Ink Drop Picker, Tear-off Coupon and Breadcrumb
- * Branch. Each card plays its own demo until the visitor touches it, so the preview only adds a light stage around it.
+ * Branch, plus Magic Calendar. Each card plays its own demo until the visitor touches it, so the preview only adds a light stage around it.
  */
 
 import type { ReactNode } from "react";
@@ -12,6 +12,7 @@ import { GlassCompare } from "@/components/glass-compare";
 import { SilkPrint } from "@/components/silk-print";
 import { GlyphRain } from "@/components/glyph-rain";
 import { AirmailGlobe } from "@/components/airmail-globe";
+import { MagicCalendar } from "@/components/magic-calendar";
 import { SandDriftGallery } from "@/components/sand-drift-gallery";
 import { DiffusionLoader } from "@/components/diffusion-loader";
 import { WarpCTA } from "@/components/warp-cta";
@@ -68,6 +69,14 @@ export function PreviewAirmailGlobe({ compact = false }: { compact?: boolean } =
   return (
     <Stage compact={compact} width={460}>
       <AirmailGlobe autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewMagicCalendar({ compact = false }: { compact?: boolean } = {}) {
+  return (
+    <Stage compact={compact} width={400}>
+      <MagicCalendar autoplay />
     </Stage>
   );
 }

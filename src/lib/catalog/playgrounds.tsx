@@ -258,6 +258,7 @@ import { GlassCompare } from "@/components/glass-compare";
 import { SilkPrint } from "@/components/silk-print";
 import { GlyphRain } from "@/components/glyph-rain";
 import { AirmailGlobe } from "@/components/airmail-globe";
+import { MagicCalendar } from "@/components/magic-calendar";
 import { SandDriftGallery } from "@/components/sand-drift-gallery";
 import { DiffusionLoader } from "@/components/diffusion-loader";
 import { WarpCTA } from "@/components/warp-cta";
@@ -5032,6 +5033,25 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => (
       <div className="mx-auto flex w-full max-w-[460px] justify-center">
         <AirmailGlobe
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "magic-calendar": {
+    lightOnly: true,
+    componentName: "MagicCalendar",
+    importPath: "@/components/magic-calendar",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[400px] justify-center">
+        <MagicCalendar
           key={`${String(v.autoplay)}`}
           autoplay={v.autoplay as boolean}
           enableSound={v.enableSound as boolean}

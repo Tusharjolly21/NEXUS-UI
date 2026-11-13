@@ -406,6 +406,8 @@ const TINT_OF: Record<string, TileTint> = {
  * are all gathered, newest first, under the wall's New tab (see NEW_TAB_DAYS).
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // thirtieth (Motion Kit Everyday: Magic Calendar)
+  "magic-calendar",
   // twenty-ninth batch (Motion Kit Everyday: LED Button, Glass Compare, Silk Print, Glyph Rain, Airmail Globe, Sand Drift Gallery, Diffusion Loader, Warp CTA, Print Styles, Inspect Text, Soap Bubble, Ink Drop Picker, Tear-off Coupon, Breadcrumb Branch)
   "led-button",
   "glass-compare",
@@ -667,6 +669,7 @@ export const MOTION_KIT_ORDER: string[] = [
 
 /** The homepage set, in order: newest interactions first, then the best of the rest. */
 export const HOME_PICKS: string[] = [
+  "magic-calendar",
   "led-button",
   "glass-compare",
   "silk-print",
