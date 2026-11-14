@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useInView, useReducedMotion, type PanInfo } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { COMMENTS, tone, type Comment } from "@/components/home/reddit-love";
+import { COMMENTS, commentKey, tone, type Comment } from "@/components/home/reddit-love";
 import { RAINBOW_HUES } from "@/components/site/rainbow-word";
 import { PRICES, formatPrice } from "@/lib/pricing";
 
@@ -18,11 +18,11 @@ import { PRICES, formatPrice } from "@/lib/pricing";
 
 const FEATURED = "aspiring_abundance";
 const HIGHLIGHT = "$79 dollars";
-/** Who leads the deck: the fullest, most specific comments first; the rest follow in the homepage's order. */
-const LEAD = ["benjaminhu", "noahelhadedy", "itsmeekaran", "No_Speech8210", "Skaifessurk", "liuxueqi0044", "ds1008", "DarkBlade_12", "vrangnarr", "Actual-Deal-4445", "webdesign_786", "dfnslvtr", "velvetlane1", "ssmlee04"];
+/** Who leads the deck (by comment key): the fullest, most specific comments first; the rest follow in the homepage's order. */
+const LEAD = ["itsmeekaran-moon-toggle", "benjaminhu", "noahelhadedy", "No_Speech8210", "Skaifessurk", "liuxueqi0044", "ds1008", "DarkBlade_12", "vrangnarr", "Actual-Deal-4445", "webdesign_786", "dfnslvtr", "velvetlane1", "ssmlee04"];
 const DECK: Comment[] = [
-  ...LEAD.map((u) => COMMENTS.find((c) => c.user === u)).filter((c): c is Comment => !!c),
-  ...COMMENTS.filter((c) => c.user !== FEATURED && !LEAD.includes(c.user)),
+  ...LEAD.map((k) => COMMENTS.find((c) => commentKey(c) === k)).filter((c): c is Comment => !!c),
+  ...COMMENTS.filter((c) => commentKey(c) !== FEATURED && !LEAD.includes(commentKey(c))),
 ];
 const SHOWN = 3;
 const STEP_MS = 4200;
@@ -68,7 +68,7 @@ function Byline({ c }: { c: Comment }) {
         <span className="truncate">{insta ? c.user : c.platform === "x" ? `@${c.user}` : `u/${c.user}`}</span>
         {c.verified ? <Image src="/images/testimonials/verified.png" alt="Verified account" width={15} height={15} className="size-[15px] shrink-0" /> : null}
       </span>
-      <span className="block text-[13px] text-muted-foreground">on {c.source}</span>
+      {c.source.startsWith("r/") ? <span className="block text-[13px] text-muted-foreground">on {c.source}</span> : null}
     </span>
   );
 }
@@ -85,7 +85,7 @@ function DeckCard({ c }: { c: Comment }) {
       >
         &rdquo;
       </span>
-      <blockquote className="relative text-[18px] leading-[1.45] tracking-[-0.25px] text-foreground sm:text-[19px]">&ldquo;{c.quote}&rdquo;</blockquote>
+      <blockquote className="relative text-[18px] leading-[1.45] tracking-[-0.25px] text-foreground sm:text-[19px]">&ldquo;{c.excerpt ?? c.quote}&rdquo;</blockquote>
       <figcaption className="relative flex items-center gap-3">
         <Avatar c={c} />
         <Byline c={c} />
@@ -182,7 +182,7 @@ function Deck() {
             .reverse()
             .map(({ c, layer }) => (
               <motion.div
-                key={c.user}
+                key={commentKey(c)}
                 custom={dir}
                 className="absolute inset-0"
                 style={{ zIndex: SHOWN - layer, touchAction: layer === 0 ? "pan-y" : undefined }}
