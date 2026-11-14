@@ -210,15 +210,19 @@ export function UpgradeDialog({
                   <PlanSwitch value={plan} onChange={setPlan} />
                 </div>
                 <div className="mt-3 flex flex-col gap-3 rounded-[20px] bg-foreground/[0.035] p-3 pl-4 min-[400px]:flex-row min-[400px]:items-center min-[400px]:justify-between dark:bg-white/[0.05]">
-                  <p key={plan} className="flex min-w-0 items-baseline gap-1.5 animate-in fade-in slide-in-from-bottom-1 duration-300 motion-reduce:animate-none">
-                    <span className="text-[28px] font-semibold tracking-[-0.035em] text-foreground tabular-nums">{price}</span>
-                    {original ? (
-                      <span className="text-[13.5px] text-muted-foreground line-through tabular-nums">
-                        <span className="sr-only">Usual price </span>
-                        {original}
-                      </span>
-                    ) : null}
-                    <span className="text-[13.5px] text-muted-foreground">{term}</span>
+                  {/* Price on its own line, the usual price and the term under it, so a long regional price
+                      (₹3,499 with $79.99 struck through) never runs under the button. */}
+                  <p key={plan} className="flex min-w-0 flex-col animate-in fade-in slide-in-from-bottom-1 duration-300 motion-reduce:animate-none">
+                    <span className="text-[28px] font-semibold leading-none tracking-[-0.035em] text-foreground tabular-nums">{price}</span>
+                    <span className="mt-1.5 flex flex-wrap items-baseline gap-x-1.5 text-[13px] leading-tight text-muted-foreground">
+                      {original ? (
+                        <span className="line-through tabular-nums">
+                          <span className="sr-only">Usual price </span>
+                          {original}
+                        </span>
+                      ) : null}
+                      <span>{term}</span>
+                    </span>
                   </p>
                   <CheckoutButton
                     plan={plan}
