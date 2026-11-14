@@ -17,7 +17,7 @@ export type GlobeIconProps = {
   play?: boolean;
 };
 
-/** A globe whose meridians sweep round as it turns. */
+/** The meridian ellipse rotates round the globe, swelling to the rim and thinning to a line, and settles back where it started. */
 export function GlobeIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: GlobeIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -38,19 +38,20 @@ export function GlobeIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <circle cx="12" cy="12" r="9" />
-      <path d="M4.4 7.6h15.2M4.4 16.4h15.2M3 12h18" strokeWidth={strokeWidth * 0.6} opacity="0.55" />
-      <motion.ellipse
-        cx="12"
-        cy="12"
-        rx="4"
-        ry="9"
-        stroke={accent}
-        style={{ originX: "50%", originY: "50%" }}
-        initial={false}
-        animate={on ? { scaleX: [1, 0.15, 1, 0.15, 1] } : { scaleX: 1 }}
-        transition={{ duration: 1 / speed, ease: "easeInOut" }}
-      />
+      <g transform="translate(0 0)">
+        <motion.ellipse
+          cx="12"
+          cy="12"
+          rx="3.973"
+          ry="9.4"
+          stroke={accent}
+          initial={false}
+          animate={on ? { rx: [3.973, 5.051, 6.042, 6.93, 7.7, 8.338, 8.833, 9.177, 9.364, 9.391, 9.257, 8.965, 8.519, 7.928, 7.201, 6.351, 5.392, 4.34, 3.215, 2.035, 0.819, 0.41, 1.632, 2.827, 3.973] } : { rx: 3.973 }}
+          transition={{ duration: 1 / speed, times: [0, 0.123, 0.1775, 0.2211, 0.2591, 0.2939, 0.3264, 0.3572, 0.387, 0.4159, 0.4442, 0.4722, 0.5, 0.5278, 0.5558, 0.5841, 0.613, 0.6428, 0.6736, 0.7061, 0.7409, 0.7789, 0.8225, 0.877, 1], ease: "linear" }}
+        />
+        <path d="M3.859 7.3 H20.141 M3.859 16.7 H20.141 M2.6 12 H21.4" strokeWidth={strokeWidth * 0.75} />
+        <circle cx="12" cy="12" r="9.4" />
+      </g>
     </svg>
   );
 }

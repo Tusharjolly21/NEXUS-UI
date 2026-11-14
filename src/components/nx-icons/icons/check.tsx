@@ -17,7 +17,7 @@ export type CheckIconProps = {
   play?: boolean;
 };
 
-/** A tick that draws itself in, then pops while a ring of green blooms out around it. */
+/** The tick draws itself in one stroke, then pops while a ring of green sweeps once around it and fades. */
 export function CheckIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: CheckIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -41,25 +41,29 @@ export function CheckIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
       <motion.circle
         cx="12"
         cy="12"
-        r="9.5"
+        r="11.2"
+        transform="rotate(-90 12 12)"
         stroke={accent}
+        strokeWidth={strokeWidth * 0.6}
         initial={false}
-        animate={on ? { scale: [0.6, 1.15], opacity: [0.9, 0] } : { opacity: 0, scale: 0.6 }}
-        transition={on ? { duration: 0.5 / speed, delay: (0.3) / speed, ease: "easeOut" } : { duration: 0.1 / speed }}
+        animate={on ? { pathLength: [0, 1, 1], opacity: [0, 1, 1, 0] } : { pathLength: 0, opacity: 0 }}
+        transition={{ pathLength: { duration: 0.5 / speed, delay: (on ? 0.4 : 0) / speed, ease: "easeOut" }, opacity: { duration: 0.5 / speed, delay: (on ? 0.4 : 0) / speed, times: [0, 0.15, 0.6, 1] } }}
       />
       <motion.g
         style={{ originX: "50%", originY: "50%" }}
         initial={false}
-        animate={on ? { scale: [1, 1, 1.22, 1] } : { scale: 1 }}
-        transition={{ duration: 0.5 / speed, times: [0, 0.6, 0.8, 1] }}
+        animate={on ? { scale: [1, 1.07, 1] } : { scale: 1 }}
+        transition={{ duration: 0.3 / speed, delay: (on ? 0.4 : 0) / speed, times: [0, 0.5, 1], ease: "easeInOut" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <motion.path
-          d="M5 12.8l4.6 4.6L19 7.6"
-          initial={false}
-          animate={on ? { pathLength: [0, 1] } : { pathLength: 1 }}
-          transition={{ duration: 0.3 / speed, delay: (on ? 0.05 : 0) / speed, ease: "easeOut" }}
-        />
+        <g transform="translate(0 0)">
+          <motion.path
+            d="M5.106 12L9.702 16.596L18.894 7.404"
+            initial={false}
+            animate={on ? { pathLength: [0, 1] } : { pathLength: 1 }}
+            transition={{ duration: 0.35 / speed, delay: (on ? 0.05 : 0) / speed, ease: "easeOut" }}
+          />
+        </g>
       </motion.g>
     </svg>
   );

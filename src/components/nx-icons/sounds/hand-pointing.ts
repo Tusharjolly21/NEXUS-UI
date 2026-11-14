@@ -4,7 +4,7 @@ import { ding, swish, tick, thud, type Time } from "../sound-kit";
 export const length = 0.8;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.11;
+export const level = 1.05;
 
 /** A faint rustle as the fingertip comes down, a small glassy tap where it touches the screen, then a soft widening ripple that fades away. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {

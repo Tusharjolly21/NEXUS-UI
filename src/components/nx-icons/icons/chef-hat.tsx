@@ -17,7 +17,7 @@ export type ChefHatIconProps = {
   play?: boolean;
 };
 
-/** A chef's hat that lifts and tips forward as the crown puffs up and a wisp of steam curls away. */
+/** A chef's toque that squats, hops and lands while its puffy crown swells and settles. */
 export function ChefHatIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: ChefHatIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -39,34 +39,26 @@ export function ChefHatIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
       aria-hidden="true"
     >
       <motion.g
-        style={{ originX: "50%", originY: "87%" }}
+        style={{ originX: "50%", originY: "86.083%" }}
         initial={false}
-        animate={on ? { rotate: [0, -9, -9, 0], y: [0, -0.6, -0.6, 0] } : { rotate: 0, y: 0 }}
-        transition={{ duration: 0.9 / speed, times: [0, 0.35, 0.65, 1], ease: "easeInOut" }}
+        animate={on ? { scaleY: [1, 0.94, 1.03, 0.97, 1], scaleX: [1, 1.04, 0.985, 1.02, 1], y: [0, 0, -0.6, 0, 0] } : { scaleY: 1, scaleX: 1, y: 0 }}
+        transition={{ duration: 0.9 / speed, times: [0, 0.2, 0.5, 0.8, 1], ease: "easeInOut" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
+        <path d="M10.755 16.46L10.443 10.46 M13.245 16.46L13.557 10.46" stroke={accent} strokeWidth={strokeWidth * 0.75} />
+        <path d="M6.2 17.66 A1.2 1.2 0 0 1 7.4 16.46 L16.6 16.46 A1.2 1.2 0 0 1 17.8 17.66 L17.8 19.46 A1.2 1.2 0 0 1 16.6 20.66 L7.4 20.66 A1.2 1.2 0 0 1 6.2 19.46 Z" />
+        <path d="M8 16.46L7 10.46" />
+        <path d="M16 16.46L17 10.46" />
         <motion.g
-          style={{ originX: "50%", originY: "68%" }}
+          style={{ originX: "50%", originY: "43.583%" }}
           initial={false}
-          animate={on ? { scaleY: [1, 1.07, 1.02, 1], scaleX: [1, 1.03, 1.01, 1] } : { scaleY: 1, scaleX: 1 }}
-          transition={{ duration: 0.9 / speed, times: [0, 0.4, 0.7, 1], ease: "easeInOut" }}
+          animate={on ? { scaleY: [1, 1, 1.07, 0.98, 1] } : { scaleY: 1 }}
+          transition={{ duration: 0.9 / speed, times: [0, 0.3, 0.55, 0.8, 1], ease: "easeInOut" }}
         >
           <rect width="24" height="24" fill="none" stroke="none" />
-          <path d="M7 16.2V13A3 3 0 1 1 8.063 7.195A4 4 0 0 1 15.937 7.195A3 3 0 1 1 17 13V16.2" />
-          <path d="M8.063 7.195V16.2M15.937 7.195V16.2" stroke={accent} />
+          <path d="M7 10.46 A3 3 0 1 1 9.065 5.284 A3.2 3.2 0 0 1 14.935 5.284 A3 3 0 1 1 17 10.46 Z" />
         </motion.g>
-        <path d="M7 16.2h10v2.9a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z" />
       </motion.g>
-      <svg x="0" y="0" width="24" height="24" viewBox="0 0 24 24" overflow="hidden">
-        <motion.path
-          d="M12 2.6c-1.2-.9 1.2-1.7 0-2.6"
-          stroke={accent}
-          strokeWidth={1.6}
-          initial={false}
-          animate={on ? { y: [2.6, -1.4], opacity: [0, 1, 1, 0] } : { y: 0, opacity: 0 }}
-          transition={{ duration: 0.7 / speed, delay: (0.25) / speed, ease: "easeOut" }}
-        />
-      </svg>
     </svg>
   );
 }

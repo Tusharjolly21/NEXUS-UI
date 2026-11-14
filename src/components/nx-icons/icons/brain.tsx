@@ -17,7 +17,7 @@ export type BrainIconProps = {
   play?: boolean;
 };
 
-/** A thought pulse runs along the folds of the brain and a spark pops from its crown. */
+/** The brain swells gently while an accent pulse runs along one fold from the outline inwards. */
 export function BrainIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: BrainIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -38,35 +38,27 @@ export function BrainIcon({ size = 24, strokeWidth = 2, className, speed = 1, ac
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <motion.g
-        style={{ originX: "50%", originY: "50%" }}
-        initial={false}
-        animate={on ? { scale: [1, 1.05, 1, 1.03, 1] } : { scale: 1 }}
-        transition={{ duration: 0.9 / speed, ease: "easeInOut" }}
-      >
-        <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="M3.6 12.2A3.3 3.3 0 0 1 4.6 7A3.8 3.8 0 0 1 9.8 4A3.9 3.9 0 0 1 15.4 4.4A3.6 3.6 0 0 1 20.2 8.4A3.2 3.2 0 0 1 19.4 13.6A2.6 2.6 0 0 1 15.4 16.4H9.6C6.6 16.4 4.2 14.8 3.6 12.2z" />
-        <path d="M12.6 16.4V20.4" />
-        <path d="M9.8 4C11.6 6.2 10 8.4 11.6 10.4M3.6 12.2C5.8 10.6 7.2 12 8.8 11.6M20.2 8.4C18.6 9 17.6 10.6 15.6 10.8" />
-        <motion.path
-          d="M9.8 4C11.6 6.2 10 8.4 11.6 10.4M3.6 12.2C5.8 10.6 7.2 12 8.8 11.6M20.2 8.4C18.6 9 17.6 10.6 15.6 10.8"
-          stroke={accent}
+      <g transform="translate(-0.29 1.12)">
+        <motion.g
+          style={{ originX: "50%", originY: "50%" }}
           initial={false}
-          animate={on ? { pathLength: 0.22, pathOffset: [-0.22, 1], opacity: [0, 1, 1, 0] } : { pathLength: 0.22, pathOffset: -0.22, opacity: 0 }}
-          transition={{ duration: 0.8 / speed, delay: (0.05) / speed, times: [0, 0.1, 0.85, 1], ease: "easeInOut" }}
-        />
-      </motion.g>
-      <motion.g
-        stroke={accent}
-        strokeWidth={1.6}
-        style={{ originX: "80.83%", originY: "20%" }}
-        initial={false}
-        animate={on ? { scale: [0, 1.25, 1, 0], opacity: [0, 1, 1, 0] } : { scale: 0, opacity: 0 }}
-        transition={{ duration: 0.55 / speed, delay: (0.5) / speed, times: [0, 0.35, 0.7, 1] }}
-      >
-        <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="M19.4 2.9L19.4 1.5M20.74 3.46L21.73 2.47M21.3 4.8L22.7 4.8" />
-      </motion.g>
+          animate={on ? { scale: [1, 1.05, 1, 1.03, 1] } : { scale: 1 }}
+          transition={{ duration: 0.9 / speed, ease: "easeInOut" }}
+        >
+          <rect width="24" height="24" fill="none" stroke="none" />
+          <path d="M7.33 4.74C6.18 6.89 9.19 8.45 8 10.3M12 3.8C13.4 5.8 10.6 7.7 12 9.4M16.67 4.74C15.04 6.56 17.59 8.78 16 10.3" strokeWidth={strokeWidth * 0.8} />
+          <motion.path
+            d="M12 3.8C13.4 5.8 10.6 7.7 12 9.4"
+            stroke={accent}
+            strokeWidth={strokeWidth * 0.8}
+            initial={false}
+            animate={on ? { pathLength: 0.3, pathOffset: [-0.3, 1], opacity: [0, 0, 1, 1, 0] } : { pathLength: 0.3, pathOffset: -0.3, opacity: 0 }}
+            transition={{ pathOffset: { duration: 0.8 / speed, delay: (0.05) / speed, ease: "linear" }, opacity: { duration: 0.8 / speed, delay: (0.05) / speed, times: [0, 0.16, 0.26, 0.85, 1], ease: "linear" } }}
+          />
+          <path d="M15.83 15.58L15.83 17.98" />
+          <path d="M16.67 4.74A8.8 6.2 0 0 1 20.75 10.71A2.84 2 0 0 0 21.04 11.85A2.98 2.1 0 0 1 18.33 14.91A2.84 2 0 0 0 16.74 15.22A8.8 6.2 0 0 1 14.86 15.86A2.84 2 0 0 0 13.57 16.51A4.26 3 0 0 1 6.02 15.08A2.84 2 0 0 0 5.36 14.07A8.8 6.2 0 0 1 7.33 4.74A2.77 1.95 0 0 1 9.79 4.57A2.77 1.95 0 0 1 14.21 4.57A2.77 1.95 0 0 1 16.67 4.74Z" />
+        </motion.g>
+      </g>
     </svg>
   );
 }

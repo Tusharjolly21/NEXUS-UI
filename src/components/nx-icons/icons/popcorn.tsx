@@ -17,7 +17,7 @@ export type PopcornIconProps = {
   play?: boolean;
 };
 
-/** Popcorn that pops up one puff after another while loose kernels hop and fall. */
+/** A popcorn bucket whose fluffy heap puffs up twice while two kernels pop out, hop and drop back in. */
 export function PopcornIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: PopcornIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -38,41 +38,31 @@ export function PopcornIcon({ size = 24, strokeWidth = 2, className, speed = 1, 
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <path d="M4.85 10.4L6.85 20H17.15L19.15 10.4z" />
-      <path d="M9.62 10.4L10.28 20M14.38 10.4L13.72 20" stroke={accent} />
+      <g fill={accent} stroke="none"><path d="M5.633 12.1 L8.18 12.1 L9.62 21.3 L8.033 21.3Z" /><path d="M10.727 12.1 L13.273 12.1 L12.793 21.3 L11.207 21.3Z" /><path d="M15.82 12.1 L18.367 12.1 L15.967 21.3 L14.38 21.3Z" /></g>
+      <path d="M4.6 12.1 L19.4 12.1 L17.273 20.253 A1.4 1.4 0 0 1 15.918 21.3 L8.082 21.3 A1.4 1.4 0 0 1 6.727 20.253 Z" />
       <motion.g
-        style={{ originX: "50%", originY: "43.33%" }}
+        style={{ originX: "50%", originY: "50.417%" }}
         initial={false}
-        animate={on ? { scaleY: [1, 1.12, 0.97, 1], scaleX: [1, 1.03, 1] } : { scaleY: 1, scaleX: 1 }}
-        transition={{ duration: 0.5 / speed, delay: (0.1) / speed, times: [0, 0.4, 0.75, 1], ease: "easeOut" }}
+        animate={on ? { scaleY: [1, 1.09, 0.99, 1.1, 0.99, 0.97, 1] } : { scaleY: 1 }}
+        transition={{ duration: 0.95 / speed, delay: (0.1) / speed, times: [0, 0.105, 0.232, 0.379, 0.526, 0.653, 1], ease: "easeInOut" }}
       >
         <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="M4.85 10.4A3 3 0 0 1 8.74 6.43A3.5 3.5 0 0 1 15.26 6.43A3 3 0 0 1 19.15 10.4" />
+        <path d="M4.6 12.1 A3.14 3.14 0 0 1 5.526 6.615 A2.9 2.9 0 0 1 9.316 4.249 A3.1 3.1 0 0 1 14.684 4.249 A2.9 2.9 0 0 1 18.474 6.615 A3.14 3.14 0 0 1 19.4 12.1" />
       </motion.g>
       <svg x="0" y="0" width="24" height="24" viewBox="0 0 24 24" overflow="hidden">
-        <motion.path
-          d="M12 4.4h.01"
-          stroke={accent}
-          strokeWidth={2.6}
+        <motion.circle
+          cx="5.526" cy="5.715" r="1.15" fill="currentColor" stroke="none"
+          style={{ originX: "50%", originY: "50%" }}
           initial={false}
-          animate={on ? { y: [0, -2.2, 0], opacity: [0, 1, 0] } : { y: 0, opacity: 0 }}
-          transition={{ duration: 0.55 / speed, delay: (0.1) / speed, times: [0, 0.45, 1], ease: "easeOut" }}
+          animate={on ? { y: [0, -4.2, 0], opacity: [0, 1, 1, 0], scale: [0.4, 1, 1, 0.4] } : { y: 0, opacity: 0, scale: 0.4 }}
+          transition={{ y: { duration: 0.6 / speed, delay: (0.1) / speed, times: [0, 0.5, 1], ease: ["easeOut", "easeIn"] }, opacity: { duration: 0.6 / speed, delay: (0.1) / speed, times: [0, 0.08, 0.85, 1], ease: "linear" }, scale: { duration: 0.6 / speed, delay: (0.1) / speed, times: [0, 0.08, 0.85, 1], ease: "linear" } }}
         />
-        <motion.path
-          d="M7.6 6.4h.01"
-          stroke={accent}
-          strokeWidth={2.6}
+        <motion.circle
+          cx="18.474" cy="5.715" r="1.15" fill="currentColor" stroke="none"
+          style={{ originX: "50%", originY: "50%" }}
           initial={false}
-          animate={on ? { y: [0, -2.2, 0], opacity: [0, 1, 0] } : { y: 0, opacity: 0 }}
-          transition={{ duration: 0.55 / speed, delay: (0.24) / speed, times: [0, 0.45, 1], ease: "easeOut" }}
-        />
-        <motion.path
-          d="M16.4 6.4h.01"
-          stroke={accent}
-          strokeWidth={2.6}
-          initial={false}
-          animate={on ? { y: [0, -2.2, 0], opacity: [0, 1, 0] } : { y: 0, opacity: 0 }}
-          transition={{ duration: 0.55 / speed, delay: (0.38) / speed, times: [0, 0.45, 1], ease: "easeOut" }}
+          animate={on ? { y: [0, -4.2, 0], opacity: [0, 1, 1, 0], scale: [0.4, 1, 1, 0.4] } : { y: 0, opacity: 0, scale: 0.4 }}
+          transition={{ y: { duration: 0.6 / speed, delay: (0.37) / speed, times: [0, 0.5, 1], ease: ["easeOut", "easeIn"] }, opacity: { duration: 0.6 / speed, delay: (0.37) / speed, times: [0, 0.08, 0.85, 1], ease: "linear" }, scale: { duration: 0.6 / speed, delay: (0.37) / speed, times: [0, 0.08, 0.85, 1], ease: "linear" } }}
         />
       </svg>
     </svg>

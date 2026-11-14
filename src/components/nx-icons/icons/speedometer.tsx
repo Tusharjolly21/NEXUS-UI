@@ -17,7 +17,7 @@ export type SpeedometerIconProps = {
   play?: boolean;
 };
 
-/** The needle swings up into the red zone, lighting the ticks as it passes, then settles back. */
+/** The needle revs round the dial into the coloured zone, the zone flashes as it arrives, then the needle wobbles, settles and drops back to zero. */
 export function SpeedometerIcon({ size = 24, strokeWidth = 2, className, speed = 1, accent = "currentColor", play }: SpeedometerIconProps) {
   const reduce = useReducedMotion();
   const [hover, setHover] = useState(false);
@@ -38,30 +38,27 @@ export function SpeedometerIcon({ size = 24, strokeWidth = 2, className, speed =
       onPointerLeave={() => setHover(false)}
       aria-hidden="true"
     >
-      <path d="M2.5 16.35a9.5 9.5 0 0 1 19 0z" />
-      <path d="M21.5 16.35A9.5 9.5 0 0 0 19.88 11.04" stroke={accent} />
-      <path d="M6.63 13.25 5.76 12.75M8.9 10.98 8.4 10.11M12 10.15V9.15M15.1 10.98 15.6 10.11M17.37 13.25 18.24 12.75" strokeWidth={1.4} />
-      {([[8.4, 10.11, 8.9, 10.98, 0.14], [12, 9.15, 12, 10.15, 0.24], [15.6, 10.11, 15.1, 10.98, 0.33], [18.24, 12.75, 17.37, 13.25, 0.42]] as [number, number, number, number, number][]).map(([x1, y1, x2, y2, td]) => (
+      <g transform="translate(0 1.38)">
         <motion.path
-          key={x1}
-          d={`M${x1} ${y1}L${x2} ${y2}`}
+          d="M21.08 9.567A9.4 9.4 0 0 1 18.647 18.647"
           stroke={accent}
-          strokeWidth={1.4}
           initial={false}
-          animate={on ? { opacity: [0, 1, 1, 0] } : { opacity: 0 }}
-          transition={{ duration: 0.7 / speed, delay: (td - 0.04) / speed, times: [0, 0.15, 0.6, 1] }}
+          animate={on ? { opacity: [1, 1, 0.3, 1, 1] } : { opacity: 1 }}
+          transition={{ duration: 1.1 / speed, times: [0, 0.2, 0.38, 0.55, 1] }}
         />
-      ))}
-      <motion.g
-        style={{ originX: "50%", originY: "68.13%" }}
-        initial={false}
-        animate={on ? { rotate: [0, 115, 106, 112, 0] } : { rotate: 0 }}
-        transition={{ duration: 1.1 / speed, times: [0, 0.38, 0.5, 0.62, 1], ease: "easeInOut" }}
-      >
-        <rect width="24" height="24" fill="none" stroke="none" />
-        <path d="M12 16.35 8.89 13.24" />
-        <circle cx="12" cy="16.35" r="1.8" fill="currentColor" stroke="none" />
-      </motion.g>
+        <path d="M5.353 18.647A9.4 9.4 0 1 1 21.08 9.567" />
+        <path d="M7.05 16.95L8.182 15.818M5.239 13.812L5.818 13.656M5.239 10.188L5.818 10.344M7.05 7.05L8.182 8.182M10.188 5.239L10.344 5.818M13.812 5.239L13.656 5.818M16.95 7.05L15.818 8.182M18.761 10.188L18.182 10.344M18.761 13.812L18.182 13.656M16.95 16.95L15.818 15.818" strokeWidth={strokeWidth * 0.75} />
+        <motion.g
+          style={{ originX: "50%", originY: "50%" }}
+          initial={false}
+          animate={on ? { rotate: [0, 250, 234, 244, 0] } : { rotate: 0 }}
+          transition={{ duration: 1.1 / speed, times: [0, 0.38, 0.5, 0.62, 1], ease: ["easeOut", "easeInOut", "easeInOut", "easeInOut"] }}
+        >
+          <rect width="24" height="24" fill="none" stroke="none" />
+          <path d="M12 12L9.737 14.263" strokeWidth={strokeWidth * 0.8} />
+          <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+        </motion.g>
+      </g>
     </svg>
   );
 }

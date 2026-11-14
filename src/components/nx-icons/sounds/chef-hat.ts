@@ -1,18 +1,19 @@
-import { swish, thud, puff, type Time } from "../sound-kit";
+import { blip, swish, tick, thud, puff, type Time } from "../sound-kit";
 
 /** How long it plays at normal speed, in seconds (for a loader, one lap). */
-export const length = 1.1;
+export const length = 0.9;
 
 /** How loud it is next to the other icons. Measured, so they all sound about equally loud. */
-export const level = 1.33;
+export const level = 1.1;
 
-/** A cloth whoosh and a soft flap as the hat tips up, a gentle steam hiss that rises with the wisp, a second flap as it swings back and a soft fabric thump as it settles. */
+/** A soft cloth press as the hat squashes, a spring tick and rising swish as it hops, a fluffy pomf as the crown puffs up, then a thud and cloth squash as it lands. */
 export function play(c: AudioContext, o: AudioNode, t: Time) {
-  swish(c, o, t(0.02), t(0.3), 500, 1400, 0.09); // 0.02-0.32 the hat tips up
-  puff(c, o, t(0.13), 0.08, 900, 0.12, "bandpass"); // 0.13 the cloth flaps at its fastest
-  swish(c, o, t(0.25), t(0.7), 4500, 7000, 0.06); // 0.25-0.95 steam hisses as the wisp rises
-  swish(c, o, t(0.58), t(0.32), 1500, 500, 0.08); // 0.58-0.9 the hat swings back
-  puff(c, o, t(0.72), 0.08, 800, 0.12, "bandpass"); // 0.72 the cloth flaps again
-  thud(c, o, t(0.9), 140, 0.18, 0.1); // 0.9 the hat settles back on
-  puff(c, o, t(0.9), 0.12, 600, 0.04, "lowpass");
+  swish(c, o, t(0.0), t(0.18), 900, 420, 0.04); // 0.00-0.18 the hat squashes down
+  tick(c, o, t(0.18), 0.05, 1400); // 0.18 the pleats let go and the hat springs up
+  swish(c, o, t(0.18), t(0.27), 350, 1300, 0.07); // 0.18-0.45 the hop rises
+  blip(c, o, 180, t(0.46), 0.09, 0.12, 330); // 0.46 the crown puffs up with a soft pomf
+  puff(c, o, t(0.47), 0.1, 2600, 0.05, "bandpass"); // 0.495 the crown is at its fullest
+  swish(c, o, t(0.5), t(0.22), 1300, 400, 0.05); // 0.50-0.72 the hat falls back down
+  thud(c, o, t(0.72), 120, 0.2, 0.12); // 0.72 it lands on the counter
+  puff(c, o, t(0.72), 0.1, 700, 0.05, "lowpass"); // 0.72 the cloth squashes
 }
