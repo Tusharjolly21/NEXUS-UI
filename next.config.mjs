@@ -139,6 +139,13 @@ const nextConfig = {
       { source: "/%2F:path(.*)", destination: "/:path", permanent: false },
       { source: "/docs", destination: "/docs/introduction", permanent: true },
       { source: "/demos", destination: "/components", permanent: true },
+      // Sample links inside block demos ("Watch the demo", "Product") that Google followed and found missing.
+      { source: "/demo", destination: "/components", permanent: true },
+      { source: "/product", destination: "/components", permanent: true },
+      { source: "/changelog", destination: "/blog", permanent: true },
+      // Old blog addresses Search Console still holds.
+      { source: "/blog/scroll-choreography", destination: "/blog/motion-scroll-choreography", permanent: true },
+      { source: "/blog/migration", destination: "/blog", permanent: true },
       { source: "/Nexus", destination: "/", permanent: true },
       // Component categories whose components all moved to the Blocks pages are empty now and 404'd in
       // Search Console. Send each to the block page that took its place.
