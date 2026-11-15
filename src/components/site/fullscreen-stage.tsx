@@ -87,7 +87,12 @@ function Viewer({ onClose, title, layout, children }: { onClose: () => void; tit
     };
     const html = document.documentElement;
     const overflow = html.style.overflow;
+    const gutter = html.style.scrollbarGutter;
     html.style.overflow = "hidden";
+    // The site keeps a scrollbar gutter on <html> so pages do not jump when the scrollbar comes and goes. While the
+    // viewer is open that empty gutter would leave a strip down the right edge (black in true full screen, where it
+    // shows the backdrop), so give it back; the page underneath is hidden anyway.
+    html.style.scrollbarGutter = "auto";
     window.addEventListener("pointermove", wake);
     window.addEventListener("pointerdown", wake);
     window.addEventListener("touchstart", wake, { passive: true });
@@ -113,6 +118,7 @@ function Viewer({ onClose, title, layout, children }: { onClose: () => void; tit
     return () => {
       window.clearTimeout(timer);
       html.style.overflow = overflow;
+      html.style.scrollbarGutter = gutter;
       window.removeEventListener("pointermove", wake);
       window.removeEventListener("pointerdown", wake);
       window.removeEventListener("touchstart", wake);
