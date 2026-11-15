@@ -19,6 +19,7 @@ import { VideoCard } from "@/components/videos/video-card";
 import { getVideo, videos } from "@/lib/catalog/videos";
 import { Band, PillLink } from "@/components/site";
 import { legalConfig } from "@/lib/legal";
+import { CompareLibraries } from "@/components/site/compare-libraries";
 import { LibraryIndex, type LibraryIndexData } from "@/components/site/library-index";
 import { HomeIconStrip } from "@/components/nx-icons/home-strip";
 import { blockVariants } from "@/lib/catalog/block-variants";
@@ -406,6 +407,7 @@ export default async function Home() {
               </Link>
               .
             </p>
+            <CompareLibraries className="mt-3 text-[16px] text-muted-foreground" />
           </div>
           <div className="border-t border-border">
             {faq.map((f) => (
