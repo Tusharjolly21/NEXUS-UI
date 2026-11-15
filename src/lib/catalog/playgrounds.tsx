@@ -302,6 +302,50 @@ import { PumpkinReveal } from "@/components/pumpkin-reveal";
 import { CatchUndo } from "@/components/catch-undo";
 import { TankRecorder } from "@/components/tank-recorder";
 import { RippleToast } from "@/components/ripple-toast";
+import { DateWheels } from "@/components/date-wheels";
+import { AgentThinking } from "@/components/agent-thinking";
+import { OdometerField } from "@/components/odometer-field";
+import { ActivityRings } from "@/components/activity-rings";
+import { NotificationCenter } from "@/components/notification-center";
+import { ContributionSkyline } from "@/components/contribution-skyline";
+import { LiquidFunnel } from "@/components/liquid-funnel";
+import { SleepScore } from "@/components/sleep-score";
+import { ShatterMark } from "@/components/shatter-mark";
+import { AnnotateText } from "@/components/annotate-text";
+import { MetalCard } from "@/components/metal-card";
+import { ReceiptButton } from "@/components/receipt-button";
+import { DecayCard } from "@/components/decay-card";
+import { RibbonGallery } from "@/components/ribbon-gallery";
+import { PhotoTunnel } from "@/components/photo-tunnel";
+import { BellToggle } from "@/components/bell-toggle";
+import { ProjectIndex } from "@/components/project-index";
+import { FuseButton } from "@/components/fuse-button";
+import { DownloadButton } from "@/components/download-button";
+import { FocusField } from "@/components/focus-field";
+import { LiquidTabs } from "@/components/liquid-tabs";
+import { LiquidStatus } from "@/components/liquid-status";
+import { GlyphFlow } from "@/components/glyph-flow";
+import { DepthStack } from "@/components/depth-stack";
+import { FoldGallery } from "@/components/fold-gallery";
+import { MeltType } from "@/components/melt-type";
+import { MessageComposer } from "@/components/message-composer";
+import { SearchModal } from "@/components/search-modal";
+import { FileDrop } from "@/components/file-drop";
+import { ProfileCard } from "@/components/profile-card";
+import { OrbNav } from "@/components/orb-nav";
+import { HaloHero } from "@/components/halo-hero";
+import { BrainAtlas } from "@/components/brain-atlas";
+
+/** Sample photos for the gallery playgrounds (the same ones their previews use). */
+const PLAYGROUND_PHOTOS = [
+  { src: "/images/motion-kit/photos/reine-lofoten.jpg", title: "Reine, Lofoten" },
+  { src: "/images/motion-kit/photos/torres-del-paine.jpg", title: "Torres del Paine" },
+  { src: "/images/motion-kit/photos/antelope-canyon.jpg", title: "Antelope Canyon" },
+  { src: "/images/motion-kit/photos/ice-cave.jpg", title: "Ice cave" },
+  { src: "/images/motion-kit/photos/dunes-at-dusk.jpg", title: "Dunes at dusk" },
+  { src: "/images/motion-kit/photos/fjord.jpg", title: "Fjord" },
+  { src: "/images/motion-kit/photos/waterfall.jpg", title: "Waterfall" },
+];
 
 // matter-js stays out of the shared playground bundle: these load lazily.
 const TagPit = React.lazy(() => import("@/components/tag-pit").then((m) => ({ default: m.TagPit })));
@@ -4993,6 +5037,645 @@ export const playgrounds: Record<string, Playground> = {
           autoplay={v.autoplay as boolean}
           defaultColourway={v.defaultColourway as string}
           price={v.price as string}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "date-wheels": {
+    lightOnly: true,
+    componentName: "DateWheels",
+    importPath: "@/components/date-wheels",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[420px] justify-center">
+        <DateWheels
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "agent-thinking": {
+    lightOnly: true,
+    componentName: "AgentThinking",
+    importPath: "@/components/agent-thinking",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[520px] justify-center">
+        <AgentThinking
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "odometer-field": {
+    lightOnly: true,
+    componentName: "OdometerField",
+    importPath: "@/components/odometer-field",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[440px] justify-center">
+        <OdometerField
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "activity-rings": {
+    lightOnly: true,
+    componentName: "ActivityRings",
+    importPath: "@/components/activity-rings",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[440px] justify-center">
+        <ActivityRings
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "notification-center": {
+    lightOnly: true,
+    componentName: "NotificationCenter",
+    importPath: "@/components/notification-center",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[440px] justify-center">
+        <NotificationCenter
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "contribution-skyline": {
+    lightOnly: true,
+    componentName: "ContributionSkyline",
+    importPath: "@/components/contribution-skyline",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[980px] justify-center">
+        <ContributionSkyline
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "liquid-funnel": {
+    lightOnly: true,
+    componentName: "LiquidFunnel",
+    importPath: "@/components/liquid-funnel",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[940px] justify-center">
+        <LiquidFunnel
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "sleep-score": {
+    lightOnly: true,
+    componentName: "SleepScore",
+    importPath: "@/components/sleep-score",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <SleepScore
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "shatter-mark": {
+    lightOnly: true,
+    componentName: "ShatterMark",
+    importPath: "@/components/shatter-mark",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[980px] justify-center">
+        <ShatterMark
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "annotate-text": {
+    lightOnly: true,
+    componentName: "AnnotateText",
+    importPath: "@/components/annotate-text",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[560px] justify-center">
+        <AnnotateText
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "metal-card": {
+    lightOnly: true,
+    componentName: "MetalCard",
+    importPath: "@/components/metal-card",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "finish", label: "Finish", options: ["titanium",  "black",  "rose"], defaultValue: "titanium" },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <MetalCard
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          finish={v.finish as "titanium" | "black" | "rose"}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "receipt-button": {
+    lightOnly: true,
+    componentName: "ReceiptButton",
+    importPath: "@/components/receipt-button",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[440px] justify-center">
+        <ReceiptButton
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "decay-card": {
+    lightOnly: true,
+    componentName: "DecayCard",
+    importPath: "@/components/decay-card",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[900px] justify-center">
+        <DecayCard
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "ribbon-gallery": {
+    lightOnly: true,
+    componentName: "RibbonGallery",
+    importPath: "@/components/ribbon-gallery",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[1000px] justify-center">
+        <RibbonGallery
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+          photos={PLAYGROUND_PHOTOS}
+        />
+      </div>
+    ),
+  },
+  "photo-tunnel": {
+    lightOnly: true,
+    componentName: "PhotoTunnel",
+    importPath: "@/components/photo-tunnel",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[1000px] justify-center">
+        <PhotoTunnel
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+          photos={PLAYGROUND_PHOTOS}
+        />
+      </div>
+    ),
+  },
+  "bell-toggle": {
+    lightOnly: true,
+    componentName: "BellToggle",
+    importPath: "@/components/bell-toggle",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[420px] justify-center">
+        <BellToggle
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "project-index": {
+    lightOnly: true,
+    componentName: "ProjectIndex",
+    importPath: "@/components/project-index",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[1000px] justify-center">
+        <ProjectIndex
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+          photos={PLAYGROUND_PHOTOS}
+        />
+      </div>
+    ),
+  },
+  "fuse-button": {
+    lightOnly: true,
+    componentName: "FuseButton",
+    importPath: "@/components/fuse-button",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[420px] justify-center">
+        <FuseButton
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "download-button": {
+    lightOnly: true,
+    componentName: "DownloadButton",
+    importPath: "@/components/download-button",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[420px] justify-center">
+        <DownloadButton
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "focus-field": {
+    lightOnly: true,
+    componentName: "FocusField",
+    importPath: "@/components/focus-field",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "palette", label: "Palette", options: ["ember",  "lagoon",  "dusk"], defaultValue: "ember" },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[520px] justify-center">
+        <FocusField
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          palette={v.palette as "ember" | "lagoon" | "dusk"}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "liquid-tabs": {
+    lightOnly: true,
+    componentName: "LiquidTabs",
+    importPath: "@/components/liquid-tabs",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[480px] justify-center">
+        <LiquidTabs
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "liquid-status": {
+    lightOnly: true,
+    componentName: "LiquidStatus",
+    importPath: "@/components/liquid-status",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[980px] justify-center">
+        <LiquidStatus
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "glyph-flow": {
+    lightOnly: true,
+    componentName: "GlyphFlow",
+    importPath: "@/components/glyph-flow",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[520px] justify-center">
+        <GlyphFlow
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "depth-stack": {
+    lightOnly: true,
+    componentName: "DepthStack",
+    importPath: "@/components/depth-stack",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[1000px] justify-center">
+        <DepthStack
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+          photos={PLAYGROUND_PHOTOS}
+        />
+      </div>
+    ),
+  },
+  "fold-gallery": {
+    lightOnly: true,
+    componentName: "FoldGallery",
+    importPath: "@/components/fold-gallery",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[900px] justify-center">
+        <FoldGallery
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+          photos={PLAYGROUND_PHOTOS}
+        />
+      </div>
+    ),
+  },
+  "melt-type": {
+    lightOnly: true,
+    componentName: "MeltType",
+    importPath: "@/components/melt-type",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[1000px] justify-center">
+        <MeltType
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "message-composer": {
+    lightOnly: true,
+    componentName: "MessageComposer",
+    importPath: "@/components/message-composer",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[980px] justify-center">
+        <MessageComposer
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+          photos={PLAYGROUND_PHOTOS}
+        />
+      </div>
+    ),
+  },
+  "search-modal": {
+    lightOnly: true,
+    componentName: "SearchModal",
+    importPath: "@/components/search-modal",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[980px] justify-center">
+        <SearchModal
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "file-drop": {
+    lightOnly: true,
+    componentName: "FileDrop",
+    importPath: "@/components/file-drop",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[980px] justify-center">
+        <FileDrop
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "profile-card": {
+    lightOnly: true,
+    componentName: "ProfileCard",
+    importPath: "@/components/profile-card",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[440px] justify-center">
+        <ProfileCard
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "orb-nav": {
+    lightOnly: true,
+    componentName: "OrbNav",
+    importPath: "@/components/orb-nav",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[1000px] justify-center">
+        <OrbNav
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "halo-hero": {
+    lightOnly: true,
+    componentName: "HaloHero",
+    importPath: "@/components/halo-hero",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "palette", label: "Palette", options: ["ember",  "ice",  "aurora"], defaultValue: "ember" },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[1100px] justify-center">
+        <HaloHero
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          palette={v.palette as "ember" | "ice" | "aurora"}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "brain-atlas": {
+    lightOnly: true,
+    componentName: "BrainAtlas",
+    importPath: "@/components/brain-atlas",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[1000px] justify-center">
+        <BrainAtlas
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
           enableSound={v.enableSound as boolean}
         />
       </div>

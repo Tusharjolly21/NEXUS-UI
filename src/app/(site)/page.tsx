@@ -106,6 +106,7 @@ export default async function Home() {
         { slug: "block-navigation", label: "Navigation" },
         { slug: "block-hero", label: "Hero" },
         { slug: "block-features", label: "Features" },
+        { slug: "block-dashboard", label: "Dashboards" },
         { slug: "block-social-proof", label: "Social proof" },
         { slug: "block-pricing-section", label: "Pricing" },
         { slug: "block-faq-folder-card", label: "FAQ" },

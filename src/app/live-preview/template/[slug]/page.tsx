@@ -195,6 +195,21 @@ const UpdraftPage = nextDynamic(
   { loading: TemplateFallback },
 );
 
+const HuddlePage = nextDynamic(
+  () => import("@/components/templates/huddle-page").then((m) => ({ default: m.HuddlePage })),
+  { loading: TemplateFallback },
+);
+
+const MeridianPage = nextDynamic(
+  () => import("@/components/templates/meridian-page").then((m) => ({ default: m.MeridianPage })),
+  { loading: TemplateFallback },
+);
+
+const DarkroomPage = nextDynamic(
+  () => import("@/components/templates/darkroom-page").then((m) => ({ default: m.DarkroomPage })),
+  { loading: TemplateFallback },
+);
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -252,6 +267,12 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><PlotlinePage /></ThemeReceiver>;
   } else if (tmpl.slug === "hoopla") {
     return <ThemeReceiver><HooplaPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "huddle") {
+    return <ThemeReceiver><HuddlePage /></ThemeReceiver>;
+  } else if (tmpl.slug === "meridian") {
+    return <ThemeReceiver><MeridianPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "darkroom") {
+    return <ThemeReceiver><DarkroomPage /></ThemeReceiver>;
   } else if (tmpl.slug === "outpost") {
     return <ThemeReceiver><OutpostPage /></ThemeReceiver>;
   } else if (tmpl.slug === "surfaced") {

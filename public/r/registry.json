@@ -1451,7 +1451,7 @@
       "name": "command-palette",
       "type": "registry:component",
       "title": "Command Palette",
-      "description": "Animated command palette that opens with ⌘K: a dimmed overlay, a search field that filters a list of commands, and Framer Motion enter and exit transitions. Also includes the Motion Kit Command Morph variant.",
+      "description": "Animated command palette that opens with ⌘K: a dimmed overlay, a search field that filters a list of commands, and Framer Motion enter and exit transitions. Also includes the Motion Kit Command Morph variant. Also includes Prism Command Palette, a palette that grows out of its own Command K pill, with a pane of glass and a thin prism sliding between results, a preview beside the list, and Enter folding it back into the pill with what happened.",
       "dependencies": [
         "framer-motion",
         "lucide-react",
@@ -1477,6 +1477,10 @@
         {
           "path": "next-ui/command-palette/index.ts",
           "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/command-palette/prism-command-palette.tsx",
+          "type": "registry:component"
         }
       ]
     },
@@ -1585,7 +1589,7 @@
       "name": "toast-stack",
       "type": "registry:component",
       "title": "Toast Stack",
-      "description": "Notifications that rest in a tidy stack: a new toast drops onto the pile squashed and springs into shape, and hover or focus fans the stack into a list. Fling a toast sideways and it tilts and skids off; with a duration set, the front toast counts down along its bottom edge and waits while the stack is open. Also includes Undo Toast, where an archived row shrinks into the toast, a ring counts down around Undo, and undo drops the row back in place. Also includes Promise Toast, a pill that follows a deploy step by step with progress filling behind the words and lands on a live link or an error with a way to the logs.",
+      "description": "Notifications that rest in a tidy stack: a new toast drops onto the pile squashed and springs into shape, and hover or focus fans the stack into a list. Fling a toast sideways and it tilts and skids off; with a duration set, the front toast counts down along its bottom edge and waits while the stack is open. Also includes Undo Toast, where an archived row shrinks into the toast, a ring counts down around Undo, and undo drops the row back in place. Also includes Promise Toast, a pill that follows a deploy step by step with progress filling behind the words and lands on a live link or an error with a way to the logs. Also includes Timed Toast Stack, toasts that stack like cards with each one's time left running round its edge, swipe-away with momentum, an upload that turns into done in place and a delete with Undo.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1604,6 +1608,10 @@
           "type": "registry:component"
         },
         {
+          "path": "next-ui/toast-stack/timed-toast-stack.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "next-ui/toast-stack/toast-stack.tsx",
           "type": "registry:component"
         },
@@ -1617,7 +1625,7 @@
       "name": "otp-input",
       "type": "registry:component",
       "title": "OTP Input",
-      "description": "A six-box one-time-code field: digits spring in as you type, the boxes ripple while the code is checked, shake on a wrong code, and fold into a Verified pill on success.",
+      "description": "A six-box one-time-code field: digits spring in as you type, the boxes ripple while the code is checked, shake on a wrong code, and fold into a Verified pill on success. Also includes OTP Code, a field with no confirm button whose digits roll in and whose boxes slide together into one bar while it checks, then turn green or shake apart.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1634,6 +1642,10 @@
         },
         {
           "path": "next-ui/otp-input/otp-autofill.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/otp-input/otp-code.tsx",
           "type": "registry:component"
         },
         {

@@ -22,7 +22,8 @@ export type BlockCategory =
   | "Error pages"
   | "Footers"
   | "Signup sections"
-  | "Comparison sections";
+  | "Comparison sections"
+  | "Dashboard sections";
 
 export type BlockManifestEntry = {
   slug: string;
@@ -445,6 +446,31 @@ import { DriftGallery } from "@/components/blocks/motion-kit/drift-gallery";
 
 export default function Page() {
   return <DriftGallery />;
+}`,
+  },
+  {
+    slug: "block-dashboard",
+    registryCliName: "dashboard-blocks",
+    name: "Dashboards",
+    description:
+      "Product screens that move: where visitors flow from source to page to outcome, KPI tiles over a chart you can scrub, and a kanban board of physical cards you pick up and throw between columns.",
+    category: "Dashboard sections",
+    tags: ["dashboard", "analytics", "sankey", "kpi", "stats", "kanban", "board", "admin", "motion kit"],
+    premium: true,
+    variants: ["Flow Chart", "Stat Cards", "Kanban Board"],
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { StatCards } from "@/components/blocks/motion-kit/stat-cards";
+
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto max-w-[1200px]">
+        <StatCards title="Overview" subtitle="Northwind Store" />
+      </div>
+    </section>
+  );
 }`,
   },
   {

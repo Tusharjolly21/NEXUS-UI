@@ -78,6 +78,14 @@ import { InfiniteBranches } from "./infinite-branches";
 import { PreviewBlockVariantMkScrollNavbar } from "@/registry/blocks/nexus-essentials-blocks-c";
 import { MorphMenu } from "./morph-menu";
 import { AnnounceBar } from "./announce-bar";
+import { FlowChart } from "@/components/blocks/motion-kit/flow-chart";
+import { StatCards } from "@/components/blocks/motion-kit/stat-cards";
+import { KanbanBoard } from "@/components/blocks/motion-kit/kanban-board";
+import { FilterDrawer } from "@/components/blocks/motion-kit/filter-drawer";
+import { PrismFlow } from "@/components/blocks/motion-kit/prism-flow";
+import { HaloHero } from "@/components/halo-hero";
+import { OrbNav } from "@/components/orb-nav";
+import { BrainAtlas } from "@/components/brain-atlas";
 
 /** Gallery stages take `compact`, not `autoplay` (they always play); the block page passes autoplay. */
 const asSection = (c: ComponentType<{ compact?: boolean }>) => c as unknown as ComponentType<{ autoplay?: boolean }>;
@@ -166,4 +174,12 @@ export const MOTION_KIT_SECTIONS: Record<string, ComponentType<{ autoplay?: bool
   "mk-xray-hero": XrayHero,
   "mk-circuit-hero": CircuitHero,
   "mk-flip-dot-hero": FlipDotHero,
+  "mk-flow-chart": FlowChart as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-stat-cards": StatCards as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-kanban-board": KanbanBoard as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-filter-drawer": FilterDrawer as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-prism-flow": PrismFlow as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-halo-hero": HaloHero as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-orb-nav": OrbNav as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-brain-atlas": BrainAtlas as unknown as ComponentType<{ autoplay?: boolean }>,
 };

@@ -26,7 +26,7 @@ const COLLAGE: string[][] = [
 
 type PlanKey = "lifetime" | "annual";
 
-function CollageRow({ slugs, reverse, time }: { slugs: string[]; reverse?: boolean; time: string }) {
+export function CollageRow({ slugs, reverse, time }: { slugs: string[]; reverse?: boolean; time: string }) {
   const tiles = (hidden: boolean) => (
     <ul aria-hidden={hidden || undefined} className="flex shrink-0 gap-2 pr-2">
       {slugs.map((s, i) => (
