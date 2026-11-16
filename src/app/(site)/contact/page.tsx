@@ -93,6 +93,62 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      <section aria-labelledby="what-we-help-with" className="px-4 pb-24">
+        <div className="mx-auto max-w-[1152px]">
+          <h2 id="what-we-help-with" className="pg-display text-[clamp(32px,4.5vw,44px)] leading-[1.02] text-foreground">
+            What to write to us about
+          </h2>
+          <ul className="mt-8 grid gap-x-10 gap-y-6 md:grid-cols-2">
+            <li>
+              <h3 className="text-[17px] font-semibold text-foreground">Installing a component</h3>
+              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
+                Nexus UI components install with the shadcn CLI or by copying the source into your project. If a
+                command fails or a dependency is missing, send the component name and your Next.js and Tailwind
+                versions. The{" "}
+                <Link href="/docs/installation" className="text-link hover:underline">
+                  installation guide
+                </Link>{" "}
+                covers the usual causes.
+              </p>
+            </li>
+            <li>
+              <h3 className="text-[17px] font-semibold text-foreground">Plans, Pro and refunds</h3>
+              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
+                Questions about what Pro includes, how billing works or a refund. The{" "}
+                <Link href="/pricing" className="text-link hover:underline">
+                  pricing page
+                </Link>{" "}
+                and the{" "}
+                <Link href="/refund-policy" className="text-link hover:underline">
+                  refund policy
+                </Link>{" "}
+                list the terms; write to us when your case is not covered there.
+              </p>
+            </li>
+            <li>
+              <h3 className="text-[17px] font-semibold text-foreground">The MCP server and API keys</h3>
+              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
+                Connecting Claude Code, Cursor or Codex to Nexus UI, or a Pro API key that is not accepted. The{" "}
+                <Link href="/mcp" className="text-link hover:underline">
+                  MCP page
+                </Link>{" "}
+                has the setup for each tool.
+              </p>
+            </li>
+            <li>
+              <h3 className="text-[17px] font-semibold text-foreground">A component you wish existed</h3>
+              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
+                Tell us what it should do and where you would use it. Browse the{" "}
+                <Link href="/components" className="text-link hover:underline">
+                  component library
+                </Link>{" "}
+                first, since it may already be there under a different name.
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
     </>
   );
 }
