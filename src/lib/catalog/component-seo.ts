@@ -839,4 +839,139 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
     description:
       "React flight tracker UI: a live flight card where a plane banks along a dotted arc, the flown part fills in and the status counts down. Expand for altitude and speed.",
   },
+  "wheel-selector": {
+    title: "React Radial Menu: Draggable Wheel Selector",
+    description:
+      "React radial selector: a ring of icon nodes you drag, fling or step with arrow keys, snapping to the nearest stop with a little overshoot. Free, Framer Motion + Tailwind CSS.",
+  },
+  "cursor-text-reveal": {
+    title: "React Text Reveal on Hover: Cursor Ink Lens",
+    description:
+      "React text reveal where an ink lens follows the cursor and shows a second sentence through it, trailing droplets on springs. Free, Framer Motion + Tailwind CSS.",
+  },
+  "nebula-glass-card": {
+    title: "React Glassmorphism Card: Tilting Nebula Glass",
+    description:
+      "React glassmorphism card over a drifting nebula that tilts toward the pointer, with a moving rim light and a press effect. Free, Framer Motion + Tailwind CSS.",
+  },
+  "glow-button": {
+    title: "React Glow Button: Cursor-Tracking Rim Light",
+    description:
+      "React call-to-action button with a rim glow that turns to face the pointer while the button drifts toward the cursor. Free, Framer Motion + Tailwind CSS.",
+  },
+  "three-d-folder": {
+    title: "React 3D Folder Card: Opens on Hover to Fan Papers",
+    description:
+      "React 3D folder card whose flap swings open on hover, focus or tap and fans up to three papers, each opening a preview. Free, Framer Motion + Tailwind CSS.",
+  },
+  "real-time-cursors": {
+    title: "React Live Cursors: Shared Board Collaboration UI",
+    description:
+      "React shared-cursor UI for a design board: arrows glide and lean with speed, name tags trail and swing, clicks and comments land. Free, Framer Motion + Tailwind CSS.",
+  },
+  "terminal": {
+    title: "React Terminal Component: Interactive Typing Window",
+    description:
+      "React macOS-style terminal that types a script with human timing, then lets you type commands like help, ls and echo. Free, Framer Motion + Tailwind CSS.",
+  },
+  "floating-dock": {
+    title: "React Dock Component: macOS-style Floating Dock",
+    description:
+      "React macOS-style dock: tiles swell under the pointer and push neighbours aside, tooltips name each one, a click bounces the tile. Free, Framer Motion + Tailwind CSS.",
+  },
+  "stateful-button": {
+    title: "React Button with Loading, Success and Error States",
+    description:
+      "React async button with idle, loading, success and error states: it squashes on press, a light sweeps while it loads, the label rolls. Free, Framer Motion + Tailwind CSS.",
+  },
+  "expandable-cards": {
+    title: "React Expandable Cards: Grid That Grows to Detail",
+    description:
+      "React expandable cards: pick one in the grid and it grows in one spring into a full card with a long description and a call to action. Free, Framer Motion + Tailwind CSS.",
+  },
+  "spectra-frame": {
+    title: "React Image Gallery: Black and White to Color Hover",
+    description:
+      "React photo grid that rests in black and white; point at a photo and colour blooms out from where the pointer entered. Free, Framer Motion + Tailwind CSS.",
+  },
+  "profile-orbit": {
+    title: "React Team Section: Profile Card with Orbiting Avatars",
+    description:
+      "React team profile card with members orbiting on a tilted ring: drag, use arrows or tap a face to spin that person to the front. Free, Framer Motion + Tailwind CSS.",
+  },
+  "feature-tools-card": {
+    title: "React Integrations Card: Tools Orbiting a Hub",
+    description:
+      "React integrations card: tool icons ride a slow ring round a hub, wired by lines that carry packets, and lean toward the pointer. Free, Framer Motion + Tailwind CSS.",
+  },
+  "link-preview": {
+    title: "React Link Preview: Hover Card on Inline Links",
+    description:
+      "React link preview that lifts a card out of the text on hover or keyboard focus and draws its own cover from the title and site. Free, Framer Motion + Tailwind CSS.",
+  },
+  "radio-cards": {
+    title: "React Radio Cards: Pricing Plan Picker",
+    description:
+      "React plan picker built on real radio inputs: the selection ring glides between cards, the chosen card opens, the button label rolls. Free, Framer Motion + Tailwind CSS.",
+  },
+  "password-strength": {
+    title: "React Password Strength Meter with Rules Checklist",
+    description:
+      "React password field with a four-segment strength meter, a rolling label, rules that tick off as you type and an eye toggle. Free, Framer Motion + Tailwind CSS.",
+  },
+  "rotating-headline": {
+    title: "React Rotating Headline: Animated Hero Words",
+    description:
+      "React hero headline whose words arrive one by one out of a blur and keep rolling to the next, with a subline and a replay button. Free, Framer Motion + Tailwind CSS.",
+  },
+  "feedback-pill": {
+    title: "React Feedback Widget: Pill That Morphs to a Form",
+    description:
+      "React feedback widget: a small pill morphs into a note form, shows a spinner while sending, then shrinks into a thank-you. Free, Framer Motion + Tailwind CSS.",
+  },
+  "stagger-menu": {
+    title: "React Dropdown Menu: Staggered Share Menu",
+    description:
+      "React dropdown menu that unfolds with items arriving one after another, a gliding highlight, arrow-key navigation and a rolling label. Free, Framer Motion + Tailwind CSS.",
+  },
+  "progress-button": {
+    title: "React Progress Button: Fills as the Work Runs",
+    description:
+      "React progress button that stretches into its own progress bar with a live percentage, then turns green with a drawn check. Free, Framer Motion + Tailwind CSS.",
+  },
+  "venom-button": {
+    title: "React Button Effect: Black Pill with Reaching Tendrils",
+    description:
+      "React glossy black pill button that oozes pseudopods toward the cursor, lunges when close, then stretches, snaps and melts back. Free, Framer Motion + Tailwind CSS.",
+  },
+  "web-sling-button": {
+    title: "React Web Sling Button: Silk Splat Click Effect",
+    description:
+      "React call-to-action button on a light stage where the cursor shoots silk: click to splat it on, hold and pull to tilt the button. Free, Framer Motion + Tailwind CSS.",
+  },
+  "dust-snap": {
+    title: "React Dust Disintegration Text Effect",
+    description:
+      "React text effect where a word turns to dust: it shivers, goes dark and grainy from one end, then crumbles into a cloud of particles. Free, Framer Motion + Tailwind CSS.",
+  },
+  "shredder-delete": {
+    title: "React Delete Animation: Paper Shredder Effect",
+    description:
+      "React delete animation: drag a document onto an office shredder, or press Delete on a focused row, and it feeds through as strips. Free, Framer Motion + Tailwind CSS.",
+  },
+  "pumpkin-reveal": {
+    title: "React 3D Pumpkin: Cracking Halloween Reveal",
+    description:
+      "React 3D jack-o'-lantern on a dead branch: it turns on its rope, glowing cracks grow where you hit it, and the third hit splits it open. Free, Framer Motion + Tailwind CSS.",
+  },
+  "catch-undo": {
+    title: "React Undo Button Animation: Silk Catches Deleted Row",
+    description:
+      "React undo animation: a deleted row drops out of the list as time slows, then Undo shoots a silk web that catches and pulls it back. Free, Framer Motion + Tailwind CSS.",
+  },
+  "status-morph": {
+    title: "React Status Bar Animation: Wi-Fi and Battery Morph",
+    description:
+      "React iPhone-style status bar that morphs when tapped: the battery drains and rounds into a ring, the signal bars sink into dots. Free, Framer Motion + Tailwind CSS.",
+  },
 };
