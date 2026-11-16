@@ -279,7 +279,7 @@ export function IconGrid() {
               </Chip>
             ))}
           </div>
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Colour">
+          <div className="flex flex-nowrap items-center gap-1.5" role="group" aria-label="Colour">
             <span className="mr-1 text-[13px] text-muted-foreground">Colour</span>
             {SWATCHES.map((c) => (
               <button
