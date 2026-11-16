@@ -739,4 +739,44 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
     description:
       "React rating input from 1 to 10: hold to aim, release to throw, and the ring the dart lands in is the score. Number keys work, and it is a real slider for screen readers.",
   },
+  "animated-tabs": {
+    title: "React Animated Tabs: Sliding Segmented Control",
+    description:
+      "Free React tabs component: a sliding segmented control swaps the panel, rows slide in from the side you moved towards and the panel resizes to fit.",
+  },
+  "mercury-tabs": {
+    title: "React Tabs Component with a Liquid Metal Indicator",
+    description:
+      "React tab bar whose selected tab sits in a frame of liquid metal, with reflections that drift and split round its corners as you pick another tab.",
+  },
+  "ink-theme-switch": {
+    title: "React Dark Mode Toggle with an Ink Pour Transition",
+    description:
+      "React dark mode toggle: the dark panel pours out of the switch as a growing ink circle and drains back in. The sun folds into a crescent moon.",
+  },
+  "window-seat-toggle": {
+    title: "React Dark Mode Toggle: Pull Down an Aeroplane Shade",
+    description:
+      "React light and dark theme switch drawn as an aeroplane window: pull the shade down and the cabin light follows your finger.",
+  },
+  "background-gradient": {
+    title: "React Animated Gradient Ring Background for Cards",
+    description:
+      "Free React card or button wrapper with a slowly turning conic-gradient ring and soft glow. Hover spins it up, press squashes and springs it back.",
+  },
+  "background-boxes": {
+    title: "React Background Boxes: Isometric Grid on Canvas",
+    description:
+      "Free React isometric grid background drawn on canvas: the cell under the pointer pops up like a key, overshoots and settles with a ripple around it.",
+  },
+  "mesh-net": {
+    title: "React Mesh Background That Lights Up Near the Cursor",
+    description:
+      "React background of a distorted triangle net that hides in the dark until the cursor comes near, then springs and lights up like a torch passing over it.",
+  },
+  "cubes-grid": {
+    title: "React 3D Cubes Grid Background with a Ripple",
+    description:
+      "React background of 3D cubes that ripple into a travelling wave under the cursor, on one canvas with one animation loop. Light or dark variants.",
+  },
 };
