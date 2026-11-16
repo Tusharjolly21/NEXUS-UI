@@ -664,4 +664,9 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
     description:
       "Free React OTP input: six boxes where digits spring in as you type, ripple while the code is checked, shake on a wrong code and fold into Verified.",
   },
+  "fan-deck": {
+    title: "Fan Deck: React Color Palette Swatch Picker",
+    description:
+      "React fan deck of paint-chip colour swatches: the deck tips over and fans into a half circle, hover lifts a chip and a click copies its hex. Framer Motion + Tailwind CSS.",
+  },
 };
