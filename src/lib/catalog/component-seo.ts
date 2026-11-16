@@ -974,4 +974,754 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
     description:
       "React iPhone-style status bar that morphs when tapped: the battery drains and rounds into a ring, the signal bars sink into dots. Free, Framer Motion + Tailwind CSS.",
   },
+  "word-magnet": {
+    title: "React Text Hover Effect: Words Pushed Like Magnets",
+    description:
+      "React headline where the pointer shoves nearby words away, each tilting the way it was pushed, then springing home with a wobble. Tailwind CSS + TypeScript.",
+  },
+  "forge-ai-command-bar": {
+    title: "React AI Command Bar: Ask, Edit or Build Prompt Panel",
+    description:
+      "React AI command bar with Ask, Edit and Build modes, suggestions, and a panel where the prompt becomes a heading and steps tick off. Tailwind CSS + TypeScript.",
+  },
+  "slide-to-confirm": {
+    title: "React Slide to Confirm Button with Stretchy Knob",
+    description:
+      "React slide-to-confirm track for payments: the knob stretches with drag speed and squashes on stop, with a shimmering label. Tailwind CSS + TypeScript.",
+  },
+  "emoji-reactions": {
+    title: "React Emoji Reactions: Chips and Spring Picker",
+    description:
+      "React emoji reactions: chips pop and roll their counts when tapped, and a spring picker adds new reactions with a layout animation. Tailwind CSS + TypeScript.",
+  },
+  "like-burst": {
+    title: "React Like Button Animation: Heart Burst and Counter",
+    description:
+      "React like button: the heart squashes and fills with a ring shockwave and particle burst, and the count rolls digit by digit. Tailwind CSS + TypeScript.",
+  },
+  "hold-to-record": {
+    title: "React Voice Note Recorder: Hold to Record Button",
+    description:
+      "React hold-to-record voice note button: a halo swells with your voice, a live waveform scrolls in, and sliding left morphs the dot. Tailwind CSS + TypeScript.",
+  },
+  "dot-sphere": {
+    title: "React Dot Sphere: Interactive Canvas Particle Globe",
+    description:
+      "React canvas sphere of dots that part around the pointer, spin when dragged and coast back to idle, with a ripple on tap. Tailwind CSS + TypeScript.",
+  },
+  "dynamic-island": {
+    title: "React Dynamic Island: Morphing Pill for Timer and Calls",
+    description:
+      "React Dynamic Island pill that grows into a timer, a playing song or an incoming call, stretching width first and height after. Tailwind CSS + TypeScript.",
+  },
+  "hold-to-confirm": {
+    title: "React Hold to Confirm Button for Destructive Actions",
+    description:
+      "React destructive button you press and hold: the fill sweeps across, early release springs back, finishing shows an undo toast. Tailwind CSS + TypeScript.",
+  },
+  "before-after": {
+    title: "React Before and After Image Slider with Springy Handle",
+    description:
+      "React image comparison slider with a springy handle, fading corner labels, arrow-key control and Before, Split, After buttons. Tailwind CSS + TypeScript.",
+  },
+  "price-odometer": {
+    title: "React Pricing Card: Seat Slider with Odometer Total",
+    description:
+      "React seat-based pricing card whose total rolls like an odometer, with a Save badge that pops in for yearly billing. Tailwind CSS + TypeScript.",
+  },
+  "tilt-pass": {
+    title: "React 3D Tilt Card: Membership Pass with Holo Sheen",
+    description:
+      "React membership pass that tilts toward the pointer with a moving glare and holographic sheen, then flips to a scannable back. Tailwind CSS + TypeScript.",
+  },
+  "shared-element-cards": {
+    title: "React Shared Element Transition: Cards Open to a Sheet",
+    description:
+      "React story cards that open into a sheet with a shared-element transition; artwork and title travel into place. Escape closes. Tailwind CSS + TypeScript.",
+  },
+  "ruler-picker": {
+    title: "React Ruler Picker: Fling-to-Select Duration Input",
+    description:
+      "React duration picker drawn as a ruler you fling: it glides with momentum, snaps to whole units, and the big number rolls. Tailwind CSS + TypeScript.",
+  },
+  "animated-icons": {
+    title: "React Animated Icons: Menu, Play, Heart, Bell, Theme Toggle",
+    description:
+      "React animated toggle icons: menu to close, play to pause, a bursting heart, a ringing bell, sun to moon, bookmark, mute and lock. Tailwind CSS + TypeScript.",
+  },
+  "folder-peek": {
+    title: "React Folder Hover Effect: Documents Fan Out on Peek",
+    description:
+      "React folder that tips its front panel back on hover or focus while a document, photo and chart fan out, then tuck back in. Tailwind CSS + TypeScript.",
+  },
+  "magnify-dock": {
+    title: "React macOS Dock: Magnifying App Icon Bar",
+    description:
+      "React macOS-style dock: icons swell as the pointer passes, show a label above, bounce when launched and keep a running dot. Tailwind CSS + TypeScript.",
+  },
+  "upload-chips": {
+    title: "React File Upload Drop Zone with Progress Chips",
+    description:
+      "React drop zone that lifts and tints on drag-over, then turns each file into a chip with a progress bar, ring and a check. Tailwind CSS + TypeScript.",
+  },
+  "island-morph": {
+    title: "React Dynamic Island Morph: Timer, Call and Music Player",
+    description:
+      "React black pill that morphs between a timer, an incoming call and a full music player, with content blurring in once it lands. Tailwind CSS + TypeScript.",
+  },
+  "lanyard-badge": {
+    title: "React Lanyard Badge: Draggable Conference Badge",
+    description:
+      "React conference badge on a strap: grab and throw it, and it swings back as a damped pendulum, twisting with sideways speed. Tailwind CSS + TypeScript.",
+  },
+  "glass-lens": {
+    title: "React Magnifying Glass: Draggable Glass Lens Effect",
+    description:
+      "React glass lens puck you drag over content: it magnifies the centre and splits colour toward the rim, with no shader needed. Tailwind CSS + TypeScript.",
+  },
+  "ascii-wake": {
+    title: "React ASCII Cursor Trail: Pointer Wake of Characters",
+    description:
+      "React cursor trail of characters that thickens where you linger and thins with age, with switchable glyph sets. Tailwind CSS + TypeScript.",
+  },
+  "liquid-dial": {
+    title: "React Floating Action Button: Liquid Speed Dial",
+    description:
+      "React floating action button whose actions bud out like liquid, with a highlight of two blobs that pulls into a thread. Tailwind CSS + TypeScript.",
+  },
+  "voice-orb": {
+    title: "React Voice Assistant Orb: Listening, Thinking, Speaking",
+    description:
+      "React voice orb with four assistant states: hold to talk, then a dotted ring becomes a glow, a thinking sphere and a churning voice. Tailwind CSS + TypeScript.",
+  },
+  "sagging-field": {
+    title: "React Text Input That Sags Under the Weight of Typing",
+    description:
+      "React text field that bends as you type: letters ride the curve on springs, overflow falls off, and Let it go drops it all. Tailwind CSS + TypeScript.",
+  },
+  "tear-off-ticket": {
+    title: "React Event Ticket: Tear-Off Stub with Perforation",
+    description:
+      "React event ticket whose stub you pull along the perforation; let go early and it snaps back, pull through and it drops. Tailwind CSS + TypeScript.",
+  },
+  "throw-wheel": {
+    title: "React 3D Card Carousel: Fling-Able Throw Wheel",
+    description:
+      "React 3D drum of cards you can fling: cards turn edge-on and blur with speed, then straighten one by one as one snaps front. Tailwind CSS + TypeScript.",
+  },
+  "pixel-select": {
+    title: "React Dropdown Select That Builds and Dissolves in Pixels",
+    description:
+      "React dropdown that builds itself from a pixel grid tinted with the chosen colour, then dissolves into falling pixels on pick. Tailwind CSS + TypeScript.",
+  },
+  "scrub-inputs": {
+    title: "React Scrubbable Number Input: Drag Labels to Change",
+    description:
+      "React design-tool number fields: drag a label sideways to change the value, Shift for big steps, Alt for fine, with a delta badge. Tailwind CSS + TypeScript.",
+  },
+  "lit-keyboard": {
+    title: "React Keyboard Component: Lit Keys with Click Sounds",
+    description:
+      "React tilted keyboard that lights up under typing with a slow afterglow and a mechanical click, with record and replay of a run. Tailwind CSS + TypeScript.",
+  },
+  "ripple-field": {
+    title: "React Dot Grid Ripple: Click Wave Across a Field",
+    description:
+      "React grid of dots: click and a ring travels outward, each dot it crosses bursts into colour, gets kicked away and springs home. Tailwind CSS + TypeScript.",
+  },
+  "dot-globe": {
+    title: "React Dotted Globe with Flight Arcs: Drag to Spin",
+    description:
+      "React dotted globe with flight arcs drawn along great circles; drag to spin with coasting, or pick a city to face it. Tailwind CSS + TypeScript.",
+  },
+  "component-layers": {
+    title: "React Exploded View: Isometric Component Layers",
+    description:
+      "React music player card that tips isometric and peels into surface, spacing, layout and content layers with leader-line labels. Tailwind CSS + TypeScript.",
+  },
+  "money-goo": {
+    title: "React Money Transfer UI: Liquid Drag-to-Pay Gooey Effect",
+    description:
+      "React peer-to-peer payment: drag an amount out of your avatar on a liquid neck, drop it on a friend, and both balances roll. Tailwind CSS + TypeScript.",
+  },
+  "weather-puck": {
+    title: "React Weather Time of Day Slider: Draggable Puck",
+    description:
+      "React puck you drag across dots to set the time of day: dots lift and warm, and the scene relights from dawn to night. Tailwind CSS + TypeScript.",
+  },
+  "metal-orbs": {
+    title: "React Liquid Metal Metaballs on Canvas",
+    description:
+      "React liquid-metal metaballs shaded per pixel with a chrome reflection: they bulge, pool and merge, in joined, apart or orbit modes. Tailwind CSS + TypeScript.",
+  },
+  "layout-switch": {
+    title: "React Photo Gallery Layout Switch: Grid, Row, Feature, Pile",
+    description:
+      "React photo set that glides between grid, row, feature and pile layouts on springs; click one to fill the frame, Escape to return. Tailwind CSS + TypeScript.",
+  },
+  "receipt-unfold": {
+    title: "React Invoice Animation: Folded Receipt That Unfolds",
+    description:
+      "React Get invoice button: a folded slip rises, unfolds panel by panel on 3D hinges, and the total gets circled by hand. Tailwind CSS + TypeScript.",
+  },
+  "page-curl": {
+    title: "React Page Curl Effect: Peel Back a Corner",
+    description:
+      "React page curl: grab a corner and peel it back; the fold is computed live from the pointer and reveals what sits underneath. Tailwind CSS + TypeScript.",
+  },
+  "sign-and-seal": {
+    title: "React Signature Pad: Sign a Card, Sealed Under Plastic",
+    description:
+      "React signature pad on a membership card: sign with the pointer on canvas, pause, and a clear plastic sleeve slides down. Tailwind CSS + TypeScript.",
+  },
+  "streak-counter": {
+    title: "React Streak Counter: Daily Streak with Flame and Week Strip",
+    description:
+      "React streak counter: log a day and the number rolls up, the week strip slides, and the flame bursts into embers. Tailwind CSS + TypeScript.",
+  },
+  "glass-bubbles": {
+    title: "React Hanging Glass Bubbles: Swinging Icon Orbs",
+    description:
+      "React glass orbs hung on threads: sweep the pointer through and they swing, collide and spin their icons before settling. Tailwind CSS + TypeScript.",
+  },
+  "box-spill": {
+    title: "React Physics Box: Open It and the Contents Spill Out",
+    description:
+      "React cardboard box on canvas: open it and flaps spring back as contents burst out, bounce and pile up; pack up to fly home. Tailwind CSS + TypeScript.",
+  },
+  "curved-reel": {
+    title: "React Curved Poster Carousel: Endless Bent Reel",
+    description:
+      "React endless reel of posters bent around a curve: centre cards pinch back, edges swing forward. It drifts, and you can drag or fling. Tailwind CSS + TypeScript.",
+  },
+  "crumple-to-trash": {
+    title: "React Delete Animation: Crumple Page into Trash Bin",
+    description:
+      "React move-to-trash animation: the page scrunches into a ball, arcs into a bin whose lid flips, and Undo throws it back flat. Tailwind CSS + TypeScript.",
+  },
+  "tape-shelf": {
+    title: "React Cassette Shelf: 3D Tape Collection Browser",
+    description:
+      "React cassette cases spine-out on a tilted 3D shelf: hover slides one up, picking one swings it round with reels turning. Tailwind CSS + TypeScript.",
+  },
+  "packet-router": {
+    title: "React LLM Router Diagram: Cost, Balanced, Quality Traffic",
+    description:
+      "React diagram of requests flowing from a router to four AI models; switch Cost, Balanced or Quality and the traffic re-balances. Tailwind CSS + TypeScript.",
+  },
+  "stamp-swirl": {
+    title: "React Postage Stamps with Swirling Artwork on Hover",
+    description:
+      "React perforated postage stamps whose artwork swirls like wet ink; hover or focus lifts one out and slides in its name and year. Tailwind CSS + TypeScript.",
+  },
+  "bubble-cluster": {
+    title: "React Bubble Cluster: Contacts Sized by Closeness",
+    description:
+      "React contacts packed into a cluster of soft bubbles sized by closeness; switch groups and everyone springs to new sizes. Tailwind CSS + TypeScript.",
+  },
+  "sticker-toss": {
+    title: "React Draggable Logo Sticker: Peel Off and Throw",
+    description:
+      "React round logo sticker you peel off a header and throw: it stretches in flight, its ring of text spins, and it springs back. Tailwind CSS + TypeScript.",
+  },
+  "context-meter": {
+    title: "React AI Context Window Meter: Token Dot Grid",
+    description:
+      "React context-window token meter drawn as a 40 by 5 dot grid; hover a category to light its dots, and Compact chat frees space. Tailwind CSS + TypeScript.",
+  },
+  "mood-wheel": {
+    title: "React Mood Picker: Draggable Emotion Wheel",
+    description:
+      "React mood wheel: drag, scroll or arrow through feelings on the rim, and the chosen word fills the sentence while the orb recolours. Tailwind CSS + TypeScript.",
+  },
+  "swipe-stack": {
+    title: "React Swipe Cards: Approve or Flag Payments Stack",
+    description:
+      "React swipe card stack for reviewing payments: drag right to approve, left to flag, with a tilt, a stamp and the next card rising. Tailwind CSS + TypeScript.",
+  },
+  "matrix-loaders": {
+    title: "React Dot Matrix Loaders: Wave, Ripple, Spiral and Rain",
+    description:
+      "React six 5 by 5 dot-matrix loaders on one shared pulse: only each dot's phase changes, giving wave, ripple, spiral, rain, sweep. Tailwind CSS + TypeScript.",
+  },
+  "todo-tower": {
+    title: "React To-Do List Animation: Tasks Stacked Like Bricks",
+    description:
+      "React to-do list stacked like bricks: tick or drag a task out and the pile drops with a bounce; overhanging bricks tip off. Tailwind CSS + TypeScript.",
+  },
+  "peek-login": {
+    title: "React Login Form with Peeking Mascot That Follows Cursor",
+    description:
+      "React sign-in card with a little face whose eyes follow the pointer and your email, covers its eyes for passwords and peeks. Tailwind CSS + TypeScript.",
+  },
+  "heat-field": {
+    title: "React Heat Map Cursor Effect: Dots Melt Under Pointer",
+    description:
+      "React field of grey dots that melts into a heat map under the cursor, yellow through red to violet; hold to leave cooling heat. Tailwind CSS + TypeScript.",
+  },
+  "particle-mark": {
+    title: "React Particle Logo: Dots Scatter from the Cursor",
+    description:
+      "React word drawn as hundreds of dots that scatter from the pointer and spring home, warming to the accent colour; click for a shockwave. Tailwind CSS + TypeScript.",
+  },
+  "generate-image": {
+    title: "React AI Image Generation UI: Noise-to-Image Reveal",
+    description:
+      "React image generation card: the picture arrives coarse to fine as noise eases off, under glass with a denoising counter. Tailwind CSS + TypeScript.",
+  },
+  "magnet-select": {
+    title: "React Status Picker with Liquid Orb Selection",
+    description:
+      "React status picker where the selection is a liquid orb: a bead reaches for the option you point at and slides over with a tail. Tailwind CSS + TypeScript.",
+  },
+  "hop-labels": {
+    title: "React Floating Label Input: Label Hops into the Border",
+    description:
+      "React outlined text fields with a floating label that hops along its letters into the border on focus, parting the outline. Tailwind CSS + TypeScript.",
+  },
+  "pull-to-refresh": {
+    title: "React Pull to Refresh: Rubber-Band Balance Card",
+    description:
+      "React pull-to-refresh balance card: it rubber-bands while a ring draws itself, closes past the line, spins, then springs back. Tailwind CSS + TypeScript.",
+  },
+  "runaway-button": {
+    title: "React Cancel Subscription Dialog with Runaway Button",
+    description:
+      "React cancel-subscription dialog whose cancel button slips away from the pointer, then gives up after a few tries. Tailwind CSS + TypeScript.",
+  },
+  "fold-note": {
+    title: "React Folding Card: Credit Note That Folds in 3D",
+    description:
+      "React printed credit note you fold on its centre crease: drag the right half over in 3D, and past halfway it snaps shut. Tailwind CSS + TypeScript.",
+  },
+  "assign-picker": {
+    title: "React Assignee Picker: Multi-Select with Flying Avatars",
+    description:
+      "React assignee pill with a multi-select menu: ticked people's avatars fly into the pill, which stacks them with a count. Tailwind CSS + TypeScript.",
+  },
+  "bend-text": {
+    title: "React Text on a String: Pull and Twang Bending Text",
+    description:
+      "React line of type on a string you can grab and pull; let go and an underdamped spring twangs it back flat. Tailwind CSS + TypeScript.",
+  },
+  "pressure-text": {
+    title: "React Variable Font Hover Effect: Pressure Text",
+    description:
+      "React headline that bulges where you hover: letters near the pointer swell on a variable font's weight axis and take the accent. Tailwind CSS + TypeScript.",
+  },
+  "liquid-gauge": {
+    title: "React Storage Meter: Liquid Gauge in a Glass Orb",
+    description:
+      "React storage meter as liquid in a glass orb with two rolling waves, rising bubbles and a surface that leans toward the pointer. Tailwind CSS + TypeScript.",
+  },
+  "thermo-dial": {
+    title: "React Thermostat Dial: Draggable Temperature Ring",
+    description:
+      "React thermostat ring you drag or step with arrow keys: ticks light to the set point, glow shifts cool to warm, number rolls. Tailwind CSS + TypeScript.",
+  },
+  "pull-cord": {
+    title: "React Light Switch: Pull Cord with Rope Physics",
+    description:
+      "React light switch on a cord: grab the bead of a small verlet rope, pull past the slack and let go to toggle the light. Tailwind CSS + TypeScript.",
+  },
+  "scratch-reveal": {
+    title: "React Scratch Card: Scratch Off Foil to Reveal Prize",
+    description:
+      "React scratch card: rub silver foil away, shedding dust, and once enough is gone the rest lifts off with a confetti burst. Tailwind CSS + TypeScript.",
+  },
+  "polaroid-develop": {
+    title: "React Polaroid Effect: Shake an Instant Photo to Develop",
+    description:
+      "React instant photo you drag and shake to develop: the faster it moves, the quicker the haze clears and colour comes through. Tailwind CSS + TypeScript.",
+  },
+  "wallet-stack": {
+    title: "React Wallet Card Stack: Payment Cards in a Leather Wallet",
+    description:
+      "React payment cards in a wallet, each peeking higher than the last; pick one to slide out, then flip it over in 3D. Tailwind CSS + TypeScript.",
+  },
+  "traffic-bars": {
+    title: "React Stacked Bar Chart: Traffic by Source with Tooltip",
+    description:
+      "React stacked bar chart of daily visits by source: the hovered column is ringed, others dim, and Day to Week flies slices. Tailwind CSS + TypeScript.",
+  },
+  "stock-line": {
+    title: "React Stock Price Chart: Scrubbable Line with Rolling Price",
+    description:
+      "React trading-style price chart: scrub along the line, a dot rides it, the price rolls, and range changes morph the line. Tailwind CSS + TypeScript.",
+  },
+  "pulse-monitor": {
+    title: "React Heart Rate Card: Bedside ECG Monitor Trace",
+    description:
+      "React heart-rate card with a sweeping ECG trace, a heart that beats on each spike and 24 hourly range bars you can scrub. Tailwind CSS + TypeScript.",
+  },
+  "spend-donut": {
+    title: "React Budget Donut Chart: Slice Slides Out on Hover",
+    description:
+      "React monthly budget donut: the slice you point at slides out and thickens while the centre rolls to its amount. Tailwind CSS + TypeScript.",
+  },
+  "usage-stack": {
+    title: "React Usage-Based Pricing: Request Blocks Drop in a Bin",
+    description:
+      "React usage pricing you can see: every 10,000 requests is a block dropping into a bin, coloured by tier as you slide volume. Tailwind CSS + TypeScript.",
+  },
+  "cloth-banner": {
+    title: "React Announcement Banner: Cloth Pinned to a Rail",
+    description:
+      "React announcement printed on cloth and pinned by five pins: it sways, drapes under your hand, and drops if yanked hard. Tailwind CSS + TypeScript.",
+  },
+  "ferrofluid-record": {
+    title: "React Record Button: Ferrofluid Drop with Spikes",
+    description:
+      "React record button drawn as ferrofluid on canvas: it grows spikes toward the cursor and bristles with a simulated voice. Tailwind CSS + TypeScript.",
+  },
+  "sand-timer": {
+    title: "React Hourglass Timer: Canvas Sand Simulation",
+    description:
+      "React session timer as a real hourglass: every grain is simulated on canvas, funneling through at the rate the time runs out. Tailwind CSS + TypeScript.",
+  },
+  "zipper-reveal": {
+    title: "React Zipper Reveal: Unzip a Pouch to Show a Code",
+    description:
+      "React fabric pouch you unzip to reveal an invite code: teeth part in a V above the slider and the pull tab swings. Tailwind CSS + TypeScript.",
+  },
+  "slingshot-send": {
+    title: "React Chat Composer: Slingshot Send Button",
+    description:
+      "React chat composer with a slingshot send button: pull the stone back, let go, and the message arcs into the thread. Tailwind CSS + TypeScript.",
+  },
+  "domino-select": {
+    title: "React Select All Checkbox: Rows Topple Like Dominoes",
+    description:
+      "React mail list where select-all topples the rows like dominoes, each tipping onto the next, then springing up ticked. Tailwind CSS + TypeScript.",
+  },
+  "lenticular-pass": {
+    title: "React Lenticular Effect: Day and Night Event Pass",
+    description:
+      "React event pass printed lenticular: tilt it with the pointer and the day pass turns into night, strip by strip, with light. Tailwind CSS + TypeScript.",
+  },
+  "origami-pricing": {
+    title: "React Pricing Card Folded Like Paper: Origami Animation",
+    description:
+      "React pricing card folded like a paper map: tap and it opens in two folds, features first, then quote and call to action. Tailwind CSS + TypeScript.",
+  },
+  "empty-projects": {
+    title: "React Empty State: Projects Screen with Template Stack",
+    description:
+      "React empty projects screen with three starter templates that fan out on hover; picking one flies it in as your first project. Tailwind CSS + TypeScript.",
+  },
+  "no-results": {
+    title: "React No Results State That Fixes the Search in One Tap",
+    description:
+      "React no-results state that explains why nothing matched and fixes it: the missing letter slides in and filter chips peel away. Tailwind CSS + TypeScript.",
+  },
+  "empty-chart": {
+    title: "React Empty Chart State: Dashed Line Becomes Real Data",
+    description:
+      "React empty chart as a breathing dashed line; connect a source and it bends into real numbers while the area fills. Tailwind CSS + TypeScript.",
+  },
+  "empty-team": {
+    title: "React Empty Team State: Invite Teammates to Seats",
+    description:
+      "React empty team page with dotted seats and an invite field: type an email and the avatar lifts into the next free seat. Tailwind CSS + TypeScript.",
+  },
+  "streaming-answer": {
+    title: "React AI Answer Card: Thinking Steps, Sources, Streaming",
+    description:
+      "React AI answer card: thinking steps tick off and fold to a summary, sources slide in, the answer streams word by word. Tailwind CSS + TypeScript.",
+  },
+  "diff-review": {
+    title: "React AI Edit Diff Review: Accept or Reject Changes",
+    description:
+      "React inline review of AI edits: removals struck red, additions green; Accept all, Reject all, or click a single change. Tailwind CSS + TypeScript.",
+  },
+  "agent-run": {
+    title: "React AI Agent Run UI: Live Steps, Clock and Stop",
+    description:
+      "React live view of an AI agent: each step shows what it is doing and folds to a tick, with a running clock and a Stop button. Tailwind CSS + TypeScript.",
+  },
+  "ghost-autocomplete": {
+    title: "React AI Autocomplete: Ghost Text Suggestion Input",
+    description:
+      "React inline AI autocomplete: a grey suggestion fades in after the cursor when you pause, and Tab inks it in left to right. Tailwind CSS + TypeScript.",
+  },
+  "morphing-dialog": {
+    title: "React Morphing Dialog: Modal That Grows from Its Button",
+    description:
+      "React dialogs that grow out of the button that opened them and shrink back on close; Share opens a link, Delete asks for a name. Tailwind CSS + TypeScript.",
+  },
+  "sound-mark": {
+    title: "React Water Ripple Logo Effect: Standing Wave Mark",
+    description:
+      "React brand mark under water with a vibrating rod: a standing ripple bends the mark like light; hold to turn it up, tap to ripple. Tailwind CSS + TypeScript.",
+  },
+  "ripple-now-playing": {
+    title: "React Music Player Card: Album Art Under Water",
+    description:
+      "React player card whose cover sits under water: every beat drops a ring through the artwork, and pausing stills the water. Tailwind CSS + TypeScript.",
+  },
+  "chladni-upload": {
+    title: "React Upload Progress: Chladni Plate Sand Pattern",
+    description:
+      "React upload progress made of sand on a vibrating plate: each stage plays a higher note and the sand settles into a new pattern. Tailwind CSS + TypeScript.",
+  },
+  "tank-recorder": {
+    title: "React Voice Memo Button: Glass Water Tank Waves",
+    description:
+      "React voice memo button over a glass tank: while you hold to record, your voice shakes a pin and real waves bounce off the glass. Tailwind CSS + TypeScript.",
+  },
+  "frost-input": {
+    title: "React Frost Input: Sign-Up Field That Freezes",
+    description:
+      "React sign-up field that freezes: frost crystals grow across the glass on focus, each key cracks the ice, and sending shatters it. Tailwind CSS + TypeScript.",
+  },
+  "black-hole-delete": {
+    title: "React Delete Animation: Black Hole Swallows the Message",
+    description:
+      "React inbox delete: swipe or close a message and a black hole opens, the list bends around it like a lens, and it is stretched in. Tailwind CSS + TypeScript.",
+  },
+  "portal-card": {
+    title: "React Portal Card: Draw a Circle to Open a Portal",
+    description:
+      "React dark card where holding and drawing a circle tears open a ring of molten sparks, showing another world through it. Tailwind CSS + TypeScript.",
+  },
+  "particle-reveal": {
+    title: "React Particle Text Reveal: Headline Made of Dots",
+    description:
+      "React headline of thousands of dots that gather out of a scatter on springs; the cursor pushes and combs them into streaks. Tailwind CSS + TypeScript.",
+  },
+  "morphing-text": {
+    title: "React Morphing Text: Words That Melt into the Next",
+    description:
+      "React keyword that melts into the next: two blurred copies meet under an SVG alpha threshold so letters flow into new letters. Tailwind CSS + TypeScript.",
+  },
+  "code-snippet": {
+    title: "React Code Block Component: Copy Button and Highlighting",
+    description:
+      "React code block with a macOS-style header, a switchable language label, a Copy button that morphs to a tick, and token highlighting. Tailwind CSS + TypeScript.",
+  },
+  "workflow-network": {
+    title: "React Workflow Diagram: Trigger Fanning Out on Wires",
+    description:
+      "React workflow diagram: one trigger fans out along curved wires on a dotted canvas, light filling each wire to its target. Tailwind CSS + TypeScript.",
+  },
+  "testimonial-wall": {
+    title: "React Testimonial Wall: Endless Reviews in Drifting Columns",
+    description:
+      "React wall of reviews in columns that drift in opposite directions; cards swell at the middle and recede toward the edges. Tailwind CSS + TypeScript.",
+  },
+  "tethered-submit": {
+    title: "React Sign-Up Button That Shows What Is Still Missing",
+    description:
+      "React sign-up button that explains why it is not ready: a hairline draws to the first field that needs something, with a hint. Tailwind CSS + TypeScript.",
+  },
+  "dependent-form": {
+    title: "React Conditional Form Fields: Billing Form That Adapts",
+    description:
+      "React billing form whose fields follow your answers: choose Business and company fields unfold along a line showing the link. Tailwind CSS + TypeScript.",
+  },
+  "glass-edit": {
+    title: "React Inline Edit: Click Text to Edit on a Glass Pane",
+    description:
+      "React inline editing: point at text and it sinks into a recess, click and it lifts onto glass while the card steps back. Tailwind CSS + TypeScript.",
+  },
+  "live-summary": {
+    title: "React Booking Form with a Live Receipt Summary",
+    description:
+      "React booking form that writes its own receipt: each choice flies a line to the summary, and only changed digits roll. Tailwind CSS + TypeScript.",
+  },
+  "scoped-search": {
+    title: "React Search Filters: Type from:anna and Get a Chip",
+    description:
+      "React search field that understands filters: type from:anna or is:unread and the words lift out of the text into a chip. Tailwind CSS + TypeScript.",
+  },
+  "ink-autosave": {
+    title: "React Autosave Indicator: Saved Text Dries Like Ink",
+    description:
+      "React note that shows save state as ink: saved text is dry black, new text is wet blue, and pausing dries it left to right. Tailwind CSS + TypeScript.",
+  },
+  "sort-stack": {
+    title: "React Sortable Table: Rows Slide Like a Stack of Cards",
+    description:
+      "React table that sorts like a stack of cards: press a column and rows lift apart, slide to new places, then close back up. Tailwind CSS + TypeScript.",
+  },
+  "reading-spine": {
+    title: "React Reading Progress Bar: Section Ticks and Scrubber",
+    description:
+      "React article scroll bar: a slim rail with a tick per section and a capsule for your place, with a glass label as you scrub. Tailwind CSS + TypeScript.",
+  },
+  "pluck-frame": {
+    title: "React Elastic Frame: Pluckable Border String",
+    description:
+      "React rounded frame drawn as one elastic string: the pointer catches an edge, stretches it out, and it slips off and rings. Tailwind CSS + TypeScript.",
+  },
+  "ai-composer": {
+    title: "React AI Prompt Box: Growing Composer with Model Picker",
+    description:
+      "React AI prompt box that grows as you type, cycles suggestions when empty, lets you pick a model and attach photos from a menu. Tailwind CSS + TypeScript.",
+  },
+  "glass-drop": {
+    title: "React Logo Intro Animation: Liquid Glass Droplet",
+    description:
+      "React logo intro in liquid glass: a droplet lands as a bubble that magnifies the logo, swells into a glass tile, then clears. Tailwind CSS + TypeScript.",
+  },
+  "lightfall": {
+    title: "React WebGL Background: Lanes of Light Falling Down a Wall",
+    description:
+      "React WebGL background: lanes of light pour down a wall and across a glossy floor, with pulses streaking along every lane. Tailwind CSS + TypeScript.",
+  },
+  "global-deploy": {
+    title: "React Deploy Map: Regions Lighting Up on a World Map",
+    description:
+      "React deploy map on real coastlines: press Deploy or click to ship from the nearest region, glowing arcs spread region to region. Tailwind CSS + TypeScript.",
+  },
+  "card-reader-verify": {
+    title: "React ID Verification UI: Drag a Card into a Reader",
+    description:
+      "React ID check: drag the card into the reader, the strip sweeps, checks run, and it springs out with a Verified stamp. Tailwind CSS + TypeScript.",
+  },
+  "intelligence-glow": {
+    title: "React AI Glow Effect: Hold to Summon the Assistant",
+    description:
+      "React press-and-hold assistant: light ripples from your finger around a phone edge, a Writing Tools panel rises, the draft rewrites. Tailwind CSS + TypeScript.",
+  },
+  "cloud-sync": {
+    title: "React Backup Button: Glass Cloud That Swallows Apps",
+    description:
+      "React backup button shaped like a glass cloud: apps leave orbit and sink in, the cloud wobbles, and coloured light rises inside. Tailwind CSS + TypeScript.",
+  },
+  "smart-light": {
+    title: "React Smart Light Control: Dim and Colour Temperature",
+    description:
+      "React light control with a real room behind it: drag to dim the pendant, slide amber to cool white, or tap a scene. Tailwind CSS + TypeScript.",
+  },
+  "storage-clean": {
+    title: "React Storage Cleanup UI: Bar Crumbles into the Trash",
+    description:
+      "React storage panel: press a recommendation and that slice of the bar crumbles into particles into the trash, with Undo. Tailwind CSS + TypeScript.",
+  },
+  "ring-gallery": {
+    title: "React 3D Ring Gallery: Photos Like Turbine Leaves",
+    description:
+      "React ring of photos standing on edge like turbine leaves: scroll, swipe or drag to spin and settle, with a tilting camera. Tailwind CSS + TypeScript.",
+  },
+  "liquid-send": {
+    title: "React Message Box with Liquid Metal Send Button",
+    description:
+      "React message box whose send button is ringed in liquid chrome drawn by a WebGL shader, with stripes of drifting light. Tailwind CSS + TypeScript.",
+  },
+  "folder-tree": {
+    title: "React File Tree: Finder-Style Folder Tree Animation",
+    description:
+      "React project tree like the Finder sidebar: opening a folder pours its files out on springs, closing draws them back in. Tailwind CSS + TypeScript.",
+  },
+  "add-to-bag": {
+    title: "React Add to Cart Animation: Product Flies into the Bag",
+    description:
+      "React add-to-cart moment: the product lifts off and arcs into the bag, which squashes on landing as the badge rolls up. Tailwind CSS + TypeScript.",
+  },
+  "molten-hold": {
+    title: "React Hold to Confirm: Pour Molten Metal Button",
+    description:
+      "React hold-to-confirm where molten metal pours along a channel with a glowing meniscus that shivers as it runs. Tailwind CSS + TypeScript.",
+  },
+  "liquid-smoke": {
+    title: "React Smoke Cursor Effect: GPU Fluid Simulation",
+    description:
+      "React fluid you stir with the pointer, solved on the GPU: smoke pours from the cursor, curls into eddies and fades. Tailwind CSS + TypeScript.",
+  },
+  "frozen-card": {
+    title: "React Freeze Card UI: Banking Card with Frost Effect",
+    description:
+      "React banking card screen where you can freeze your debit card: it tilts toward the pointer with a glare and holographic sheen. Tailwind CSS + TypeScript.",
+  },
+  "seat-crowd": {
+    title: "React Pricing Seat Picker: A Crowd of Little People",
+    description:
+      "React seat picker for pricing: drag or fling the ruler and your team appears on stage, each person hopping in on an arc. Tailwind CSS + TypeScript.",
+  },
+  "flap-clock": {
+    title: "React Split-Flap World Clock for Teams",
+    description:
+      "React team world clock on a split-flap board: each row is a city with local time on flaps and whether they are asleep or working. Tailwind CSS + TypeScript.",
+  },
+  "image-press": {
+    title: "React Image Compressor UI: A Toy Press That Shrinks Photos",
+    description:
+      "React image compressor: drop a photo on the press, turn the dial to Tiny or Balanced, and it really shrinks it before upload. Tailwind CSS + TypeScript.",
+  },
+  "jelly-splitter": {
+    title: "React Bill Splitter: Chop a Slab of Jelly into Shares",
+    description:
+      "React bill splitter where the bill is glossy jelly on a plate: a cleaver follows you, click to chop and split the pieces. Tailwind CSS + TypeScript.",
+  },
+  "forecast-status": {
+    title: "React App Review Status Card Shown as Weather",
+    description:
+      "React app-review status card shown as weather: lilac sky while waiting, clouds and rain in review, the sun out when approved. Tailwind CSS + TypeScript.",
+  },
+  "paperclip-attach": {
+    title: "React Message Composer with Paperclip File Attach",
+    description:
+      "React message composer that clips attachments with a real paperclip: the file flies in and slides under the wire. Tailwind CSS + TypeScript.",
+  },
+  "aquarium-prompt": {
+    title: "React AI Prompt Box in a Pixel-Art Aquarium",
+    description:
+      "React AI prompt box floating in a pixel-art aquarium, with a shoal of pixel fish schooling behind the frosted glass. Tailwind CSS + TypeScript.",
+  },
+  "elemental-picker": {
+    title: "React Mode Picker: Capsules That Burn, Glow and Freeze",
+    description:
+      "React mode capsules where the chosen one comes alive: choose Ember and flames lick up its sides with flying embers and smoke. Tailwind CSS + TypeScript.",
+  },
+  "oracle-orb": {
+    title: "React AI Answer Orb: Crystal Ball with Liquid Nebula",
+    description:
+      "React crystal ball for AI answers: a glass sphere holds a drifting nebula of violet, pink and amber with stars caught inside. Tailwind CSS + TypeScript.",
+  },
+  "clock-picker": {
+    title: "React Time Picker: Drag the Hands of a Real Clock Face",
+    description:
+      "React time picker on a clock face: drag either hand on a spring, the hour hand creeps as the minute hand moves. Tailwind CSS + TypeScript.",
+  },
+  "bloom-gift-card": {
+    title: "React Gift Card Animation: Flower Blooms to Show Amount",
+    description:
+      "React gift card with a flower bud: tilt it, press and hold to open, and the bud blooms in 3D to show the amount. Tailwind CSS + TypeScript.",
+  },
+  "piano-text": {
+    title: "React Interactive Text: Play Words Like Piano Keys",
+    description:
+      "React words you can play: every letter is a key on a scale, and gliding the pointer across plays each note as the letter dances. Tailwind CSS + TypeScript.",
+  },
+  "highlight-popover": {
+    title: "React Text Selection Toolbar: Highlight Popover",
+    description:
+      "React text selection toolbar: select text in an article and a dark pill rises from it like a drop of ink. Tailwind CSS + TypeScript.",
+  },
+  "pixel-atlas": {
+    title: "React Pixel World Map: Live Activity Heat in Glowing Pixels",
+    description:
+      "React live map drawn in glowing pixels: every place warms the land around it, from slate through violet and magenta to cream. Tailwind CSS + TypeScript.",
+  },
+  "glass-recorder": {
+    title: "React Voice Button for AI Apps: Liquid Glass Recorder",
+    description:
+      "React voice button of liquid glass that bends the light behind it: the drop swells toward the pointer like liquid to a finger. Tailwind CSS + TypeScript.",
+  },
+  "murmur": {
+    title: "React AI Landing Screen: Swallows Over a Field of Type",
+    description:
+      "React landing screen for a writing assistant: four swallows fly around the prompt over a sky drawn live as a field of type. Tailwind CSS + TypeScript.",
+  },
+  "loupe-lens": {
+    title: "React Glass Lens: WebGL Loupe over Printed Objects",
+    description:
+      "React glass ball you drag across a table of tiny printed things: a fragment shader magnifies and refracts the rim like real glass. Tailwind CSS + TypeScript.",
+  },
+  "face-scan-morph": {
+    title: "React Face Scan Animation: Pay with Your Face Morph",
+    description:
+      "React pay-with-your-face confirmation: tap and the scan corners curl into a spinning ring while the face glances and blinks. Tailwind CSS + TypeScript.",
+  },
 };
