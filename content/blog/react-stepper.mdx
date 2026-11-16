@@ -1,6 +1,6 @@
 ---
 title: "React Stepper Component: Build It Step by Step"
-description: "Build an accessible React stepper with Tailwind CSS and Framer Motion: progress steps, an animated line, a multi-step form and a number stepper."
+description: "Build an accessible React stepper with Tailwind CSS and Framer Motion: animated steps, a multi-step form, a Next.js App Router version and a number stepper."
 date: "2026-11-14"
 ---
 
@@ -521,6 +521,75 @@ export function NumberStepper({ min = 1, max = 10 }: { min?: number; max?: numbe
 
 Each button has an `aria-label`, because a bare plus or minus sign is not a useful name. The value sits in an `<output>` with `aria-live="polite"`, so a screen reader reads the new number after each press. Clamping with `min` and `max` and disabling the button at each limit means the control can never show an impossible value. `tabular-nums` keeps the digits the same width so the buttons do not shift as the number changes.
 
+## A stepper in the Next.js App Router
+
+In a Next.js app, the best place to keep the current step is the URL, not component state. The Back button then works, a refresh keeps your place, and you can link someone straight to step 3. The hook below reads a `step` search parameter, clamps it to a valid range, and pushes a new URL when the step changes.
+
+```tsx
+"use client";
+
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+const STEPS = ["Account", "Profile", "Plan", "Review"] as const;
+
+export function useStep() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+
+  const raw = Number(params.get("step") ?? 1);
+  const step = Number.isInteger(raw) ? Math.min(Math.max(raw, 1), STEPS.length) : 1;
+
+  function go(target: number) {
+    const query = new URLSearchParams(params.toString());
+    query.set("step", String(Math.min(Math.max(target, 1), STEPS.length)));
+    router.push(`${pathname}?${query.toString()}`, { scroll: false });
+  }
+
+  return {
+    step,
+    total: STEPS.length,
+    label: STEPS[step - 1],
+    next: () => go(step + 1),
+    back: () => go(step - 1),
+  };
+}
+```
+
+Use it in a client component, and wrap that component in `Suspense`. Next.js asks for this whenever a prerendered page reads search parameters on the client, so that the rest of the page can still be sent as static HTML.
+
+```tsx
+import { Suspense } from "react";
+import { useStep } from "./use-step";
+
+function StepperBody() {
+  const { step, total, label, next, back } = useStep();
+  return (
+    <div>
+      <p>
+        Step {step} of {total}: {label}
+      </p>
+      <button type="button" onClick={back} disabled={step === 1}>
+        Back
+      </button>
+      <button type="button" onClick={next} disabled={step === total}>
+        Next
+      </button>
+    </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <StepperBody />
+    </Suspense>
+  );
+}
+```
+
+Put `"use client"` at the top of the file that holds `StepperBody`, since it uses a hook. Swap the plain text for the stepper markup from Stage 1 and the animation from Stage 2; nothing else changes. Keep form values somewhere that survives navigation between steps, such as a parent layout, a context provider or a server action that saves a draft, because each `router.push` re-renders the route.
+
 ## Ready-made React steppers
 
 If you need a stepper on a page today, these are finished options.
@@ -597,6 +666,10 @@ Use an ordered list, mark the active item with `aria-current="step"`, give each 
 
 No. The basic version in this guide is about sixty lines with no dependencies beyond a class name helper. A library is worth it when your app already uses one, or when you want polished motion without writing it.
 
+### How do I build a stepper in Next.js?
+
+Store the current step in a search parameter such as `?step=2` and read it with `useSearchParams`. Clamp the value to the valid range, push a new URL on Next and Back, and wrap the client component in `Suspense`. The section above has the full hook.
+
 ## Where to go from here
 
-You now have a progress stepper, an animated version, a validated multi-step form, a vertical layout and a number stepper. To see finished, animated versions before you build your own, open the [Step Player](/components/step-player) and [Elastic Stepper](/components/elastic-stepper) previews, or browse the rest of the [components](/components).
+You now have a progress stepper, an animated version, a validated multi-step form, a vertical layout, a Next.js App Router version and a number stepper. To see finished, animated versions before you build your own, open the [Step Player](/components/step-player) and [Elastic Stepper](/components/elastic-stepper) previews, or browse the rest of the [components](/components).

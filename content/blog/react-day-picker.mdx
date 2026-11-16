@@ -1,0 +1,134 @@
+---
+title: "React Day Picker: Setup, Ranges and Styling"
+description: "Set up React DayPicker for a single date or a date range, style it with Tailwind, and avoid the timezone bugs that catch most date pickers."
+date: "2026-11-16"
+---
+
+React DayPicker is the calendar library behind most React date pickers, including the Calendar component in shadcn/ui. It gives you a month grid with keyboard navigation, single, multiple and range selection, and a wide set of props for disabling days, showing several months and changing the caption. This guide sets it up, shows a single date and a date range, styles it with Tailwind CSS and then covers the timezone bug that catches most date pickers sooner or later.
+
+The code below uses `react-day-picker` version 9 and was typechecked against it before going on this page. If you are on an older version, the prop names for dropdown captions and class names differ, so check the upgrade notes first.
+
+## Install and import
+
+```bash
+npm install react-day-picker
+```
+
+The library ships its default styles in a separate file. Import them once, in the component or in your root layout, and the calendar is usable straight away. If you style everything with Tailwind yourself, skip the import and pass your own classes instead (see below).
+
+## A single date
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
+
+export function SingleDate() {
+  const [date, setDate] = useState<Date | undefined>();
+
+  return (
+    <div>
+      <DayPicker mode="single" selected={date} onSelect={setDate} disabled={{ before: new Date() }} />
+      <p>{date ? date.toLocaleDateString() : "Pick a day"}</p>
+    </div>
+  );
+}
+```
+
+`mode="single"` means one selected day. `selected` is the current value and `onSelect` receives the new one, or `undefined` when the person clicks the selected day again. The `disabled` prop takes a matcher, and here it blocks every day before today. Because the component is controlled, the date lives in your state and you can send it to a form or an API from there.
+
+Keyboard support comes with the library: the arrow keys move between days, Page Up and Page Down change the month, and Enter or Space selects. It is worth testing with the keyboard once, since it is the part people most often break when they restyle the calendar.
+
+## A date range
+
+A range picker is the same component with `mode="range"`, and it is the usual choice for bookings and reports.
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { DayPicker, type DateRange } from "react-day-picker";
+import "react-day-picker/style.css";
+
+export function TripDates() {
+  const [range, setRange] = useState<DateRange | undefined>();
+
+  return (
+    <DayPicker
+      mode="range"
+      numberOfMonths={2}
+      selected={range}
+      onSelect={setRange}
+      min={2}
+      excludeDisabled
+      disabled={{ before: new Date() }}
+    />
+  );
+}
+```
+
+`selected` is now an object with `from` and `to`. `numberOfMonths={2}` shows two months side by side, which makes a stay that crosses a month boundary much easier to pick. `min={2}` asks for at least two days in the range, and `excludeDisabled` stops a range from being drawn across days that are blocked. On a phone, one month at a time is usually the better layout, so switch `numberOfMonths` with a media query hook.
+
+## Styling it with Tailwind
+
+DayPicker lets you replace the class for each part of the calendar with `classNames`, so Tailwind utilities can do the styling.
+
+```tsx
+"use client";
+
+import { DayPicker } from "react-day-picker";
+
+export function Styled() {
+  return (
+    <DayPicker
+      mode="single"
+      captionLayout="dropdown"
+      startMonth={new Date(2024, 0)}
+      endMonth={new Date(2030, 11)}
+      classNames={{
+        selected: "bg-indigo-600 text-white rounded-full",
+        today: "font-bold text-indigo-600",
+        chevron: "fill-indigo-600",
+      }}
+    />
+  );
+}
+```
+
+`captionLayout="dropdown"` swaps the month label for month and year dropdowns, which helps a lot when someone needs a date a few years away. In version 9 the range for those dropdowns comes from `startMonth` and `endMonth`. When you pass `classNames` you replace the default class for that part only, so you can restyle the selected day and keep everything else.
+
+## Avoid the timezone bug
+
+Most date picker bugs come from one thing: a `Date` object is a moment in time, but a calendar day is not. If someone picks 15 March and you save `date.toISOString()`, a browser east of UTC can send back 14 March, because midnight local time is the previous day in UTC.
+
+- **For a calendar day, store the day, not the instant.** Format it as `yyyy-MM-dd` from the local parts, or use `toLocaleDateString("en-CA")`, which gives that format.
+- **Parse it back at local midnight** with `new Date(year, month - 1, day)`, rather than `new Date("2026-03-15")`, which is read as UTC.
+- **Use a timestamp only for a real moment**, such as a meeting start, and store the timezone alongside it.
+
+## When a plain input is better
+
+A calendar is slow for dates the person already knows. A date of birth is faster to type into three fields than to reach by clicking back through decades, and a deadline a few days away is quicker from a calendar. Pick the control by how far the date is from today and how often it is entered.
+
+## Date pickers with more character
+
+If you want a date or time picker that is part of the design rather than a default calendar, these Nexus UI components are built for that. They are Pro components with their source to copy.
+
+- [Date Wheels](/components/date-wheels) is a date picker made of three drums for day, month and year, each a real cylinder in 3D that you can fling.
+- [Range Calendar](/components/range-calendar) is a trip date picker whose selection is one liquid ribbon that stretches to your finger.
+- [Magic Calendar](/components/magic-calendar) is a month calendar that knows the world's festivals and celebrates each one when you open it.
+- [Clock Picker](/components/clock-picker) is a time picker on a real clock face, with hands you can drag.
+- [Ruler Picker](/components/ruler-picker) is a duration picker you fling like a ruler.
+
+## Frequently asked questions
+
+**What is React DayPicker?** It is an open source React library for calendars and date pickers. It handles the month grid, keyboard navigation and selection modes, and leaves the look to you. shadcn/ui's Calendar is built on it.
+
+**How do I select a date range with React DayPicker?** Set `mode="range"`, keep a `DateRange` in state and pass it as `selected` with `onSelect`. The value has a `from` and a `to` date.
+
+**How do I disable past dates?** Pass `disabled={{ before: new Date() }}`. You can also pass an array of matchers to disable weekends or a list of booked days.
+
+**How do I style it with Tailwind CSS?** Pass a `classNames` object with Tailwind utilities for the parts you want to change, or skip the default stylesheet and style every part yourself.
+
+For more patterns, see our guides to [choosing a React component library](/blog/best-react-component-library) and [Framer Motion examples](/blog/framer-motion-examples).

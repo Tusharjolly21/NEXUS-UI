@@ -1,0 +1,157 @@
+---
+title: "React Count Up Animation: Numbers That Roll"
+description: "Build a React count up animation with Framer Motion or plain requestAnimationFrame: start on scroll, format numbers, support screen readers and reduced motion."
+date: "2026-11-16"
+---
+
+A count up animation takes a number from zero to its final value over a second or two: 12,400 users, 98% uptime, $2.4M saved. It is a staple of landing pages because the motion draws the eye to the figure that matters. It is also easy to get wrong: it starts before anyone can see it, it makes screen readers read a hundred numbers, or it ignores people who have asked for less motion.
+
+This guide builds a React count up animation two ways: a small component with Framer Motion, and a dependency-free hook with `requestAnimationFrame`. Both run in a Next.js or Vite app, and the code is TypeScript that was type-checked before it went on this page.
+
+## Do you need a library?
+
+The usual answers are `countup.js` (a standalone library) and `react-countup` (a React wrapper around it). They work, and they handle number formatting and easing out of the box. But a count up is a number, a timer and an easing curve. If your project already uses Framer Motion, you can write it in about thirty lines, you control exactly when it starts, and you add no dependency. If you only need it once and do not use Framer Motion, the hook further down needs nothing at all.
+
+## Count up with Framer Motion
+
+The idea is to animate a motion value from the start number to the target, and turn that value into text. A motion value updates outside React's render cycle, so the page does not re-render on every frame.
+
+```tsx
+"use client";
+
+import { useEffect, useRef } from "react";
+import { animate, motion, useInView, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
+
+type CountUpProps = {
+  to: number;
+  from?: number;
+  duration?: number;
+  format?: (value: number) => string;
+};
+
+export function CountUp({ to, from = 0, duration = 1.6, format = (n) => Math.round(n).toLocaleString("en-US") }: CountUpProps) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "0px 0px -15% 0px" });
+  const reduce = useReducedMotion();
+  const value = useMotionValue(from);
+  const text = useTransform(value, format);
+
+  useEffect(() => {
+    if (!inView) return;
+    if (reduce) {
+      value.set(to);
+      return;
+    }
+    const controls = animate(value, to, { duration, ease: "easeOut" });
+    return () => controls.stop();
+  }, [inView, reduce, to, duration, value]);
+
+  return (
+    <span ref={ref} className="tabular-nums">
+      <span className="sr-only">{format(to)}</span>
+      <motion.span aria-hidden="true">{text}</motion.span>
+    </span>
+  );
+}
+```
+
+How it works:
+
+- `useMotionValue(from)` holds the number. `animate(value, to, ...)` moves it to the target with an ease-out curve.
+- `useTransform(value, format)` converts the number into the string that is displayed, so rounding and separators happen in one place.
+- `useInView` with `once: true` waits until the number scrolls into view and then runs a single time. The `margin` starts it when the element is a little way inside the viewport, not the moment its edge appears.
+- The effect returns `controls.stop()`, so an unmount or a changed target cancels a running animation.
+
+Use it like this:
+
+```tsx
+<p className="text-5xl font-semibold">
+  <CountUp to={12400} />+
+</p>
+
+<CountUp to={98.6} format={(n) => `${n.toFixed(1)}%`} />
+```
+
+The `format` prop is a function, so it can only be passed from another client component. A server component cannot pass functions to a client component, so wrap the stat in a small client component if you need custom formatting there. For currency and compact numbers, `Intl.NumberFormat` does the work: `new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n)`.
+
+## Count up without a library
+
+If you do not use Framer Motion, a hook with `requestAnimationFrame` does the same job. It eases the value with a cubic curve, and it jumps straight to the target if the visitor prefers reduced motion.
+
+```tsx
+"use client";
+
+import { useEffect, useState } from "react";
+
+export function useCountUp(target: number, duration = 1500) {
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setValue(target);
+      return;
+    }
+    let frame = 0;
+    const start = performance.now();
+
+    function tick(now: number) {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setValue(target * eased);
+      if (t < 1) frame = requestAnimationFrame(tick);
+    }
+
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [target, duration]);
+
+  return Math.round(value);
+}
+```
+
+Call it as `const users = useCountUp(12400)` and render `users.toLocaleString("en-US")`. This version starts on mount. To start on scroll, pass a flag from an `IntersectionObserver` and return early from the effect while it is false.
+
+## Accessibility and reduced motion
+
+Two details separate a good count up from an annoying one.
+
+**Reduced motion.** Some people turn on "reduce motion" because animation makes them unwell. Both versions above check for it and show the final number immediately. In Framer Motion, `useReducedMotion` reads the setting; in the hook, `matchMedia("(prefers-reduced-motion: reduce)")` does.
+
+**Screen readers.** A rolling number changes many times a second. If it is in the accessibility tree, a screen reader can announce every step. The Framer Motion component avoids this by rendering the final value in a visually hidden span (`sr-only`) and marking the animated text `aria-hidden`, so assistive technology reads the real number once. If you use the hook, do the same: hide the animated span with `aria-hidden="true"` and add the final value as hidden text.
+
+Also use `tabular-nums` (the Tailwind class) so every digit is the same width. Without it, the number jitters sideways as the digits change.
+
+## Other ways to animate a number
+
+A count up is one of several number animations. A countdown, a rolling counter and a stepper each suit a different job:
+
+- A timer that counts down to a date: the [Animated Countdown](/components/animated-countdown) rolls days, hours, minutes and seconds in four styles.
+- A value that changes in response to the user, like a quantity: [Odometer Field](/components/odometer-field) rolls digits like a mechanical odometer as you scrub or step.
+- A total that follows a control, like a price: [Price Odometer](/components/price-odometer) rolls the total as the seat count changes.
+- A number that goes up when the user does something: [Streak Counter](/components/streak-counter) rolls up when a day is logged.
+- A plus and minus control: [Elastic Stepper](/components/elastic-stepper) rolls the value and rubber-bands at its limits.
+
+For the building blocks behind these, see our guide to [Framer Motion examples](/blog/framer-motion-examples), or browse all [components](/components).
+
+## Frequently asked questions
+
+### How do I make a count up animation in React?
+
+Animate a number from a start value to a target and display it as text. With Framer Motion, use `useMotionValue`, `animate` and `useTransform`. Without a library, update state inside a `requestAnimationFrame` loop and ease the value. Both are shown above.
+
+### How do I start the count up when it scrolls into view?
+
+Use Framer Motion's `useInView` with `once: true` and run the animation when it becomes true. Without Framer Motion, use an `IntersectionObserver` and start the loop from its callback.
+
+### How do I format the number with commas, decimals or a currency?
+
+Pass a format function that uses `toLocaleString` or `Intl.NumberFormat`. Use `toFixed` for a fixed number of decimals, and add the unit (such as %, + or a currency symbol) in the same function.
+
+### Should I use countup.js or write my own?
+
+`countup.js` is a fine choice if you want a ready-made option and do not mind the dependency. If you already use Framer Motion, writing your own takes little code and gives you full control over when it starts and how it handles reduced motion.
+
+### Is a count up animation bad for accessibility?
+
+It can be, if it ignores reduced motion or makes screen readers announce every step. Show the final value at once when reduced motion is on, and expose the final number to assistive technology once.

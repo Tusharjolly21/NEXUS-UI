@@ -1,0 +1,81 @@
+---
+title: "Next.js Website Template: How to Choose One"
+description: "How to choose a Next.js website template, what to check before you start, and how to customize one: metadata, images, fonts and content. Two are free."
+date: "2026-11-16"
+---
+
+A Next.js website template saves the slowest part of building a site: getting the layout, sections and animation to a point where it looks finished. The risk is picking one that fights you later, with a stack you do not use, content baked into components, or a design that only works with the demo's text. This guide explains what to check before you choose a Next.js template, how to turn a template into your own site, and which kinds of template fit which job.
+
+## What to check before you choose
+
+Most of the cost of a template shows up after you install it, so look at these things first.
+
+- **The stack.** Check that it uses the tools you already use. Nexus UI templates are built with Next.js, TypeScript, Tailwind CSS and Framer Motion, so if your project uses another styling approach you will be translating as you go.
+- **The pages it includes.** A single landing page and a nine-page site are different jobs. Look at the page list, not just the home page screenshot.
+- **Where the content lives.** The best templates keep text, links and image paths in one place, so changing the words does not mean editing layout code.
+- **How it handles motion.** Animation should respect reduced motion settings, and heavy effects should not block the first paint. Open the live demo on a phone, not only on a laptop.
+- **What you can reuse.** A good template is also a set of sections you can lift into another page, so check that sections are separate components rather than one long file.
+- **The licence and the price.** Check what you are allowed to do with the code and whether the template you want is free or paid before you build on it.
+
+## The types of Next.js website template
+
+Different sites need different templates, so start from the job:
+
+- **SaaS and product landing pages.** One long page that explains a product and asks for a signup. [Simplistic](/templates/simplistic-saas-template) is a free one: a single-accent landing page for AI agents that run routine workflows overnight, with a hero you drag from 22:00 to 07:00. [Plotline](/templates/plotline) is a product-planning landing page whose hero holds a working app in a browser frame, and [Afterglow](/templates/afterglow) is a dark landing page for release analytics.
+- **Developer and AI tools.** Dark, technical pages with demos in the hero. [Strata](/templates/strata) is a landing page for an inference platform with a dashboard that tilts flat as you scroll into it.
+- **Portfolios.** [Launchfolio](/templates/launchfolio-portfolio) is a free case-study portfolio for a product designer, with a hero that is a real redesign you can drag a divider across. [Margin](/templates/margin) is a single-column developer portfolio in light and dark.
+- **Agencies and studios.** [Kiln](/templates/kiln) is a dark studio landing page with a work wall, client quotes and a team grid.
+- **Magazines and blogs.** [Kiosk](/templates/kiosk) is a whole small magazine site in nine pages: a home page, an articles index, a page for every desk, a story page, about, contact, privacy, terms and a 404.
+- **App landing pages.** [Tally](/templates/tally) is a money app page with a live phone in the hero, and [Wayfare](/templates/wayfare) is a travel page with a spinning dot globe.
+
+All of them are in the [template gallery](/templates). Two of the templates there are free, and the rest need a Pro plan.
+
+## Customizing a template, step by step
+
+Once you have picked one, this order keeps the work manageable.
+
+1. **Run it unchanged first.** Make sure it builds and starts before you touch anything, so you know any later problem is yours.
+2. **Replace the content before the design.** Swap the headline, product name, copy, links and images first. Most of the "this does not look right" feeling comes from the demo's words being wrong, not from the layout.
+3. **Set your own metadata.** Every page needs a title and description that describe your site, not the demo's. In the Next.js App Router you export them from the page:
+
+```tsx
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Acme: project planning for small teams",
+  description: "Plan work, share roadmaps and ship on time. Free for teams of up to five.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Acme: project planning for small teams",
+    images: ["/og.png"],
+  },
+};
+```
+
+4. **Replace the share image and the favicon.** The default share card still shows the demo's brand, so people will see it when your link is posted.
+5. **Swap fonts and colours through the theme.** Change the colour tokens and the font in one place rather than hunting for classes across components.
+6. **Optimize images.** Use the `Image` component from `next/image` so images are sized and served in modern formats, and give every image a useful `alt`.
+7. **Delete what you do not use.** Remove sections, pages and dependencies you will not ship. Less code means a faster site and fewer surprises.
+8. **Check it on a phone and with the keyboard.** Tab through the page, and test with reduced motion switched on.
+
+## SEO basics before you launch
+
+A template gives you a good starting structure, but search engines need things only you can supply.
+
+- One clear `h1` per page, in words people would search for.
+- A unique title (aim for 60 characters or fewer) and description on every page.
+- A sitemap and a `robots.txt`, which the Next.js App Router can generate from files in the `app` folder.
+- Real, specific copy. A page that still says "Lorem ipsum" or the demo's product name will not rank and will not convert.
+- Fast loading. Test with Lighthouse, and be careful with large hero videos and heavy effects.
+
+## Frequently asked questions
+
+**What is a Next.js website template?** It is a ready-made site built with Next.js: pages, layout, styling and often animation, that you copy and edit with your own content instead of starting from an empty project.
+
+**Are there free Next.js templates?** Yes. [Simplistic](/templates/simplistic-saas-template) and [Launchfolio](/templates/launchfolio-portfolio) are free in the Nexus UI gallery, and the rest need a Pro plan.
+
+**Do I need to know Next.js to use one?** You need the basics: running a Next.js project and editing React components. Choosing a template with a single page and clear section components makes the first edit much easier.
+
+**How do I change the colours and fonts?** Look for the theme or design tokens file and change them there, so the whole template updates, rather than editing individual classes.
+
+For more patterns, see our guides to [Next.js and React components](/blog/nextjs-react-components) and [landing page structure](/blog/landing-page-structure).

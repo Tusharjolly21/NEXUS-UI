@@ -1,0 +1,176 @@
+---
+title: "React Navbar: Responsive and Animated"
+description: "Build a React navbar component with Tailwind CSS and Framer Motion: sticky header, animated active link, mobile menu and the accessibility details."
+date: "2026-11-16"
+---
+
+The navbar is the one piece of interface that appears on every page, so it gets used more than anything else you build. It has to show where you are, work on a phone, stay out of the way while you scroll, and be usable from the keyboard. It also sets the first impression of the whole site.
+
+This guide builds a React navbar component for Next.js with Tailwind CSS and Framer Motion: a sticky header, links with an animated active indicator, a mobile menu that opens and closes smoothly, and the accessibility details people skip. The code was type-checked against the Next.js App Router before it went on this page. Further down are ready-made navbar components if you would rather start from a finished one.
+
+## What a navbar needs
+
+Before animation, get the basics right:
+
+- **A `nav` landmark with a label.** `<nav aria-label="Main">` lets screen reader users jump straight to it.
+- **Real links.** Use your framework's `Link` for navigation. Buttons are for actions, links are for going somewhere.
+- **A current page marker.** `aria-current="page"` tells assistive technology which link is active, and gives you a hook for styling.
+- **A mobile layout.** Most visitors arrive on a phone. A row of links does not fit, so below a breakpoint the links move behind a menu button.
+- **Stay in reach.** A sticky header keeps navigation available on long pages.
+
+## The component
+
+```tsx
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
+
+const LINKS = [
+  { href: "/components", label: "Components" },
+  { href: "/templates", label: "Templates" },
+  { href: "/blog", label: "Guides" },
+  { href: "/pricing", label: "Pricing" },
+];
+
+export function Navbar() {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  return (
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-black/60 backdrop-blur">
+      <nav aria-label="Main" className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+        <Link href="/" className="font-semibold text-white">
+          Acme
+        </Link>
+
+        <ul className="hidden items-center gap-1 md:flex">
+          {LINKS.map(({ href, label }) => {
+            const active = pathname === href || pathname.startsWith(`${href}/`);
+            return (
+              <li key={href} className="relative">
+                <Link
+                  href={href}
+                  aria-current={active ? "page" : undefined}
+                  className="block rounded-full px-3 py-1.5 text-sm text-white/70 transition-colors hover:text-white aria-[current=page]:text-white"
+                >
+                  {label}
+                </Link>
+                {active ? (
+                  <motion.span
+                    layoutId="nav-underline"
+                    className="absolute inset-x-3 -bottom-px h-px bg-white"
+                    transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                  />
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+
+        <button
+          type="button"
+          className="rounded-md px-3 py-1.5 text-sm text-white md:hidden"
+          aria-expanded={open}
+          aria-controls="mobile-menu"
+          onClick={() => setOpen((v) => !v)}
+        >
+          {open ? "Close" : "Menu"}
+        </button>
+      </nav>
+
+      <AnimatePresence>
+        {open ? (
+          <motion.ul
+            id="mobile-menu"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden border-t border-white/10 md:hidden"
+          >
+            {LINKS.map(({ href, label }) => (
+              <li key={href}>
+                <Link href={href} className="block px-4 py-3 text-white/80 hover:text-white">
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </motion.ul>
+        ) : null}
+      </AnimatePresence>
+    </header>
+  );
+}
+```
+
+How it works:
+
+- **`usePathname`** gives the current URL path, so each link knows if it is active. The check also matches child routes, so `/blog/some-post` still highlights Guides.
+- **`aria-current={active ? "page" : undefined}`** marks the active link. The Tailwind variant `aria-[current=page]:text-white` styles it from the same attribute, so the visual state and the accessible state cannot drift apart.
+- **`layoutId="nav-underline"`** is what animates the indicator. Only the active item renders the underline, and because every render uses the same `layoutId`, Framer Motion slides it from the old link to the new one with a spring. No position maths needed.
+- **The mobile button** has `aria-expanded` and `aria-controls`, so a screen reader announces whether the menu is open. The menu is hidden at `md` and above with `md:hidden`, and the desktop list is hidden below it with `hidden md:flex`.
+- **`AnimatePresence`** keeps the menu mounted for its exit animation, so it slides closed as well as open.
+- **Closing behaviour.** The first effect closes the menu when the route changes, so tapping a link does not leave it hanging open. The second closes it on Escape.
+
+Render `<Navbar />` once in your root layout, above `{children}`, so it stays mounted while pages change. That is also what lets the underline animate between routes.
+
+## Details worth getting right
+
+**Sticky header and anchor links.** A sticky header covers the top of any section you link to with a `#hash`. Add `scroll-margin-top` (the Tailwind class is `scroll-mt-20`) to your section headings, equal to the header height.
+
+**Backdrop blur.** `backdrop-blur` over a translucent background looks good, but text over a busy page can be hard to read. Keep the background opacity high enough that link text keeps good contrast over whatever scrolls underneath.
+
+**Reduced motion.** The spring indicator and the sliding menu are small, but respect the setting anyway. Wrap the app in Framer Motion's `MotionConfig` with `reducedMotion="user"` and the animations switch off for anyone who asked.
+
+**Focus styles.** Do not remove the outline on links. If you restyle it, use `focus-visible` so keyboard users still see where they are.
+
+**Keyboard order.** Put the logo first, then the links, then any call to action. Keep the DOM order the same as the visual order.
+
+## Ready-made navbar components
+
+If you would rather copy a finished component than build one, these cover the common styles:
+
+- **Pill navigation:** [Stretch Nav](/components/stretch-nav) has an active capsule that leads with its front edge and lets the back edge catch up, so it stretches to the next link.
+- **A navbar with a crystal orb mark:** [Orb Nav](/components/orb-nav) is a minimal bar whose logo is a smoked crystal orb lit by your pointer.
+- **Glass morphism:** [Float Glass Navbar](/blocks/block-navigation#float-glass-navbar) floats over the page content with backdrop blur and a spring entrance.
+- **Dock-style navigation:** [Floating Dock](/components/floating-dock) and [Magnify Dock](/components/magnify-dock) are macOS-style docks whose icons swell under the pointer.
+- **A dropdown menu:** [Stagger Menu](/components/stagger-menu) unfolds its items one after another with arrow-key navigation.
+
+For the animation side, see our guides to [Framer Motion animations in Next.js](/blog/framer-motion-nextjs-animations) and [React components for Next.js](/blog/nextjs-react-components), or browse all [components](/components).
+
+## Frequently asked questions
+
+### How do I create a navbar in React?
+
+Render a `nav` element with a list of links, and show the active link by comparing each link's path to the current URL. In Next.js, `usePathname` gives you the path. Add a mobile menu that toggles with state, and put the navbar in your root layout so it appears on every page.
+
+### How do I make a navbar responsive?
+
+Show the full list of links from a breakpoint up (`hidden md:flex` in Tailwind) and show a menu button below it (`md:hidden`). The button toggles a list of the same links.
+
+### How do I highlight the active link in Next.js?
+
+Read the path with `usePathname`, compare it to each link's `href`, and set `aria-current="page"` on the match. Style it with the `aria-[current=page]:` Tailwind variant so the visual state and the accessible state are the same.
+
+### How do I make a navbar sticky?
+
+Give the header `sticky top-0` with a z-index so it stays above the page content. If you link to sections with `#hash` anchors, add `scroll-margin-top` to those sections so the sticky bar does not cover their headings.
+
+### What makes a navbar accessible?
+
+A labelled `nav` landmark, real links, `aria-current="page"` on the active one, a menu button with `aria-expanded` and `aria-controls`, a visible focus style, and a way to close the mobile menu with Escape.

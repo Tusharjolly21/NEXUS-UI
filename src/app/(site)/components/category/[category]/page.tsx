@@ -18,6 +18,7 @@ import { ComponentGallery } from "@/components/gallery/component-gallery";
 import { getPricing } from "@/lib/region";
 import { Band, PillLink } from "@/components/site";
 import { allGalleryItems } from "@/lib/catalog/gallery-items";
+import { getIndexableTypes, getTypeHref } from "@/lib/catalog/type-collections";
 
 type Props = { params: Promise<{ category: string }> };
 
@@ -150,6 +151,17 @@ export default async function ComponentCategoryPage({ params }: Props) {
             </div>
           </div>
         )}
+
+        <div className="mt-10">
+          <h2 className="text-[17px] font-semibold text-foreground">Browse by type</h2>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {getIndexableTypes().map((t) => (
+              <PillLink key={t.slug} href={getTypeHref(t.slug)} variant="white" size="sm">
+                {t.heading.replace(/^React /, "").replace(/ Components?$/, "").replace(/: .*$/, "")}
+              </PillLink>
+            ))}
+          </div>
+        </div>
       </Band>
     </>
   );
