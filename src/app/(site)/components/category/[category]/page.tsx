@@ -118,6 +118,8 @@ export default async function ComponentCategoryPage({ params }: Props) {
 
       <section aria-label={`${label} gallery`} className="px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
+          {/* the tile titles below are h3s: this h2 keeps the outline H1 > H2 > H3 */}
+          <h2 className="sr-only">{`Browse ${label}`}</h2>
           {/* the For fun group is heavy (canvas, WebGL): its tiles start as posters and run when played */}
           <ComponentGallery items={galleryItems} pricing={pricing} playOnClick={category === "for-fun"} />
         </div>

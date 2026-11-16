@@ -110,6 +110,7 @@ export default async function ComponentTypePage({ params }: Props) {
 
       <section aria-label={`${collection.heading} gallery`} className="px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
+          <h2 className="sr-only">{`Browse ${collection.heading}`}</h2>
           <ComponentGallery items={galleryItems} pricing={pricing} />
         </div>
       </section>
