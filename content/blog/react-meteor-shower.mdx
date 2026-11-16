@@ -1,0 +1,232 @@
+---
+title: "React Meteor Shower: CSS and Canvas Effect"
+description: "Make a meteor shower effect in React: a CSS keyframe version you can paste in, plus a canvas Meteors component with density, angle and click-to-strike."
+date: "2026-11-16"
+---
+
+A meteor shower is a small streak of light that crosses a dark background and fades out, repeated at random. It is one of the cheapest ways to make a hero section, a pricing card or a launch page feel alive, and it works with almost no code.
+
+This guide shows two ways to build it. The first is plain HTML and CSS, then wrapped as a React component, with no animation library. The second is a canvas component for when you want denser skies, glow, stars and pointer interaction.
+
+## How a CSS meteor works
+
+Every meteor is one tiny element with three tricks applied to it.
+
+1. **A head and a tail.** The element itself is a 2 pixel dot. Its `::before` pseudo-element is a thin line with a gradient that fades to transparent, and it points backwards, away from the direction of travel.
+2. **One keyframe that moves it in a straight line.** The element is rotated to the angle you want, then pushed along its own axis with `translateX`. Because the rotation happens first, a plain horizontal move becomes a diagonal fall.
+3. **Random timing.** Each meteor gets its own start position, delay and duration, so they never move in step.
+
+## The CSS
+
+Put this in your global stylesheet (in a Next.js App Router project, `app/globals.css`).
+
+```css
+.meteor {
+  position: absolute;
+  top: -10px;
+  width: 2px;
+  height: 2px;
+  border-radius: 9999px;
+  background: #cfe6ff;
+  box-shadow: 0 0 6px 1px rgb(207 230 255 / 0.5);
+  transform: rotate(215deg);
+  animation: meteor 4s linear infinite;
+}
+
+.meteor::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 70px;
+  height: 1px;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg, #cfe6ff, transparent);
+}
+
+@keyframes meteor {
+  0% {
+    transform: rotate(215deg) translateX(0);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(215deg) translateX(-700px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meteor {
+    display: none;
+  }
+}
+```
+
+The angle appears in the `rotate()` of all three places, and it has to match. At 215 degrees the meteors fall down and to the right. Use 325 degrees for down and to the left. The tail always trails behind because the gradient runs along the same axis.
+
+## The HTML-only version
+
+You do not need React for this. Put the meteors inside a container that is `position: relative` with `overflow: hidden`, and give each one a position and timing.
+
+```html
+<div class="sky">
+  <span class="meteor" style="left: 20%; animation-delay: 0s"></span>
+  <span class="meteor" style="left: 55%; animation-delay: 1.4s; animation-duration: 3s"></span>
+  <span class="meteor" style="left: 80%; animation-delay: 3s"></span>
+</div>
+```
+
+```css
+.sky {
+  position: relative;
+  overflow: hidden;
+  height: 24rem;
+  background: #020617;
+}
+```
+
+Three or four hand-placed meteors can look better than twenty random ones. If you want the random version, use React.
+
+## The React component
+
+```tsx
+"use client";
+
+import { useEffect, useState } from "react";
+
+type Meteor = { id: number; left: number; delay: number; duration: number };
+
+export function MeteorShower({ count = 14 }: { count?: number }) {
+  const [meteors, setMeteors] = useState<Meteor[]>([]);
+
+  // Random values are made after mount so the server and client HTML match.
+  useEffect(() => {
+    setMeteors(
+      Array.from({ length: count }, (_, id) => ({
+        id,
+        left: Math.random() * 100,
+        delay: Math.random() * 6,
+        duration: 2 + Math.random() * 4,
+      })),
+    );
+  }, [count]);
+
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+      {meteors.map((m) => (
+        <span
+          key={m.id}
+          className="meteor"
+          style={{ left: `${m.left}%`, animationDelay: `${m.delay}s`, animationDuration: `${m.duration}s` }}
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+Use it by placing it inside any positioned, clipped container, with your content above it:
+
+```tsx
+export function Hero() {
+  return (
+    <section className="relative isolate overflow-hidden bg-slate-950 px-6 py-32 text-center text-white">
+      <MeteorShower />
+      <h1 className="relative text-5xl font-semibold tracking-tight">Ship something people remember</h1>
+    </section>
+  );
+}
+```
+
+Notes on the choices in this code:
+
+- **Random values in an effect, not in render.** If you call `Math.random()` while rendering, the server and the browser produce different numbers and React reports a hydration mismatch. Generating the meteors in `useEffect` avoids it. The sky is empty for the first frame, which nobody notices.
+- **`aria-hidden` and `pointer-events-none`.** The layer is decoration. Screen readers skip it, and it never blocks a click on the button underneath.
+- **`relative` on the headline.** The meteors are absolutely positioned. Giving your content `relative` keeps it above them without a z-index.
+- **Inline `animationDelay` and `animationDuration`.** Inline styles win over the shorthand in the stylesheet, so each meteor can keep its own timing while sharing one class.
+- **Only `transform` and `opacity` animate.** Those two properties are handled by the GPU and do not trigger layout, which is why fifteen meteors stay smooth.
+
+## Performance and accessibility
+
+- **Keep the count low.** Ten to twenty is plenty. More than that rarely looks better and costs every visitor on a slow phone.
+- **Respect reduced motion.** The media query in the CSS hides the meteors for people who have asked their system to reduce motion. A static sky is still a fine background.
+- **Contrast comes first.** Meteors cross behind your text. Keep the head and tail faint near copy, and check the text still passes contrast against the darkest and lightest part of the background.
+- **Clip it.** `overflow: hidden` on the container stops meteors from creating a horizontal scrollbar when they leave the edge.
+
+## When to use the canvas version
+
+CSS meteors are the right tool for a few streaks. They stop scaling when you want:
+
+- a denser sky with twinkling stars behind it
+- a soft glow around each head and a flash where it lands
+- meteors that react to the pointer, curving toward it and landing where you click
+- a precise travel angle, speed range and spacing from props, with no hand-written keyframes
+
+The [Meteors](/components/meteors) component draws all of this on a single canvas, so adding more meteors does not add more elements to the page. Install it with the shadcn CLI:
+
+```bash
+npx shadcn@latest add @nexus-labs/meteors
+```
+
+Then wrap whatever should sit on the sky:
+
+```tsx
+import { Meteors } from "@/components/meteors";
+
+export function LaunchCard() {
+  return (
+    <Meteors
+      number={22}
+      stars={70}
+      intensity="medium"
+      className="flex min-h-[420px] items-center justify-center rounded-3xl bg-slate-950"
+    >
+      <h2 className="text-4xl font-semibold text-white">Make a wish.</h2>
+    </Meteors>
+  );
+}
+```
+
+The props that matter most:
+
+- `number` and `intensity` set how many meteors are in the air (`intensity` scales the count to 0.65x, 1x or 1.45x).
+- `angle` sets the direction of travel in degrees.
+- `stars` adds faint twinkling stars behind the meteors.
+- `hoverOnly` shows meteors only while the pointer is over the container.
+- `interactive` lets the pointer bend passing meteors, and a click calls one down to strike that spot.
+- `color` and `glow` change the head colour and the bloom.
+
+With reduced motion turned on, the meteors stay in place as faint static streaks instead of moving.
+
+## More background effects
+
+Meteors pair well with other dark, ambient backgrounds. Our guide to [React background components](/blog/react-background-components) compares the main approaches (gradients, grids, aurora, particles, shaders) and when to use each, and the full set lives in the [background effects](/components/category/background-effects) category. For the animation library behind much of this, see our [Framer Motion examples](/blog/framer-motion-examples).
+
+## Frequently asked questions
+
+### How do I make a meteor shower effect with CSS?
+
+Create a small element with a gradient tail on `::before`, rotate it to the angle you want, and animate `translateX` in a keyframe so it travels along that angle while its opacity fades to zero. Give each copy a different `left`, `animation-delay` and `animation-duration`. The CSS above is a complete version.
+
+### How do I add a meteor effect in React or Next.js?
+
+Add the CSS to your global stylesheet and use the `MeteorShower` component inside a relative container. Mark the file `"use client"` and create the random values in `useEffect`, so server-rendered and client HTML match. For a canvas version with props, install the Meteors component with `npx shadcn@latest add @nexus-labs/meteors`.
+
+### Which direction do the meteors fall, and how do I change it?
+
+With 215 degrees they fall down and to the right. Change the angle in all three `rotate()` calls in the CSS, for example to 325 degrees for down and to the left. In the canvas component, change the `angle` prop instead.
+
+### Does a meteor background hurt performance?
+
+Not if you keep it small. CSS meteors only animate `transform` and `opacity`, so the browser composites them without recalculating layout. Stay at around ten to twenty. If you want a lot more, use a canvas, where the cost does not grow with the number of DOM elements.
+
+### Should I use CSS or canvas for meteors?
+
+Use CSS for a few simple streaks behind a hero. Use canvas when you want density, glow, stars or pointer interaction, because one canvas replaces dozens of animated elements.
+
+### How do I make meteors respect reduced motion?
+
+Hide them inside a `prefers-reduced-motion: reduce` media query, as in the CSS above. The Meteors component handles this for you and keeps faint static streaks in place.

@@ -1,0 +1,204 @@
+---
+title: "React Input With Search Icon (Tailwind)"
+description: "Put a search icon inside an input in React and Tailwind CSS: accessible markup, a clear button, a plain HTML and CSS version, and animated search bars to copy."
+date: "2026-11-16"
+---
+
+A search field with a magnifier inside it is one of the most common pieces of interface there is, and it is easy to get slightly wrong: the icon blocks clicks, the text runs underneath it, the browser draws its own clear button on top of yours, and a screen reader has no idea what the field is for.
+
+This guide builds a search input with an icon inside it, first in plain HTML and CSS, then as a React component with Tailwind CSS that adds a clear button and proper labelling. At the end are animated search bars you can use when a static field is not enough.
+
+## The idea: icon on top, padding underneath
+
+An input cannot contain an icon. What looks like one is an icon positioned on top of the input, with extra padding on the input so the typed text starts after it. So the structure is always the same:
+
+1. A wrapper with `position: relative`.
+2. The icon, absolutely positioned inside the wrapper, vertically centred, with `pointer-events: none` so clicks go through to the input.
+3. The input, with left padding wider than the icon.
+
+## In plain HTML and CSS
+
+```html
+<div class="search">
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+    <circle cx="9" cy="9" r="5.5" />
+    <path d="m13.5 13.5 3.5 3.5" />
+  </svg>
+  <input type="search" placeholder="Search" aria-label="Search" />
+</div>
+```
+
+```css
+.search {
+  position: relative;
+  max-width: 24rem;
+}
+
+.search svg {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  width: 1rem;
+  height: 1rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #a1a1aa;
+}
+
+.search input {
+  width: 100%;
+  height: 2.5rem;
+  padding: 0 0.75rem 0 2.25rem;
+  border: 1px solid #e4e4e7;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+}
+```
+
+The icon is `1rem` wide and sits `0.75rem` from the edge, so the text needs `0.75rem + 1rem + a small gap`, which is the `2.25rem` of left padding. If you change the icon size, change the padding with it.
+
+## The React and Tailwind component
+
+This version adds a visible label for assistive technology, a colour change on focus, and a clear button that appears once there is text.
+
+```tsx
+"use client";
+
+import { useId } from "react";
+
+export function SearchField({
+  value,
+  onChange,
+  placeholder = "Search components",
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}) {
+  const id = useId();
+
+  return (
+    <div className="group relative w-full max-w-sm">
+      <label htmlFor={id} className="sr-only">
+        {placeholder}
+      </label>
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400 transition-colors group-focus-within:text-zinc-700"
+      >
+        <circle cx="9" cy="9" r="5.5" />
+        <path d="m13.5 13.5 3.5 3.5" />
+      </svg>
+      <input
+        id={id}
+        type="search"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="h-10 w-full rounded-xl border border-zinc-200 bg-white pl-9 pr-9 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus-visible:border-zinc-400 focus-visible:ring-2 focus-visible:ring-zinc-900/10 [&::-webkit-search-cancel-button]:appearance-none"
+      />
+      {value && (
+        <button
+          type="button"
+          aria-label="Clear search"
+          onClick={() => onChange("")}
+          className="absolute right-2 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-md text-zinc-400 outline-none hover:text-zinc-700 focus-visible:ring-2 focus-visible:ring-zinc-900/20"
+        >
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="size-3.5">
+            <path d="m5 5 10 10M15 5 5 15" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
+```
+
+Notes on the choices in this code:
+
+- **`type="search"`** tells the browser and assistive technology this is a search field, and gives mobile keyboards a Search key.
+- **A real `<label>`, hidden with `sr-only`.** A placeholder disappears as soon as you type and is not a reliable name for the field. The label gives screen readers a name without changing the layout.
+- **`useId`** links the label to the input without you inventing ids, and stays unique if the component appears twice on a page.
+- **`pl-9 pr-9`** reserves room for the icon on the left and the clear button on the right, so text never runs underneath either.
+- **`group` and `group-focus-within`** darken the icon while the input has focus, a small cue that the field is active.
+- **`[&::-webkit-search-cancel-button]:appearance-none`** hides the browser's own clear button in Chrome and Safari. Without it you get two clear buttons.
+- **The clear button is a real `<button type="button">`** with an `aria-label`. `type="button"` stops it from submitting a surrounding form.
+
+## Using it to filter a list
+
+The component is controlled, so filtering is a matter of keeping the query in state.
+
+```tsx
+"use client";
+
+import { useMemo, useState } from "react";
+import { SearchField } from "./search-field";
+
+const ITEMS = ["Button", "Carousel", "Date picker", "File upload", "Progress bar", "Toggle switch"];
+
+export function SearchableList() {
+  const [query, setQuery] = useState("");
+
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return q ? ITEMS.filter((item) => item.toLowerCase().includes(q)) : ITEMS;
+  }, [query]);
+
+  return (
+    <div className="space-y-3">
+      <SearchField value={query} onChange={setQuery} />
+      <ul className="text-sm text-zinc-700">
+        {results.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+      {results.length === 0 && <p className="text-sm text-zinc-500">No matches for "{query}"</p>}
+    </div>
+  );
+}
+```
+
+For a large list or a server search, debounce the query before you filter or fetch, and show a message for the empty state so a blank list never looks broken.
+
+## When a plain field is not enough
+
+A static field with an icon is the right default for a filter above a table. For a primary search, such as a header, a docs site or a command palette, the interaction itself can do more work. These are finished React components you can copy:
+
+- [Seek Search](/components/seek-search) is a round button that opens into a field as one object, with suggestions that drop in underneath and filter as you type.
+- [Lens Search](/components/lens-search) grows the magnifier into a lens that glides down the results and magnifies each row.
+- [Scoped Search](/components/scoped-search) understands filters: type `from:anna` or `is:unread` and the words lift out of the text into a chip.
+- [Gooey Search Input](/components/gooey-search-input) merges a pill and an icon bubble through an SVG goo filter, then springs open into a text field.
+- [Search Modal](/components/search-modal) opens a command-K style palette with photos, matched letters and a keyboard highlight.
+
+Install one with the shadcn CLI, for example `npx shadcn@latest add @nexus-labs/seek-search`. Some components in the library are Pro, and each component page says which. For more fields, pickers and controls, see the [input and control components](/components/category/inputs-controls) category and the [input components](/components/type/inputs) collection.
+
+## Frequently asked questions
+
+### How do I put a search icon inside an input?
+
+Wrap the input in an element with `position: relative`, place the icon inside it with `position: absolute`, and add left padding to the input so text starts after the icon. Set `pointer-events: none` on the icon so clicks reach the input.
+
+### How do I add a search icon to an input in Tailwind CSS?
+
+Use a relative wrapper, give the icon `absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none`, and give the input `pl-9`. The React component above is a complete example.
+
+### Why do I get two clear buttons in a search input?
+
+Chrome and Safari draw their own clear button inside `type="search"` fields. Hide it with `[&::-webkit-search-cancel-button]:appearance-none` in Tailwind, or `input[type="search"]::-webkit-search-cancel-button { appearance: none; }` in CSS, if you provide your own.
+
+### Do I need a label if I have a placeholder?
+
+Yes. A placeholder vanishes when someone types and is not a dependable accessible name. Use a real `<label>`, visible or hidden with `sr-only`, or at least an `aria-label` on the input.
+
+### Should I use type="search" or type="text"?
+
+Use `type="search"`. It carries the right meaning for assistive technology and gives phones a Search key on the keyboard. The only cost is the browser's built-in clear button, which you can hide.
+
+### How do I make the search icon change colour on focus?
+
+Add `group` to the wrapper and `group-focus-within:text-zinc-700` to the icon. The icon changes whenever anything inside the wrapper, including the input, has focus.
