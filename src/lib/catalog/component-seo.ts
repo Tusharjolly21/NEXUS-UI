@@ -190,7 +190,7 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
       "React 404 hero of falling characters that settle into a hidden message where your pointer lingers. WebGL + Framer Motion + Tailwind CSS.",
   },
   "magic-calendar": {
-    title: "React Calendar Component: Festival Celebrations",
+    title: "Animated React Calendar Component with Festival Effects",
     description:
       "React month calendar that celebrates about fifty world festivals with snow, fireworks, lanterns and candles. Canvas + Framer Motion + Tailwind CSS.",
   },
@@ -325,7 +325,7 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
       "React image trail effect: images spawn along the cursor path and fade out with a blur. Works with touch input. Built with Tailwind CSS and Framer Motion.",
   },
   "draggable-card-stack": {
-    title: "Draggable Cards UI — React Card Stack",
+    title: "React Card Stack UI: Draggable Cards You Can Fling",
     description:
       "Draggable card stack for React: drag or fling the top card to send it to the back of a tilted deck. Supports video cards. Tailwind CSS + Framer Motion.",
   },
@@ -580,7 +580,7 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
       "Animated React date range picker: drag and the selection stretches like a ribbon, snapping day by day, while the nights count rolls. Framer Motion.",
   },
   "seek-search": {
-    title: "React Search Bar That Expands, With Suggestions",
+    title: "React Expandable Search Bar with Suggestions",
     description:
       "Animated React search bar: a round button opens into a field as one object, and suggestions drop in underneath and filter as you type. Escape closes it.",
   },
@@ -590,7 +590,7 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
       "React image accordion: the photo strip you point at opens and its neighbours give way on a smooth falloff, with a caption that rises. Framer Motion.",
   },
   "goo-reorder": {
-    title: "React Drag and Drop List: Liquid Reorder",
+    title: "React Draggable List: Drag and Drop with Liquid Reorder",
     description:
       "React drag and drop list that reorders like ink: rows stay joined by a liquid neck that stretches and pinches off as one moves, with keyboard support.",
   },
@@ -605,7 +605,7 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
       "Free React copy to clipboard button: the icon morphs into a check under a ripple with a Copied tooltip, plus a command line copy. Framer Motion.",
   },
   "toast-stack": {
-    title: "React Toast Notifications That Stack",
+    title: "Animated React Toast Notifications That Stack",
     description:
       "Free React toast notifications: new toasts drop onto a stack and spring into shape, hover fans them out, and a fling sends one skidding away. Framer Motion.",
   },
@@ -778,5 +778,55 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
     title: "React 3D Cubes Grid Background with a Ripple",
     description:
       "React background of 3D cubes that ripple into a travelling wave under the cursor, on one canvas with one animation loop. Light or dark variants.",
+  },
+  "tag-pit": {
+    title: "React Tag Picker with Pill Tags You Can Throw",
+    description:
+      "React tag input for an interests picker: every tag is a pill dropped into a tray. Grab and throw them, shake the tray, tap to pick, and Continue unlocks at a minimum.",
+  },
+  "cursor-buddy": {
+    title: "React Cursor Effect: A Character Whose Eyes Follow You",
+    description:
+      "React cursor effect: a soft little character whose eyes follow the pointer, blink, flinch when you come close, doze off when idle and hop when you click it.",
+  },
+  "morph-cursor": {
+    title: "React Custom Cursor That Morphs into Buttons",
+    description:
+      "React custom cursor like the iPad pointer: a soft dot melts into the shape of whatever you can press, sits behind it as a highlight and becomes a caret over text.",
+  },
+  "encrypted-text": {
+    title: "React Scramble Text Effect: Text That Decodes Itself",
+    description:
+      "Free React scramble text effect: characters shuffle in fixed-width cells, then a lock wave drops each into place with a spring. Start on load, hover, click or scroll.",
+  },
+  "motion-layer-scroller": {
+    title: "React Parallax Scroll Effect with Paper-Cut Layers",
+    description:
+      "Free React parallax scroll: a landscape of paper-cut layers where each ridge rises at its own speed as you scroll, then settles on a soft spring. Pass your own layers.",
+  },
+  "bending-rail": {
+    title: "React Slider with a Rail That Bends to the Knob",
+    description:
+      "React slider whose rail follows the knob: pull the knob off the groove and the rail bends toward it while a ghost knob keeps the value, then it twangs straight.",
+  },
+  "capsule-toggles": {
+    title: "React Toggle Switch: A Ball Sealed in a Glass Capsule",
+    description:
+      "Free React toggle switches built as a ball in a glass capsule. Flip one and the ball stretches into a pill, takes on the row's colour and glows as it lands.",
+  },
+  "stretch-nav": {
+    title: "React Navbar with a Stretching Pill Indicator",
+    description:
+      "React pill navigation: the active capsule leads with its front edge and the back edge catches up, so it stretches to the next item. A hover pill follows the pointer.",
+  },
+  "svg-noise-shader": {
+    title: "React Noise Gradient Background with SVG Grain",
+    description:
+      "Free React grainy gradient background built from SVG feTurbulence: film grain over soft pools of colour that lean toward the pointer, and a press melts the surface.",
+  },
+  "tracing-spotlight-panel": {
+    title: "React Spotlight Card with a Tracing Border Glow",
+    description:
+      "Free React spotlight card: a soft light trails the pointer on a spring and the border glows where it is closest. Leave and it runs laps round the border.",
   },
 };
