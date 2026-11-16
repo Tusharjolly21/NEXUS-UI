@@ -1,14 +1,40 @@
 ---
-title: "React Custom Cursor: Spring Follower Ring"
-description: "Build a custom cursor in React with Framer Motion: a spring-driven ring that grows over links, hides on touch screens and respects reduced motion."
+title: "React Custom Mouse Cursor: CSS and Spring"
+description: "Make a custom mouse cursor in React: use the CSS cursor property with your own image, then build an animated spring-driven follower ring with Framer Motion."
 date: "2026-11-16"
 ---
 
-A custom cursor replaces or decorates the mouse pointer with something of your own: a ring that trails behind, a dot that grows over buttons, a blob that changes shape. Done well, it makes a portfolio or product page feel crafted. Done badly, it lags, blocks clicks, and shows up on phones where there is no mouse at all.
+A custom mouse cursor replaces or decorates the pointer with something of your own: a ring that trails behind, a dot that grows over buttons, a blob that changes shape. Done well, it makes a portfolio or product page feel crafted. Done badly, it lags, blocks clicks, and shows up on phones where there is no mouse at all.
 
-This guide builds a React custom cursor with Framer Motion: a ring that follows the pointer on a spring, grows when it is over something clickable, and switches itself off on touch devices. It keeps the real pointer visible, which is the safer choice, and the accessibility section covers when hiding it makes sense.
+There are two ways to make one. The CSS `cursor` property swaps the pointer for an image and needs no JavaScript, but the result is a static picture. For animated mouse cursors, with motion, physics and hover states, you draw your own element and make it follow the pointer. This guide covers both: first the CSS cursor, then a React custom cursor built with Framer Motion, a ring that follows the pointer on a spring, grows when it is over something clickable, and switches itself off on touch devices. It keeps the real pointer visible, which is the safer choice, and the accessibility section covers when hiding it makes sense.
 
-## How a cursor follower works
+## The CSS way: a custom mouse cursor with no JavaScript
+
+If all you want is a different pointer, CSS is enough. Put your cursor image in the `public` folder and point the `cursor` property at it, with a standard keyword as the fallback.
+
+```css
+body {
+  cursor: url("/cursors/dot.svg") 8 8, auto;
+}
+
+a,
+button,
+[role="button"] {
+  cursor: url("/cursors/dot-active.svg") 12 12, pointer;
+}
+```
+
+What each part does:
+
+- **`url("/cursors/dot.svg")`** is the image. SVG and PNG both work in modern browsers.
+- **`8 8`** is the hotspot: the point inside the image that counts as the click position, measured in pixels from the top left. For a round dot, use its centre.
+- **`, auto`** is the fallback keyword. If the image fails to load, the browser uses the normal pointer. Never leave it out.
+- **The second rule** gives links and buttons their own cursor, so people can still tell what is clickable.
+
+Keep the image small, 32 by 32 pixels or less. Browsers limit how large a cursor image can be, and big ones can disappear near the edge of the window. The CSS cursor is also a still image in practice, so it cannot animate, follow with a delay or change shape smoothly. For that, you need the follower below.
+
+
+## How an animated cursor follower works
 
 There are three parts.
 
@@ -109,6 +135,14 @@ Once the basic follower works, the same pattern extends in several directions. T
 For more on the motion library behind them, see our guide to [Framer Motion examples](/blog/framer-motion-examples), or browse all [components](/components).
 
 ## Frequently asked questions
+
+### How do I make a custom mouse cursor with CSS?
+
+Set the `cursor` property to an image with a hotspot and a fallback, for example `cursor: url("/cursors/dot.svg") 8 8, auto;`. Keep the image at 32 by 32 pixels or smaller, and give links and buttons their own rule so they still look clickable.
+
+### Can I animate a custom mouse cursor?
+
+Not with the CSS `cursor` property, which shows a static image. To animate it, draw your own element that follows the pointer, as in the component above. Framer Motion's `useSpring` gives it the lag and settle that makes it feel physical.
 
 ### How do I make a custom cursor in React?
 
