@@ -103,6 +103,20 @@ export default function IconsPage() {
             </ul>
           </section>
 
+          {/* Plain text index of every icon: the grid above loads in batches, so this keeps every icon page linked from the hub in the server HTML. */}
+          <section aria-labelledby="all-icons" className="mt-20">
+            <h2 id="all-icons" className="text-[17px] font-semibold text-foreground">All {ICONS.length} animated icons</h2>
+            <ul className="mt-4 columns-2 gap-x-8 text-[14px] leading-7 sm:columns-3 lg:columns-5">
+              {ICONS.map((i) => (
+                <li key={i.slug} className="break-inside-avoid">
+                  <Link href={`/icons/${i.slug}`} className="text-muted-foreground hover:text-foreground hover:underline">
+                    {i.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+
           <div className="mt-20 grid gap-8 sm:grid-cols-3">
             {[
               ["A tiny story and a sound each", "Not just a wiggle: a bell that pops a badge, a bin that catches a crumpled paper, a house that switches its windows on. Every one has its own sound, scored note by note against its animation."],
