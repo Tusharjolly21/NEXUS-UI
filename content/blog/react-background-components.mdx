@@ -1,0 +1,132 @@
+---
+title: "React Background Components: Animated Backgrounds with Tailwind"
+description: "Build animated React background components with Tailwind CSS and Framer Motion: a gradient mesh, moving blobs, accessibility and performance, plus ready-made options."
+date: "2026-11-16"
+---
+
+A background component sits behind your content and sets the mood of a page: a soft gradient behind a hero, a slow drift of colour behind a pricing section, a grid that reacts to the pointer. Done well, it adds depth without competing with the text. Done badly, it makes the text hard to read and the page slow.
+
+This guide covers how to build React background components that stay out of the way. It starts with the rules that apply to every background, then builds two of them with Tailwind CSS and Framer Motion: a static gradient mesh and an animated one. The code is React with TypeScript, and both components were typechecked before they went on this page. Ready-made backgrounds are listed near the end if you would rather install one.
+
+## Rules that apply to every background
+
+Most problems with background components come from the same few mistakes, so it helps to set the rules first:
+
+- **Put the background behind the content, not in the flow.** Position it absolutely inside a relative wrapper, give it `-z-10`, and add `pointer-events-none` so it never blocks a click.
+- **Hide it from screen readers.** A decorative background should carry `aria-hidden="true"`.
+- **Keep the text readable.** Check contrast against the lightest and the darkest part of the background, not the average. Text needs 4.5 to 1 against whatever sits behind it.
+- **Respect reduced motion.** If someone has asked their system for less motion, show a still version.
+- **Mind the cost.** Large blurred layers and full-screen canvases are the usual reason a background makes a page feel heavy, so use as few as you can.
+
+## A static gradient mesh
+
+The simplest good background is a few large, soft blobs of colour on a plain base. It needs no animation library and costs almost nothing.
+
+```tsx
+export function GradientMesh({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative isolate overflow-hidden bg-background">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-indigo-400/30 blur-3xl" />
+        <div className="absolute -right-16 top-1/3 h-80 w-80 rounded-full bg-pink-400/25 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-sky-400/25 blur-3xl" />
+      </div>
+      {children}
+    </div>
+  );
+}
+```
+
+`isolate` creates a new stacking context so the `-z-10` layer stays inside this wrapper instead of dropping behind the whole page. `overflow-hidden` crops the blobs at the edge of the section. The colours use opacity, such as `bg-indigo-400/30`, so they stay soft and let the base colour show through, which also keeps text contrast predictable.
+
+## An animated gradient background
+
+To make the blobs drift, wrap each one in a Framer Motion element and animate its position slowly. The motion should be slow enough that it is felt, not watched.
+
+```tsx
+"use client";
+
+import { motion, useReducedMotion } from "framer-motion";
+
+type Blob = {
+  className: string;
+  x: number[];
+  y: number[];
+  duration: number;
+};
+
+const blobs: Blob[] = [
+  { className: "-left-24 -top-24 h-96 w-96 bg-indigo-400/30", x: [0, 60, 0], y: [0, 40, 0], duration: 18 },
+  { className: "-right-16 top-1/3 h-80 w-80 bg-pink-400/25", x: [0, -50, 0], y: [0, 60, 0], duration: 22 },
+  { className: "bottom-0 left-1/3 h-72 w-72 bg-sky-400/25", x: [0, 40, 0], y: [0, -50, 0], duration: 26 },
+];
+
+export function AnimatedGradient({ children }: { children: React.ReactNode }) {
+  const reduce = useReducedMotion();
+
+  return (
+    <div className="relative isolate overflow-hidden bg-background">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+        {blobs.map((blob) => (
+          <motion.div
+            key={blob.className}
+            className={`absolute rounded-full blur-3xl ${blob.className}`}
+            animate={reduce ? undefined : { x: blob.x, y: blob.y }}
+            transition={{ duration: blob.duration, repeat: Infinity, ease: "easeInOut" }}
+          />
+        ))}
+      </div>
+      {children}
+    </div>
+  );
+}
+```
+
+Each blob has its own duration, 18, 22 and 26 seconds, so they never line up and the pattern does not visibly repeat. `useReducedMotion` returns true when someone has asked for less motion, and passing `undefined` to `animate` leaves the blobs where the layout put them. Because Framer Motion animates `x` and `y` as transforms, the browser can move the blobs without recalculating the layout of the page.
+
+## Picking the right kind of background
+
+| Kind | Good for | Watch out for |
+| --- | --- | --- |
+| Gradient mesh | Hero sections, pricing, calls to action | Low contrast where blobs overlap text |
+| Grid or dot pattern | Developer products, dashboards | Looking busy behind long text |
+| Noise or grain | Adding texture to flat colour | Large blurred or filtered layers on mobile |
+| Pointer-reactive | A single showcase section | Touch devices have no pointer, so test them |
+| Canvas | Many moving elements | Always give it a still fallback |
+
+## Ready-made React background components
+
+If you need a background today, these are finished options.
+
+**From Nexus UI.** These are our own components, built with React, Tailwind CSS and Framer Motion or canvas and installed as source with the shadcn CLI.
+
+- **[Background Boxes](/components/background-boxes):** an isometric grid drawn on canvas. The cell under the pointer pops up like a key, overshoots and settles, with a ripple through its neighbours. It is free.
+- **[Background Gradient](/components/background-gradient):** a card or button wrapped in a slowly turning conic-gradient ring with a soft glow. Hover spins it up. It is free.
+- **[SVG Noise Shader](/components/svg-noise-shader):** a grainy gradient surface built from SVG filters, where press and hold melts it and letting go snaps it back. It is free.
+- **[Tracing Spotlight Panel](/components/tracing-spotlight-panel):** a panel with a spotlight that trails the pointer and a border that glows where the light is closest. It is free.
+- **[Mesh Net](/components/mesh-net):** a distorted triangle net that hides in the dark until the cursor comes near, then lights up like a torch passing over it. It is a Pro component.
+- **[Cubes Grid](/components/cubes-grid):** a field of 3D cubes that ripples into a travelling wave under the cursor, on one canvas with one animation loop. It is a Pro component.
+
+For a wider comparison of libraries, see the [best React component library](/blog/best-react-component-library) guide, and for more on motion, the [Framer Motion examples](/blog/framer-motion-examples).
+
+## Frequently asked questions
+
+### How do I make an animated background in React?
+
+Put the background in an absolutely positioned layer behind your content, then animate its parts with a library such as Framer Motion or with CSS keyframes. Keep the movement slow, and show a still version when the visitor has asked for reduced motion.
+
+### How do I add a gradient background in React with Tailwind CSS?
+
+Use a few large rounded elements with a colour and a low opacity, such as `bg-indigo-400/30`, and soften them with `blur-3xl`. Place them in an absolutely positioned container with `-z-10` and `pointer-events-none`.
+
+### Are animated backgrounds bad for performance?
+
+They can be. The usual causes are large blurred layers, many animated elements and full-screen canvases. Animate transforms, which the browser can move cheaply, use few layers, and test on a mid-range phone.
+
+### Are animated backgrounds accessible?
+
+They can be, if the text on top stays readable, the background is hidden from screen readers with `aria-hidden`, and motion stops when someone has asked their system for less of it.
+
+### Do I need a library for a background component?
+
+No. A gradient mesh is plain Tailwind CSS, and an animated one needs only Framer Motion. A library saves time for the more complex kinds, such as canvas grids and pointer-reactive effects.
