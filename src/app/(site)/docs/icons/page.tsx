@@ -91,7 +91,7 @@ npm i framer-motion`}</DocPre>
           <p className="text-sm leading-relaxed text-muted-foreground">
             Wrap an icon, or a whole grid, in {code("IconMaterial")} for a neon, aurora or chrome finish, or for the liquid looks: {code("mercury")} (flowing
             liquid metal), {code("liquid")} (a glossy droplet that wobbles on hover) and {code("glass")} (a lens with a bright rim and a red and blue
-            fringe). They are pure SVG, so there is no canvas or WebGL to set up. It is one small file, shown at the bottom of every icon page.
+            fringe). Add {code("rainbow")} to paint every stroke in the site&apos;s blue, violet, pink and orange. They are pure SVG, so there is no canvas or WebGL to set up. It is one small file, shown at the bottom of every icon page.
           </p>
         </DocSection>
 

@@ -9,7 +9,7 @@ import { Chip } from "@/components/site/chip-rail";
 import type { IconMeta } from "@/lib/icons/catalog";
 import { cn } from "@/lib/utils";
 import { CopyButton } from "./copy-button";
-import { MATERIALS, SWATCHES, accentFor } from "./icon-grid";
+import { MATERIALS, RAINBOW, RAINBOW_SWATCH, SWATCHES, accentFor } from "./icon-grid";
 import { hasIconSound, iconSoundLength, isLiquidLook, playIconSound, playMaterialSound } from "./icon-sounds";
 import { IconMaterial, type IconMaterialName } from "./icon-material";
 import { NX_ICONS } from "./registry";
@@ -162,16 +162,17 @@ export function IconPlayground({ icon, source, locked = false }: { icon: IconMet
 
   const play = isLoop ? !paused : preview || (trigger === "hover" ? hover : trigger === "hold" ? pressed : trigger === "loop" ? cycle : false);
   const dark = stage === "dark";
-  const ink = dark && color === SWATCHES[0] ? "#f5f5f7" : color === SWATCHES[0] ? undefined : color;
+  const rainbow = color === RAINBOW;
+  const ink = rainbow ? undefined : dark && color === SWATCHES[0] ? "#f5f5f7" : color === SWATCHES[0] ? undefined : color;
   const accent = accentFor(icon, material);
-  const wrap = material !== "line" && material !== "spark";
+  const wrap = (material !== "line" && material !== "spark") || rainbow;
 
   const surprise = () => {
     const m = pick(MATERIALS);
     setMaterial(m.id);
     if (isLiquidLook(m.id)) playMaterialSound(m.id, "switch", { force: true });
     setStage(m.dark ? "dark" : pick<Stage>(["light", "light", "dark"]));
-    setColor(pick(SWATCHES));
+    setColor(pick<string>([...SWATCHES, RAINBOW]));
     setSpeed(pick(MOODS).speed);
     setStroke(pick([1.5, 2, 2.5]));
     setSize(pick([88, 104, 128]));
@@ -202,14 +203,14 @@ export function IconPlayground({ icon, source, locked = false }: { icon: IconMet
     stroke !== 2 ? `strokeWidth={${stroke}}` : "",
     speed !== 1 ? `speed={${speed}}` : "",
     accent ? `accent="${accent}"` : "",
-    color !== SWATCHES[0] ? `className="text-[${color}]"` : "",
+    color !== SWATCHES[0] && !rainbow ? `className="text-[${color}]"` : "",
     icon.states && state !== "auto" ? `state="${state}"` : "",
   ].filter(Boolean);
   const tag = `<${icon.component}${attrs.length ? " " + attrs.join(" ") : ""} />`;
   const withSound = sound && !isLoop;
   const soundArgs = speed !== 1 ? `, { speed: ${speed} }` : "";
   const inner = withSound ? `<span onPointerEnter={() => playIconSound("${icon.slug}"${soundArgs})}>\n        ${tag}\n      </span>` : tag;
-  const body = wrap ? `<IconMaterial material="${material}">\n      ${inner}\n    </IconMaterial>` : inner;
+  const body = wrap ? `<IconMaterial material="${material}"${rainbow ? " rainbow" : ""}>\n      ${inner}\n    </IconMaterial>` : inner;
   const usage = [
     `import { ${icon.component} } from "@/components/icons/${icon.slug}";`,
     wrap ? `import { IconMaterial } from "@/components/icons/icon-material";` : "",
@@ -254,7 +255,7 @@ export function IconPlayground({ icon, source, locked = false }: { icon: IconMet
         >
           <motion.div style={{ x: mx, y: my, rotate: tilt }}>
             <motion.div drag dragSnapToOrigin dragElastic={0.55} whileDrag={{ scale: 1.14 }} whileTap={{ scale: 0.96 }} className="cursor-grab active:cursor-grabbing">
-              <IconMaterial material={material} color={ink} className="grid place-items-center">
+              <IconMaterial material={material} color={ink} rainbow={rainbow} className="grid place-items-center">
                 <Icon key={epoch} size={size} strokeWidth={stroke} speed={speed} accent={accent} play={play} state={icon.states && state !== "auto" ? (state as "idle") : undefined} />
               </IconMaterial>
             </motion.div>
@@ -361,9 +362,18 @@ export function IconPlayground({ icon, source, locked = false }: { icon: IconMet
                 style={{ background: c }}
               />
             ))}
+            <button
+              type="button"
+              aria-label="Rainbow"
+              title="Rainbow"
+              aria-pressed={color === RAINBOW}
+              onClick={() => setColor(RAINBOW)}
+              className="size-7 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,.14)] outline-none transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card aria-pressed:ring-2 aria-pressed:ring-foreground aria-pressed:ring-offset-2 aria-pressed:ring-offset-card"
+              style={{ background: RAINBOW_SWATCH }}
+            />
             <label className="relative grid size-7 cursor-pointer place-items-center overflow-hidden rounded-full bg-[conic-gradient(from_0deg,#f43f5e,#f59e0b,#10b981,#3b82f6,#8b5cf6,#f43f5e)] shadow-[inset_0_0_0_1px_rgba(0,0,0,.14)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-card">
               <span className="sr-only">Pick any colour</span>
-              <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="absolute inset-0 size-full cursor-pointer opacity-0" />
+              <input type="color" value={color === RAINBOW ? "#2563eb" : color} onChange={(e) => setColor(e.target.value)} className="absolute inset-0 size-full cursor-pointer opacity-0" />
             </label>
           </Row>
           <Slider label="Size" value={size} min={24} max={160} step={2} onChange={setSize} />

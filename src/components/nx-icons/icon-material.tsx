@@ -27,6 +27,8 @@ export type IconMaterialName = "line" | "spark" | "neon" | "aurora" | "chrome" |
  */
 
 const AURORA: [string, string][] = [["0", "#0090f7"], ["0.3", "#6e5bff"], ["0.55", "#ba62fc"], ["0.78", "#f2416b"], ["1", "#f55600"]];
+/** The rainbow of the site's theme (the dot beside "Icons" in the nav, the rainbow word in every heading): blue, violet, pink, orange. */
+const RAINBOW: [string, string][] = [["0", "#0a84ff"], ["0.34", "#bf5af2"], ["0.66", "#ff375f"], ["1", "#ff9f0a"]];
 const CHROME: [string, string][] = [["0", "#f4f5fb"], ["0.22", "#9ea3b6"], ["0.38", "#ffffff"], ["0.55", "#6d7183"], ["0.72", "#e8e9f2"], ["0.84", "#ffe3b8"], ["1", "#bfc3d4"]];
 // The room mercury reflects, as one stripe of light: bright sky, soft grey, two hard dark bands and a warm window.
 // It starts and ends on the same colour so it can repeat and flow without a seam.
@@ -39,6 +41,7 @@ const GLASS: [string, string, number][] = [["0", "#ffffff", 0.95], ["0.35", "#e6
 export function IconMaterial({
   material = "line",
   color,
+  rainbow = false,
   className,
   style,
   children,
@@ -46,6 +49,8 @@ export function IconMaterial({
   material?: IconMaterialName;
   /** The current colour for everything inside. Left out, it inherits. */
   color?: string;
+  /** Paint every stroke with the site's blue, violet, pink and orange rainbow. Works with the line, spark and neon looks; the other looks paint themselves. */
+  rainbow?: boolean;
   className?: string;
   style?: CSSProperties;
   children: ReactNode;
@@ -53,21 +58,23 @@ export function IconMaterial({
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const scope = `nx-mat-${uid}`;
   const reduce = useReducedMotion();
-  const flat = material === "aurora" || material === "chrome";
-  const stops = material === "aurora" ? AURORA : CHROME;
+  const rainbowOn = rainbow && (material === "line" || material === "spark" || material === "neon");
+  const flat = material === "aurora" || material === "chrome" || rainbowOn;
+  const stops = rainbowOn ? RAINBOW : material === "aurora" ? AURORA : CHROME;
   const liquidish = material === "mercury" || material === "liquid" || material === "glass";
 
   // An inline <style> (not a class in a stylesheet), so that url(#…) points into this page's own document.
   // Filters go on each top-level shape of an icon (not the <svg>), so their units are the icon's own 24-unit grid
   // and a look is the same size-for-size at 16px or 160px.
   let css = "";
-  if (material === "neon") {
+  if (material === "neon" && !rainbowOn) {
     css = `.${scope} svg{filter:drop-shadow(0 0 1.5px currentColor) drop-shadow(0 0 6px currentColor)}`;
   } else if (flat) {
     css =
       `.${scope} svg *:not([stroke="none"]){stroke:url(#${scope}) !important}` +
       `.${scope} svg *[fill]:not([fill="none"]){fill:url(#${scope}) !important}` +
-      (material === "chrome" ? `.${scope} svg{filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}` : "");
+      (material === "chrome" ? `.${scope} svg{filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}` : "") +
+      (material === "neon" ? `.${scope} svg{filter:drop-shadow(0 0 1.5px #bf5af2) drop-shadow(0 0 6px #0a84ff)}` : "");
   } else if (liquidish) {
     css =
       `.${scope} svg *:not([stroke="none"]){stroke:url(#${scope}) !important}` +

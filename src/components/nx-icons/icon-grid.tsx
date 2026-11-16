@@ -60,6 +60,10 @@ function AccessSwitch({ value, onChange }: { value: Access; onChange: (v: Access
 
 export const SWATCHES = ["#1d1d1f", "#2563eb", "#7c3aed", "#e11d48", "#f59e0b", "#059669"] as const;
 
+/** The colour that is not one colour: every stroke painted with the site's rainbow (blue, violet, pink, orange). */
+export const RAINBOW = "rainbow";
+export const RAINBOW_SWATCH = "conic-gradient(from 210deg, #0a84ff, #bf5af2, #ff375f, #ff9f0a, #0a84ff)";
+
 /** The accent colour an icon gets under a look: its own colours for Spark and Neon, plain otherwise. */
 export function accentFor(icon: IconMeta, material: IconMaterialName) {
   return material === "spark" || material === "neon" ? icon.accent : undefined;
@@ -288,6 +292,15 @@ export function IconGrid() {
                 style={{ background: c }}
               />
             ))}
+            <button
+              type="button"
+              aria-label="Rainbow"
+              title="Rainbow"
+              aria-pressed={color === RAINBOW}
+              onClick={() => setColor(RAINBOW)}
+              className="size-6 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,.14)] outline-none transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card aria-pressed:ring-2 aria-pressed:ring-foreground aria-pressed:ring-offset-2 aria-pressed:ring-offset-card"
+              style={{ background: RAINBOW_SWATCH }}
+            />
           </div>
           <label className="flex items-center gap-2.5 text-[13px] text-muted-foreground">
             Size
@@ -332,7 +345,7 @@ export function IconGrid() {
       </div>
 
       {shown.length ? (
-        <IconMaterial material={material} color={dark || color === SWATCHES[0] ? undefined : color} className="mt-6"><div ref={listRef}>
+        <IconMaterial material={material} color={dark || color === SWATCHES[0] || color === RAINBOW ? undefined : color} rainbow={color === RAINBOW} className="mt-6"><div ref={listRef}>
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
             {shown.map((i, n) => (
               <li key={i.slug}>
