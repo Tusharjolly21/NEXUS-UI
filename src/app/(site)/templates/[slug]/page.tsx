@@ -36,7 +36,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return createMetadata(
     {
-      title: `${t.title} — Next.js Landing Page Template`,
+      // Name only (before the descriptor dash): the site suffix " · Nexus UI Labs" is added after this, and
+      // the full "name — what it is — Next.js Landing Page Template" ran to ~85 characters. The descriptor stays in the description.
+      title: `${t.title.split(" — ")[0]} — Next.js Landing Page Template`,
       description: shortDescription(t.description),
       openGraph: { title: `${t.title} · ${siteConfig.siteName}` },
       alternates: { canonical: `/templates/${slug}` },

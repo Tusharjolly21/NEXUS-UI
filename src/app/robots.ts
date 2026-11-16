@@ -41,14 +41,16 @@ export default function robots(): MetadataRoute.Robots {
         // "/api/registry/" and "/r/" (the install JSON the shadcn CLI reads) are open on purpose: Google
         // had already indexed a few of them as bare URLs, and it can only drop an indexed URL after it
         // is allowed to fetch it and see the "X-Robots-Tag: noindex" header set in next.config.mjs.
-        allow: ["/", "/api/og", "/api/registry/"],
+        // "/cdn-cgi/scripts/" is Cloudflare's email-decode script, which pages load; it stays open (longer
+        // rule wins over "/cdn-cgi/") so crawlers do not report required page resources as blocked.
+        allow: ["/", "/api/og", "/api/registry/", "/cdn-cgi/scripts/"],
         disallow: PRIVATE_AND_FACETED,
       },
       // Googlebot-Image obeys only its own group and ignores "*", so it repeats the shared rules.
       // Globe texture assets are internal canvas images, not meaningful for Google Images.
       {
         userAgent: "Googlebot-Image",
-        allow: ["/", "/api/og", "/api/registry/"],
+        allow: ["/", "/api/og", "/api/registry/", "/cdn-cgi/scripts/"],
         disallow: [...PRIVATE_AND_FACETED, "/images/"],
       },
     ],
