@@ -829,4 +829,14 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
     description:
       "Free React spotlight card: a soft light trails the pointer on a spring and the border glows where it is closest. Leave and it runs laps round the border.",
   },
+  "time-scrubber": {
+    title: "React Time Scrubber: A Ruler Time Picker You Fling",
+    description:
+      "React time scrubber: a time picker drawn as a ruler you drag or fling under a fixed needle. It coasts, ticks at every interval and lands exactly on a snap point.",
+  },
+  "flight-tracker": {
+    title: "React Flight Tracker UI: Live Flight Card with Plane Arc",
+    description:
+      "React flight tracker UI: a live flight card where a plane banks along a dotted arc, the flown part fills in and the status counts down. Expand for altitude and speed.",
+  },
 };
