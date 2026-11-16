@@ -1,0 +1,123 @@
+---
+title: "Skeleton Loader CSS: Shimmer and Pulse"
+description: "Build a skeleton loader in CSS and React: a Tailwind pulse, a custom shimmer, screen reader support and reduced motion, plus when not to use one."
+date: "2026-11-16"
+---
+
+A skeleton loader is a grey placeholder drawn in the shape of the content that is about to appear. Instead of a spinner and an empty page, people see the outline of a card, a list or a profile, which tells them what is coming and keeps the layout from jumping when the real content arrives. It is one of the cheapest ways to make a loading state feel faster.
+
+This guide shows how to build skeleton loaders with plain CSS and with Tailwind CSS, how to make them work for screen readers and for people who have turned off animation, and when a skeleton is the wrong choice. The CSS and the React component below were checked before they went on this page.
+
+## When to use a skeleton, and when not to
+
+A skeleton helps when you know the shape of what will load and the wait is long enough to notice. Some rules of thumb:
+
+- **Use one for content you can predict**: cards, lists, tables, profile headers, article text.
+- **Skip it for very short waits.** If the content usually arrives in well under a third of a second, a skeleton only flashes. Show nothing, or delay the skeleton briefly.
+- **Use a spinner or a progress bar for actions** such as saving or uploading, where there is no content shape to show.
+- **Show a real empty state when there is nothing to load.** A skeleton that turns into "no results" feels like a trick.
+
+## The fastest version: a Tailwind pulse
+
+Tailwind ships an `animate-pulse` utility that fades an element in and out. For many pages that is all a skeleton needs: grey blocks with rounded corners, sized to match the real content.
+
+```tsx
+import { Suspense } from "react";
+
+function Skeleton({ className = "" }: { className?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`animate-pulse rounded-md bg-zinc-200 motion-reduce:animate-none dark:bg-zinc-800 ${className}`}
+    />
+  );
+}
+
+export function ProfileSkeleton() {
+  return (
+    <div role="status" className="flex items-center gap-4">
+      <span className="sr-only">Loading profile</span>
+      <Skeleton className="size-14 rounded-full" />
+      <div className="flex-1 space-y-2">
+        <Skeleton className="h-4 w-1/3" />
+        <Skeleton className="h-3 w-2/3" />
+      </div>
+    </div>
+  );
+}
+
+function Profile() {
+  return <p>Loaded profile</p>;
+}
+
+export function ProfileSection() {
+  return (
+    <Suspense fallback={<ProfileSkeleton />}>
+      <Profile />
+    </Suspense>
+  );
+}
+```
+
+A few details make this version better than a quick grey box:
+
+- **The shapes are hidden from screen readers** with `aria-hidden="true"`, since a row of empty `div` elements means nothing when read aloud.
+- **One element announces the state.** The wrapper has `role="status"` and a visually hidden line, "Loading profile", so a screen reader user hears that something is loading instead of silence.
+- **`motion-reduce:animate-none`** stops the pulse for people who have asked their system for less motion. The grey shapes still show, they just hold still.
+- **The sizes match the content.** The avatar is the same size as the real avatar and the text lines have a similar height, so the page does not shift when the data replaces them.
+- **React Suspense does the switching.** The skeleton is the `fallback`, and it is swapped for the content as soon as the component stops suspending.
+
+## A custom shimmer in plain CSS
+
+A shimmer is a soft band of light that sweeps across the placeholder. It reads as more active than a pulse, and it takes a few lines of CSS and no JavaScript:
+
+```css
+.skeleton {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+```
+
+The gradient is twice as wide as the element, and the animation slides it across. For dark mode, swap the three greys for darker ones, for example `#27272a`, `#3f3f46` and `#27272a`. Keep the sweep slow, around a second and a half, because a fast shimmer is tiring to look at and draws attention away from the page.
+
+## Rules that make skeletons feel good
+
+- **One animation clock.** If every block pulses on its own timing, the page looks noisy. Put the same animation on all of them so they move together.
+- **Prefer fewer, larger shapes.** Five hundred small grey bars look like static. A block for the title, a block for the image and two for the text is enough.
+- **Do not skeleton what is already known.** If the page heading is static, render it for real and only placeholder the data.
+- **Time out gracefully.** A skeleton that never resolves is worse than a spinner. After a long wait, replace it with an error message and a retry button.
+- **Measure layout shift.** If the page jumps when the data lands, the skeleton does not match the content, and the fix is in its dimensions, not its animation.
+
+## Skeletons that become the content
+
+The usual pattern swaps the skeleton for the content in one cut. Two components in the Nexus UI library take a different approach, and both are Pro components with their source to copy:
+
+- [Skeleton Morph](/components/skeleton-morph) is a card whose loading skeletons are cut to the exact shape of the content that replaces them, with one light sweeping across every block.
+- [Skeleton Morph Rows](/components/skeleton-morph-rows) is a loading state that becomes the content instead of being swapped for it: each grey shape knows what it stands for.
+
+For loaders that are not skeletons, [Matrix Loaders](/components/matrix-loaders) gives six dot-matrix loaders that run on one shared pulse, and the [animated icons](/icons) include looping spinners, dots and ripples.
+
+## Frequently asked questions
+
+**How do I make a skeleton loader with CSS?** Give the placeholder a grey background, rounded corners and the same dimensions as the real content, then animate it with either a pulse (a fade in and out) or a shimmer (a gradient that slides across using `background-position`).
+
+**How do I make a skeleton loader in Tailwind CSS?** Use `animate-pulse` on grey blocks, for example `animate-pulse rounded-md bg-zinc-200`. Add `motion-reduce:animate-none` so people who prefer reduced motion get a still version.
+
+**Are skeleton loaders accessible?** They can be. Hide the grey shapes with `aria-hidden`, announce the loading state once with a `role="status"` element and hidden text, and turn the animation off for reduced motion.
+
+**Are skeleton screens better than spinners?** For content with a known shape, usually yes, because they show where things will appear and avoid layout shift. For actions with no content shape, such as saving or uploading, a spinner or progress bar fits better.
+
+For more patterns, see our guides to [choosing a React component library](/blog/best-react-component-library) and [Framer Motion examples](/blog/framer-motion-examples).
