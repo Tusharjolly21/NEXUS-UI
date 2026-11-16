@@ -669,4 +669,74 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
     description:
       "React fan deck of paint-chip colour swatches: the deck tips over and fans into a half circle, hover lifts a chip and a click copies its hex. Framer Motion + Tailwind CSS.",
   },
+  "slosh-slider": {
+    title: "React Range Slider with a Liquid Slosh",
+    description:
+      "React range slider whose liquid fill lags behind the handle, leans with your drag speed and sloshes back before it settles. Framer Motion + Tailwind CSS.",
+  },
+  "wake-slider": {
+    title: "React Range Slider Made of Springy Bars",
+    description:
+      "React range slider built from 56 thin bars: drag across it and the bars spring up in your wake, taller the faster you move, then ripple back down.",
+  },
+  "bolting-sliders": {
+    title: "React Settings Sliders with a Leaping Knob",
+    description:
+      "React settings sliders where a click makes the knob leap to the spot in an arc with a fading trail, then land with a squash. Drag and arrow keys work too.",
+  },
+  "effort-slider": {
+    title: "React Effort Slider with a Galaxy Thumb",
+    description:
+      "React slider for an AI effort setting, from Faster to Smarter. The thumb is a spiral galaxy that grows richer as you go, and the top level bursts into sparks.",
+  },
+  "card-carousel-3d": {
+    title: "React 3D Card Carousel with Drag and Fling",
+    description:
+      "Free React 3D carousel: product cards stand round a cylinder, coast when you fling it and click into place. Wheel, arrow keys, dots and tap all work.",
+  },
+  "smear-carousel": {
+    title: "React Carousel with Smeared Neighbour Cards",
+    description:
+      "React carousel where the cards either side are pulled into long flowing streaks. Drag, fling or use the arrow keys, and it settles on a card with a spring.",
+  },
+  "marble-progress": {
+    title: "React Onboarding Checklist with Marble Progress",
+    description:
+      "React onboarding checklist that keeps score with marbles: tick a step and a marble rolls down ramps into a jar, untick it and it pops. The jar glows when done.",
+  },
+  "domino-progress": {
+    title: "React Progress Stepper Made of Dominoes",
+    description:
+      "React deploy-pipeline progress made of standing dominoes: each finished step tips onto the next. Pause, resume and reset, with a live region for screen readers.",
+  },
+  "vine-progress": {
+    title: "React Progress Bar That Grows as a Vine",
+    description:
+      "React onboarding checklist with a vine for a progress bar: it grows to your current step, unfurls a leaf per step and flowers when you finish. Leaves rustle on hover.",
+  },
+  "genie-uploader": {
+    title: "React File Upload with a Genie Drop Animation",
+    description:
+      "React file upload that swallows files like a macOS window minimising: drop or pick files, they pour into a cloud with per-file progress, retry and a size limit.",
+  },
+  "mercury-upload": {
+    title: "React File Upload with a Mercury Progress Bar",
+    description:
+      "React file upload where the file pours in as mercury: a bead falls into a pool that spreads as progress, then pulls together into a bead with a check.",
+  },
+  "ripple-toast": {
+    title: "React Toast Notifications That Splash Like Water",
+    description:
+      "React toast notifications that drop in like a bead of water, splash into a pill and send out a ring. Up to three stack, and dismissed ones lift away.",
+  },
+  "skeleton-morph-rows": {
+    title: "React Skeleton Loader Rows That Become the Content",
+    description:
+      "React skeleton loader that turns into the content instead of being swapped for it: each grey shape stretches to its real box and dissolves, row by row.",
+  },
+  "dart-rating": {
+    title: "React Rating Input Where You Throw a Dart",
+    description:
+      "React rating input from 1 to 10: hold to aim, release to throw, and the ring the dart lands in is the score. Number keys work, and it is a real slider for screen readers.",
+  },
 };
