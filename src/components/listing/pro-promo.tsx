@@ -3,12 +3,15 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, ChevronRight } from "lucide-react";
+import { ArrowUpRight, ChevronRight, Pause, Play } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useProAccess } from "@/components/pro/pro-access";
 import { useSlots } from "@/components/site/use-slots";
 import { slotsLeft } from "@/lib/launch-slots";
 import { GLOBAL_PRICING, type DisplayPricing } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
+import { CollageRow } from "@/components/pro/upgrade-dialog";
+import { LINE_COMMENT, MiniQuote } from "@/components/home/reddit-love";
 
 export type PromoCopy = {
   /** The card's heading. `accent` is the part set in the spectrum (a number, or "Pro"). */
@@ -19,7 +22,7 @@ export type PromoCopy = {
   band: string;
 };
 
-/** Four Pro pieces that look good still: one large, two side by side, one wide. Each links to its own page. */
+/** The Pro pieces the band under 1280px shows (the column has the spotlight instead). */
 const SHOWCASE = {
   hero: { slug: "glass-drop", name: "Glass Drop", src: "/promo/glass-drop.webp", w: 720, h: 353 },
   pair: [
@@ -29,32 +32,160 @@ const SHOWCASE = {
   wide: { slug: "standing-calendar", name: "Standing Calendar", src: "/promo/standing-calendar.webp", w: 667, h: 350 },
 } as const;
 
-const caption =
-  "pointer-events-none absolute bottom-1.5 left-1.5 max-w-[calc(100%-12px)] truncate rounded-full bg-white/92 px-2 py-0.5 text-[10.5px] font-semibold text-[#1d1d1f] shadow-[0_0_0_0.5px_rgba(0,0,0,0.1)]";
-const tile =
-  "group/tile relative block overflow-hidden rounded-[16px] shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 
-function Showcase() {
-  const { hero, pair, wide } = SHOWCASE;
+
+
+/**
+ * The best Pro pieces, one at a time: each holds for a few seconds with a slow push-in, then the next slides over it.
+ * The set is long and the day picks where it starts, so the column looks different from one visit to the next.
+ * Pointing at it (or focusing it) holds the current one; under reduced motion it stays still until you step through.
+ */
+const SPOTLIGHT: { slug: string; name: string; line: string }[] = [
+  { slug: "glass-drop", name: "Glass Drop", line: "A logo poured in liquid glass" },
+  { slug: "airmail-globe", name: "Airmail Globe", line: "A postcard that folds and flies" },
+  { slug: "magic-calendar", name: "Magic Calendar", line: "Fifty festivals, each celebrated" },
+  { slug: "eclipse-toggle", name: "Eclipse Toggle", line: "Drag the sun, the moon rises" },
+  { slug: "lightfall", name: "Lightfall", line: "A hero lit by falling light" },
+  { slug: "silk-print", name: "Silk Print", line: "A scarf that ripples in the breeze" },
+  { slug: "dynamic-island", name: "Dynamic Island", line: "Live activity, island style" },
+  { slug: "flight-tracker", name: "Flight Tracker", line: "A boarding pass that lands" },
+  { slug: "vinyl-player", name: "Vinyl Player", line: "Drop the needle, scratch the record" },
+  { slug: "interactive-globe-explorer", name: "Globe Explorer", line: "Spin the world, land anywhere" },
+  { slug: "glyph-rain", name: "Glyph Rain", line: "A 404 that hides a message" },
+  { slug: "order-tracking", name: "Order Tracking", line: "Every parcel, every step" },
+];
+const HOLD = 5200;
+
+function Spotlight() {
+  const reduce = useReducedMotion();
+  const [start] = React.useState(() => Math.floor(Date.now() / 86_400_000) % SPOTLIGHT.length);
+  const [step, setStep] = React.useState(0);
+  const [held, setHeld] = React.useState(false);
+  const [paused, setPaused] = React.useState(false);
+  const at = (start + step) % SPOTLIGHT.length;
+  const item = SPOTLIGHT[at];
+  const running = !reduce && !held && !paused;
+  React.useEffect(() => {
+    if (!running) return;
+    const t = window.setTimeout(() => setStep((s) => s + 1), HOLD);
+    return () => window.clearTimeout(t);
+  }, [running, step]);
+  const shown = [0, 1, 2, 3, 4, 5].map((k) => (start + Math.floor(step / 6) * 6 + k) % SPOTLIGHT.length);
   return (
-    <div className="grid gap-1.5">
-      <Link href={`/components/${hero.slug}`} className={cn(tile, "aspect-[16/10] rounded-[20px] bg-black")}>
-        <Image src={hero.src} alt={`${hero.name}, a Pro component`} fill sizes="280px" className="object-cover transition-transform duration-500 group-hover/tile:scale-[1.03] motion-reduce:transition-none" />
-        <span className={cn(caption, "bottom-2.5 left-2.5 px-2.5 text-[11.5px]")}>{hero.name}</span>
+    <div
+      className="relative"
+      onPointerEnter={() => setHeld(true)}
+      onPointerLeave={() => setHeld(false)}
+      onFocus={() => setHeld(true)}
+      onBlur={() => setHeld(false)}
+    >
+      <Link
+        href={`/components/${item.slug}`}
+        className="group/spot relative block aspect-[4/3] overflow-hidden rounded-[20px] bg-[#f2f2f4] shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:bg-[#111113]"
+      >
+        <AnimatePresence initial={false} mode="popLayout">
+          <motion.div
+            key={item.slug}
+            className="absolute inset-0"
+            initial={reduce ? { opacity: 0 } : { opacity: 0, x: "18%", scale: 1.04 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, x: "-12%", scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 160, damping: 26, mass: 0.9 }}
+          >
+            <motion.div
+              className="absolute inset-0"
+              initial={{ scale: 1 }}
+              animate={running ? { scale: 1.06 } : { scale: 1.02 }}
+              transition={{ duration: HOLD / 1000 + 0.6, ease: "linear" }}
+            >
+              <Image src={`/og-shots/components/${item.slug}.jpg`} alt={`${item.name}, a Pro component`} fill sizes="280px" className="object-cover" />
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+        {/* a dark wash at the foot so the name reads on any shot */}
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-3 bottom-3 flex items-end justify-between gap-2 text-white">
+          <AnimatePresence initial={false} mode="wait">
+            <motion.div
+              key={item.slug}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.28 }}
+              className="min-w-0"
+            >
+              <p className="truncate text-[15px] font-semibold tracking-[-0.015em]">{item.name}</p>
+              <p className="truncate text-[12px] text-white/75">{item.line}</p>
+            </motion.div>
+          </AnimatePresence>
+          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-white text-[#1d1d1f] shadow-[0_6px_18px_-6px_rgba(0,0,0,0.6)] transition-transform group-hover/spot:-translate-y-0.5 group-hover/spot:translate-x-0.5">
+            <ArrowUpRight className="size-4" aria-hidden />
+          </span>
+        </div>
+        <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-black/45 px-2 py-0.5 text-[10.5px] font-semibold text-white backdrop-blur-md">Pro spotlight</span>
       </Link>
-      <div className="grid grid-cols-2 gap-1.5">
-        {pair.map((p) => (
-          <Link key={p.slug} href={`/components/${p.slug}`} className={cn(tile, "aspect-[4/3]", p.bg)}>
-            <Image src={p.src} alt={`${p.name}, a Pro component`} fill sizes="140px" className="object-contain" />
-            <span className={caption}>{p.name}</span>
-          </Link>
-        ))}
+      {/* the next few as story segments: the running one fills, any one can be picked */}
+      <div className="mt-2 flex items-center gap-1 px-1">
+        {shown.map((k, i) => {
+          const on = k === at;
+          const past = shown.indexOf(at) > i;
+          return (
+            <button
+              key={`${k}-${i}`}
+              type="button"
+              onClick={() => setStep((s) => s + ((k - at + SPOTLIGHT.length) % SPOTLIGHT.length))}
+              aria-label={`Show ${SPOTLIGHT[k].name}`}
+              aria-current={on || undefined}
+              className="relative h-1 flex-1 overflow-hidden rounded-full bg-foreground/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              {on ? (
+                <motion.span
+                  key={`${step}-${running}`}
+                  className="absolute inset-y-0 left-0 rounded-full bg-foreground/70"
+                  initial={{ width: running ? "0%" : "100%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: running ? HOLD / 1000 : 0, ease: "linear" }}
+                />
+              ) : past ? (
+                <span className="absolute inset-0 rounded-full bg-foreground/35" />
+              ) : null}
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => setPaused((v) => !v)}
+          aria-label={paused ? "Play the spotlight" : "Pause the spotlight"}
+          className="ml-1 grid size-6 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+        >
+          {paused || reduce ? <Play className="size-3" aria-hidden /> : <Pause className="size-3" aria-hidden />}
+        </button>
       </div>
-      <Link href={`/components/${wide.slug}`} className={cn(tile, "aspect-[667/300] bg-white")}>
-        <Image src={wide.src} alt={`${wide.name}, a Pro component`} fill sizes="280px" className="object-contain px-2 pb-5 pt-1" />
-        <span className={caption}>{wide.name}</span>
-      </Link>
     </div>
+  );
+}
+
+/** Two rows of Pro screenshots drifting past each other, the strip the upgrade dialog opens with. */
+const STRIP: string[][] = [
+  ["dynamic-island", "vinyl-player", "airmail-globe", "led-button", "warp-cta", "soap-bubble"],
+  ["interactive-globe-explorer", "magic-calendar", "venom-button", "image-galleries", "silk-print", "flight-tracker"],
+];
+
+function Strip() {
+  return (
+    <Link
+      href="/components?access=pro"
+      className="pg-marquee group/strip relative block overflow-hidden rounded-[18px] bg-[#f2f2f4] py-2.5 shadow-[0_0_0_0.5px_rgba(0,0,0,0.06)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:bg-[#0c0c0e]"
+    >
+      <div aria-hidden className="flex flex-col gap-2 [mask-image:linear-gradient(90deg,transparent,#000_12%,#000_88%,transparent)]">
+        <CollageRow slugs={STRIP[0]} time="34s" />
+        <CollageRow slugs={STRIP[1]} time="40s" reverse />
+      </div>
+      <span className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 whitespace-nowrap rounded-full bg-card/85 px-3 py-1.5 text-[12.5px] font-semibold text-foreground shadow-[0_0_0_0.5px_rgba(0,0,0,0.08),0_10px_24px_-12px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-transform group-hover/strip:scale-[1.03] dark:bg-[#1c1c1e]/85">
+        See every Pro component
+        <ChevronRight className="size-3.5" aria-hidden />
+      </span>
+    </Link>
   );
 }
 
@@ -75,8 +206,9 @@ const RING =
   "[background:linear-gradient(var(--card),var(--card))_padding-box,linear-gradient(140deg,#0090f7,#6e5bff_30%,#ba62fc_52%,#f2416b_76%,#f55600)_border-box] border-[1.5px] border-transparent";
 
 /**
- * The right-hand column on wide screens, for visitors without Pro: four Pro pieces, what Pro costs, how many early
- * slots are left, then the 21st.dev line and the MCP server. It stays in view while the page scrolls.
+ * The right-hand column on wide screens, for visitors without Pro: a spotlight of the best Pro pieces that changes
+ * by itself, what Pro costs, how many early slots are left, a strip of Pro screenshots drifting past, what one
+ * visitor said, then the 21st.dev line and the MCP server. It stays in view while the page scrolls.
  */
 export function ProRail({ copy, pricing: given }: { copy: PromoCopy; pricing?: DisplayPricing }) {
   const { isPro, pricing: shell } = useProAccess();
@@ -85,9 +217,9 @@ export function ProRail({ copy, pricing: given }: { copy: PromoCopy; pricing?: D
   if (isPro) return null;
   const [before, accent, after] = copy.title;
   return (
-    <aside aria-label="Nexus UI Pro" className="sticky top-[88px] flex max-h-[calc(100dvh-104px)] flex-col gap-3 overflow-y-auto overscroll-contain pb-2 [scrollbar-width:none]">
+    <aside aria-label="Nexus UI Pro" className="sticky top-[88px] flex max-h-[calc(100dvh-104px)] flex-col gap-3 overflow-y-auto [&>*]:shrink-0 overscroll-contain pb-2 [scrollbar-width:none]">
       <div className={cn("rounded-[26px] p-2", RING)}>
-        <Showcase />
+        <Spotlight />
         <div className="px-2.5 pb-2.5 pt-4">
           <h2 className="text-[21px] font-semibold leading-[1.15] tracking-[-0.025em] text-foreground">
             {before}
@@ -113,6 +245,10 @@ export function ProRail({ copy, pricing: given }: { copy: PromoCopy; pricing?: D
           </p>
         </div>
       </div>
+
+      <Strip />
+
+      {LINE_COMMENT ? <MiniQuote c={LINE_COMMENT} text="line" className="bg-card shadow-[0_0_0_0.5px_var(--border)]" /> : null}
 
       <Link href="/impact" className="group flex items-start gap-2.5 rounded-2xl px-2 py-1 text-[13.5px] leading-[1.45] text-foreground/80 focus-visible:outline-2 focus-visible:outline-ring">
         <span aria-hidden className="mt-px grid size-6 shrink-0 place-items-center rounded-md bg-[#3b5bff] text-[10px] font-bold text-white">21</span>

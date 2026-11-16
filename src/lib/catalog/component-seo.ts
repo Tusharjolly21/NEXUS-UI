@@ -4,6 +4,171 @@
  * Search Console shows people actually typing (pages ranking ~5–30 with no clicks yet).
  */
 export const COMPONENT_SEO: Record<string, { title: string; description: string }> = {
+  "date-wheels": {
+    title: "React Date Picker: iOS-style 3D Wheels",
+    description:
+      "React date picker of three 3D drums for day, month and year that you fling, scroll or tap, with a magnifying glass band. Framer Motion + Tailwind CSS.",
+  },
+  "agent-thinking": {
+    title: "React AI Thinking Indicator: Agent Steps",
+    description:
+      "React component for an AI agent's thinking state: a living orb, shimmering steps with sources, a folding summary and a streamed answer. Framer Motion + Tailwind CSS.",
+  },
+  "odometer-field": {
+    title: "React Number Input: Mechanical Odometer Stepper",
+    description:
+      "React quantity field that rolls like a mechanical odometer, with a sliding ruler to scrub, accelerating steppers and a counting total. Framer Motion + Tailwind CSS.",
+  },
+  "activity-rings": {
+    title: "React Activity Rings: Fitness Progress Chart",
+    description:
+      "React activity rings for move, exercise and running, with a second lap past the goal, sparks when a ring closes and a week to step through. Framer Motion + Tailwind CSS.",
+  },
+  "notification-center": {
+    title: "React Notification Center: Swipe to Archive",
+    description:
+      "React notification centre with rolling unread counts, swipe-to-archive rows with Undo, a mark-all-read wave and new notices that drop in. Framer Motion + Tailwind CSS.",
+  },
+  "contribution-skyline": {
+    title: "React Contribution Graph: 3D Heatmap Skyline",
+    description:
+      "React GitHub-style contribution heatmap that stands up into a 3D city of bars you can walk round, with streak highlighting. Framer Motion + Tailwind CSS.",
+  },
+  "liquid-funnel": {
+    title: "React Funnel Chart: Liquid in a Glass Tube",
+    description:
+      "React conversion funnel drawn as liquid in a glass tube, with drops of lost users that fall and splash, and periods to switch between. Framer Motion + Tailwind CSS.",
+  },
+  "sleep-score": {
+    title: "React Sleep Score Card: Night Sky Dashboard",
+    description:
+      "React sleep score card under a real night sky: a cratered moon, the Milky Way, a glowing three-channel gauge and a staircase of sleep stages. Framer Motion + Tailwind CSS.",
+  },
+  "shatter-mark": {
+    title: "React 3D Logo Effect: Chrome Shatter",
+    description:
+      "React chrome logo built from thousands of triangles that shatter around your pointer and crumple home. WebGL + Framer Motion + Tailwind CSS.",
+  },
+  "annotate-text": {
+    title: "React Text Annotation: Hand-drawn Highlights",
+    description:
+      "React paragraph that gets marked up as you watch: a highlighter, circled and struck words, double underlines and a box, drawn at the speed of a hand. Framer Motion + Tailwind CSS.",
+  },
+  "metal-card": {
+    title: "React 3D Credit Card: Brushed Metal Tilt",
+    description:
+      "React brushed metal payment card that tilts in 3D with sliding light, engraved digits, a shifting hologram and a flip to the back. Framer Motion + Tailwind CSS.",
+  },
+  "receipt-button": {
+    title: "React Pay Button: Prints a Receipt",
+    description:
+      "React pay button that sinks into a slot and prints a thermal receipt you can pull down and tear off along its teeth. Framer Motion + Tailwind CSS.",
+  },
+  "decay-card": {
+    title: "React Image Reveal: Burning Photo Card",
+    description:
+      "React photo card that rots and burns away from where your pointer came in, with a charred edge and embers, to reveal the next photo. Framer Motion + Tailwind CSS.",
+  },
+  "ribbon-gallery": {
+    title: "React Image Carousel: Waving Ribbon Gallery",
+    description:
+      "React photo gallery printed on one long ribbon of paper that waves like fabric, slides with momentum and swells under your pointer. Framer Motion + Tailwind CSS.",
+  },
+  "photo-tunnel": {
+    title: "React 3D Image Gallery: Fly-through Tunnel",
+    description:
+      "React spatial gallery: a tunnel of photographs in the dark that you fly through with momentum, and open one to hold it up. Framer Motion + Tailwind CSS.",
+  },
+  "bell-toggle": {
+    title: "React Toggle: Notify Me Bell",
+    description:
+      "React notify-me toggle with a brass bell that swings and rings when struck, and gives one dull knock when you turn it off. Framer Motion + Tailwind CSS.",
+  },
+  "project-index": {
+    title: "React Hover Image List: Editorial Project Index",
+    description:
+      "React editorial project index in big type where each project's picture follows your pointer and redraws square by square as you move. Framer Motion + Tailwind CSS.",
+  },
+  "fuse-button": {
+    title: "React Undo Button: Burning Fuse Timer",
+    description:
+      "React action button with a burning fuse round its outline for the undo window: undo snuffs the spark, burnout commits. Framer Motion + Tailwind CSS.",
+  },
+  "download-button": {
+    title: "React Download Button: Liquid Fill Progress",
+    description:
+      "React download button whose file icon fills like a glass, with sloshing waves, bubbles and a counting percentage, then closes up to Saved. Framer Motion + Tailwind CSS.",
+  },
+  "focus-field": {
+    title: "React Focus Timer: Dithered Pixel Field",
+    description:
+      "React focus-mode card on a drifting field of dithered squares that flee your pointer, with a countdown and held notifications you can bat away. Framer Motion + Tailwind CSS.",
+  },
+  "liquid-tabs": {
+    title: "React Tabs: Liquid Gooey Tab Indicator",
+    description:
+      "React settings tabs where the chosen tab is a bump in the card that runs across like a drop of liquid and settles with an overshoot. Framer Motion + Tailwind CSS.",
+  },
+  "liquid-status": {
+    title: "React Stat Cards: Liquid Glass Vessels",
+    description:
+      "React status cards where each icon is a glass vessel of glowing liquid filled to its number, sloshing as the card turns. Framer Motion + Tailwind CSS.",
+  },
+  "glyph-flow": {
+    title: "React ASCII Art Card: Flowing Characters",
+    description:
+      "React feature card whose picture is made of characters that ripple, part around your pointer and swirl into the next shape on click. Framer Motion + Tailwind CSS.",
+  },
+  "depth-stack": {
+    title: "React 3D Photo Stack: Depth of Field Gallery",
+    description:
+      "React stack of photographs receding on a diagonal that you travel along, each lifting into sharp focus while the rest falls out of focus. Framer Motion + Tailwind CSS.",
+  },
+  "fold-gallery": {
+    title: "React Swipe Gallery: Soft Page Turn",
+    description:
+      "React photo gallery that turns each picture over like a soft sheet: the edges curl, the corners flare and the colours smear apart. Framer Motion + Tailwind CSS.",
+  },
+  "melt-type": {
+    title: "React Text Effect: Melting Liquid Type",
+    description:
+      "React heading in heavy type that melts and swirls like stirred ink under your pointer, then settles back into sharp type. WebGL + Framer Motion + Tailwind CSS.",
+  },
+  "message-composer": {
+    title: "React Chat Input: Message Composer with Mentions",
+    description:
+      "React message composer with formatting, @mention chips, photo attachments with upload rings, a voice-note recorder and scheduled send. Framer Motion + Tailwind CSS.",
+  },
+  "search-modal": {
+    title: "React Search Modal: Command K with Previews",
+    description:
+      "React search field that opens into results with photos for projects and faces for people, lit matches and a gliding keyboard highlight. Framer Motion + Tailwind CSS.",
+  },
+  "file-drop": {
+    title: "React File Upload: Animated Drag and Drop",
+    description:
+      "React upload area for real files: a marching border, light that gathers to your file, liquid upload fills, a shake for files too big. Framer Motion + Tailwind CSS.",
+  },
+  "profile-card": {
+    title: "React Profile Card: 3D Avatar and Follow",
+    description:
+      "React profile card with a drifting cover photo, a 3D avatar that rises out of its frame and a Follow button with confetti and a rolling count. Framer Motion + Tailwind CSS.",
+  },
+  "orb-nav": {
+    title: "React Navbar: Crystal Orb Navigation",
+    description:
+      "React minimal navbar whose mark is a smoked crystal orb lit by your pointer, tinting as you point at links and turning the bar into search. WebGL + Framer Motion + Tailwind CSS.",
+  },
+  "halo-hero": {
+    title: "React Hero Section: Particle Halo",
+    description:
+      "React hero inside a living halo of particles that breathes, flares under your pointer and goes nova on the button, and flows into new forms. WebGL + Framer Motion + Tailwind CSS.",
+  },
+  "brain-atlas": {
+    title: "React 3D Brain: Interactive Neuron Atlas",
+    description:
+      "React brain made of firing neurons you can turn in your hand; point to light a region and click to turn to it with a live signal trace. Canvas + Framer Motion + Tailwind CSS.",
+  },
   "led-button": {
     title: "React LED Button: Dot-Matrix Copy Button",
     description:

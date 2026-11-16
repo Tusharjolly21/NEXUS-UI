@@ -12,6 +12,7 @@ import type { DisplayPricing } from "@/lib/pricing";
 import { NexusMark } from "@/components/brand/nexus-mark";
 import { CheckoutButton } from "@/components/pricing/checkout-button";
 import { IndiaFlag } from "@/components/pricing/india-discount-badge";
+import { LINE_COMMENT, MiniQuote } from "@/components/home/reddit-love";
 
 /**
  * Real Pro components, three rows of them, drifting behind the Nexus mark at the top of the dialog
@@ -25,7 +26,7 @@ const COLLAGE: string[][] = [
 
 type PlanKey = "lifetime" | "annual";
 
-function CollageRow({ slugs, reverse, time }: { slugs: string[]; reverse?: boolean; time: string }) {
+export function CollageRow({ slugs, reverse, time }: { slugs: string[]; reverse?: boolean; time: string }) {
   const tiles = (hidden: boolean) => (
     <ul aria-hidden={hidden || undefined} className="flex shrink-0 gap-2 pr-2">
       {slugs.map((s, i) => (
@@ -202,6 +203,8 @@ export function UpgradeDialog({
                 </li>
               ))}
             </ul>
+
+            {LINE_COMMENT ? <MiniQuote c={LINE_COMMENT} text="line" className="mt-5" onNavigate={onClose} /> : null}
 
             {pricing && price ? (
               <>

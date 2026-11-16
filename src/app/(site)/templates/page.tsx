@@ -55,8 +55,8 @@ export default async function TemplatesPage() {
           Next.js templates, ready to make <RainbowWord>yours</RainbowWord>
         </h1>
         <p className="mt-5 max-w-[620px] text-[18px] leading-[1.55] text-muted-foreground">
-          {templates.length} Next.js landing pages with the motion already done. Open any of them live, then take the
-          full source and change whatever you like.
+          {templates.length} Next.js landing pages and apps with the motion already done. Open any of them live, then take
+          the full source and change whatever you like.
         </p>
 
         <section id={RESULTS_ID} aria-label="Templates" className="mt-10 scroll-mt-24">

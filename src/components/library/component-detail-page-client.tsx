@@ -10,6 +10,7 @@ import { API_KEY_ENV_VAR, REGISTRIES_PRO, envLocalLine, installCommand, registry
 import { useRegistryFiles } from "@/components/library/use-registry-files";
 import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Download, Expand, File, Folder, Link2, Lock, LockOpen, Monitor, Plus, RotateCcw, Sparkles } from "lucide-react";
 import { componentDescriptions } from "@/lib/catalog/component-descriptions";
+import { commentAbout, MiniQuote } from "@/components/home/reddit-love";
 import { DynamicPreview } from "@/components/library/dynamic-preview";
 import { FitPreview } from "@/components/library/fit-preview";
 import { PreviewShield } from "@/components/pro/preview-shield";
@@ -600,6 +601,7 @@ function InstallPanel({
   const command = installCommand(registryCliName ?? slug);
   const extra = getExtraLibraries(dependencies);
   const { requestUpgrade, pricing } = useProAccess();
+  const quote = commentAbout(slug);
 
   if (locked) {
     return (
@@ -634,6 +636,7 @@ function InstallPanel({
           See what Pro includes
         </Link>
         <MemberStack className="mt-3" />
+        {quote ? <MiniQuote c={quote} text="about" className="mt-5" /> : null}
         {hasPrompt ? <BuildPromptCard slug={slug} name={name} locked={locked} free={!premium} /> : null}
         {interactions.length ? (
           <div className="mt-6">

@@ -24,6 +24,7 @@ const PREVIEW_BY_SLUG: Record<string, ComponentType> = {
   "block-newsletter": Previews.PreviewBlockVariantMkTypoCatchingSignup,
   "block-gallery": Previews.PreviewBlockVariantMkDriftGallery,
   "block-changelog": Previews.PreviewBlockVariantMkChangelogPile,
+  "block-dashboard": Previews.PreviewBlockVariantMkStatCards,
   "block-404": Previews.PreviewBlockVariantMkGravity404,
   "block-comparison": Previews.PreviewBlockVariantMkHeadToHeadCompare,
   "block-cta": Previews.PreviewNebulaCtaGlowRedesign,
