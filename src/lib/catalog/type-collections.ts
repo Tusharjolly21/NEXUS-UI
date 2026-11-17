@@ -38,7 +38,7 @@ export const TYPE_COLLECTIONS: readonly TypeCollection[] = [
   },
   {
     slug: "toggle-switches",
-    title: "React Toggle Switch Components",
+    title: "React Toggle Switch Components, Free with Tailwind",
     noun: "toggle switches",
     heading: "React Toggle Switch Components",
     description:
@@ -67,7 +67,7 @@ export const TYPE_COLLECTIONS: readonly TypeCollection[] = [
   },
   {
     slug: "cursor-effects",
-    title: "React Custom Cursor Effects",
+    title: "React Custom Cursor Effects, Free and Copy-Paste",
     noun: "cursor effects",
     heading: "React Custom Cursor Effects",
     description:
@@ -81,7 +81,7 @@ export const TYPE_COLLECTIONS: readonly TypeCollection[] = [
   },
   {
     slug: "text-effects",
-    title: "React Text Animation Components",
+    title: "React Text Animation Components, Free and Copy-Paste",
     noun: "text effects",
     heading: "React Text Animation Components",
     description:
@@ -96,7 +96,7 @@ export const TYPE_COLLECTIONS: readonly TypeCollection[] = [
   },
   {
     slug: "sliders",
-    title: "React Slider Components",
+    title: "React Slider Components, Free Animated Examples",
     noun: "sliders",
     heading: "React Slider Components",
     description:
@@ -110,7 +110,7 @@ export const TYPE_COLLECTIONS: readonly TypeCollection[] = [
   },
   {
     slug: "file-uploads",
-    title: "React File Upload Components",
+    title: "React File Upload Components with Drag and Drop",
     noun: "file uploads",
     heading: "React File Upload Components",
     description:
@@ -124,7 +124,7 @@ export const TYPE_COLLECTIONS: readonly TypeCollection[] = [
   },
   {
     slug: "progress-bars",
-    title: "React Progress Bar Components",
+    title: "React Progress Bar Components, Free and Animated",
     noun: "progress indicators",
     heading: "React Progress Bar Components",
     description:

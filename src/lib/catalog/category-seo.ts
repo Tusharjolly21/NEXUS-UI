@@ -147,7 +147,7 @@ const CATEGORY_COPY: Partial<Record<ComponentCategorySlug, CategoryCopy>> = {
       "Free CTA section components for React and Next.js — animated call-to-action banners built with Tailwind CSS and Framer Motion.",
     heading: "CTA Section Components",
     intro:
-      "Call-to-action sections that close a landing page: glowing banners and focused sign-up prompts with motion that draws the eye without distracting.",
+      "Call-to-action components for React and Next.js that give a visitor a reason to click at the moment the page asks for it. Glow Button is a free call-to-action link with a coloured light on its rim: the brightest arc turns to face the pointer, the glow behind it leans the same way and the button drifts a few pixels toward the cursor. Cloth Banner is a Pro announcement printed on cloth and pinned to a rail: it sways in the breeze, drapes under your hand, and drops away when you yank it down or press Dismiss. Each is a copy-paste React component you can install with the shadcn CLI.",
   },
   "pricing-sections": {
     title: "React Pricing Section Components",
