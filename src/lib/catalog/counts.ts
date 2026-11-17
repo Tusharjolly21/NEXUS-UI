@@ -1,5 +1,5 @@
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
-import { libraryComponents } from "@/lib/catalog/library-components";
+import componentCounts from "@/lib/catalog/component-counts.generated.json";
 import { templates } from "@/lib/catalog/templates";
 import { videos } from "@/lib/catalog/videos";
 import { ICONS, ICON_CATEGORIES } from "@/lib/icons/catalog";
@@ -7,12 +7,14 @@ import { ICONS, ICON_CATEGORIES } from "@/lib/icons/catalog";
 /**
  * Real catalogue sizes. Marketing copy reads these instead of hard-coding numbers,
  * so "82 components" can never drift from what actually ships.
- * Server-side only in practice: `libraryComponents` pulls in the preview registry.
+ * The component numbers come from component-counts.generated.json (scripts/scan-catalog-counts.mjs, run
+ * before every build and dev start), not from `libraryComponents`: importing that pulls the whole live-preview
+ * registry into the layout, and every page then downloads it.
  */
 export const CATALOG_COUNTS = {
-  components: libraryComponents.length,
-  freeComponents: libraryComponents.filter((c) => !c.premium).length,
-  proComponents: libraryComponents.filter((c) => c.premium).length,
+  components: componentCounts.components,
+  freeComponents: componentCounts.components - componentCounts.pro,
+  proComponents: componentCounts.pro,
   templates: templates.length,
   freeTemplates: templates.filter((t) => !t.premium).length,
   blocks: blocksManifest.length,
