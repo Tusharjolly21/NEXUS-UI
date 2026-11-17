@@ -94,7 +94,7 @@ export default function IconsPage() {
                   <p className="mt-2.5 flex flex-wrap gap-1.5">
                     {f.icons.map((i) => (
                       <Link key={i} href={`/icons/${i}`} className="rounded-full bg-secondary px-2.5 py-1 text-[12px] text-foreground/80 transition-colors hover:text-foreground">
-                        {i}
+                        {i.replace(/-/g, " ")} icon
                       </Link>
                     ))}
                   </p>
@@ -110,7 +110,7 @@ export default function IconsPage() {
               {ICONS.map((i) => (
                 <li key={i.slug} className="break-inside-avoid">
                   <Link href={`/icons/${i.slug}`} className="text-muted-foreground hover:text-foreground hover:underline">
-                    {i.title}
+                    {i.title} icon
                   </Link>
                 </li>
               ))}

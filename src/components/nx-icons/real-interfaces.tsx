@@ -61,7 +61,7 @@ function Card({ title, where, slugs, children, className }: { title: string; whe
         <p className="mt-3 flex flex-wrap gap-1.5">
           {slugs.map((s) => (
             <Link key={s} href={`/icons/${s}`} className="rounded-full bg-secondary px-2.5 py-1 text-[12px] text-foreground/80 transition-colors hover:text-foreground">
-              {s}
+              {s.replace(/-/g, " ")} icon
             </Link>
           ))}
         </p>
