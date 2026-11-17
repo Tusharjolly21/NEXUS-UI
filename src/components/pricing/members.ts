@@ -3,7 +3,7 @@ import { RAINBOW_HUES } from "@/components/site/rainbow-word";
 /**
  * People who bought All-Access (the lifetime plan) and agreed to be shown by name. Newest first.
  * Keep it to real buyers who said yes. Shown under the All-Access and Upgrade buttons as faces with round flag
- * badges and a "Joined by" line that opens the full list (MemberStack) and, once there are enough names, as the full row on /pricing (MembersRow).
+ * badges and a "Joined by" line that opens the full list (MemberStack).
  *
  * `face` (0 to 4) picks the hand-drawn avatar in MemberStack (/public/avatars/face-<n>.svg); give each new person
  * the next unused one so it stays theirs when newer names are added in front. Leave it out and the position in
