@@ -3,11 +3,12 @@
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Flag } from "@/components/pricing/flag";
-import { MEMBERS, discBackground, initials } from "@/components/pricing/members";
+import { MEMBERS } from "@/components/pricing/members";
+import { Face } from "@/components/pricing/member-stack";
 
 /**
  * People who bought All-Access (the lifetime plan), shown by name under the plans with their permission.
- * One flat, quiet row: an initial in a spectrum-coloured disc, the name, the country. It reads as
+ * One flat, quiet row: the same hand-drawn face as under the buy buttons, the name, the flag and the country. It reads as
  * intentional with two names and simply wraps onto more lines as the list grows, so there is no
  * count and no fan to outgrow. Newest first. Keep it to real buyers who said yes to being shown.
  *
@@ -27,17 +28,14 @@ function Member({ m, i, inView }: { m: (typeof MEMBERS)[number]; i: number; inVi
       animate={inView || reduced ? { opacity: 1, y: 0 } : undefined}
       transition={{ type: "spring", stiffness: 220, damping: 24, delay: 0.1 + i * 0.07 }}
     >
-      <span
-        aria-hidden
-        className="flex size-11 shrink-0 items-center justify-center rounded-full text-[15px] font-semibold uppercase tracking-[-0.2px] text-white"
-        style={{ background: discBackground(i) }}
-      >
-        {initials(m.name)}
+      <span aria-hidden className="shrink-0">
+        <Face m={m} i={i} size={44} />
       </span>
       <span className="min-w-0">
         <span className="block truncate text-[16px] font-semibold leading-tight tracking-[-0.2px] text-foreground">{m.name}</span>
-        <span className="mt-1 block leading-none">
-          <Flag code={m.code} country={m.country} className="h-[14px] w-[21px]" />
+        <span className="mt-1 flex items-center gap-1.5 text-[13px] leading-none text-muted-foreground">
+          <Flag code={m.code} country="" className="h-[14px] w-[21px]" />
+          {m.country}
         </span>
       </span>
     </motion.li>

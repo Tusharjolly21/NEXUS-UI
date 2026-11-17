@@ -12,7 +12,7 @@ const SHOWN = 4;
 
 type Member = (typeof MEMBERS)[number];
 
-function Face({ m, i, size }: { m: Member; i: number; size: number }) {
+export function Face({ m, i, size }: { m: Member; i: number; size: number }) {
   const face = (m.face ?? i) % FACE_BACKGROUNDS.length;
   return (
     <span
@@ -125,6 +125,8 @@ export function MemberStack({ className }: { className?: string }) {
             <span className="absolute -bottom-0.5 -right-0.5 block size-[15px] overflow-hidden rounded-full ring-2 ring-card">
               {/* eslint-disable-next-line @next/next/no-img-element -- tiny static SVG, no optimisation needed */}
               <img src={`/flags/${m.code}.svg`} alt="" width={15} height={15} className="size-full object-cover" />
+              {/* a hairline so a mostly white flag (Japan) still reads as a badge against the white ring */}
+              <span className="absolute inset-0 rounded-full shadow-[inset_0_0_0_0.5px_rgba(0,0,0,.25)]" />
             </span>
           </span>
         ))}
