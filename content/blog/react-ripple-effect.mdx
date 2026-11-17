@@ -1,0 +1,178 @@
+---
+title: "React Ripple Effect for Buttons and Clicks"
+description: "Build a click ripple effect in React and Tailwind CSS: a small button component, keyboard support, reduced motion, and water-style ripples for backgrounds and toasts."
+date: "2026-11-17"
+---
+
+A ripple is a circle that grows out from the exact point you pressed and fades as it spreads. It tells the person that the press registered, and where. It is simple to build, but the usual snippets miss three things: the ripple has to start under the pointer, it has to grow far enough to cover the whole element, and it has to clean up after itself.
+
+This guide builds a ripple button in React and Tailwind CSS with no library, covers keyboard presses and reduced motion, and then shows what to reach for when you want a ripple that behaves like water rather than a button press.
+
+## How the effect works
+
+Every ripple is one absolutely positioned circle inside a clipped container.
+
+1. **The container** is `position: relative` with `overflow: hidden`, so the circle never spills outside the button.
+2. **The circle** is placed so its centre sits on the pointer: `left` and `top` are the pointer position minus half the circle's size.
+3. **One keyframe** scales it from nothing to full size while its opacity falls to zero.
+4. **When the animation ends**, the circle is removed from the DOM.
+
+The only maths is the size. To cover the button from any starting point, the circle must reach the farthest corner. Take the larger horizontal and vertical distance from the pointer to an edge, find the diagonal of those two, and double it for a diameter.
+
+## The CSS
+
+Put this in your global stylesheet (in a Next.js App Router project, `app/globals.css`).
+
+```css
+.ripple {
+  position: absolute;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.25;
+  transform: scale(0);
+  pointer-events: none;
+  animation: ripple 600ms ease-out forwards;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ripple {
+    display: none;
+  }
+}
+```
+
+The circle uses `currentColor`, so it automatically picks up the text colour of the button: pale on a dark button, dark on a light one, with no extra props.
+
+## The React component
+
+```tsx
+"use client";
+
+import { useRef, useState, type ComponentProps, type MouseEvent, type PointerEvent } from "react";
+
+type Ripple = { id: number; x: number; y: number; size: number };
+
+export function RippleButton({
+  children,
+  className = "",
+  onPointerDown,
+  onClick,
+  ...props
+}: ComponentProps<"button">) {
+  const [ripples, setRipples] = useState<Ripple[]>([]);
+  const nextId = useRef(0);
+
+  function spawn(el: HTMLElement, clientX: number, clientY: number) {
+    const rect = el.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    // Distance from the press point to the farthest corner.
+    const radius = Math.hypot(Math.max(x, rect.width - x), Math.max(y, rect.height - y));
+    setRipples((current) => [...current, { id: nextId.current++, x, y, size: radius * 2 }]);
+  }
+
+  function handlePointerDown(e: PointerEvent<HTMLButtonElement>) {
+    onPointerDown?.(e);
+    spawn(e.currentTarget, e.clientX, e.clientY);
+  }
+
+  function handleClick(e: MouseEvent<HTMLButtonElement>) {
+    onClick?.(e);
+    // A keyboard press has no pointer, so it has no pointerdown. Ripple from the centre.
+    if (e.detail === 0) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      spawn(e.currentTarget, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    }
+  }
+
+  return (
+    <button
+      {...props}
+      onPointerDown={handlePointerDown}
+      onClick={handleClick}
+      className={`relative overflow-hidden rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white outline-none focus-visible:ring-2 focus-visible:ring-zinc-900/40 focus-visible:ring-offset-2 ${className}`}
+    >
+      {children}
+      {ripples.map((r) => (
+        <span
+          key={r.id}
+          aria-hidden="true"
+          className="ripple"
+          style={{ left: r.x - r.size / 2, top: r.y - r.size / 2, width: r.size, height: r.size }}
+          onAnimationEnd={() => setRipples((current) => current.filter((item) => item.id !== r.id))}
+        />
+      ))}
+    </button>
+  );
+}
+```
+
+Use it like any button:
+
+```tsx
+<RippleButton onClick={() => console.log("saved")}>Save changes</RippleButton>
+```
+
+Notes on the choices in this code:
+
+- **`pointerdown`, not `click`.** The ripple should start the moment the finger or cursor lands, not when it lifts. Waiting for `click` makes the feedback feel late.
+- **Keyboard presses are handled separately.** Pressing Enter or Space fires `click` with `detail` equal to `0` and no pointer position, so the ripple starts from the centre instead of not appearing at all.
+- **Each ripple removes itself** in `onAnimationEnd`. Without that, every press leaves a dead element behind and the list grows forever.
+- **`aria-hidden` on the circle.** It is decoration, so screen readers skip it.
+- **The consumer's handlers still run.** `onPointerDown` and `onClick` are pulled out of the props and called, so passing your own does not silently disable the effect.
+- **Only `transform` and `opacity` animate**, which the browser composites without recalculating layout, so rapid clicking stays smooth.
+
+## Ripples on cards, rows and tabs
+
+Nothing in the component is specific to a button. Move the same logic into a hook that returns the ripples and a `pointerdown` handler, and you can attach it to a list row, a tab or a clickable card. Two things to watch:
+
+- The container needs `relative overflow-hidden`. A card with a rounded corner and `overflow-hidden` also clips the circle to the corner.
+- If the card holds other interactive elements, ripple on the card only when the press did not start on one of them, so a nested link does not also trigger the card's ripple.
+
+## Reduced motion and contrast
+
+The media query in the CSS hides the circle for people who have asked their system to reduce motion. The button still works and still shows its normal pressed and focus states, which are enough on their own.
+
+Keep the ripple faint. At `0.25` opacity it reads as a touch of light on the surface. Much higher and it starts to fight the label for contrast, and the label has to stay readable at the moment the ripple is at its widest.
+
+## When you want a ripple that behaves like water
+
+A button ripple is feedback: a single ring that confirms a press and is gone in half a second. A different family of effects treats the ripple as the whole point of the surface, with rings that travel, interact with the things they cross and settle. Two finished React components do that:
+
+- [Ripple Field](/components/ripple-field) is a quiet grid of dots. Click anywhere and a ring travels outward; every dot it crosses bursts into colour, gets kicked away from the centre and springs back home. It suits hero sections and empty states. Ripple Field is a Pro component.
+- [Ripple Toast](/components/ripple-toast) makes notifications arrive like a drop hitting water: a bead falls in, splashes flat into a pill, sends out a ring, and the text resolves out of the ripples. Up to three stack. Ripple Toast is a Pro component.
+
+Both install with the shadcn CLI, for example `npx shadcn@latest add @nexus-labs/ripple-toast`, and each component page says exactly what the install includes. For more ambient and interactive surfaces, browse the [background effects](/components/category/background-effects) and [motion effects](/components/category/motion-effects) categories. If you are choosing an animation approach more generally, our [Framer Motion examples](/blog/framer-motion-examples) cover the spring-based techniques behind effects like these.
+
+## Frequently asked questions
+
+### How do I add a ripple effect to a button in React?
+
+Make the button `relative overflow-hidden`, create an absolutely positioned circle at the pointer position on `pointerdown`, animate it from `scale(0)` to `scale(1)` while fading out, and remove it when the animation ends. The component above is a complete version in about 60 lines with no dependencies.
+
+### How do I make a Material-style ripple with Tailwind CSS?
+
+Use Tailwind for the layout (`relative overflow-hidden`) and a small piece of global CSS for the `ripple` keyframe, since the animation is created at runtime. Tailwind does not need to generate the circle, because its size and position are set inline from the click point.
+
+### Why does my ripple not start where I clicked?
+
+The coordinates must be relative to the button, not the page. Subtract `getBoundingClientRect().left` and `.top` from `clientX` and `clientY`, then subtract half the circle's size so it is centred on that point, as the code above does.
+
+### Does a ripple effect work with the keyboard?
+
+Not unless you add it. Pressing Enter or Space triggers `click` but not `pointerdown`. Handle `click` where `event.detail` is `0` and start the ripple from the centre of the button.
+
+### How do I stop the ripple spilling outside a rounded button?
+
+Put `overflow-hidden` on the same element that has the border radius. The circle is clipped to the rounded shape.
+
+### Is a ripple effect bad for performance or accessibility?
+
+It is cheap, because it only animates `transform` and `opacity`. For accessibility, hide it under `prefers-reduced-motion`, keep it faint so label contrast holds, and never let it be the only sign that a press worked.
