@@ -190,6 +190,7 @@ export function IconTile({
         </span>
         <span className={cn("text-[13px] font-medium transition-colors", dark ? "text-white/50 group-hover:text-white" : "text-muted-foreground group-hover:text-foreground")}>
           {icon.title}
+          <span className="sr-only"> animated icon</span>
         </span>
       </Link>
       {icon.premium ? <ProBadge onDark={dark} className="pointer-events-none absolute left-2.5 top-2.5 px-2 py-0.5 text-[11px]" /> : null}

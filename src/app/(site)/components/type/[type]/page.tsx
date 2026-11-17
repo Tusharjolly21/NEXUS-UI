@@ -12,6 +12,7 @@ import {
   TYPE_COLLECTIONS,
 } from "@/lib/catalog/type-collections";
 import { ComponentGallery } from "@/components/gallery/component-gallery";
+import { excerpt } from "@/lib/catalog/excerpt";
 import { getPricing } from "@/lib/region";
 import { Band, PillLink } from "@/components/site";
 import { allGalleryItems } from "@/lib/catalog/gallery-items";
@@ -126,7 +127,7 @@ export default async function ComponentTypePage({ params }: Props) {
               <Link href={`/components/${c.slug}`} className="text-[17px] font-semibold text-foreground hover:underline">
                 {c.name}
               </Link>
-              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{c.description}</p>
+              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{excerpt(c.description)}</p>
             </li>
           ))}
         </ul>

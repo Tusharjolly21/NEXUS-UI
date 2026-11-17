@@ -19,6 +19,7 @@ import { getPricing } from "@/lib/region";
 import { Band, PillLink } from "@/components/site";
 import { allGalleryItems } from "@/lib/catalog/gallery-items";
 import { getIndexableTypes, getTypeHref } from "@/lib/catalog/type-collections";
+import { excerpt } from "@/lib/catalog/excerpt";
 
 type Props = { params: Promise<{ category: string }> };
 
@@ -136,7 +137,7 @@ export default async function ComponentCategoryPage({ params }: Props) {
               <Link href={`/components/${c.slug}`} className="text-[17px] font-semibold text-foreground hover:underline">
                 {c.name}
               </Link>
-              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{c.description}</p>
+              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{excerpt(c.description)}</p>
             </li>
           ))}
         </ul>
