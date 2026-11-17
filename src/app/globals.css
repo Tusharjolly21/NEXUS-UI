@@ -279,6 +279,81 @@ html.dark {
   animation-play-state: paused;
 }
 
+/* The homepage comment wall: columns scroll forever (the track holds two copies, so -50% is one seamless loop) */
+@keyframes pg-wall {
+  to { transform: translateY(-50%); }
+}
+
+.pg-wall-col {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 13%, #000 87%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 13%, #000 87%, transparent 100%);
+}
+
+.pg-wall-track {
+  animation: pg-wall var(--pg-wall-time, 60s) linear infinite;
+  will-change: transform;
+}
+
+.pg-wall-track[data-reverse="true"] {
+  animation-direction: reverse;
+}
+
+.pg-wall-col:hover .pg-wall-track,
+.pg-wall-col:focus-within .pg-wall-track {
+  animation-play-state: paused;
+}
+
+/* Soft edges: stacked blur bands, stronger toward the edge, over the column's own fade */
+.pg-wall-edge {
+  position: absolute;
+  inset-inline: 0;
+  height: 140px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pg-wall-edge[data-edge="top"] { top: 0; }
+.pg-wall-edge[data-edge="bottom"] { bottom: 0; transform: scaleY(-1); }
+
+.pg-wall-edge > i {
+  position: absolute;
+  inset: 0;
+}
+
+.pg-wall-edge > i:nth-child(1) {
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0 60%, transparent 100%);
+}
+
+.pg-wall-edge > i:nth-child(2) {
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 40%, transparent 75%);
+  mask-image: linear-gradient(to bottom, #000 0 40%, transparent 75%);
+}
+
+.pg-wall-edge > i:nth-child(3) {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 22%, transparent 50%);
+  mask-image: linear-gradient(to bottom, #000 0 22%, transparent 50%);
+}
+
+.pg-wall-edge > i:nth-child(4) {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 8%, transparent 28%);
+  mask-image: linear-gradient(to bottom, #000 0 8%, transparent 28%);
+}
+
+/* Phones: keep the fade, drop the costlier blur */
+@media (max-width: 767px) {
+  .pg-wall-edge { display: none; }
+}
+
 @keyframes pg-drop {
   0% { transform: translateY(-0.35em) scale(0.9); }
   60% { transform: translateY(0.05em) scale(1.02); }
@@ -298,6 +373,23 @@ html.dark {
     overflow-x: auto;
     -webkit-mask-image: none;
     mask-image: none;
+  }
+  /* the comment wall stands still; each column scrolls by hand */
+  .pg-wall-track {
+    animation: none;
+  }
+  .pg-wall-track > ul[aria-hidden="true"] {
+    display: none;
+  }
+  .pg-wall-col {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 88%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0, #000 88%, transparent 100%);
+  }
+  .pg-wall-edge[data-edge="top"] {
+    display: none;
   }
   .pg-spotlight {
     display: none;

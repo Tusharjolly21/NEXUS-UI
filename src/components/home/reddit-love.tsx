@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
  * Real comments from Reddit threads, Instagram and X about Nexus UI components, quoted as written (an
- * ellipsis marks anything left out). Two rows drift in opposite directions and never end; hovering pauses them, and
- * people who prefer reduced motion get a row they can scroll by hand instead. No images or scripts
+ * ellipsis marks anything left out). On the homepage they fill columns that scroll forever, neighbours in opposite
+ * directions; hovering pauses a column, and people who prefer reduced motion get columns they scroll by hand instead. No images or scripts
  * are loaded from Reddit, Instagram or X: the avatar is just the first letter of the username, and the
  * small Reddit, Instagram or X logo marks where each comment came from. The blue badge shows only on an
  * account that Instagram or X itself shows as verified.
@@ -28,13 +29,18 @@ export type Comment = {
   about?: string;
   /** The part of the comment about that component, for its page. */
   aboutCut?: string;
+  /**
+   * Slug of the component the comment talks about, for the "About" link on the homepage wall only (unlike
+   * `about`, it doesn't put the comment on that component's page).
+   */
+  on?: string;
 };
 
 /** A stable key for a comment: its id if it has one, otherwise the username. */
 export const commentKey = (c: Comment) => c.id ?? c.user;
 
 const ROW_ONE: Comment[] = [
-  { user: "aspiring_abundance", source: "r/SaaS", quote: "The pumpkin smash component alone deserves $79 dollars … what a perfect little detail to throw into a UI library" },
+  { user: "aspiring_abundance", source: "r/SaaS", quote: "The pumpkin smash component alone deserves $79 dollars … what a perfect little detail to throw into a UI library", on: "pumpkin-reveal" },
   {
     user: "itsmeekaran",
     id: "itsmeekaran-moon-toggle",
@@ -53,14 +59,15 @@ const ROW_ONE: Comment[] = [
   { user: "JOvertron", source: "r/webdesign", quote: "Very cool" },
   { user: "vrangnarr", source: "r/MotionDesign", quote: "Brilliant, love it!" },
   { user: "benjaminhu", source: "Reddit", quote: "This is incredibly good! Source code, please! :)" },
-  { user: "DarkBlade_12", source: "Reddit", quote: "Woahh this is soo cool!! The effect of the symbiote taking over if you stay close for too long is genuinely awesome" },
+  { user: "DarkBlade_12", source: "Reddit", quote: "Woahh this is soo cool!! The effect of the symbiote taking over if you stay close for too long is genuinely awesome", on: "venom-button" },
   { user: "nuestras", source: "Reddit", quote: "soooooooo nice!" },
   { user: "InformationOne8032", source: "Reddit", quote: "Very very cool!" },
-  { user: "dfnslvtr", source: "r/MotionDesign", quote: "ok the rope is satisfying" },
+  { user: "dfnslvtr", source: "r/MotionDesign", quote: "ok the rope is satisfying", on: "pull-cord" },
   {
     user: "liuxueqi0044",
     source: "r/creativecoding",
     quote: "The refill meter turns this into a tiny game \u{1F602} I'd forget what I came to click and start rationing my web fluid instead.",
+    on: "web-sling-button",
   },
   { user: "ssmlee04", source: "Reddit", quote: "Hi! Your website looks great" },
 ];
@@ -72,7 +79,7 @@ const ROW_TWO: Comment[] = [
   { user: "velvetlane1", source: "r/webdesign", quote: "yeah super creative concept tbh" },
   { user: "ds1008", source: "r/SaaS", quote: "Pretty sick UI kit" },
   { user: "BonRoxz", source: "r/webdesign", quote: "That's awesome good stuff" },
-  { user: "Present_Gur1911", source: "Reddit", quote: "looks cool man. I felt like I'm poisoned with venom when the cursor is all black" },
+  { user: "Present_Gur1911", source: "Reddit", quote: "looks cool man. I felt like I'm poisoned with venom when the cursor is all black", on: "venom-button" },
   { user: "Actual-Deal-4445", source: "Reddit", quote: "I like it man. That's what I can call a cool project" },
   { user: "NomsaMbeki-8", source: "Reddit", quote: "This would be awesome for a game!" },
   { user: "No_Speech8210", source: "r/SideProject", quote: "Really cool concept man, the creativity is unreal" },
@@ -142,33 +149,136 @@ export function Card({ c, className, short = false }: { c: Comment; className?: 
   );
 }
 
-function Row({ items, seconds, reverse }: { items: Comment[]; seconds: number; reverse?: boolean }) {
+/** The components the wall links to: their name, a picture for the small tile, and how far to zoom into it. */
+const ON: Record<string, { name: string; image: string; zoom: number }> = {
+  "pumpkin-reveal": { name: "Pumpkin Reveal", image: "/posters/pumpkin-reveal.webp", zoom: 2.2 },
+  "eclipse-toggle": { name: "Eclipse Toggle", image: "/og-shots/components/eclipse-toggle.jpg", zoom: 2.6 },
+  "venom-button": { name: "Venom Button", image: "/og-shots/components/venom-button.jpg", zoom: 2.2 },
+  "web-sling-button": { name: "Web Sling Button", image: "/og-shots/components/web-sling-button.jpg", zoom: 1.8 },
+  "pull-cord": { name: "Pull Cord", image: "/og-shots/components/pull-cord.jpg", zoom: 1.3 },
+};
+
+/** One card on the homepage wall: who said it and where, the words (big when there are only a few), and the component it's about. */
+function WallCard({ c }: { c: Comment }) {
+  const [from, to] = tone(c.user);
+  const insta = c.platform === "instagram";
+  const onX = c.platform === "x";
+  const words = c.excerpt ?? c.quote;
+  const slug = c.on ?? c.about;
+  const on = slug ? ON[slug] : undefined;
   return (
-    <div
-      className="pg-marquee overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_8%,#000_92%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,#000_8%,#000_92%,transparent)]"
-    >
-      <div
-        className="pg-marquee-track flex w-max gap-5 py-3 pr-5"
-        data-reverse={reverse ? "true" : undefined}
-        style={{ ["--pg-marquee-time" as string]: `${seconds}s` }}
+    <figure className="flex flex-col gap-4 rounded-[22px] bg-card p-[22px] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_1px_2px_rgba(0,0,0,.04),0_18px_36px_-24px_rgba(0,0,0,.28)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]">
+      <figcaption className="flex items-center gap-3">
+        <span
+          aria-hidden
+          className="flex size-[38px] shrink-0 items-center justify-center rounded-full text-[15px] font-semibold uppercase text-white"
+          style={{ backgroundImage: `linear-gradient(135deg, ${from}, ${to})` }}
+        >
+          {c.user[0]}
+        </span>
+        <span className="min-w-0">
+          <span className="flex items-center gap-1.5 text-[14.5px] font-semibold tracking-[-0.01em] text-foreground">
+            <span className="truncate">{insta ? c.user : onX ? `@${c.user}` : `u/${c.user}`}</span>
+            {c.verified ? (
+              <Image src="/images/testimonials/verified.png" alt="Verified account" width={15} height={15} className="size-[15px] shrink-0" />
+            ) : null}
+          </span>
+          {c.source.startsWith("r/") ? <span className="mt-px block text-[13px] text-muted-foreground">on {c.source}</span> : null}
+        </span>
+        {insta ? (
+          <Image src="/images/testimonials/instagram.png" alt="Instagram" width={22} height={22} className="ml-auto size-[22px] shrink-0" />
+        ) : onX ? (
+          <Image src="/images/testimonials/x.png" alt="X" width={22} height={22} className="ml-auto size-[22px] shrink-0 rounded-[6px] dark:invert" />
+        ) : (
+          <Image src="/reddit-icon.png" alt="Reddit" width={22} height={22} className="ml-auto size-[22px] shrink-0 rounded-[6px]" />
+        )}
+      </figcaption>
+      <blockquote
+        className={cn(
+          "text-foreground",
+          words.length < 36 ? "text-[21px] font-medium leading-[1.25] tracking-[-0.4px]" : "text-[15.5px] leading-[1.55] tracking-[-0.15px]",
+        )}
       >
-        <ul className="flex gap-5">
-          {items.map((c) => (
-            <li key={commentKey(c)} className="flex">
-              <Card c={c} />
-            </li>
-          ))}
-        </ul>
-        {/* Second copy so the loop has no seam. Hidden from screen readers so nothing is read twice. */}
-        <ul className="flex gap-5" aria-hidden>
-          {items.map((c) => (
-            <li key={commentKey(c)} className="flex">
-              <Card c={c} />
-            </li>
-          ))}
-        </ul>
-      </div>
+        &ldquo;{words}&rdquo;
+      </blockquote>
+      {on && slug ? (
+        <Link
+          href={`/components/${slug}`}
+          className="inline-flex items-center gap-2 self-start rounded-xl bg-foreground/[0.045] py-1.5 pl-1.5 pr-3 text-[13px] text-muted-foreground transition-colors hover:bg-foreground/[0.08] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:bg-white/[0.07] dark:hover:bg-white/[0.11]"
+        >
+          <span className="size-7 shrink-0 overflow-hidden rounded-lg bg-[#f0f0f3]">
+            <Image src={on.image} alt="" width={56} height={56} sizes="28px" className="size-full object-cover" style={{ transform: `scale(${on.zoom})` }} />
+          </span>
+          <span>
+            About <span className="font-semibold text-foreground">{on.name}</span>
+          </span>
+          <ArrowUpRight aria-hidden className="size-3.5" />
+        </Link>
+      ) : null}
+    </figure>
+  );
+}
+
+/** Seconds for one full loop of each column; they differ so the columns never line up. */
+const SPEEDS = [62, 74, 56];
+
+/**
+ * Every comment in columns that scroll forever, neighbours in opposite directions. The cards blur and fade as
+ * they reach the top and bottom edge. Hovering a column, or focusing a link in it, stops it; with reduced
+ * motion nothing moves and each column scrolls by hand instead (see .pg-wall in globals.css).
+ */
+function Wall({ columns, className }: { columns: number; className?: string }) {
+  const buckets: Comment[][] = Array.from({ length: columns }, () => []);
+  COMMENTS.forEach((c, i) => buckets[i % columns].push(c));
+  return (
+    <div className={cn("pg-wall relative h-[640px] gap-5 sm:h-[720px]", className)} style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
+      {buckets.map((items, i) => (
+        <div key={i} className="pg-wall-col -mx-2 px-2">
+          <div
+            className="pg-wall-track flex flex-col gap-5 pb-5"
+            data-reverse={i % 2 ? "true" : undefined}
+            style={{ ["--pg-wall-time" as string]: `${SPEEDS[i % SPEEDS.length]}s` }}
+          >
+            <ul className="flex flex-col gap-5">
+              {items.map((c) => (
+                <li key={commentKey(c)}>
+                  <WallCard c={c} />
+                </li>
+              ))}
+            </ul>
+            {/* Second copy so the loop has no seam: hidden from screen readers and out of the tab order. */}
+            <ul className="flex flex-col gap-5" aria-hidden inert>
+              {items.map((c) => (
+                <li key={commentKey(c)}>
+                  <WallCard c={c} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ))}
+      <span aria-hidden className="pg-wall-edge" data-edge="top">
+        <i />
+        <i />
+        <i />
+        <i />
+      </span>
+      <span aria-hidden className="pg-wall-edge" data-edge="bottom">
+        <i />
+        <i />
+        <i />
+        <i />
+      </span>
     </div>
+  );
+}
+
+function SourcePill({ src, label, invert }: { src: string; label: string; invert?: boolean }) {
+  return (
+    <li className="inline-flex items-center gap-1.5 rounded-full bg-foreground/[0.045] py-1.5 pl-1.5 pr-3 text-[14px] font-medium text-foreground dark:bg-white/[0.07]">
+      <Image src={src} alt="" width={18} height={18} className={cn("size-[18px] rounded-[5px]", invert && "dark:invert")} />
+      {label}
+    </li>
   );
 }
 
@@ -249,11 +359,15 @@ export function RedditLove() {
         <p className="mt-4 text-[18px] text-muted-foreground">
           Comments from Reddit, Instagram and X on the components, quoted as written.
         </p>
+        <ul aria-hidden className="mt-5 flex flex-wrap gap-2">
+          <SourcePill src="/reddit-icon.png" label="Reddit" />
+          <SourcePill src="/images/testimonials/x.png" label="X" invert />
+          <SourcePill src="/images/testimonials/instagram.png" label="Instagram" />
+        </ul>
       </div>
-      <div className="-mx-4 mt-12 flex flex-col gap-2 sm:mx-0">
-        <Row items={ROW_ONE} seconds={70} />
-        <Row items={ROW_TWO} seconds={80} reverse />
-      </div>
+      <Wall columns={1} className="mt-10 grid md:hidden" />
+      <Wall columns={2} className="mt-12 hidden md:grid lg:hidden" />
+      <Wall columns={3} className="mt-14 hidden lg:grid" />
     </div>
   );
 }
