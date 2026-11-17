@@ -9,20 +9,20 @@ import { createMetadata } from "@/lib/seo";
 import {
   ANALYTICS_CHECKED_LABEL,
   CHECKED_LABEL,
-  EARLIER_LABEL,
   fmt,
   DAILY,
   LAST_30_DAYS,
   PROFILE_URL,
   RANK,
   SNAPSHOT,
+  compact,
   thousands,
 } from "@/lib/twenty-first-stats";
 
 export const metadata: Metadata = createMetadata({
-  title: "Nexus UI on 21st.dev: almost 1M views",
+  title: "Nexus UI on 21st.dev: 1M views",
   description:
-    `Almost a million views on 21st.dev. Our last 30 days there: ${Math.round(LAST_30_DAYS.views / 1000)}K views and ${fmt.format(LAST_30_DAYS.copies)} copies, and #${RANK.position} of ${fmt.format(RANK.of)} authors this week.`,
+    `A million views on 21st.dev. Our last 30 days there: ${Math.round(LAST_30_DAYS.views / 1000)}K views and ${fmt.format(LAST_30_DAYS.copies)} copies, and #${RANK.position} of ${fmt.format(RANK.of)} authors this week.`,
   alternates: { canonical: "/impact" },
 });
 
@@ -33,9 +33,9 @@ const GRID =
 const MONTH_CELLS = [
   { label: "Views", value: LAST_30_DAYS.views },
   { label: "Copies", value: LAST_30_DAYS.copies },
-  { label: "Installs", value: LAST_30_DAYS.installs, note: `from the CLI and MCP, as of ${EARLIER_LABEL}` },
+  { label: "Installs", value: LAST_30_DAYS.installs, note: "from the CLI and MCP" },
   { label: "Bookmarks", value: LAST_30_DAYS.bookmarks },
-  { label: "Profile views", value: LAST_30_DAYS.profileViews, note: `as of ${EARLIER_LABEL}` },
+  { label: "Profile views", value: LAST_30_DAYS.profileViews },
 ] as const;
 
 export default function ImpactPage() {
@@ -47,7 +47,7 @@ export default function ImpactPage() {
         <div className="relative mx-auto max-w-[1152px]">
           <TwentyFirstLogo className="h-6 w-auto text-foreground" />
           <h1 className="pg-display mt-6 max-w-[860px] text-[clamp(44px,7.4vw,80px)] text-foreground">
-            Almost a <RainbowWord>million</RainbowWord> views on 21st.dev
+            A <RainbowWord>million</RainbowWord> views on 21st.dev
           </h1>
           <p className="mt-5 max-w-[600px] text-[19px] leading-[1.55] text-muted-foreground">
             21st.dev is a community library where developers browse and copy React components. We publish our
@@ -95,8 +95,9 @@ export default function ImpactPage() {
             </div>
           </dl>
           <p className="mt-5 max-w-[760px] text-[13.5px] leading-relaxed text-muted-foreground">
-            The all-time views and bookmarks are estimates between checks: the last count we read, {thousands(SNAPSHOT.views)}K
-            views and {thousands(SNAPSHOT.bookmarks)}K bookmarks on {CHECKED_LABEL}, plus our average of the last 30 days. We
+            The all-time views and bookmarks are estimates between checks: the last count we read,{" "}
+            {compact(SNAPSHOT.views).digits}
+            {compact(SNAPSHOT.views).suffix} views and {thousands(SNAPSHOT.bookmarks)}K bookmarks on {CHECKED_LABEL}, plus our average of the last 30 days. We
             update them each time we re-check.
           </p>
         </div>
@@ -150,12 +151,14 @@ export default function ImpactPage() {
                   <span className="pg-display text-[clamp(32px,4.2vw,52px)] tabular-nums text-white">
                     <CountUp to={RANK.position} prefix="#" />
                   </span>
-                  <span className="ml-2 inline-flex items-center gap-0.5 text-[15px] font-medium text-[#34c759]">
-                    <ArrowUp className="size-4" aria-hidden />
-                    {RANK.up}
-                  </span>
+                  {RANK.up ? (
+                    <span className="ml-2 inline-flex items-center gap-0.5 text-[15px] font-medium text-[#34c759]">
+                      <ArrowUp className="size-4" aria-hidden />
+                      {RANK.up}
+                    </span>
+                  ) : null}
                   <span className="block text-[13px] text-white/50">
-                    of {RANK.of} authors, up {RANK.up} places since {RANK.since}
+                    of {fmt.format(RANK.of)} authors{RANK.up ? `, up ${RANK.up} places since ${RANK.since}` : ""}
                   </span>
                 </dd>
               </div>

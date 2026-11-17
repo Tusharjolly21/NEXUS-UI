@@ -4,17 +4,29 @@ import { useRef, useSyncExternalStore, type PointerEvent } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { TwentyFirstLogo } from "@/components/home/twenty-first-logo";
-import { CHECKED_LABEL, PROFILE_URL, SNAPSHOT, estimateLifetime, thousands } from "@/lib/twenty-first-stats";
+import { CHECKED_LABEL, PROFILE_URL, SNAPSHOT, compact, estimateLifetime } from "@/lib/twenty-first-stats";
 
 /**
  * Figures from the nexus-ui profile on 21st.dev, kept in src/lib/twenty-first-stats.ts. The views and
  * bookmarks roll to today's estimate once the page is open. `digits` is what the odometer rolls to; `spoken`
  * is what a screen reader hears.
  */
-function buildStats(views: string, bookmarks: string) {
+const WORD = { K: "thousand", M: "million" } as const;
+
+/** "1.01M" -> { digits: "1.01", suffix: "M" } */
+const split = (s: string) => ({ digits: s.slice(0, -1), suffix: s.slice(-1) as "K" | "M" });
+/** As a string, so the browser snapshot below only changes when the shown figure does. */
+const shown = (n: number) => {
+  const { digits, suffix } = compact(n);
+  return digits + suffix;
+};
+
+function buildStats(viewsText: string, bookmarksText: string) {
+  const views = split(viewsText);
+  const bookmarks = split(bookmarksText);
   return [
-    { digits: views, suffix: "K", label: "views", spoken: `about ${views} thousand views` },
-    { digits: bookmarks, suffix: "K", label: "bookmarks", spoken: `about ${bookmarks} thousand bookmarks` },
+    { ...views, label: "views", spoken: `about ${views.digits} ${WORD[views.suffix]} views` },
+    { ...bookmarks, label: "bookmarks", spoken: `about ${bookmarks.digits} ${WORD[bookmarks.suffix]} bookmarks` },
     { digits: String(SNAPSHOT.components), suffix: "", label: "components listed", spoken: `${SNAPSHOT.components} components listed` },
   ];
 }
@@ -78,8 +90,8 @@ export function TwentyFirstMilestone() {
   const still = !!useReducedMotion();
   const go = inView || still;
   // Server and first paint show the last counted value; the browser then switches to today's estimate.
-  const views = useSyncExternalStore(subscribeNever, () => thousands(estimateLifetime().views), () => thousands(SNAPSHOT.views));
-  const bookmarks = useSyncExternalStore(subscribeNever, () => thousands(estimateLifetime().bookmarks), () => thousands(SNAPSHOT.bookmarks));
+  const views = useSyncExternalStore(subscribeNever, () => shown(estimateLifetime().views), () => shown(SNAPSHOT.views));
+  const bookmarks = useSyncExternalStore(subscribeNever, () => shown(estimateLifetime().bookmarks), () => shown(SNAPSHOT.bookmarks));
   const STATS = buildStats(views, bookmarks);
 
   return (
@@ -145,7 +157,7 @@ export function TwentyFirstMilestone() {
           </div>
 
           <h2 id="milestone-title" className="pg-display mt-9 max-w-[760px] text-[clamp(36px,5.6vw,62px)] leading-[1.03]">
-            Almost a million views on 21st.dev
+            A million views on 21st.dev
           </h2>
           <p className="mt-4 max-w-[500px] text-[17px] leading-[1.55] text-white/62">
             21st.dev is a community library where developers browse and copy React components.
