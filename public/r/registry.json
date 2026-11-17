@@ -2150,6 +2150,29 @@
       ]
     },
     {
+      "name": "animated-accordion",
+      "type": "registry:component",
+      "title": "Animated Accordion",
+      "description": "A free React accordion that opens on a spring. The open entry lifts onto its own tile, its height eases to fit the text, the text follows a beat later and the plus turns into a minus. Single or multiple open, light or dark, with real buttons inside headings and Up, Down, Home and End to move between titles.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/animated-accordion/animated-accordion.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/animated-accordion/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "cinematic-logo-cloud",
       "type": "registry:component",
       "title": "Cinematic Logo Cloud",

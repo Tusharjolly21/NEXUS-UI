@@ -4,6 +4,11 @@
  * Search Console shows people actually typing (pages ranking ~5–30 with no clicks yet).
  */
 export const COMPONENT_SEO: Record<string, { title: string; description: string }> = {
+  "animated-accordion": {
+    title: "React Accordion Component, Free with Tailwind",
+    description:
+      "Free React accordion that opens on a spring: single or multiple open, light or dark, keyboard accessible, copy-paste with the shadcn CLI. Framer Motion + Tailwind CSS.",
+  },
   "date-wheels": {
     title: "React Date Picker: iOS-style 3D Wheels",
     description:

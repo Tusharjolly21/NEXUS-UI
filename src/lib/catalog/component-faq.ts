@@ -197,6 +197,13 @@ export const COMPONENT_FAQ: Record<string, ComponentFaqItem[]> = {
     { q: "Does it need a chart library?", a: "No. Each sparkline is an inline SVG path built from the `trend` numbers and drawn in with Framer Motion. It is green when the change is good and red when it is bad, so latency or churn can use `lowerIsBetter`." },
     { q: "Does it support dark mode and reduced motion?", a: "Yes. It is styled with Tailwind `dark:` variants, and with prefers-reduced-motion on, the sparkline draw-in, hover lift and switcher slide are skipped." },
   ],
+  "animated-accordion": [
+    { q: "How do I install the animated accordion?", a: "Run `npx shadcn@latest add @nexus-labs/animated-accordion`. It adds the AnimatedAccordion component and installs framer-motion." },
+    { q: "How do I add my own questions?", a: "Pass `items` as an array of `{ id?, title, hint?, content }`. `content` can be plain text or any React node, such as a paragraph with a link. `hint` is an optional small line under the title." },
+    { q: "How do I let more than one panel stay open?", a: "Set `type=\"multiple\"`. The default, `type=\"single\"`, keeps one entry open and closes the others. In single mode, `collapsible={false}` stops the open entry from being closed again." },
+    { q: "Is it accessible?", a: "Each title is a real button inside a heading, with `aria-expanded` and `aria-controls`, and each panel is a labelled region. Closed answers are removed from the page, so nothing hidden can be tabbed into. Up, Down, Home and End move between titles. With reduced motion on, panels open and close instantly." },
+    { q: "Does it work in dark mode?", a: "Yes. Set `tone=\"dark\"` for a dark surface. Both tones are styled with fixed colours, so it looks the same whatever the page theme is." },
+  ],
   "scroll-progress-bar": [
     { q: "How do I track one section instead of the whole page?", a: "Pass that section's ref as `targetRef`. Add `containerRef` if the section scrolls inside its own container, or pass your own `progress` motion value." },
     { q: "Can I use it as a horizontal bar at the top of the page?", a: "It is built as a vertical rail that fills from top to bottom. For a horizontal top bar, change the fill from `scaleY` to `scaleX` and swap the `height` and `width` values." },
