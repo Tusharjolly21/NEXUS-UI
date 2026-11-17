@@ -16521,6 +16521,67 @@ export default function Page() {
     tailwindSource: tw,
   },
   {
+    slug: "animated-accordion",
+    name: "Animated Accordion",
+    registryCliName: "animated-accordion",
+    description:
+      "A free React accordion that opens on a spring. The open entry lifts onto its own tile, its height eases to fit the text, the text follows a beat later and the plus turns into a minus. Single or multiple open, light or dark, with real buttons inside headings and Up, Down, Home and End to move between titles.",
+    categorySlug: "cards",
+    tags: ["accordion", "react accordion", "faq", "expand collapse", "disclosure", "collapsible", "tailwind accordion", "accessible", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 190,
+    createdAt: "2026-11-17",
+    animationKinds: ["layout", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "AccordionEntry[]", defaultValue: "sample questions", description: "The entries: { id?, title, hint?, content }. Content can be text or any React node." },
+      { name: "type", type: "\"single\" | \"multiple\"", defaultValue: "\"single\"", description: "single keeps one entry open at a time. multiple lets any number stay open." },
+      { name: "collapsible", type: "boolean", defaultValue: "true", description: "Single mode only: whether the open entry can be closed again." },
+      { name: "defaultOpen", type: "string | string[]", defaultValue: "first entry", description: "The id, or ids for multiple, open at the start." },
+      { name: "onChange", type: "(open: string[]) => void", description: "Called with the ids that are open after every change." },
+      { name: "headingLevel", type: "1 | 2 | 3 | 4 | 5 | 6", defaultValue: "3", description: "Heading level used for each title. Pick the one that fits your page outline." },
+      { name: "tone", type: "\"light\" | \"dark\"", defaultValue: "\"light\"", description: "Light or dark surface." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens the entries one after another by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewAnimatedAccordion,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { AnimatedAccordion } from "@/components/animated-accordion";
+
+const FAQ = [
+  {
+    title: "Can I use it in a commercial project?",
+    hint: "Licence",
+    content: "Yes. You own the copied code, so you can change anything in it.",
+  },
+  {
+    title: "Does it work with the App Router?",
+    hint: "Setup",
+    content: "It does. The file starts with use client, so a server component can render it directly.",
+  },
+  {
+    title: "Can more than one stay open?",
+    hint: "Behaviour",
+    content: "Set type to multiple and any number of entries can be open at once.",
+  },
+];
+
+// Press a title, or use the arrow keys to move between them.
+export default function Page() {
+  return (
+    <section className="grid min-h-[60vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <div className="w-full max-w-[520px]">
+        <AnimatedAccordion items={FAQ} type="single" />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
     slug: "bell-toggle",
     name: "Bell Toggle",
     registryCliName: "bell-toggle",

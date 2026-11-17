@@ -1,0 +1,177 @@
+---
+title: "React Accordion Component With Tailwind"
+description: "Build an accessible accordion in React and Tailwind CSS: smooth height animation, single or multiple panels, a no-JavaScript version, and animated accordions to copy."
+date: "2026-11-17"
+---
+
+An accordion is a stack of headings where each one shows or hides its content. It is the standard answer for FAQs, settings groups and long product pages, and it is easy to build badly: the panels jump instead of animating, the open state is invisible to a screen reader, and closed content can still be tabbed into.
+
+This guide builds an accessible accordion in React and Tailwind CSS with no library. It animates height without measuring anything, supports single or multiple open panels, shows a version that needs no JavaScript at all, and then points to animated accordions for when a plain list is not enough.
+
+## The anatomy of an accessible accordion
+
+Each item is two parts: a heading containing a button, and a panel.
+
+- The **button** is a real `button` inside a heading element. It carries `aria-expanded` and points at its panel with `aria-controls`.
+- The **panel** has an id, and a `region` role labelled by its button.
+- Closed panels must not be reachable by keyboard. Hidden content that can still take focus is the most common accordion bug.
+
+## The React and Tailwind component
+
+```tsx
+"use client";
+
+import { useId, useState } from "react";
+
+type Item = { question: string; answer: string };
+
+const ITEMS: Item[] = [
+  { question: "Can I use it in a commercial project?", answer: "Yes. Free components can be used in personal and commercial projects." },
+  { question: "Does it work with Next.js?", answer: "It works with any React setup, including the Next.js App Router." },
+  { question: "How do I install a component?", answer: "Run the install command from the component page with the shadcn CLI." },
+];
+
+export function Accordion({
+  items = ITEMS,
+  allowMultiple = false,
+}: {
+  items?: Item[];
+  allowMultiple?: boolean;
+}) {
+  const [open, setOpen] = useState<number[]>([0]);
+  const baseId = useId();
+
+  function toggle(index: number) {
+    setOpen((current) =>
+      current.includes(index)
+        ? current.filter((i) => i !== index)
+        : allowMultiple
+          ? [...current, index]
+          : [index],
+    );
+  }
+
+  return (
+    <div className="w-full max-w-xl divide-y divide-zinc-200 rounded-2xl border border-zinc-200 bg-white">
+      {items.map((item, index) => {
+        const isOpen = open.includes(index);
+        const id = `${baseId}-${index}`;
+        return (
+          <div key={item.question}>
+            <h3>
+              <button
+                type="button"
+                id={`${id}-trigger`}
+                aria-expanded={isOpen}
+                aria-controls={`${id}-panel`}
+                onClick={() => toggle(index)}
+                className="flex w-full items-center justify-between gap-4 rounded-2xl px-5 py-4 text-left text-sm font-medium text-zinc-900 outline-none hover:bg-zinc-50 focus-visible:ring-2 focus-visible:ring-zinc-900/20"
+              >
+                {item.question}
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className={`size-4 shrink-0 text-zinc-500 transition-transform duration-200 motion-reduce:transition-none ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
+                >
+                  <path d="m5 8 5 5 5-5" />
+                </svg>
+              </button>
+            </h3>
+            <div
+              id={`${id}-panel`}
+              role="region"
+              aria-labelledby={`${id}-trigger`}
+              inert={!isOpen}
+              className={`grid transition-[grid-template-rows] duration-200 motion-reduce:transition-none ${
+                isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+              }`}
+            >
+              <div className="overflow-hidden">
+                <p className="px-5 pb-4 text-sm leading-relaxed text-zinc-600">{item.answer}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+```
+
+Notes on the choices in this code:
+
+- **Animating height without measuring it.** CSS cannot transition to `height: auto`, so the usual workaround is JavaScript that measures the content. Here the panel is a grid whose single row animates between `0fr` and `1fr`, and the inner element has `overflow: hidden`. The browser works out the height, and you write no measuring code.
+- **`inert` on the closed panel.** It removes the hidden content from the tab order and from assistive technology in one attribute, so a link inside a collapsed answer cannot be focused. React 19 accepts `inert` as a boolean. On React 18, pass the string instead: `inert={isOpen ? undefined : ""}`.
+- **The button inside a heading.** Screen reader users navigate by headings, so each question appears in the heading list, and the button inside it carries the interaction.
+- **`aria-expanded` and `aria-controls`.** They report the open state and link the button to its panel.
+- **`useId` for the ids.** The generated id keeps every accordion on the page unique, so two accordions never share panel ids.
+- **One open at a time by default.** In single mode, opening an item replaces the open list. Set `allowMultiple` for a settings page where people want several open.
+- **`motion-reduce:transition-none`** makes the open and close instant for people who ask their system to reduce motion.
+
+## A version with no JavaScript
+
+The native `details` element is an accordion that the browser already knows how to build. It handles the open state, the keyboard and the accessibility for you.
+
+```html
+<details name="faq" open>
+  <summary>Can I use it in a commercial project?</summary>
+  <p>Yes. Free components can be used in personal and commercial projects.</p>
+</details>
+<details name="faq">
+  <summary>Does it work with Next.js?</summary>
+  <p>It works with any React setup, including the Next.js App Router.</p>
+</details>
+```
+
+Giving several `details` elements the same `name` makes them exclusive: opening one closes the others. This works in current versions of Chrome, Safari and Firefox, and in an older browser the items simply open independently, which still works.
+
+Choose `details` for static content such as a FAQ on a marketing page, where you want the least code and the strongest default accessibility. Choose the React version when you need smooth height animation across all browsers, control over the open state from elsewhere in your app, or a custom layout in the header row.
+
+## Accordion mistakes to avoid
+
+- **Hiding important content.** If most people need an answer, do not bury it in a collapsed panel.
+- **Click targets that are only the arrow.** The whole header row should be the button, as in the code above.
+- **Removing the focus ring.** Keyboard users need to see which header has focus.
+- **Using `display: none` and animating.** It cannot animate. Use the grid row technique or a measured height.
+- **Putting interactive content in a closed panel without `inert`.** It stays focusable and confuses keyboard and screen reader users.
+
+## When a plain accordion is not enough
+
+A list of questions and answers needs no personality. When the accordion is the main visual element, such as a row of photo strips in a gallery or a showcase section, the way panels open can do more:
+
+- [Falloff Accordion](/components/falloff-accordion) is a row of photo strips where the one you point at opens, and its neighbours give way on a smooth Gaussian falloff, so the whole row leans toward the pointer while a caption rises on the open strip. It is a Pro component.
+
+Install it with the shadcn CLI, for example `npx shadcn@latest add @nexus-labs/falloff-accordion`; the component page lists exactly what it adds. For more expanding and revealing layouts, browse the [card components](/components/category/cards) category. For the animation techniques behind effects like this, see our [Framer Motion examples](/blog/framer-motion-examples), and for the other pieces of a landing page, the guide to [landing page structure](/blog/landing-page-structure).
+
+## Frequently asked questions
+
+### How do I build an accordion in React with Tailwind CSS?
+
+Keep the open panels in state, render each item as a heading with a button and a panel, and animate the panel with a grid whose row goes from `grid-rows-[0fr]` to `grid-rows-[1fr]`. Add `aria-expanded` and `aria-controls` to the button. The component above is a complete example.
+
+### How do I animate an accordion height with CSS?
+
+Transition `grid-template-rows` from `0fr` to `1fr` on a grid wrapper, with `overflow: hidden` on the child. This animates to the content's natural height without JavaScript measuring. In Tailwind, use `grid-rows-[0fr]`, `grid-rows-[1fr]` and `transition-[grid-template-rows]`.
+
+### How do I allow only one accordion item open at a time?
+
+Store a single open index, or an array that is replaced on each click, as in the `toggle` function above. With native `details`, give the elements the same `name` attribute.
+
+### Is an accordion accessible?
+
+It can be, if the header is a real button inside a heading, the button has `aria-expanded` and `aria-controls`, closed content is removed from the tab order with `inert`, and focus is visible. Native `details` and `summary` provide most of this by default.
+
+### Should I use details and summary or build it in React?
+
+Use `details` for static content that needs no animation or outside control, because it is the least code. Use React when you need smooth height animation in every browser, to control the open state from other parts of your app, or a custom header layout.
+
+### How do I make an accordion respect reduced motion?
+
+Add `motion-reduce:transition-none` to the elements that animate, so the panel opens and closes instantly for people who have asked their system to reduce motion.

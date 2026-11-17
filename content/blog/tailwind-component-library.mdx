@@ -1,0 +1,100 @@
+---
+title: "Tailwind Component Library: How to Choose"
+description: "Choosing a Tailwind component library: copy-paste, plugin, headless and paid options compared, with the questions to ask before you commit."
+date: "2026-11-17"
+---
+
+Tailwind CSS gives you utility classes, not components. So most projects reach for a Tailwind component library sooner or later, and the options are different enough in kind that picking the wrong type costs real time. A library that ships as an npm package behaves very differently from one that copies source files into your repo.
+
+This guide sorts the main options by how they work, says what each type is good for, and gives you questions to ask before you commit. It is written by the team behind Nexus UI, which is one of the options, so it is listed with the same caveats as the rest.
+
+## The four types of Tailwind component library
+
+### 1. Copy-paste libraries
+
+You copy the source into your project and own it. There is no package to update, so you can change anything, and nothing is hidden behind an API.
+
+- **shadcn/ui** is the best-known: accessible components built on Radix primitives and Tailwind, added one at a time with a CLI.
+- **HyperUI** offers free, copy-paste Tailwind sections and components as plain HTML.
+- **Magic UI, Aceternity UI and Nexus UI** add animation on top, for React with Framer Motion. Nexus UI installs through the same shadcn CLI, with free and Pro components.
+
+Best for: teams that want full control of the code and a consistent look they can restyle. The cost is that you maintain what you copy.
+
+### 2. Plugin and class-based libraries
+
+You install a package that adds component classes or a plugin, then use those classes in your markup.
+
+- **DaisyUI** is a Tailwind plugin that adds semantic classes such as `btn` and `card`, so your markup stays short and themes switch with a setting.
+- **Flowbite** and **Preline UI** provide ready-made Tailwind components, with some JavaScript for interactive ones such as dropdowns and modals.
+
+Best for: moving fast on dashboards and internal tools, and for projects that are not React. The cost is that you work within the library's conventions, and overriding them can fight the plugin.
+
+### 3. Headless libraries
+
+These give you behaviour and accessibility with no styling at all, and you style everything with Tailwind.
+
+- **Headless UI** from the Tailwind team provides unstyled, accessible components such as menus, dialogs and listboxes.
+- **Radix UI** and **React Aria** provide primitives with deep accessibility work.
+
+Best for: teams with a design system who want the hard parts of interaction, such as focus management and keyboard handling, done correctly. The cost is that you design and style every component yourself.
+
+### 4. Paid first-party kits
+
+**Tailwind Plus**, the paid library from the Tailwind team, provides professionally designed components and templates. Best for teams who want polished, layout-heavy pages quickly and are happy to pay for design.
+
+## What to ask before you choose
+
+1. **Do I want to own the code?** If yes, choose copy-paste. If you would rather update a package, choose a plugin or kit.
+2. **Is it for React, or another framework?** Some libraries are HTML only, some have React and Vue versions, and some are React only.
+3. **Is accessibility handled for me?** Check that menus, dialogs and tabs manage focus and keyboard input. If a library does not say, test one yourself.
+4. **How does it handle animation?** Static components are fine for a dashboard. A landing page or product site often needs motion, and that is where animated libraries differ.
+5. **Does it work with my stack?** For Next.js, check that components that use state or effects are marked as client components, and that they work with the App Router.
+6. **What happens when I need to change it?** With copy-paste you edit a file. With a plugin you may be overriding classes.
+7. **What is free and what is paid?** Many libraries have a free core and paid extras. Look at exactly which components are in which tier before you build on one.
+8. **Is it maintained?** Check the last release, the open issues and whether the components work with your Tailwind version.
+
+## A quick guide by situation
+
+| You are building | Consider |
+|---|---|
+| A SaaS app with custom branding | shadcn/ui, with Headless UI or Radix where you need more |
+| An internal tool or admin panel, fast | DaisyUI, Flowbite or Preline |
+| A marketing page or portfolio in plain HTML | HyperUI or Tailwind Plus |
+| A landing page that needs motion | Nexus UI, Magic UI or Aceternity UI |
+| A design system with strict accessibility needs | Radix, React Aria or Headless UI |
+
+## Mixing libraries
+
+Most real projects use more than one. A common stack is shadcn/ui for forms, dialogs and menus, plus an animated library for hero sections, pricing and features. This works well with copy-paste libraries because they share the same foundation: Tailwind classes and plain React components that you own. The one thing to keep consistent is your design tokens, such as colours, radius and spacing, so the pieces look like one product.
+
+## Where Nexus UI fits
+
+Nexus UI is an animated React component library built on Tailwind CSS and Framer Motion. Components, blocks and full Next.js templates install with the shadcn CLI, which means they live in your repo and you can change them. Some are free and some are Pro, and each page says which.
+
+If you want to try it, start with the [free components](/components), look through the [background effects](/components/category/background-effects) or [card components](/components/category/cards), or see how it compares to others in our guides to [Magic UI and Aceternity alternatives](/blog/aceternity-magic-ui-alternatives), [the best React component library](/blog/best-react-component-library) and [Nexus UI vs HeroUI](/blog/nexus-ui-vs-heroui). Side-by-side pages cover [Magic UI](/alternatives/magic-ui), [React Bits](/alternatives/react-bits), [Aceternity UI](/alternatives/aceternity-ui) and [shadcn/ui](/alternatives/shadcn-ui). For a Tailwind helper you will use in every component, see the guide to the [cn utility](/blog/cn-utility-tailwind).
+
+## Frequently asked questions
+
+### What is the best Tailwind component library?
+
+It depends on what you are building. shadcn/ui is the most popular copy-paste choice for apps, DaisyUI and Flowbite are quick for dashboards, Headless UI and Radix suit custom design systems, and animated libraries such as Nexus UI, Magic UI and Aceternity UI suit landing pages that need motion.
+
+### What is the difference between Tailwind and a Tailwind component library?
+
+Tailwind is a utility-class framework: it gives you the building blocks, not finished components. A component library gives you finished buttons, cards, menus and sections already built with Tailwind classes.
+
+### Are there free Tailwind component libraries?
+
+Yes. shadcn/ui, HyperUI, DaisyUI, Flowbite, Preline and Headless UI all have free options, and Nexus UI has free components alongside Pro ones. Check the licence of each, especially for commercial use.
+
+### Should I use a copy-paste library or an npm package?
+
+Use copy-paste when you want full control and expect to change the components. Use a package when you want updates handled for you and are happy to follow the library's conventions.
+
+### Do Tailwind component libraries work with Next.js?
+
+Most do. For the App Router, components that use state, effects or event handlers must be client components, so check that the library marks them with `"use client"` or tells you to.
+
+### Can I use more than one Tailwind component library?
+
+Yes, and many projects do. Keep your colours, radius and spacing in shared design tokens so components from different sources look consistent.
