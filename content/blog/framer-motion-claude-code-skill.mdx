@@ -1,0 +1,116 @@
+---
+title: "Framer Motion Skill for Claude Code"
+description: "Write a Framer Motion skill for Claude Code: what a SKILL.md is, where it goes, and a ready-to-copy rule set so the code your agent writes animates well."
+date: "2026-11-17"
+---
+
+Ask a coding agent for an animation and you often get something that works once and is awkward after: a linear tween where a spring belongs, a menu that vanishes without animating out, motion that ignores reduced-motion settings. The agent knows the library. It does not know your standards.
+
+A skill fixes that. This guide explains what a skill is, where it lives, and gives you a Framer Motion skill you can copy, with the reasoning behind each rule so you can change it. Framer Motion is now called Motion, and `framer-motion` and `motion/react` are the same library for this purpose.
+
+## What a skill is
+
+A skill for Claude Code is a folder containing a `SKILL.md` file. The file starts with a short header that names the skill and says when to use it, followed by plain instructions. Claude reads the short description to decide when the skill applies, and loads the full instructions only when it does, so a skill costs very little until it is needed.
+
+Skills can live in two places:
+
+- **In your project**, under `.claude/skills/<name>/SKILL.md`. It is checked in with the code, so the whole team and every agent session gets the same rules.
+- **In your home folder**, under `~/.claude/skills/<name>/SKILL.md`, for rules you want in every project.
+
+If you only want always-on rules, a section in `CLAUDE.md` does the same job. A skill is better when the guidance is long or only relevant to some tasks, which is true of animation.
+
+## A Framer Motion skill you can copy
+
+Create `.claude/skills/framer-motion/SKILL.md` with this content:
+
+```markdown
+---
+name: framer-motion
+description: Rules for writing animation with Framer Motion (Motion) in React and Next.js. Use when adding or changing animation, transitions, gestures, layout or scroll effects.
+---
+
+# Framer Motion rules
+
+## Setup
+- Import from "framer-motion" (or "motion/react" if the project already uses it). Do not mix both.
+- Any file that uses motion components, hooks or AnimatePresence needs "use client" at the top in the Next.js App Router.
+
+## Choosing the motion
+- Prefer springs for things that respond to the user (press, drag, open, close). Use a short tween for fades and colour changes.
+- Default spring for UI: type "spring", stiffness 380, damping 36. Lower damping for playful, higher for calm.
+- Keep durations short. UI transitions are 150 to 300 ms. Do not use delays longer than 400 ms on anything the user is waiting on.
+
+## Structure
+- Put animation on the element with props (initial, animate, exit, whileHover, whileTap). Use variants when several children share states.
+- Use AnimatePresence around anything that mounts and unmounts, with a stable key, so it can animate out.
+- Use the layout prop for size and position changes. Use layoutId to connect two elements across a swap.
+- Animate transform and opacity only. Never animate width, height, top or left directly; use layout or scale.
+- Read values in event handlers or animation frames from refs or motion values, not from React state, to avoid re-rendering on every frame.
+
+## Accessibility
+- Respect reduced motion. Use useReducedMotion, or MotionConfig with reducedMotion="user" at the app root. When reduced, remove movement and keep simple fades or no animation.
+- Never rely on animation alone to show state. Keep aria attributes (aria-expanded, aria-selected) correct.
+- Keep focus styles visible. Do not remove outlines on animated elements.
+
+## Hygiene
+- Do not animate more than a handful of elements at once on mount. Stagger lists with a small per-item delay (0.04 to 0.1 s).
+- Use whileInView with viewport={{ once: true }} for scroll reveals instead of scroll listeners.
+- No emojis or decorative motion that does not explain a state change.
+```
+
+Why each group is there:
+
+- **Setup** prevents the two most common errors: mixing import paths, and forgetting `"use client"` in the App Router.
+- **Choosing the motion** gives the agent a default feel. Without it, agents tend to reach for `duration: 0.5` and `ease: "easeInOut"` on everything. Springs feel more physical for things the user touches, and fixed numbers stop the result changing from one session to the next.
+- **Structure** encodes the things that make Framer Motion worth using: exit animations, layout animations and animating cheap properties.
+- **Accessibility** makes reduced motion the default, not an afterthought.
+- **Hygiene** keeps pages from filling with motion for its own sake.
+
+Change the numbers to match your product. The point is that the choices are written down once instead of being re-decided in every prompt.
+
+## Using the skill
+
+Once the file exists, you do not call it by name. Ask for the animation you want and the agent uses the skill when the task matches its description:
+
+```text
+Make the pricing toggle animate between monthly and yearly. The price should
+slide out and the new one slide in, and it should respect reduced motion.
+```
+
+A short, specific description in the skill header is what makes it load at the right time, so keep it to one sentence about when to use it.
+
+## Combine it with real components
+
+Rules make the code the agent writes better. They do not replace finished components. When you want an effect that already exists, have the agent install it instead of rebuilding it, then adapt it:
+
+```bash
+npx shadcn@latest add @nexus-labs/glow-button
+```
+
+Nexus UI components are built on Framer Motion and Tailwind CSS, and each one follows rules much like the ones above. The [Claude Code and Cursor guide](/claude-code) shows how to install by name from an agent, and the [MCP server page](/mcp) explains how an agent can search the library itself. For the patterns your skill refers to, our guide to [ten Framer Motion examples](/blog/framer-motion-examples) has working code for each, and [Framer Motion in Next.js](/blog/framer-motion-nextjs-animations) covers the App Router details. If you are unsure whether Framer Motion is the right tool for a given effect, read [GSAP vs Framer Motion](/blog/gsap-vs-framer-motion).
+
+## Frequently asked questions
+
+### What is a Claude Code skill?
+
+A folder with a `SKILL.md` file. A short header tells Claude when the skill applies, and the body holds instructions Claude follows when it does. Skills can live in `.claude/skills` in a project or in `~/.claude/skills` in your home folder.
+
+### Where do I put a Framer Motion skill?
+
+In `.claude/skills/framer-motion/SKILL.md` in your project, so the rules are checked in with your code and shared with your team. Put it in `~/.claude/skills` instead if you want it in every project on your machine.
+
+### How is a skill different from CLAUDE.md?
+
+`CLAUDE.md` is loaded in every session, so keep it for short rules that always apply. A skill is loaded only when its description matches the task, so it suits longer guidance such as animation standards.
+
+### Does the skill work for Motion and motion/react?
+
+Yes. Framer Motion was renamed Motion, and the React API is the same. The skill above tells the agent to follow whichever import path your project already uses.
+
+### Will the agent always follow the skill?
+
+It follows it when the task matches the description, but it is guidance, not a guarantee. Review animated code as you would any other, and tighten the wording of a rule if the agent keeps missing it.
+
+### Can I add my own design tokens to the skill?
+
+Yes, and you should. Add your spring values, easing, durations and any named motion presets, so every animation in the project feels like it belongs to the same product.
