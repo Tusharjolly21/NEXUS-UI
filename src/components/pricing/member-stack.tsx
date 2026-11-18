@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 import { Flag } from "@/components/pricing/flag";
 import { MEMBERS } from "@/components/pricing/members";
 
-/** The ink-line faces in /public/avatars (face-0.svg to face-4.svg), each on its own pastel. */
-const FACE_BACKGROUNDS = ["#e7dcff", "#cdeee0", "#ffe1d6", "#fff0c9", "#d6ebff"];
+/** The ink-line faces in /public/avatars (face-0.svg to face-5.svg), each on its own pastel. */
+const FACE_BACKGROUNDS = ["#e7dcff", "#cdeee0", "#ffe1d6", "#fff0c9", "#d6ebff", "#ffdcec"];
 const SHOWN = 4;
 
 type Member = (typeof MEMBERS)[number];
