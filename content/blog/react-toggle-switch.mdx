@@ -1,0 +1,163 @@
+---
+title: "React Toggle Switch: Accessible and Animated"
+description: "Build a React toggle switch that works with the keyboard and screen readers, then animate it with Framer Motion. Includes a dark mode toggle checklist."
+date: "2026-11-16"
+---
+
+A toggle switch is the control for settings that take effect straight away: notifications on or off, dark mode, a feature flag. It looks simple, and it is easy to get subtly wrong. A switch made from a styled `div` cannot be reached with the keyboard, a switch with no label tells a screen reader nothing, and a switch that animates with no regard for reduced motion can make some people feel unwell.
+
+This guide builds a React toggle switch properly. It starts with the accessible version using only Tailwind CSS, adds a Framer Motion spring on top, and then covers when to use a switch at all, how to word its label and what a dark mode toggle needs. Both components were typechecked before they went on this page. Ready-made animated switches are listed at the end if you would rather install one.
+
+## Switch, checkbox or button?
+
+These three controls look alike but mean different things, and picking the right one matters more than how it is styled.
+
+- **Use a switch** for a setting that applies immediately, with no save step. The label names the thing, and the state says whether it is on.
+- **Use a checkbox** when the choice is part of a form that gets submitted later, or when you pick several items from a list.
+- **Use a button** for an action, such as "Send" or "Delete". A button does something once; a switch holds a state.
+
+If flipping the control does not change anything until the person presses Save, it is a checkbox, even if you make it look like a switch.
+
+## The accessible version
+
+The right element is a real `button` with `role="switch"` and an `aria-checked` value. A native button gives you keyboard focus and both Space and Enter for free, and the role tells assistive technology that it is a switch rather than a plain button.
+
+```tsx
+"use client";
+
+import { useId, useState } from "react";
+
+type SwitchProps = {
+  label: string;
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+  disabled?: boolean;
+};
+
+export function Switch({ label, checked, defaultChecked = false, onCheckedChange, disabled }: SwitchProps) {
+  const labelId = useId();
+  const [inner, setInner] = useState(defaultChecked);
+  const controlled = checked !== undefined;
+  const on = controlled ? checked : inner;
+
+  function toggle() {
+    if (disabled) return;
+    if (!controlled) setInner(!on);
+    onCheckedChange?.(!on);
+  }
+
+  return (
+    <div className="flex items-center gap-3">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-labelledby={labelId}
+        disabled={disabled}
+        onClick={toggle}
+        className="group relative h-7 w-12 shrink-0 rounded-full bg-zinc-300 transition-colors aria-checked:bg-emerald-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <span className="absolute left-0.5 top-0.5 size-6 rounded-full bg-white shadow transition-transform group-aria-checked:translate-x-5" />
+      </button>
+      <span id={labelId} className="text-sm">
+        {label}
+      </span>
+    </div>
+  );
+}
+```
+
+A few details are worth pointing out:
+
+- **The label is linked with `aria-labelledby`**, so a screen reader announces something like "Email notifications, switch, on". The text next to the switch is part of the control.
+- **The knob moves with `group-aria-checked:translate-x-5`.** Tailwind can style an element from the `aria-checked` attribute of its parent, so the colour and the knob position come from the same value a screen reader reads. There is no second piece of state to keep in sync.
+- **It works controlled or uncontrolled.** Pass `checked` and `onCheckedChange` when the parent owns the state, or just `defaultChecked` when it does not.
+- **The focus ring uses `focus-visible`**, so it shows for keyboard users and stays out of the way for mouse users.
+- **Disabled is real.** The `disabled` attribute removes the button from the tab order and from clicks, and the faded style tells everyone why.
+
+## Add a spring with Framer Motion
+
+The CSS transition above is enough for most products. If you want the knob to settle with a little life, Framer Motion can animate it with a spring. The trick is to move the knob with layout rather than with pixel values: put the knob at the start or the end of a flex row and let `layout` animate the change.
+
+```tsx
+"use client";
+
+import { useId, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+
+export function SpringSwitch({ label }: { label: string }) {
+  const labelId = useId();
+  const [on, setOn] = useState(false);
+  const reduce = useReducedMotion();
+
+  return (
+    <div className="flex items-center gap-3">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-labelledby={labelId}
+        onClick={() => setOn((v) => !v)}
+        className={`flex h-7 w-12 shrink-0 items-center rounded-full p-0.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
+          on ? "justify-end bg-emerald-500" : "justify-start bg-zinc-300"
+        }`}
+      >
+        <motion.span
+          layout
+          transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 32 }}
+          className="size-6 rounded-full bg-white shadow"
+        />
+      </button>
+      <span id={labelId} className="text-sm">
+        {label}
+      </span>
+    </div>
+  );
+}
+```
+
+Because the knob sits at the end of a flex row when the switch is on, the same code works at any switch size. `useReducedMotion` turns the spring into an instant change for people who have asked their system for less motion, which you should treat as the default rather than an extra.
+
+## Make the target easy to hit
+
+A 48 by 28 pixel switch is fine to look at, but it can be hard to press on a phone. Two things help. First, make the label part of the target: wrap the switch and its text in a `label`, or give the text an `onClick` that calls the same toggle, so the whole row is pressable. Second, leave at least 8 pixels between neighbouring switches in a settings list. WCAG 2.2 asks for targets of at least 24 by 24 pixels, and 44 pixels is the figure most touch guidelines recommend.
+
+## Writing the label
+
+The label should name the setting, not the action. "Email notifications" works with both states: on means you get them, off means you do not. "Turn on email notifications" breaks as soon as the switch is on, because it then reads as an instruction that no longer applies. Avoid putting "on" and "off" in the label as well, since the control already shows it, and avoid negatives such as "Disable tracking", which make an on switch mean "off".
+
+## Checklist for a dark mode toggle
+
+A dark mode toggle is a switch with a few extra jobs.
+
+1. **Start from the system preference.** Read `prefers-color-scheme` the first time, then respect whatever the person chooses afterwards.
+2. **Store the choice** in `localStorage`, wrapped in a try and catch because storage can be blocked.
+3. **Set the theme before the page paints.** A small inline script that sets the class on the `html` element avoids the flash of the wrong theme on load.
+4. **Label it by what it does**, such as "Dark mode", and keep `aria-checked` in step with the real theme.
+5. **Consider three states.** Light, dark and "follow my system" is friendlier than two, and a switch can be paired with a small menu for it.
+
+## Ready-made animated switches
+
+If you want switches with more character than a plain knob, these are in the Nexus UI library. Each one is a working React and Tailwind component with its source to copy.
+
+- [Capsule Toggles](/components/capsule-toggles) is free. Each switch is a ball sealed in a glass capsule: flip it and the ball stretches into a pill mid-flight, then takes on the row's colour and glows.
+- [Mercury Switch](/components/mercury-switch) makes the knob a bead of mercury, shaded per pixel like a real chrome drop.
+- [Ink Theme Switch](/components/ink-theme-switch) is a dark mode toggle where the dark version of a settings panel pours out of the switch as a growing ink circle.
+- [Eclipse Toggle](/components/eclipse-toggle) is a light and dark switch played as an evening going by, and it can change the whole page with it.
+- [Window Seat Toggle](/components/window-seat-toggle) draws the light and dark switch as an aeroplane window.
+- [Bell Toggle](/components/bell-toggle) is a notify-me toggle with a brass bell that is struck when you press it.
+
+Most of the animated switches in that list are Pro components, and Capsule Toggles is the free one to start with.
+
+## Frequently asked questions
+
+**Should a toggle switch be a checkbox or a button?** Use a button with `role="switch"`. It is focusable, works with Space and Enter, and the role tells screen readers it is a switch. A real checkbox input styled as a switch also works, but a styled `div` does not.
+
+**How do I make a toggle switch accessible?** Use a native button, set `role="switch"` and `aria-checked`, link a visible label with `aria-labelledby`, keep a visible focus ring, and respect reduced motion in any animation.
+
+**How do I animate a toggle switch in React?** For a simple slide, a Tailwind `transition-transform` on the knob is enough. For a spring, use Framer Motion's `layout` on the knob inside a flex row that changes its `justify` value when the state changes.
+
+**How big should a toggle switch be?** The visible switch can be around 48 by 28 pixels. Make the whole row, including the label, pressable so the touch target is comfortably larger than the drawing.
+
+For more patterns, see our guides to [choosing a React component library](/blog/best-react-component-library) and [Framer Motion examples](/blog/framer-motion-examples).

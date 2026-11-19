@@ -9,6 +9,7 @@ import { ProBadge, useLocked, useProAccess } from "@/components/pro/pro-access";
 import { demoScript, FitPreview } from "./fit-preview";
 import { PreviewGuard } from "@/components/library/dynamic-preview";
 import { TINT_CLASSES, type GalleryItem } from "./types";
+import { POSTER_SLUGS } from "./poster-slugs";
 
 /**
  * The bento: four columns of 148px rows. Every tile spans the columns (1–2) and rows (1–3) its own
@@ -73,7 +74,7 @@ export function GalleryTile({
 }) {
   const [run, setRun] = React.useState(0);
   const [playing, setPlaying] = React.useState(!playOnClick);
-  const [posterFailed, setPosterFailed] = React.useState(false);
+  const [posterFailed, setPosterFailed] = React.useState(!POSTER_SLUGS.has(item.slug));
   const href = hrefProp ?? `/components/${item.slug}`;
   const opensPage = !!hrefProp && !onOpen;
   const locked = useLocked(item.premium);

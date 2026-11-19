@@ -1,6 +1,7 @@
 "use client";
 
 import { useUrlParam } from "@/components/gallery/use-url-param";
+import { InfiniteSentinel, useInfiniteCount } from "@/components/gallery/infinite-scroll";
 import * as React from "react";
 import Link from "next/link";
 import { useInView } from "framer-motion";
@@ -189,6 +190,7 @@ export function IconTile({
         </span>
         <span className={cn("text-[13px] font-medium transition-colors", dark ? "text-white/50 group-hover:text-white" : "text-muted-foreground group-hover:text-foreground")}>
           {icon.title}
+          <span className="sr-only"> animated icon</span>
         </span>
       </Link>
       {icon.premium ? <ProBadge onDark={dark} className="pointer-events-none absolute left-2.5 top-2.5 px-2 py-0.5 text-[11px]" /> : null}
@@ -243,6 +245,11 @@ export function IconGrid() {
       return i.title.toLowerCase().includes(q) || i.slug.includes(q) || i.tags.some((t) => t.toLowerCase().includes(q));
     });
   }, [query, category, access]);
+
+  // The whole set is ~1,800 inline SVGs, which made /icons over 2 MB of HTML (Googlebot reads the first 2 MB).
+  // Render a first batch and load the rest on scroll; search and filters still run over every icon.
+  const { count, more, done } = useInfiniteCount({ total: shown.length, batch: 72, storeKey: "icons-grid" });
+  const visible = React.useMemo(() => shown.slice(0, count), [shown, count]);
 
   return (
     <div>
@@ -347,12 +354,13 @@ export function IconGrid() {
       {shown.length ? (
         <IconMaterial material={material} color={dark || color === SWATCHES[0] || color === RAINBOW ? undefined : color} rainbow={color === RAINBOW} className="mt-6"><div ref={listRef}>
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
-            {shown.map((i, n) => (
+            {visible.map((i, n) => (
               <li key={i.slug}>
                 <IconTile icon={i} material={material} size={size} dark={dark} party={party} sound={sound} pulse={wave ? { id: wave, delay: Math.round(Math.hypot((n % cols) - (cols - 1) / 2, Math.floor(n / cols) + 0.6) * 120) } : undefined} />
               </li>
             ))}
           </ul>
+          {done ? null : <InfiniteSentinel onMore={more} shown={count} total={shown.length} noun="icons" className="mt-8" />}
         </div></IconMaterial>
       ) : (
         <p className="mt-16 text-center text-[16px] text-muted-foreground">

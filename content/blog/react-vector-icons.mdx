@@ -1,0 +1,168 @@
+---
+title: "React Vector Icons: SVG Icons That Animate"
+description: "How to use vector icons in React: inline SVG, icon libraries and SVGR, then a stroke-drawing animated icon with Framer Motion, accessible and reduced-motion safe."
+date: "2026-11-16"
+---
+
+Vector icons are small pictures drawn with maths instead of pixels, so they stay sharp at any size and take their colour from your CSS. In React you will almost always use them as SVG. There are three common ways to get them into a project, and a fourth, animating them, that makes an interface feel alive.
+
+This guide covers all four: writing an inline SVG icon component yourself, using an icon library, converting SVG files with SVGR, and animating an icon with Framer Motion. The code is TypeScript and was type-checked before it went on this page.
+
+## Option 1: an inline SVG component
+
+An SVG is just markup, so a React icon is a function that returns an `<svg>`. This is the smallest setup, with no dependency, and it is the shape every icon library uses.
+
+```tsx
+import type { SVGProps } from "react";
+
+type IconProps = Omit<SVGProps<SVGSVGElement>, "width" | "height"> & {
+  size?: number;
+  strokeWidth?: number;
+};
+
+export function BellIcon({ size = 24, strokeWidth = 2, ...props }: IconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+    </svg>
+  );
+}
+```
+
+Three details make it behave like a proper icon:
+
+- **`stroke="currentColor"`** makes the icon take the text colour of whatever it sits in. Set `text-red-500` on the icon or its parent and it changes colour, with no second file for dark mode.
+- **A 24 by 24 `viewBox`** gives every icon the same grid, so icons line up next to each other. The `size` prop sets the rendered width and height.
+- **`aria-hidden="true"`** hides a decorative icon from screen readers. The button or link around it needs a text label of its own, such as `aria-label="Notifications"`. If the icon is the only content and means something, use `role="img"` with an `aria-label` instead.
+
+The rest of the SVG props pass through with `{...props}`, so `className`, `onClick` and `style` work the way people expect.
+
+## Option 2: an icon library
+
+If you need hundreds of common icons, you do not want to draw them. The usual choices are `lucide-react`, `react-icons` (which bundles several icon sets behind one package), Heroicons from the Tailwind team, Phosphor and Tabler. They all work the same way: import the ones you use by name, render them as components, and your bundler drops the rest.
+
+```tsx
+import { Bell } from "lucide-react";
+
+<Bell size={20} strokeWidth={1.75} />
+```
+
+Import by name, not the whole package, so only the icons you use end up in your bundle. Pick one library for the whole app: mixing sets with different stroke weights and corner styles makes an interface look uneven.
+
+## Option 3: convert SVG files with SVGR
+
+When a designer hands you a folder of `.svg` files, SVGR turns each into a React component. It is built into most setups: Next.js and Vite both have plugins, and there is a command line tool. Before converting, replace hard-coded colours in the files with `currentColor` so the icons follow your text colour. Run the files through an optimizer first to strip editor metadata.
+
+## Option 4: animate the icon
+
+A static icon is fine for most things. An animated one earns its place at moments that matter: a checkmark that draws itself when a save succeeds, a bell that rings when a notification arrives, a spinner while something loads. SVG is good at this because each shape is a path you can animate.
+
+The simplest effect is drawing a stroke. Framer Motion animates `pathLength` from 0 to 1, which traces the path as if a pen were drawing it.
+
+```tsx
+"use client";
+
+import { motion, useReducedMotion } from "framer-motion";
+
+type CheckIconProps = {
+  size?: number;
+  play?: boolean;
+};
+
+export function CheckIcon({ size = 24, play = true }: CheckIconProps) {
+  const reduce = useReducedMotion();
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <motion.path
+        d="M8 12.5l2.5 2.5L16 9.5"
+        initial={false}
+        animate={{ pathLength: play || reduce ? 1 : 0, opacity: play || reduce ? 1 : 0 }}
+        transition={reduce ? { duration: 0 } : { duration: 0.4, ease: "easeOut" }}
+      />
+    </svg>
+  );
+}
+```
+
+The `play` prop is what makes it reusable. Hover can drive it, but so can your own state: draw the check on success, hold it still while idle. Here it is wired to a button.
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { CheckIcon } from "./check-icon";
+
+export function SaveButton() {
+  const [saved, setSaved] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => setSaved((v) => !v)}
+      className="inline-flex items-center gap-2 text-foreground"
+    >
+      <CheckIcon play={saved} />
+      {saved ? "Saved" : "Save"}
+    </button>
+  );
+}
+```
+
+Two accessibility details are built into the icon. It uses `useReducedMotion`, so for visitors who have asked for less motion the check appears at once instead of drawing. And it stays `aria-hidden`, because the word "Saved" next to it already says what happened.
+
+## Ready-made animated icons
+
+Writing and animating every icon yourself is slow. Nexus UI has a collection of animated icons: each one is a single file that draws an SVG on a 24 by 24 grid and animates it with Framer Motion. You copy the files you use, and the only dependency is Framer Motion.
+
+- Browse the [animated icons](/icons) by category, from loaders and arrows to commerce and weather.
+- Open an icon such as [Bell](/icons/bell) to see it play and copy its file.
+- The [icons guide](/docs/icons) covers the props that every icon shares: size, stroke width, speed, accent colour and `play`.
+
+For the motion library behind them, see our guide to [Framer Motion examples](/blog/framer-motion-examples), or browse the [components](/components).
+
+## Frequently asked questions
+
+### What are vector icons in React?
+
+Icons drawn as SVG paths instead of bitmap images. They scale to any size without going blurry, and they can take their colour from CSS. In React they are components that return an `<svg>`.
+
+### Which React icon library should I use?
+
+Pick one with the style you like and the icons you need: `lucide-react`, Heroicons, Phosphor and Tabler are all common. Import icons by name so unused ones are left out of the bundle, and use one set across the app so the stroke weight matches.
+
+### How do I change the colour of an SVG icon in React?
+
+Set `stroke="currentColor"` (or `fill="currentColor"` for solid icons) inside the SVG, then set the text colour on the icon or its parent. With Tailwind that is a class like `text-blue-600`.
+
+### How do I animate an SVG icon in React?
+
+Use Framer Motion's `motion.path` and animate `pathLength` to draw a stroke, or animate `rotate`, `scale` and `opacity` for other effects. Drive it from a prop or state so you can play it on hover, on click or when something succeeds.
+
+### Are SVG icons accessible?
+
+They can be. A decorative icon gets `aria-hidden="true"` and the control around it gets a text label. An icon that carries meaning on its own needs `role="img"` and an `aria-label`. Respect reduced motion for animated ones.

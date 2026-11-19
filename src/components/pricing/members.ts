@@ -2,16 +2,19 @@ import { RAINBOW_HUES } from "@/components/site/rainbow-word";
 
 /**
  * People who bought All-Access (the lifetime plan) and agreed to be shown by name. Newest first.
- * Keep it to real buyers who said yes. Shown as a small stack under the Pro and All-Access buttons
- * (MemberStack) and, once there are enough names, as the full row on /pricing (MembersRow).
+ * Keep it to real buyers who said yes. Shown under the All-Access and Upgrade buttons as faces with round flag
+ * badges and a "Joined by" line that opens the full list (MemberStack).
  *
- * `face` (0 to 4) picks the hand-drawn avatar in MemberStack (/public/avatars/face-<n>.svg); give each new person
+ * `face` (0 to 5) picks the hand-drawn avatar in MemberStack (/public/avatars/face-<n>.svg); give each new person
  * the next unused one so it stays theirs when newer names are added in front. Leave it out and the position in
  * the list decides.
  * `code` is the two-letter country code. Its flag is a file at /public/flags/<code>.svg; to add a country,
  * copy `3x2/<CODE>.svg` from the MIT-licensed `country-flag-icons` package (licence kept beside the flags).
  */
 export const MEMBERS: { name: string; country: string; code: string; face?: number }[] = [
+  { name: "Fahad", country: "Malaysia", code: "my", face: 5 },
+  { name: "Zhihui Liu", country: "Japan", code: "jp", face: 4 },
+  { name: "Miao Deng", country: "China", code: "cn", face: 3 },
   { name: "Han Wang", country: "Ireland", code: "ie", face: 2 },
   { name: "GoCellar GoWinery", country: "Australia", code: "au", face: 1 },
   { name: "Jon Massey", country: "United Kingdom", code: "gb", face: 0 },

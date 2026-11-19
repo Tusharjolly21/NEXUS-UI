@@ -4,6 +4,7 @@ import { ComponentGallery } from "@/components/gallery/component-gallery";
 import { getPricing } from "@/lib/region";
 import { Band, PillLink, RainbowWord } from "@/components/site";
 import { getPopulatedCategories, isIndexableCategory } from "@/lib/catalog/category-seo";
+import { getIndexableTypes, getTypeHref } from "@/lib/catalog/type-collections";
 import { allGalleryItems } from "@/lib/catalog/gallery-items";
 import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
 import { alternatives } from "@/lib/alternatives";
@@ -80,6 +81,18 @@ export default async function ComponentsPage() {
                     </PillLink>
                   </li>
                 ))}
+            </ul>
+            <h2 id="by-type" className="mt-8 text-[17px] font-semibold text-foreground">
+              Browse by type
+            </h2>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {getIndexableTypes().map((t) => (
+                <li key={t.slug}>
+                  <PillLink href={getTypeHref(t.slug)} variant="white" size="sm">
+                    {t.heading.replace(/^React /, "").replace(/ Components?$/, "").replace(/: .*$/, "")}
+                  </PillLink>
+                </li>
+              ))}
             </ul>
             <p className="mt-8 text-[15px] leading-relaxed text-muted-foreground">
               Comparing libraries? See Nexus UI next to{" "}

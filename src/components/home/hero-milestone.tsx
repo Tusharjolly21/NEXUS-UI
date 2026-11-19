@@ -8,7 +8,7 @@ import { TwentyFirstLogo } from "@/components/home/twenty-first-logo";
 const MotionLink = motion.create(Link);
 
 /**
- * The hero's milestone pill: the 21st mark, "Almost 1M views on 21st.dev", and "See our impact", with a thin
+ * The hero's milestone pill: the 21st mark, "1M views on 21st.dev", and "See our impact", with a thin
  * blue edge. A soft light passes over it every few seconds. It opens /impact, our numbers from 21st.dev
  * (that page links on to the profile itself). With reduced motion nothing moves.
  */
@@ -17,7 +17,7 @@ export function HeroMilestone() {
   return (
     <MotionLink
       href="/impact"
-      aria-label="Almost one million views on 21st.dev. See our impact."
+      aria-label="One million views on 21st.dev. See our impact."
       initial={still ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1], delay: 0.1 }}
@@ -33,7 +33,7 @@ export function HeroMilestone() {
       )}
       <span className="relative inline-flex items-center gap-2.5">
         <TwentyFirstLogo word={false} className="size-[16px]" />
-        <span>Almost 1M views on 21st.dev</span>
+        <span>1M views on 21st.dev</span>
       </span>
       <span className="relative inline-flex items-center gap-0.5 font-semibold text-[oklch(0.485_0.291_264.121)] dark:text-[#8aa0ff]">
         See our impact

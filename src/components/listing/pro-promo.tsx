@@ -253,7 +253,7 @@ export function ProRail({ copy, pricing: given }: { copy: PromoCopy; pricing?: D
       <Link href="/impact" className="group flex items-start gap-2.5 rounded-2xl px-2 py-1 text-[13.5px] leading-[1.45] text-foreground/80 focus-visible:outline-2 focus-visible:outline-ring">
         <span aria-hidden className="mt-px grid size-6 shrink-0 place-items-center rounded-md bg-[#3b5bff] text-[10px] font-bold text-white">21</span>
         <span>
-          Almost 1M views on 21st.dev.{" "}
+          1M views on 21st.dev.{" "}
           <span className="whitespace-nowrap text-link group-hover:underline group-hover:underline-offset-4">
             See our impact <ChevronRight className="inline size-3.5 -translate-y-px" aria-hidden />
           </span>

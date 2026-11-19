@@ -1,0 +1,156 @@
+---
+title: "GSAP vs Framer Motion: Which to Use in React"
+description: "GSAP or Framer Motion (now Motion) for React? The same animations built both ways, where each wins, and a short rule for choosing, with code you can paste."
+date: "2026-11-17"
+---
+
+If you are adding animation to a React app, two libraries come up first: GSAP and Framer Motion. Framer Motion has been renamed Motion, and you will see both names, but it is the same library: `framer-motion` still works, and the newer package is imported from `motion/react`. This guide calls it Framer Motion because that is still what most people search for.
+
+They are not interchangeable. They are built around different ideas, and that difference decides which one feels natural for a given job. Below is the same animation built both ways, a comparison of where each is stronger, and a short rule for choosing.
+
+## The difference in one sentence
+
+**Framer Motion is declarative and component-shaped:** you describe what a component should look like in each state, and the library animates between states. **GSAP is imperative and timeline-shaped:** you tell it what to animate, in what order and for how long, and it plays the sequence.
+
+That one difference explains almost everything else.
+
+## The same animation, both ways
+
+A list of cards that fade up one after another when they mount.
+
+### Framer Motion
+
+```tsx
+"use client";
+
+import { motion } from "framer-motion";
+
+const ITEMS = ["Design", "Build", "Ship"];
+
+export function Steps() {
+  return (
+    <ul className="space-y-3">
+      {ITEMS.map((label, i) => (
+        <motion.li
+          key={label}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.08, duration: 0.5, ease: "easeOut" }}
+          className="rounded-xl border border-zinc-200 bg-white p-4"
+        >
+          {label}
+        </motion.li>
+      ))}
+    </ul>
+  );
+}
+```
+
+The animation lives on the element. Add an item to the array and it animates in; remove the component and nothing is left running. There is no cleanup to write.
+
+### GSAP
+
+```tsx
+"use client";
+
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+
+const ITEMS = ["Design", "Build", "Ship"];
+
+export function Steps() {
+  const scope = useRef<HTMLUListElement>(null);
+
+  useGSAP(
+    () => {
+      gsap.from(".step", { y: 24, opacity: 0, duration: 0.5, ease: "power3.out", stagger: 0.08 });
+    },
+    { scope },
+  );
+
+  return (
+    <ul ref={scope} className="space-y-3">
+      {ITEMS.map((label) => (
+        <li key={label} className="step rounded-xl border border-zinc-200 bg-white p-4">
+          {label}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+The animation lives in a function that runs after the component mounts. `useGSAP` from `@gsap/react` limits selectors to the `scope` element and cleans the animation up when the component unmounts, which is the part people forget when they use GSAP in an effect by hand. The built-in `stagger` option is the neat part: one line staggers a whole group.
+
+## Where Framer Motion is stronger
+
+- **State-driven UI.** Open and closed, selected and unselected, hovered and pressed: you write the variants once and the component moves between them.
+- **Exit animations.** `AnimatePresence` keeps an element in the page long enough to animate out before React removes it. Doing this by hand with any library is fiddly.
+- **Layout animations.** Add the `layout` prop and an element animates smoothly when its size or position changes, such as a list reordering or a card expanding. Shared layout transitions between two elements use `layoutId`.
+- **Gestures.** Hover, tap, drag and focus are props, with springs that carry the velocity of a flick.
+- **React ergonomics.** Animations are part of the JSX, follow props and state, and clean up with the component.
+
+## Where GSAP is stronger
+
+- **Long, precisely timed sequences.** A timeline lets you place tweens at exact moments, overlap them, label them, pause, reverse and scrub through the whole thing as one object.
+- **Scroll storytelling.** ScrollTrigger pins sections, scrubs animation to scroll position and handles many triggers on one page.
+- **Animating things that are not React.** GSAP works on any DOM element, SVG, canvas properties or plain objects, so it suits a mixed codebase.
+- **SVG effects.** Drawing and morphing paths are first-class. GSAP and its plugins are free to use.
+- **Fine control of easing and timing** across many elements at once.
+
+## Comparison
+
+| | Framer Motion | GSAP |
+|---|---|---|
+| Style | Declarative, props on components | Imperative, tweens and timelines |
+| Best at | UI state, layout, exit, gestures | Sequences, scroll stories, SVG |
+| Exit animations | Built in with `AnimatePresence` | You build the delay yourself |
+| Layout animations | Built in with `layout` | Possible with the Flip plugin |
+| Scroll | `useScroll` and `useTransform` | ScrollTrigger |
+| React fit | Native; cleans up with the component | `useGSAP` hook handles cleanup |
+| Outside React | React only | Works on any DOM |
+
+## A simple rule for choosing
+
+1. **Is the animation a reaction to state in a component?** A menu opening, a tab changing, a card expanding, a list reordering. Use Framer Motion.
+2. **Is it a timed sequence or a scroll story?** A hero that plays in order, a pinned section that scrubs as you scroll. Use GSAP.
+3. **Is it a small hover or fade?** Plain CSS transitions are enough. Do not add a library for a colour change.
+
+You can use both. A common setup is CSS for small states, Framer Motion for components, and GSAP for one scroll-heavy landing page. If you do mix them, never let both animate the same property of the same element.
+
+## Accessibility and performance for either
+
+- **Respect reduced motion.** In Framer Motion use the `useReducedMotion` hook, or wrap the app in `MotionConfig` with `reducedMotion="user"`. In GSAP use `gsap.matchMedia()` with the `prefers-reduced-motion` query to skip or shorten animations.
+- **Animate `transform` and `opacity`.** They avoid layout recalculation. Animating `width`, `height` or `top` forces the browser to relayout on every frame.
+- **Keep the count down.** Dozens of simultaneously animating elements is rarely better than a handful that are well chosen.
+
+## Where to see Framer Motion patterns
+
+The patterns above are the basis for most of the library's components. Our guide to [ten Framer Motion examples](/blog/framer-motion-examples) shows each with code, [Framer Motion in Next.js](/blog/framer-motion-nextjs-animations) covers the App Router specifics, and [scroll choreography with Motion](/blog/motion-scroll-choreography) goes deeper on scroll. For the wider field, including React Spring and AutoAnimate, see [the best animation library for React](/blog/best-animation-library-for-react). To copy finished animated components built on Framer Motion, browse the [motion effects](/components/category/motion-effects) category.
+
+## Frequently asked questions
+
+### Is GSAP better than Framer Motion?
+
+Neither is better overall. Framer Motion is better for animations driven by component state, layout changes, exits and gestures. GSAP is better for long timelines, scroll-driven storytelling and animation outside React. Pick by the job.
+
+### Is Framer Motion the same as Motion?
+
+Yes. The library was renamed Motion. The `framer-motion` package still works, and the newer package is imported from `motion/react`. The API for React components is the same.
+
+### Is GSAP free?
+
+Yes. GSAP and its plugins, including ScrollTrigger, are free to use, including in commercial projects. Check the current licence on the GSAP site before you ship.
+
+### Can I use GSAP and Framer Motion together?
+
+Yes, as long as they do not animate the same property of the same element. A common split is Framer Motion for UI components and GSAP for one scroll-heavy section.
+
+### Which is easier to learn?
+
+Framer Motion, if you already think in React: you add props to a component. GSAP has a bigger surface to learn, because of timelines, plugins and the tools around them, but its core ideas are simple and well documented.
+
+### Which is better for scroll animations?
+
+GSAP's ScrollTrigger is the more complete tool for pinning and scrubbing. Framer Motion's `useScroll` and `useTransform` are enough for scroll progress bars, parallax and simple reveals.

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, Minus, Plus } from "lucide-react";
 import { CommentDeck } from "@/components/pricing/comment-deck";
-import { MembersRow } from "@/components/pricing/members-row";
 import { MemberStack } from "@/components/pricing/member-stack";
 import { PlanAction, PlanNotice, PlanTag } from "@/components/pricing/plan-action";
 import { IndiaDiscountBadge } from "@/components/pricing/india-discount-badge";
@@ -351,9 +350,6 @@ export default async function PricingPage() {
 
       {/* Where the components are seen: our 21st.dev numbers */}
       <TwentyFirstMilestone />
-
-      {/* Named buyers, after the bigger proof. Shows nothing until MEMBERS has names. */}
-      <MembersRow />
 
       {/* What people say, as a pull quote and a deck of comments */}
       <section className="overflow-hidden px-4 pb-28">

@@ -15,13 +15,26 @@ export function generateStaticParams() {
   return videos.map((v) => ({ slug: v.slug }));
 }
 
+// Titles get " · Nexus UI Labs" appended (16 characters), so keep the part written here at 44 or fewer: try the
+// fullest wording first and fall back to a shorter one rather than let a search result cut the title off.
+function videoTitle(title: string, purpose: string, hyperframes: boolean) {
+  const tail = hyperframes ? "for HyperFrames" : "in React";
+  const options = [
+    `${title}: ${purpose} Video Template ${tail}`,
+    `${title}: ${purpose} Video Template`,
+    `${title} Video Template ${tail}`,
+    `${title} Video Template`,
+  ];
+  return options.find((o) => o.length <= 44) ?? options[options.length - 1];
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const v = getVideo(slug);
   if (!v) return {};
   const hf = isHyperframes(v);
   return createMetadata({
-    title: `${v.title}: ${v.purpose} Video Template ${hf ? "for HyperFrames" : "in React"}`,
+    title: videoTitle(v.title, v.purpose, hf),
     description: hf
       ? `${v.blurb} A ${v.duration}-second ${v.formats.join(", ")} video as one HTML file: take the prompt and the source, then render it to MP4 with HyperFrames.`
       : `${v.blurb} A ${v.duration}-second ${v.formats.join(", ")} video${v.silent ? " that loops without a seam" : " with its own soundtrack"}: edit the words live, then take the prompt and the code.`,

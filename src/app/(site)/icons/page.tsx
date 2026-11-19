@@ -94,10 +94,24 @@ export default function IconsPage() {
                   <p className="mt-2.5 flex flex-wrap gap-1.5">
                     {f.icons.map((i) => (
                       <Link key={i} href={`/icons/${i}`} className="rounded-full bg-secondary px-2.5 py-1 text-[12px] text-foreground/80 transition-colors hover:text-foreground">
-                        {i}
+                        {i.replace(/-/g, " ")} icon
                       </Link>
                     ))}
                   </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {/* Plain text index of every icon: the grid above loads in batches, so this keeps every icon page linked from the hub in the server HTML. */}
+          <section aria-labelledby="all-icons" className="mt-20">
+            <h2 id="all-icons" className="text-[17px] font-semibold text-foreground">All {ICONS.length} animated icons</h2>
+            <ul className="mt-4 columns-2 gap-x-8 text-[14px] leading-7 sm:columns-3 lg:columns-5">
+              {ICONS.map((i) => (
+                <li key={i.slug} className="break-inside-avoid">
+                  <Link href={`/icons/${i.slug}`} className="text-muted-foreground hover:text-foreground hover:underline">
+                    {i.title} icon
+                  </Link>
                 </li>
               ))}
             </ul>

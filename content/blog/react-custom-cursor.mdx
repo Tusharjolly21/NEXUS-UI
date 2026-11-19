@@ -1,0 +1,165 @@
+---
+title: "React Custom Mouse Cursor: CSS and Spring"
+description: "Make a custom mouse cursor in React: use the CSS cursor property with your own image, then build an animated spring-driven follower ring with Framer Motion."
+date: "2026-11-16"
+---
+
+A custom mouse cursor replaces or decorates the pointer with something of your own: a ring that trails behind, a dot that grows over buttons, a blob that changes shape. Done well, it makes a portfolio or product page feel crafted. Done badly, it lags, blocks clicks, and shows up on phones where there is no mouse at all.
+
+There are two ways to make one. The CSS `cursor` property swaps the pointer for an image and needs no JavaScript, but the result is a static picture. For animated mouse cursors, with motion, physics and hover states, you draw your own element and make it follow the pointer. This guide covers both: first the CSS cursor, then a React custom cursor built with Framer Motion, a ring that follows the pointer on a spring, grows when it is over something clickable, and switches itself off on touch devices. It keeps the real pointer visible, which is the safer choice, and the accessibility section covers when hiding it makes sense.
+
+## The CSS way: a custom mouse cursor with no JavaScript
+
+If all you want is a different pointer, CSS is enough. Put your cursor image in the `public` folder and point the `cursor` property at it, with a standard keyword as the fallback.
+
+```css
+body {
+  cursor: url("/cursors/dot.svg") 8 8, auto;
+}
+
+a,
+button,
+[role="button"] {
+  cursor: url("/cursors/dot-active.svg") 12 12, pointer;
+}
+```
+
+What each part does:
+
+- **`url("/cursors/dot.svg")`** is the image. SVG and PNG both work in modern browsers.
+- **`8 8`** is the hotspot: the point inside the image that counts as the click position, measured in pixels from the top left. For a round dot, use its centre.
+- **`, auto`** is the fallback keyword. If the image fails to load, the browser uses the normal pointer. Never leave it out.
+- **The second rule** gives links and buttons their own cursor, so people can still tell what is clickable.
+
+Keep the image small, 32 by 32 pixels or less. Browsers limit how large a cursor image can be, and big ones can disappear near the edge of the window. The CSS cursor is also a still image in practice, so it cannot animate, follow with a delay or change shape smoothly. For that, you need the follower below.
+
+
+## How an animated cursor follower works
+
+There are three parts.
+
+1. **Track the pointer.** Listen for `pointermove` on the window and write the coordinates into two motion values. Motion values update outside React's render cycle, so moving the mouse does not re-render your page.
+2. **Smooth it.** Pass each value through `useSpring`. The ring then lags slightly behind the pointer and settles with a bit of give, which is what makes it feel physical.
+3. **React to what is under it.** On each move, check whether the element under the pointer is a link, a button or something you marked, and change the ring's scale.
+
+## The component
+
+```tsx
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion, useMotionValue, useSpring } from "framer-motion";
+
+export function CursorFollower() {
+  const x = useMotionValue(-100);
+  const y = useMotionValue(-100);
+  const sx = useSpring(x, { stiffness: 500, damping: 40, mass: 0.4 });
+  const sy = useSpring(y, { stiffness: 500, damping: 40, mass: 0.4 });
+  const [enabled, setEnabled] = useState(false);
+  const [overTarget, setOverTarget] = useState(false);
+
+  useEffect(() => {
+    const fine = window.matchMedia("(pointer: fine)");
+    setEnabled(fine.matches);
+    const onChange = () => setEnabled(fine.matches);
+    fine.addEventListener("change", onChange);
+    return () => fine.removeEventListener("change", onChange);
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) return;
+    function onMove(e: PointerEvent) {
+      x.set(e.clientX);
+      y.set(e.clientY);
+      const el = e.target instanceof Element ? e.target.closest("a, button, [data-cursor]") : null;
+      setOverTarget(el !== null);
+    }
+    window.addEventListener("pointermove", onMove);
+    return () => window.removeEventListener("pointermove", onMove);
+  }, [enabled, x, y]);
+
+  if (!enabled) return null;
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      className="pointer-events-none fixed left-0 top-0 z-50 -ml-4 -mt-4 size-8 rounded-full border border-white mix-blend-difference"
+      style={{ x: sx, y: sy }}
+      animate={{ scale: overTarget ? 1.8 : 1 }}
+      transition={{ type: "spring", stiffness: 400, damping: 28 }}
+    />
+  );
+}
+```
+
+Notes on the choices in this code:
+
+- **`pointer-events-none`** is essential. Without it the ring sits under the pointer and swallows every click.
+- **`(pointer: fine)`** is true for a mouse or trackpad and false for a finger. The component renders nothing on touch devices, where a cursor makes no sense. It also listens for changes, so plugging in a mouse works.
+- **`mix-blend-difference`** with a white border keeps the ring visible on both light and dark backgrounds.
+- **`e.target.closest("a, button, [data-cursor]")`** decides the hover state. Add `data-cursor` to any other element, such as a card, that should make the ring grow.
+- **`position: fixed`** with motion values for `x` and `y` keeps the ring in viewport coordinates, so it works while the page scrolls.
+- **`-ml-4 -mt-4`** pulls the ring back by half its 32 pixel size so it is centred on the pointer, not hanging off its corner. Framer Motion owns the `transform` property, so a Tailwind translate class on the same element would be overwritten.
+
+Mount it once, in your root layout. In a Next.js App Router project, import it into `app/layout.tsx` and render `<CursorFollower />` next to `{children}`. The file starts with `"use client"`, which is all a client component needs.
+
+## Tuning the spring
+
+The feel comes from three numbers in `useSpring`:
+
+- **`stiffness`** is how hard the ring is pulled to the pointer. Higher numbers feel snappier.
+- **`damping`** is how quickly it stops bouncing. Lower numbers overshoot and wobble.
+- **`mass`** is how heavy it feels. Higher numbers feel slower to start and stop.
+
+Keep it quick. A ring that trails by more than a few frames feels like input lag, and people notice that on a product page far more than on a portfolio.
+
+## Accessibility and reduced motion
+
+A cursor effect is decoration, so it should never get in the way.
+
+- **Keep the native pointer.** This component draws a ring around it and does not hide it. Hiding the pointer with `cursor: none` means the cursor is only as good as your code: if the script fails, loads late or lags, the person has no pointer at all. If you do hide it, only do it inside the `(pointer: fine)` check, and make sure the custom cursor is clearly visible on every background.
+- **Respect reduced motion.** For a lagging spring, `useReducedMotion` from Framer Motion is the natural switch: follow the pointer directly without the spring so it does not trail.
+- **Hide it from assistive technology.** The ring has `aria-hidden="true"` so screen readers ignore it.
+- **Do not rely on it.** Hover feedback that only exists in the custom cursor is invisible to keyboard users. Keep a visible `focus-visible` style on links and buttons.
+
+## Ready-made cursor effects
+
+Once the basic follower works, the same pattern extends in several directions. These are finished components you can copy instead of building:
+
+- A cursor that melts into the shape of what it hovers: [Morph Cursor](/components/morph-cursor) works like the iPad pointer, with a dot that becomes a highlight behind a button and a caret over text.
+- A cursor with personality: [Cursor Buddy](/components/cursor-buddy) is a small character whose eyes follow the pointer.
+- A cursor that reveals something: [Cursor Text Reveal](/components/cursor-text-reveal) shows a second sentence through a lens that follows the pointer.
+- A trail instead of a ring: [ASCII Wake](/components/ascii-wake) leaves a trail of characters behind the pointer.
+- Cursors for other people: [Real-time Cursors](/components/real-time-cursors) shows shared cursors with name tags for a collaboration board.
+
+For more on the motion library behind them, see our guide to [Framer Motion examples](/blog/framer-motion-examples), or browse all [components](/components).
+
+## Frequently asked questions
+
+### How do I make a custom mouse cursor with CSS?
+
+Set the `cursor` property to an image with a hotspot and a fallback, for example `cursor: url("/cursors/dot.svg") 8 8, auto;`. Keep the image at 32 by 32 pixels or smaller, and give links and buttons their own rule so they still look clickable.
+
+### Can I animate a custom mouse cursor?
+
+Not with the CSS `cursor` property, which shows a static image. To animate it, draw your own element that follows the pointer, as in the component above. Framer Motion's `useSpring` gives it the lag and settle that makes it feel physical.
+
+### How do I make a custom cursor in React?
+
+Track the pointer with a `pointermove` listener, store the position in Framer Motion motion values, and render a fixed, `pointer-events-none` element at those coordinates. Pass the values through `useSpring` for a smooth trail. The component above does all of that.
+
+### Should I hide the default cursor?
+
+Usually not. A ring or dot that follows the real pointer is safer, because the person always has a working cursor. If you do hide it, do it only for devices with a fine pointer and test that your replacement is visible on every background.
+
+### How do I stop the custom cursor appearing on mobile?
+
+Check `window.matchMedia("(pointer: fine)")`. It is false on touch screens, so render nothing there. The component above also updates if the pointer type changes.
+
+### Will a custom cursor slow my site down?
+
+Not if the position lives in motion values, as here, because moving the mouse does not re-render React. Avoid putting the position in `useState`, which would re-render on every move.
+
+### How do I change the cursor over links and buttons?
+
+Use `closest("a, button, [data-cursor]")` on the event target to detect them, then change the ring's scale, colour or shape. Add a `data-cursor` attribute to anything else that should trigger it.

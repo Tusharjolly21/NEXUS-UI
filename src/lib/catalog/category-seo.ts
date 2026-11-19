@@ -147,7 +147,47 @@ const CATEGORY_COPY: Partial<Record<ComponentCategorySlug, CategoryCopy>> = {
       "Free CTA section components for React and Next.js — animated call-to-action banners built with Tailwind CSS and Framer Motion.",
     heading: "CTA Section Components",
     intro:
-      "Call-to-action sections that close a landing page: glowing banners and focused sign-up prompts with motion that draws the eye without distracting.",
+      "Call-to-action components for React and Next.js that give a visitor a reason to click at the moment the page asks for it. Glow Button is a free call-to-action link with a coloured light on its rim: the brightest arc turns to face the pointer, the glow behind it leans the same way and the button drifts a few pixels toward the cursor. Cloth Banner is a Pro announcement printed on cloth and pinned to a rail: it sways in the breeze, drapes under your hand, and drops away when you yank it down or press Dismiss. Each is a copy-paste React component you can install with the shadcn CLI.",
+  },
+  "pricing-sections": {
+    title: "React Pricing Section Components",
+    description:
+      "React pricing components that show the cost instead of listing it: a seat slider with an odometer total, usage blocks dropping into a bin, and a card folded like paper.",
+    heading: "Pricing Section Components",
+    intro:
+      "Pricing sections for React and Next.js that make the number part of the interaction. A seat-based card rolls its total like an odometer and pops a Save badge for yearly billing. A usage-based one turns every 10,000 requests into a block that drops into a bin, coloured by tier, so a visitor sees what volume costs. A third folds open like a paper map, features first, then the quote and a call to action. Each is a copy-paste component built with Tailwind CSS and TypeScript.",
+  },
+  "login-forms": {
+    title: "React Login Form Components",
+    description:
+      "React login forms: a frosted glass card with passkey sign-in first, and a sign-in card with a mascot whose eyes follow the pointer and cover for passwords.",
+    heading: "Login Form Components",
+    intro:
+      "Sign-in forms for React and Next.js with a point of view. One is a frosted glass card over a slow aurora that tilts toward the pointer, offering passkey sign-in first and email and password second. The other pairs an email and password form with a small face whose eyes follow the pointer and your typing, cover up when you enter a password, and peek back out. Both are copy-paste components built with Tailwind CSS. They render the form only, so you connect your own authentication provider.",
+  },
+  shaders: {
+    title: "React Shader and Noise Background Components",
+    description:
+      "React shader-style backgrounds: grainy gradients built from SVG noise that lean toward the pointer, and liquid metal metaballs shaded per pixel on canvas.",
+    heading: "Shader Components",
+    intro:
+      "Surface effects that look like shaders. One is a grainy gradient built from SVG feTurbulence, with film grain over soft pools of colour that lean toward the pointer and a press that melts the surface. The other draws liquid-metal metaballs on a canvas, shaded per pixel with a chrome reflection, so they bulge, pool and merge in joined, apart or orbit modes. Both are copy-paste React components for Next.js.",
+  },
+  timelines: {
+    title: "React Timeline Components",
+    description:
+      "React timeline components for project roadmaps and milestones, with done, current and upcoming states on a rail that fills to the current step.",
+    heading: "Timeline Components",
+    intro:
+      "Timelines for React and Next.js that show where a project is: milestones marked done, current or upcoming, on a rail that fills to the current one. Use them for roadmaps, release histories and onboarding progress. Each is a copy-paste component built with Tailwind CSS.",
+  },
+  "blog-components": {
+    title: "React Blog Components",
+    description:
+      "React components for articles and blogs, starting with a reading progress bar that has a tick for every section and a capsule that follows your place.",
+    heading: "Blog Components",
+    intro:
+      "Components for long reads in React and Next.js. The reading progress bar is a slim rail with a tick for every section and a capsule that follows your place, with a glass label that appears as you scrub through the article. Built with Tailwind CSS and TypeScript.",
   },
 };
 

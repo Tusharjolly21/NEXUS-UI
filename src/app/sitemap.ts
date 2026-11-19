@@ -9,6 +9,7 @@ import { alternatives } from "@/lib/alternatives";
 import { getCategoryComponents, getPopulatedCategories, isIndexableCategory } from "@/lib/catalog/category-seo";
 import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
 import { ICONS } from "@/lib/icons/catalog";
+import { getIndexableTypes, getTypeComponents, getTypeHref } from "@/lib/catalog/type-collections";
 
 // Every page's markup changed on this date (component redesign, Pro-only templates, new pricing),
 // so no lastmod is older than it.
@@ -78,6 +79,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: since(getCategoryComponents(c.slug).reduce((a, b) => (a.createdAt > b.createdAt ? a : b)).createdAt),
     }));
 
+  // Component type pages (buttons, toggle switches, carousels...) — lastmod is the newest member.
+  const typeRoutes: MetadataRoute.Sitemap = getIndexableTypes().map((t) => ({
+    url: `${base}${getTypeHref(t.slug)}`,
+    lastModified: since(getTypeComponents(t).reduce((a, b) => (a.createdAt > b.createdAt ? a : b)).createdAt),
+  }));
+
   const templateRoutes: MetadataRoute.Sitemap = templates.map((t) => ({
     url: `${base}/templates/${t.slug}`,
     lastModified: since(t.createdAt),
@@ -98,5 +105,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: since(post.date ?? "2026-01-01"),
   }));
 
-  return [...staticRoutes, ...categoryRoutes, ...componentRoutes, ...iconRoutes, ...templateRoutes, ...blockRoutes, ...videoRoutes, ...blogRoutes];
+  return [...staticRoutes, ...categoryRoutes, ...typeRoutes, ...componentRoutes, ...iconRoutes, ...templateRoutes, ...blockRoutes, ...videoRoutes, ...blogRoutes];
 }

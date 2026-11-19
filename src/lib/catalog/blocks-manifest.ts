@@ -183,6 +183,7 @@ export default function Page() {
     slug: "block-why-choose-us",
     registryCliName: "why-choose-us-bento",
     name: "Why Choose Us Bento Grid",
+    seoTitle: "React Bento Grid: Animated Feature Grid Blocks for Next.js",
     description: "Animated feature bento collection with mentoring cards, ATS scoring, upload flows, interview scheduling, and progress tracking.",
     category: "Feature grids",
     tags: ["bento", "features", "animated", "ats", "upload", "framer-motion"],

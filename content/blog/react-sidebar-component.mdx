@@ -1,0 +1,176 @@
+---
+title: "React Sidebar Component With Tailwind CSS"
+description: "Build a collapsible sidebar in React and Tailwind CSS: accessible navigation markup, an icon-only collapsed state, mobile behaviour, and free animated sidebars to copy."
+date: "2026-11-17"
+---
+
+A sidebar looks like the simplest layout piece there is: a column of links down the left. The details are where it goes wrong. The collapsed state hides the labels from screen readers, the active page is only shown by colour, the toggle does not say what it controls, and on a phone the whole thing eats half the screen.
+
+This guide builds a collapsible sidebar in React and Tailwind CSS with no UI library, explains each accessibility choice, covers the mobile case, and then points to animated sidebars you can copy when you want more than a width transition.
+
+## What a good sidebar needs
+
+- **A real navigation landmark.** A `nav` element with a label, so assistive technology can jump straight to it.
+- **A visible current page.** The active link is marked with `aria-current="page"` and styled to match, so the state is not carried by colour alone.
+- **A collapse button that says what it does.** It names its action, reports its state with `aria-expanded`, and points at the navigation it controls.
+- **Labels that survive collapsing.** When only icons are visible, the text is still there for screen readers.
+- **A mobile plan.** A permanent column does not fit a narrow screen.
+
+## The React and Tailwind component
+
+```tsx
+"use client";
+
+import { useState } from "react";
+
+type NavItem = { href: string; label: string; icon: string };
+
+const ITEMS: NavItem[] = [
+  { href: "/dashboard", label: "Overview", icon: "M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" },
+  { href: "/dashboard/reports", label: "Reports", icon: "M4 20V10M10 20V4M16 20v-7" },
+  { href: "/dashboard/settings", label: "Settings", icon: "M4 7h10m4 0h2M4 17h2m4 0h10" },
+];
+
+export function Sidebar({
+  items = ITEMS,
+  currentPath = "/dashboard",
+}: {
+  items?: NavItem[];
+  currentPath?: string;
+}) {
+  const [collapsed, setCollapsed] = useState(false);
+
+  return (
+    <aside
+      className={`flex h-screen flex-col border-r border-zinc-200 bg-white transition-[width] duration-200 motion-reduce:transition-none ${
+        collapsed ? "w-16" : "w-60"
+      }`}
+    >
+      <div className="flex h-14 items-center justify-between px-3">
+        <span className={`px-2 text-sm font-semibold text-zinc-900 ${collapsed ? "sr-only" : ""}`}>Acme</span>
+        <button
+          type="button"
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-expanded={!collapsed}
+          aria-controls="sidebar-nav"
+          onClick={() => setCollapsed((c) => !c)}
+          className="grid size-8 place-items-center rounded-lg text-zinc-500 outline-none hover:bg-zinc-100 hover:text-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-900/20"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`size-4 transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`}
+          >
+            <path d="m15 6-6 6 6 6" />
+          </svg>
+        </button>
+      </div>
+
+      <nav id="sidebar-nav" aria-label="Main" className="flex-1 space-y-1 px-2 py-2">
+        {items.map((item) => {
+          const active = item.href === currentPath;
+          return (
+            <a
+              key={item.href}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              title={collapsed ? item.label : undefined}
+              className={`flex h-10 items-center gap-3 rounded-lg px-3 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-zinc-900/20 ${
+                active ? "bg-zinc-100 font-medium text-zinc-900" : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+              }`}
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-4 shrink-0"
+              >
+                <path d={item.icon} />
+              </svg>
+              <span className={collapsed ? "sr-only" : "truncate"}>{item.label}</span>
+            </a>
+          );
+        })}
+      </nav>
+    </aside>
+  );
+}
+```
+
+In a Next.js App Router project, swap each `a` for `Link` from `next/link`, and read the current path with `usePathname()` from `next/navigation` instead of passing it in.
+
+Notes on the choices in this code:
+
+- **`sr-only` instead of removing the label.** When the sidebar is collapsed the text is hidden visually but stays in the page, so a screen reader still hears "Reports" rather than an unnamed link. The `title` gives sighted mouse users a tooltip while the labels are hidden.
+- **`aria-expanded` and `aria-controls` on the toggle.** The button announces whether the sidebar is open and which element it controls. Its label changes with the state so it always names the action it will take.
+- **`aria-current="page"`** marks the active link for assistive technology. The background and weight change is the visual match for it.
+- **`transition-[width]`** animates only the width. The labels switch immediately rather than fading, and `truncate` stops them wrapping while the column is still moving. `motion-reduce:transition-none` makes the change instant for people who ask for reduced motion.
+- **`shrink-0` on the icon.** Without it, a long label can squash the icon as the column narrows.
+- **A fixed width for each state.** `w-16` (64 pixels) leaves room for a `size-4` icon plus the link and column padding, and the icon sits on the same left edge in both states, so it does not jump when the sidebar opens. If you change the icon size or padding, change the widths with it.
+
+## Remembering the collapsed state
+
+People expect a collapsed sidebar to stay collapsed on the next page. Store the value in `localStorage` or a cookie. Read it in an effect, not during render: reading storage while rendering gives the server and browser different HTML and causes a hydration warning. A cookie is better if you want the server to render the right width on the first paint and avoid a visible jump.
+
+## Mobile: do not keep the column
+
+A 240 pixel column is too much on a phone. The usual pattern is:
+
+1. Hide the sidebar below the `md` breakpoint with `hidden md:flex`.
+2. Show a menu button in the top bar that opens the same navigation as a drawer sliding over the content.
+3. Trap focus inside the drawer while it is open, close it on Escape and on a link press, and return focus to the menu button afterwards. The native `dialog` element, opened with `showModal()`, gives you the focus trap, the Escape key and the backdrop for free.
+
+Reuse the same `items` array for both, so the desktop and mobile navigation can never drift apart.
+
+## Free animated sidebars to copy
+
+A width transition is enough for most dashboards. If you want sidebars with more character, the Sidebar block in Nexus UI is free and ships several variants built with Tailwind CSS and Framer Motion:
+
+- Simple Sidebar with Hover
+- Collapsible Sidebar
+- Grouped Sidebar
+- Collapsing Rail
+- Workbench Sidebar
+
+Browse them on the [Sidebar block page](/blocks/block-sidebar) and install with the shadcn CLI:
+
+```bash
+npx shadcn@latest add @nexus-labs/sidebar
+```
+
+If your layout needs a top bar as well, see our guide to the [React navbar component](/blog/react-navbar-component) and the [navbar components](/components/category/navbars) category. For full dashboard screens to put a sidebar into, browse the [dashboard components](/components/category/dashboards) category, or see [Tailwind SaaS layouts](/blog/tailwind-saas-layouts) for how the pieces fit together on a page.
+
+## Frequently asked questions
+
+### How do I build a sidebar in React with Tailwind CSS?
+
+Use an `aside` containing a labelled `nav`, give the column a fixed width with `w-60`, and toggle to `w-16` for the collapsed state with `transition-[width]`. Keep the collapsed flag in `useState`. The component above is a complete example.
+
+### How do I make a collapsible sidebar in React?
+
+Keep a boolean in state, switch the width class on it, and hide the labels visually with `sr-only` when collapsed so they remain available to screen readers. Add a toggle button with `aria-expanded` and an accurate label.
+
+### How do I show the active link in a sidebar?
+
+Compare each link's path with the current path, set `aria-current="page"` on the match, and style it differently. In Next.js, get the current path from `usePathname()`.
+
+### Should the sidebar be a nav or an aside?
+
+Both work together. Use `aside` for the column as a whole, and put a `nav` with an `aria-label` inside it for the links. If the sidebar holds only navigation, a `nav` on its own is also fine.
+
+### How do I make a sidebar responsive?
+
+Hide the permanent column on small screens and open the same links in a drawer from a menu button. A native `dialog` opened with `showModal()` handles focus trapping and the Escape key for you.
+
+### Is there a free animated sidebar component for React?
+
+Yes. The Sidebar block in Nexus UI is free and includes hover, collapsible, grouped, rail and workbench variants. Install it with `npx shadcn@latest add @nexus-labs/sidebar`.

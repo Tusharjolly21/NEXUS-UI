@@ -18,6 +18,8 @@ import { ComponentGallery } from "@/components/gallery/component-gallery";
 import { getPricing } from "@/lib/region";
 import { Band, PillLink } from "@/components/site";
 import { allGalleryItems } from "@/lib/catalog/gallery-items";
+import { getIndexableTypes, getTypeHref } from "@/lib/catalog/type-collections";
+import { excerpt } from "@/lib/catalog/excerpt";
 
 type Props = { params: Promise<{ category: string }> };
 
@@ -117,6 +119,8 @@ export default async function ComponentCategoryPage({ params }: Props) {
 
       <section aria-label={`${label} gallery`} className="px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
+          {/* the tile titles below are h3s: this h2 keeps the outline H1 > H2 > H3 */}
+          <h2 className="sr-only">{`Browse ${label}`}</h2>
           {/* the For fun group is heavy (canvas, WebGL): its tiles start as posters and run when played */}
           <ComponentGallery items={galleryItems} pricing={pricing} playOnClick={category === "for-fun"} />
         </div>
@@ -133,7 +137,7 @@ export default async function ComponentCategoryPage({ params }: Props) {
               <Link href={`/components/${c.slug}`} className="text-[17px] font-semibold text-foreground hover:underline">
                 {c.name}
               </Link>
-              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{c.description}</p>
+              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{excerpt(c.description)}</p>
             </li>
           ))}
         </ul>
@@ -150,6 +154,17 @@ export default async function ComponentCategoryPage({ params }: Props) {
             </div>
           </div>
         )}
+
+        <div className="mt-10">
+          <h2 className="text-[17px] font-semibold text-foreground">Browse by type</h2>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {getIndexableTypes().map((t) => (
+              <PillLink key={t.slug} href={getTypeHref(t.slug)} variant="white" size="sm">
+                {t.heading.replace(/^React /, "").replace(/ Components?$/, "").replace(/: .*$/, "")}
+              </PillLink>
+            ))}
+          </div>
+        </div>
       </Band>
     </>
   );
