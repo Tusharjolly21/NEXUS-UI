@@ -609,6 +609,108 @@ import * as s_timeline from "./sounds/timeline";
 import * as s_glue_stick from "./sounds/glue-stick";
 import * as s_spirit_level from "./sounds/spirit-level";
 
+import * as s_ampersand from "./sounds/ampersand";
+import * as s_asterisk from "./sounds/asterisk";
+import * as s_copyright from "./sounds/copyright";
+import * as s_bitcoin from "./sounds/bitcoin";
+import * as s_euro from "./sounds/euro";
+import * as s_pound from "./sounds/pound";
+import * as s_yen from "./sounds/yen";
+import * as s_rupee from "./sounds/rupee";
+import * as s_ballot_box from "./sounds/ballot-box";
+import * as s_flip_horizontal from "./sounds/flip-horizontal";
+import * as s_boolean_union from "./sounds/boolean-union";
+import * as s_link_broken from "./sounds/link-broken";
+import * as s_closed_captions from "./sounds/closed-captions";
+import * as s_camera_switch from "./sounds/camera-switch";
+import * as s_verified_seal from "./sounds/verified-seal";
+import * as s_sticker from "./sounds/sticker";
+import * as s_picture_frame from "./sounds/picture-frame";
+import * as s_checkerboard from "./sounds/checkerboard";
+import * as s_recycle from "./sounds/recycle";
+import * as s_eiffel_tower from "./sounds/eiffel-tower";
+import * as s_leaning_tower from "./sounds/leaning-tower";
+import * as s_big_ben from "./sounds/big-ben";
+import * as s_parthenon from "./sounds/parthenon";
+import * as s_statue_of_liberty from "./sounds/statue-of-liberty";
+import * as s_pagoda from "./sounds/pagoda";
+import * as s_igloo from "./sounds/igloo";
+import * as s_carousel from "./sounds/carousel";
+import * as s_roller_coaster from "./sounds/roller-coaster";
+import * as s_globe_stand from "./sounds/globe-stand";
+import * as s_cargo_ship from "./sounds/cargo-ship";
+import * as s_submarine from "./sounds/submarine";
+import * as s_mailbox from "./sounds/mailbox";
+import * as s_safe from "./sounds/safe";
+import * as s_doorbell from "./sounds/doorbell";
+import * as s_pine_tree from "./sounds/pine-tree";
+import * as s_lotus from "./sounds/lotus";
+import * as s_seashell from "./sounds/seashell";
+import * as s_hurricane from "./sounds/hurricane";
+import * as s_snowman from "./sounds/snowman";
+import * as s_bowl_rice from "./sounds/bowl-rice";
+import * as s_egg from "./sounds/egg";
+import * as s_pretzel from "./sounds/pretzel";
+import * as s_peanut from "./sounds/peanut";
+import * as s_candy_cane from "./sounds/candy-cane";
+import * as s_taco from "./sounds/taco";
+import * as s_sushi from "./sounds/sushi";
+import * as s_watermelon from "./sounds/watermelon";
+import * as s_cherries from "./sounds/cherries";
+import * as s_grapes from "./sounds/grapes";
+import * as s_banana from "./sounds/banana";
+import * as s_strawberry from "./sounds/strawberry";
+import * as s_lemon from "./sounds/lemon";
+import * as s_corn from "./sounds/corn";
+import * as s_honey_jar from "./sounds/honey-jar";
+import * as s_chopsticks from "./sounds/chopsticks";
+import * as s_soda_can from "./sounds/soda-can";
+import * as s_salt_shaker from "./sounds/salt-shaker";
+import * as s_waffle from "./sounds/waffle";
+import * as s_hot_dog from "./sounds/hot-dog";
+import * as s_baby from "./sounds/baby";
+import * as s_gender_female from "./sounds/gender-female";
+import * as s_gender_male from "./sounds/gender-male";
+import * as s_hand_fist from "./sounds/hand-fist";
+import * as s_hand_heart from "./sounds/hand-heart";
+import * as s_peace_hand from "./sounds/peace-hand";
+import * as s_sock from "./sounds/sock";
+import * as s_baby_bottle from "./sounds/baby-bottle";
+import * as s_stroller from "./sounds/stroller";
+import * as s_teddy_bear from "./sounds/teddy-bear";
+import * as s_yarn_ball from "./sounds/yarn-ball";
+import * as s_love_letter from "./sounds/love-letter";
+import * as s_christmas_tree from "./sounds/christmas-tree";
+import * as s_pumpkin from "./sounds/pumpkin";
+import * as s_firework from "./sounds/firework";
+import * as s_x_ray from "./sounds/x-ray";
+import * as s_molecule from "./sounds/molecule";
+import * as s_petri_dish from "./sounds/petri-dish";
+import * as s_inhaler from "./sounds/inhaler";
+import * as s_crutch from "./sounds/crutch";
+import * as s_octopus from "./sounds/octopus";
+import * as s_crab from "./sounds/crab";
+import * as s_ladybug from "./sounds/ladybug";
+import * as s_fox from "./sounds/fox";
+import * as s_elephant from "./sounds/elephant";
+import * as s_giraffe from "./sounds/giraffe";
+import * as s_dolphin from "./sounds/dolphin";
+import * as s_spiderweb from "./sounds/spiderweb";
+import * as s_beehive from "./sounds/beehive";
+import * as s_flamingo from "./sounds/flamingo";
+import * as s_hockey_stick from "./sounds/hockey-stick";
+import * as s_roller_skate from "./sounds/roller-skate";
+import * as s_ice_skate from "./sounds/ice-skate";
+import * as s_whistle from "./sounds/whistle";
+import * as s_dartboard from "./sounds/dartboard";
+import * as s_skis from "./sounds/skis";
+import * as s_jump_rope from "./sounds/jump-rope";
+import * as s_racing_flag from "./sounds/racing-flag";
+import * as s_punching_bag from "./sounds/punching-bag";
+import * as s_snorkel_mask from "./sounds/snorkel-mask";
+
+import * as s_cube from "./sounds/cube";
+
 type Score = { length: number; level: number; play: (c: AudioContext, o: AudioNode, t: Time) => void };
 
 /** Every icon's score by slug. Each one is timed against that icon's own animation. */
@@ -1213,6 +1315,106 @@ const SCORES: Record<string, Score> = {
   "timeline": s_timeline,
   "glue-stick": s_glue_stick,
   "spirit-level": s_spirit_level,
+  "ampersand": s_ampersand,
+  "asterisk": s_asterisk,
+  "copyright": s_copyright,
+  "bitcoin": s_bitcoin,
+  "euro": s_euro,
+  "pound": s_pound,
+  "yen": s_yen,
+  "rupee": s_rupee,
+  "ballot-box": s_ballot_box,
+  "cube": s_cube,
+  "flip-horizontal": s_flip_horizontal,
+  "boolean-union": s_boolean_union,
+  "link-broken": s_link_broken,
+  "closed-captions": s_closed_captions,
+  "camera-switch": s_camera_switch,
+  "verified-seal": s_verified_seal,
+  "sticker": s_sticker,
+  "picture-frame": s_picture_frame,
+  "checkerboard": s_checkerboard,
+  "recycle": s_recycle,
+  "eiffel-tower": s_eiffel_tower,
+  "leaning-tower": s_leaning_tower,
+  "big-ben": s_big_ben,
+  "parthenon": s_parthenon,
+  "statue-of-liberty": s_statue_of_liberty,
+  "pagoda": s_pagoda,
+  "igloo": s_igloo,
+  "carousel": s_carousel,
+  "roller-coaster": s_roller_coaster,
+  "globe-stand": s_globe_stand,
+  "cargo-ship": s_cargo_ship,
+  "submarine": s_submarine,
+  "mailbox": s_mailbox,
+  "safe": s_safe,
+  "doorbell": s_doorbell,
+  "pine-tree": s_pine_tree,
+  "lotus": s_lotus,
+  "seashell": s_seashell,
+  "hurricane": s_hurricane,
+  "snowman": s_snowman,
+  "bowl-rice": s_bowl_rice,
+  "egg": s_egg,
+  "pretzel": s_pretzel,
+  "peanut": s_peanut,
+  "candy-cane": s_candy_cane,
+  "taco": s_taco,
+  "sushi": s_sushi,
+  "watermelon": s_watermelon,
+  "cherries": s_cherries,
+  "grapes": s_grapes,
+  "banana": s_banana,
+  "strawberry": s_strawberry,
+  "lemon": s_lemon,
+  "corn": s_corn,
+  "honey-jar": s_honey_jar,
+  "chopsticks": s_chopsticks,
+  "soda-can": s_soda_can,
+  "salt-shaker": s_salt_shaker,
+  "waffle": s_waffle,
+  "hot-dog": s_hot_dog,
+  "baby": s_baby,
+  "gender-female": s_gender_female,
+  "gender-male": s_gender_male,
+  "hand-fist": s_hand_fist,
+  "hand-heart": s_hand_heart,
+  "peace-hand": s_peace_hand,
+  "sock": s_sock,
+  "baby-bottle": s_baby_bottle,
+  "stroller": s_stroller,
+  "teddy-bear": s_teddy_bear,
+  "yarn-ball": s_yarn_ball,
+  "love-letter": s_love_letter,
+  "christmas-tree": s_christmas_tree,
+  "pumpkin": s_pumpkin,
+  "firework": s_firework,
+  "x-ray": s_x_ray,
+  "molecule": s_molecule,
+  "petri-dish": s_petri_dish,
+  "inhaler": s_inhaler,
+  "crutch": s_crutch,
+  "octopus": s_octopus,
+  "crab": s_crab,
+  "ladybug": s_ladybug,
+  "fox": s_fox,
+  "elephant": s_elephant,
+  "giraffe": s_giraffe,
+  "dolphin": s_dolphin,
+  "spiderweb": s_spiderweb,
+  "beehive": s_beehive,
+  "flamingo": s_flamingo,
+  "hockey-stick": s_hockey_stick,
+  "roller-skate": s_roller_skate,
+  "ice-skate": s_ice_skate,
+  "whistle": s_whistle,
+  "dartboard": s_dartboard,
+  "skis": s_skis,
+  "jump-rope": s_jump_rope,
+  "racing-flag": s_racing_flag,
+  "punching-bag": s_punching_bag,
+  "snorkel-mask": s_snorkel_mask,
 };
 
 export function hasIconSound(slug: string) {

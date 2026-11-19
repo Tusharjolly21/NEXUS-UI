@@ -601,6 +601,106 @@ import { BathroomScaleIcon } from "./icons/bathroom-scale";
 import { FaceMaskIcon } from "./icons/face-mask";
 import { WaterBottleIcon } from "./icons/water-bottle";
 import { MoneyBagIcon } from "./icons/money-bag";
+import { AmpersandIcon } from "./icons/ampersand";
+import { AsteriskIcon } from "./icons/asterisk";
+import { CopyrightIcon } from "./icons/copyright";
+import { BitcoinIcon } from "./icons/bitcoin";
+import { EuroIcon } from "./icons/euro";
+import { PoundIcon } from "./icons/pound";
+import { YenIcon } from "./icons/yen";
+import { RupeeIcon } from "./icons/rupee";
+import { BallotBoxIcon } from "./icons/ballot-box";
+import { CubeIcon } from "./icons/cube";
+import { FlipHorizontalIcon } from "./icons/flip-horizontal";
+import { BooleanUnionIcon } from "./icons/boolean-union";
+import { LinkBrokenIcon } from "./icons/link-broken";
+import { ClosedCaptionsIcon } from "./icons/closed-captions";
+import { CameraSwitchIcon } from "./icons/camera-switch";
+import { VerifiedSealIcon } from "./icons/verified-seal";
+import { StickerIcon } from "./icons/sticker";
+import { PictureFrameIcon } from "./icons/picture-frame";
+import { CheckerboardIcon } from "./icons/checkerboard";
+import { RecycleIcon } from "./icons/recycle";
+import { EiffelTowerIcon } from "./icons/eiffel-tower";
+import { LeaningTowerIcon } from "./icons/leaning-tower";
+import { BigBenIcon } from "./icons/big-ben";
+import { ParthenonIcon } from "./icons/parthenon";
+import { StatueOfLibertyIcon } from "./icons/statue-of-liberty";
+import { PagodaIcon } from "./icons/pagoda";
+import { IglooIcon } from "./icons/igloo";
+import { CarouselIcon } from "./icons/carousel";
+import { RollerCoasterIcon } from "./icons/roller-coaster";
+import { GlobeStandIcon } from "./icons/globe-stand";
+import { CargoShipIcon } from "./icons/cargo-ship";
+import { SubmarineIcon } from "./icons/submarine";
+import { MailboxIcon } from "./icons/mailbox";
+import { SafeIcon } from "./icons/safe";
+import { DoorbellIcon } from "./icons/doorbell";
+import { PineTreeIcon } from "./icons/pine-tree";
+import { LotusIcon } from "./icons/lotus";
+import { SeashellIcon } from "./icons/seashell";
+import { HurricaneIcon } from "./icons/hurricane";
+import { SnowmanIcon } from "./icons/snowman";
+import { BowlRiceIcon } from "./icons/bowl-rice";
+import { EggIcon } from "./icons/egg";
+import { PretzelIcon } from "./icons/pretzel";
+import { PeanutIcon } from "./icons/peanut";
+import { CandyCaneIcon } from "./icons/candy-cane";
+import { TacoIcon } from "./icons/taco";
+import { SushiIcon } from "./icons/sushi";
+import { WatermelonIcon } from "./icons/watermelon";
+import { CherriesIcon } from "./icons/cherries";
+import { GrapesIcon } from "./icons/grapes";
+import { BananaIcon } from "./icons/banana";
+import { StrawberryIcon } from "./icons/strawberry";
+import { LemonIcon } from "./icons/lemon";
+import { CornIcon } from "./icons/corn";
+import { HoneyJarIcon } from "./icons/honey-jar";
+import { ChopsticksIcon } from "./icons/chopsticks";
+import { SodaCanIcon } from "./icons/soda-can";
+import { SaltShakerIcon } from "./icons/salt-shaker";
+import { WaffleIcon } from "./icons/waffle";
+import { HotDogIcon } from "./icons/hot-dog";
+import { BabyIcon } from "./icons/baby";
+import { GenderFemaleIcon } from "./icons/gender-female";
+import { GenderMaleIcon } from "./icons/gender-male";
+import { HandFistIcon } from "./icons/hand-fist";
+import { HandHeartIcon } from "./icons/hand-heart";
+import { PeaceHandIcon } from "./icons/peace-hand";
+import { SockIcon } from "./icons/sock";
+import { BabyBottleIcon } from "./icons/baby-bottle";
+import { StrollerIcon } from "./icons/stroller";
+import { TeddyBearIcon } from "./icons/teddy-bear";
+import { YarnBallIcon } from "./icons/yarn-ball";
+import { LoveLetterIcon } from "./icons/love-letter";
+import { ChristmasTreeIcon } from "./icons/christmas-tree";
+import { PumpkinIcon } from "./icons/pumpkin";
+import { FireworkIcon } from "./icons/firework";
+import { XRayIcon } from "./icons/x-ray";
+import { MoleculeIcon } from "./icons/molecule";
+import { PetriDishIcon } from "./icons/petri-dish";
+import { InhalerIcon } from "./icons/inhaler";
+import { CrutchIcon } from "./icons/crutch";
+import { OctopusIcon } from "./icons/octopus";
+import { CrabIcon } from "./icons/crab";
+import { LadybugIcon } from "./icons/ladybug";
+import { FoxIcon } from "./icons/fox";
+import { ElephantIcon } from "./icons/elephant";
+import { GiraffeIcon } from "./icons/giraffe";
+import { DolphinIcon } from "./icons/dolphin";
+import { SpiderwebIcon } from "./icons/spiderweb";
+import { BeehiveIcon } from "./icons/beehive";
+import { FlamingoIcon } from "./icons/flamingo";
+import { HockeyStickIcon } from "./icons/hockey-stick";
+import { RollerSkateIcon } from "./icons/roller-skate";
+import { IceSkateIcon } from "./icons/ice-skate";
+import { WhistleIcon } from "./icons/whistle";
+import { DartboardIcon } from "./icons/dartboard";
+import { SkisIcon } from "./icons/skis";
+import { JumpRopeIcon } from "./icons/jump-rope";
+import { RacingFlagIcon } from "./icons/racing-flag";
+import { PunchingBagIcon } from "./icons/punching-bag";
+import { SnorkelMaskIcon } from "./icons/snorkel-mask";
 
 export type NxIconProps = {
   size?: number;
@@ -1215,4 +1315,104 @@ export const NX_ICONS: Record<string, ComponentType<NxIconProps>> = {
   "face-mask": FaceMaskIcon,
   "water-bottle": WaterBottleIcon,
   "money-bag": MoneyBagIcon,
+  "ampersand": AmpersandIcon,
+  "asterisk": AsteriskIcon,
+  "copyright": CopyrightIcon,
+  "bitcoin": BitcoinIcon,
+  "euro": EuroIcon,
+  "pound": PoundIcon,
+  "yen": YenIcon,
+  "rupee": RupeeIcon,
+  "ballot-box": BallotBoxIcon,
+  "cube": CubeIcon,
+  "flip-horizontal": FlipHorizontalIcon,
+  "boolean-union": BooleanUnionIcon,
+  "link-broken": LinkBrokenIcon,
+  "closed-captions": ClosedCaptionsIcon,
+  "camera-switch": CameraSwitchIcon,
+  "verified-seal": VerifiedSealIcon,
+  "sticker": StickerIcon,
+  "picture-frame": PictureFrameIcon,
+  "checkerboard": CheckerboardIcon,
+  "recycle": RecycleIcon,
+  "eiffel-tower": EiffelTowerIcon,
+  "leaning-tower": LeaningTowerIcon,
+  "big-ben": BigBenIcon,
+  "parthenon": ParthenonIcon,
+  "statue-of-liberty": StatueOfLibertyIcon,
+  "pagoda": PagodaIcon,
+  "igloo": IglooIcon,
+  "carousel": CarouselIcon,
+  "roller-coaster": RollerCoasterIcon,
+  "globe-stand": GlobeStandIcon,
+  "cargo-ship": CargoShipIcon,
+  "submarine": SubmarineIcon,
+  "mailbox": MailboxIcon,
+  "safe": SafeIcon,
+  "doorbell": DoorbellIcon,
+  "pine-tree": PineTreeIcon,
+  "lotus": LotusIcon,
+  "seashell": SeashellIcon,
+  "hurricane": HurricaneIcon,
+  "snowman": SnowmanIcon,
+  "bowl-rice": BowlRiceIcon,
+  "egg": EggIcon,
+  "pretzel": PretzelIcon,
+  "peanut": PeanutIcon,
+  "candy-cane": CandyCaneIcon,
+  "taco": TacoIcon,
+  "sushi": SushiIcon,
+  "watermelon": WatermelonIcon,
+  "cherries": CherriesIcon,
+  "grapes": GrapesIcon,
+  "banana": BananaIcon,
+  "strawberry": StrawberryIcon,
+  "lemon": LemonIcon,
+  "corn": CornIcon,
+  "honey-jar": HoneyJarIcon,
+  "chopsticks": ChopsticksIcon,
+  "soda-can": SodaCanIcon,
+  "salt-shaker": SaltShakerIcon,
+  "waffle": WaffleIcon,
+  "hot-dog": HotDogIcon,
+  "baby": BabyIcon,
+  "gender-female": GenderFemaleIcon,
+  "gender-male": GenderMaleIcon,
+  "hand-fist": HandFistIcon,
+  "hand-heart": HandHeartIcon,
+  "peace-hand": PeaceHandIcon,
+  "sock": SockIcon,
+  "baby-bottle": BabyBottleIcon,
+  "stroller": StrollerIcon,
+  "teddy-bear": TeddyBearIcon,
+  "yarn-ball": YarnBallIcon,
+  "love-letter": LoveLetterIcon,
+  "christmas-tree": ChristmasTreeIcon,
+  "pumpkin": PumpkinIcon,
+  "firework": FireworkIcon,
+  "x-ray": XRayIcon,
+  "molecule": MoleculeIcon,
+  "petri-dish": PetriDishIcon,
+  "inhaler": InhalerIcon,
+  "crutch": CrutchIcon,
+  "octopus": OctopusIcon,
+  "crab": CrabIcon,
+  "ladybug": LadybugIcon,
+  "fox": FoxIcon,
+  "elephant": ElephantIcon,
+  "giraffe": GiraffeIcon,
+  "dolphin": DolphinIcon,
+  "spiderweb": SpiderwebIcon,
+  "beehive": BeehiveIcon,
+  "flamingo": FlamingoIcon,
+  "hockey-stick": HockeyStickIcon,
+  "roller-skate": RollerSkateIcon,
+  "ice-skate": IceSkateIcon,
+  "whistle": WhistleIcon,
+  "dartboard": DartboardIcon,
+  "skis": SkisIcon,
+  "jump-rope": JumpRopeIcon,
+  "racing-flag": RacingFlagIcon,
+  "punching-bag": PunchingBagIcon,
+  "snorkel-mask": SnorkelMaskIcon,
 };
