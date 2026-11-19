@@ -51,11 +51,17 @@ function IconButton({
   );
 }
 
+/**
+ * One mock-up with its write-up. Its layout follows its own width, not the window's (the section sits between
+ * the sidebar and the Pro rail, so the window says little): the mock-up above the text when the card is narrow,
+ * beside it once there is room for both.
+ */
 function Card({ title, where, slugs, children, className }: { title: string; where: string; slugs: string[]; children: React.ReactNode; className?: string }) {
   return (
-    <article className={cn("flex flex-col overflow-hidden rounded-[24px] bg-card shadow-[0_0_0_1px_rgba(0,0,0,.05)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]", className)}>
-      <div className="flex flex-1 items-center justify-center bg-secondary/60 p-5 sm:p-6">{children}</div>
-      <div className="p-5">
+    <article className={cn("@container overflow-hidden rounded-[24px] bg-card shadow-[0_0_0_1px_rgba(0,0,0,.05)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]", className)}>
+      <div className="flex h-full flex-col @min-[680px]:flex-row">
+      <div className="flex flex-1 items-center justify-center bg-secondary/60 p-4 @min-[360px]:p-6 @min-[680px]:w-[408px] @min-[680px]:flex-none @min-[680px]:py-8">{children}</div>
+      <div className="p-5 @min-[680px]:flex @min-[680px]:flex-1 @min-[680px]:flex-col @min-[680px]:justify-center @min-[680px]:p-7">
         <h3 className="text-[16px] font-semibold text-foreground">{title}</h3>
         <p className="mt-1.5 text-[14.5px] leading-relaxed text-muted-foreground">{where}</p>
         <p className="mt-3 flex flex-wrap gap-1.5">
@@ -65,6 +71,7 @@ function Card({ title, where, slugs, children, className }: { title: string; whe
             </Link>
           ))}
         </p>
+      </div>
       </div>
     </article>
   );
@@ -320,7 +327,7 @@ function TabBar() {
       <div className="grid h-[132px] place-items-center bg-gradient-to-b from-secondary/50 to-transparent">
         <p className="text-[13px] text-muted-foreground" aria-live="polite">{tabs.find((t) => t.slug === active)?.label} screen</p>
       </div>
-      <nav aria-label="Tab bar" className="flex items-center justify-around border-t border-border px-2 pb-3 pt-2">
+      <nav aria-label="Tab bar" className="flex items-center gap-1 border-t border-border px-2 pb-3 pt-2">
         {tabs.map((t) => {
           const Icon = NX_ICONS[t.slug];
           const on = active === t.slug;
@@ -333,13 +340,13 @@ function TabBar() {
               aria-current={on ? "page" : undefined}
               onClick={() => { setActive(t.slug); setEpoch((e) => e + 1); blip(t.slug); }}
               className={cn(
-                "relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-1 outline-none focus-visible:outline-2 focus-visible:outline-ring",
-                fab ? "mx-1 size-12 justify-center rounded-full bg-foreground text-background" : on ? "text-foreground" : "text-muted-foreground",
+                "relative flex flex-col items-center gap-0.5 rounded-xl py-1 outline-none focus-visible:outline-2 focus-visible:outline-ring",
+                fab ? "mx-1 size-12 shrink-0 justify-center rounded-full bg-foreground text-background" : cn("min-w-0 flex-1 px-1", on ? "text-foreground" : "text-muted-foreground"),
               )}
             >
               <Icon key={on ? epoch : "idle"} size={fab ? 22 : 22} play={on} />
               {!fab && <span className="text-[10.5px] font-medium">{t.label}</span>}
-              {t.slug === "bell" && <span aria-hidden className="absolute right-2 top-0.5 size-2 rounded-full bg-[#ff375f]" />}
+              {t.slug === "bell" && <span aria-hidden className="absolute left-1/2 top-0.5 ml-1.5 size-2 rounded-full bg-[#ff375f]" />}
             </button>
           );
         })}
@@ -363,7 +370,9 @@ export function RealInterfaces() {
           {sound ? <Volume2 className="size-4" aria-hidden /> : <VolumeX className="size-4" aria-hidden />} Sound
         </button>
       </div>
-      <div className="mt-4 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+      {/* Columns follow the section's own width: three only when each card has room for its mock-up */}
+      <div className="@container mt-4">
+      <div className="grid gap-5 @min-[780px]:grid-cols-2 @min-[1180px]:grid-cols-3">
         <Card title="Editor toolbar" where="Undo, edit, link, attach and crop buttons for a rich-text editor, a notes app or a CMS. Each one plays on hover, so the toolbar feels alive without a single extra line of CSS." slugs={["undo", "pencil", "link", "paperclip", "image", "scissors", "sliders", "code"]}>
           <EditorToolbar />
         </Card>
@@ -382,6 +391,7 @@ export function RealInterfaces() {
         <Card title="Mobile tab bars" where="Home, search, create, alerts and profile. The active tab plays its icon each time you switch to it, which makes a bottom bar feel native." slugs={["home", "search", "plus", "bell", "user"]}>
           <TabBar />
         </Card>
+      </div>
       </div>
     </SoundContext.Provider>
   );
