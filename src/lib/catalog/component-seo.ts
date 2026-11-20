@@ -957,7 +957,7 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
   "dust-snap": {
     title: "React Dust Disintegration Text Effect",
     description:
-      "React text effect where a word turns to dust: it shivers, goes dark and grainy from one end, then crumbles into a cloud of particles. Free, Framer Motion + Tailwind CSS.",
+      "React text effect where a word turns to dust: it shivers, darkens and crumbles into a cloud of particles. Free, Framer Motion + Tailwind CSS.",
   },
   "shredder-delete": {
     title: "React Delete Animation: Paper Shredder Effect",
