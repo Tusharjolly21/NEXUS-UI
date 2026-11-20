@@ -4301,9 +4301,9 @@ export default function Page() {
     slug: "slide-to-confirm",
     name: "Slide to Confirm",
     registryCliName: "slide-to-confirm",
-    description: "A slide-to-confirm track for payments and other deliberate actions. The knob stretches along the track in proportion to how fast you drag it and squashes back when it stops, the label shimmers and fades as you pull, and past the threshold the track floods with the success colour while a check draws itself.",
+    description: "A slide-to-confirm track for payments and other deliberate actions. The knob stretches along the track in proportion to how fast you drag it and squashes back when it stops, the label shimmers and fades as you pull, and past the threshold the track floods with the success colour while a check draws itself. Also includes Slide to Pay, a payment you confirm by sliding: the track pulls in to a circle under your thumb, spins while it sends and turns into a tick.",
     categorySlug: "inputs-controls",
-    tags: ["slider", "confirm", "swipe", "payment", "button", "squash and stretch", "motion kit", "framer-motion"],
+    tags: ["slider", "confirm", "swipe", "payment", "button", "squash and stretch", "motion kit", "framer-motion", "slide to pay", "confirm payment", "swipe to pay"],
     premium: true,
     trendingScore: 172,
     createdAt: "2026-10-19",
@@ -4322,8 +4322,63 @@ export default function Page() {
       { name: "width", type: "number", description: "Track width in px. Defaults per size (260, 300, 340)." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Slides itself across and confirms (without calling onConfirm) until someone touches it." },
       { name: "disabled", type: "boolean", defaultValue: "false", description: "Dims the track and ignores input." },
+      { name: "SlideToPay.payee", type: "string", defaultValue: "\"Emily Parker\"", description: "Name of the person being paid." },
+      { name: "SlideToPay.note", type: "string", defaultValue: "\"Concert tickets\"", description: "Short note shown under the payee." },
+      { name: "SlideToPay.amount", type: "number", defaultValue: "240", description: "Amount being paid." },
+      { name: "SlideToPay.currency", type: "string", defaultValue: "\"$\"", description: "Currency symbol shown before amounts." },
+      { name: "SlideToPay.from", type: "string", defaultValue: "\"Everyday debit 4821\"", description: "Account the money leaves." },
+      { name: "SlideToPay.arrives", type: "string", defaultValue: "\"Instantly\"", description: "When the payment arrives." },
+      { name: "SlideToPay.onSend", type: "() => Promise<void> | void", description: "called when the slide completes; resolve when the payment is done" },
+      { name: "SlideToPay.enableSound", type: "boolean", defaultValue: "true", description: "Soft synthesised sounds as you use it. They also follow the site-wide sound switch." },
+      { name: "SlideToPay.volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "SlideToPay.autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "SlideToPay.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
     ],
     Preview: Previews.PreviewSlideToConfirmRedesign,
+    previewSections: [
+      {
+        title: "Slide to Confirm",
+        Preview: Previews.PreviewSlideToConfirmRedesign,
+        reactSource: `// src/app/page.tsx
+"use client";
+
+import { SlideToConfirm } from "@/components/slide-to-confirm";
+
+async function pay() {
+  const res = await fetch("/api/pay", { method: "POST" });
+  if (!res.ok) throw new Error("Payment failed");
+}
+
+export default function Page() {
+  return (
+    <SlideToConfirm
+      label="Slide to pay $24.00"
+      pendingLabel="Paying"
+      successLabel="Paid"
+      onConfirm={pay}
+      resetAfter={0}
+    />
+  );
+}`,
+      },
+      {
+        title: "Slide to Pay",
+        Preview: Previews.PreviewSlideToPayVariant,
+        reactSource: `// src/app/page.tsx
+"use client";
+
+import { SlideToPay } from "@/components/slide-to-confirm";
+
+export default function Page() {
+  return (
+    <SlideToPay
+      onSend={() => console.log("send")}
+    />
+  );
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `// src/app/page.tsx
 "use client";
@@ -5371,9 +5426,9 @@ export default function Page() {
     name: "Password Strength",
     registryCliName: "password-strength",
     description:
-      "A password field with a four-segment meter that fills and recolours as you type, a rolling strength label, rules that tick themselves off, and an eye toggle that draws its own slash.",
+      "A password field with a four-segment meter that fills and recolours as you type, a rolling strength label, rules that tick themselves off, and an eye toggle that draws its own slash. Also includes Password Reveal, a password field whose reveal is a small wave: the dots turn into letters one after another, left to right, while a slash draws across the eye.",
     categorySlug: "signup-forms",
-    tags: ["password", "strength meter", "validation", "signup", "form", "input", "motion kit", "framer-motion", "crack time", "password meter", "log scale", "crack-time meter", "suggested password", "password generator", "sign up"],
+    tags: ["password", "strength meter", "validation", "signup", "form", "input", "motion kit", "framer-motion", "crack time", "password meter", "log scale", "crack-time meter", "suggested password", "password generator", "sign up", "password reveal", "show password", "reveal password", "password field", "eye toggle"],
     premium: false,
     trendingScore: 157,
     createdAt: "2026-10-19",
@@ -5392,6 +5447,16 @@ export default function Page() {
       { name: "SuggestPassword.onUse", type: "(password: string) => void", defaultValue: "undefined", description: "Called when the suggested password is taken." },
       { name: "SuggestPassword.onSubmit", type: "(password: string) => void", defaultValue: "undefined", description: "Called with the current password when Create account is pressed. The component sends nothing anywhere." },
       { name: "SuggestPassword.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the card." },
+      { name: "PasswordReveal.title", type: "string", defaultValue: "\"Create a password\"", description: "Heading above the field." },
+      { name: "PasswordReveal.hint", type: "string", defaultValue: "\"Use 8 or more characters with a mix of letters, numbers and symbols.\"", description: "Helper text shown under the field." },
+      { name: "PasswordReveal.label", type: "string", defaultValue: "\"Password\"", description: "Label of the field." },
+      { name: "PasswordReveal.defaultValue", type: "string", defaultValue: "\"Mountain-river42\"", description: "Password the field starts with." },
+      { name: "PasswordReveal.submitLabel", type: "string", defaultValue: "\"Continue\"", description: "Text on the submit button." },
+      { name: "PasswordReveal.onSubmit", type: "(password: string) => void", description: "Called with the password when the form is submitted." },
+      { name: "PasswordReveal.enableSound", type: "boolean", defaultValue: "true", description: "Soft synthesised sounds as you use it. They also follow the site-wide sound switch." },
+      { name: "PasswordReveal.volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "PasswordReveal.autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "PasswordReveal.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
     ],
     Preview: Previews.PreviewPasswordStrength,
     previewSections: [
@@ -5442,6 +5507,23 @@ export default function Page() {
   return (
     <SuggestPassword
       email="maya@orbitly.com"
+    />
+  );
+}
+`,
+      },
+      {
+        title: "Password Reveal",
+        Preview: Previews.PreviewPasswordRevealVariant,
+        reactSource: `// src/app/page.tsx
+"use client";
+
+import { PasswordReveal } from "@/components/password-strength";
+
+export default function Page() {
+  return (
+    <PasswordReveal
+      onSubmit={(password) => console.log(password)}
     />
   );
 }
@@ -7120,9 +7202,9 @@ export default function Page() {
     name: "Money Goo",
     registryCliName: "money-goo",
     description:
-      "A peer-to-peer payment you drag out of your avatar: a liquid neck stretches, thins and snaps, and dropping the amount on a friend pours it in while both balances roll.",
+      "A peer-to-peer payment you drag out of your avatar: a liquid neck stretches, thins and snaps, and dropping the amount on a friend pours it in while both balances roll. Also includes Send Money, a send-money flow: pick a friend, type an amount and slide their face along the track while the digits fly into their picture.",
     categorySlug: "motion-effects",
-    tags: ["payment", "send money", "drag and drop", "gooey", "metaball", "fintech", "motion kit", "framer-motion"],
+    tags: ["payment", "send money", "drag and drop", "gooey", "metaball", "fintech", "motion kit", "framer-motion", "payments", "face slide", "transfer"],
     premium: true,
     trendingScore: 156,
     createdAt: "2026-10-19",
@@ -7134,8 +7216,53 @@ export default function Page() {
       { name: "to", type: "MoneyGooPerson", defaultValue: '{ name: "Maya", initials: "MK", balance: 112 }', description: "Recipient: name, initials shown in the avatar, and starting balance." },
       { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of the goo, the blob and the drop-target ring." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sends money by itself on a loop until someone drags." },
+      { name: "SendMoney.payees", type: "Payee[]", defaultValue: "DEFAULT_PAYEES", description: "The people to choose from, each as { id, name, avatar }." },
+      { name: "SendMoney.balance", type: "number", description: "Balance the amount is checked against. Sending more than this is refused." },
+      { name: "SendMoney.currency", type: "string", defaultValue: "\"$\"", description: "Currency symbol shown before amounts." },
+      { name: "SendMoney.onSend", type: "(payee: Payee, amount: number) => void", description: "Called with the payee and the amount when the face is slid across." },
+      { name: "SendMoney.enableSound", type: "boolean", defaultValue: "true", description: "Soft synthesised sounds as you use it. They also follow the site-wide sound switch." },
+      { name: "SendMoney.volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "SendMoney.autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "SendMoney.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
     ],
     Preview: Previews.PreviewMoneyGoo,
+    previewSections: [
+      {
+        title: "Money Goo",
+        Preview: Previews.PreviewMoneyGoo,
+        reactSource: `// src/app/page.tsx
+
+import { MoneyGoo } from "@/components/money-goo";
+
+export default function Page() {
+  return (
+    <MoneyGoo
+      amount={25}
+      from={{ name: "You", initials: "ME", balance: 180 }}
+      to={{ name: "Leo", initials: "LO", balance: 64 }}
+      accent="#34c759"
+    />
+  );
+}`,
+      },
+      {
+        title: "Send Money",
+        Preview: Previews.PreviewSendMoneyVariant,
+        reactSource: `// src/app/page.tsx
+"use client";
+
+import { SendMoney } from "@/components/money-goo";
+
+export default function Page() {
+  return (
+    <SendMoney
+      onSend={(payee, amount) => console.log(payee, amount)}
+    />
+  );
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `// src/app/page.tsx
 
@@ -8111,9 +8238,9 @@ export default function Page() {
     name: "Context Meter",
     registryCliName: "context-meter",
     description:
-      "A context-window token meter drawn as a 40 by 5 dot grid. Hover a category to light only its dots; the conversation keeps growing, and Compact chat drops its dots out of the grid while everything after them reflows to close the gap.",
+      "A context-window token meter drawn as a 40 by 5 dot grid. Hover a category to light only its dots; the conversation keeps growing, and Compact chat drops its dots out of the grid while everything after them reflows to close the gap. Also includes Context Gauge, how full an AI model's context window is, drawn as a hundred fine ticks that rise as you add files and slide together when you compact.",
     categorySlug: "ai-components",
-    tags: ["tokens", "context window", "llm", "usage meter", "dot grid", "ai chat", "layout", "motion kit", "framer-motion"],
+    tags: ["tokens", "context window", "llm", "usage meter", "dot grid", "ai chat", "layout", "motion kit", "framer-motion", "context gauge", "compact", "ai context"],
     premium: true,
     trendingScore: 153,
     createdAt: "2026-10-20",
@@ -8124,8 +8251,53 @@ export default function Page() {
       { name: "limit", type: "number", defaultValue: "200", description: "Window size in thousands of tokens; the grid always has 200 dots." },
       { name: "growId", type: "string", defaultValue: '"conv"', description: "Category that grows by 2.2K every 380ms and is cut back to 6.2K by Compact chat." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Cycles the highlight and compacts when the window passes 90%, until someone touches the card." },
+      { name: "ContextGauge.limit", type: "number", defaultValue: "200000", description: "the model's context window, in tokens" },
+      { name: "ContextGauge.items", type: "ContextItem[]", description: "The files and messages filling the gauge, each as { id, kind, label, tokens }." },
+      { name: "ContextGauge.keep", type: "number", defaultValue: "0.16", description: "how much of the compacted history the summary keeps, 0 to 1" },
+      { name: "ContextGauge.onChange", type: "(items: ContextItem[]) => void", description: "Called with the whole list whenever an item is added or removed." },
+      { name: "ContextGauge.onCompact", type: "(summary: ContextItem, removed: ContextItem[]) => void", description: "Called after Compact, with the summary that replaced the items and the items it removed." },
+      { name: "ContextGauge.enableSound", type: "boolean", defaultValue: "true", description: "Soft synthesised sounds as you use it. They also follow the site-wide sound switch." },
+      { name: "ContextGauge.volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "ContextGauge.autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "ContextGauge.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
     ],
     Preview: Previews.PreviewContextMeter,
+    previewSections: [
+      {
+        title: "Context Meter",
+        Preview: Previews.PreviewContextMeter,
+        reactSource: `// src/app/page.tsx
+
+import { ContextMeter, type ContextCategory } from "@/components/context-meter";
+
+const usage: ContextCategory[] = [
+  { id: "sys", label: "Instructions", color: "#8e8e93", tokens: 6 },
+  { id: "docs", label: "Attached docs", color: "#ff9f0a", tokens: 31.5 },
+  { id: "chat", label: "Chat history", color: "#0071e3", tokens: 22 },
+];
+
+export default function Page() {
+  return <ContextMeter categories={usage} limit={128} growId="chat" />;
+}`,
+      },
+      {
+        title: "Context Gauge",
+        Preview: Previews.PreviewContextGaugeVariant,
+        reactSource: `// src/app/page.tsx
+"use client";
+
+import { ContextGauge } from "@/components/context-meter";
+
+export default function Page() {
+  return (
+    <ContextGauge
+      onChange={(items) => console.log(items)}
+    />
+  );
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `// src/app/page.tsx
 
@@ -8147,9 +8319,9 @@ export default function Page() {
     name: "Mood Wheel",
     registryCliName: "mood-wheel",
     description:
-      "Feelings laid along the rim of a wheel that you drag, scroll or arrow through. The word at the centre gets bracketed, fills the sentence below and the orb beside it melts into that mood's colours.",
+      "Feelings laid along the rim of a wheel that you drag, scroll or arrow through. The word at the centre gets bracketed, fills the sentence below and the orb beside it melts into that mood's colours. Also includes Mood Orb, a mood check-in with a ball of liquid chrome beside an arc of feelings: scroll to change the mood, or throw the ball across.",
     categorySlug: "inputs-controls",
-    tags: ["mood", "picker", "wheel", "slider", "inertia", "snap", "journal", "motion kit", "framer-motion"],
+    tags: ["mood", "picker", "wheel", "slider", "inertia", "snap", "journal", "motion kit", "framer-motion", "mood orb", "mood picker", "mood log", "ball throw", "orb"],
     premium: true,
     trendingScore: 151,
     createdAt: "2026-10-20",
@@ -8162,8 +8334,71 @@ export default function Page() {
       { name: "spacing", type: "number", defaultValue: "0.32", description: "Gap between neighbouring words around the wheel, in radians (0.2 to 0.6). Larger spreads the words further apart." },
       { name: "orbSize", type: "number", defaultValue: "150", description: "Width and height of the colour orb, in px (60 to 200)." },
       { name: "glide", type: "number", defaultValue: "1", description: "How far the wheel keeps rolling after you let go (0.25 to 4). Higher glides further, lower stops sooner." },
+      { name: "MoodOrb.question", type: "string", defaultValue: "\"How are you feeling?\"", description: "Question shown above the words." },
+      { name: "MoodOrb.moods", type: "Mood[]", defaultValue: "DEFAULT_MOODS", description: "The words on the reel, each as { name, tint, warp, speed, freq }." },
+      { name: "MoodOrb.defaultMood", type: "number", defaultValue: "4", description: "Index of the word the reel starts on." },
+      { name: "MoodOrb.onLog", type: "(mood: Mood) => void", description: "Called with the mood when it is logged by throwing the ball." },
+      { name: "MoodOrb.enableSound", type: "boolean", defaultValue: "true", description: "Soft synthesised sounds as you use it. They also follow the site-wide sound switch." },
+      { name: "MoodOrb.volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "MoodOrb.autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "MoodOrb.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
     ],
     Preview: Previews.PreviewMoodWheel,
+    previewSections: [
+      {
+        title: "Mood Wheel",
+        Preview: Previews.PreviewMoodWheel,
+        reactSource: `// src/app/page.tsx
+
+import { MoodWheel, type Mood } from "@/components/mood-wheel";
+
+const moods: Mood[] = [
+  { word: "Calm", a: "#8ec5ff", b: "#d7f0ff" },
+  { word: "Hopeful", a: "#ffd36e", b: "#fff4d1" },
+  { word: "Restless", a: "#ff7a6b", b: "#ffe0db" },
+  { word: "Tired", a: "#a7a3d9", b: "#ebe9ff" },
+  { word: "Grateful", a: "#9fd36b", b: "#eefcd9" },
+];
+
+export default function Page() {
+  return (
+    <section className="flex flex-col items-center gap-6 py-12">
+      <h2 className="text-[22px] font-semibold tracking-[-0.02em]">How are you today?</h2>
+      <MoodWheel moods={moods} />
+    </section>
+  );
+}
+
+// Tune the feel
+import { MoodWheel } from "@/components/mood-wheel";
+
+// A tighter wheel with the words packed close, a bigger orb, and a long glide after you let go.
+export default function Page() {
+  return (
+    <section className="flex flex-col items-center py-12">
+      <MoodWheel radius={170} spacing={0.28} orbSize={180} glide={2} />
+    </section>
+  );
+}`,
+      },
+      {
+        title: "Mood Orb",
+        Preview: Previews.PreviewMoodOrbVariant,
+        reactSource: `// src/app/page.tsx
+"use client";
+
+import { MoodOrb } from "@/components/mood-wheel";
+
+export default function Page() {
+  return (
+    <MoodOrb
+      onLog={(mood) => console.log(mood)}
+    />
+  );
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `// src/app/page.tsx
 
@@ -9748,9 +9983,9 @@ export default function Page() {
     name: "Spend Donut",
     registryCliName: "spend-donut",
     description:
-      "A monthly budget donut: the slice you point at slides out of the ring and thickens while the centre rolls to its amount. Switch month and every slice re-measures itself in one continuous spring sweep.",
+      "A monthly budget donut: the slice you point at slides out of the ring and thickens while the centre rolls to its amount. Switch month and every slice re-measures itself in one continuous spring sweep. Also includes Spend Ring, a month of spending as a ring: point at a category and its arc swells, click it and the arc unwinds into a straight budget bar.",
     categorySlug: "dashboards",
-    tags: ["donut chart", "pie chart", "budget", "spending", "finance", "chart", "legend", "motion kit", "framer-motion"],
+    tags: ["donut chart", "pie chart", "budget", "spending", "finance", "chart", "legend", "motion kit", "framer-motion", "spend ring", "spending ring", "categories"],
     premium: true,
     trendingScore: 148,
     createdAt: "2026-10-20",
@@ -9760,8 +9995,51 @@ export default function Page() {
       { name: "thickness", type: "number", defaultValue: "18", description: "Ring thickness in px (220px viewBox). The pointed-at slice grows by 6." },
       { name: "gap", type: "number", defaultValue: "4", description: "Clear space between slices in px; the round caps are accounted for." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Points at each category in turn and changes month every ~8s until someone interacts." },
+      { name: "SpendRing.title", type: "string", defaultValue: "\"Spending\"", description: "Heading above the ring." },
+      { name: "SpendRing.monthNames", type: "string[]", defaultValue: "MONTHS", description: "month names, oldest first; each category's `months` lines up with these" },
+      { name: "SpendRing.categories", type: "SpendCategory[]", defaultValue: "DEFAULT_CATEGORIES", description: "The slices of the ring, each as { id, label, color, budget, months, txns }." },
+      { name: "SpendRing.currency", type: "string", defaultValue: "\"$\"", description: "Currency symbol shown before amounts." },
+      { name: "SpendRing.onSelect", type: "(category: SpendCategory | null) => void", description: "Called with the chosen category, or null when the selection is cleared." },
+      { name: "SpendRing.enableSound", type: "boolean", defaultValue: "true", description: "Soft synthesised sounds as you use it. They also follow the site-wide sound switch." },
+      { name: "SpendRing.volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "SpendRing.autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "SpendRing.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
     ],
     Preview: Previews.PreviewSpendDonut,
+    previewSections: [
+      {
+        title: "Spend Donut",
+        Preview: Previews.PreviewSpendDonut,
+        reactSource: `// src/app/page.tsx
+
+import { SpendDonut } from "@/components/spend-donut";
+
+export default function Page() {
+  return (
+    <aside className="flex justify-center p-6">
+      <SpendDonut thickness={22} gap={6} />
+    </aside>
+  );
+}`,
+      },
+      {
+        title: "Spend Ring",
+        Preview: Previews.PreviewSpendRingVariant,
+        reactSource: `// src/app/page.tsx
+"use client";
+
+import { SpendRing } from "@/components/spend-donut";
+
+export default function Page() {
+  return (
+    <SpendRing
+      onSelect={(category) => console.log(category)}
+    />
+  );
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `// src/app/page.tsx
 
@@ -17605,9 +17883,9 @@ export default function Page() {
     name: "Order Tracking",
     registryCliName: "order-tracking",
     description:
-      "A live delivery tracker on a real-looking city map. A courier puck leaves the Pickup marker and rides a blue route with direction arrows to the Drop-off pin on the door, pausing at the drop-offs before yours while the ridden part fills in behind it; its arrow turns at every corner. The arrival time rolls down digit by digit, stages check off, live updates drop into a feed, and on arrival a proof-of-delivery card lands. Hover the map for what is at each point, and a stage for its detail. Shows the delivered state under reduced motion.",
+      "A live delivery tracker on a real-looking city map. A courier puck leaves the Pickup marker and rides a blue route with direction arrows to the Drop-off pin on the door, pausing at the drop-offs before yours while the ridden part fills in behind it; its arrow turns at every corner. The arrival time rolls down digit by digit, stages check off, live updates drop into a feed, and on arrival a proof-of-delivery card lands. Hover the map for what is at each point, and a stage for its detail. Shows the delivered state under reduced motion. Also includes Order Tracker, a delivery tracker with a little map, where a van follows the route and drives back to any step you click.",
     categorySlug: "dashboards",
-    tags: ["order tracking", "delivery", "map", "route", "courier", "timeline", "eta", "ecommerce", "motion kit", "framer-motion"],
+    tags: ["order tracking", "delivery", "map", "route", "courier", "timeline", "eta", "ecommerce", "motion kit", "framer-motion", "order tracker", "order status", "shipping progress"],
     premium: true,
     trendingScore: 199,
     createdAt: "2026-11-13",
@@ -17627,8 +17905,57 @@ export default function Page() {
       { name: "onMessage", type: "() => void", description: "Message button. Without it a sample note shows." },
       { name: "onCall", type: "() => void", description: "Call button. Without it a sample note shows." },
       { name: "className", type: "string", description: "Classes for the section." },
+      { name: "OrderTracker.title", type: "string", defaultValue: "\"Arriving today\"", description: "Headline above the progress line." },
+      { name: "OrderTracker.items", type: "string", defaultValue: "\"Linen shirt and 2 more\"", description: "Short summary of what is in the order." },
+      { name: "OrderTracker.steps", type: "TrackStep[]", defaultValue: "DEFAULT_STEPS", description: "The stages of the delivery, each as { id, label, time, at, eta, note }." },
+      { name: "OrderTracker.current", type: "number", defaultValue: "3", description: "index of the step the order has reached" },
+      { name: "OrderTracker.driver", type: "{ name: string; avatar: string }", defaultValue: "{ name: \"Tomás\"", description: "Courier shown on the card as { name, avatar }." },
+      { name: "OrderTracker.onStep", type: "(index: number) => void", description: "Called with the step index when a stage is pressed." },
+      { name: "OrderTracker.enableSound", type: "boolean", defaultValue: "true", description: "Soft synthesised sounds as you use it. They also follow the site-wide sound switch." },
+      { name: "OrderTracker.volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "OrderTracker.autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "OrderTracker.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
     ],
     Preview: Previews.PreviewOrderTracking,
+    previewSections: [
+      {
+        title: "Order Tracking",
+        Preview: Previews.PreviewOrderTracking,
+        reactSource: `// src/app/page.tsx
+"use client";
+
+import { OrderTracking } from "@/components/order-tracking";
+
+export default function Page() {
+  return (
+    <OrderTracking
+      orderId="Order NX-4182"
+      orderTitle="Ceramic pour-over set and 2 more"
+      address="17 Calder Lane, Unit 4"
+      courier={{ name: "Mira Okafor", initials: "MO", rating: "4.9", vehicle: "Cargo e-bike" }}
+      etaMinutes={14}
+    />
+  );
+}`,
+      },
+      {
+        title: "Order Tracker",
+        Preview: Previews.PreviewOrderTrackerVariant,
+        reactSource: `// src/app/page.tsx
+"use client";
+
+import { OrderTracker } from "@/components/order-tracking";
+
+export default function Page() {
+  return (
+    <OrderTracker
+      onStep={(index) => console.log(index)}
+    />
+  );
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `// src/app/page.tsx
 "use client";
@@ -18075,6 +18402,1223 @@ export default function Page() {
     </section>
   );
 }`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "home-scenes",
+    name: "Home Scenes",
+    registryCliName: "home-scenes",
+    description:
+      "A home dashboard where every change arrives as a wave of light. Run Goodnight, lock the door, boost the heating or switch the living room to evening, and a soft aurora spreads through that card from where you pressed: the contents blur, bend and split into colour as it passes, and the new state settles out of it sharp.",
+    categorySlug: "cards",
+    tags: ["smart home", "scenes", "thermostat", "lights", "toggle", "home control", "iot", "dashboard card", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 230,
+    createdAt: "2026-11-20",
+    animationKinds: ["spring", "layout", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "bedtime", type: "string", defaultValue: "\"10:42 PM\"", description: "time the Goodnight scene says it started" },
+      { name: "onSceneChange", type: "(scene: string, on: boolean) => void", description: "Called when a scene is switched on or off, with the scene name and its new state." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewHomeScenes,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { HomeScenes } from "@/components/home-scenes";
+
+export default function Page() {
+  return (
+    <HomeScenes
+      onSceneChange={(scene, on) => console.log(scene, on)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "action-stack",
+    name: "Action Stack",
+    registryCliName: "action-stack",
+    description:
+      "A plus button that opens into a short list of actions. Press it and the screen behind frosts over while the plus turns into a close mark and Receive, Send and Swap rise out of it one after another; point at one and the others step back.",
+    categorySlug: "inputs-controls",
+    tags: ["plus button", "fab", "action menu", "floating action button", "speed dial", "quick actions", "add menu", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 229,
+    createdAt: "2026-11-20",
+    animationKinds: ["spring", "press", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "actions", type: "StackAction[]", defaultValue: "DEFAULT_ACTIONS", description: "The actions that fan out of the plus button, each as { id, label, icon, color }." },
+      { name: "onAction", type: "(id: string) => void", description: "Called with the action's id when one is picked." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewActionStack,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { ActionStack } from "@/components/action-stack";
+
+export default function Page() {
+  return (
+    <ActionStack
+      onAction={(id) => console.log(id)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "address-field",
+    name: "Address Field",
+    registryCliName: "address-field",
+    description:
+      "A recipient field that checks what you type. Enter a handle and the hint under the field becomes a small spinner while it looks it up, then the name and wallet address it found with a green tick, and Continue wakes up. A handle that doesn't exist says so in place.",
+    categorySlug: "inputs-controls",
+    tags: ["address input", "payment handle", "recipient field", "send money", "username lookup", "recent contacts", "payments", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 228,
+    createdAt: "2026-11-20",
+    animationKinds: ["type", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "directory", type: "KnownHandle[]", defaultValue: "DIR", description: "handles the field can resolve; anything else ending in .pay is reported as not found" },
+      { name: "recent", type: "string[]", defaultValue: "[\"mira.pay\", \"jonas.pay\"]", description: "shown under the field and used by Paste" },
+      { name: "onContinue", type: "(r: { handle: string; address: string }) => void", description: "Called when Continue is pressed, with the handle and the address it resolved to." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewAddressField,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { AddressField } from "@/components/address-field";
+
+export default function Page() {
+  return (
+    <AddressField
+      onContinue={(r) => console.log(r)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "withdrawal-sheet",
+    name: "Withdrawal Sheet",
+    registryCliName: "withdrawal-sheet",
+    description:
+      "A withdrawal receipt that tells you where the money is. The status line opens into the steps it has been through, the current one in blue with the line drawn up to it; when the payout lands it turns green with a tick. Show details slides out the rest of the receipt.",
+    categorySlug: "cards",
+    tags: ["bottom sheet", "withdrawal", "transaction status", "receipt", "crypto", "payments", "details sheet", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 227,
+    createdAt: "2026-11-20",
+    animationKinds: ["spring", "layout", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: "\"USDC withdrawal\"", description: "Heading of the sheet." },
+      { name: "amount", type: "string", defaultValue: "\"1,508.50 USDC\"", description: "Amount shown in large type, with its unit." },
+      { name: "date", type: "string", defaultValue: "\"11 March 2026 at 10:07\"", description: "Date and time the withdrawal was made." },
+      { name: "steps", type: "string[]", defaultValue: "STEPS", description: "step names, oldest first; the last one means done" },
+      { name: "step", type: "number", description: "index into steps of where the money is now" },
+      { name: "rows", type: "WithdrawalRow[]", defaultValue: "ROWS", description: "Detail rows shown once the status is open, each as { label, value } with optional tone and copy." },
+      { name: "more", type: "WithdrawalRow[]", defaultValue: "MORE", description: "Extra detail rows revealed by Show details, in the same shape as rows." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewWithdrawalSheet,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+import { WithdrawalSheet } from "@/components/withdrawal-sheet";
+
+export default function Page() {
+  return (
+    <WithdrawalSheet />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "coin-focus",
+    name: "Coin Focus",
+    registryCliName: "coin-focus",
+    description:
+      "A coin list where tapping a holding gives it the room. The other coins blur away, the one you picked slides to the top, and its breakdown draws in underneath: a bar of what you can spend against what is staked, then the staked amount and what it has earned.",
+    categorySlug: "cards",
+    tags: ["crypto", "portfolio", "holdings", "coin list", "price chart", "staking", "wallet", "finance", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 226,
+    createdAt: "2026-11-20",
+    animationKinds: ["spring", "layout", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "holdings", type: "Holding[]", defaultValue: "HOLDINGS", description: "The coins to list, each as { id, name, symbol, units, value, change, icon, color } with optional staked and earned units." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewCoinFocus,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+import { CoinFocus } from "@/components/coin-focus";
+
+export default function Page() {
+  return (
+    <CoinFocus />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "notch-send",
+    name: "Notch Send",
+    registryCliName: "notch-send",
+    description:
+      "Sending an email that leaves through the notch. Press Send and the message shrinks and flies up into the camera notch, which stretches into a status bar: Sending on one side, a red Undo with the seconds counting down on the other. Undo and it drops back out as you left it.",
+    categorySlug: "motion-effects",
+    tags: ["email send", "undo send", "dynamic island", "notch", "status bar", "mail", "send animation", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 225,
+    createdAt: "2026-11-20",
+    animationKinds: ["spring", "layout", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "to", type: "string", defaultValue: "\"nora@atelierlund.com\"", description: "Recipient shown in the draft." },
+      { name: "from", type: "string", defaultValue: "\"sam@fieldwork.studio\"", description: "Sender shown in the draft." },
+      { name: "subject", type: "string", defaultValue: "\"Floor plan\"", description: "Subject line of the draft." },
+      { name: "body", type: "string", defaultValue: "BODY", description: "Body text of the draft." },
+      { name: "undoSeconds", type: "number", defaultValue: "6", description: "seconds you have to take it back" },
+      { name: "wallpaper", type: "string", defaultValue: "WALL", description: "Image behind the window. Defaults to a photo hosted with the site." },
+      { name: "onSent", type: "() => void", description: "Called once the undo window has run out and the message has gone." },
+      { name: "onUndo", type: "() => void", description: "Called when Undo is pressed and the message drops back out of the notch." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewNotchSend,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { NotchSend } from "@/components/notch-send";
+
+export default function Page() {
+  return (
+    <NotchSend
+      onSent={() => console.log("sent")}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "row-editor",
+    name: "Row Editor",
+    registryCliName: "row-editor",
+    description:
+      "A table you edit in place. Press the pencil on a row and it opens into a small form right where it sits: each column becomes a labelled field, the rows around it fade back, and Done writes the change in with the edited cell settling into its new value.",
+    categorySlug: "inputs-controls",
+    tags: ["inline edit", "editable table", "expense list", "row editor", "form rows", "edit in place", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 224,
+    createdAt: "2026-11-20",
+    animationKinds: ["layout", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "rows", type: "ExpenseRow[]", description: "The rows to edit, each as { id, expense, method, amount }." },
+      { name: "onChange", type: "(rows: ExpenseRow[]) => void", description: "Called with the whole list after a row is saved." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewRowEditor,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { RowEditor } from "@/components/row-editor";
+
+export default function Page() {
+  return (
+    <RowEditor
+      onChange={(rows) => console.log(rows)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "status-picker",
+    name: "Status Picker",
+    registryCliName: "status-picker",
+    description:
+      "A presence dot that opens into its own picker. Press the dot on the avatar and it stretches into a row of statuses; point at one and its name writes itself in above. Pick one and the row folds back into the dot in the new colour.",
+    categorySlug: "inputs-controls",
+    tags: ["status", "presence", "availability", "avatar", "dropdown", "status menu", "picker", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 223,
+    createdAt: "2026-11-20",
+    animationKinds: ["layout", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "name", type: "string", defaultValue: "\"Maya Okafor\"", description: "Name shown beside the avatar." },
+      { name: "face", type: "string", defaultValue: "FACE", description: "Avatar image URL." },
+      { name: "statuses", type: "PresenceStatus[]", defaultValue: "STATUSES", description: "The statuses on offer, each as { id, label, note, color, icon }." },
+      { name: "value", type: "string", description: "The selected status id. Pass it to control the picker from outside." },
+      { name: "onChange", type: "(id: string) => void", description: "Called with the status id when a different status is picked." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewStatusPicker,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { StatusPicker } from "@/components/status-picker";
+
+export default function Page() {
+  return (
+    <StatusPicker
+      onChange={(id) => console.log(id)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "invite-reveal",
+    name: "Invite Reveal",
+    registryCliName: "invite-reveal",
+    description:
+      "An invite code that arrives like a ticket. Press the green button and the pill splits in two: the message lifts away as a small label and a perforated ticket opens underneath with the code writing itself in, letter by letter. The green button becomes Copy, then Copied.",
+    categorySlug: "cards",
+    tags: ["invite code", "referral", "reveal", "copy code", "coupon", "promo code", "share", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 222,
+    createdAt: "2026-11-20",
+    animationKinds: ["spring", "press", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "code", type: "string", defaultValue: "\"NORTHWIND-24\"", description: "The invite code that is revealed." },
+      { name: "ready", type: "string", defaultValue: "\"Your invite is ready\"", description: "Text shown on the button before the reveal." },
+      { name: "label", type: "string", defaultValue: "\"Your invite code\"", description: "Caption above the revealed code." },
+      { name: "onCopy", type: "(code: string) => void", description: "Called with the code when it is copied." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewInviteReveal,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { InviteReveal } from "@/components/invite-reveal";
+
+export default function Page() {
+  return (
+    <InviteReveal
+      onCopy={(code) => console.log(code)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "days-slider",
+    name: "Days Slider",
+    registryCliName: "days-slider",
+    description:
+      "A slider whose fill carries its own value. The dark capsule never gets smaller than its label, so the number is always readable; drag it and the count rolls over at each step, then it settles onto the nearest one with a spring. Pull past either end and it gives a little.",
+    categorySlug: "inputs-controls",
+    tags: ["slider", "capsule", "retention", "days", "range input", "settings", "stepper", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 221,
+    createdAt: "2026-11-20",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "min", type: "number", defaultValue: "1", description: "Smallest value the capsule can take." },
+      { name: "max", type: "number", defaultValue: "7", description: "Largest value the capsule can take." },
+      { name: "value", type: "number", description: "The current value. Pass it to control the slider from outside." },
+      { name: "unit", type: "[string, string]", defaultValue: "[\"day\", \"days\"]", description: "Singular and plural unit shown after the number, as [one, many]." },
+      { name: "title", type: "string", defaultValue: "\"Keep deleted files for\"", description: "Heading above the capsule." },
+      { name: "note", type: "(v: number) => string", defaultValue: "defNote", description: "Returns the sentence shown under the slider for a value." },
+      { name: "onChange", type: "(v: number) => void", description: "Called with the new value as the capsule moves." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewDaysSlider,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { DaysSlider } from "@/components/days-slider";
+
+export default function Page() {
+  return (
+    <DaysSlider
+      onChange={(v) => console.log(v)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "fold-balance",
+    name: "Fold Balance",
+    registryCliName: "fold-balance",
+    description:
+      "Fold the corner to hide your balance. Take the top corner of the account sheet and pull: the paper folds along a crease that follows your finger, its back turning over with a soft shadow while the card shows underneath. Let go past the middle and it stays folded with every amount turned to dots.",
+    categorySlug: "cards",
+    tags: ["balance", "hide balance", "page curl", "fold", "bank card", "privacy", "finance", "transactions", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 220,
+    createdAt: "2026-11-20",
+    animationKinds: ["drag", "spring", "3d"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "balance", type: "number", defaultValue: "5432", description: "The balance shown on the folded card." },
+      { name: "account", type: "string", defaultValue: "\"Everyday\"", description: "Account name shown above the balance." },
+      { name: "transactions", type: "FoldTransaction[]", defaultValue: "DEFAULT_TX", description: "The transactions revealed under the fold, each as { name, detail, amount, time, icon }." },
+      { name: "currency", type: "string", defaultValue: "\"$\"", description: "Currency symbol shown before the balance and amounts." },
+      { name: "defaultHidden", type: "boolean", defaultValue: "false", description: "start with the corner folded down" },
+      { name: "onHiddenChange", type: "(hidden: boolean) => void", description: "Called when the corner is turned down or back up, with whether the balance is now hidden." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewFoldBalance,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { FoldBalance } from "@/components/fold-balance";
+
+export default function Page() {
+  return (
+    <FoldBalance
+      onHiddenChange={(hidden) => console.log(hidden)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "card-wear",
+    name: "Card Wear",
+    registryCliName: "card-wear",
+    description:
+      "A card that wears the way a real one does. Drag along the ruler to age it from new to four years: hairline scratches gather, a few long scrapes cross the face and the edges dull. Move over the card and it tilts under the light, each scratch glinting only when it runs across the light, like brushed metal.",
+    categorySlug: "cards",
+    tags: ["credit card", "card wear", "scratches", "ruler", "ageing", "debit card", "wallet", "card design", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 219,
+    createdAt: "2026-11-20",
+    animationKinds: ["hover", "drag", "gradient"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "months", type: "number", description: "the card's age to start at, in months" },
+      { name: "maxMonths", type: "number", defaultValue: "48", description: "the oldest the scrubber goes, in months" },
+      { name: "holder", type: "string", defaultValue: "\"Alex Morgan\"", description: "Cardholder name printed on the card." },
+      { name: "last4", type: "string", defaultValue: "\"4821\"", description: "Last four digits shown on the card." },
+      { name: "onMonthsChange", type: "(months: number) => void", description: "Called with the number of months as the ruler is dragged." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewCardWear,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { CardWear } from "@/components/card-wear";
+
+export default function Page() {
+  return (
+    <CardWear
+      onMonthsChange={(months) => console.log(months)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "time-chips",
+    name: "Time Chips",
+    registryCliName: "time-chips",
+    description:
+      "A chat that reads times in your zone. Every time someone writes is underlined; pick a zone and each one turns over in place to that zone, the words easing to the new width with a small +1 when it lands on another day. Point at a converted time to see how it was written. Auto detect uses your own zone.",
+    categorySlug: "inputs-controls",
+    tags: ["time zone", "chat", "time conversion", "scheduling", "chips", "messages", "show in", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 218,
+    createdAt: "2026-11-20",
+    animationKinds: ["layout", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "contact", type: "string", defaultValue: "\"Maya Chen\"", description: "Name of the person on the other end of the chat." },
+      { name: "avatar", type: "string", defaultValue: "built-in sample", description: "Avatar image URL for the contact." },
+      { name: "from", type: "{ abbr: string; offset: number }", defaultValue: "{ abbr: \"PT\", offset: -8 }", description: "the zone the messages were written in" },
+      { name: "messages", type: "ChatMessage[]", defaultValue: "DEFAULT_MESSAGES", description: "Chat messages, each as { mine, parts, sent }. A part is text or { at, zone }, which becomes a time chip." },
+      { name: "zones", type: "TimeZoneOption[]", defaultValue: "DEFAULT_ZONES", description: "Time zones offered in the Show in menu, each as { id, name, abbr, offset }." },
+      { name: "defaultZone", type: "string", defaultValue: "\"off\"", description: "the zone id to start converted to, or \"off\"" },
+      { name: "onZoneChange", type: "(id: string) => void", description: "Called with the zone id when a different zone is picked." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewTimeChips,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { TimeChips } from "@/components/time-chips";
+
+export default function Page() {
+  return (
+    <TimeChips
+      onZoneChange={(id) => console.log(id)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "income-stream",
+    name: "Income Stream",
+    registryCliName: "income-stream",
+    description:
+      "Income drawn as a stream. Each month's money flows as a band mirrored about its centre, the steady salary inside and the extras around it, breathing a little as it flows. Move along it and a hairline picks out the month: the total rolls to it, the month before is compared and the band brightens under the line.",
+    categorySlug: "dashboards",
+    tags: ["income", "stream graph", "stacked area", "chart", "earnings", "revenue", "finance dashboard", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 217,
+    createdAt: "2026-11-20",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: "\"Income\"", description: "Heading above the stream." },
+      { name: "sources", type: "IncomeSource[]", defaultValue: "DEFAULT_SOURCES", description: "The income sources drawn as bands, each as { id, name, color }." },
+      { name: "months", type: "IncomeMonth[]", defaultValue: "DEFAULT_MONTHS", description: "One entry per month as { month, values }, where values holds an amount for each source id." },
+      { name: "currency", type: "string", defaultValue: "\"$\"", description: "Currency symbol shown before amounts." },
+      { name: "onMonthChange", type: "(index: number) => void", description: "Called with the month index as the pointer or the arrow keys move along the stream." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewIncomeStream,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { IncomeStream } from "@/components/income-stream";
+
+export default function Page() {
+  return (
+    <IncomeStream
+      onMonthChange={(index) => console.log(index)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "race-bars",
+    name: "Race Bars",
+    registryCliName: "race-bars",
+    description:
+      "Holdings, racing through the years. Press play and each bar grows and shrinks with its value; when one overtakes another they trade places on a spring and the leader turns black. Drag along the timeline to scrub between years, and tap a bar to follow it in blue.",
+    categorySlug: "dashboards",
+    tags: ["bar chart race", "ranking", "racing bars", "timeline", "holdings", "chart", "playback", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 216,
+    createdAt: "2026-11-20",
+    animationKinds: ["layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: "\"Holdings\"", description: "Heading above the chart." },
+      { name: "steps", type: "(string | number)[]", defaultValue: "DEFAULT_STEPS", description: "the label of each step, e.g. years" },
+      { name: "series", type: "RaceSeries[]", defaultValue: "DEFAULT_SERIES", description: "The bars that race, each as { id, name, values } with one value for every step." },
+      { name: "currency", type: "string", defaultValue: "\"$\"", description: "Currency symbol shown before amounts." },
+      { name: "pace", type: "number", defaultValue: "1.4", description: "seconds per step while playing" },
+      { name: "onStepChange", type: "(index: number) => void", description: "Called with the step index as the chart plays or is scrubbed." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewRaceBars,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { RaceBars } from "@/components/race-bars";
+
+export default function Page() {
+  return (
+    <RaceBars
+      onStepChange={(index) => console.log(index)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "persona-reminder",
+    name: "Persona Reminder",
+    registryCliName: "persona-reminder",
+    description:
+      "A reminder that sounds like someone. Pick who reminds you and the notification above rewrites itself in their voice, word by word, while their face pops in. Preview drops it in the way it will arrive, with that persona's own chime.",
+    categorySlug: "ai-components",
+    tags: ["reminder", "voice", "persona", "assistant", "voice picker", "notification", "ai voice", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 215,
+    createdAt: "2026-11-20",
+    animationKinds: ["spring", "press", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "task", type: "string", defaultValue: "\"Give Yoshi his flea drops\"", description: "The reminder text the persona reads out." },
+      { name: "when", type: "string", defaultValue: "\"Mon 18 May, 6:00 AM\"", description: "Date and time shown under the task." },
+      { name: "repeat", type: "string", defaultValue: "\"Every month\"", description: "Repeat rule shown under the task." },
+      { name: "personas", type: "Persona[]", defaultValue: "DEFAULT_PERSONAS", description: "The voices on offer, each as { id, name, mood, avatar, message, chime }." },
+      { name: "defaultPersona", type: "string", description: "Id of the persona selected at the start." },
+      { name: "onPersonaChange", type: "(id: string) => void", description: "Called with the persona id when another voice is picked." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewPersonaReminder,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { PersonaReminder } from "@/components/persona-reminder";
+
+export default function Page() {
+  return (
+    <PersonaReminder
+      onPersonaChange={(id) => console.log(id)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "private-send",
+    name: "Private Send",
+    registryCliName: "private-send",
+    description:
+      "Sending with a one-time address. Switch on Send privately and three things move together: the From address re-types itself into a fresh relay address character by character, the shield fills, and the button grows from Send into Send privately, the word Send sliding over while the rest arrives letter by letter.",
+    categorySlug: "inputs-controls",
+    tags: ["private payment", "send money", "privacy toggle", "crypto", "confirmation", "transfer", "shielded", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 214,
+    createdAt: "2026-11-20",
+    animationKinds: ["spring", "layout", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "amount", type: "number", defaultValue: "1250", description: "Amount being sent." },
+      { name: "currency", type: "string", defaultValue: "\"$\"", description: "Currency symbol shown before amounts." },
+      { name: "to", type: "{ name: string; address: string; avatar: string }", defaultValue: "{ name: \"Maya Chen\"", description: "Recipient as { name, address, avatar }." },
+      { name: "from", type: "{ name: string; address: string }", defaultValue: "{ name: \"Everyday wallet\"", description: "Sending account as { name, address }." },
+      { name: "relay", type: "string", defaultValue: "\"0xA4e01fB2c9D85e3370aB64c1E9f2d07B5c3811d9\"", description: "the one-time address used when sending privately" },
+      { name: "defaultPrivate", type: "boolean", defaultValue: "false", description: "Starts with Send privately turned on." },
+      { name: "onPrivateChange", type: "(on: boolean) => void", description: "Called when Send privately is switched on or off." },
+      { name: "onSend", type: "(privately: boolean) => void", description: "Called when the send finishes, with whether it was sent privately." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewPrivateSend,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { PrivateSend } from "@/components/private-send";
+
+export default function Page() {
+  return (
+    <PrivateSend
+      onPrivateChange={(on) => console.log(on)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "dust-delete",
+    name: "Dust Delete",
+    registryCliName: "dust-delete",
+    description:
+      "Deleting a photo by turning it to dust. Drag the handle across the card and the picture comes apart behind it into fine grains of its own colours that blow away; let go early and they fly back. Past halfway it finishes itself, a slow aurora fills the card's place, and Undo brings every grain home.",
+    categorySlug: "motion-effects",
+    tags: ["delete", "dust", "particles", "thanos snap", "photo delete", "disintegrate", "undo", "webgl", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 213,
+    createdAt: "2026-11-20",
+    animationKinds: ["drag", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "src", type: "string", defaultValue: "built-in sample", description: "the picture on the card" },
+      { name: "title", type: "string", defaultValue: "\"Antelope Canyon\"", description: "Title shown under the photo." },
+      { name: "onDelete", type: "() => void", description: "Called once the photo has turned to dust." },
+      { name: "onUndo", type: "() => void", description: "Called when Undo brings the photo back." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewDustDelete,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { DustDelete } from "@/components/dust-delete";
+
+export default function Page() {
+  return (
+    <DustDelete
+      onDelete={() => console.log("delete")}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "wave-confirm",
+    name: "Wave Confirm",
+    registryCliName: "wave-confirm",
+    description:
+      "A payment confirmation that ripples when it goes through. After a short wait a wave of distortion runs across the card with its colours splitting at the edges, an iridescent ring chases round the border and sparks fly from the tick. Done folds it into a small receipt pill.",
+    categorySlug: "inputs-controls",
+    tags: ["confirm button", "send payment", "wave", "success", "payment confirmation", "button", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 212,
+    createdAt: "2026-11-20",
+    animationKinds: ["press", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "payee", type: "string", defaultValue: "\"Maya Chen\"", description: "Name of the person being paid." },
+      { name: "avatar", type: "string", defaultValue: "FACE", description: "Avatar image URL for the payee." },
+      { name: "amount", type: "number", defaultValue: "1250", description: "Amount being sent." },
+      { name: "currency", type: "string", defaultValue: "\"$\"", description: "Currency symbol shown before amounts." },
+      { name: "rows", type: "[string, string][]", defaultValue: "DEFAULT_ROWS", description: "Detail rows shown above the button, each as [label, value]." },
+      { name: "onConfirm", type: "() => Promise<void> | void", description: "resolve when the payment has gone through" },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewWaveConfirm,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { WaveConfirm } from "@/components/wave-confirm";
+
+export default function Page() {
+  return (
+    <WaveConfirm
+      onConfirm={() => console.log("confirm")}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "balance-matrix",
+    name: "Balance Matrix",
+    registryCliName: "balance-matrix",
+    description:
+      "A balance drawn as a field of dots on frosted glass, one column per day lit as high as the balance stood. Scrub across it and a ripple of light runs out from your finger while the total rolls to that day. Point at money in or out and the field refills from the bottom to show that instead.",
+    categorySlug: "dashboards",
+    tags: ["balance", "dot matrix", "money in out", "chart", "finance", "week view", "scrub", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 211,
+    createdAt: "2026-11-20",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "days", type: "BalanceDay[]", defaultValue: "DEFAULT_DAYS", description: "One entry per day as { label, balance, in, out }." },
+      { name: "currency", type: "string", defaultValue: "\"$\"", description: "Currency symbol shown before amounts." },
+      { name: "change", type: "number", defaultValue: "4.66", description: "Percentage change shown beside the total." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewBalanceMatrix,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+import { BalanceMatrix } from "@/components/balance-matrix";
+
+export default function Page() {
+  return (
+    <BalanceMatrix />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "focus-mode",
+    name: "Focus Mode",
+    registryCliName: "focus-mode",
+    description:
+      "A focus switch that gathers your notifications. Turn it on and everyone not allowed through flies out of their row into a little stack on the switch with a count; anything new peeks in and gets pulled in too. Turn it off and they all go back. Click a person to let them through.",
+    categorySlug: "inputs-controls",
+    tags: ["focus mode", "do not disturb", "notifications", "toggle", "switch", "allowed apps", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 210,
+    createdAt: "2026-11-20",
+    animationKinds: ["press", "spring", "gradient"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "notes", type: "FocusNote[]", defaultValue: "DEFAULT_NOTES", description: "The notifications that fade out while Focus is on, each as { id, from, text, time, color, allowed }. Notes marked allowed stay visible." },
+      { name: "incoming", type: "FocusNote[]", defaultValue: "DEFAULT_INCOMING", description: "notes that arrive later in the demo" },
+      { name: "defaultOn", type: "boolean", defaultValue: "false", description: "Starts with Focus turned on." },
+      { name: "onChange", type: "(on: boolean) => void", description: "Called when Focus is flipped, with the new state." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewFocusMode,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { FocusMode } from "@/components/focus-mode";
+
+export default function Page() {
+  return (
+    <FocusMode
+      onChange={(on) => console.log(on)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "target-bars",
+    name: "Target Bars",
+    registryCliName: "target-bars",
+    description:
+      "A sales chart of glass boxes. Each period is a faint box with a dashed outline as tall as its target; point at one and it fills with solid blue up to what sold, rising on a soft spring, while the total rolls on digit reels. Switch days, months and years and the boxes regrow one after another.",
+    categorySlug: "dashboards",
+    tags: ["bar chart", "target line", "sales", "day month year", "range switch", "analytics", "dashboard chart", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 209,
+    createdAt: "2026-11-20",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: "\"Average sales\"", description: "Heading above the bars." },
+      { name: "data", type: "{ day: TargetSeries; month: TargetSeries; year: TargetSeries }", defaultValue: "DEFAULT_DATA", description: "Bars and target line for each range as { day, month, year }, each holding { labels, target, sales }." },
+      { name: "currency", type: "string", defaultValue: "\"$\"", description: "Currency symbol shown before amounts." },
+      { name: "dark", type: "boolean", defaultValue: "false", description: "Draws the chart on a dark card." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewTargetBars,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+import { TargetBars } from "@/components/target-bars";
+
+export default function Page() {
+  return (
+    <TargetBars />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "spend-strip",
+    name: "Spend Strip",
+    registryCliName: "spend-strip",
+    description:
+      "A quiet month of spending: one soft grey bar per day under the total and a thin budget line. Choose a category and each day's share of it rises in its colour from the bottom of the bar while the total rolls to it on digit reels; point at a day to read what it cost.",
+    categorySlug: "dashboards",
+    tags: ["spending", "budget", "categories", "strip chart", "expenses", "month view", "finance", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 208,
+    createdAt: "2026-11-20",
+    animationKinds: ["hover", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "month", type: "string", defaultValue: "\"November\"", description: "Month named in the heading." },
+      { name: "days", type: "number", defaultValue: "30", description: "days in the month" },
+      { name: "budget", type: "number", defaultValue: "10000", description: "Monthly budget the strip is measured against." },
+      { name: "categories", type: "SpendCategory[]", defaultValue: "DEFAULT_CATS", description: "The categories drawn as segments, each as { id, name, color }." },
+      { name: "items", type: "SpendItem[]", defaultValue: "DEFAULT_ITEMS", description: "Individual purchases that fill the segments, each as { day, cat, amount }." },
+      { name: "currency", type: "string", defaultValue: "\"$\"", description: "Currency symbol shown before amounts." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewSpendStrip,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+import { SpendStrip } from "@/components/spend-strip";
+
+export default function Page() {
+  return (
+    <SpendStrip />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "stack-reel",
+    name: "Stack Reel",
+    registryCliName: "stack-reel",
+    description:
+      "A reel of health cards. The middle one is open with its details; the rest fold to slim pills that fade towards the edges. Scroll, drag or use the arrow keys and the reel rolls round, the open card folding as the next grows out of its pill.",
+    categorySlug: "cards",
+    tags: ["card stack", "reel", "scroll stack", "story cards", "3d scroll", "carousel", "wheel", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 207,
+    createdAt: "2026-11-20",
+    animationKinds: ["scroll", "3d", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "ReelItem[]", defaultValue: "DEFAULT_ITEMS", description: "The cards on the reel, each as { id, title, icon, body } with optional who, meta and dark." },
+      { name: "start", type: "number", defaultValue: "0", description: "Index of the card that starts in front." },
+      { name: "onOpen", type: "(item: ReelItem) => void", description: "Called with the card when one is pressed." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewStackReel,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { StackReel } from "@/components/stack-reel";
+
+export default function Page() {
+  return (
+    <StackReel
+      onOpen={(item) => console.log(item)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "folder-path",
+    name: "Folder Path",
+    registryCliName: "folder-path",
+    description:
+      "A folder browser that moves like a stack of pages. Open a folder and its list slides in while the path grows a step; go back and everything slides the other way. When the path gets long its middle folds into a button that opens the hidden steps.",
+    categorySlug: "inputs-controls",
+    tags: ["folder browser", "breadcrumb", "path bar", "file tree", "finder", "file picker", "navigation", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 206,
+    createdAt: "2026-11-20",
+    animationKinds: ["layout", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "root", type: "PathNode", defaultValue: "DEFAULT_ROOT", description: "The folder tree as nested { name, children } nodes, with a size on the files at the leaves." },
+      { name: "startPath", type: "string[]", defaultValue: "[\"Clients\"]", description: "names to open on first show, below the root" },
+      { name: "onOpenFile", type: "(path: string[]) => void", description: "Called with the path segments when a file is opened." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewFolderPath,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { FolderPath } from "@/components/folder-path";
+
+export default function Page() {
+  return (
+    <FolderPath
+      onOpenFile={(path) => console.log(path)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "widget-morph",
+    name: "Widget Morph",
+    registryCliName: "widget-morph",
+    description:
+      "A wide widget card that turns into four. Pick one from the switch and the card grows or shrinks to fit on a spring while the contents cross-fade: night mode, where the switch sets the sun behind the hills, raises the moon and turns the card dark; revenue with an area chart you can scrub; the weather as a day's temperature curve; and a track.",
+    categorySlug: "cards",
+    tags: ["widget", "weather", "music player", "night mode", "morph", "tabs", "dashboard widget", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 205,
+    createdAt: "2026-11-20",
+    animationKinds: ["layout", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "start", type: "number", defaultValue: "0", description: "which widget shows first: 0 night mode, 1 revenue, 2 weather, 3 now playing" },
+      { name: "revenue", type: "number[]", defaultValue: "DEFAULT_REVENUE", description: "twelve monthly totals, in thousands" },
+      { name: "city", type: "string", defaultValue: "\"Almaty\"", description: "City shown in the weather tab." },
+      { name: "forecast", type: "WidgetDay[]", defaultValue: "DEFAULT_FORECAST", description: "Forecast days shown in the weather tab, each as { day, temp, sky, hours }." },
+      { name: "track", type: "{ title: string; artist: string; length: number }", defaultValue: "{ title: \"Low Tide\", artist: \"Mara Lind\", length: 214 }", description: "Track shown in the music tab as { title, artist, length }." },
+      { name: "onNightMode", type: "(on: boolean) => void", description: "Called when Night mode is flicked on or off." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewWidgetMorph,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { WidgetMorph } from "@/components/widget-morph";
+
+export default function Page() {
+  return (
+    <WidgetMorph
+      onNightMode={(on) => console.log(on)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "folder-upload",
+    name: "Folder Upload",
+    registryCliName: "folder-upload",
+    description:
+      "An upload card built around a glass folder. Pick or drop files and each little document drops in from above behind the frosted front, which dips as it lands, while its row fills; cancel one and it lifts back out. When all are in, they settle low and the folder glows green.",
+    categorySlug: "inputs-controls",
+    tags: ["upload", "drag and drop", "folder", "file upload", "progress", "dropzone", "files", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 204,
+    createdAt: "2026-11-20",
+    animationKinds: ["drag", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "folder", type: "string", defaultValue: "\"Brand assets\"", description: "Name of the folder the files land in." },
+      { name: "demoFiles", type: "UploadFile[]", defaultValue: "DEFAULT_FILES", description: "files the Browse button pretends to pick, in bytes" },
+      { name: "speed", type: "number", defaultValue: "4.5e6", description: "bytes per second the upload pretends to move" },
+      { name: "maxSize", type: "number", defaultValue: "50e6", description: "Largest file accepted, in bytes. Bigger files are refused with a message." },
+      { name: "onDone", type: "(files: UploadFile[]) => void", description: "Called with the files that went through once every transfer has finished." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewFolderUpload,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { FolderUpload } from "@/components/folder-upload";
+
+export default function Page() {
+  return (
+    <FolderUpload
+      onDone={(files) => console.log(files)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "charge-menu",
+    name: "Charge Menu",
+    registryCliName: "charge-menu",
+    description:
+      "A battery menu with the charge as a glass cell lying on its side, the liquid inside glowing green. Plugged in, it fizzes and creeps along the tube; unplugged, it goes quiet and drains, turning amber and then red. Move over the cell and it turns in your hand, the light sliding along the glass. Plugging in sends a wave of light through the charge.",
+    categorySlug: "cards",
+    tags: ["battery", "menu bar", "macos", "charging", "plug", "energy", "status menu", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 203,
+    createdAt: "2026-11-20",
+    animationKinds: ["hover", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "level", type: "number", description: "starting charge, 0 to 100" },
+      { name: "plugged", type: "boolean", description: "Whether the battery starts plugged in. Pass it to control the menu from outside." },
+      { name: "apps", type: "EnergyApp[]", defaultValue: "DEFAULT_APPS", description: "Apps listed under Using Significant Energy, each as { name, icon }." },
+      { name: "onPlugChange", type: "(plugged: boolean) => void", description: "Called when the cell is clicked to plug in or unplug." },
+      { name: "onSettings", type: "() => void", description: "Called when Battery Settings is pressed." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewChargeMenu,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { ChargeMenu } from "@/components/charge-menu";
+
+export default function Page() {
+  return (
+    <ChargeMenu
+      onPlugChange={(plugged) => console.log(plugged)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "focus-board",
+    name: "Focus Board",
+    registryCliName: "focus-board",
+    description:
+      "A quiet dark dashboard. Switch the range and the energy bars regrow; point at one and the big number rolls to it. Drag round the focus ring to set the minutes and start it to watch it drain. Last night's sleep is a grid of dots; open it and the card grows over the whole board into a chart you can scrub.",
+    categorySlug: "dashboards",
+    tags: ["dashboard", "sleep", "focus", "player", "greeting", "wellness", "scrub", "cards", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 202,
+    createdAt: "2026-11-20",
+    animationKinds: ["drag", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "name", type: "string", defaultValue: "\"Mia\"", description: "First name used in the greeting." },
+      { name: "avatar", type: "string", defaultValue: "built-in sample", description: "Avatar image URL shown in the header." },
+      { name: "date", type: "string", defaultValue: "\"Tuesday, 18 November\"", description: "Date line shown under the greeting." },
+      { name: "energy", type: "{ today: EnergySeries; week: EnergySeries; month: EnergySeries }", defaultValue: "DEFAULT_ENERGY", description: "energy for each range of the switch" },
+      { name: "focusMinutes", type: "number", defaultValue: "25", description: "focus session length in minutes" },
+      { name: "sleep", type: "SleepStage[]", defaultValue: "DEFAULT_SLEEP", description: "sleep stages every 15 minutes from bedtime: 0 awake, 1 REM, 2 light, 3 deep" },
+      { name: "bedtime", type: "number", defaultValue: "23 * 60 + 4", description: "bedtime in minutes after midnight, e.g. 23 * 60 + 4" },
+      { name: "sleepNote", type: "string", defaultValue: "\"You fell asleep 14 min faster than your weekly average.\"", description: "Sentence shown on the sleep card." },
+      { name: "track", type: "{ title: string; subtitle: string; kind: string }", defaultValue: "{ title: \"Rain on glass\"", description: "Sound shown on the player card as { title, subtitle, kind }." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewFocusBoard,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+import { FocusBoard } from "@/components/focus-board";
+
+export default function Page() {
+  return (
+    <FocusBoard />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "cover-planner",
+    name: "Cover Planner",
+    registryCliName: "cover-planner",
+    description:
+      "Approving time off without leaving the team short. Each day is a column of dots, one per person on shift, with the minimum marked. Point at a request and its days light up; approve it and those dots slide out of the shift as the columns re-stack. If a day would fall below the minimum it turns red and shakes, and Suggest dates moves the request to the nearest days that keep everyone covered.",
+    categorySlug: "cards",
+    tags: ["shift cover", "scheduling", "approval", "rota", "team calendar", "time off", "requests", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 201,
+    createdAt: "2026-11-20",
+    animationKinds: ["hover", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "team", type: "string", defaultValue: "\"Support, EU shift\"", description: "Team and shift named in the heading." },
+      { name: "people", type: "CoverPerson[]", defaultValue: "DEFAULT_PEOPLE", description: "The people whose cover is planned, each as { id, name }." },
+      { name: "days", type: "[string, string][]", defaultValue: "DEFAULT_DAYS", description: "the working days shown, as labels: [weekday letter, date]" },
+      { name: "dayNames", type: "string[]", defaultValue: "DEFAULT_DAY_NAMES", description: "full names of the days, for messages" },
+      { name: "booked", type: "Record<string, number[]>", defaultValue: "DEFAULT_BOOKED", description: "time off already booked: person id to the indexes of the days they're off" },
+      { name: "requests", type: "CoverRequest[]", description: "Cover requests to review, each as { id, person, kind, days }." },
+      { name: "min", type: "number", defaultValue: "6", description: "the fewest people that must be on shift each day" },
+      { name: "onDecide", type: "(request: CoverRequest, decision: \"approved\" | \"declined\" | \"offered\") => void", description: "Called with the request and the decision, approved or declined." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewCoverPlanner,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { CoverPlanner } from "@/components/cover-planner";
+
+export default function Page() {
+  return (
+    <CoverPlanner
+      onDecide={(request, decision) => console.log(request, decision)}
+    />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "wave-trimmer",
+    name: "Wave Trimmer",
+    registryCliName: "wave-trimmer",
+    description:
+      "A trimmer for a clip of real synthesised music. Hold a handle and the waveform swells under it like a lens so you can place it precisely; the handles click onto every half beat and stretch on a rubber band at the ends. Play lights the bars as they sound. Trim lets the rest fall away while the kept part springs out to fill the width.",
+    categorySlug: "inputs-controls",
+    tags: ["audio trim", "waveform", "voice memo", "trimmer", "range handles", "audio editor", "playback", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 200,
+    createdAt: "2026-11-20",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: "\"Morning idea\"", description: "Name of the recording shown above the wave." },
+      { name: "notes", type: "WaveNote[]", defaultValue: "DEFAULT_NOTES", description: "the clip, as notes the trimmer synthesises and draws; seconds and hertz" },
+      { name: "duration", type: "number", defaultValue: "12", description: "Length of the recording in seconds." },
+      { name: "grid", type: "number", defaultValue: "0.5", description: "spacing of the magnetic grid, in seconds" },
+      { name: "minLength", type: "number", defaultValue: "1", description: "the shortest clip you can trim to, in seconds" },
+      { name: "onTrim", type: "(start: number, end: number) => void", description: "Called with the start and end in seconds when Trim is pressed." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewWaveTrimmer,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { WaveTrimmer } from "@/components/wave-trimmer";
+
+export default function Page() {
+  return (
+    <WaveTrimmer
+      onTrim={(start, end) => console.log(start, end)}
+    />
+  );
+}
+`,
     tailwindSource: tw,
   },
 ];

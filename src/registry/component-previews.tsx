@@ -4372,3 +4372,4 @@ export * from "./signature/motion-kit-batch-28";
 export * from "./signature/motion-kit-batch-29";
 export * from "./signature/motion-kit-batch-30";
 export * from "./signature/motion-kit-batch-31";
+export * from "./signature/motion-kit-batch-32";

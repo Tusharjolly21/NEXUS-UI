@@ -403,7 +403,7 @@ export default function MessageComposer({
 
   const exec = (cmd: string) => {
     touched.current = true;
-    ed.current?.focus();
+    ed.current?.focus({ preventScroll: true });
     if (cmd === "code") {
       const sel = window.getSelection();
       const text = sel?.toString() || "code";
@@ -569,7 +569,7 @@ export default function MessageComposer({
     const type = async (s: string) => {
       for (const ch of s) {
         if (!alive || touched.current) return false;
-        ed.current?.focus();
+        ed.current?.focus({ preventScroll: true });
         document.execCommand("insertText", false, ch);
         refresh();
         await wait(55 + Math.random() * 60);

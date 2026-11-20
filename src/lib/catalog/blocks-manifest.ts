@@ -458,7 +458,7 @@ export default function Page() {
     category: "Dashboard sections",
     tags: ["dashboard", "analytics", "sankey", "kpi", "stats", "kanban", "board", "admin", "motion kit"],
     premium: true,
-    variants: ["Flow Chart", "Stat Cards", "Kanban Board"],
+    variants: ["Flow Chart", "Stat Cards", "Kanban Board", "Odds Chart"],
     reactSource: `// src/app/page.tsx
 "use client";
 

@@ -47,7 +47,7 @@ export const TYPE_COLLECTIONS: readonly TypeCollection[] = [
       "Toggle switches and dark mode toggles with a bit of physics: a knob of liquid mercury, a ball sealed in a glass capsule, a light you pull by its cord, a window shade that drops over the sky. Each one is a real on-off control you can drop into a settings page, built with Framer Motion and Tailwind CSS.",
     slugs: [
       "mercury-switch", "capsule-toggles", "pull-cord", "ink-theme-switch", "window-seat-toggle", "eclipse-toggle",
-      "bell-toggle",
+      "bell-toggle", "focus-mode",
     ],
   },
   {
@@ -105,7 +105,7 @@ export const TYPE_COLLECTIONS: readonly TypeCollection[] = [
       "Sliders that feel physical: a range slider that sloshes like liquid, a rail that bends toward the knob, a row of springy bars, a ruler you fling, a draggable thermostat ring, and before and after sliders for comparing images. Each is a copy-paste React component built with Framer Motion and Tailwind CSS.",
     slugs: [
       "tick-slider", "slosh-slider", "bending-rail", "wake-slider", "bolting-sliders", "effort-slider", "ruler-picker",
-      "thermo-dial", "scrub-inputs", "before-after", "compare", "glass-compare",
+      "thermo-dial", "scrub-inputs", "before-after", "compare", "glass-compare", "days-slider", "wave-trimmer",
     ],
   },
   {
@@ -119,7 +119,7 @@ export const TYPE_COLLECTIONS: readonly TypeCollection[] = [
       "File upload components for React with drag and drop and a progress state worth watching: dropzones with progress chips, a genie animation that swallows the file, a mercury progress bar and sand that settles into a pattern as the upload advances. Each is a copy-paste component built with Framer Motion and Tailwind CSS.",
     slugs: [
       "upload-dropzone", "file-drop", "upload-chips", "genie-uploader", "mercury-upload", "chladni-upload",
-      "upload-morph", "paperclip-attach", "image-press",
+      "upload-morph", "paperclip-attach", "image-press", "folder-upload",
     ],
   },
   {
@@ -150,7 +150,7 @@ export const TYPE_COLLECTIONS: readonly TypeCollection[] = [
       "hop-labels", "sagging-field", "frost-input", "otp-input", "phone-input", "password-strength", "scrub-inputs",
       "odometer-field", "elastic-stepper", "gooey-search-input", "seek-search", "lens-search", "scoped-search",
       "search-modal", "command-palette", "ghost-autocomplete", "bubble-tags", "tag-pit", "message-composer",
-      "ai-composer",
+      "ai-composer", "address-field",
     ],
   },
   {
@@ -165,6 +165,7 @@ export const TYPE_COLLECTIONS: readonly TypeCollection[] = [
     slugs: [
       "date-wheels", "range-calendar", "magic-calendar", "clock-picker", "time-scrubber", "ruler-picker",
       "ink-drop-picker", "mood-wheel", "magnet-select", "assign-picker", "elemental-picker", "model-picker",
+      "status-picker", "time-chips",
     ],
   },
 ];

@@ -1744,4 +1744,159 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
     description:
       "React pay-with-your-face confirmation: tap and the scan corners curl into a spinning ring while the face glances and blinks. Tailwind CSS + TypeScript.",
   },
+  "home-scenes": {
+    title: "React Smart Home Scenes Card: Tap to Run a Scene",
+    description:
+      "A home dashboard where every change arrives as a wave of light. Framer Motion + Tailwind CSS.",
+  },
+  "action-stack": {
+    title: "React Floating Action Menu: A Stack of Actions",
+    description:
+      "A plus button that opens into a short list of actions. Framer Motion + Tailwind CSS.",
+  },
+  "address-field": {
+    title: "React Recipient Address Field with Handle Lookup",
+    description:
+      "A recipient field that checks what you type. Framer Motion + Tailwind CSS.",
+  },
+  "withdrawal-sheet": {
+    title: "React Withdrawal Status Sheet with Details",
+    description:
+      "A withdrawal receipt that tells you where the money is. Framer Motion + Tailwind CSS.",
+  },
+  "coin-focus": {
+    title: "React Crypto Holdings List: Tap a Coin to Focus",
+    description:
+      "A coin list where tapping a holding gives it the room. Framer Motion + Tailwind CSS.",
+  },
+  "notch-send": {
+    title: "React Send Email Animation: Out Through the Notch",
+    description:
+      "Sending an email that leaves through the notch. Framer Motion + Tailwind CSS.",
+  },
+  "row-editor": {
+    title: "React Editable Table Rows: Pencil to Edit Inline",
+    description:
+      "A table you edit in place. Framer Motion + Tailwind CSS.",
+  },
+  "status-picker": {
+    title: "React Presence Status Picker on an Avatar",
+    description:
+      "A presence dot that opens into its own picker. Framer Motion + Tailwind CSS.",
+  },
+  "invite-reveal": {
+    title: "React Invite Code Reveal Button with Copy",
+    description:
+      "An invite code that arrives like a ticket. Framer Motion + Tailwind CSS.",
+  },
+  "days-slider": {
+    title: "React Days Slider: A Capsule You Drag",
+    description:
+      "A slider whose fill carries its own value. Framer Motion + Tailwind CSS.",
+  },
+  "fold-balance": {
+    title: "React Balance Card with a Fold-Down Corner",
+    description:
+      "Fold the corner to hide your balance. Framer Motion + Tailwind CSS.",
+  },
+  "card-wear": {
+    title: "React Credit Card That Wears with Time",
+    description:
+      "A card that wears the way a real one does. Framer Motion + Tailwind CSS.",
+  },
+  "time-chips": {
+    title: "React Chat Time Zone Chips: Show Times in Yours",
+    description:
+      "A chat that reads times in your zone. Framer Motion + Tailwind CSS.",
+  },
+  "income-stream": {
+    title: "React Income Stream Chart with Hover Scrub",
+    description:
+      "Income drawn as a stream. Framer Motion + Tailwind CSS.",
+  },
+  "race-bars": {
+    title: "React Bar Chart Race with a Timeline",
+    description:
+      "Holdings, racing through the years. Framer Motion + Tailwind CSS.",
+  },
+  "persona-reminder": {
+    title: "React Reminder Card with Voice Personas",
+    description:
+      "A reminder that sounds like someone. Framer Motion + Tailwind CSS.",
+  },
+  "private-send": {
+    title: "React Send Privately Toggle for Payments",
+    description:
+      "Sending with a one-time address. Framer Motion + Tailwind CSS.",
+  },
+  "dust-delete": {
+    title: "React Delete Photo Animation: Turn It to Dust",
+    description:
+      "Deleting a photo by turning it to dust. Framer Motion + Tailwind CSS.",
+  },
+  "wave-confirm": {
+    title: "React Send Button That Waves to Confirm",
+    description:
+      "A payment confirmation that ripples when it goes through. Framer Motion + Tailwind CSS.",
+  },
+  "balance-matrix": {
+    title: "React Balance Dot Matrix with Money In and Out",
+    description:
+      "A balance drawn as a field of dots on frosted glass, one column per day lit as high as the balance stood. Framer Motion + Tailwind CSS.",
+  },
+  "focus-mode": {
+    title: "React Focus Mode Switch That Clears Notifications",
+    description:
+      "A focus switch that gathers your notifications. Framer Motion + Tailwind CSS.",
+  },
+  "target-bars": {
+    title: "React Bar Chart with a Target Line and Ranges",
+    description:
+      "A sales chart of glass boxes. Framer Motion + Tailwind CSS.",
+  },
+  "spend-strip": {
+    title: "React Monthly Spend Strip by Category",
+    description:
+      "A quiet month of spending: one soft grey bar per day under the total and a thin budget line. Framer Motion + Tailwind CSS.",
+  },
+  "stack-reel": {
+    title: "React Scrolling Card Reel: A Stack You Roll",
+    description:
+      "A reel of health cards. The middle one is open with its details; the rest fold to slim pills that fade towards the edges. Framer Motion + Tailwind CSS.",
+  },
+  "folder-path": {
+    title: "React Folder Browser with a Path Bar",
+    description:
+      "A folder browser that moves like a stack of pages. Framer Motion + Tailwind CSS.",
+  },
+  "widget-morph": {
+    title: "React Widget That Morphs Between Tabs",
+    description:
+      "A wide widget card that turns into four. Framer Motion + Tailwind CSS.",
+  },
+  "folder-upload": {
+    title: "React Folder Upload with Per-File Progress",
+    description:
+      "An upload card built around a glass folder. Framer Motion + Tailwind CSS.",
+  },
+  "charge-menu": {
+    title: "React Battery Menu with a Plug-and-Unplug Cell",
+    description:
+      "A battery menu with the charge as a glass cell lying on its side, the liquid inside glowing green. Framer Motion + Tailwind CSS.",
+  },
+  "focus-board": {
+    title: "React Focus Dashboard: Sleep, Sound and Plans",
+    description:
+      "A quiet dark dashboard. Switch the range and the energy bars regrow; point at one and the big number rolls to it. Framer Motion + Tailwind CSS.",
+  },
+  "cover-planner": {
+    title: "React Shift Cover Planner with Approvals",
+    description:
+      "Approving time off without leaving the team short. Each day is a column of dots, one per person on shift, with the minimum marked. Framer Motion + Tailwind CSS.",
+  },
+  "wave-trimmer": {
+    title: "React Audio Trimmer with a Waveform",
+    description:
+      "A trimmer for a clip of real synthesised music. Framer Motion + Tailwind CSS.",
+  },
 };

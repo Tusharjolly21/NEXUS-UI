@@ -1686,7 +1686,7 @@
       "name": "password-strength",
       "type": "registry:component",
       "title": "Password Strength",
-      "description": "A password field with a four-segment meter that fills and recolours as you type, a rolling strength label, rules that tick themselves off, and an eye toggle that draws its own slash.",
+      "description": "A password field with a four-segment meter that fills and recolours as you type, a rolling strength label, rules that tick themselves off, and an eye toggle that draws its own slash. Also includes Password Reveal, a password field whose reveal is a small wave: the dots turn into letters one after another, left to right, while a slash draws across the eye.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1704,6 +1704,10 @@
         {
           "path": "next-ui/password-strength/index.ts",
           "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/password-strength/password-reveal.tsx",
+          "type": "registry:component"
         },
         {
           "path": "next-ui/password-strength/password-strength.tsx",
