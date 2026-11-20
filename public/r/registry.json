@@ -2173,6 +2173,74 @@
       ]
     },
     {
+      "name": "dither-field",
+      "type": "registry:component",
+      "title": "Dither Field",
+      "description": "A free React dither background: a field of dots that shimmers between two colours the way old screens faked shades. Move the pointer to light the dots under it, press to send out a ring, or let the ghost pointer run the demo. Drop a headline on top and it becomes a hero.",
+      "dependencies": [
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/dither-field/dither-field.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/dither-field/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "count-up-digits",
+      "type": "registry:component",
+      "title": "Count Up Digits",
+      "description": "A free React count-up animation that rolls its digits like an odometer. Every column runs on its own spring, so digits far from their target spin fast and settle with a small overshoot. It starts when scrolled into view, counts again when pressed, and keeps the final number in the page text for screen readers.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/count-up-digits/count-up-digits.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/count-up-digits/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "bento-grid",
+      "type": "registry:component",
+      "title": "Bento Grid",
+      "description": "A free React bento grid in Tailwind CSS: tiles of different sizes where one soft light follows the pointer across all of them, so the grid reads as a single surface. Tiles rise in one after another when scrolled into view, lift on hover, and take any React node as their visual. Light or dark.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/bento-grid/bento-grid.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/bento-grid/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "cinematic-logo-cloud",
       "type": "registry:component",
       "title": "Cinematic Logo Cloud",
