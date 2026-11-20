@@ -16665,11 +16665,11 @@ export default function Page() {
       <div className="flex gap-12">
         <div>
           <CountUpDigits value={12480} suffix="+" className="text-6xl font-semibold tracking-[-0.03em] text-[#1d1d1f]" />
-          <p className="mt-1 text-sm text-[#6e6e73]">Installs</p>
+          <p className="mt-2 text-sm text-[#6e6e73]">Installs</p>
         </div>
         <div>
           <CountUpDigits value={4.9} decimals={1} className="text-6xl font-semibold tracking-[-0.03em] text-[#1d1d1f]" />
-          <p className="mt-1 text-sm text-[#6e6e73]">Rating</p>
+          <p className="mt-2 text-sm text-[#6e6e73]">Rating</p>
         </div>
       </div>
     </section>

@@ -57,7 +57,7 @@ export function PreviewCountUpDigits({ compact = false }: { compact?: boolean } 
               startOn="mount"
               className="text-4xl font-semibold tracking-[-0.03em] text-[#1d1d1f]"
             />
-            <p className="mt-1 text-xs text-[#6e6e73]">{s.label}</p>
+            <p className="mt-2.5 text-xs text-[#6e6e73]">{s.label}</p>
           </div>
         ))}
       </div>
