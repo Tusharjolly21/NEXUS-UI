@@ -277,7 +277,7 @@ export default function FuseButton({
     let last = performance.now();
     let lastCrackle = 0;
     const frame = (now: number) => {
-      const dt = Math.min(0.05, (now - last) / 1000);
+      const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
       last = now;
       const W = w + M * 2;
       const HH = H + M * 2;

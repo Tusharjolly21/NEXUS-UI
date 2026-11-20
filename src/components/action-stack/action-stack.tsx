@@ -237,11 +237,11 @@ export default function ActionStack({
     setLast(id);
     onAction?.(id);
     toggle(false);
-    fab.current?.focus();
+    fab.current?.focus({ preventScroll: true });
   };
 
   useEffect(() => {
-    if (open) requestAnimationFrame(() => btns.current[order.length - 1]?.focus());
+    if (open) requestAnimationFrame(() => btns.current[order.length - 1]?.focus({ preventScroll: true }));
   }, [open, order.length]);
 
   const onKey = (e: RKeyboardEvent) => {
@@ -249,7 +249,7 @@ export default function ActionStack({
     if (e.key === "Escape") {
       e.preventDefault();
       toggle(false);
-      fab.current?.focus();
+      fab.current?.focus({ preventScroll: true });
       return;
     }
     if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
@@ -257,7 +257,7 @@ export default function ActionStack({
     const i = btns.current.findIndex((b) => b === document.activeElement);
     const n = order.length;
     const next = e.key === "ArrowUp" ? (i <= 0 ? n - 1 : i - 1) : i < 0 || i >= n - 1 ? 0 : i + 1;
-    btns.current[next]?.focus();
+    btns.current[next]?.focus({ preventScroll: true });
   };
 
   useEffect(() => {

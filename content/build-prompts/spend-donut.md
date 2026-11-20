@@ -1242,7 +1242,7 @@ export default function SpendRing({
                     const j =
                       (i + (e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : categories.length - 1)) %
                       categories.length;
-                    hits.current[j]?.focus();
+                    hits.current[j]?.focus({ preventScroll: true });
                   }
                 }}
                 style={{

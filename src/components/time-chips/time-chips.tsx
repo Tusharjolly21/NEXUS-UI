@@ -454,7 +454,7 @@ export default function TimeChips({
       options.findIndex((o) => o.id === zone),
     );
     setActive(i);
-    requestAnimationFrame(() => list.current?.focus());
+    requestAnimationFrame(() => list.current?.focus({ preventScroll: true }));
     const off = (e: PointerEvent) =>
       !root.current?.querySelector("[data-picker]")?.contains(e.target as Node) && setOpen(false);
     window.addEventListener("pointerdown", off);
@@ -470,7 +470,7 @@ export default function TimeChips({
     else if (e.key === "Enter" || e.key === " ") choose(options[active].id);
     else if (e.key === "Escape" || e.key === "Tab") {
       setOpen(false);
-      if (e.key === "Escape") btn.current?.focus();
+      if (e.key === "Escape") btn.current?.focus({ preventScroll: true });
       return;
     } else return;
     e.preventDefault();

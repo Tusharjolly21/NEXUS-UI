@@ -281,7 +281,7 @@ export default function RowEditor({
   };
 
   useEffect(() => {
-    if (editing) requestAnimationFrame(() => first.current?.focus());
+    if (editing) requestAnimationFrame(() => first.current?.focus({ preventScroll: true }));
   }, [editing]);
 
   useEffect(() => {

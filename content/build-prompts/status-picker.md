@@ -326,7 +326,7 @@ export default function StatusPicker({
     onChange?.(id);
     show(false);
     sfx.note(1175, { dur: 0.12, gain: 0.035 });
-    requestAnimationFrame(() => dot.current?.focus());
+    requestAnimationFrame(() => dot.current?.focus({ preventScroll: true }));
   };
 
   useEffect(() => {
@@ -335,7 +335,7 @@ export default function StatusPicker({
         0,
         statuses.findIndex((s) => s.id === value),
       );
-      requestAnimationFrame(() => btns.current[i]?.focus());
+      requestAnimationFrame(() => btns.current[i]?.focus({ preventScroll: true }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -345,7 +345,7 @@ export default function StatusPicker({
     if (e.key === "Escape") {
       e.preventDefault();
       show(false);
-      dot.current?.focus();
+      dot.current?.focus({ preventScroll: true });
       return;
     }
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
@@ -353,7 +353,7 @@ export default function StatusPicker({
     const n = statuses.length;
     const i = btns.current.findIndex((b) => b === document.activeElement);
     const next = e.key === "ArrowRight" ? (i + 1) % n : (i - 1 + n) % n;
-    btns.current[next]?.focus();
+    btns.current[next]?.focus({ preventScroll: true });
   };
 
   useEffect(() => {

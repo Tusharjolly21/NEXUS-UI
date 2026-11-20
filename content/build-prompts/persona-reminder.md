@@ -337,7 +337,7 @@ export default function PersonaReminder({
     touched.current = true;
     const n = personas[(idx + d + personas.length) % personas.length];
     choose(n.id);
-    (root.current?.querySelector(`[data-persona="${n.id}"]`) as HTMLElement | null)?.focus();
+    (root.current?.querySelector(`[data-persona="${n.id}"]`) as HTMLElement | null)?.focus({ preventScroll: true });
   };
 
   // autoplay: go through the voices, preview one

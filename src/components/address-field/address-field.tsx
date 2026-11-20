@@ -477,7 +477,7 @@ export default function AddressField({
                   exit={{ opacity: 0, scale: 0.6 }}
                   onClick={() => {
                     set("");
-                    input.current?.focus();
+                    input.current?.focus({ preventScroll: true });
                   }}
                   className="outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]"
                   style={{
@@ -578,7 +578,7 @@ export default function AddressField({
               onClick={() => {
                 touched.current = true;
                 void fill(recent[0] ?? "mira.pay");
-                input.current?.focus();
+                input.current?.focus({ preventScroll: true });
               }}
               className="outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]"
               style={{
