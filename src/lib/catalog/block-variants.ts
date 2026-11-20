@@ -64,6 +64,7 @@ const ADDED_ON: Record<string, string[]> = {
   "2026-11-10": ["lanyard-signup"],
   "2026-11-12": ["infinite-branches"],
   "2026-11-15": ["flow-chart", "stat-cards", "kanban-board", "filter-drawer", "prism-flow", "halo-hero", "orb-nav", "brain-atlas"],
+  "2026-11-20": ["odds-chart"],
   "2026-11-02": ["head-to-head-compare", "receipt-hero", "sealed-and-sent", "wall-clock-contact", "wordmark-footer"],
 };
 const ADDED = new Map(Object.entries(ADDED_ON).flatMap(([day, slugs]) => slugs.map((slug) => [slug, day] as const)));
@@ -183,6 +184,7 @@ const baseVariants: BlockVariant[] = [
   mk("flow-chart", "block-dashboard", "Flow Chart", "FlowChart"),
   mk("stat-cards", "block-dashboard", "Stat Cards", "StatCards"),
   mk("kanban-board", "block-dashboard", "Kanban Board", "KanbanBoard"),
+  mk("odds-chart", "block-dashboard", "Odds Chart", "OddsChart"),
   mk("filter-drawer", "block-checkout-moments", "Filter Drawer", "FilterDrawer"),
   mk("prism-flow", "block-hero", "Prism Flow", "PrismFlow"),
   { ...mk("halo-hero", "block-hero", "Halo Hero", "HaloHero"), registryCliName: "halo-hero-section", source: "src/components/halo-hero/halo-hero.tsx" },

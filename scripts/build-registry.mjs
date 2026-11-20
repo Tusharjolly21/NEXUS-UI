@@ -1130,6 +1130,14 @@ const BLOCK_REGISTRY_PACKAGES = [
     components: ["blocks/motion-kit/kanban-board"],
   },
   {
+    name: "odds-chart",
+    title: "Odds Chart",
+    description: "A prediction market at a glance. Yes and No are two mirrored lines, and new prices keep arriving: each slides in from the right as the line moves along and the end pulses. Switch the range and the lines reshape into that history; move across to read any moment, and choose a side to bring its line forward.",
+    premium: true,
+    dependencies: ["framer-motion"],
+    components: ["blocks/motion-kit/odds-chart"],
+  },
+  {
     name: "filter-drawer",
     title: "Filter Drawer",
     description: "A filters drawer over a shop of handmade ceramics, shown in real product photos (or drawn in SVG when you pass none). The drawer is a sheet of glass from the right, or a bottom sheet you drag between heights on a phone; the page behind sinks back and softens out of focus exactly as far as it's open. Filters apply live.",

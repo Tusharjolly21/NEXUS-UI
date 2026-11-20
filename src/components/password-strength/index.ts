@@ -4,3 +4,5 @@ export { CrackTimePassword } from "./crack-time-password";
 export type { CrackTimePasswordProps } from "./crack-time-password";
 export { SuggestPassword } from "./suggest-password";
 export type { SuggestPasswordProps } from "./suggest-password";
+export { default as PasswordReveal } from "./password-reveal";
+export type { PasswordRevealProps } from "./password-reveal";

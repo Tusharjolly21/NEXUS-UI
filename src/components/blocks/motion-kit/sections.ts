@@ -81,6 +81,7 @@ import { AnnounceBar } from "./announce-bar";
 import { FlowChart } from "@/components/blocks/motion-kit/flow-chart";
 import { StatCards } from "@/components/blocks/motion-kit/stat-cards";
 import { KanbanBoard } from "@/components/blocks/motion-kit/kanban-board";
+import { OddsChart } from "@/components/blocks/motion-kit/odds-chart";
 import { FilterDrawer } from "@/components/blocks/motion-kit/filter-drawer";
 import { PrismFlow } from "@/components/blocks/motion-kit/prism-flow";
 import { HaloHero } from "@/components/halo-hero";
@@ -177,6 +178,7 @@ export const MOTION_KIT_SECTIONS: Record<string, ComponentType<{ autoplay?: bool
   "mk-flow-chart": FlowChart as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-stat-cards": StatCards as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-kanban-board": KanbanBoard as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-odds-chart": OddsChart as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-filter-drawer": FilterDrawer as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-prism-flow": PrismFlow as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-halo-hero": HaloHero as unknown as ComponentType<{ autoplay?: boolean }>,

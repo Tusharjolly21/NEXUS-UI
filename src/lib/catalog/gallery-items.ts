@@ -406,6 +406,38 @@ const TINT_OF: Record<string, TileTint> = {
  * are all gathered, newest first, under the wall's New tab (see NEW_TAB_DAYS).
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // thirty-third batch (Motion Kit Everyday, 20 November: Home Scenes to Wave Trimmer)
+  "home-scenes",
+  "action-stack",
+  "address-field",
+  "withdrawal-sheet",
+  "coin-focus",
+  "notch-send",
+  "row-editor",
+  "status-picker",
+  "invite-reveal",
+  "days-slider",
+  "fold-balance",
+  "card-wear",
+  "time-chips",
+  "income-stream",
+  "race-bars",
+  "persona-reminder",
+  "private-send",
+  "dust-delete",
+  "wave-confirm",
+  "balance-matrix",
+  "focus-mode",
+  "target-bars",
+  "spend-strip",
+  "stack-reel",
+  "folder-path",
+  "widget-morph",
+  "folder-upload",
+  "charge-menu",
+  "focus-board",
+  "cover-planner",
+  "wave-trimmer",
   // thirty-second batch (Motion Kit Everyday, 15 November: Date Wheels to Brain Atlas)
   "date-wheels",
   "agent-thinking",
@@ -900,6 +932,8 @@ const PROMPT_PARENTS = new Set([
   "hold-to-record",
   "hover-highlight-text",
   "link-preview",
+  // carries the Slide to Pay variant
+  "slide-to-confirm",
 ]);
 
 const KIT_RANK = new Map(MOTION_KIT_ORDER.map((slug, i) => [slug, i] as const));
