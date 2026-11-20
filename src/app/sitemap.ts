@@ -58,6 +58,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/mcp`,                     lastModified: since("2026-11-08") },
     { url: `${base}/impact`,                  lastModified: since("2026-11-10") },
     { url: `${base}/alternatives`,            lastModified: since("2026-10-21") },
+    { url: `${base}/changelog`,               lastModified: since(latestComponent.createdAt) },
+    { url: `${base}/tools/box-shadow-generator`, lastModified: since("2026-11-20") },
     ...alternatives.map((a) => ({ url: `${base}/alternatives/${a.slug}`, lastModified: since("2026-10-21") })),
   ];
 

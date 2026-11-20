@@ -58,22 +58,12 @@ export default async function TemplateDetailPage({ params, searchParams }: Props
   const pricing = await getPricing();
   const checkoutPending = checkout === "success" && !hasAccess;
   const others = templates.filter((t) => t.slug !== slug).sort((a, b) => b.trendingScore - a.trendingScore);
-  const related = [...others.filter((t) => t.category === tmpl.category), ...others.filter((t) => t.category !== tmpl.category)].slice(0, 2);
-
-  const softwareJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: tmpl.title,
-    description: tmpl.description,
-    applicationCategory: "DeveloperApplication",
-    operatingSystem: "Web",
-    url: `${siteConfig.url}/templates/${slug}`,
-    offers: {
-      "@type": "Offer",
-      price: tmpl.premium ? "49" : "0",
-      priceCurrency: "USD",
-    },
-  };
+  // One slot goes to the next template in catalogue order (wrapping round), so every template is linked from at
+  // least one sibling. Ranking by trendingScore alone left newer templates with a single incoming link.
+  const index = templates.findIndex((t) => t.slug === slug);
+  const next = templates[(index + 1) % templates.length];
+  const ranked = [...others.filter((t) => t.category === tmpl.category), ...others.filter((t) => t.category !== tmpl.category)];
+  const related = [ranked.find((t) => t.slug !== next.slug), next].filter((t): t is NonNullable<typeof t> => !!t);
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -87,7 +77,6 @@ export default async function TemplateDetailPage({ params, searchParams }: Props
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <TemplateDetailContent tmpl={tmpl} related={related} isPremium={hasAccess} checkoutPending={checkoutPending} pricing={pricing} />
     </>
