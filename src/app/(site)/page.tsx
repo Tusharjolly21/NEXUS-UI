@@ -160,16 +160,6 @@ export default async function Home() {
       ...(siteConfig.socialProfiles.length > 0 ? { sameAs: siteConfig.socialProfiles } : {}),
       contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: legalConfig.contactEmail },
     },
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      name: siteConfig.siteName,
-      url: siteConfig.url,
-      description: siteConfig.description,
-      applicationCategory: "DeveloperApplication",
-      operatingSystem: "Web",
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    },
   ];
 
   return (

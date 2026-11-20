@@ -29,6 +29,8 @@ const COLUMNS = [
       { href: "/claude-code", label: "Claude Code" },
       { href: "/mcp", label: "MCP server" },
       { href: "/alternatives", label: "Compare libraries" },
+      { href: "/changelog", label: "Changelog" },
+      { href: "/tools/box-shadow-generator", label: "Box shadow generator" },
       { href: "/blog", label: "Blog" },
     ],
   },

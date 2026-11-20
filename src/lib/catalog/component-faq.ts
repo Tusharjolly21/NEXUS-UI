@@ -5,6 +5,27 @@
 export type ComponentFaqItem = { q: string; a: string };
 
 export const COMPONENT_FAQ: Record<string, ComponentFaqItem[]> = {
+  "dither-field": [
+    { q: "How do I install the dither field?", a: "Run `npx shadcn@latest add @nexus-labs/dither-field`. It adds one component and needs no other package." },
+    { q: "What is dithering?", a: "A way to show shades with only two colours. Each dot is either on or off, decided by comparing a soft moving pattern with a fixed grid of thresholds, so the shade comes from how many dots are on in an area." },
+    { q: "How do I change the colours and dot size?", a: "Pass `foreground` and `background` as hex values and `cellSize` in pixels. A bigger `cellSize` looks chunkier and uses less processing." },
+    { q: "Can I put text on top of it?", a: "Yes. Pass children and they sit above the field. Add `pointer-events-none` to the text wrapper if you want the pointer and presses to reach the dots underneath." },
+    { q: "Does it respect reduced motion and save battery?", a: "With reduced motion on, it draws one still frame and does not animate. It also stops drawing when it is scrolled out of view or the tab is hidden." },
+  ],
+  "count-up-digits": [
+    { q: "How do I install the count up component?", a: "Run `npx shadcn@latest add @nexus-labs/count-up-digits`. It adds the component and installs framer-motion." },
+    { q: "How do I add a prefix, suffix or decimals?", a: "Use `prefix`, `suffix` and `decimals`, for example `prefix=\"$\" value={4.9} decimals={1}`. Commas are added by default, and `grouping={false}` turns them off." },
+    { q: "How do I start the count when it scrolls into view?", a: "That is the default (`startOn=\"view\"`). It counts once the number is on screen. Use `startOn=\"mount\"` to count straight away." },
+    { q: "Is it accessible?", a: "The rolling columns are hidden from screen readers and the final number is in the page text, so it reads as the finished value. With reduced motion on, the number appears at once." },
+    { q: "Can visitors replay the animation?", a: "Yes. Pressing the number counts it again, and it is a real button you can reach with the keyboard. Set `replayOnPress={false}` to make it plain text." },
+  ],
+  "bento-grid": [
+    { q: "How do I install the bento grid?", a: "Run `npx shadcn@latest add @nexus-labs/bento-grid`. It adds the component and installs framer-motion." },
+    { q: "How do I make tiles different sizes?", a: "Give each item `cols` (1 to 3) and `rows` (1 or 2). The grid has three columns from tablet width up, two on small screens and one on phones." },
+    { q: "What can I put in a tile?", a: "Anything. Pass a React node as `visual`: a chart, a form, an image, a video or your own component. The title and description sit under it." },
+    { q: "How do I make a tile a link?", a: "Add `href` to the item. A link covers the whole tile and uses the title as its accessible name." },
+    { q: "Does it work in dark mode?", a: "Set `tone=\"dark\"` for dark tiles. Both tones use fixed colours, so they look the same whatever the page theme is." },
+  ],
   "animated-countdown": [
     { q: "How do I set the date it counts down to?", a: "Pass `targetDate` as a Date, an ISO string or a timestamp. Without a target it shows a static demo time, which you can set with `initialStaticTime`." },
     { q: "What styles are available?", a: "`variant` can be \"modern\", \"digital\", \"minimal\" or \"classic\", and `size` can be \"sm\", \"md\" or \"lg\". Separators between units are on by default for the digital style." },

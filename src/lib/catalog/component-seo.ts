@@ -4,6 +4,21 @@
  * Search Console shows people actually typing (pages ranking ~5–30 with no clicks yet).
  */
 export const COMPONENT_SEO: Record<string, { title: string; description: string }> = {
+  "dither-field": {
+    title: "React Dither Effect: Free Dithered Background",
+    description:
+      "Free React dither background: two colours, every shade. A field of dots that reacts to the pointer and sends out a ring on press. Canvas, no dependencies.",
+  },
+  "count-up-digits": {
+    title: "React Count Up Animation: Rolling Digits",
+    description:
+      "Free React count up animation that rolls its digits like an odometer, on springs. Starts in view, replays on press, screen reader friendly. Framer Motion.",
+  },
+  "bento-grid": {
+    title: "React Bento Grid with Tailwind, Free",
+    description:
+      "Free React bento grid in Tailwind CSS: mixed-size tiles, a pointer light across the whole grid, spring entrance, light or dark. Copy-paste or shadcn CLI.",
+  },
   "animated-accordion": {
     title: "React Accordion Component, Free with Tailwind",
     description:
@@ -957,7 +972,7 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
   "dust-snap": {
     title: "React Dust Disintegration Text Effect",
     description:
-      "React text effect where a word turns to dust: it shivers, goes dark and grainy from one end, then crumbles into a cloud of particles. Free, Framer Motion + Tailwind CSS.",
+      "React text effect where a word turns to dust: it shivers, darkens and crumbles into a cloud of particles. Free, Framer Motion + Tailwind CSS.",
   },
   "shredder-delete": {
     title: "React Delete Animation: Paper Shredder Effect",

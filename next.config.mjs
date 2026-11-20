@@ -142,7 +142,6 @@ const nextConfig = {
       // Sample links inside block demos ("Watch the demo", "Product") that Google followed and found missing.
       { source: "/demo", destination: "/components", permanent: true },
       { source: "/product", destination: "/components", permanent: true },
-      { source: "/changelog", destination: "/blog", permanent: true },
       // Old blog addresses Search Console still holds.
       { source: "/blog/scroll-choreography", destination: "/blog/motion-scroll-choreography", permanent: true },
       { source: "/blog/migration", destination: "/blog", permanent: true },

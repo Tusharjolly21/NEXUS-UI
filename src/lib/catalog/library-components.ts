@@ -16860,6 +16860,147 @@ export default function Page() {
     tailwindSource: tw,
   },
   {
+    slug: "dither-field",
+    name: "Dither Field",
+    registryCliName: "dither-field",
+    description:
+      "A free React dither background: a field of dots that shimmers between two colours the way old screens faked shades. Move the pointer to light the dots under it, press to send out a ring, or let the ghost pointer run the demo. Drop a headline on top and it becomes a hero.",
+    categorySlug: "background-effects",
+    tags: ["dither", "dithering", "dither ui", "dither background", "bayer", "canvas", "retro", "pixel", "react background", "hero background", "motion kit"],
+    premium: false,
+    trendingScore: 192,
+    createdAt: "2026-11-20",
+    animationKinds: ["hover", "press", "gradient"],
+    dependencies: [],
+    props: [
+      { name: "foreground", type: "string", defaultValue: "\"#1d1d1f\"", description: "Colour of the lit dots, as a hex value." },
+      { name: "background", type: "string", defaultValue: "\"#f5f5f7\"", description: "Colour of the unlit dots, as a hex value." },
+      { name: "cellSize", type: "number", defaultValue: "4", description: "Size of one dot in CSS pixels. Bigger looks chunkier and costs less." },
+      { name: "speed", type: "number", defaultValue: "1", description: "How fast the field drifts." },
+      { name: "interactive", type: "boolean", defaultValue: "true", description: "Pointer lights up the dots under it and a press sends out a ring." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "A ghost pointer wanders over the field until the visitor touches it. Never runs under reduced motion." },
+      { name: "children", type: "ReactNode", description: "Anything to place on top of the field, such as a headline." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element. Give it a height." },
+    ],
+    Preview: Previews.PreviewDitherField,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { DitherField } from "@/components/dither-field";
+
+// Move over it, or press to send a ring across the dots.
+export default function Page() {
+  return (
+    <section className="grid min-h-[70vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <DitherField className="h-[420px] w-full max-w-[860px]" foreground="#0a84ff" background="#04122b">
+        <div className="pointer-events-none relative flex h-full items-end p-8">
+          <h1 className="text-4xl font-semibold tracking-[-0.03em] text-white">Two colours, every shade.</h1>
+        </div>
+      </DitherField>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "count-up-digits",
+    name: "Count Up Digits",
+    registryCliName: "count-up-digits",
+    description:
+      "A free React count-up animation that rolls its digits like an odometer. Every column runs on its own spring, so digits far from their target spin fast and settle with a small overshoot. It starts when scrolled into view, counts again when pressed, and keeps the final number in the page text for screen readers.",
+    categorySlug: "motion-effects",
+    tags: ["count up", "countup", "count up animation", "number animation", "animated counter", "odometer", "rolling digits", "stats", "number ticker", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 191,
+    createdAt: "2026-11-20",
+    animationKinds: ["spring", "scroll", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "value", type: "number", defaultValue: "12480", description: "The number to count up to." },
+      { name: "from", type: "number", defaultValue: "0", description: "Where the count starts." },
+      { name: "decimals", type: "number", defaultValue: "0", description: "Decimal places to show." },
+      { name: "prefix", type: "string", defaultValue: "\"\"", description: "Text before the number, such as a currency sign." },
+      { name: "suffix", type: "string", defaultValue: "\"\"", description: "Text after the number, such as + or %." },
+      { name: "grouping", type: "boolean", defaultValue: "true", description: "Group digits with commas, as in 12,480." },
+      { name: "startOn", type: "\"view\" | \"mount\"", defaultValue: "\"view\"", description: "Start when scrolled into view, or right away." },
+      { name: "stiffness", type: "number", defaultValue: "70", description: "Spring stiffness. Higher lands faster." },
+      { name: "replayOnPress", type: "boolean", defaultValue: "true", description: "Pressing the number counts it again." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Counts again every few seconds until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Text size and colour. Digits are sized in em, so set the font size here." },
+    ],
+    Preview: Previews.PreviewCountUpDigits,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { CountUpDigits } from "@/components/count-up-digits";
+
+// Scroll it into view and the digits roll. Press a number to count it again.
+export default function Page() {
+  return (
+    <section className="grid min-h-[50vh] place-items-center bg-[#f5f5f7] px-4 py-16">
+      <div className="flex gap-12">
+        <div>
+          <CountUpDigits value={12480} suffix="+" className="text-6xl font-semibold tracking-[-0.03em] text-[#1d1d1f]" />
+          <p className="mt-2 text-sm text-[#6e6e73]">Installs</p>
+        </div>
+        <div>
+          <CountUpDigits value={4.9} decimals={1} className="text-6xl font-semibold tracking-[-0.03em] text-[#1d1d1f]" />
+          <p className="mt-2 text-sm text-[#6e6e73]">Rating</p>
+        </div>
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "bento-grid",
+    name: "Bento Grid",
+    registryCliName: "bento-grid",
+    description:
+      "A free React bento grid in Tailwind CSS: tiles of different sizes where one soft light follows the pointer across all of them, so the grid reads as a single surface. Tiles rise in one after another when scrolled into view, lift on hover, and take any React node as their visual. Light or dark.",
+    categorySlug: "bento-grids",
+    tags: ["bento grid", "react bento grid", "tailwind bento grid", "bento", "grid layout", "feature grid", "spotlight", "cards", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 190,
+    createdAt: "2026-11-20",
+    animationKinds: ["hover", "spring", "scroll"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "BentoItem[]", defaultValue: "demo tiles", description: "The tiles: { id?, title, description, visual?, cols?, rows?, href? }. cols is 1 to 3 and rows is 1 or 2." },
+      { name: "tone", type: "\"light\" | \"dark\"", defaultValue: "\"light\"", description: "Light or dark tiles." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "A ghost light drifts across the tiles until the visitor touches the grid. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the grid." },
+    ],
+    Preview: Previews.PreviewBentoGrid,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { BentoGrid } from "@/components/bento-grid";
+
+const TILES = [
+  { title: "Fast by default", description: "Everything is static until it needs to move.", cols: 2, rows: 2 },
+  { title: "Dark mode", description: "Set tone to dark for a dark surface." },
+  { title: "Your content", description: "Pass any React node as the visual." },
+  { title: "Links", description: "Add an href and the whole tile is a link.", cols: 2, href: "/docs" },
+];
+
+// Move the pointer over the grid: one light follows it across every tile.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto max-w-[860px]">
+        <BentoGrid items={TILES} />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
     slug: "bell-toggle",
     name: "Bell Toggle",
     registryCliName: "bell-toggle",
