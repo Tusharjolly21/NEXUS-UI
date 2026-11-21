@@ -19,6 +19,21 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
     description:
       "Free React bento grid in Tailwind CSS: mixed-size tiles, a pointer light across the whole grid, spring entrance, light or dark. Copy-paste or shadcn CLI.",
   },
+  "typing-indicator": {
+    title: "React Typing Indicator: Chat Dots, Free",
+    description:
+      "Free React typing indicator for chat: liquid dots, stacked avatars, a who-is-typing label and a bubble that opens into the message. Framer Motion + Tailwind CSS.",
+  },
+  "status-cards": {
+    title: "React Status Page Cards, Free Service UI",
+    description:
+      "Free React status cards: uptime, a live response-time line, a scrubbable 30-day strip and a summary banner. Press a status to simulate an incident. Framer Motion.",
+  },
+  "skeleton-loader": {
+    title: "React Skeleton Loader: Accessible, Free",
+    description:
+      "Free React skeleton loader with one shared shimmer wave, a blur-in reveal and screen reader announcements through aria-busy. Framer Motion + Tailwind CSS.",
+  },
   "animated-accordion": {
     title: "React Accordion Component, Free with Tailwind",
     description:

@@ -17001,6 +17001,161 @@ export default function Page() {
     tailwindSource: tw,
   },
   {
+    slug: "typing-indicator",
+    name: "Typing Indicator",
+    registryCliName: "typing-indicator",
+    description:
+      "A free React typing indicator for chat. Three liquid dots ride a wave inside a bubble, then fold away and the same bubble opens into the message, word by word. Names under the bubble say who is typing, avatars stack when several people are, and the wave quickens with the crowd.",
+    categorySlug: "ai-components",
+    tags: ["typing indicator", "typing dots", "chat typing", "is typing", "chat ui", "messaging", "ai chat", "message bubble", "react chat", "loading dots", "motion kit"],
+    premium: false,
+    trendingScore: 257,
+    createdAt: "2026-11-21",
+    animationKinds: ["type", "spring", "press"],
+    dependencies: [],
+    props: [
+      { name: "names", type: "string[]", defaultValue: "[\"Maya\"]", description: "Who is typing. Drives the label and the avatars. An empty list shows the dots alone." },
+      { name: "typing", type: "boolean", description: "Show the dots (true) or the message (false). Leave it out and the component runs by itself." },
+      { name: "message", type: "string", defaultValue: "\"Ten minutes. I'm bringing the files.\"", description: "The message the bubble opens into when typing stops." },
+      { name: "tone", type: "\"light\" | \"dark\"", defaultValue: "\"light\"", description: "Colours for a light or a dark page." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Alternates between typing and the message until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewTypingIndicator,
+    previewShell: "plain",
+    reactSource: `// src/app/chat/page.tsx
+"use client";
+
+import { useState } from "react";
+import { TypingIndicator } from "@/components/typing-indicator";
+
+// Drive it from your own state: dots while the other person types, the message once it lands.
+export default function Page() {
+  const [typing, setTyping] = useState(true);
+
+  return (
+    <main className="grid min-h-screen place-items-center bg-[#f5f5f7] p-6">
+      <TypingIndicator
+        names={["Maya", "Leo"]}
+        typing={typing}
+        message="Found it. Sending the link now."
+      />
+      <button className="mt-6 text-sm text-[#0071e3]" onClick={() => setTyping((t) => !t)}>
+        {typing ? "Deliver the message" : "Type again"}
+      </button>
+    </main>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "status-cards",
+    name: "Status Cards",
+    registryCliName: "status-cards",
+    description:
+      "Free React status page cards. Each service shows its state, uptime and a live response-time line that redraws as new samples arrive, with a 30-day strip you can scrub. A banner above sums up the worst state. Press a status to simulate an incident and the colours, numbers and line all answer.",
+    categorySlug: "dashboards",
+    tags: ["status page", "status cards", "uptime", "service status", "system status", "health check", "monitoring", "sparkline", "incident", "react dashboard", "motion kit"],
+    premium: false,
+    trendingScore: 256,
+    createdAt: "2026-11-21",
+    animationKinds: ["hover", "press", "layout"],
+    dependencies: [],
+    props: [
+      { name: "items", type: "StatusCardItem[]", description: "The services to show: name, status, and optionally note, uptime and latency. Four demo services when left out." },
+      { name: "tone", type: "\"light\" | \"dark\"", defaultValue: "\"light\"", description: "Colours for a light or a dark page." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Runs a scripted incident through the cards, with a live latency feed, until the visitor touches a status. Never runs under reduced motion." },
+      { name: "onStatusChange", type: "(item, next) => void", description: "Called when someone presses a status to move it on." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewStatusCards,
+    previewShell: "plain",
+    reactSource: `// src/app/status/page.tsx
+"use client";
+
+import { StatusCards } from "@/components/status-cards";
+
+const services = [
+  { name: "API", note: "REST API", status: "operational", uptime: 99.98, latency: 118 },
+  { name: "Dashboard", note: "Web app", status: "degraded", uptime: 99.95, latency: 164 },
+  { name: "Webhooks", note: "Delivery queue", status: "operational", uptime: 99.91, latency: 92 },
+  { name: "CDN", note: "Static assets", status: "maintenance", uptime: 99.99, latency: 38 },
+] as const;
+
+export default function Page() {
+  return (
+    <main className="mx-auto max-w-3xl bg-[#f5f5f7] p-6">
+      <StatusCards items={[...services]} />
+    </main>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "skeleton-loader",
+    name: "Skeleton Loader",
+    registryCliName: "skeleton-loader",
+    description:
+      "A free React skeleton loader that behaves. One highlight sweeps across the whole layout as a single wave instead of every block shimmering alone, the real content blurs in when it arrives, and screen readers hear Loading and then Loaded through a polite live region with aria-busy on the wrapper. Build placeholders from Skeleton, SkeletonText and SkeletonAvatar.",
+    categorySlug: "loaders",
+    tags: ["skeleton loader", "skeleton screen", "loading skeleton", "shimmer", "placeholder", "isLoading", "aria-busy", "accessible loading", "react loading", "content placeholder", "motion kit"],
+    premium: false,
+    trendingScore: 255,
+    createdAt: "2026-11-21",
+    animationKinds: ["layout", "gradient"],
+    dependencies: [],
+    props: [
+      { name: "isLoading", type: "boolean", description: "True while the content is on its way. Leave it out and the component runs a demo with a button to flip it." },
+      { name: "skeleton", type: "ReactNode", description: "The placeholder, built from Skeleton, SkeletonText and SkeletonAvatar." },
+      { name: "children", type: "ReactNode", description: "The real content. It blurs in when isLoading turns false." },
+      { name: "label", type: "string", defaultValue: "\"Loading\"", description: "Announced to screen readers while loading." },
+      { name: "loadedLabel", type: "string", defaultValue: "\"Loaded\"", description: "Announced when the content has arrived." },
+      { name: "shimmer", type: "boolean", defaultValue: "true", description: "Sweep a highlight across every placeholder. Off under reduced motion." },
+      { name: "tone", type: "\"light\" | \"dark\"", defaultValue: "\"light\"", description: "Colours for a light or a dark page." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "In the demo, flips between loading and content until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewSkeletonLoader,
+    previewShell: "plain",
+    reactSource: `// src/components/profile-card.tsx
+"use client";
+
+import { SkeletonLoader, Skeleton, SkeletonAvatar, SkeletonText } from "@/components/skeleton-loader";
+
+type Profile = { name: string; role: string; bio: string };
+
+// Pass your own loading flag. The wave crosses every Skeleton as one sweep, and the card blurs in when data arrives.
+export function ProfileCard({ profile, isLoading }: { profile?: Profile; isLoading: boolean }) {
+  return (
+    <SkeletonLoader
+      isLoading={isLoading}
+      label="Loading profile"
+      skeleton={
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <SkeletonAvatar size={48} />
+            <div className="flex flex-1 flex-col gap-2">
+              <Skeleton className="h-3.5 w-32 rounded-full" />
+              <Skeleton className="h-3 w-44 rounded-full" />
+            </div>
+          </div>
+          <SkeletonText lines={3} />
+        </div>
+      }
+    >
+      {profile && (
+        <div className="flex flex-col gap-4">
+          <p className="text-base font-semibold">{profile.name}</p>
+          <p className="text-sm text-neutral-500">{profile.role}</p>
+          <p className="text-sm">{profile.bio}</p>
+        </div>
+      )}
+    </SkeletonLoader>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
     slug: "bell-toggle",
     name: "Bell Toggle",
     registryCliName: "bell-toggle",

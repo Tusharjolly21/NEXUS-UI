@@ -2245,6 +2245,75 @@
       ]
     },
     {
+      "name": "typing-indicator",
+      "type": "registry:component",
+      "title": "Typing Indicator",
+      "description": "A free React typing indicator for chat. Three liquid dots ride a wave inside a bubble, then fold away and the same bubble opens into the message, word by word. Names under the bubble say who is typing, avatars stack when several people are, and the wave quickens with the crowd.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/typing-indicator/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/typing-indicator/typing-indicator.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "status-cards",
+      "type": "registry:component",
+      "title": "Status Cards",
+      "description": "Free React status page cards. Each service shows its state, uptime and a live response-time line that redraws as new samples arrive, with a 30-day strip you can scrub. A banner above sums up the worst state. Press a status to simulate an incident and the colours, numbers and line all answer.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/status-cards/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/status-cards/status-cards.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "skeleton-loader",
+      "type": "registry:component",
+      "title": "Skeleton Loader",
+      "description": "A free React skeleton loader that behaves. One highlight sweeps across the whole layout as a single wave instead of every block shimmering alone, the real content blurs in when it arrives, and screen readers hear Loading and then Loaded through a polite live region with aria-busy on the wrapper. Build placeholders from Skeleton, SkeletonText and SkeletonAvatar.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/skeleton-loader/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/skeleton-loader/skeleton-loader.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "cinematic-logo-cloud",
       "type": "registry:component",
       "title": "Cinematic Logo Cloud",
