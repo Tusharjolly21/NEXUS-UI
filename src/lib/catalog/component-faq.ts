@@ -26,6 +26,27 @@ export const COMPONENT_FAQ: Record<string, ComponentFaqItem[]> = {
     { q: "How do I make a tile a link?", a: "Add `href` to the item. A link covers the whole tile and uses the title as its accessible name." },
     { q: "Does it work in dark mode?", a: "Set `tone=\"dark\"` for dark tiles. Both tones use fixed colours, so they look the same whatever the page theme is." },
   ],
+  "typing-indicator": [
+    { q: "How do I install the typing indicator?", a: "Run `npx shadcn@latest add @nexus-labs/typing-indicator`. It adds the component and installs framer-motion." },
+    { q: "How do I control when it shows the dots?", a: "Pass `typing` as true while the other person is typing and false when their message lands. Without `typing` the component runs by itself, and pressing the bubble switches it." },
+    { q: "Can it show more than one person typing?", a: "Yes. Pass several names and it stacks up to three avatars and writes \"Maya and Leo are typing\". The wave quickens a little with each extra person." },
+    { q: "Is it accessible?", a: "A polite live region announces who is typing and then the message. The animated bubble is hidden from screen readers so nothing is read twice, and it stays still under reduced motion." },
+    { q: "Does it work in dark mode?", a: "Set `tone=\"dark\"` for dark bubbles and labels. Both tones use fixed colours, so they look the same whatever the page theme is." },
+  ],
+  "status-cards": [
+    { q: "How do I install the status cards?", a: "Run `npx shadcn@latest add @nexus-labs/status-cards`. It adds the component and installs framer-motion." },
+    { q: "What data does each card need?", a: "A `name` and a `status` of operational, degraded, outage or maintenance. `note`, `uptime` and `latency` are optional. The response-time line and the 30-day strip are generated from the name, so they stay the same between renders." },
+    { q: "Can I feed it real data?", a: "Pass your own `items` and update `status` as your monitor reports. The cards react to every change. The line and the 30-day strip are illustrative, so replace them with your own series before showing real history." },
+    { q: "How does a visitor simulate an incident?", a: "Pressing the status pill moves a card to the next state and calls `onStatusChange`. With `autoplay` a scripted incident runs by itself until someone touches a pill." },
+    { q: "Is colour the only signal?", a: "No. Every state has a text label, each card has an accessible name that includes its state and uptime, and a polite live region announces changes to the summary banner." },
+  ],
+  "skeleton-loader": [
+    { q: "How do I install the skeleton loader?", a: "Run `npx shadcn@latest add @nexus-labs/skeleton-loader`. It adds the component and installs framer-motion." },
+    { q: "How do I use it with my own data?", a: "Wrap your content in `SkeletonLoader`, pass `isLoading` from your fetch state and build the placeholder with `Skeleton`, `SkeletonText` and `SkeletonAvatar`. When `isLoading` turns false the content blurs in." },
+    { q: "What does aria-busy do here?", a: "The wrapper sets `aria-busy` while loading, and a polite live region says \"Loading\" and then \"Loaded\". You can change both phrases with `label` and `loadedLabel`. The placeholder blocks are hidden from screen readers." },
+    { q: "Why does the shimmer look like one wave?", a: "All placeholders share one sweep and each block shows its own slice of it, so the highlight crosses the whole layout together instead of every block pulsing alone." },
+    { q: "Does it respect reduced motion?", a: "Yes. The sweep is turned off, the content appears without the blur, and the placeholders stay as plain grey blocks." },
+  ],
   "animated-countdown": [
     { q: "How do I set the date it counts down to?", a: "Pass `targetDate` as a Date, an ISO string or a timestamp. Without a target it shows a static demo time, which you can set with `initialStaticTime`." },
     { q: "What styles are available?", a: "`variant` can be \"modern\", \"digital\", \"minimal\" or \"classic\", and `size` can be \"sm\", \"md\" or \"lg\". Separators between units are on by default for the digital style." },
