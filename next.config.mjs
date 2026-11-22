@@ -9,6 +9,9 @@ const adsenseFrameHosts =
   "https://googleads.g.doubleclick.net https://*.doubleclick.net https://*.googlesyndication.com https://www.google.com https://*.adtrafficquality.google";
 const adsenseBeaconHosts =
   "https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google https://www.google.com https://csi.gstatic.com";
+// X (Twitter) conversion pixel: the loader (uwt.js) and the beacons it sends.
+const xPixelScriptHosts = "https://static.ads-twitter.com";
+const xPixelBeaconHosts = "https://t.co https://analytics.twitter.com";
 
 const securityHeaders = [
   // Prevents MIME-type sniffing — blocks drive-by downloads and XSS via wrong content type
@@ -26,13 +29,13 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://www.gstatic.com https://static.cloudflareinsights.com ${adsenseScriptHosts}`,
+      `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://www.gstatic.com https://static.cloudflareinsights.com ${xPixelScriptHosts} ${adsenseScriptHosts}`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      `img-src 'self' data: blob: https://images.unsplash.com https://plus.unsplash.com https://i.pravatar.cc https://picsum.photos https://fastly.picsum.photos https://cdn.jsdelivr.net https://cdn.simpleicons.org https://raw.githubusercontent.com https://*.google-analytics.com https://*.googletagmanager.com ${adsenseBeaconHosts}`,
+      `img-src 'self' data: blob: https://images.unsplash.com https://plus.unsplash.com https://i.pravatar.cc https://picsum.photos https://fastly.picsum.photos https://cdn.jsdelivr.net https://cdn.simpleicons.org https://raw.githubusercontent.com https://*.google-analytics.com https://*.googletagmanager.com ${xPixelBeaconHosts} ${adsenseBeaconHosts}`,
       "font-src 'self' https://fonts.gstatic.com",
       // audio and video from this site, plus the short silent clip (a data: URL) that keeps phone audio on the media channel
       "media-src 'self' data: blob:",
-      `connect-src 'self' blob: https://cdn.jsdelivr.net https://*.supabase.co https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.googletagmanager.com https://www.google.com/g/collect https://va.vercel-scripts.com https://vitals.vercel-insights.com https://www.gstatic.com https://cloudflareinsights.com ${adsenseBeaconHosts}`,
+      `connect-src 'self' blob: https://cdn.jsdelivr.net https://*.supabase.co https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.googletagmanager.com https://www.google.com/g/collect https://va.vercel-scripts.com https://vitals.vercel-insights.com https://www.gstatic.com https://cloudflareinsights.com ${xPixelBeaconHosts} ${adsenseBeaconHosts}`,
       "worker-src 'self' blob:",
       `frame-src 'self' https://checkout.stripe.com ${adsenseFrameHosts}`,
       "frame-ancestors 'self'",

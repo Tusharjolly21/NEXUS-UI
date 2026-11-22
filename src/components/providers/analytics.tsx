@@ -11,6 +11,14 @@ const GOOGLE_TAG_ID = "G-LNN2CTHENQ";
 const CLOUDFLARE_TOKEN = "27b8689ab43848efa888f93f6c6e6b02";
 const ADSENSE_CLIENT = "ca-pub-6537827972143266";
 
+/** X conversion tracking base code (pixel `riinx`), exactly as X's Ads Manager provides it. */
+const X_PIXEL_BASE_CODE = `
+!function(e,t,n,s,u,a){e.twq||(s=e.twq=function(){s.exe?s.exe.apply(s,arguments):s.queue.push(arguments);
+},s.version='1.1',s.queue=[],u=t.createElement(n),u.async=!0,u.src='https://static.ads-twitter.com/uwt.js',
+a=t.getElementsByTagName(n)[0],a.parentNode.insertBefore(u,a))}(window,document,'script');
+twq('config','riinx');
+`;
+
 /** localStorage key that switches every analytics tool off in this browser. */
 const OPT_OUT_KEY = "nexus-no-track";
 
@@ -67,7 +75,7 @@ export function AdSenseScript() {
 
 /**
  * Loads Cloudflare Web Analytics, Vercel Web Analytics and Speed Insights (none of them sets cookies)
- * and, once the visitor has accepted cookies, Google Analytics. Nothing loads until the opt-out check
+ * and, once the visitor has accepted cookies, Google Analytics and the X pixel. Nothing loads until the opt-out check
  * has run, so an opted-out visit never reaches any of them (not even for the first page view).
  */
 export function SiteAnalytics() {
@@ -97,6 +105,10 @@ export function SiteAnalytics() {
               gtag('js', new Date());
               gtag('config', '${GOOGLE_TAG_ID}');
             `}
+          </Script>
+          {/* X advertising pixel: sets ad cookies, so it waits for the same "yes" as Google's tag. */}
+          <Script id="x-pixel" strategy="afterInteractive">
+            {X_PIXEL_BASE_CODE}
           </Script>
         </>
       ) : null}
