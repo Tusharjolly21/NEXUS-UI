@@ -2,6 +2,7 @@ import { NextResponse, after } from "next/server";
 import { headers } from "next/headers";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { trackServer } from "@/lib/track-server";
+import { sendXConversion } from "@/lib/x-conversions";
 import { cancelSubscription, planForProductId, subscriptionIdsForPayment, verifyWebhook } from "@/lib/dodo";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +38,7 @@ type DodoSubscription = {
   next_billing_date?: string | null;
   expires_at?: string | null;
   cancel_at_next_billing_date?: boolean | null;
-  customer?: { customer_id?: string | null } | null;
+  customer?: { customer_id?: string | null; email?: string | null } | null;
   metadata?: Metadata;
 };
 
@@ -89,6 +90,8 @@ export async function POST(req: Request) {
   const supabase = getAdminClient();
   // Set when this delivery is a brand-new purchase, so it can be counted once the delivery is safely recorded.
   let purchased: "lifetime" | "annual" | null = null;
+  // Who bought and which payment or subscription it was, for the X conversion sent after the delivery is recorded.
+  let purchaseInfo: { email?: string | null; ref: string } | null = null;
 
   // Idempotency: Dodo retries failed deliveries, so skip anything already processed.
   const { data: existing } = await supabase.from("webhook_events").select("id").eq("id", webhookId).maybeSingle();
@@ -124,7 +127,10 @@ export async function POST(req: Request) {
             });
         if (error) throw error;
         console.log(`[dodo-webhook] lifetime order user=${userId} payment=${payment.payment_id}`);
-        if (!found) purchased = "lifetime";
+        if (!found) {
+          purchased = "lifetime";
+          purchaseInfo = { email: payment.customer?.email, ref: payment.payment_id };
+        }
       } else if (lifetimeItem) {
         // A paid lifetime purchase that can't be tied to an account (no user_id in the metadata, for
         // example from a payment link made in the Dodo dashboard). Nothing can be granted here, so make
@@ -207,6 +213,7 @@ export async function POST(req: Request) {
             .insert({ user_id: userId, provider_subscription_id: sub.subscription_id, ...fields });
           if (error) throw error;
           purchased = "annual";
+          purchaseInfo = { email: sub.customer?.email, ref: sub.subscription_id };
         } else {
           // Same case for the yearly plan: a subscription we have no row for and can't tie to an account.
           console.error(
@@ -228,6 +235,25 @@ export async function POST(req: Request) {
   if (purchased) {
     const plan = purchased;
     after(() => trackServer("purchase_completed", { plan }, req.headers));
+  }
+  // Tell X about the purchase from here, where it is confirmed (never from the browser). Production only, and
+  // only once X_PURCHASE_EVENT_ID (the event ID from X Events Manager) is set. The buyer's email is hashed
+  // in x-conversions. The payment or subscription ID is the conversion_id, so a future web-pixel purchase
+  // event can send the same one and X counts it once.
+  const xPurchaseEventId = process.env.X_PURCHASE_EVENT_ID;
+  if (purchaseInfo && xPurchaseEventId && process.env.VERCEL_ENV === "production") {
+    const info = purchaseInfo;
+    after(async () => {
+      const result = await sendXConversion({
+        eventId: xPurchaseEventId,
+        conversionId: info.ref,
+        email: info.email ?? undefined,
+        eventSourceUrl: "https://nexus-ui.com/pricing",
+      });
+      if (!result.ok) {
+        console.error(`[x-conversions] purchase not sent: ${result.reason}${result.status ? ` (${result.status})` : ""}${result.detail ? ` ${result.detail}` : ""}`);
+      }
+    });
   }
   return NextResponse.json({ received: true });
 }
