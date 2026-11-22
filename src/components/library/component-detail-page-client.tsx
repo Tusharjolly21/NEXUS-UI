@@ -391,17 +391,18 @@ function Stage({
 
   return (
     <div className={cn("rounded-tile p-3", TINT_CLASSES[tint])}>
-      {locked ? null : (
-        <FullscreenStage open={full} onClose={() => setFull(false)} title={title}>
-          {(n) => (
-            <AutoplaySound allow>
+      {/* Full screen is open to everyone. Without Pro the piece sits inside the same Pro-preview shield as on the page. */}
+      <FullscreenStage open={full} onClose={() => setFull(false)} title={title}>
+        {(n) => (
+          <AutoplaySound allow>
+            <PreviewShield active={locked} className="contents">
               <FitPreview key={n}>
                 <DynamicPreview exportName={exportName} compact={false} />
               </FitPreview>
-            </AutoplaySound>
-          )}
-        </FullscreenStage>
-      )}
+            </PreviewShield>
+          </AutoplaySound>
+        )}
+      </FullscreenStage>
       <div className="flex flex-wrap items-center justify-between gap-2 px-1 pb-3">
         <div role="tablist" aria-label={`${title} view`} className="flex gap-1 rounded-full bg-card/80 p-1">
           {(["preview", "code"] as const).map((v) => (
@@ -440,33 +441,15 @@ function Stage({
               Replay
             </button>
           ) : null}
-          {locked ? (
-            <button
-              type="button"
-              onClick={() => requestUpgrade(name, "full-screen preview")}
-              aria-label="Full-screen preview is part of Pro"
-              className="pg-glass relative grid size-9 place-items-center rounded-full bg-card text-foreground"
-            >
-              <Expand className="size-4" aria-hidden />
-              {/* Same arrows as the unlocked button, with a small lock on its corner to mark it Pro */}
-              <span
-                aria-hidden
-                className="absolute -right-1 -top-1 grid size-[17px] place-items-center rounded-full bg-foreground text-background ring-2 ring-card"
-              >
-                <Lock className="size-[9px]" strokeWidth={3} />
-              </span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setFull(true)}
-              aria-label={`Show ${title} full screen`}
-              aria-haspopup="dialog"
-              className="pg-glass grid size-9 place-items-center rounded-full bg-card text-foreground"
-            >
-              <Expand className="size-4" aria-hidden />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setFull(true)}
+            aria-label={`Show ${title} full screen`}
+            aria-haspopup="dialog"
+            className="pg-glass grid size-9 place-items-center rounded-full bg-card text-foreground"
+          >
+            <Expand className="size-4" aria-hidden />
+          </button>
         </div>
       </div>
 
