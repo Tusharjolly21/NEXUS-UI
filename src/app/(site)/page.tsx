@@ -36,7 +36,7 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 export const metadata: Metadata = {
   ...createMetadata(
     { title: { absolute: `${siteConfig.siteName} — ${siteConfig.tagline}` }, description: siteConfig.description, alternates: { canonical: "/" } },
-    { title: "Animated React components, blocks and templates" },
+    { title: "Animated React components, blocks and templates", shot: "wall" },
   ),
 };
 

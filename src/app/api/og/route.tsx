@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { siteConfig } from "@/lib/seo";
 import { ogText } from "@/lib/og-text";
+import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 
 export const runtime = "nodejs";
 
@@ -21,7 +22,8 @@ export const runtime = "nodejs";
  *   description  one or two lines; cut at a word with an ellipsis
  *   kind         a small pill: Component, Template, Block, Video, Docs…
  *   pro          "1" adds a Pro pill next to it
- *   shot         "<components|blocks|templates|videos>/<slug>", the picture
+ *   shot         "<components|blocks|templates|videos>/<slug>", the picture, or "wall" for the homepage
+ *                (a tilted wall of real template screenshots, so the link shows what the library makes)
  */
 
 const RAINBOW = ["#0090f7", "#6e5bff", "#ba62fc", "#f2416b", "#f55600"];
@@ -42,6 +44,41 @@ const SHOT_PATH: Record<string, (slug: string) => string> = {
   templates: (s) => `og-shots/templates/${s}.jpg`,
   videos: (s) => `videos/previews/${s}.jpg`,
 };
+
+/**
+ * The homepage card: a tilted mosaic of real pieces (templates, components, blocks) running edge to edge,
+ * with the brand, headline and the live counts on a clean panel in the middle. Five columns of five.
+ * Pictures are shrunk with sharp first, so twenty-five of them stay light enough for a scraper's timeout.
+ */
+type WallKind = "templates" | "components" | "blocks";
+const WALL: [WallKind, string][][] = [
+  [["templates", "helix-ai-platform"], ["components", "halo-hero"], ["blocks", "mk-beam-pricing"], ["templates", "kiln"], ["components", "thermo-dial"]],
+  [["components", "liquid-gauge"], ["templates", "pulse-landing"], ["blocks", "mk-circuit-hero"], ["components", "vinyl-player"], ["templates", "afterglow"]],
+  [["templates", "orbit-ai-page"], ["components", "svg-noise-shader"], ["templates", "tally"], ["blocks", "mk-cursor-crowd-hero"], ["components", "sound-mark"]],
+  [["components", "dynamic-island"], ["templates", "side-b"], ["blocks", "bento-spotlight"], ["components", "wallet-stack"], ["templates", "wayfare"]],
+  [["templates", "skein"], ["components", "tilt-pass"], ["templates", "orion-ai-ops"], ["components", "squeeze-progress"], ["blocks", "mk-halo-hero"]],
+];
+
+const SHOT_DIR: Record<WallKind, string> = {
+  templates: "og-shots/templates",
+  components: "og-shots/components",
+  blocks: "og-shots/blocks",
+};
+
+async function loadWall() {
+  const { default: sharp } = await import("sharp");
+  return Promise.all(
+    WALL.map((col) =>
+      Promise.all(
+        col.map(async ([kind, slug]) => {
+          const file = join(process.cwd(), "public", SHOT_DIR[kind], `${slug}.jpg`);
+          const small = await sharp(file).resize({ width: 340 }).jpeg({ quality: 72 }).toBuffer();
+          return `data:image/jpeg;base64,${small.toString("base64")}`;
+        }),
+      ),
+    ),
+  );
+}
 
 async function loadShot(value: string | null) {
   const m = /^(components|blocks|templates|videos)\/([a-z0-9-]{1,80})$/.exec(value ?? "");
@@ -158,7 +195,94 @@ export async function GET(request: Request) {
       </div>
     ) : null;
 
-  const card = shot ? (
+  const wallShots = searchParams.get("shot") === "wall" ? await loadWall() : null;
+
+  const TILE_W = 244;
+  const TILE_H = 183;
+  const GAP = 16;
+  // each column sits at its own height, so the mosaic reads as a wall and not a grid
+  const COL_SHIFT = [-30, -110, -10, -90, -50];
+  const stats: [string, string, string][] = [
+    [String(CATALOG_COUNTS.components), "components", RAINBOW[0]],
+    [String(CATALOG_COUNTS.blocks), "blocks", RAINBOW[2]],
+    [String(CATALOG_COUNTS.templates), "templates", RAINBOW[4]],
+  ];
+
+  const card = wallShots ? (
+    <div style={{ position: "relative", width: "100%", height: "100%", display: "flex", background: "#f5f5f7", fontFamily: "Inter", overflow: "hidden" }}>
+      <div
+        style={{
+          position: "absolute",
+          left: -50,
+          top: -180,
+          width: 5 * TILE_W + 4 * GAP,
+          height: 5 * TILE_H + 4 * GAP,
+          display: "flex",
+          transform: "rotate(-8deg)",
+        }}
+      >
+        {wallShots.map((col, ci) => (
+          <div key={ci} style={{ display: "flex", flexDirection: "column", marginLeft: ci ? GAP : 0, marginTop: COL_SHIFT[ci] }}>
+            {col.map((src, ri) => (
+              <div
+                key={ri}
+                style={{
+                  display: "flex",
+                  width: TILE_W,
+                  height: TILE_H,
+                  marginTop: ri ? GAP : 0,
+                  padding: 5,
+                  borderRadius: 20,
+                  background: "#fff",
+                  boxShadow: "0 0 0 1px rgba(0,0,0,.06), 0 18px 30px -18px rgba(0,0,0,.35)",
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element -- share-card renderer, not a page */}
+                <img src={src} alt="" width={TILE_W - 10} height={TILE_H - 10} style={{ width: TILE_W - 10, height: TILE_H - 10, borderRadius: 15, objectFit: "cover" }} />
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+      {/* a light veil pushes the mosaic back so the panel is what the eye lands on */}
+      <div style={{ position: "absolute", left: 0, top: 0, width: W, height: H, display: "flex", background: "rgba(245,245,247,0.12)" }} />
+      <div
+        style={{
+          position: "absolute",
+          left: 170,
+          top: 150,
+          width: 860,
+          height: 330,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          padding: 40,
+          borderRadius: 40,
+          background: "rgba(255,255,255,0.94)",
+          boxShadow: "0 0 0 1px rgba(0,0,0,.06), 0 60px 110px -34px rgba(0,0,0,.5), 0 20px 40px -24px rgba(0,0,0,.25)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Brand />
+          <div style={{ fontSize: 22, fontWeight: 600, color: INK, opacity: 0.45 }}>{domain}</div>
+        </div>
+        <div style={{ display: "flex", fontSize: 52, fontWeight: 600, color: INK, letterSpacing: "-0.04em", lineHeight: 1.04 }}>{title}</div>
+        <div style={{ display: "flex", gap: 10 }}>
+          {stats.map(([n, label, color]) => (
+            <div
+              key={label}
+              style={{ display: "flex", alignItems: "center", gap: 9, height: 42, padding: "0 18px", borderRadius: 999, background: "#f5f5f7", boxShadow: "0 0 0 1px rgba(0,0,0,.07)" }}
+            >
+              <div style={{ width: 10, height: 10, borderRadius: 999, background: color }} />
+              <div style={{ fontSize: 20, fontWeight: 600, color: INK }}>{n}</div>
+              <div style={{ fontSize: 20, color: MUTED }}>{label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{ position: "absolute", left: 0, bottom: 0, width: W, height: 8, display: "flex", background: `linear-gradient(90deg, ${RAINBOW.join(", ")})` }} />
+    </div>
+  ) : shot ? (
     // split: words on the left, the picture on the right in a white frame that runs off the edge
     <div style={{ position: "relative", width: "100%", height: "100%", display: "flex", background: "#f5f5f7", fontFamily: "Inter" }}>
       <Backdrop />
