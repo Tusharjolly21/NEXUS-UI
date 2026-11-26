@@ -55,7 +55,7 @@ export default function IntroductionPage() {
             <Link href="/blocks" className={link}>
               blocks
             </Link>{" "}
-            (page sections that come in several layouts) and {CATALOG_COUNTS.templates}{" "}
+            (page sections in {CATALOG_COUNTS.blockCategories} categories) and {CATALOG_COUNTS.templates}{" "}
             <Link href="/templates" className={link}>
               templates
             </Link>{" "}

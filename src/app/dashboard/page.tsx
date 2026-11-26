@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
 import { getApiTokenInfo, getUserEntitlements } from "@/lib/entitlements";
-import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { OverviewView } from "@/components/dashboard/overview-view";
 import { summarisePlan } from "@/lib/plan";
@@ -34,10 +33,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const isPremium = plan.hasAccess;
   const token = { exists: !!tokenInfo, used: !!tokenInfo?.last_used_at };
 
-  const freeBlocks = blocksManifest.filter((b) => !b.premium).length;
   const counts = {
     components: { yours: isPremium ? CATALOG_COUNTS.components : CATALOG_COUNTS.freeComponents, total: CATALOG_COUNTS.components },
-    blocks: { yours: isPremium ? CATALOG_COUNTS.blocks : freeBlocks, total: CATALOG_COUNTS.blocks },
+    blocks: { yours: isPremium ? CATALOG_COUNTS.blocks : CATALOG_COUNTS.freeBlocks, total: CATALOG_COUNTS.blocks },
     templates: { yours: isPremium ? CATALOG_COUNTS.templates : CATALOG_COUNTS.freeTemplates, total: CATALOG_COUNTS.templates },
     proComponents: CATALOG_COUNTS.proComponents,
     freeComponents: CATALOG_COUNTS.freeComponents,

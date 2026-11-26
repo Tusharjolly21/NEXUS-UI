@@ -1,3 +1,4 @@
+import { blockVariants } from "@/lib/catalog/block-variants";
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import componentCounts from "@/lib/catalog/component-counts.generated.json";
 import { templates } from "@/lib/catalog/templates";
@@ -11,13 +12,21 @@ import { ICONS, ICON_CATEGORIES } from "@/lib/icons/catalog";
  * before every build and dev start), not from `libraryComponents`: importing that pulls the whole live-preview
  * registry into the layout, and every page then downloads it.
  */
+/** A block is free unless it, or the category it sits in, is Pro (the same rule the Blocks page uses). */
+const categoryIsPro = new Map(blocksManifest.map((b) => [b.slug, b.premium]));
+const freeBlockCount = blockVariants.filter((v) => !(v.premium ?? categoryIsPro.get(v.block))).length;
+
 export const CATALOG_COUNTS = {
   components: componentCounts.components,
   freeComponents: componentCounts.components - componentCounts.pro,
   proComponents: componentCounts.pro,
   templates: templates.length,
   freeTemplates: templates.filter((t) => !t.premium).length,
-  blocks: blocksManifest.length,
+  /** Individual blocks (page sections), the number the Blocks page shows. */
+  blocks: blockVariants.length,
+  freeBlocks: freeBlockCount,
+  /** The categories blocks are grouped into (Hero, Pricing, FAQ…). */
+  blockCategories: blocksManifest.length,
   videos: videos.length,
   freeVideos: videos.filter((v) => !v.premium).length,
   icons: ICONS.length,
