@@ -12,6 +12,8 @@ import { RAINBOW_HUES } from "@/components/site/rainbow-word";
  * copy `3x2/<CODE>.svg` from the MIT-licensed `country-flag-icons` package (licence kept beside the flags).
  */
 export const MEMBERS: { name: string; country: string; code: string; face?: number }[] = [
+  // All six hand-drawn faces are taken, so this one shares Jon Massey's; they are never next to each other.
+  { name: "未寒", country: "United States", code: "us", face: 0 },
   { name: "Fahad", country: "Malaysia", code: "my", face: 5 },
   { name: "Zhihui Liu", country: "Japan", code: "jp", face: 4 },
   { name: "Miao Deng", country: "China", code: "cn", face: 3 },
