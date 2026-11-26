@@ -448,6 +448,16 @@ import { ChargeMenu } from "@/components/charge-menu";
 import { FocusBoard } from "@/components/focus-board";
 import { CoverPlanner } from "@/components/cover-planner";
 import { WaveTrimmer } from "@/components/wave-trimmer";
+import { ThinkingMatrix } from "@/components/thinking-matrix";
+import { BorderBeam } from "@/components/border-beam";
+import { CouponApply } from "@/components/coupon-apply";
+import { DictationCard } from "@/components/dictation-card";
+import { ShapeshiftHero } from "@/components/shapeshift-hero";
+import { BurstLike } from "@/components/burst-like";
+import { HaloSwitch } from "@/components/halo-switch";
+import { RimCard } from "@/components/rim-card";
+import { GlowDock } from "@/components/glow-dock";
+import { SyncRing } from "@/components/sync-ring";
 
 const DEMO_AVATARS = [
   { fallback: "PS", tooltip: "Priya Sharma", bgColor: "#06b6d4" },
@@ -7075,6 +7085,190 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => (
       <div className="mx-auto flex w-full max-w-[460px] justify-center">
         <WaveTrimmer
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "thinking-matrix": {
+    lightOnly: true,
+    componentName: "ThinkingMatrix",
+    importPath: "@/components/thinking-matrix",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "pattern", label: "Pattern", options: ["spiral", "ripple", "signals", "orbit"], defaultValue: "spiral" },
+      { kind: "select", prop: "tint", label: "Tint", options: ["amber", "ice", "mint"], defaultValue: "amber" },
+      { kind: "range", prop: "speed", label: "Speed", min: 0.5, max: 2, step: 0.1, unit: "x", defaultValue: 1 },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[420px] justify-center">
+        <ThinkingMatrix pattern={v.pattern as "spiral" | "ripple" | "signals" | "orbit"} tint={v.tint as "amber" | "ice" | "mint"} speed={v.speed as number} />
+      </div>
+    ),
+  },
+  "border-beam": {
+    lightOnly: true,
+    componentName: "BorderBeam",
+    importPath: "@/components/border-beam",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "palette", label: "Palette", options: ["spectrum", "neon", "sunset", "aurora", "ocean"], defaultValue: "spectrum" },
+      { kind: "select", prop: "size", label: "Size", options: ["sm", "md", "lg"], defaultValue: "md" },
+      { kind: "range", prop: "duration", label: "Lap time", min: 1, max: 8, step: 0.2, unit: "s", defaultValue: 2.6 },
+      { kind: "range", prop: "strength", label: "Strength", min: 0.2, max: 2, step: 0.1, defaultValue: 1 },
+      { kind: "toggle", prop: "twin", label: "Twin beams", defaultValue: false },
+      { kind: "toggle", prop: "reverse", label: "Counterclockwise", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[420px] justify-center">
+        <BorderBeam radius={20} palette={v.palette as "spectrum" | "neon" | "sunset" | "aurora" | "ocean"} size={v.size as "sm" | "md" | "lg"} duration={v.duration as number} strength={v.strength as number} twin={v.twin as boolean} direction={v.reverse ? "counterclockwise" : "clockwise"}>
+          <div className="rounded-[20px] bg-[#070707] px-6 py-5 text-[15px] text-white/80">Ask anything, and the light follows.</div>
+        </BorderBeam>
+      </div>
+    ),
+  },
+  "coupon-apply": {
+    lightOnly: true,
+    componentName: "CouponApply",
+    importPath: "@/components/coupon-apply",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <CouponApply
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "dictation-card": {
+    lightOnly: true,
+    componentName: "DictationCard",
+    importPath: "@/components/dictation-card",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <DictationCard
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "shapeshift-hero": {
+    lightOnly: true,
+    componentName: "ShapeshiftHero",
+    importPath: "@/components/shapeshift-hero",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "dwell", label: "Seconds per scene", min: 0, max: 12, step: 1, unit: "s", defaultValue: 6 },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[900px] justify-center">
+        <ShapeshiftHero key={String(v.dwell)} dwell={v.dwell as number} />
+      </div>
+    ),
+  },
+  "burst-like": {
+    lightOnly: true,
+    componentName: "BurstLike",
+    importPath: "@/components/burst-like",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[400px] justify-center">
+        <BurstLike
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "halo-switch": {
+    lightOnly: true,
+    componentName: "HaloSwitch",
+    importPath: "@/components/halo-switch",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[400px] justify-center">
+        <HaloSwitch
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "rim-card": {
+    lightOnly: true,
+    componentName: "RimCard",
+    importPath: "@/components/rim-card",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[400px] justify-center">
+        <RimCard
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "glow-dock": {
+    lightOnly: true,
+    componentName: "GlowDock",
+    importPath: "@/components/glow-dock",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[400px] justify-center">
+        <GlowDock
+          key={`${String(v.autoplay)}`}
+          autoplay={v.autoplay as boolean}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  },
+  "sync-ring": {
+    lightOnly: true,
+    componentName: "SyncRing",
+    importPath: "@/components/sync-ring",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[400px] justify-center">
+        <SyncRing
           key={`${String(v.autoplay)}`}
           autoplay={v.autoplay as boolean}
           enableSound={v.enableSound as boolean}

@@ -19776,6 +19776,392 @@ export default function Page() {
 `,
     tailwindSource: tw,
   },
+  {
+    slug: "thinking-matrix",
+    name: "Thinking Matrix",
+    registryCliName: "thinking-matrix",
+    description:
+      "A thinking pill with a tiny panel of lamps next to its label: a seven-by-seven grid of amber squares like an old instrument panel. Choose a pattern and the lamps play it: rings rippling out from the centre, a light winding in to the middle and back, sparks wandering the grid with fading trails, or two lights circling in opposite directions, while a warm highlight sweeps across the label.",
+    categorySlug: "loaders",
+    tags: ["thinking indicator", "ai loading", "loading indicator", "lamp matrix", "led matrix", "ai thinking", "status pill", "loader", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 261,
+    createdAt: "2026-11-26",
+    animationKinds: ["gradient", "type"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "label", type: "string", defaultValue: "\"Thinking\"", description: "The words next to the lamps. Screen readers hear them once, as a status." },
+      { name: "pattern", type: "\"spiral\" | \"ripple\" | \"signals\" | \"orbit\"", defaultValue: "\"spiral\"", description: "What the lamps do: wind in and out, ripple from the middle, send sparks across the grid or circle in opposite directions." },
+      { name: "tint", type: "\"amber\" | \"ice\" | \"mint\"", defaultValue: "\"amber\"", description: "The colour of the lamps." },
+      { name: "speed", type: "number", defaultValue: "1", description: "How fast the pattern runs, 0.5 to 2." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the pill." },
+    ],
+    Preview: Previews.PreviewThinkingMatrix,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { ThinkingMatrix } from "@/components/thinking-matrix";
+
+export default function Page() {
+  return (
+    <ThinkingMatrix label="Thinking" pattern="ripple" />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "border-beam",
+    name: "Border Beam",
+    registryCliName: "border-beam",
+    description:
+      "A beam of light that runs around the edge of whatever you wrap in it: a bright head fading to nothing along its tail, a sharp thin line on the border with a tight glow and a wide one that washes the content near the edge. Pick a palette, how much of the edge it covers, its speed and direction, or run twin beams that chase each other. It quickens while anything inside has focus.",
+    categorySlug: "motion-effects",
+    tags: ["border beam", "animated border", "glowing border", "border light", "gradient border", "running light", "ai input glow", "magic border", "motion kit"],
+    premium: true,
+    trendingScore: 261,
+    createdAt: "2026-11-26",
+    animationKinds: ["gradient", "hover"],
+    dependencies: [],
+    props: [
+      { name: "children", type: "ReactNode", description: "What the beam runs around. Leave it out to see a showcase of examples." },
+      { name: "radius", type: "number", defaultValue: "20", description: "Corner radius of the thing inside, in px. Use 999 for a pill or a circle." },
+      { name: "palette", type: "\"spectrum\" | \"neon\" | \"sunset\" | \"aurora\" | \"ocean\" | string[]", defaultValue: "\"spectrum\"", description: "A named palette, or your own colours from the head of the beam to its tail." },
+      { name: "size", type: "\"sm\" | \"md\" | \"lg\" | number", defaultValue: "\"md\"", description: "How much of the edge the beam covers, or a fraction from 0.05 to 0.9." },
+      { name: "duration", type: "number", defaultValue: "2.6", description: "Seconds for one lap." },
+      { name: "direction", type: "\"clockwise\" | \"counterclockwise\"", defaultValue: "\"clockwise\"", description: "Which way the beam travels." },
+      { name: "strength", type: "number", defaultValue: "1", description: "How bright the line and its glow are, 0 to 2." },
+      { name: "twin", type: "boolean", defaultValue: "false", description: "Two beams chasing each other from opposite sides." },
+      { name: "surface", type: "\"dark\" | \"light\"", defaultValue: "\"dark\"", description: "What it sits on. On dark surfaces the light is added; on light ones it is painted." },
+      { name: "active", type: "boolean", defaultValue: "true", description: "Set to false and the beam fades out." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the wrapper." },
+    ],
+    Preview: Previews.PreviewBorderBeam,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { BorderBeam } from "@/components/border-beam";
+
+export default function Page() {
+  return (
+    <BorderBeam radius={20} palette="aurora">
+      <div className="rounded-[20px] bg-[#070707] px-6 py-4 text-white">Ask anything</div>
+    </BorderBeam>
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "coupon-apply",
+    name: "Coupon Apply",
+    registryCliName: "coupon-apply",
+    description:
+      "A checkout where the coupon is a holographic foil stamp you can watch being spent. It tilts toward your pointer with the foil sliding through peach, lilac, sky and mint; apply it and it dissolves into thousands of specks that fall in a whirlpool down the order and pour into the total, where the old price is struck through and the new one rises into place. Remove it and the stamp comes back.",
+    categorySlug: "cards",
+    tags: ["coupon", "promo code", "discount code", "checkout", "apply coupon", "holographic", "foil", "order summary", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 261,
+    createdAt: "2026-11-26",
+    animationKinds: ["press", "hover", "3d"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "code", type: "string", defaultValue: "\"WELCOME20\"", description: "The coupon code on the stamp." },
+      { name: "brand", type: "string", description: "Name shown on the stamp." },
+      { name: "discount", type: "number", defaultValue: "0.2", description: "The discount as a fraction from 0 to 1." },
+      { name: "subtotal", type: "number", description: "The order total before the coupon." },
+      { name: "delivery", type: "number", description: "The delivery fee." },
+      { name: "currency", type: "string", description: "Currency symbol." },
+      { name: "onApply", type: "(code: string) => void", description: "Called with the code when it is applied." },
+      { name: "onRemove", type: "(code: string) => void", description: "Called with the code when it is removed." },
+      { name: "onPlaceOrder", type: "() => void", description: "Called when the order button is pressed." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewCouponApply,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { CouponApply } from "@/components/coupon-apply";
+
+export default function Page() {
+  return (
+    <CouponApply code="WELCOME20" discount={0.2} onApply={(code) => console.log(code)} />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "dictation-card",
+    name: "Dictation Card",
+    registryCliName: "dictation-card",
+    description:
+      "Dictation you can watch turning into words. A field of tiny dots rises into a mound of light that swells with your voice; each recognised word is flung off the top as a spray of dots that arcs up to its place on the line, arriving blurred and settling sharp. A clock counts up in the corner, and when you stop the mound sinks into a thin line while it finishes thinking. The demo plays a script, so feed in your own words to use it for real.",
+    categorySlug: "ai-components",
+    tags: ["dictation", "voice input", "speech to text", "voice typing", "microphone", "ai input", "voice", "transcription", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 261,
+    createdAt: "2026-11-26",
+    animationKinds: ["type", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "script", type: "string", description: "What the demo hears, word by word." },
+      { name: "placeholder", type: "string", description: "Text shown before anything is said." },
+      { name: "onDone", type: "(text: string) => void", description: "Called with the full text when it has finished." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays a short demo by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewDictationCard,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { DictationCard } from "@/components/dictation-card";
+
+export default function Page() {
+  return (
+    <DictationCard script="Remind me to send the invoice on Friday." onDone={(text) => console.log(text)} />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "shapeshift-hero",
+    name: "Shapeshift Hero",
+    registryCliName: "shapeshift-hero",
+    description:
+      "A studio landing hero where eight thousand points of light hold a shape and shift: a sphere, a knotted ring, a spiral galaxy with a glowing core, a lattice cube that shimmers into moiré, and the studio's own name. Each scene has its own page and particle colours; moving on, the particles scatter into a drifting cloud and pour into the next shape. Drag to spin it, move over it and the points part round your pointer.",
+    categorySlug: "motion-effects",
+    tags: ["particle hero", "shapeshift", "particles", "landing hero", "3d particles", "canvas hero", "galaxy", "hero section", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 261,
+    createdAt: "2026-11-26",
+    animationKinds: ["3d", "drag", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "scenes", type: "ShapeshiftScene[]", defaultValue: "SCENES", description: "Each scene is { name, shape, bg, ink, dots }. Shapes: sphere, knot, galaxy, lattice and word." },
+      { name: "brand", type: "[string, string]", defaultValue: "[\"LUMEN\", \"•FIELD\"]", description: "The brand, shown top left and spelt out in particles by the word shape." },
+      { name: "headline", type: "[string, string]", description: "The two lines of the headline." },
+      { name: "place", type: "string", description: "Small line above the headline." },
+      { name: "questions", type: "string[]", description: "Questions the search pill types out." },
+      { name: "cta", type: "string", defaultValue: "\"Start a project\"", description: "The button text." },
+      { name: "onCta", type: "() => void", description: "Called when the button is pressed." },
+      { name: "dwell", type: "number", defaultValue: "6", description: "Seconds on each scene before moving on; 0 to stay." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewShapeshiftHero,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { ShapeshiftHero } from "@/components/shapeshift-hero";
+
+export default function Page() {
+  return (
+    <ShapeshiftHero brand={["NORTH", "•LIGHT"]} headline={["Every idea has", "a shape of its own."]} onCta={() => {}} />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "burst-like",
+    name: "Burst Like",
+    registryCliName: "burst-like",
+    description:
+      "A like button that goes off like a small firework. Tap it and the pill squeezes, a violet ring shoots out from the heart, a dozen sparks burst round it, the heart pops back filled with a pink-to-blue gradient, the count rolls up a digit and the rim lights from the heart across to the far end. Tap again and the count rolls back and the light sinks.",
+    categorySlug: "inputs-controls",
+    tags: ["like button", "heart button", "favorite button", "burst", "firework", "like animation", "reaction", "count", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 261,
+    createdAt: "2026-11-26",
+    animationKinds: ["spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "count", type: "number", description: "The count without your like." },
+      { name: "liked", type: "boolean", description: "Controlled liked state." },
+      { name: "defaultLiked", type: "boolean", defaultValue: "false", description: "Initial liked state when uncontrolled." },
+      { name: "onChange", type: "(liked: boolean) => void", description: "Called when the visitor likes or unlikes." },
+      { name: "bare", type: "boolean", defaultValue: "false", description: "Drop the dark cell. It still needs a dark background." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Likes and unlikes by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewBurstLike,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { BurstLike } from "@/components/burst-like";
+
+export default function Page() {
+  return (
+    <BurstLike count={128} onChange={(liked) => console.log(liked)} />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "halo-switch",
+    name: "Halo Switch",
+    registryCliName: "halo-switch",
+    description:
+      "A switch whose rim lights up. Press and the pearl knob flattens into an oval; let go and it slides across, stretched by its speed, with the light travelling underneath. When it lands the light spreads round the whole edge of the track: gold along the top, pink and violet at the knob's end, blue and cyan underneath, with the colours slowly drifting. Turn it off and the light draws back to a faint arc. It is a real switch, with keyboard support, a focus ring and aria-checked.",
+    categorySlug: "inputs-controls",
+    tags: ["toggle switch", "switch", "toggle", "halo", "rim light", "glowing switch", "on off", "checkbox", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 261,
+    createdAt: "2026-11-26",
+    animationKinds: ["spring", "press", "drag"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "checked", type: "boolean", description: "Controlled state." },
+      { name: "defaultChecked", type: "boolean", defaultValue: "false", description: "Initial state when uncontrolled." },
+      { name: "onChange", type: "(checked: boolean) => void", description: "Called when the switch is flipped." },
+      { name: "label", type: "string", description: "Read out by screen readers." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Stops the switch responding." },
+      { name: "bare", type: "boolean", defaultValue: "false", description: "Drop the dark cell. The switch still needs a dark background." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flips by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewHaloSwitch,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { HaloSwitch } from "@/components/halo-switch";
+
+export default function Page() {
+  return (
+    <HaloSwitch label="Notifications" onChange={(on) => console.log(on)} />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "rim-card",
+    name: "Rim Card",
+    registryCliName: "rim-card",
+    description:
+      "A selectable card whose rim catches fire. At rest only a faint film of light lies along its edge; tap and it dips under your finger, a dot in the corner swells into a white tick and the whole rim ignites: gold across the top, pink and violet down the right, blue underneath, with a soft halo and slowly drifting colours. Tap again and the light sinks back. It is a real toggle button with aria-pressed.",
+    categorySlug: "cards",
+    tags: ["selectable card", "radio card", "option card", "plan card", "glowing border", "rim light", "toggle card", "select card", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 261,
+    createdAt: "2026-11-26",
+    animationKinds: ["press", "gradient"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", description: "The card title." },
+      { name: "kicker", type: "string", description: "Small line above the title." },
+      { name: "meta", type: "string", description: "Small line under the title." },
+      { name: "selected", type: "boolean", description: "Controlled state." },
+      { name: "defaultSelected", type: "boolean", defaultValue: "false", description: "Initial state when uncontrolled." },
+      { name: "onChange", type: "(selected: boolean) => void", description: "Called when the card is selected or cleared." },
+      { name: "bare", type: "boolean", defaultValue: "false", description: "Drop the dark cell. It still needs a dark background." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Selects and clears itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewRimCard,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { RimCard } from "@/components/rim-card";
+
+export default function Page() {
+  return (
+    <RimCard title="Studio" kicker="Plan" meta="Billed yearly" onChange={(on) => console.log(on)} />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "glow-dock",
+    name: "Glow Dock",
+    registryCliName: "glow-dock",
+    description:
+      "A tab dock with a lens of light that slides between its icons. The selected icon sits in a rounded square ringed with thin-film light; pick another and the lens stretches toward it, its leading edge leaping ahead while the trailing edge follows, then gathers itself round the new icon. The dock's own edge glows where the lens is, and the light has a natural falloff with a faint breathing flicker. Arrow keys move between tabs.",
+    categorySlug: "navbars",
+    tags: ["dock", "tab bar", "bottom navigation", "tab dock", "glow", "nav dock", "icon dock", "lens", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 261,
+    createdAt: "2026-11-26",
+    animationKinds: ["spring", "hover", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "DockItem[]", defaultValue: "DEMO", description: "The tabs, each as { id, label, icon } with the icon as an SVG path." },
+      { name: "value", type: "string", description: "Controlled selected tab id." },
+      { name: "defaultValue", type: "string", defaultValue: "\"music\"", description: "Initial tab when uncontrolled." },
+      { name: "onChange", type: "(id: string) => void", description: "Called with the tab id when one is picked." },
+      { name: "bare", type: "boolean", defaultValue: "false", description: "Drop the dark cell. It still needs a dark background." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Moves between tabs by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewGlowDock,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { GlowDock } from "@/components/glow-dock";
+
+export default function Page() {
+  return (
+    <GlowDock defaultValue="music" onChange={(id) => console.log(id)} />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "sync-ring",
+    name: "Sync Ring",
+    registryCliName: "sync-ring",
+    description:
+      "A sync button that fills its own rim with light. At rest it is a dark glass disc reading 0% and Tap to sync, with a small spark breathing on its top edge. Tap and the spark becomes the head of a line of thin-film light running clockwise round the rim in the uneven steps real syncs take while the number counts up. At the end the ring closes and brightens, a white disc with a tick replaces the number, and a comet runs once round the outside and flies off.",
+    categorySlug: "loaders",
+    tags: ["sync button", "progress ring", "circular progress", "sync", "upload progress", "ring loader", "glow ring", "loading button", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 261,
+    createdAt: "2026-11-26",
+    animationKinds: ["press", "gradient"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "progress", type: "number", description: "Drive it yourself, 0 to 100. Leave it out and a tap runs a demo sync." },
+      { name: "onSynced", type: "() => void", description: "Called when the ring closes." },
+      { name: "bare", type: "boolean", defaultValue: "false", description: "Drop the dark cell. It still needs a dark background." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Sound level, 0 to 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Runs a sync by itself until the visitor touches it. Never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: "\"\"", description: "Extra classes for the outer element." },
+    ],
+    Preview: Previews.PreviewSyncRing,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+"use client";
+
+import { SyncRing } from "@/components/sync-ring";
+
+export default function Page() {
+  return (
+    <SyncRing onSynced={() => console.log("synced")} />
+  );
+}
+`,
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */
