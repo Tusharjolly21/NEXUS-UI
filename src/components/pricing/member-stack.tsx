@@ -4,13 +4,13 @@ import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Flag } from "@/components/pricing/flag";
-import { MEMBERS } from "@/components/pricing/members";
+import { MEMBERS as ALL_MEMBERS } from "@/components/pricing/members";
 
 /** The ink-line faces in /public/avatars (face-0.svg to face-5.svg), each on its own pastel. */
 const FACE_BACKGROUNDS = ["#e7dcff", "#cdeee0", "#ffe1d6", "#fff0c9", "#d6ebff", "#ffdcec"];
 const SHOWN = 4;
 
-type Member = (typeof MEMBERS)[number];
+type Member = (typeof ALL_MEMBERS)[number];
 
 export function Face({ m, i, size }: { m: Member; i: number; size: number }) {
   const face = (m.face ?? i) % FACE_BACKGROUNDS.length;
@@ -43,7 +43,9 @@ export function Face({ m, i, size }: { m: Member; i: number; size: number }) {
  * A pointer opens it on hover; a tap, Enter or Space toggles it, and Escape or a press anywhere else closes it.
  * It rises in with a small spring; with reduced motion it only fades.
  */
-export function MemberStack({ className }: { className?: string }) {
+export function MemberStack({ className, plan = "all-access" }: { className?: string; plan?: "all-access" | "pro" }) {
+  // each plan shows its own people; the All-Access line says "for life", the Pro one does not
+  const MEMBERS = ALL_MEMBERS.filter((m) => (m.plan ?? "all-access") === plan);
   const reduced = !!useReducedMotion();
   const [open, setOpen] = React.useState(false);
   const root = React.useRef<HTMLDivElement>(null);
@@ -152,8 +154,8 @@ export function MemberStack({ className }: { className?: string }) {
               {others === 1 ? "1 other" : `${others} others`}
             </button>
           </>
-        ) : null}{" "}
-        for life
+        ) : null}
+        {plan === "all-access" ? " for life" : null}
       </p>
 
       <AnimatePresence>
@@ -179,7 +181,7 @@ export function MemberStack({ className }: { className?: string }) {
                   : { opacity: 0, y: below ? -6 : 6, scale: 0.98, transition: { duration: 0.12 } }
               }
             >
-              <p className="px-2.5 pb-1 pt-2 text-[11.5px] text-background/60">All-Access members, newest first</p>
+              <p className="px-2.5 pb-1 pt-2 text-[11.5px] text-background/60">{plan === "pro" ? "Pro members, newest first" : "All-Access members, newest first"}</p>
               <ul>
                 {MEMBERS.map((m, i) => (
                   <li key={m.name} className="flex items-center gap-2.5 rounded-xl px-2.5 py-[7px]">

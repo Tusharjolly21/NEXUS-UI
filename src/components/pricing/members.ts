@@ -1,7 +1,7 @@
 import { RAINBOW_HUES } from "@/components/site/rainbow-word";
 
 /**
- * People who bought All-Access (the lifetime plan) and agreed to be shown by name. Newest first.
+ * People who bought a plan (All-Access, the lifetime one, unless `plan` says "pro") and agreed to be shown by name. Newest first.
  * Keep it to real buyers who said yes. Shown under the All-Access and Upgrade buttons as faces with round flag
  * badges and a "Joined by" line that opens the full list (MemberStack).
  *
@@ -11,7 +11,9 @@ import { RAINBOW_HUES } from "@/components/site/rainbow-word";
  * `code` is the two-letter country code. Its flag is a file at /public/flags/<code>.svg; to add a country,
  * copy `3x2/<CODE>.svg` from the MIT-licensed `country-flag-icons` package (licence kept beside the flags).
  */
-export const MEMBERS: { name: string; country: string; code: string; face?: number }[] = [
+export const MEMBERS: { name: string; country: string; code: string; face?: number; plan?: "all-access" | "pro" }[] = [
+  // `plan: "pro"` is an annual subscriber, shown under Get Pro. Leave `plan` out for an All-Access (lifetime) buyer.
+  { name: "Hai Pham Hoang", country: "Vietnam", code: "vn", face: 2, plan: "pro" },
   // All six hand-drawn faces are taken, so this one shares Jon Massey's; they are never next to each other.
   { name: "未寒", country: "United States", code: "us", face: 0 },
   { name: "Fahad", country: "Malaysia", code: "my", face: 5 },

@@ -299,7 +299,10 @@ export default async function PricingPage() {
                       Browse free components
                     </PillLink>
                   ) : p.name === "Pro" ? (
-                    <PlanAction tier="pro">Get Pro</PlanAction>
+                    <>
+                      <PlanAction tier="pro">Get Pro</PlanAction>
+                      <MemberStack plan="pro" className="mt-4" />
+                    </>
                   ) : (
                     <>
                       <PlanAction tier="all-access" variant="cta">
