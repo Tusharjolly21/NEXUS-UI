@@ -1,0 +1,5388 @@
+{
+ "wall": [
+  {
+   "slug": "date-wheels",
+   "name": "Date Wheels",
+   "description": "A date picker made of three drums, day, month and year, each a real cylinder in 3D. Fling one and it carries on with your speed and springs to rest dead centre on a row; scroll it or tap a row. A glass band across the middle magnifies the chosen rows, each row ticks softly as it passes, and the date above rolls its digits as the drums turn.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag",
+    "3d",
+    "sound"
+   ],
+   "exportName": "PreviewDateWheels",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     210,
+     74,
+     542,
+     612
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "date-wheels",
+   "isNew": true,
+   "isRecent": true,
+   "addedAt": 1794700800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A soft tick as each day, month or year passes the glass band.",
+   "demo": null
+  },
+  {
+   "slug": "brain-atlas",
+   "name": "Brain Atlas",
+   "description": "A brain made of neurons that you can turn in your hand. Signals run along the links between them in cascades, so it looks alive. Point at it and the neurons under your pointer fire and that region lights in its own colour; click a region and the brain turns to show it while a live trace counts its signals.",
+   "categoryLabel": "3D Components",
+   "group": "effects",
+   "interactions": [
+    "hover",
+    "drag",
+    "press",
+    "3d",
+    "sound"
+   ],
+   "exportName": "PreviewBrainAtlas",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     0,
+     0,
+     960,
+     720
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "brain-atlas",
+   "isNew": true,
+   "isRecent": true,
+   "addedAt": 1794700800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Soft crackles as neurons fire under your pointer and a tone when a region is chosen.",
+   "demo": null
+  },
+  {
+   "slug": "halo-hero",
+   "name": "Halo Hero",
+   "description": "A hero section inside a living halo of light: tens of thousands of particles on a shell that breathes, wobbles in slow lobes and turns, coloured top to bottom from amber through rose and violet to blue. Point at the halo and it flares where you are, the particles thrown out, stirred and burning white hot; move into the hollow and it breathes in. Press the button and it goes nova. Switch its form and the particles flow into a ring, a torus or a disc.",
+   "categoryLabel": "Background Effects",
+   "group": "effects",
+   "interactions": [
+    "hover",
+    "press",
+    "3d",
+    "sound"
+   ],
+   "exportName": "PreviewHaloHero",
+   "tint": "pink",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     0,
+     0,
+     960,
+     720
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "halo-hero",
+   "isNew": true,
+   "isRecent": true,
+   "addedAt": 1794700800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A rising swell as the halo flares and a deep bloom when it goes nova.",
+   "demo": null
+  },
+  {
+   "slug": "liquid-funnel",
+   "name": "Liquid Funnel",
+   "description": "A conversion funnel as liquid in a glass tube, narrowing at every stage: a meniscus, caustics rippling near the bottom, bubbles, a sheen, the glass's highlights and rim. Where it narrows, the people who left gather as drops on the underside, hang, let go, and splash on the floor with a crown and ripples, more where more were lost. Point at a stage to count what it lost; change the period and the tube reshapes.",
+   "categoryLabel": "Dashboards",
+   "group": "layout",
+   "interactions": [
+    "hover",
+    "sound"
+   ],
+   "exportName": "PreviewLiquidFunnel",
+   "tint": "pink",
+   "fit": {
+    "canvas": [
+     1200,
+     820
+    ],
+    "focus": [
+     142,
+     98,
+     918,
+     650
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "liquid-funnel",
+   "isNew": true,
+   "isRecent": true,
+   "addedAt": 1794700800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Soft drips and splashes as the people who left fall from each stage.",
+   "demo": null
+  },
+  {
+   "slug": "metal-card",
+   "name": "Metal Card",
+   "description": "A brushed metal card you can hold. Move over it and it tilts in 3D: the grain catches a band of light that slides across, the engraved number throws tiny highlights and shadows, the hologram shifts through the spectrum and the shadow moves on the floor. Click it to turn it over.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "hover",
+    "3d",
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewMetalCard",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     176,
+     76,
+     608,
+     568
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "metal-card",
+   "isNew": true,
+   "isRecent": true,
+   "addedAt": 1794700800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A soft metallic ring as the card turns over.",
+   "demo": null
+  },
+  {
+   "slug": "receipt-button",
+   "name": "Receipt Button",
+   "description": "A pay button that prints its own receipt. Press it: it thinks for a moment, then sinks into a slot and a thermal receipt feeds out underneath with the stutter of a real printer, and the blade cuts it with a small shake. Pull it down and it tears off along its teeth and falls away.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewReceiptButton",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     275,
+     87,
+     410,
+     454
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "receipt-button",
+   "isNew": true,
+   "isRecent": true,
+   "addedAt": 1794700800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "The stutter of a thermal printer, the snip of the blade and a tear as it comes away.",
+   "demo": null
+  },
+  {
+   "slug": "photo-tunnel",
+   "name": "Photo Tunnel",
+   "description": "A spatial gallery: a long tunnel of photographs hanging in the dark that you fly through. Drag and the frames rush at you, swell and slip past the edges, with momentum after you let go and the far frames sitting in haze. Click a photo and the camera flies to it and holds it up; click again to drop back into the tunnel.",
+   "categoryLabel": "3D Components",
+   "group": "effects",
+   "interactions": [
+    "drag",
+    "press",
+    "3d",
+    "sound"
+   ],
+   "exportName": "PreviewPhotoTunnel",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     0,
+     0,
+     960,
+     720
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "photo-tunnel",
+   "isNew": true,
+   "isRecent": true,
+   "addedAt": 1794700800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A soft whoosh as frames rush past, and a click when one opens.",
+   "demo": null
+  },
+  {
+   "slug": "fuse-button",
+   "name": "Fuse Button",
+   "description": "An action with a burning fuse for an undo. Press Archive and the button turns into Archived with an Undo inside it, while a fuse lit at its top runs round the outline, fizzing and throwing embers, leaving the cord charred behind it. Undo before it burns round and the spark is snuffed in a puff of smoke; let it burn out and the message is filed away.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewFuseButton",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     229,
+     215,
+     504,
+     314
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "fuse-button",
+   "isNew": true,
+   "isRecent": true,
+   "addedAt": 1794700800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A fizzing fuse, a puff when it is snuffed, and a soft thud when the action sticks.",
+   "demo": null
+  },
+  {
+   "slug": "bell-toggle",
+   "name": "Bell Toggle",
+   "description": "A notify-me toggle with a real brass bell in it. Press it and the bell is struck: it swings on its pivot and the clapper swings after it, ringing each time it meets the lip, a little quieter each time, with rings of sound spreading out. Press again and a line is drawn through the bell and it gives one dull knock.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewBellToggle",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     224,
+     216,
+     514,
+     312
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "bell-toggle",
+   "isNew": true,
+   "isRecent": true,
+   "addedAt": 1794700800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A bell that rings each time its clapper meets the lip, quieter each time, and a dull knock when you turn it off.",
+   "demo": null
+  },
+  {
+   "slug": "contribution-skyline",
+   "name": "Contribution Skyline",
+   "description": "A year of contributions as a heatmap that stands up into a city. Switch to Skyline and the grid tilts back and turns while every day rises into a bar as tall as its count, a wave running toward today, lit from one side. Drag to walk round it, point at a day to read it, point at a streak and only its days stay lit.",
+   "categoryLabel": "Dashboards",
+   "group": "layout",
+   "interactions": [
+    "drag",
+    "3d",
+    "hover",
+    "sound"
+   ],
+   "exportName": "PreviewContributionSkyline",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     1200,
+     820
+    ],
+    "focus": [
+     12,
+     66,
+     1178,
+     714
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "contribution-skyline",
+   "isNew": true,
+   "isRecent": true,
+   "addedAt": 1794700800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Soft sounds as the grid stands up into a skyline and as you move round it.",
+   "demo": null
+  },
+  {
+   "slug": "sleep-score",
+   "name": "Sleep Score",
+   "description": "Last night's sleep under a real night sky: a cratered moon with its terminator, the Milky Way, stars of different colours with four-point spikes, a shooting star after a good night. The score sits in a gauge of three glowing glass channels, energy running along what you earned to a bright head. Below, the night as a staircase of lit capsules you can scrub. Step between nights and everything flows.",
+   "categoryLabel": "Dashboards",
+   "group": "layout",
+   "interactions": [
+    "hover",
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewSleepScore",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     1200,
+     820
+    ],
+    "focus": [
+     282,
+     0,
+     636,
+     820
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 3,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "sleep-score",
+   "isNew": true,
+   "isRecent": true,
+   "addedAt": 1794700800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Soft chimes as the gauge fills and as you step between nights.",
+   "demo": null
+  },
+  {
+   "slug": "download-button",
+   "name": "Download Button",
+   "description": "A download button whose file icon fills up like a glass. Press it and the pill opens out; liquid rises inside the page icon as the percentage counts, sloshing in two layers of waves with a bright meniscus and bubbles rising through it, while a wave-edged wash sweeps across the pill. At the top a tick drops onto the page and the pill closes up to Saved.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewDownloadButton",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     319,
+     291,
+     322,
+     152
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "download-button",
+   "isNew": true,
+   "isRecent": true,
+   "addedAt": 1794700800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A soft bubbling as it fills and a chime when it is saved.",
+   "demo": null
+  },
+  {
+   "slug": "magic-calendar",
+   "name": "Magic Calendar",
+   "description": "A month calendar that knows the world's festivals, about fifty of them, and celebrates each one when you open it. Christmas snows into a drift along the bottom, New Year's Eve fires fireworks, Lunar New Year hangs red lanterns, Eid brings a crescent moon and swinging lanterns, Hanukkah and Kwanzaa light their candles one by one, Diwali strings lights, Holi bursts colour, Easter drops painted eggs, Songkran splashes water, Makar Sankranti flies kites, a birthday sends up balloons and April Fools' Day turns the calendar upside down. Every effect is drawn on one canvas over the card with its own small sound. Marked days carry a dot and an icon, and the panel below names the day or counts down to the next one. The days are a real grid you can move through with the arrow keys.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewMagicCalendar",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     188,
+     24,
+     584,
+     696
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 3,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "magic-calendar",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794528000000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Soft bell notes as the snow falls, a whoosh, boom and crackle for each firework, a pop and a rising chime for confetti, wing flaps for the bats, and a short phrase of its own for every other celebration.",
+   "demo": null
+  },
+  {
+   "slug": "led-button",
+   "name": "LED Button",
+   "description": "A button made of hundreds of tiny LEDs that spell its label like a dot-matrix sign, each lamp throwing a little glow onto its neighbours. A pool of blue light follows your pointer across the lamps. Press it and a ripple runs out from your finger, the label dissolves lamp by lamp into a scrolling marquee while sparks twinkle, and it settles into a green check. By default it copies a prompt to the clipboard; give it onPress and the marquee runs until your promise settles. The lamps are drawn in WebGL, with a plain button underneath for keyboards and screen readers.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "hover",
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewLEDButton",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     202,
+     196,
+     558,
+     350
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "led-button",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794441600000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A click as you press, relays ticking while the marquee runs, and a chime when it settles on the check.",
+   "demo": null
+  },
+  {
+   "slug": "glass-compare",
+   "name": "Glass Compare",
+   "description": "A before-and-after slider whose divider is a bar of glass. It bends the picture behind it like a lens, with a bright rim, a streak of light and a faint rainbow fringe. Flick it and the bar bends like a ribbon and springs straight, the side it sweeps toward smears with motion blur, and droplets of glass spray off and fall. Drag the bar or anywhere on the picture, or focus it and use the arrow keys. Without your own images it paints a harbour street by day and by night.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewGlassCompare",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     136,
+     72,
+     690,
+     596
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "glass-compare",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794441600000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A soft glassy slide that follows the bar, and little ticks as the droplets fall.",
+   "demo": null
+  },
+  {
+   "slug": "silk-print",
+   "name": "Silk Print",
+   "description": "A silk scarf hanging from a rod on a product card, drawn as a real cloth mesh in WebGL. Waves roll down it in a soft draught and its sheen runs along the threads and slides across the folds. Your pointer is a breath of air that ripples the silk, and dragging turns it on the rod so you can see the print through the back. Pick a colourway and the print changes. The name, details, price and colourway buttons are ordinary HTML.",
+   "categoryLabel": "3D Components",
+   "group": "effects",
+   "interactions": [
+    "hover",
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewSilkPrint",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     158,
+     0,
+     646,
+     720
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "silk-print",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794441600000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A soft rustle whenever the draught or your hand moves the silk.",
+   "demo": null
+  },
+  {
+   "slug": "glyph-rain",
+   "name": "Glyph Rain",
+   "description": "A 404 hero of falling characters that hides a message. Columns of letters rain down at their own speeds with bright heads and fading tails, and your pointer lights them as it passes. Linger and the rain around you stops changing and settles into the words of a hidden message, which stays a while before melting back into the rain. The title, description and button are plain HTML over the canvas.",
+   "categoryLabel": "Background Effects",
+   "group": "effects",
+   "interactions": [
+    "hover",
+    "sound"
+   ],
+   "exportName": "PreviewGlyphRain",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     0,
+     82,
+     960,
+     576
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "glyph-rain",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794441600000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A faint ticking as the letters settle into the hidden message.",
+   "demo": null
+  },
+  {
+   "slug": "airmail-globe",
+   "name": "Airmail Globe",
+   "description": "A postcard composer that sends by airmail across a real globe. Press send and the card folds itself into a paper plane right where it lies, in one smooth movement, then is thrown onto the globe and becomes the plane you watch fly. It sets off away from them, goes the long way round behind the earth trailing a contrail, and comes down on the person you chose, the only place marked on the globe. The globe is lit by the sun where it is right now, and on landing it tells you the time there. The recipients are a radio group with arrow keys and the message is a real text field.",
+   "categoryLabel": "3D Components",
+   "group": "effects",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewAirmailGlobe",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     154,
+     0,
+     654,
+     720
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "airmail-globe",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794441600000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Paper creasing as the card folds, a whoosh on take-off, wind on the way round and a chime when it lands.",
+   "demo": null
+  },
+  {
+   "slug": "sand-drift-gallery",
+   "name": "Sand Drift Gallery",
+   "description": "An endless strip of pictures that turn to sand at the edges. A wind takes the grains, swirling them outward and up, and packs them back into a picture as it returns; fling the strip and the sand trails behind, blown harder the faster you throw it. Tens of thousands of WebGL points meet a crisp card in the middle, and the strip drifts on its own while nobody is touching it. Focus it and the arrow keys step through the pictures.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "drag",
+    "scroll",
+    "sound"
+   ],
+   "exportName": "PreviewSandDriftGallery",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     0,
+     60,
+     960,
+     620
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 2
+    }
+   },
+   "install": "sand-drift-gallery",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794441600000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Sand hissing behind the strip when you fling it, louder the harder you throw.",
+   "demo": null
+  },
+  {
+   "slug": "diffusion-loader",
+   "name": "Diffusion Loader",
+   "description": "An image-generation placeholder that resolves the way a diffusion model does. A fine film grain sits over a soft wash of colour that flows like ink, then firms into shapes, edges and texture step by step as the noise drains away, with a glow of colour breathing round the frame. At the end a soft focus front sweeps down and brings the sharp picture in. The step count is read out, and Regenerate starts again with a new seed.",
+   "categoryLabel": "Loaders",
+   "group": "cards",
+   "interactions": [
+    "loop",
+    "sound"
+   ],
+   "exportName": "PreviewDiffusionLoader",
+   "tint": "pink",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     187,
+     69,
+     588,
+     602
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "diffusion-loader",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794441600000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A soft tick on each denoising step and a chime when the picture comes into focus.",
+   "demo": null
+  },
+  {
+   "slug": "warp-cta",
+   "name": "Warp CTA",
+   "description": "A deploy button that goes to warp. Hover and the drive spools up on a smooth spring: stars drifting toward you draw out into streaks of true motion blur from a vanishing point that eases after your pointer, and a hairline of light on the rim follows you round. Click and the streaks run long into a bloom while the deploy runs, then draw back into stars when it lands. Give it onDeploy and the jump lasts until your promise settles.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "hover",
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewWarpCTA",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     189,
+     139,
+     584,
+     464
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "warp-cta",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794441600000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "The drive spooling up as you hover, a rush on the jump and a settling note on arrival.",
+   "demo": null
+  },
+  {
+   "slug": "print-styles",
+   "name": "Print Styles",
+   "description": "A cover-image style picker that prints the picture as you choose. There is 1-bit, four handheld greens, newsprint with four inks at their real screen angles, or a two-ink risograph slightly off register. A print head runs across to lay each style down, and a printer's loupe magnifies the dots under your pointer; press and hold to see the original. The styles are a radio group with arrow keys.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "hover",
+    "sound"
+   ],
+   "exportName": "PreviewPrintStyles",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     169,
+     37,
+     624,
+     666
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "print-styles",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794441600000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "The print head chattering as it runs across the picture.",
+   "demo": null
+  },
+  {
+   "slug": "inspect-text",
+   "name": "Inspect Text",
+   "description": "An intro paragraph where every word, logo and photo is its own layer, like in a design tool. A selection frame with handles and a live size tag springs between the layers as you point, and logos fill with colour from the edge you came in by. Click a layer to inspect its real styles, then point at another for red measurement lines between the two; drag a handle to resize. In autoplay a collaborator's cursor wanders in and does it for you.",
+   "categoryLabel": "Motion Effects",
+   "group": "effects",
+   "interactions": [
+    "hover",
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewInspectText",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     136,
+     132,
+     690,
+     476
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 2
+    }
+   },
+   "install": "inspect-text",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794441600000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Soft ticks as the frame springs between layers and a tock when you select one.",
+   "demo": null
+  },
+  {
+   "slug": "soap-bubble",
+   "name": "Soap Bubble",
+   "description": "A kudos button you blow like a soap bubble. Hold the wand and a bubble swells and wobbles; let go and it floats off, its skin swirling with thin-film colours as the soap drains, then pops into droplets at the top and leaves the message behind. Hold too long and it bursts. The bubble is a WebGL shader, and Space or Enter works the wand the same way as a press.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewSoapBubble",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     188,
+     74,
+     586,
+     592
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "soap-bubble",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794441600000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Breath through the wand as the bubble swells, a soft release as it lets go and a bright pop.",
+   "demo": null
+  },
+  {
+   "slug": "ink-drop-picker",
+   "name": "Ink Drop Picker",
+   "description": "An accent colour picker that drops your colour into a glass of water. A pipette squeezes a drop in; it rings the surface, then rolls into a vortex ring that sinks, hits the floor and curls back up. It is run by a fluid simulation on the GPU and seen through the glass like a lens, and you can stir the water by dragging in it. Inks mix the way dyes do, and once the water settles the colour flows into the interface below. The inks are a radio group with arrow keys.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewInkDropPicker",
+   "tint": "pink",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     216,
+     0,
+     530,
+     720
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 3,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "ink-drop-picker",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794441600000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "The pipette squeezing, a plip as the drop lands and the water settling.",
+   "demo": null
+  },
+  {
+   "slug": "tear-off-coupon",
+   "name": "Tear-off Coupon",
+   "description": "A promo code you claim by tearing off the stub. The ticket tilts under your hand and its holographic foil shifts colour as it moves. Pull the stub and it peels up and tears hole by hole, each bridge of paper snapping in turn; once free it swings from your finger in 3D, then drops into the tray and flips to show the code, ready to copy. A Tear off button does it for you.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "drag",
+    "hover",
+    "sound"
+   ],
+   "exportName": "PreviewTearOffCoupon",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     212,
+     48,
+     538,
+     646
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 3,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "tear-off-coupon",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794441600000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Paper tearing hole by hole, a tap as the stub lands in the tray and a flick as it flips.",
+   "demo": null
+  },
+  {
+   "slug": "breadcrumb-branch",
+   "name": "Breadcrumb Branch",
+   "description": "Breadcrumb navigation grown as a living branch. Your path is the wood, twigs carry the places beside each step and buds at the tip are the places inside. Tap a bud and the branch grows into it; go back and the old wood turns to autumn and its leaves tumble down. A sparrow, which is you, hops to the tip and the springy limb dips under it. Gusts run through the leaves, your pointer rustles them and sunlight dapples it all. Every place is also a real button, so the path works with a keyboard and a screen reader.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "hover",
+    "sound"
+   ],
+   "exportName": "PreviewBreadcrumbBranch",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     44,
+     64,
+     874,
+     612
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "breadcrumb-branch",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794441600000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Wood creaking as the branch grows, leaves rustling and falling, and the sparrow chirping as it hops.",
+   "demo": null
+  },
+  {
+   "slug": "eclipse-toggle",
+   "name": "Eclipse Toggle",
+   "description": "A light and dark switch played as an evening going by, that can change the whole page with it. The switch is a strip of sky over low hills, and the knob is the sun. Switch to dark and the sun sinks towards the hills: the light turns golden, the sun grows larger and goes orange and then red as it nears the horizon, and it sets behind the hills while a silver moon rises in its place. A rosy afterglow lingers, the evening star comes out first and then the stars, and the hills turn to silhouettes in the moonlight. Switch back and it plays as a sunrise, and a few birds fly off singing. Tap it, use Space, Enter or the arrow keys, or drag the knob to scrub the evening by hand. Turn on pageTransition and the page changes with it: dusk spreads out of the switch across the page as the stars come out, and switching back floods it with sunlight.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewEclipseToggle",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     253,
+     199,
+     454,
+     344
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "eclipse-toggle",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794268800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A low swell as the light drains away and a soft bell as the sun sets; at sunrise a bright ting, a rising arpeggio and two birds answering each other.",
+   "demo": null
+  },
+  {
+   "slug": "peel-delete",
+   "name": "Peel Delete",
+   "description": "Hold to delete, where holding peels the note off like a sticker. Press and hold the bin and the note's corner lifts, then the fold runs in across it, the paper back of the curl showing and its shadow falling on the note, with a rasp that follows the speed of the peel. Let go early and it sticks back down with a pat. Hold all the way and it rips off like a plaster in one continuous pull, leaving the patch where it was stuck. The bin turns into Undo with the time left drawn round it, and Undo slides the note back and smooths it flat. Space or Enter holds from the keyboard, and the bin's label says to press and hold.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "3d",
+    "sound"
+   ],
+   "exportName": "PreviewPeelDelete",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     255,
+     145,
+     452,
+     452
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "peel-delete",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794268800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A rasp that follows the speed of the peel, a pat when it sticks back down, a rip and a rush of air when it comes free, and a soft slide and chime on Undo.",
+   "demo": null
+  },
+  {
+   "slug": "bubble-tags",
+   "name": "Bubble Tags",
+   "description": "A tag input where every tag is a soap bubble. Type a word and press Enter: a wand in the corner blows a bubble with the word inside, which swells, lets go with a wobble and drifts up to join the others. The bubbles hang in a sunlit garden, turning their colours, pressing softly against each other and leaning away when your pointer passes like a breath of air. Tap a bubble to remove its tag and it pops in a ring of droplets; Backspace in the empty field pops the newest. Every bubble is a real button and the field is a real input, so keyboards and screen readers get a plain list.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "type",
+    "press",
+    "hover",
+    "sound"
+   ],
+   "exportName": "PreviewBubbleTags",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     254,
+     138,
+     454,
+     464
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "bubble-tags",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794268800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A soft breath as the wand blows, a rising note as each bubble swells and lets go, and a bright little pop with a falling blip when you tap one.",
+   "demo": null
+  },
+  {
+   "slug": "lens-search",
+   "name": "Lens Search",
+   "description": "A search box whose magnifying glass is a real lens. Type, and the magnifier lifts out of the field and grows into a glass lens over the list. It looks down the rows, magnifying each as it passes and dimming the ones that do not match, and parks on the first match with a chime, the matched letters in blue under the glass. Arrow keys glide it between matches, and Enter or a click opens one. When nothing matches it reaches the bottom, shakes its head and goes home. Clear the field or press Escape and it drops back in as the icon. The field is a combobox over a listbox, with the result count in a polite live region.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "type",
+    "sound"
+   ],
+   "exportName": "PreviewLensSearch",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     236,
+     64,
+     490,
+     612
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 3,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "lens-search",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794268800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Air as the lens lifts out of the field, soft ticks as it passes rows, a chime when it parks on a match, and two low notes when nothing matches.",
+   "demo": null
+  },
+  {
+   "slug": "neon-star-rating",
+   "name": "Neon Star Rating",
+   "description": "A star rating in neon: five star-shaped glass tubes on a brick wall, each bent round ten corners and held off the bricks by two small brackets. Off, they are grey glass. Choose a score and the tubes up to it strike one after another: a click from the transformer, a stutter of flickers with a crackle on each and a short buzz, then a steady amber glow that washes over the bricks around it. Lower the score and the rest drop out with a fading afterglow. Pointing at a star warms the tubes up to it, and now and then a lit tube stutters the way old neon does. It is a radio group with arrow keys, and the score is read out in a polite live region.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "hover",
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewNeonStarRating",
+   "tint": "pink",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     255,
+     183,
+     452,
+     374
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "neon-star-rating",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794268800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Each tube strikes with a click from the transformer, a crackle on every flicker and a short electric buzz before it settles into a steady glow.",
+   "demo": null
+  },
+  {
+   "slug": "upload-morph",
+   "name": "Upload Morph",
+   "description": "An upload status that takes itself apart to do the job. Tap it and the cloud's puffs smooth out, from the top round to the bottom, into a ring that becomes the progress track; a glowing head leads the progress round it while the arrow keeps rising up through the ring like a conveyor. When it lands the ring gives a soft pulse and a ripple, puffs back out into the cloud, and the arrow's head folds into a check. If the upload fails the ring turns red and shakes, and the cloud comes back with its arrow. Its sounds follow the picture: a tap, air as the cloud rounds, a note for each tenth that climbs the scale, a chime as it lands.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewUploadMorph",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     262,
+     192,
+     398,
+     356
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "upload-morph",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794268800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A tap, air as the cloud rounds into a ring, a note for each tenth that climbs the scale, a chime as it lands, and a soft fall when it fails.",
+   "demo": null
+  },
+  {
+   "slug": "voice-morph",
+   "name": "Voice Morph",
+   "description": "A voice-message button whose glyph takes itself apart to do the job. Tap the mic and its head splits into five bars that spread into a live waveform while the stand folds away; the button turns red and a timer runs. Tap again and the bars pack themselves into the send arrow: three become its shaft and wings, the other two fold away, the button turns blue and the arrow shoots up out of it as the message lands in the thread. Then the mic rises back into place. Escape cancels a recording. The loudness is simulated, so it needs no microphone; it is decoration over a plain button.",
+   "categoryLabel": "AI Components",
+   "group": "effects",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewVoiceMorph",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     229,
+     165,
+     504,
+     410
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "voice-morph",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794268800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A rising bloop as the mic splits open, a click as the bars snap into the arrow, and a whoosh with two bright notes as the message sends.",
+   "demo": null
+  },
+  {
+   "slug": "face-scan-morph",
+   "name": "Face Scan Morph",
+   "description": "A pay-with-your-face confirmation whose glyph takes itself apart to check you. Tap it and the four scan corners curl inward into the arcs of a ring that spins while the face glances about and blinks. A match closes the ring into one green circle as the eyes fade and the smile straightens into a check. No match stops the spin, the arcs straighten back into corners, and the face shakes its head with a flat mouth and waits for another go. The glyph is a plain button with each state spoken in a live region.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewFaceScanMorph",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     278,
+     154,
+     406,
+     432
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "face-scan-morph",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794268800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A faint tick each quarter turn of the spinning ring, a rising chime and a warm note on a match, and two low notes as the face shakes its head.",
+   "demo": null
+  },
+  {
+   "slug": "frozen-card",
+   "name": "Frozen Card",
+   "description": "The card screen of a banking app, where you can freeze your card. The “Aurora” debit card tilts toward your pointer with a glare and a holographic sheen, glowing in its own colours on a dark panel. Press Freeze card and feathery frost grows in from the corners and edges with a frosted bloom behind it, the print blurs and drains to icy slate blue, the card shivers, a Frozen tag replaces the network mark, and snow falls across the whole screen, some of it in front of the card; tilt it and the glare sparkles on the ice. Unfreeze and cracks race across the ice, it melts from the middle outwards with drips running off the bottom edge, and a warm glow brings the colour back. The eye on the card shows the full number. Keyboard: Tab to Freeze card (a switch) and press Space or Enter; the eye, Change limits, Transactions, back and more are buttons.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "hover",
+    "press",
+    "3d"
+   ],
+   "exportName": "PreviewFrozenCard",
+   "tint": "pink",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     105,
+     27,
+     630,
+     693
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "frozen-card",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "seat-crowd",
+   "name": "Seat Crowd",
+   "description": "The seat picker for a pricing page, as a crowd of little people. Drag or fling the yellow ruler and your team appears on stage: each new person hops in from the side on an arc, lands with a squash and the row shuffles to make room, while the camera zooms out as the crowd grows. Take seats away and the newest wave goodbye and hop off. Cross into a bigger plan and the badge flips over with a pop of confetti in the plan's colour; past forty people, the last one holds up a “+12 more” sign. The price rolls like an odometer, monthly or yearly. Keyboard: focus the ruler; arrow keys add or remove one seat, Page Up and Page Down five, Home and End jump to the ends. Arrow keys also switch between monthly and yearly billing.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag"
+   ],
+   "exportName": "PreviewSeatCrowd",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     19,
+     35,
+     624,
+     670
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "seat-crowd",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "flap-clock",
+   "name": "Flap Clock",
+   "description": "A team world clock on a split-flap board. Every row is a city: its local time and name on enamel flaps in the row's own colour, and whether they're asleep, starting their morning, working or done for the day. When a minute turns, the flaps clatter round to the new time. Drag the handle along the sky strip underneath to look up to twelve hours either way (“what time is it for everyone if we meet at four?”): the whole board flips as you go, and the count at the top says how many people would be working. Now snaps it back to the live time. Keyboard: the handle is a slider; arrows move by a quarter hour, Page Up and Page Down by an hour, Home returns to now.",
+   "categoryLabel": "Dashboards",
+   "group": "layout",
+   "interactions": [
+    "drag"
+   ],
+   "exportName": "PreviewFlapClock",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     1200,
+     820
+    ],
+    "focus": [
+     0,
+     0,
+     1200,
+     820
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 2
+    }
+   },
+   "install": "flap-clock",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "image-press",
+   "name": "Image Press",
+   "description": "A toy press that really shrinks photos before you upload them. Drop a photo on it (or choose one, or drag the sample in) and it sits on top of the machine, wobbling. Turn the cobalt dial to Tiny, Balanced or Crisp and hit the red button: the photo is pulled into the slot between striped rollers, the machine rumbles while the LCD counts the size down, and the pressed copy slides out of the bottom slot, smaller, with a perforated edge and a sticker showing how much it saved. Download it or press another. Anything that isn't a photo is spat back out. The compression is real: the photo is redrawn at the level's size limit and exported as WebP (JPEG where WebP isn't available), and onCompressed hands you the new File. Keyboard: the tray is a button that opens the file picker, the dial is a slider (arrow keys, Home, End), and the red button presses. Progress is announced politely.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag",
+    "press"
+   ],
+   "exportName": "PreviewImagePress",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     4,
+     0,
+     614,
+     720
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 3,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "image-press",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "jelly-splitter",
+   "name": "Jelly Splitter",
+   "description": "A bill splitter where the bill is a slab of glossy watermelon jelly on a plate. Move over the jelly and a cleaver follows you; click or tap and it chops down, the slab splits there and the two pieces wobble apart, each one labelled with the next person and what they owe. Drag the handle in a gap to move the cut and the neighbouring pieces squash and stretch while the amounts follow, snapping to whole percents with a pull at every 5%. The small cross on a piece squishes it back into its neighbour, “Split evenly” glides every cut into place with a jiggle that runs left to right, and “Send requests” hands you the shares. Keyboard: Tab to a cut handle and use the arrow keys (1%, or 5% with Shift); “Add a cut” halves the biggest piece, and each piece's cross button merges it.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag"
+   ],
+   "exportName": "PreviewJellySplitter",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     44,
+     0,
+     754,
+     720
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "jelly-splitter",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "effort-slider",
+   "name": "Effort Slider",
+   "description": "An effort setting for an AI answer, from Faster to Smarter. Below the top level the track is a calm glowing fill with a few stars in it and a shimmer running through, coloured from cool teal up to violet, and the thumb is a spiral galaxy seen at an angle, like a telescope photograph: thousands of stars, dust lanes, pink star-forming knots, a warm core and diffraction spikes, maturing from a faint loose spiral into a bright grand-design one as you go. Reach the top and the slider transforms: a flash, a burst of sparks, and the fill breaks into a dense mosaic of violet, pink, cyan and white star pixels that cascade back from the thumb and then stream smoothly out of it from right to left in three depth layers, while dotted rays stream out of the thumb like a starburst and the level's name turns iridescent. Drag it and the thumb squashes with speed, throws a comet trail only when you really fling it, rings each level it passes and clicks into the nearest one with a little bounce. Keyboard: it's a slider, so the arrow keys move a level at a time and Home and End jump to the ends.",
+   "categoryLabel": "AI Components",
+   "group": "effects",
+   "interactions": [
+    "drag"
+   ],
+   "exportName": "PreviewEffortSlider",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     101,
+     153,
+     620,
+     450
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "effort-slider",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "window-seat-toggle",
+   "name": "Window Seat Toggle",
+   "description": "A light/dark theme switch drawn as an aeroplane window set in a piece of cabin wall. Outside it's a bright blue sky over a drifting sea of cumulus with the tip of a wing. Grab the shade's tab and pull it down: it follows your finger with a little resistance, and the light in the cabin follows it: the daylight on the wall and in the recess shrinks to the open strip of glass, the room's exposure drops, the sunlit shade glows warm, and near the bottom only a thin line of light leaks round its sides and under its lip. Let go past halfway and it snaps shut with a soft bounce, the cabin dims, and a moment later the shade glides back up by itself on a night sky of stars, a crescent moon, lilac clouds and amber city lights far below. Pull it again and it's day. Let go early and it springs back open. A click anywhere on the window runs the whole thing for you, and the view shifts slightly against your pointer. Applying the theme is your job, for example: <WindowSeatToggle onThemeChange={(t) => { document.documentElement.dataset.theme = t; }} /> Keyboard: focus the window; Space or Enter toggles, Arrow Down closes towards dark, Arrow Up opens towards light.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag"
+   ],
+   "exportName": "PreviewWindowSeatToggle",
+   "tint": "pink",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     120,
+     80,
+     522,
+     594
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "window-seat-toggle",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "smear-carousel",
+   "name": "Smear Carousel",
+   "description": "A carousel whose neighbours smear. The card in the middle is a colour-graded photograph with its own long-exposure streak; the cards either side are turned away from you, and from their outer edge the picture is pulled out to the edge of the stage in long flowing streaks that flare open like the bell of a trumpet, edged with a thin iridescent rim. Drag or fling it (or scroll sideways) and the cards turn and slide through the smear, then settle on the nearest one with a spring. Click a side card to bring it in. Keyboard: Arrow Left and Right move, Home and End jump to the ends, Enter selects the middle card.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "drag",
+    "3d",
+    "scroll"
+   ],
+   "exportName": "PreviewSmearCarousel",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     0,
+     50,
+     960,
+     622
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 2
+    }
+   },
+   "install": "smear-carousel",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "forecast-status",
+   "name": "Forecast Status",
+   "description": "An app-review status card that shows its state as weather. Waiting is a lilac sky with clouds drifting by; in review it clouds over and rains; approved, the clouds part, the sun comes out with turning rays and a rainbow; rejected, a purple storm rolls in with sheets of rain and lightning. Every change blends the sky, clouds and rain over a second. Move across the sky and the clouds drift away from you; tap it and the weather answers (a splash, a lightning strike, a sparkle).",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "hover"
+   ],
+   "exportName": "PreviewForecastStatus",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     158,
+     42,
+     566,
+     676
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 3,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "forecast-status",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "paperclip-attach",
+   "name": "Paperclip Attach",
+   "description": "A message composer that clips attachments on with a real paperclip. Attach a file (or drop it on the message) and the clip springs open, the file flies in from the button and slides under the wire, and the clip snaps shut, jiggling the stack. Older files fan out behind, pinned at the same corner; tap one to slip it out and back on top, or pull the top one off with its close button. Keyboard: the paperclip button opens the file picker; every card and close button is reachable with Tab.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press"
+   ],
+   "exportName": "PreviewPaperclipAttach",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     106,
+     90,
+     610,
+     560
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "paperclip-attach",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "aquarium-prompt",
+   "name": "Aquarium Prompt",
+   "description": "Aquarium Prompt: an AI prompt box floating in a pixel-art aquarium. A shoal of pixel fish swims behind the frosted glass, each kind schooling with its own: clownfish, blue and yellow tangs, and a fast flicker of sardines. Move the pointer through the water and they scatter; click the water and a ripple sends them darting. Type, and they crowd round the caret to watch, a bubble rising with each key. Press send and they all swim into the box with your message, which floats up as a bubble and pops. Keyboard: it's a normal text field; Enter sends.",
+   "categoryLabel": "AI Components",
+   "group": "effects",
+   "interactions": [
+    "type",
+    "hover"
+   ],
+   "exportName": "PreviewAquariumPrompt",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     0,
+     34,
+     960,
+     684
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "aquarium-prompt",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "elemental-picker",
+   "name": "Elemental Picker",
+   "description": "Elemental Picker: a set of mode capsules where the chosen one comes alive. Choose Ember and the capsule catches fire: flames lick up its sides, embers fly and smoke curls off the top. Solar throws long rays that turn slowly behind it, Bloom showers it in petals that flutter down and settle, and Breeze sends wind streaks curling past with tumbling leaves while the capsule sways in the gusts. The old element dies down as the new one starts, and everything is reflected in a glossy floor. Keyboard: it's a radio group. Arrow keys move the choice; Tab leaves.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "hover"
+   ],
+   "exportName": "PreviewElementalPicker",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     74,
+     70,
+     814,
+     618
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "elemental-picker",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "oracle-orb",
+   "name": "Oracle Orb",
+   "description": "Oracle Orb: a crystal ball for AI answers. A glass sphere holds a liquid nebula of violet, pink and amber that drifts and swirls, with stars caught in it and light pooling on the floor beneath. Ask something and the orb thinks: the swirl quickens, its heart glows and a halo breathes round it. Then the answer condenses out of the mist below, word by word, sharpening from a blur. Move the pointer over the ball to tilt the nebula toward you; drag across it to stir. Keyboard: type a question and press Enter, or Tab to a suggestion.",
+   "categoryLabel": "AI Components",
+   "group": "effects",
+   "interactions": [
+    "type",
+    "hover",
+    "3d"
+   ],
+   "exportName": "PreviewOracleOrb",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     72,
+     0,
+     736,
+     720
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "oracle-orb",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "clock-picker",
+   "name": "Clock Picker",
+   "description": "A time picker on a real clock face. Drag either hand: it trails your finger on a spring, the hour hand creeps as the minute hand goes round, and the numbers swell as a hand passes. Let go mid-spin and it coasts, then ticks into place. Wind past twelve and the AM/PM flap flips; the dial's sky follows the hour so night looks like night. Tap a number to jump the hour, or the minute track to set minutes. Keyboard: focus a hand and use the arrow keys (Page Up/Down for an hour, A/P for AM/PM).",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag"
+   ],
+   "exportName": "PreviewClockPicker",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     165,
+     19,
+     532,
+     700
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 3,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "clock-picker",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "vine-progress",
+   "name": "Vine Progress",
+   "description": "An onboarding checklist with a vine for a progress bar. The vine grows down to the step you're on, unfurling a leaf for every step behind it; untick one and it pulls back and the leaves drop. Finish them all and it reaches the bottom and flowers. Brush the leaves with the pointer and they rustle.",
+   "categoryLabel": "Loaders",
+   "group": "cards",
+   "interactions": [
+    "loop"
+   ],
+   "exportName": "PreviewVineProgress",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     132,
+     6,
+     578,
+     714
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 3,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "vine-progress",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "bloom-gift-card",
+   "name": "Bloom Gift Card",
+   "description": "A gift card with a flower bud on it. Tilt it with the pointer; press and hold to open it and the bud swells and trembles, then blooms in 3D, petal ring by petal ring, to show the amount in the middle with a puff of pollen. Let go early and it closes up again. Keyboard: hold Space or Enter on the button.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "press",
+    "3d",
+    "hover"
+   ],
+   "exportName": "PreviewBloomGiftCard",
+   "tint": "pink",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     211,
+     141,
+     454,
+     438
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "bloom-gift-card",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "genie-uploader",
+   "name": "Genie Uploader",
+   "description": "Genie Uploader: a file drop that swallows files the way macOS minimises a window. Drop files on the well, or click it to choose some. Each file appears as a card where it landed (a real thumbnail for images), then bends into a funnel and pours into the cloud, which gulps it and fills with blue as the uploads run. The files settle into a list with a progress line each; a file that's too big goes halfway in, gets spat back out and shakes its head, and a failed upload can be retried, which sends it into the cloud again. A check lands on the cloud when everything is up. Keyboard: Tab to the well and press Enter or Space to choose files; each row's buttons remove or retry.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag"
+   ],
+   "exportName": "PreviewGenieUploader",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     98,
+     30,
+     586,
+     678
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 3,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "genie-uploader",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "piano-text",
+   "name": "Piano Text",
+   "description": "Piano Text: words you can play. Every letter is a key, climbing a scale from the first letter to the last. Glide the pointer across the words and each letter you cross plays its note and dances: it's pressed down, springs up, wobbles and lands, while its neighbours sway along and it flashes its colour. The faster you glide, the louder and higher it jumps. The line underneath vibrates like a plucked string where you play, and with sound on it also traces the real waveform. Browsers keep pages silent until a click, so the first click on the words turns sound on with a run up the scale. On touch screens, drag a finger along the words. Keyboard: focus the words and press Enter to turn sound on, Arrow Left or Right to play letter by letter, or type a letter to play it.",
+   "categoryLabel": "Motion Effects",
+   "group": "effects",
+   "interactions": [
+    "hover"
+   ],
+   "exportName": "PreviewPianoText",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     4,
+     68,
+     954,
+     602
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "piano-text",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "highlight-popover",
+   "name": "Highlight Popover",
+   "description": "Highlight Popover: select text in an article and a toolbar rises out of the selection like a drop of ink. The dark pill and a bead of liquid start at the selection; the pill lifts and widens while the bead stretches a neck behind it and snaps away. Point at a colour to see it on the words, then pick it and a marker nib draws the highlight line by line: a chisel-tip band with uneven edges and ink pooled where the tip stopped, multiplied onto the page so the words stay crisp. Tap a highlight to change its colour, add a note (the pill widens into a field and a marker appears in the margin), copy it, or remove it, which wipes the ink back off. Keyboard: select with Shift and the arrows, then press Enter to reach the toolbar. Highlights are buttons; Escape closes.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press"
+   ],
+   "exportName": "PreviewHighlightPopover",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     0,
+     10,
+     788,
+     710
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "highlight-popover",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793836800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "pixel-atlas",
+   "name": "Pixel Atlas",
+   "description": "Pixel Atlas: a live map of where you are in the world, drawn in glowing pixels. Every place warms the land around it, from slate through violet and magenta to orange and cream at the busiest, with slow waves of signal running outward. The map pops in from west to east, then tours your places one by one. Hover to swell the pixels under the pointer, click a place for its card, drag to pan all the way round the world, and use the filters to glide to one kind of place. Pinch, Ctrl-scroll or the buttons zoom. Keyboard: arrow keys pan, plus and minus zoom, Escape closes the card.",
+   "categoryLabel": "Dashboards",
+   "group": "layout",
+   "interactions": [
+    "hover",
+    "drag"
+   ],
+   "exportName": "PreviewPixelAtlas",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     1200,
+     820
+    ],
+    "focus": [
+     0,
+     0,
+     1200,
+     820
+    ],
+    "bg": "#060c0c",
+    "clearRoot": false,
+    "dark": true,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 2
+    }
+   },
+   "install": "pixel-atlas",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794009600000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "glass-recorder",
+   "name": "Glass Recorder",
+   "description": "Glass Recorder: a voice button for AI apps, made of liquid glass that really bends the light behind it. Bring the pointer near and the drop swells out towards it like a liquid drawn to a finger; press and it squashes and turns milky, then spreads into a bar while a glass knob buds from its end to hold stop. Your voice pours in as glowing liquid that rises and ripples as you talk. Tap stop and the knob pinches off and floats away carrying your recording's length. With the microphone allowed it follows your voice (it only measures loudness and tone, and keeps nothing); otherwise it plays a sample voice. Keyboard: it is one real button, so Space or Enter records and stops, with the status spoken to screen readers.",
+   "categoryLabel": "AI Components",
+   "group": "effects",
+   "interactions": [
+    "hover",
+    "press"
+   ],
+   "exportName": "PreviewGlassRecorder",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     0,
+     0,
+     960,
+     720
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "glass-recorder",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794009600000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "gold-star-rating",
+   "name": "Gold Star Rating",
+   "description": "A five-star rating made of real 3D gold stars. Each star is a faceted solid with twenty flat faces, turned, sorted and shaded every frame like polished metal, with a softbox glint that runs across the faces as they move; empty stars are brushed silver. Choose a score and the stars up to it spin round one after another and come out gold, each with a metallic ting a step higher, a little pop and a sparkle, while the rest spin back to silver. The stars lean towards your pointer, lift up to the one you point at as a preview, and turn slightly while they wait so the light keeps moving. It is a radio group with arrow keys, Home and End, and the score in a polite live region.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "hover",
+    "press",
+    "3d",
+    "sound"
+   ],
+   "exportName": "PreviewGoldStarRating",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     255,
+     201,
+     452,
+     338
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "gold-star-rating",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794268800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Each star that turns gold rings a metallic ting a step higher than the last, with a faint whoosh as it spins; stars going back to silver play a soft low note.",
+   "demo": null
+  },
+  {
+   "slug": "murmur",
+   "name": "Murmur",
+   "description": "Murmur: a landing screen for a writing assistant where four swallows fly around the prompt, and the whole sky is drawn live as a field of type. Each bird is built from real wing shapes, then re-read as a grid of small coloured cells that each pick a character by how much of the bird covers them, with a soft blurred shadow and drifting specks of dust. The birds wander, steer away from the screen edges, from the prompt box and from each other, flap in bursts, glide, and now and then tuck into a fast dart. Tap the sky near a bird and it startles away; send the prompt and every bird takes off at full flap while a line says what is being drafted. The prompt box is real glass over the sky, with a real textarea: Enter sends, Shift+Enter makes a new line. The drawing pauses when it is off screen or the tab is hidden, and with reduced motion the sky is drawn once and stays still.",
+   "categoryLabel": "AI Components",
+   "group": "effects",
+   "interactions": [
+    "hover",
+    "press"
+   ],
+   "exportName": "PreviewMurmur",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     0,
+     0,
+     960,
+     720
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "murmur",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794009600000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "loupe-lens",
+   "name": "Loupe Lens",
+   "description": "Loupe Lens: a glass ball you drag across a table of tiny printed things, and it bends the light like real glass. A fragment shader magnifies what is under it, refracts the rim with a separate bend for red, green and blue so white light splits into a spectrum, lays a thin film of colour along the edge, and adds a highlight, a window reflection, a soft shadow and a caustic. Under it sit eight printed objects drawn on a canvas, each with micro-print you can only read through the glass: a stamp, a ticket, a working watch dial, a map of the Amsterdam canals, a type specimen, a film strip, a facts label and a badge. Drag the glass and it follows on a spring, then coasts on release; tap the table and it glides there; drag an object and it lifts and tilts to the front. Scroll over it or pinch with two fingers to resize; arrow keys nudge it from the focused stage. A Lens panel sets size, magnification, refraction, dispersion and iridescence. It drifts by itself until first touch, pauses when off screen, shows a note when WebGL is missing, and with reduced motion it stays still.",
+   "categoryLabel": "Motion Effects",
+   "group": "effects",
+   "interactions": [
+    "drag",
+    "hover"
+   ],
+   "exportName": "PreviewLoupeLens",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     0,
+     0,
+     960,
+     720
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "loupe-lens",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794009600000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "liquid-smoke",
+   "name": "Liquid Smoke",
+   "description": "A fluid you stir with the pointer, solved on the GPU. Move and smoke pours out of the cursor, curls into eddies and fades, lit so it reads as a body of smoke with a wet glint on its folds. A slow drift leaves a wisp and a fast sweep pours. Screen it over a dark section or set Multiply for ink on a light one, inside any element or over the whole page. Clicks pass straight through. It sleeps once the trail has gone, skips machines without a GPU, and stays off for people who ask for reduced motion.",
+   "categoryLabel": "Background Effects",
+   "group": "effects",
+   "interactions": [
+    "hover"
+   ],
+   "exportName": "PreviewLiquidSmoke",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     0,
+     0,
+     960,
+     720
+    ],
+    "bg": "#0b0b0d",
+    "clearRoot": false,
+    "dark": true,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "liquid-smoke",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793577600000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "molten-hold",
+   "name": "Molten Hold",
+   "description": "Hold to confirm by pouring molten metal. Press and hold and metal pours into the channel: the front is a glowing meniscus, white-orange at the lip, that shivers as it runs and throws heat onto the groove ahead, while behind it the metal cools through orange and red into chrome, its skin breaking into slow cells. Let go early and it drains back. Hold to the end and the glow fades, one ripple runs the length of the set bar, and the label is pressed into the metal. Space or Enter hold it from the keyboard. Until you touch it, it holds and lets go by itself.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewMoltenHold",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     163,
+     163,
+     634,
+     394
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "molten-hold",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793491200000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A low thump and a short whoosh as the metal starts to run, then a sizzle that follows the front: grains of hiss and crackle that come closer together and brighter as the channel fills, with the odd spit and a low glug. Let go early and it drains with an airy slide and a few bubbly notes stepping down. Hold to the end and it sets with a heavy thunk, a hiss of steam as the metal quenches, a ring of chrome and a sheen that runs the length of the bar. Pressing it again plays a soft reverse blip.",
+   "demo": null
+  },
+  {
+   "slug": "mercury-switch",
+   "name": "Mercury Switch",
+   "description": "Settings toggles whose knob is a bead of mercury, shaded per pixel like a real chrome drop: a bright softbox up top, a dark horizon line, a warm floor, a fine rainbow at the rim. Flip one and the bead does not slide, it reaches: the leading side pulls ahead on a neck that thins as it parts, the rest lets go and catches up, and it lands with a squash and a wobble. Drag it and it stretches after your finger. Switched on, the groove glows and the mercury picks up that colour underneath. Space or Enter flips the focused switch. Until you touch it, it flips them by itself.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewMercurySwitch",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     134,
+     138,
+     692,
+     500
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "mercury-switch",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793491200000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Each flip is a drop of liquid metal: a bloop that rises as the leading edge reaches across, a second, higher one as the rest catches up, a soft plop as it squashes into the end of the groove and a small chrome ring. Switching off is the same, falling. Each row has its own pitch, so three switches flipped in turn make a little run of notes, and taking hold of a bead to drag it gives a short, wet squeeze.",
+   "demo": null
+  },
+  {
+   "slug": "mercury-upload",
+   "name": "Mercury Upload",
+   "description": "A file upload that pours the file in as mercury. A bead swells under the file's chip, stretches on a thinning neck and falls, lengthening as it speeds up, then merges into the pool below with ripples running off both ways. Drop by drop the pool spreads from the middle of the channel, which is the progress. When the last drop is in, the whole pool pulls itself together into a single bead and a check is pressed into it. Real file picker and drag and drop; wire progress to your upload. Until you touch it, it uploads a sample file by itself.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewMercuryUpload",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     161,
+     137,
+     638,
+     444
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "mercury-upload",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793491200000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "A soft thock as the file arrives, a tick as each bead lets go under the chip and a bubble as it lands in the pool, rising in pitch as the pool fills, like a bottle ringing higher as it fills, so you can hear the progress. When the last drop is in the pool gathers itself with a rising swell of air and a low note drawing in, then a thunk and a ring of chrome as the check is pressed into the bead.",
+   "demo": null
+  },
+  {
+   "slug": "mercury-tabs",
+   "name": "Mercury Tabs",
+   "description": "A tab bar whose selection is a frame of liquid metal, and the frame moves like mercury. The active tab sits in a rounded frame of chrome whose reflection never stops sliding: highlights drift across it, split round its corners and meet again, with short rainbows of blue and gold where a dark band's edge passes. Pick another tab and the frame does not jump: its leading edge flows out toward the new tab first, the rest follows, the metal thinning and flattening as it stretches, and it arrives with a wobble, bulging a little before it settles. Hover a tab and the frame leans toward it; any tab the metal flows across swells beneath it with faint red and blue edges, like a drop of glass. The sun at the end flips the theme: the new look spreads out from the switch in a circle and the chrome starts reflecting a bright room. Arrow keys move between tabs. Until you touch it, it tours the tabs and flips the theme by itself.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "hover",
+    "press"
+   ],
+   "exportName": "PreviewMercuryTabs",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     121,
+     187,
+     720,
+     346
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "mercury-tabs",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793404800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "liquid-send",
+   "name": "Liquid Send",
+   "description": "A message box whose send button is ringed in liquid metal, and it really sends. The ring is a tube of chrome drawn by a WebGL shader: stripes of light drift across it, split into short rainbows of blue, white and gold where a dark band ends, and it stays dull and grey until you type. Send, by click or Enter, and a bead of molten light races round the ring while the arrow lifts away; your message rises into the thread above in a dark bubble edged in the same chrome, and the ring flashes once before the arrow comes back. The sparkle writes a suggestion into the field letter by letter, and the paperclip attaches a real file. If WebGL is unavailable it falls back to a painted chrome ring. Until you touch it, it writes and sends a few messages on its own.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "type"
+   ],
+   "exportName": "PreviewLiquidSend",
+   "tint": "pink",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     300,
+     208,
+     360,
+     304
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "liquid-send",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793404800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "folder-tree",
+   "name": "Folder Tree",
+   "description": "A project tree that behaves like the Finder sidebar. Open a folder and its files pour out from underneath it on springs, one after another; close it and they are drawn back in, and Option-click opens everything inside in a wave. Drag a file and it lifts off and leans with your speed, hold it over a closed folder and the folder springs open, drop it and it flies into place, sorted, while the folder bounces. New files and folders slide out of the folder they are made in, named untitled and ready to rename; delete one and it is flung off the list with an Undo. Arrow keys, Option with the arrows, Return to rename, Delete, Cmd-Z and type-to-find all work. Until you touch it, it opens, selects and moves things by itself.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag"
+   ],
+   "exportName": "PreviewFolderTree",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     182,
+     48,
+     598,
+     644
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "folder-tree",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793404800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "context-menu",
+   "name": "Context Menu",
+   "description": "The right-click menu, made of liquid. Right-click a file, or press and hold on a phone, or press Shift+F10, and a drop forms under the pointer and flows out into the menu while the drop is absorbed. The highlight glides from row to row, and Move To buds a submenu off the side that snaps free like a droplet. Every action works: rename in place, duplicate, copy a link, pin to the top, favourite, tag, move into a folder (the file flies in and the folder bounces) or move to Trash with Undo. On close the menu drains back into the point it came from. Arrow keys, Enter and Escape work throughout. Until you touch it, it plays a few right-clicks by itself. Also includes Desktop Context Menu, a vibrancy menu that springs out of the exact point you right-click on a desktop at dusk, with a sliding highlight, submenus that wait for you, and rename, share, tags and delete with Undo.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press"
+   ],
+   "exportName": "PreviewContextMenu",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     84,
+     66,
+     794,
+     608
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "context-menu",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793404800000,
+   "premium": true,
+   "hasPrompt": true,
+   "variants": 2,
+   "demo": null
+  },
+  {
+   "slug": "consent-dock",
+   "name": "Consent Dock",
+   "description": "The cookie banner every site needs, without the nag. Choose, and the banner drains into a small button in the corner; customise, and the switches fall in a domino run before it closes. The button is a physical thing: throw it and it flies to whichever corner you aimed at, the way a picture-in-picture video does on iPhone, and it stretches if you pull it off the edge. Tap it to grow the preferences back out of it. Arrow keys move it between corners, and the choice can be saved to localStorage. It records the choice and hands it to onChange; it does not load or block any scripts itself, so wire onChange to your analytics. Until you touch it, it plays through a choice and a few throws on its own. Also includes Privacy Banner, a cookie banner with a real cookie on its corner that loses bites with every choice, and a switch for each kind of cookie under Customize.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag",
+    "press"
+   ],
+   "exportName": "PreviewConsentDock",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     32,
+     64,
+     880,
+     612
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "consent-dock",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793404800000,
+   "premium": true,
+   "hasPrompt": true,
+   "variants": 2,
+   "demo": null
+  },
+  {
+   "slug": "add-to-bag",
+   "name": "Add to Bag",
+   "description": "The add-to-cart moment, made physical. Press the button and the product lifts off and arcs through the air into the bag, which squashes as it lands while the badge rolls to the new count. The button folds into a quantity stepper, and taking one out hops it back out of the bag. The demo product is a stoneware mug ray-marched live in WebGL that you can drag to turn; give each colourway an image to show your own product photo instead. Point target at your header's bag icon and the product flies there. It handles the motion and the count; adding to a real cart is up to your onChange. Until you touch it, it adds, switches colour and removes by itself.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "press",
+    "3d"
+   ],
+   "exportName": "PreviewAddToBag",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     205,
+     0,
+     552,
+     699
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 3,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "add-to-bag",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793404800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "liquid-pagination",
+   "name": "Liquid Pagination",
+   "description": "Page controls where the selection is a drop of water. Pick a page and the drop stretches toward it, its front edge racing ahead of its back edge, then pulls itself round; numbers turn white only where the drop covers them, and the row of numbers reflows a beat later, sliding in from the side you are heading. Grab the drop and drag it, fling it and it coasts to a page, pull it past either end and it stretches against the edge. The dots variant is the iPhone page control: tap either side to step, or press and slide along it to scrub. Arrow keys, Home and End work in both. Use it controlled with page and onChange, or uncontrolled with defaultPage. Until you touch it, it moves through the pages by itself.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag"
+   ],
+   "exportName": "PreviewLiquidPagination",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     208,
+     234,
+     546,
+     242
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "liquid-pagination",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1793404800000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "glass-bubbles",
+   "name": "Glass Bubbles",
+   "description": "Four glass orbs hang on threads from the top of a panel. Sweep the pointer through them and they swing, knock into each other and spin their icons before settling back under their anchors.",
+   "categoryLabel": "Motion Effects",
+   "group": "effects",
+   "interactions": [
+    "hover"
+   ],
+   "exportName": "PreviewGlassBubbles",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     214,
+     142,
+     512,
+     352
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 2
+    }
+   },
+   "install": "glass-bubbles",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792454400000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "curved-reel",
+   "name": "Curved Reel",
+   "description": "An endless reel of posters bent around the inside of a curve: the centre cards sit back and pinch in while the edge cards swing round and come forward. It drifts on its own, and you can drag it or fling it to coast.",
+   "categoryLabel": "3D Components",
+   "group": "effects",
+   "interactions": [
+    "drag",
+    "3d"
+   ],
+   "exportName": "PreviewCurvedReel",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     72,
+     136,
+     804,
+     430
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "curved-reel",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792454400000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "swipe-stack",
+   "name": "Swipe Stack",
+   "description": "Payments to review as a deck of cards. Drag the top card right to approve or left to flag: it tilts as you pull, a stamp fades in, and once thrown the next card rises from the deck. Also includes the Motion Kit Swipe Rows variant.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "drag",
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewSwipeStack",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     298,
+     190,
+     366,
+     346
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "swipe-stack",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792454400000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Swipes a card away on throw, then chimes for approve or latches off for flag; the inbox rows do the same for archive and delete.",
+   "variants": 2,
+   "demo": null
+  },
+  {
+   "slug": "packet-router",
+   "name": "Packet Router",
+   "description": "A live diagram of requests flowing from a router to four AI models along curved paths. Switch between Cost, Balanced and Quality and the traffic re-balances while each model's share and the blended price roll to their new values.",
+   "categoryLabel": "AI Components",
+   "group": "effects",
+   "interactions": [
+    "press"
+   ],
+   "exportName": "PreviewPacketRouter",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     190,
+     210,
+     580,
+     302
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "packet-router",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792454400000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "stretch-nav",
+   "name": "Stretch Nav",
+   "description": "A pill navigation whose active capsule moves its leading edge first and lets the trailing edge catch up, so it stretches towards the next item and snaps back to size, with a soft hover pill that follows the pointer.",
+   "categoryLabel": "Navbars",
+   "group": "navigation",
+   "interactions": [
+    "hover",
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewStretchNav",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     254,
+     292,
+     464,
+     136
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 1,
+     "sm": 2,
+     "lg": 1
+    }
+   },
+   "install": "stretch-nav",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Ticks when you select a different item.",
+   "demo": null
+  },
+  {
+   "slug": "magnify-dock",
+   "name": "Magnify Dock",
+   "description": "A macOS-style app dock: icons swell as the pointer passes over them, show a label above, bounce when launched and keep a running dot underneath.",
+   "categoryLabel": "Navbars",
+   "group": "navigation",
+   "interactions": [
+    "hover",
+    "press"
+   ],
+   "exportName": "PreviewMagnifyDock",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     279,
+     337,
+     404,
+     124
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "magnify-dock",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "animated-icons",
+   "name": "Animated Icons",
+   "description": "Eight toggle icons with their own small stories: menu to close, play morphing into pause, a heart that bursts, a bell that rings, sun turning to moon, a bookmark that fills, sound muting and a lock that springs open.",
+   "categoryLabel": "Motion Effects",
+   "group": "effects",
+   "interactions": [
+    "press",
+    "hover"
+   ],
+   "exportName": "PreviewAnimatedIcons",
+   "tint": "pink",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     264,
+     216,
+     432,
+     274
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "animated-icons",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "island-morph",
+   "name": "Island Morph",
+   "description": "A black pill that morphs between a timer, an incoming call and a full music player, with each state's content blurring in once the shape lands.",
+   "categoryLabel": "Motion Effects",
+   "group": "effects",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewIslandMorph",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     306,
+     198,
+     348,
+     324
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "island-morph",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Whooshes softly when you press a state button, Accept or Decline.",
+   "demo": null
+  },
+  {
+   "slug": "ruler-picker",
+   "name": "Ruler Picker",
+   "description": "A duration picker you fling like a ruler: it glides with momentum and snaps to whole units, the big number rolls in the direction you moved, and presets spring the ruler into place.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewRulerPicker",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     303,
+     225,
+     354,
+     278
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "ruler-picker",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Ticks as the ruler passes each unit while you drag, fling or press arrows, and taps on a preset.",
+   "demo": null
+  },
+  {
+   "slug": "folder-peek",
+   "name": "Folder Peek",
+   "description": "A folder that tips its front panel back on hover or focus while a document, a photo and a chart fan out of it, then tuck back in when you leave.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "hover",
+    "3d"
+   ],
+   "exportName": "PreviewFolderPeek",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     308,
+     184,
+     346,
+     308
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "folder-peek",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "notification-stack",
+   "name": "Notification Stack",
+   "description": "Toasts that pile into a neat stack, spread out while hovered (pausing their timers), swipe away sideways, and turn a loading toast into a success when the work finishes.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "hover",
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewNotificationStack",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     279,
+     363,
+     388,
+     182
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "notification-stack",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Pings when you press a trigger and a toast arrives.",
+   "demo": null
+  },
+  {
+   "slug": "stagger-menu",
+   "name": "Stagger Menu",
+   "description": "A share menu that unfolds from its button with the items arriving one after another, a highlight that glides between rows, arrow-key navigation, and a button label that rolls to confirm what you picked.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "hover",
+    "sound"
+   ],
+   "exportName": "PreviewStaggerMenu",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     330,
+     210,
+     300,
+     330
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "stagger-menu",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": false,
+   "hasPrompt": true,
+   "sound": "Pops when the menu opens, ticks when you press an item, then chimes as the button shows its confirmation.",
+   "demo": null
+  },
+  {
+   "slug": "copy-button",
+   "name": "Copy Button",
+   "description": "Two copy controls: an ID chip whose icon morphs into a check under a ripple and a Copied tooltip, and a command line whose button rolls from Copy to Copied.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewCopyButton",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     265,
+     255,
+     438,
+     210
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "copy-button",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": false,
+   "hasPrompt": true,
+   "sound": "Chimes softly when you copy; the key field also latches on and off for reveal and hide and whooshes on rotate.",
+   "variants": 3,
+   "demo": null
+  },
+  {
+   "slug": "elastic-stepper",
+   "name": "Elastic Stepper",
+   "description": "A plus / minus stepper whose number rolls up or down, with a dot track that stretches to the current value and a rubber-band bounce when you push past either limit.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewElasticStepper",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     364,
+     286,
+     232,
+     124
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "elastic-stepper",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": false,
+   "hasPrompt": true,
+   "sound": "Taps when you step up and ticks when you step down.",
+   "demo": null
+  },
+  {
+   "slug": "upload-chips",
+   "name": "Upload Chips",
+   "description": "A drop zone that lifts and tints while you drag over it, then turns every file into a chip with a filling progress bar, a progress ring and a check when it lands.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag",
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewUploadChips",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     229,
+     163,
+     502,
+     330
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 2
+    }
+   },
+   "install": "upload-chips",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Taps when you drop or choose files and plays a done chord for each finished upload.",
+   "demo": null
+  },
+  {
+   "slug": "feedback-pill",
+   "name": "Feedback Pill",
+   "description": "A small Feedback pill that morphs into a note form, shows a spinner in the Send button while it posts, then shrinks into a thank-you before folding back into the pill.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "type",
+    "sound"
+   ],
+   "exportName": "PreviewFeedbackPill",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     264,
+     218,
+     432,
+     284
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 2
+    }
+   },
+   "install": "feedback-pill",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": false,
+   "hasPrompt": true,
+   "sound": "Pops open, taps shut, chimes when the message is sent and bumps if sending fails.",
+   "typing": true,
+   "demo": null
+  },
+  {
+   "slug": "progress-button",
+   "name": "Progress Button",
+   "description": "A button that becomes its own progress bar: it stretches, fills as the work runs with a live percentage, then turns green with a drawn check and a new label.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewProgressButton",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     386,
+     306,
+     188,
+     88
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "progress-button",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": false,
+   "hasPrompt": true,
+   "sound": "Taps on press and plays a soft rising chime when the download finishes.",
+   "demo": null
+  },
+  {
+   "slug": "hold-to-confirm",
+   "name": "Hold to Confirm",
+   "description": "A destructive button you have to press and hold: the fill sweeps across, letting go early springs it back, and finishing bursts into a tick with an undo toast that counts down.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewHoldToConfirm",
+   "tint": "pink",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     283,
+     155,
+     388,
+     344
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "hold-to-confirm",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Rises while you hold, chimes when it confirms and hushes if you let go early.",
+   "demo": null
+  },
+  {
+   "slug": "price-odometer",
+   "name": "Price Odometer",
+   "description": "A seat-based pricing card whose total rolls like an odometer: each digit spins on its own spring, columns slide in as the number grows, and a Save badge pops in for yearly billing.",
+   "categoryLabel": "Pricing Sections",
+   "group": "marketing",
+   "interactions": [
+    "drag"
+   ],
+   "exportName": "PreviewPriceOdometer",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     1200,
+     800
+    ],
+    "focus": [
+     333,
+     209,
+     534,
+     390
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "price-odometer",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "slide-to-confirm",
+   "name": "Slide to Confirm",
+   "description": "A slide-to-confirm track for payments and other deliberate actions. The knob stretches along the track in proportion to how fast you drag it and squashes back when it stops, the label shimmers and fades as you pull, and past the threshold the track floods with the success colour while a check draws itself. Also includes Slide to Pay, a payment you confirm by sliding: the track pulls in to a circle under your thumb, spins while it sends and turns into a tick.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag",
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewSlideToConfirmRedesign",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     324,
+     292,
+     314,
+     114
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "slide-to-confirm",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Ticks softly as the knob passes each quarter of the track, chimes on confirm and bumps if the confirm fails. The Slide to Pay variant ticks softly as you use it, chimes on the key moments and whooshes on the bigger moves.",
+   "variants": 2,
+   "demo": null
+  },
+  {
+   "slug": "otp-input",
+   "name": "OTP Input",
+   "description": "A six-box one-time-code field: digits spring in as you type, the boxes ripple while the code is checked, shake on a wrong code, and fold into a Verified pill on success. Also includes OTP Code, a field with no confirm button whose digits roll in and whose boxes slide together into one bar while it checks, then turn green or shake apart.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "type",
+    "sound"
+   ],
+   "exportName": "PreviewOtpInput",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     236,
+     214,
+     488,
+     292
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "otp-input",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": false,
+   "hasPrompt": true,
+   "sound": "Ticks quietly for each digit, chimes when the code verifies and bumps on a wrong code.",
+   "typing": true,
+   "variants": 4,
+   "demo": null
+  },
+  {
+   "slug": "tilt-pass",
+   "name": "Tilt Pass",
+   "description": "A membership pass that tilts towards the pointer with a moving glare and holographic sheen, casts a shadow that shifts with it, and flips over to a scannable back on click.",
+   "categoryLabel": "3D Components",
+   "group": "effects",
+   "interactions": [
+    "hover",
+    "3d"
+   ],
+   "exportName": "PreviewTiltPass",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     278,
+     206,
+     412,
+     294
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "tilt-pass",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "demo": null
+  },
+  {
+   "slug": "cursor-buddy",
+   "name": "Cursor Buddy",
+   "description": "A soft little character whose eyes follow the pointer anywhere on the page, sliding round its curved face and narrowing near the edge. It blinks, flinches when you come close, dozes off when left alone, and hops with a squash and stretch when you click it or press Enter.",
+   "categoryLabel": "Motion Effects",
+   "group": "effects",
+   "interactions": [
+    "hover",
+    "press",
+    "3d"
+   ],
+   "exportName": "PreviewCursorBuddyRedesign",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     292,
+     266,
+     378,
+     166
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "cursor-buddy",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": false,
+   "demo": null
+  },
+  {
+   "slug": "tick-slider",
+   "name": "Tick Slider",
+   "description": "A slider drawn as a row of ticks that fill with colour up to the value. Ticks swell in a wave around the pointer and the needle, the needle leans into the direction it moves and swings upright when it stops, and the number above rolls digit by digit.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewTickSliderRedesign",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     362,
+     278,
+     264,
+     148
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 1,
+     "lg": 1
+    }
+   },
+   "install": "tick-slider",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": false,
+   "sound": "Ticks quietly as you drag or use the keys across each tick mark.",
+   "demo": null
+  },
+  {
+   "slug": "toast-stack",
+   "name": "Toast Stack",
+   "description": "Notifications that rest in a tidy stack: a new toast drops onto the pile squashed and springs into shape, and hover or focus fans the stack into a list. Fling a toast sideways and it tilts and skids off; with a duration set, the front toast counts down along its bottom edge and waits while the stack is open. Also includes Undo Toast, where an archived row shrinks into the toast, a ring counts down around Undo, and undo drops the row back in place. Also includes Promise Toast, a pill that follows a deploy step by step with progress filling behind the words and lands on a live link or an error with a way to the logs. Also includes Timed Toast Stack, toasts that stack like cards with each one's time left running round its edge, swipe-away with momentum, an upload that turns into done in place and a delete with Undo.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "hover",
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewToastStackRedesign",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     282,
+     342,
+     396,
+     168
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "toast-stack",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": false,
+   "hasPrompt": true,
+   "sound": "Swishes when you swipe a toast away or close it, and taps its action button; Undo Toast pings on archive and drops on Undo; Promise Toast pings on Deploy, then chimes on success or bumps on error. A toast you push with { sound: true } pings, chimes or bumps by type.",
+   "variants": 4,
+   "demo": null
+  },
+  {
+   "slug": "dot-sphere",
+   "name": "Dot Sphere",
+   "description": "A turning sphere of dots drawn on canvas: the pointer parts the dots as it passes, and dragging spins it in any direction before it coasts back to its idle turn. Tap it and a ripple rolls out from that spot, swelling the dots and lighting them in the accent colour as it wraps round the far side.",
+   "categoryLabel": "Motion Effects",
+   "group": "effects",
+   "interactions": [
+    "hover",
+    "drag",
+    "press",
+    "3d"
+   ],
+   "exportName": "PreviewDotSphereRedesign",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     412,
+     332,
+     196,
+     216
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "dot-sphere",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": false,
+   "demo": null
+  },
+  {
+   "slug": "emoji-reactions",
+   "name": "Emoji Reactions",
+   "description": "A message with reaction chips that pop and roll their counts when tapped, plus a spring picker that adds new reactions with a layout animation. Also includes the Motion Kit Spark Reactions variant.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewEmojiReactions",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     314,
+     292,
+     332,
+     140
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "emoji-reactions",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Pops when you pick or add a reaction and plays a quieter off when you remove yours.",
+   "variants": 2,
+   "demo": null
+  },
+  {
+   "slug": "like-burst",
+   "name": "Like Burst",
+   "description": "A like button whose heart squashes and fills with a ring shockwave and a particle burst, while the count rolls digit by digit. Also includes the Motion Kit Confetti Like variant.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewLikeBurst",
+   "tint": "pink",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     416,
+     324,
+     126,
+     72
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 1
+    }
+   },
+   "install": "like-burst",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Pops when you like and plays a quieter off when you unlike.",
+   "variants": 2,
+   "demo": null
+  },
+  {
+   "slug": "dynamic-island",
+   "name": "Dynamic Island",
+   "description": "A black pill that grows into whatever is happening: a running timer, the song that is playing or an incoming call. Each change stretches it, the width shooting out first and the height catching up on a looser spring, and tapping it opens live controls.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewDynamicIslandRedesign",
+   "tint": "pink",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     229,
+     159,
+     502,
+     402
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "dynamic-island",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": false,
+   "sound": "Pops when the pill opens, pops quieter when it tucks away and whooshes when you stop the timer or decline the call.",
+   "demo": null
+  },
+  {
+   "slug": "time-scrubber",
+   "name": "Time Scrubber",
+   "description": "A time picker drawn as a ruler you drag or fling under a fixed needle. The ruler coasts and lands exactly on a snap point, the needle ticks at every interval it crosses and bounces when the ruler lands, the digits roll and a small sky chip shifts from night to dawn to day.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewTimeScrubberRedesign",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     295,
+     235,
+     370,
+     256
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "time-scrubber",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": false,
+   "sound": "Ticks for each mark crossed while you drag or fling, then one soft drop when it lands.",
+   "demo": null
+  },
+  {
+   "slug": "hold-to-record",
+   "name": "Hold to Record",
+   "description": "Press and hold to record a voice note, release to keep it. A soft halo behind the record dot swells with your voice, the live waveform scrolls in from the right, and sliding left morphs the dot into a bin whose lid opens; let go there to throw the note away. Kept notes become a small player. Also includes Voice Dictation: Bars move with your voice, words arrive faint while they're guesses and firm up when sure, and corrections like “for” to “4” visibly swap in place.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewHoldToRecordRedesign",
+   "tint": "peach",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     277,
+     293,
+     406,
+     134
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "hold-to-record",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Clicks on when recording starts, off when you keep the note, hushes when you cancel and taps on play, pause and delete. The Voice Dictation variant clicks on when listening starts and off when it stops, whether you press stop or it finishes on its own; the level bars make no sound.",
+   "variants": 2,
+   "demo": null
+  },
+  {
+   "slug": "upload-dropzone",
+   "name": "Upload Dropzone",
+   "description": "A file drop target with a list of uploads. While a file hovers, a little stack of sheets fans out over a tray and the dashed edge marches; when files land the tray squashes as it swallows them, each row fills a progress ring that turns into a drawn check, and rejected files shake the zone. Also includes Avatar Upload, a profile photo picker where you drag and zoom inside a circle and a ring draws itself around the avatar as it saves. Also includes Upload Queue, a list where each row is its own progress bar with pause, cancel and a whole-card drop target that counts the files. Also includes Empty Table: Ghost columns show the shape of the data. Drop a CSV or take the sample and a scan line reads down the table as cells fill in order, columns label their types and the count rolls up.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewUploadDropzoneRedesign",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     266,
+     232,
+     430,
+     248
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "upload-dropzone",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792368000000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Thumps when you drop or choose files, bumps on a rejected file and plays a done chord when an upload finishes. The Empty Table variant taps when you press Upload CSV or Use sample data and plays one soft rising chord when the row count finishes rolling up.",
+   "variants": 4,
+   "demo": null
+  },
+  {
+   "slug": "cinematic-card-deck",
+   "name": "Cinematic Card Deck",
+   "description": "A deck of poster cards in 3D: the front card peels away on its bottom edge while the cards behind rise to take its place, leaning back as the deck moves and springing upright when it stops. Swipe or fling it, scroll the wheel over it, use the arrow keys or the progress pills, or set scrollLinked to deal it from page scroll.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "drag",
+    "scroll",
+    "3d",
+    "sound"
+   ],
+   "exportName": "PreviewCinematicCardDeckRedesign",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     1200,
+     800
+    ],
+    "focus": [
+     402,
+     212,
+     396,
+     292
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "cinematic-card-deck",
+   "isNew": false,
+   "isRecent": false,
+   "addedAt": 1779408000000,
+   "premium": false,
+   "hasPrompt": false,
+   "sound": "Ticks each time a new card comes to the front from your drag, wheel, keys or progress pills.",
+   "demo": null
+  },
+  {
+   "slug": "gooey-search-input",
+   "name": "Gooey Search Input",
+   "description": "A search pill whose icon pinches off into its own bubble through an SVG goo filter when you open it, while the field grows with a springy overshoot. Pass suggestions and the matches drip out of the underside of the field through the same goo, with arrow-key navigation.",
+   "categoryLabel": "Motion Effects",
+   "group": "effects",
+   "interactions": [
+    "type",
+    "sound"
+   ],
+   "exportName": "PreviewGooeySearchInputRedesign",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     318,
+     188,
+     330,
+     228
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "gooey-input",
+   "isNew": false,
+   "isRecent": false,
+   "addedAt": 1778630400000,
+   "premium": false,
+   "hasPrompt": false,
+   "sound": "Pops open, switches off on close and taps when you pick a suggestion.",
+   "typing": true,
+   "demo": null
+  },
+  {
+   "slug": "mac-keyboard",
+   "name": "Mac Keyboard",
+   "description": "A Mac keyboard drawn in HTML, in silver or space grey. Press a key and it sinks, squashes and springs back while a ring of backlight spreads out from it through the gaps; it can listen to the real keyboard, plays a recorded mechanical click for each key the instant it goes down, and shows what you type in a strip above.",
+   "categoryLabel": "Motion Effects",
+   "group": "effects",
+   "interactions": [
+    "press",
+    "type"
+   ],
+   "exportName": "PreviewMacKeyboardRedesign",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     1100,
+     560
+    ],
+    "focus": [
+     167,
+     53,
+     766,
+     436
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "mac-keyboard",
+   "isNew": false,
+   "isRecent": false,
+   "addedAt": 1778716800000,
+   "premium": false,
+   "hasPrompt": false,
+   "variants": 2,
+   "demo": null
+  },
+  {
+   "slug": "floating-dock",
+   "name": "Nexus floating dock",
+   "description": "A macOS-style dock: tiles swell under the pointer and push their neighbours aside on springs, a tooltip names each one, and a click bounces the tile like a launching app before a running dot slides under it. Below md it turns into one glass button that springs the tiles up as a stack.",
+   "categoryLabel": "Navbars",
+   "group": "navigation",
+   "interactions": [
+    "hover",
+    "press"
+   ],
+   "exportName": "PreviewFloatingDockRedesign",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     74,
+     128,
+     812,
+     442
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "floating-dock",
+   "isNew": false,
+   "isRecent": false,
+   "addedAt": 1778630400000,
+   "premium": false,
+   "hasPrompt": false,
+   "demo": "wander"
+  },
+  {
+   "slug": "wheel-selector",
+   "name": "Wheel Selector",
+   "description": "A radial selector: a ring of icon nodes you drag round, fling, scroll or step with the arrow keys. It coasts, snaps to the nearest stop with a little overshoot, and the node at the top swells and fills with its colour while the hub counter rolls and the side panel swaps to that item.",
+   "categoryLabel": "Feature Sections",
+   "group": "marketing",
+   "interactions": [
+    "drag",
+    "press",
+    "sound"
+   ],
+   "exportName": "PreviewWheelSelectorRedesign",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     1200,
+     800
+    ],
+    "focus": [
+     188,
+     146,
+     792,
+     508
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 2
+    }
+   },
+   "install": "wheel-selector",
+   "isNew": false,
+   "isRecent": false,
+   "addedAt": 1779753600000,
+   "premium": false,
+   "hasPrompt": false,
+   "sound": "Ticks as each item passes the top and drops softly when the dial settles on a choice.",
+   "demo": null
+  },
+  {
+   "slug": "glowing-effect-cards",
+   "name": "Glowing Effect Cards",
+   "description": "Cards wrapped in a hairline rim that lights up on the side nearest the pointer: the lit arc chases the pointer round the edge on a spring, neighbouring cards catch the light as the pointer nears them, and a press flares it. Ships as GlowingEffect (wrap anything), GlowingCard (icon, title, line, call to action) and GlowingCardsLayout (a 2-1-2 grid that stacks by container width). Also includes Lit Border: A wrapper for any element: <LitBorder> draws a thin border whose light band turns to face the pointer and brightens as it gets closer. Put several inside <LightGroup> and they share one light, shown here on pricing cards and a search field.",
+   "categoryLabel": "Cards",
+   "group": "cards",
+   "interactions": [
+    "hover",
+    "press"
+   ],
+   "exportName": "PreviewGlowingEffectCardsRedesign",
+   "tint": "pink",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     124,
+     112,
+     712,
+     496
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "glowing-effect-cards",
+   "isNew": false,
+   "isRecent": false,
+   "addedAt": 1778716800000,
+   "premium": false,
+   "hasPrompt": true,
+   "variants": 3,
+   "demo": "wander"
+  },
+  {
+   "slug": "encrypted-text",
+   "name": "Encrypted Text",
+   "description": "Text that decodes itself: every character shuffles through a charset in a fixed-width cell so the line never jitters, then a lock wave runs left to right and each character drops into place with a spring pop. Start it on load, on hover, on click or when it scrolls into view, and loop it if you like.",
+   "categoryLabel": "Motion Effects",
+   "group": "effects",
+   "interactions": [
+    "hover",
+    "press",
+    "scroll"
+   ],
+   "exportName": "PreviewEncryptedTextRedesign",
+   "tint": "violet",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     216,
+     212,
+     526,
+     290
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "encrypted-text",
+   "isNew": false,
+   "isRecent": false,
+   "addedAt": 1778716800000,
+   "premium": false,
+   "hasPrompt": false,
+   "demo": "wander"
+  },
+  {
+   "slug": "avatar-group",
+   "name": "Avatar Group",
+   "description": "An overlapping stack of avatars that behaves like a dock: the face under the pointer swells and rises, its neighbours lean out of the way and a single name pill glides from face to face. Past a maximum a +N chip opens the rest, and every avatar is focusable from the keyboard.",
+   "categoryLabel": "Motion Effects",
+   "group": "effects",
+   "interactions": [
+    "hover"
+   ],
+   "exportName": "PreviewAvatarGroupRedesign",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     327,
+     243,
+     306,
+     218
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 1,
+     "lg": 1
+    },
+    "rows": {
+     "base": 2,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "avatar-group",
+   "isNew": false,
+   "isRecent": false,
+   "addedAt": 1779321600000,
+   "premium": false,
+   "hasPrompt": false,
+   "demo": "wander"
+  }
+ ],
+ "story": [
+  {
+   "slug": "lens-search",
+   "name": "Lens Search",
+   "description": "A search box whose magnifying glass is a real lens. Type, and the magnifier lifts out of the field and grows into a glass lens over the list. It looks down the rows, magnifying each as it passes and dimming the ones that do not match, and parks on the first match with a chime, the matched letters in blue under the glass. Arrow keys glide it between matches, and Enter or a click opens one. When nothing matches it reaches the bottom, shakes its head and goes home. Clear the field or press Escape and it drops back in as the icon. The field is a combobox over a listbox, with the result count in a polite live region.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "type",
+    "sound"
+   ],
+   "exportName": "PreviewLensSearch",
+   "tint": "mint",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     236,
+     64,
+     490,
+     612
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 3,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "lens-search",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1794268800000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Air as the lens lifts out of the field, soft ticks as it passes rows, a chime when it parks on a match, and two low notes when nothing matches.",
+   "demo": null
+  },
+  {
+   "slug": "bolting-sliders",
+   "name": "Bolting Sliders",
+   "description": "A panel of settings sliders where clicking a track makes the knob leap there in an arc, leaving a fading dotted trail and reading out its value mid-air, then landing with a squash. Dragging and arrow keys work as usual.",
+   "categoryLabel": "Inputs & Controls",
+   "group": "controls",
+   "interactions": [
+    "press",
+    "drag",
+    "sound"
+   ],
+   "exportName": "PreviewBoltingSliders",
+   "tint": "sky",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     276,
+     140,
+     418,
+     444
+    ],
+    "bg": null,
+    "clearRoot": true,
+    "dark": false,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 2,
+     "sm": 3,
+     "lg": 3
+    }
+   },
+   "install": "bolting-sliders",
+   "isNew": true,
+   "isRecent": false,
+   "addedAt": 1792454400000,
+   "premium": true,
+   "hasPrompt": true,
+   "sound": "Lifts as the knob leaps to your click and drops when it lands.",
+   "demo": null
+  },
+  {
+   "slug": "terminal",
+   "name": "Interactive Terminal",
+   "description": "A macOS-style terminal window that types a script of commands with human timing, shows a spinner while each runs and prints its output. Then the prompt is yours: click in and type help, ls, echo or any scripted command, with history, Tab completion and Ctrl+C.",
+   "categoryLabel": "Motion Effects",
+   "group": "effects",
+   "interactions": [
+    "type",
+    "sound"
+   ],
+   "exportName": "PreviewTerminalRedesign",
+   "tint": "butter",
+   "fit": {
+    "canvas": [
+     960,
+     720
+    ],
+    "focus": [
+     133,
+     143,
+     684,
+     292
+    ],
+    "bg": "#1e1e1e",
+    "clearRoot": false,
+    "dark": true,
+    "span": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    },
+    "rows": {
+     "base": 1,
+     "sm": 2,
+     "lg": 2
+    }
+   },
+   "install": "terminal",
+   "isNew": false,
+   "isRecent": false,
+   "addedAt": 1778630400000,
+   "premium": false,
+   "hasPrompt": false,
+   "typing": true,
+   "variants": 2,
+   "demo": null
+  }
+ ],
+ "categories": [
+  {
+   "slug": "inputs-controls",
+   "label": "Inputs & Controls",
+   "count": 110,
+   "href": "/components/category/inputs-controls"
+  },
+  {
+   "slug": "motion-effects",
+   "label": "Motion Effects",
+   "count": 69,
+   "href": "/components/category/motion-effects"
+  },
+  {
+   "slug": "cards",
+   "label": "Cards",
+   "count": 67,
+   "href": "/components/category/cards"
+  },
+  {
+   "slug": "dashboards",
+   "label": "Dashboards",
+   "count": 26,
+   "href": "/components/category/dashboards"
+  },
+  {
+   "slug": "ai-components",
+   "label": "AI Components",
+   "count": 24,
+   "href": "/components/category/ai-components"
+  },
+  {
+   "slug": "background-effects",
+   "label": "Background Effects",
+   "count": 16,
+   "href": "/components/category/background-effects"
+  },
+  {
+   "slug": "three-d-components",
+   "label": "3D Components",
+   "count": 14,
+   "href": "/components/category/three-d-components"
+  },
+  {
+   "slug": "loaders",
+   "label": "Loaders",
+   "count": 13,
+   "href": "/components/category/loaders"
+  },
+  {
+   "slug": "for-fun",
+   "label": "For Fun",
+   "count": 8,
+   "href": "/components/category/for-fun"
+  },
+  {
+   "slug": "navbars",
+   "label": "Navbars",
+   "count": 4,
+   "href": "/components/category/navbars"
+  },
+  {
+   "slug": "testimonials",
+   "label": "Testimonials",
+   "count": 3,
+   "href": "/components/category/testimonials"
+  },
+  {
+   "slug": "pricing-sections",
+   "label": "Pricing Sections",
+   "count": 3,
+   "href": "/components/category/pricing-sections"
+  },
+  {
+   "slug": "signup-forms",
+   "label": "Signup Forms",
+   "count": 3,
+   "href": "/components/category/signup-forms"
+  },
+  {
+   "slug": "login-forms",
+   "label": "Login Forms",
+   "count": 2,
+   "href": "/components/category/login-forms"
+  },
+  {
+   "slug": "feature-sections",
+   "label": "Feature Sections",
+   "count": 2,
+   "href": "/components/category/feature-sections"
+  },
+  {
+   "slug": "cta-sections",
+   "label": "CTA Sections",
+   "count": 2,
+   "href": "/components/category/cta-sections"
+  }
+ ],
+ "drops": [
+  {
+   "month": "2026-11",
+   "label": "November 2026",
+   "count": 125,
+   "picks": [
+    {
+     "slug": "typing-indicator",
+     "name": "Typing Indicator",
+     "premium": false
+    },
+    {
+     "slug": "status-cards",
+     "name": "Status Cards",
+     "premium": false
+    },
+    {
+     "slug": "skeleton-loader",
+     "name": "Skeleton Loader",
+     "premium": false
+    },
+    {
+     "slug": "home-scenes",
+     "name": "Home Scenes",
+     "premium": true
+    }
+   ]
+  },
+  {
+   "month": "2026-10",
+   "label": "October 2026",
+   "count": 184,
+   "picks": [
+    {
+     "slug": "mercury-tabs",
+     "name": "Mercury Tabs",
+     "premium": true
+    },
+    {
+     "slug": "ring-gallery",
+     "name": "Ring Gallery",
+     "premium": true
+    },
+    {
+     "slug": "liquid-send",
+     "name": "Liquid Send",
+     "premium": true
+    },
+    {
+     "slug": "global-deploy",
+     "name": "Global Deploy",
+     "premium": true
+    }
+   ]
+  },
+  {
+   "month": "2026-05",
+   "label": "May 2026",
+   "count": 50,
+   "picks": [
+    {
+     "slug": "ask-nexus-input",
+     "name": "Ask Nexus Input",
+     "premium": true
+    },
+    {
+     "slug": "interactive-globe-explorer",
+     "name": "Interactive Globe Explorer",
+     "premium": true
+    },
+    {
+     "slug": "warp-speed-card",
+     "name": "Warp Speed Card",
+     "premium": true
+    },
+    {
+     "slug": "animated-select-headline",
+     "name": "Animated Select Headline",
+     "premium": false
+    }
+   ]
+  }
+ ]
+}

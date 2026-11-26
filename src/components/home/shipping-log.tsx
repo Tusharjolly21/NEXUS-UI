@@ -1,40 +1,11 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { PillLink } from "@/components/site";
-import { libraryComponents } from "@/lib/catalog/library-components";
 import { ProMark } from "@/components/pro/pro-access";
-
-type Drop = { month: string; label: string; count: number; picks: { slug: string; name: string; premium: boolean }[] };
-
-/** Groups the catalog by the month each component shipped, newest first. */
-function recentDrops(limit = 3): Drop[] {
-  const byMonth = new Map<string, typeof libraryComponents>();
-  for (const c of libraryComponents) {
-    const month = c.createdAt.slice(0, 7);
-    byMonth.set(month, [...(byMonth.get(month) ?? []), c]);
-  }
-  return [...byMonth.entries()]
-    .sort(([a], [b]) => (a < b ? 1 : -1))
-    .slice(0, limit)
-    .map(([month, items]) => ({
-      month,
-      label: new Date(`${month}-01T00:00:00Z`).toLocaleDateString("en-US", {
-        month: "long",
-        year: "numeric",
-        timeZone: "UTC",
-      }),
-      count: items.length,
-      picks: [...items]
-        .sort((a, b) => b.trendingScore - a.trendingScore)
-        .slice(0, 4)
-        .map(({ slug, name, premium }) => ({ slug, name, premium })),
-    }));
-}
+import type { HomeDrop } from "@/lib/catalog/home-snapshot-config";
 
 /** Release history plus the requests pitch: shows the library keeps growing. */
-export function ShippingLog() {
-  const drops = recentDrops();
-
+export function ShippingLog({ drops }: { drops: HomeDrop[] }) {
   return (
     <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
       <div>

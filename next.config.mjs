@@ -206,22 +206,33 @@ const nextConfig = {
       },
     ];
   },
-  // The homepage is the same for everyone who is signed out, so serve that visitor a copy built once
-  // and cached (src/app/(static)/home-static) instead of rendering it on a server in one region for
-  // every visit. Skipped, so the regular page is served as before, for anyone with a sign-in cookie
-  // or who has closed the launch banner (the one other thing the regular page reads per visitor).
+  // The homepage is the same for everyone who is signed out apart from its prices, so serve that visitor a
+  // copy built once and cached instead of rendering it on a server in one region for every visit. There are
+  // two copies, one per price list: src/app/(static)/home-static-in for visitors Cloudflare places in India
+  // (rupee prices) and src/app/(static)/home-static for everyone else. Both are skipped, so the regular page
+  // is served as before, for anyone with a sign-in cookie, who has closed the launch banner (the one other
+  // thing the regular page reads per visitor), or whose request carries no Cloudflare country header (the
+  // regular page then falls back to Vercel's, which only it reads).
   async rewrites() {
     const session = supabaseSessionCookies();
     if (!session.length) return [];
+    const notPersonalised = [
+      ...session.map((key) => ({ type: "cookie", key })),
+      // any value: the regular page decides whether that banner id is the current one
+      { type: "cookie", key: "nx-banner" },
+    ];
     return {
       beforeFiles: [
         {
           source: "/",
-          missing: [
-            ...session.map((key) => ({ type: "cookie", key })),
-            // any value: the regular page decides whether that banner id is the current one
-            { type: "cookie", key: "nx-banner" },
-          ],
+          has: [{ type: "header", key: "cf-ipcountry", value: "IN" }],
+          missing: notPersonalised,
+          destination: "/home-static-in",
+        },
+        {
+          source: "/",
+          has: [{ type: "header", key: "cf-ipcountry" }],
+          missing: [...notPersonalised, { type: "header", key: "cf-ipcountry", value: "IN" }],
           destination: "/home-static",
         },
       ],
