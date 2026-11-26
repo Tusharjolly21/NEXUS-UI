@@ -87,10 +87,21 @@ export function CodeToUi() {
   const [typed, setTyped] = React.useState(reduce ? SCENES[0].code.length : 0);
   const [phase, setPhase] = React.useState<Phase>(reduce ? "live" : "typing");
   const [held, setHeld] = React.useState(false);
+  // The hero shows this only from 1024px up; below that it is hidden, so it must not run (it re-renders the
+  // page every frame while it types, which a phone feels).
+  const [wide, setWide] = React.useState(false);
   const code = SCENES[scene].code;
 
   React.useEffect(() => {
-    if (reduce) return;
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const update = () => setWide(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  React.useEffect(() => {
+    if (reduce || !wide) return;
     let t: ReturnType<typeof setTimeout>;
     if (phase === "typing") {
       if (typed < code.length) {
@@ -111,7 +122,7 @@ export function CodeToUi() {
         }, 120);
     }
     return () => clearTimeout(t);
-  }, [phase, typed, code, reduce, held]);
+  }, [phase, typed, code, reduce, held, wide]);
 
   const pick = (i: number) => {
     setHeld(true);
