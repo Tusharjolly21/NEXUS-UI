@@ -53,13 +53,18 @@ html.dark .cx {
   }
 }
 
+/*
+ * The hero's entrance. It blurs and slides text into focus but never starts it at opacity 0: Chrome does not
+ * count text that starts transparent as the page's main content, so with a fade the hero never registered as
+ * the Largest Contentful Paint and the metric fell to a small banner that paints after the scripts run
+ * (about 8.6 s on a simulated slow phone, against 2.5 s with this).
+ */
 /* Letters blur in */
 .cx-rise {
   animation: cx-rise 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 @keyframes cx-rise {
   from {
-    opacity: 0;
     filter: blur(14px);
     transform: translateY(0.25em);
   }
@@ -69,7 +74,7 @@ html.dark .cx {
 }
 @keyframes cx-fade {
   from {
-    opacity: 0;
+    filter: blur(6px);
     transform: translateY(10px);
   }
 }
