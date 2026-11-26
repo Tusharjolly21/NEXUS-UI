@@ -6,6 +6,13 @@ import type { SoundName } from "@/lib/ui-sounds";
  * stays silent on hover, and makes the same sounds when it plays itself (autoplay) once the visitor has used the page. The sounds are synthesised in `@/lib/ui-sounds`.
  */
 export const COMPONENT_SOUNDS: Record<string, string> = {
+  "coupon-apply": "Ticks softly as you use it, chimes on the key moments and whooshes on the bigger moves.",
+  "dictation-card": "Ticks softly as you use it, chimes on the key moments and whooshes on the bigger moves.",
+  "burst-like": "Ticks softly as you use it, chimes on the key moments and whooshes on the bigger moves.",
+  "halo-switch": "Ticks softly as you use it, chimes on the key moments and whooshes on the bigger moves.",
+  "rim-card": "Ticks softly as you use it, chimes on the key moments and whooshes on the bigger moves.",
+  "glow-dock": "Ticks softly as you use it, chimes on the key moments and whooshes on the bigger moves.",
+  "sync-ring": "Ticks softly as you use it, chimes on the key moments and whooshes on the bigger moves.",
   "home-scenes": "Chimes on the key moments and whooshes on the bigger moves.",
   "action-stack": "Ticks softly as you use it, chimes on the key moments and whooshes on the bigger moves.",
   "address-field": "Ticks softly as you use it and chimes on the key moments.",

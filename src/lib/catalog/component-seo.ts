@@ -1914,4 +1914,54 @@ export const COMPONENT_SEO: Record<string, { title: string; description: string 
     description:
       "A trimmer for a clip of real synthesised music. Framer Motion + Tailwind CSS.",
   },
+  "thinking-matrix": {
+    title: "React AI Thinking Indicator with a Lamp Matrix",
+    description:
+      "A thinking pill with a grid of tiny lamps that ripple, spiral and wander. Framer Motion + Tailwind CSS.",
+  },
+  "border-beam": {
+    title: "React Border Beam: Light Running Around an Edge",
+    description:
+      "A beam of light that travels the border of any element, with a soft glow. Tailwind CSS.",
+  },
+  "coupon-apply": {
+    title: "React Coupon Code Checkout with a Foil Stamp",
+    description:
+      "A checkout where the coupon is a foil stamp that dissolves into the total. Framer Motion + Tailwind CSS.",
+  },
+  "dictation-card": {
+    title: "React Voice Dictation Card with Live Words",
+    description:
+      "A dictation card where a mound of light throws each word onto the line. Framer Motion + Tailwind CSS.",
+  },
+  "shapeshift-hero": {
+    title: "React Particle Hero That Shapeshifts",
+    description:
+      "A landing hero of 8,000 particles that turn into a galaxy, a knot and your brand. Canvas + Tailwind CSS.",
+  },
+  "burst-like": {
+    title: "React Like Button That Bursts Like a Firework",
+    description:
+      "A like button with a burst of sparks, a rolling count and a rim of light. Framer Motion + Tailwind CSS.",
+  },
+  "halo-switch": {
+    title: "React Toggle Switch with a Glowing Rim",
+    description:
+      "A toggle switch whose rim fills with drifting thin-film light. Framer Motion + Tailwind CSS.",
+  },
+  "rim-card": {
+    title: "React Selectable Card with a Glowing Rim",
+    description:
+      "A selectable card whose edge ignites with thin-film light when chosen. Framer Motion + Tailwind CSS.",
+  },
+  "glow-dock": {
+    title: "React Tab Dock with a Glowing Lens",
+    description:
+      "A tab dock where a lens of soft light stretches between icons. Framer Motion + Tailwind CSS.",
+  },
+  "sync-ring": {
+    title: "React Sync Button with a Progress Ring of Light",
+    description:
+      "A sync button whose rim fills with light, ends with a tick and a comet. Framer Motion + Tailwind CSS.",
+  },
 };

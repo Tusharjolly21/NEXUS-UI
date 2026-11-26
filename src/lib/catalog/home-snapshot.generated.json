@@ -40,7 +40,7 @@
    },
    "install": "date-wheels",
    "isNew": true,
-   "isRecent": true,
+   "isRecent": false,
    "addedAt": 1794700800000,
    "premium": true,
    "hasPrompt": true,
@@ -89,7 +89,7 @@
    },
    "install": "brain-atlas",
    "isNew": true,
-   "isRecent": true,
+   "isRecent": false,
    "addedAt": 1794700800000,
    "premium": true,
    "hasPrompt": true,
@@ -137,7 +137,7 @@
    },
    "install": "halo-hero",
    "isNew": true,
-   "isRecent": true,
+   "isRecent": false,
    "addedAt": 1794700800000,
    "premium": true,
    "hasPrompt": true,
@@ -183,7 +183,7 @@
    },
    "install": "liquid-funnel",
    "isNew": true,
-   "isRecent": true,
+   "isRecent": false,
    "addedAt": 1794700800000,
    "premium": true,
    "hasPrompt": true,
@@ -231,7 +231,7 @@
    },
    "install": "metal-card",
    "isNew": true,
-   "isRecent": true,
+   "isRecent": false,
    "addedAt": 1794700800000,
    "premium": true,
    "hasPrompt": true,
@@ -278,7 +278,7 @@
    },
    "install": "receipt-button",
    "isNew": true,
-   "isRecent": true,
+   "isRecent": false,
    "addedAt": 1794700800000,
    "premium": true,
    "hasPrompt": true,
@@ -326,7 +326,7 @@
    },
    "install": "photo-tunnel",
    "isNew": true,
-   "isRecent": true,
+   "isRecent": false,
    "addedAt": 1794700800000,
    "premium": true,
    "hasPrompt": true,
@@ -372,7 +372,7 @@
    },
    "install": "fuse-button",
    "isNew": true,
-   "isRecent": true,
+   "isRecent": false,
    "addedAt": 1794700800000,
    "premium": true,
    "hasPrompt": true,
@@ -418,7 +418,7 @@
    },
    "install": "bell-toggle",
    "isNew": true,
-   "isRecent": true,
+   "isRecent": false,
    "addedAt": 1794700800000,
    "premium": true,
    "hasPrompt": true,
@@ -466,7 +466,7 @@
    },
    "install": "contribution-skyline",
    "isNew": true,
-   "isRecent": true,
+   "isRecent": false,
    "addedAt": 1794700800000,
    "premium": true,
    "hasPrompt": true,
@@ -513,7 +513,7 @@
    },
    "install": "sleep-score",
    "isNew": true,
-   "isRecent": true,
+   "isRecent": false,
    "addedAt": 1794700800000,
    "premium": true,
    "hasPrompt": true,
@@ -559,7 +559,7 @@
    },
    "install": "download-button",
    "isNew": true,
-   "isRecent": true,
+   "isRecent": false,
    "addedAt": 1794700800000,
    "premium": true,
    "hasPrompt": true,
@@ -5208,19 +5208,19 @@
   {
    "slug": "inputs-controls",
    "label": "Inputs & Controls",
-   "count": 110,
+   "count": 112,
    "href": "/components/category/inputs-controls"
   },
   {
    "slug": "motion-effects",
    "label": "Motion Effects",
-   "count": 69,
+   "count": 71,
    "href": "/components/category/motion-effects"
   },
   {
    "slug": "cards",
    "label": "Cards",
-   "count": 67,
+   "count": 69,
    "href": "/components/category/cards"
   },
   {
@@ -5232,7 +5232,7 @@
   {
    "slug": "ai-components",
    "label": "AI Components",
-   "count": 24,
+   "count": 25,
    "href": "/components/category/ai-components"
   },
   {
@@ -5242,16 +5242,16 @@
    "href": "/components/category/background-effects"
   },
   {
+   "slug": "loaders",
+   "label": "Loaders",
+   "count": 15,
+   "href": "/components/category/loaders"
+  },
+  {
    "slug": "three-d-components",
    "label": "3D Components",
    "count": 14,
    "href": "/components/category/three-d-components"
-  },
-  {
-   "slug": "loaders",
-   "label": "Loaders",
-   "count": 13,
-   "href": "/components/category/loaders"
   },
   {
    "slug": "for-fun",
@@ -5262,7 +5262,7 @@
   {
    "slug": "navbars",
    "label": "Navbars",
-   "count": 4,
+   "count": 5,
    "href": "/components/category/navbars"
   },
   {
@@ -5306,26 +5306,26 @@
   {
    "month": "2026-11",
    "label": "November 2026",
-   "count": 125,
+   "count": 135,
    "picks": [
     {
-     "slug": "typing-indicator",
-     "name": "Typing Indicator",
-     "premium": false
+     "slug": "thinking-matrix",
+     "name": "Thinking Matrix",
+     "premium": true
     },
     {
-     "slug": "status-cards",
-     "name": "Status Cards",
-     "premium": false
+     "slug": "border-beam",
+     "name": "Border Beam",
+     "premium": true
     },
     {
-     "slug": "skeleton-loader",
-     "name": "Skeleton Loader",
-     "premium": false
+     "slug": "coupon-apply",
+     "name": "Coupon Apply",
+     "premium": true
     },
     {
-     "slug": "home-scenes",
-     "name": "Home Scenes",
+     "slug": "dictation-card",
+     "name": "Dictation Card",
      "premium": true
     }
    ]

@@ -8,7 +8,10 @@ import { LifetimeCount } from "@/components/impact/lifetime-count";
 import { createMetadata } from "@/lib/seo";
 import {
   ANALYTICS_CHECKED_LABEL,
+  CHANGE,
   CHECKED_LABEL,
+  TOP_COMPONENTS,
+  TOP_SEARCHES,
   fmt,
   DAILY,
   LAST_30_DAYS,
@@ -31,11 +34,11 @@ const GRID =
   "linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px)";
 
 const MONTH_CELLS = [
-  { label: "Views", value: LAST_30_DAYS.views },
-  { label: "Copies", value: LAST_30_DAYS.copies },
+  { label: "Views", value: LAST_30_DAYS.views, change: CHANGE.views },
+  { label: "Copies", value: LAST_30_DAYS.copies, change: CHANGE.copies },
   { label: "Installs", value: LAST_30_DAYS.installs, note: "from the CLI and MCP" },
-  { label: "Bookmarks", value: LAST_30_DAYS.bookmarks },
-  { label: "Profile views", value: LAST_30_DAYS.profileViews },
+  { label: "Bookmarks", value: LAST_30_DAYS.bookmarks, change: CHANGE.bookmarks },
+  { label: "Profile views", value: LAST_30_DAYS.profileViews, change: CHANGE.profileViews },
 ] as const;
 
 export default function ImpactPage() {
@@ -141,6 +144,12 @@ export default function ImpactPage() {
                     <span className="pg-display text-[clamp(32px,4.2vw,52px)] tabular-nums text-white">
                       <CountUp to={c.value} />
                     </span>
+                    {"change" in c ? (
+                      <span className="mt-0.5 flex items-center gap-1 text-[13px] font-medium text-[#34c759]">
+                        <ArrowUp className="size-3.5" aria-hidden />
+                        {c.change}% <span className="font-normal text-white/50">on the 30 days before</span>
+                      </span>
+                    ) : null}
                     {"note" in c ? <span className="block text-[13px] text-white/50">{c.note}</span> : null}
                   </dd>
                 </div>
@@ -164,7 +173,36 @@ export default function ImpactPage() {
               </div>
             </dl>
 
-            <p className="mt-6 text-[17px] font-medium text-white/80">And counting, every day.</p>
+            <div className="mt-10 grid gap-5 lg:grid-cols-2">
+              <div className="rounded-[20px] bg-white/[0.025] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.1)] sm:p-7">
+                <h3 className="text-[17px] font-medium text-white">What people open most</h3>
+                <p className="mt-1 text-[14px] text-white/55">Our most viewed components, with how often each was copied.</p>
+                <ol className="mt-4 divide-y divide-white/10">
+                  {TOP_COMPONENTS.map((c) => (
+                    <li key={c.name} className="flex items-baseline justify-between gap-4 py-2.5">
+                      <span className="text-[15px] text-white/90">{c.name}</span>
+                      <span className="text-[13.5px] tabular-nums text-white/55">
+                        {fmt.format(c.views)} views, {fmt.format(c.copies)} copies
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="rounded-[20px] bg-white/[0.025] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.1)] sm:p-7">
+                <h3 className="text-[17px] font-medium text-white">What they typed to find us</h3>
+                <p className="mt-1 text-[14px] text-white/55">Searches inside 21st that sent people to our components.</p>
+                <ol className="mt-4 divide-y divide-white/10">
+                  {TOP_SEARCHES.map((q) => (
+                    <li key={q.query} className="flex items-baseline justify-between gap-4 py-2.5">
+                      <span className="text-[15px] text-white/90">{q.query}</span>
+                      <span className="text-[13.5px] tabular-nums text-white/55">{fmt.format(q.clicks)} clicks</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+
+            <p className="mt-8 text-[17px] font-medium text-white/80">And counting, every day.</p>
 
             <a
               href={PROFILE_URL}

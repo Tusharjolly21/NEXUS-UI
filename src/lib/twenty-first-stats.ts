@@ -10,33 +10,54 @@
 export const PROFILE_URL = "https://21st.dev/@nexus-ui";
 
 /** When the lifetime SNAPSHOT was read (UTC), and how that date is written on the page. The estimate counts from here. */
-export const CHECKED_AT = "2026-11-17T04:31:00Z";
-export const CHECKED_LABEL = "17 November 2026";
+export const CHECKED_AT = "2026-11-26T16:10:00Z";
+export const CHECKED_LABEL = "26 November 2026";
 
 /** When the last-30-days figures and the weekly rank were last read. */
-export const ANALYTICS_CHECKED_AT = "2026-11-17T04:31:00Z";
-export const ANALYTICS_CHECKED_LABEL = "17 November 2026";
+export const ANALYTICS_CHECKED_AT = "2026-11-26T16:10:00Z";
+export const ANALYTICS_CHECKED_LABEL = "26 November 2026";
 
 /**
  * Lifetime counts on the public profile when they were last read. The profile rounds them ("1M", "4.3K"), so
  * these are the shown values, which never overstate the real count.
  */
-export const SNAPSHOT: { views: number; bookmarks: number; components: number } = { views: 1_000_000, bookmarks: 4_300, components: 45 };
+export const SNAPSHOT: { views: number; bookmarks: number; components: number } = { views: 1_100_000, bookmarks: 4_700, components: 46 };
 
 /** Exact figures from the Creator Studio analytics, "Last 30 days", read at ANALYTICS_CHECKED_AT. */
 export const LAST_30_DAYS = {
-  views: 192_925,
-  copies: 1_264,
-  installs: 190,
-  bookmarks: 809,
-  profileViews: 158,
+  views: 230_219,
+  copies: 1_590,
+  installs: 286,
+  bookmarks: 1_051,
+  profileViews: 226,
 } as const;
+
+/** Growth in percent against the 30 days before, as Creator Studio shows it. It gives none for installs. */
+export const CHANGE = { views: 25, copies: 22, bookmarks: 85, profileViews: 201 } as const;
+
+/** Our five most viewed components in the same 30 days (Creator Studio, "Top components"). */
+export const TOP_COMPONENTS = [
+  { name: "Circular Carousel", views: 27_369, copies: 180 },
+  { name: "Cinematic Logo Cloud", views: 20_618, copies: 89 },
+  { name: "Logo Clouds", views: 19_904, copies: 73 },
+  { name: "Infinite Moving Cards", views: 19_020, copies: 137 },
+  { name: "Chat Messages", views: 13_484, copies: 222 },
+] as const;
+
+/** The searches inside 21st that opened our components most, in the same 30 days: what was typed, and clicks to us. */
+export const TOP_SEARCHES = [
+  { query: "chat", clicks: 282 },
+  { query: "logo", clicks: 102 },
+  { query: "footer", clicks: 64 },
+  { query: "map", clicks: 62 },
+  { query: "chatbot", clicks: 54 },
+] as const;
 
 /**
  * Weekly author rank on 21st.dev: position and authors ranked. `up` (places gained since the reading on `since`)
- * is shown only when the rank has climbed; this week it is one place lower than #54 on 12 November, so it is left out.
+ * is shown only when the rank has climbed: #55 on 17 November to #40 now.
  */
-export const RANK: { position: number; of: number; up?: number; since?: string } = { position: 55, of: 1_270 };
+export const RANK: { position: number; of: number; up?: number; since?: string } = { position: 40, of: 1_067, up: 15, since: "17 November" };
 
 /** What we add per day on top of the snapshot: the last 30 days divided by 30. */
 export const DAILY = {

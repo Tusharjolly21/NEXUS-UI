@@ -406,6 +406,17 @@ const TINT_OF: Record<string, TileTint> = {
  * are all gathered, newest first, under the wall's New tab (see NEW_TAB_DAYS).
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // thirty-fourth batch (Motion Kit Halo and more, 26 November: Thinking Matrix to Sync Ring)
+  "thinking-matrix",
+  "border-beam",
+  "coupon-apply",
+  "dictation-card",
+  "shapeshift-hero",
+  "burst-like",
+  "halo-switch",
+  "rim-card",
+  "glow-dock",
+  "sync-ring",
   // thirty-third batch (Motion Kit Everyday, 20 November: Home Scenes to Wave Trimmer)
   "home-scenes",
   "action-stack",
