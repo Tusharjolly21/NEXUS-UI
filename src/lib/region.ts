@@ -32,3 +32,12 @@ export function regionFor(requestHeaders: Pick<Headers, "get">): PriceRegion {
 export async function getPricing(): Promise<DisplayPricing> {
   return regionFor(await headers()) === "india" ? INDIA_PRICING : GLOBAL_PRICING;
 }
+
+/**
+ * The prices of a given region, for pages built ahead of time (the cached homepage copies in src/app/(static)),
+ * which can't read the request. India's rupee prices are only shown where checkout can charge them, the same
+ * rule `regionFor` applies per request.
+ */
+export function pricingForRegion(region: PriceRegion): DisplayPricing {
+  return region === "india" && indiaProductsConfigured() ? INDIA_PRICING : GLOBAL_PRICING;
+}

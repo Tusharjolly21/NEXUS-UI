@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { motion, useReducedMotion, useScroll, useSpring, useTransform, type MotionValue } from "framer-motion";
+import { motion, useInView, useReducedMotion, useScroll, useSpring, useTransform, type MotionValue } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { demoScript, FitPreview } from "@/components/gallery/fit-preview";
 import { TINT_CLASSES, type GalleryItem } from "@/components/gallery/types";
@@ -22,7 +22,31 @@ const DRIFT: [number, number][] = [
 /** Dashed blueprint lines, a little stronger than the page hairline so they read in dark mode too. */
 const DASH = "border-dashed border-[color-mix(in_oklab,var(--foreground)_13%,transparent)]";
 
-function Tile({ item }: { item: GalleryItem }) {
+/**
+ * True once the page has finished loading and the browser is idle. The live previews share one big script
+ * (every component's preview, about 1.9 MB compressed); starting it before this would compete with the first
+ * paint and make the page unresponsive while it loads.
+ */
+function useAfterLoad() {
+  const [ready, setReady] = React.useState(false);
+  React.useEffect(() => {
+    let cancelled = false;
+    const go = () => {
+      const run = () => !cancelled && setReady(true);
+      if ("requestIdleCallback" in window) window.requestIdleCallback(run, { timeout: 2500 });
+      else setTimeout(run, 1200);
+    };
+    if (document.readyState === "complete") go();
+    else window.addEventListener("load", go, { once: true });
+    return () => {
+      cancelled = true;
+      window.removeEventListener("load", go);
+    };
+  }, []);
+  return ready;
+}
+
+function Tile({ item, live }: { item: GalleryItem; live: boolean }) {
   // shape the tile like the component itself (plus a little air), so there are no empty bands
   const [, , fw, fh] = item.fit.focus;
   const ratio = Math.min(1.9, Math.max(0.62, (fw * 1.12) / (fh * 1.18)));
@@ -43,16 +67,18 @@ function Tile({ item }: { item: GalleryItem }) {
         style={{ aspectRatio: ratio, ...(item.fit.bg ? { backgroundColor: item.fit.bg } : {}) }}
       >
         <div className="relative z-0 size-full">
-          <FitPreview
-            exportName={item.exportName}
-            canvas={item.fit.canvas}
-            focus={item.fit.focus}
-            demo={item.demo ? demoScript(item.demo, item.fit.canvas, item.fit.focus) : undefined}
-            className={cn(
-              item.fit.clearRoot &&
-                "not-dark:[&>div>*]:!rounded-none not-dark:[&>div>*]:!border-0 not-dark:[&>div>*]:!bg-transparent not-dark:[&>div>*]:!shadow-none",
-            )}
-          />
+          {live ? (
+            <FitPreview
+              exportName={item.exportName}
+              canvas={item.fit.canvas}
+              focus={item.fit.focus}
+              demo={item.demo ? demoScript(item.demo, item.fit.canvas, item.fit.focus) : undefined}
+              className={cn(
+                item.fit.clearRoot &&
+                  "not-dark:[&>div>*]:!rounded-none not-dark:[&>div>*]:!border-0 not-dark:[&>div>*]:!bg-transparent not-dark:[&>div>*]:!shadow-none",
+              )}
+            />
+          ) : null}
         </div>
         <Link
           href={`/components/${item.slug}`}
@@ -66,7 +92,7 @@ function Tile({ item }: { item: GalleryItem }) {
   );
 }
 
-function Column({ items, index, progress }: { items: GalleryItem[]; index: number; progress: MotionValue<number> }) {
+function Column({ items, index, progress, live }: { items: GalleryItem[]; index: number; progress: MotionValue<number>; live: boolean }) {
   const reduce = useReducedMotion();
   const [from, to] = DRIFT[index];
   const raw = useTransform(progress, [0, 1], reduce ? [0, 0] : [from, to]);
@@ -82,7 +108,7 @@ function Column({ items, index, progress }: { items: GalleryItem[]; index: numbe
     >
       <motion.div style={{ y, paddingTop: STAGGER[index] }} className="will-change-transform">
         {items.map((it) => (
-          <Tile key={it.slug} item={it} />
+          <Tile key={it.slug} item={it} live={live} />
         ))}
       </motion.div>
     </div>
@@ -97,6 +123,10 @@ function Column({ items, index, progress }: { items: GalleryItem[]; index: numbe
 export function LiveWall({ items, total }: { items: GalleryItem[]; total: number }) {
   const ref = React.useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const gridRef = React.useRef<HTMLDivElement>(null);
+  const near = useInView(gridRef, { once: true, margin: "300px 0px" });
+  const loaded = useAfterLoad();
+  const live = near && loaded;
   const columns = Array.from({ length: COLUMNS }, (_, c) => items.filter((_, i) => i % COLUMNS === c));
 
   return (
@@ -124,9 +154,9 @@ export function LiveWall({ items, total }: { items: GalleryItem[]; total: number
       </div>
 
       <div className={cn("relative mt-14 h-[880px] overflow-hidden border-t sm:h-[1000px] lg:h-[1080px]", DASH)}>
-        <div className="mx-auto grid h-full max-w-[1400px] grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4">
+        <div ref={gridRef} className="mx-auto grid h-full max-w-[1400px] grid-cols-2 px-1 md:grid-cols-3 lg:grid-cols-4">
           {columns.map((col, i) => (
-            <Column key={i} items={col} index={i} progress={scrollYProgress} />
+            <Column key={i} items={col} index={i} progress={scrollYProgress} live={live} />
           ))}
         </div>
         {/* edges fade into the page, the bottom deepest, where the way onward sits */}
