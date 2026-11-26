@@ -33,7 +33,7 @@ export function videoDefaults(slug: string): Record<string, string> {
     base.count = String(CATALOG_COUNTS.components);
     base.free = String(CATALOG_COUNTS.freeComponents);
     base.sections = String(blockVariants.length);
-    base.blocks = String(CATALOG_COUNTS.blocks);
+    base.blocks = String(CATALOG_COUNTS.blockCategories);
     base.templates = String(CATALOG_COUNTS.templates);
     base.sounds = String(sounds);
   }

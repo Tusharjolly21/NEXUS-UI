@@ -1,37 +1,33 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import { Plus } from "lucide-react";
-import { CodeDemo } from "@/components/home/code-demo";
+import "@/components/home-cinematic/cinematic.css";
+import { ClosingHorizon } from "@/components/home-cinematic/closing-horizon";
+import { Faq } from "@/components/home-cinematic/faq";
+import { CinematicHero } from "@/components/home-cinematic/hero";
+import { PricingStage } from "@/components/home-cinematic/pricing-stage";
+import { RepoStory } from "@/components/home-cinematic/repo-story";
+import { ShelfBento } from "@/components/home-cinematic/shelf-bento";
+import { LiveWall } from "@/components/home-cinematic/live-wall";
+import { Numbers } from "@/components/home-cinematic/numbers";
+import { TemplateRows, type TemplateShot } from "@/components/home-cinematic/template-rows";
 import { HeroInstall } from "@/components/home/hero-install";
-import { HeroSpotlight } from "@/components/home/hero-spotlight";
-import { HeroStickers } from "@/components/home/hero-stickers";
-import { HeroTutorial } from "@/components/home/hero-tutorial";
-import { HeroWord } from "@/components/home/hero-word";
-import { PricingTeaser } from "@/components/home/pricing-teaser";
 import { RedditLove } from "@/components/home/reddit-love";
-import { IfPro } from "@/components/pro/pro-access";
 import { ShippingLog } from "@/components/home/shipping-log";
 import { StackStrip } from "@/components/home/stack-strip";
-import { HeroMilestone } from "@/components/home/hero-milestone";
-import { ComponentGallery } from "@/components/gallery/component-gallery";
-import { VideoCard } from "@/components/videos/video-card";
-import { getVideo, videos } from "@/lib/catalog/videos";
-import { Band, PillLink } from "@/components/site";
-import { legalConfig } from "@/lib/legal";
-import { CompareLibraries } from "@/components/site/compare-libraries";
-import { LibraryIndex, type LibraryIndexData } from "@/components/site/library-index";
-import { HomeIconStrip } from "@/components/nx-icons/home-strip";
-import { blockVariants } from "@/lib/catalog/block-variants";
+import { IfPro } from "@/components/pro/pro-access";
+import { PillLink } from "@/components/site";
+import type { LibraryIndexData } from "@/components/site/library-index";
+import type { GalleryItem } from "@/components/gallery/types";
 import { getCategoryComponents, getPopulatedCategories } from "@/lib/catalog/category-seo";
-import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
-import { SOUNDS } from "@/lib/ui-sounds";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
-import { homeGalleryItems } from "@/lib/catalog/gallery-items";
+import { allGalleryItems, homeGalleryItems } from "@/lib/catalog/gallery-items";
+import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
 import { templates } from "@/lib/catalog/templates";
+import { getVideo } from "@/lib/catalog/videos";
+import { legalConfig } from "@/lib/legal";
 import { GLOBAL_PRICING, type DisplayPricing } from "@/lib/pricing";
 import { getPricing } from "@/lib/region";
 import { createMetadata, siteConfig } from "@/lib/seo";
+import { SOUNDS } from "@/lib/ui-sounds";
 
 export const metadata: Metadata = {
   ...createMetadata(
@@ -40,9 +36,17 @@ export const metadata: Metadata = {
   ),
 };
 
+/** The gallery-to-repo story: a search to find it, sliders to tweak it, a terminal to add it. */
+const STORY_SLUGS = ["lens-search", "bolting-sliders", "terminal"];
+
+function pick(items: GalleryItem[], slugs: string[]) {
+  const bySlug = new Map(items.map((i) => [i.slug, i]));
+  return slugs.map((s) => bySlug.get(s)).filter((i): i is GalleryItem => !!i);
+}
+
 const HOME_VIDEOS = ["launch-reel", "feature-drop", "brand-film", "whats-new"];
 
-// Dark and light alternate across the grid so the wall reads as a mix, not a single look.
+// Dark and light alternate along the template rows so they read as a mix, not a single look.
 const WALL_SLUGS = ["kiosk", "wharf", "plotline", "kiln", "cairn", "strata"];
 
 function buildFaq(pricing: DisplayPricing) {
@@ -74,22 +78,21 @@ function buildFaq(pricing: DisplayPricing) {
   ];
 }
 
-const STEPS = [
-  { title: "Find it", body: "Search by name, or filter the gallery by how a component moves." },
-  { title: "Tweak it", body: "Change speed, colour and size in the playground and watch it update." },
-  { title: "Add it", body: "One shadcn command drops the source into your project. It's yours to edit." },
-];
-
 export default async function Home() {
   const pricing = await getPricing();
   const faq = buildFaq(pricing);
   const items = homeGalleryItems();
-  const wall = WALL_SLUGS.map((slug) => templates.find((t) => t.slug === slug)).filter(
-    (t): t is (typeof templates)[number] => !!t?.previewImages?.hero,
-  );
+  const everything = allGalleryItems();
+  // The template rows: the hand-picked wall first, then more finished sites to fill both rows.
+  const withHero = templates.filter((t) => t.previewImages?.hero);
+  const rowTemplates = [
+    ...WALL_SLUGS.map((slug) => withHero.find((t) => t.slug === slug)).filter((t): t is (typeof templates)[number] => !!t),
+    ...withHero.filter((t) => !WALL_SLUGS.includes(t.slug)),
+  ].slice(0, 14);
+  const inRows = new Set(rowTemplates.map((t) => t.slug));
 
   // The library index: real counts, the busiest categories, a page's worth of block types, and
-  // templates that aren't already on the wall further down.
+  // templates that aren't already in the rows above it.
   const libraryIndex: LibraryIndexData = {
     components: {
       total: CATALOG_COUNTS.components,
@@ -100,8 +103,8 @@ export default async function Home() {
         .slice(0, 16),
     },
     blocks: {
-      total: CATALOG_COUNTS.blocks,
-      sections: blockVariants.length,
+      total: CATALOG_COUNTS.blockCategories,
+      sections: CATALOG_COUNTS.blocks,
       items: [
         { slug: "block-navigation", label: "Navigation" },
         { slug: "block-hero", label: "Hero" },
@@ -118,7 +121,7 @@ export default async function Home() {
     templates: {
       total: CATALOG_COUNTS.templates,
       items: templates
-        .filter((t) => t.previewImages?.hero && !WALL_SLUGS.includes(t.slug))
+        .filter((t) => t.previewImages?.hero && !inRows.has(t.slug))
         .slice(0, 3)
         .map((t) => ({ slug: t.slug, title: t.title.split(" — ")[0], image: t.previewImages!.hero })),
     },
@@ -129,7 +132,6 @@ export default async function Home() {
     sounds: { total: Object.keys(SOUNDS).length },
     icons: { total: CATALOG_COUNTS.icons, free: CATALOG_COUNTS.freeIcons, categories: CATALOG_COUNTS.iconCategories },
   };
-  const homeVideos = HOME_VIDEOS.map((slug) => getVideo(slug)).filter((v): v is NonNullable<typeof v> => !!v);
 
   const jsonLd = [
     {
@@ -162,297 +164,86 @@ export default async function Home() {
     },
   ];
 
+  const shots: TemplateShot[] = rowTemplates.map((t) => ({ slug: t.slug, title: t.title.split(" — ")[0], image: t.previewImages!.hero, category: t.category }));
+  const half = Math.ceil(shots.length / 2);
+
   return (
-    <>
+    <div className="cx">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      {/* Hero: tucked under the floating nav so the dot grid runs behind it */}
-      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-20 pt-[148px]">
-        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
-        <HeroSpotlight />
-        <HeroStickers />
-        <p className="absolute right-6 top-[84px] z-20 hidden text-[13px] font-medium text-muted-foreground lg:block">
-          Psst. Try throwing a sticker.
-        </p>
-        <div className="relative z-20 mx-auto max-w-[980px] text-center">
-          <div className="flex flex-col items-center justify-center gap-3.5">
-            <HeroMilestone />
-            <p className="pg-glass inline-flex items-center gap-2 rounded-full bg-card px-3.5 py-1.5 text-[13px] font-medium text-foreground">
-              <span className="relative flex size-2" aria-hidden>
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-rainbow-green opacity-60 motion-reduce:animate-none" />
-                <span className="relative inline-flex size-2 rounded-full bg-rainbow-green" />
-              </span>
-              <span>
-                <strong className="font-semibold">{CATALOG_COUNTS.components}+</strong>
-                <span className="sm:hidden"> components, </span>
-                <span className="hidden sm:inline"> animated components, and </span>
-                <span className="ml-0.5 inline-block whitespace-nowrap rounded-full bg-[linear-gradient(90deg,#0090f7,#6e5bff_35%,#ba62fc_65%,#f2416b)] px-2.5 py-0.5 font-semibold text-white shadow-[0_4px_14px_-4px_rgba(110,91,255,0.55)]">
-                  more coming for Pro
-                </span>
-              </span>
-            </p>
-          </div>
-          <h1 className="pg-display mt-7 text-[clamp(52px,11vw,124px)] text-foreground selection:bg-[#fdf0c9] selection:text-[#6b3a00]">
-            <span className="block">Make your</span>
-            <HeroWord className="block" />
-            <span className="block">move.</span>
-          </h1>
-          <p className="mx-auto mt-8 max-w-[560px] text-[18px] leading-[1.55] text-muted-foreground">
-            Copy-paste React components with real motion: inputs, docks, card decks, backgrounds and 3D. Built on
-            Tailwind, Motion and the shadcn CLI.
-          </p>
-          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <PillLink href="/components">Browse components</PillLink>
-            <HeroTutorial />
-            <IfPro
-              pro={null}
-              otherwise={
-                <PillLink href="/pricing" variant="white" plansSource="hero">
-                  See Pro plans
-                </PillLink>
-              }
-            />
-          </div>
+      <CinematicHero pricing={pricing} />
+
+      <LiveWall items={items.slice(0, 16)} total={CATALOG_COUNTS.components} />
+
+      {/* Everything below sits in one framed column: a hairline between sections, rails down the sides */}
+      <div className="relative">
+        <div aria-hidden className="cx-page-rails" />
+
+      <Numbers
+        figures={[
+          { value: CATALOG_COUNTS.components, label: "Animated components", href: "/components", icon: "components", note: `${CATALOG_COUNTS.freeComponents} free with source` },
+          { value: CATALOG_COUNTS.blocks, label: "Blocks", href: "/blocks", icon: "blocks", note: `Across ${CATALOG_COUNTS.blockCategories} categories` },
+          { value: CATALOG_COUNTS.templates, label: "Full-site templates", href: "/templates", icon: "templates", note: "Open any one live" },
+          { value: CATALOG_COUNTS.icons, label: "Icons that move", href: "/icons", icon: "icons", note: `${CATALOG_COUNTS.freeIcons} free` },
+          { value: CATALOG_COUNTS.videos, label: "Product videos", href: "/videos", icon: "videos", note: "With soundtracks" },
+        ]}
+      />
+
+
+      <TemplateRows rows={[shots.slice(0, half), shots.slice(half)]} total={CATALOG_COUNTS.templates} />
+
+      <RepoStory items={pick(everything, STORY_SLUGS)} />
+
+      {/* Everything else in the library */}
+      <ShelfBento data={libraryIndex}>
+        <StackStrip />
+      </ShelfBento>
+
+      <section id="love" className="cx-section px-4 py-24 sm:py-32">
+        <div className="mx-auto max-w-[1152px]">
+          <RedditLove />
+        </div>
+      </section>
+
+      <section id="new" className="cx-section px-4 py-24 sm:py-32">
+        <div className="mx-auto max-w-[1152px]">
+          <ShippingLog />
+        </div>
+      </section>
+
+      <PricingStage pricing={pricing} />
+
+      <Faq items={faq} />
+
+      {/* Closing: a lit horizon rises under the last call to action */}
+      <ClosingHorizon>
+        <h2 className="pg-display text-[clamp(44px,8vw,96px)] leading-[0.98] text-foreground">
+          Start with the component you need today.
+        </h2>
+        <p className="mx-auto mt-6 max-w-[480px] text-[18px] leading-[1.55] text-muted-foreground">
           <IfPro
-            pro={null}
-            otherwise={
-              <p className="mx-auto mt-5 max-w-[520px] text-[14px] leading-[1.5] text-muted-foreground">
-                Free to start. Pro unlocks everything and every new release: {pricing.pro} a year, or{" "}
-                {pricing.allAccess} once.
-              </p>
-            }
+            pro={`All ${CATALOG_COUNTS.components} components, every template and every block are yours.`}
+            otherwise={`${CATALOG_COUNTS.freeComponents} are free, with full source. Pro unlocks the rest, from ${pricing.pro} a year.`}
           />
-          <HeroInstall className="mx-auto mt-6 max-w-[520px]" />
-        </div>
-      </section>
-
-      <section id="gallery" aria-label="Components by interaction" className="scroll-mt-20 px-4 pb-24">
-        <div className="mx-auto max-w-[1152px]">
-          <ComponentGallery
-            items={items}
-            pricing={pricing}
-            limit={13}
-            mobileLimit={8}
-            aside={
-              <Link
-                href="/components"
-                className="shrink-0 text-[15px] text-link hover:underline hover:underline-offset-4"
-              >
-                Browse all {CATALOG_COUNTS.components} components ›
-              </Link>
-            }
-          />
-        </div>
-      </section>
-
-      <section className="px-4 pb-24">
-        <div className="mx-auto max-w-[1152px]">
-          <LibraryIndex data={libraryIndex} />
-          <StackStrip />
-        </div>
-      </section>
-
-      {/* Templates */}
-      <Band tint="butter" id="templates">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">Made with Nexus UI</h2>
-            <p className="mt-4 max-w-[480px] text-[18px] text-muted-foreground">
-              {CATALOG_COUNTS.templates} complete landing pages built from these components. Open any of them live; the
-              source comes with Pro.
-            </p>
-          </div>
-          <PillLink href="/templates" variant="white" className="shrink-0 self-start md:self-auto">
-            See all {CATALOG_COUNTS.templates} templates
-          </PillLink>
-        </div>
-        <ul className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {wall.map((t) => (
-            <li key={t.slug}>
-              <Link
-                href={`/templates/${t.slug}`}
-                className="pg-float group block overflow-hidden rounded-[20px] bg-card transition-transform duration-150 hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
-              >
-                <div className="flex gap-1.5 border-b border-border px-3 py-2.5" aria-hidden>
-                  <span className="size-2 rounded-full bg-[#ff605c]" />
-                  <span className="size-2 rounded-full bg-[#ffbd44]" />
-                  <span className="size-2 rounded-full bg-[#00ca4e]" />
-                </div>
-                <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-                  <Image
-                    src={t.previewImages!.hero}
-                    alt={`${t.title.split(" — ")[0]} template`}
-                    fill
-                    sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.03] motion-reduce:transition-none"
-                  />
-                </div>
-                <div className="flex items-center justify-between gap-3 px-4 py-3">
-                  <p className="truncate text-[15px] font-semibold tracking-[-0.2px] text-foreground">{t.title.split(" — ")[0]}</p>
-                  <p className="shrink-0 text-[13px] text-muted-foreground">{t.category}</p>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </Band>
-
-      {/* Videos */}
-      <Band tint="violet" id="videos">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">Videos that move like the site</h2>
-            <p className="mt-4 max-w-[520px] text-[18px] text-muted-foreground">
-              {videos.length} product videos for launches, pricing, updates and app stores, each with its own soundtrack. Change the
-              words, then render it for Reels, Shorts or YouTube.
-            </p>
-          </div>
-          <PillLink href="/videos" variant="white" className="shrink-0 self-start md:self-auto">
-            See all {videos.length} videos
-          </PillLink>
-        </div>
-        <ul className="mt-12 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
-          {homeVideos.map((v) => (
-            <li key={v.slug}>
-              <VideoCard video={v} />
-            </li>
-          ))}
-        </ul>
-      </Band>
-
-      {/* Icons */}
-      <Band tint="sky" id="icons">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">Icons that move, and make a sound</h2>
-            <p className="mt-4 max-w-[560px] text-[18px] text-muted-foreground">
-              {CATALOG_COUNTS.icons} animated icons for toolbars, players, carts and tab bars. Each tells a tiny story, has a sound scored to its animation, and
-              is one file you copy. {CATALOG_COUNTS.freeIcons} are free; Pro unlocks the other {CATALOG_COUNTS.proIcons}.
-            </p>
-          </div>
-          <PillLink href="/icons" variant="white" className="shrink-0 self-start md:self-auto">
-            See all {CATALOG_COUNTS.icons} icons
-          </PillLink>
-        </div>
-        <HomeIconStrip className="mt-12" />
-        <p className="mt-6 text-[14.5px] text-muted-foreground">
-          Want the sounds in your own app? Read the{" "}
-          <Link href="/icons/sounds" className="text-foreground underline underline-offset-4">
-            sound guide
-          </Link>
-          .
         </p>
-      </Band>
-
-      {/* Your code: a live component beside its source, then the three steps */}
-      <section className="px-4 py-24 sm:py-28">
-        <div className="mx-auto max-w-[1152px]">
-          <div className="max-w-[640px]">
-            <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">From the gallery to your repo</h2>
-            <p className="mt-4 text-[18px] text-muted-foreground">
-              No package to keep up to date. One command copies the source into your project, and from then on
-              it&apos;s your code.
-            </p>
-          </div>
-          <div className="mt-12">
-            <CodeDemo />
-          </div>
-          <ol className="mt-14 grid gap-8 md:grid-cols-3">
-            {STEPS.map((s, i) => (
-              <li key={s.title} className="border-t-2 border-foreground pt-5">
-                <p className="pg-display text-[40px] text-foreground">{i + 1}</p>
-                <h3 className="mt-3 text-[19px] font-semibold tracking-[-0.4px] text-foreground">{s.title}</h3>
-                <p className="mt-1 text-[15px] text-muted-foreground">{s.body}</p>
-              </li>
-            ))}
-          </ol>
+        <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <PillLink href="/components">Browse components</PillLink>
+          <IfPro
+            pro={
+              <PillLink href="/dashboard" variant="white">
+                Open your dashboard
+              </PillLink>
+            }
+            otherwise={
+              <PillLink href="/pricing" variant="white" plansSource="closing">
+                See plans
+              </PillLink>
+            }
+          />
         </div>
-      </section>
-
-      {/* What people say: real Reddit comments, looping */}
-      <Band tint="sky" id="love">
-        <RedditLove />
-      </Band>
-
-      {/* Release history and requests */}
-      <Band tint="mint" id="new">
-        <ShippingLog />
-      </Band>
-
-      {/* Plans */}
-      <section className="px-4 py-24 sm:py-28">
-        <div className="mx-auto max-w-[1152px]">
-          <PricingTeaser pricing={pricing} />
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="px-4 pb-24 sm:pb-28">
-        <div className="mx-auto grid max-w-[1152px] gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
-          <div>
-            <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">Before you start</h2>
-            <p className="mt-4 text-[18px] text-muted-foreground">
-              Something else?{" "}
-              <Link href="/contact" className="text-link hover:underline hover:underline-offset-4">
-                Write to us
-              </Link>
-              .
-            </p>
-            <CompareLibraries className="mt-3 text-[16px] text-muted-foreground" />
-          </div>
-          <div className="border-t border-border">
-            {faq.map((f) => (
-              <details key={f.q} className="group border-b border-border">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[17px] font-semibold tracking-[-0.3px] text-foreground [&::-webkit-details-marker]:hidden">
-                  {f.q}
-                  <Plus className="size-5 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-45 motion-reduce:transition-none" aria-hidden />
-                </summary>
-                <p className="max-w-[620px] pb-5 text-[15.5px] leading-relaxed text-muted-foreground">{f.a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Closing */}
-      <section className="px-4 pb-24">
-        <div className="relative mx-auto max-w-[1152px] overflow-hidden rounded-tile bg-[#1d1d1f] px-6 py-24 text-center sm:py-28 dark:bg-card">
-          <h2 className="pg-display mx-auto max-w-[720px] text-[clamp(40px,7vw,64px)] leading-[1.02] text-[#f5f5f7]">
-            Start with the component you need today.
-          </h2>
-          <p className="mx-auto mt-5 max-w-[460px] text-[17px] text-white/60">
-            <IfPro
-              pro={`All ${CATALOG_COUNTS.components} components, every template and every block are yours.`}
-              otherwise={`${CATALOG_COUNTS.freeComponents} are free. Pro unlocks the rest, from ${pricing.pro} a year.`}
-            />
-          </p>
-          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <PillLink href="/components" variant="cta" className="h-14 px-8 text-[16px]">
-              Browse components
-            </PillLink>
-            <IfPro
-              pro={
-                <PillLink
-                  href="/dashboard"
-                  variant="white"
-                  className="h-14 bg-white/10 px-8 text-[16px] text-white shadow-none hover:bg-white/15"
-                >
-                  Open your dashboard
-                </PillLink>
-              }
-              otherwise={
-                <PillLink
-                  href="/pricing"
-                  variant="white"
-                  className="h-14 bg-white/10 px-8 text-[16px] text-white shadow-none hover:bg-white/15"
-                >
-                  See plans
-                </PillLink>
-              }
-            />
-          </div>
-        </div>
-      </section>
-    </>
+        <HeroInstall className="mx-auto mt-8 max-w-[520px]" />
+      </ClosingHorizon>
+      </div>
+    </div>
   );
 }
