@@ -271,6 +271,7 @@ export default async function PricingPage() {
 
       <section aria-label="Plans" className="px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
+          <MemberStack plan="all" className="mb-9" />
           <div className="grid gap-5 lg:grid-cols-3">
             {plans.map((p) => (
               <article
@@ -299,17 +300,11 @@ export default async function PricingPage() {
                       Browse free components
                     </PillLink>
                   ) : p.name === "Pro" ? (
-                    <>
-                      <PlanAction tier="pro">Get Pro</PlanAction>
-                      <MemberStack plan="pro" className="mt-4" />
-                    </>
+                    <PlanAction tier="pro">Get Pro</PlanAction>
                   ) : (
-                    <>
-                      <PlanAction tier="all-access" variant="cta">
-                        Get All-Access
-                      </PlanAction>
-                      <MemberStack className="mt-4" />
-                    </>
+                    <PlanAction tier="all-access" variant="cta">
+                      Get All-Access
+                    </PlanAction>
                   )}
                 </div>
               </article>

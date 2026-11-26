@@ -43,9 +43,9 @@ export function Face({ m, i, size }: { m: Member; i: number; size: number }) {
  * A pointer opens it on hover; a tap, Enter or Space toggles it, and Escape or a press anywhere else closes it.
  * It rises in with a small spring; with reduced motion it only fades.
  */
-export function MemberStack({ className, plan = "all-access" }: { className?: string; plan?: "all-access" | "pro" }) {
+export function MemberStack({ className, plan = "all-access" }: { className?: string; plan?: "all-access" | "pro" | "all" }) {
   // each plan shows its own people; the All-Access line says "for life", the Pro one does not
-  const MEMBERS = ALL_MEMBERS.filter((m) => (m.plan ?? "all-access") === plan);
+  const MEMBERS = plan === "all" ? ALL_MEMBERS : ALL_MEMBERS.filter((m) => (m.plan ?? "all-access") === plan);
   const reduced = !!useReducedMotion();
   const [open, setOpen] = React.useState(false);
   const root = React.useRef<HTMLDivElement>(null);
@@ -181,12 +181,17 @@ export function MemberStack({ className, plan = "all-access" }: { className?: st
                   : { opacity: 0, y: below ? -6 : 6, scale: 0.98, transition: { duration: 0.12 } }
               }
             >
-              <p className="px-2.5 pb-1 pt-2 text-[11.5px] text-background/60">{plan === "pro" ? "Pro members, newest first" : "All-Access members, newest first"}</p>
+              <p className="px-2.5 pb-1 pt-2 text-[11.5px] text-background/60">{plan === "all" ? "Members, newest first" : plan === "pro" ? "Pro members, newest first" : "All-Access members, newest first"}</p>
               <ul>
                 {MEMBERS.map((m, i) => (
                   <li key={m.name} className="flex items-center gap-2.5 rounded-xl px-2.5 py-[7px]">
                     <Face m={m} i={i} size={26} />
                     <span className="min-w-0 truncate text-[13px] font-semibold">{m.name}</span>
+                    {plan === "all" ? (
+                      <span className="shrink-0 rounded-full bg-background/12 px-1.5 py-px text-[10.5px] font-medium text-background/70">
+                        {m.plan === "pro" ? "Pro" : "All-Access"}
+                      </span>
+                    ) : null}
                     <span className="ml-auto flex shrink-0 items-center gap-1.5 text-[12px] text-background/70">
                       <Flag code={m.code} country={m.country} />
                       {m.country}
