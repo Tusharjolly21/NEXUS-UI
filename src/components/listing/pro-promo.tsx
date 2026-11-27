@@ -1,5 +1,6 @@
 "use client";
 
+import { WasPrice } from "@/components/pricing/sale-badge";
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -229,9 +230,13 @@ export function ProRail({ copy, pricing: given }: { copy: PromoCopy; pricing?: D
           <p className="mt-2 text-[14px] leading-[1.5] text-muted-foreground">{copy.body}</p>
           <p className="mt-4 flex items-baseline gap-1.5">
             <span className="text-[28px] font-semibold tabular-nums tracking-[-0.03em] text-foreground">{pricing.pro}</span>
+            {pricing.proWas ? <WasPrice was={pricing.proWas} className="text-[15px] text-muted-foreground" /> : null}
             <span className="text-[14px] text-muted-foreground">a year</span>
           </p>
-          <p className="text-[13.5px] text-muted-foreground">or {pricing.allAccess} once, for good</p>
+          <p className="text-[13.5px] text-muted-foreground">
+            or {pricing.allAccess} {pricing.allAccessWas ? <WasPrice was={pricing.allAccessWas} /> : null} once, for good
+          </p>
+          {pricing.proSave ? <p className="mt-1.5 text-[12.5px] font-medium text-[#126b3a] dark:text-[#7ee2a8]">{pricing.proSave}% off early prices</p> : null}
           <Link
             href="/pricing"
             data-plans-source="listing_rail"

@@ -1,5 +1,6 @@
 "use client";
 
+import { WasPrice } from "@/components/pricing/sale-badge";
 import { AfterCopyProLine } from "@/components/pro/after-copy-pro-line";
 import { announceCopy } from "@/components/pro/pro-access";
 import { ProNudge, type ProPick } from "@/components/pro/pro-nudge";
@@ -597,8 +598,10 @@ function InstallPanel({
         {pricing ? (
           <p className="mt-3 text-[14px] leading-relaxed text-foreground">
             <span className="font-semibold tabular-nums">{pricing.pro}</span>
+            {pricing.proWas ? <> <WasPrice was={pricing.proWas} className="text-muted-foreground" /></> : null}
             <span className="text-muted-foreground"> a year, or </span>
             <span className="font-semibold tabular-nums">{pricing.allAccess}</span>
+            {pricing.allAccessWas ? <> <WasPrice was={pricing.allAccessWas} className="text-muted-foreground" /></> : null}
             <span className="text-muted-foreground"> once for </span>
             <span className="whitespace-nowrap text-muted-foreground">All-Access.</span>
           </p>

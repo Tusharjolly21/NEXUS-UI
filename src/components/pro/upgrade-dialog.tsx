@@ -168,7 +168,12 @@ export function UpgradeDialog({
 
   const lifetime = plan === "lifetime";
   const price = pricing ? (lifetime ? pricing.allAccess : pricing.pro) : null;
-  const original = pricing ? (lifetime ? pricing.allAccessOriginal : pricing.proOriginal) : null;
+  const original = pricing
+    ? lifetime
+      ? (pricing.allAccessOriginal ?? pricing.allAccessWas)
+      : (pricing.proOriginal ?? pricing.proWas)
+    : null;
+  const save = pricing ? (lifetime ? pricing.allAccessSave : pricing.proSave) : null;
   const term = lifetime ? "lifetime" : "a year";
   const fine = lifetime ? "One payment, never renews." : "Renews yearly, cancel anytime.";
 
@@ -225,6 +230,11 @@ export function UpgradeDialog({
                         </span>
                       ) : null}
                       <span>{term}</span>
+                      {save ? (
+                        <span className="rounded-full bg-[#34c759]/14 px-2 py-0.5 text-[11.5px] font-semibold text-[#126b3a] dark:text-[#7ee2a8]">
+                          {save}% off early price
+                        </span>
+                      ) : null}
                     </span>
                   </p>
                   <CheckoutButton

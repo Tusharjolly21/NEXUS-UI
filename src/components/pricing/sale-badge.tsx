@@ -18,3 +18,13 @@ export function SaleBadge({ was, save, className }: { was: string; save: number;
     </div>
   );
 }
+
+/** The regular price struck through, small, for tight places that already show the price in a sentence or a button. */
+export function WasPrice({ was, className }: { was: string; className?: string }) {
+  return (
+    <s className={cn("tabular-nums decoration-[#ff3b30]/70 decoration-[1.5px]", className)}>
+      <span className="sr-only">Regular price </span>
+      {was}
+    </s>
+  );
+}

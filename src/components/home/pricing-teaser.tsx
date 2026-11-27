@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { PillLink } from "@/components/site";
 import { PlanLink } from "@/components/pricing/plan-action";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
+import { SaleBadge } from "@/components/pricing/sale-badge";
 import { IndiaDiscountBadge } from "@/components/pricing/india-discount-badge";
 import type { DisplayPricing } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,8 @@ function buildPlans(pricing: DisplayPricing) {
       price: pricing.pro,
       discount: pricing.proDiscount,
       original: pricing.proOriginal,
+      was: pricing.proWas,
+      save: pricing.proSave,
       term: "per year",
       line: "Everything, plus every release while you're subscribed.",
       href: "/pricing",
@@ -32,6 +35,8 @@ function buildPlans(pricing: DisplayPricing) {
       price: pricing.allAccess,
       discount: pricing.allAccessDiscount,
       original: pricing.allAccessOriginal,
+      was: pricing.allAccessWas,
+      save: pricing.allAccessSave,
       term: "once",
       line: "The same as Pro, paid once and yours for good.",
       href: "/pricing",
@@ -87,6 +92,7 @@ export function PricingTeaser({ pricing }: { pricing: DisplayPricing }) {
               <span className="text-[15px] text-muted-foreground">{p.term}</span>
             </p>
             {"discount" in p && p.discount ? <IndiaDiscountBadge percent={p.discount} original={p.original} className="mt-3" /> : null}
+            {"was" in p && p.was && p.save ? <SaleBadge was={p.was} save={p.save} className="mt-3" /> : null}
             <p className="mt-3 flex-1 text-[15px] text-muted-foreground">{p.line}</p>
             {p.name === "Free" ? (
               <PillLink href={p.href} variant="white" className="mt-7 w-full">
