@@ -10,13 +10,17 @@ export const PRICES = {
   allAccess: 79.99,
 } as const;
 
-/** The earlier prices, struck through beside today's (global only). Display only: what is charged is set in the payment dashboard. */
+/**
+ * The regular prices the plans move to once their early slots are gone (see launch-slots.ts), struck through beside
+ * today's early price (global only). Only show these while the price really will rise to them. Display only: what
+ * is charged is set in the payment dashboard.
+ */
 export const WAS_PRICES = {
   pro: 99.99,
-  allAccess: 149.99,
+  allAccess: 159.99,
 } as const;
 
-/** Percent saved against the earlier price, rounded: 99.99 -> 49.99 is 50, 149.99 -> 79.99 is 47. */
+/** Percent the early price saves against the regular price, rounded: 99.99 -> 49.99 is 50, 159.99 -> 79.99 is 50. */
 export function savePercent(was: number, now: number): number {
   return Math.round((1 - now / was) * 100);
 }
@@ -51,7 +55,7 @@ export type DisplayPricing = {
   /** The usual USD price, struck through beside a regional price. Null where the price is the usual one. */
   proOriginal: string | null;
   allAccessOriginal: string | null;
-  /** The earlier price, struck through, and the percent saved against it. Null where there is none (India). */
+  /** The regular price, struck through, and the percent the early price saves against it. Null where there is none (India). */
   proWas: string | null;
   allAccessWas: string | null;
   proSave: number | null;
