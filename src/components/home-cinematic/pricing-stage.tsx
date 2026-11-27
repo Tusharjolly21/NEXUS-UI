@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { SaleBadge } from "@/components/pricing/sale-badge";
 import { IndiaDiscountBadge } from "@/components/pricing/india-discount-badge";
 import { PlanLink } from "@/components/pricing/plan-action";
 import { PillLink } from "@/components/site";
@@ -74,6 +75,7 @@ export function PricingStage({ pricing }: { pricing: DisplayPricing }) {
                 {pricing.proDiscount ? (
                   <IndiaDiscountBadge percent={pricing.proDiscount} original={pricing.proOriginal} className="mt-3" />
                 ) : null}
+                {pricing.proWas && pricing.proSave ? <SaleBadge was={pricing.proWas} save={pricing.proSave} className="mt-3" /> : null}
                 <p className="mt-4 flex-1 text-[15px] leading-[1.55] text-muted-foreground">
                   Every component, template, block and video, plus every release while you&apos;re subscribed.
                 </p>
@@ -98,6 +100,7 @@ export function PricingStage({ pricing }: { pricing: DisplayPricing }) {
               {pricing.allAccessDiscount ? (
                 <IndiaDiscountBadge percent={pricing.allAccessDiscount} original={pricing.allAccessOriginal} className="mt-3" />
               ) : null}
+              {pricing.allAccessWas && pricing.allAccessSave ? <SaleBadge was={pricing.allAccessWas} save={pricing.allAccessSave} className="mt-3" /> : null}
               <p className="mt-4 flex-1 text-[15px] leading-[1.55] text-muted-foreground">
                 The same as Pro, paid once and yours for good, including what we release next.
               </p>

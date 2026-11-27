@@ -10,6 +10,17 @@ export const PRICES = {
   allAccess: 79.99,
 } as const;
 
+/** The earlier prices, struck through beside today's (global only). Display only: what is charged is set in the payment dashboard. */
+export const WAS_PRICES = {
+  pro: 99.99,
+  allAccess: 149.99,
+} as const;
+
+/** Percent saved against the earlier price, rounded: 99.99 -> 49.99 is 50, 149.99 -> 79.99 is 47. */
+export function savePercent(was: number, now: number): number {
+  return Math.round((1 - now / was) * 100);
+}
+
 /** India prices in INR, charged through the separate *_IN Dodo products. */
 export const INDIA_PRICES = {
   pro: 1999,
@@ -40,6 +51,11 @@ export type DisplayPricing = {
   /** The usual USD price, struck through beside a regional price. Null where the price is the usual one. */
   proOriginal: string | null;
   allAccessOriginal: string | null;
+  /** The earlier price, struck through, and the percent saved against it. Null where there is none (India). */
+  proWas: string | null;
+  allAccessWas: string | null;
+  proSave: number | null;
+  allAccessSave: number | null;
 };
 
 /** 49 → "$49", 49.99 → "$49.99" */
@@ -61,6 +77,10 @@ export const GLOBAL_PRICING: DisplayPricing = {
   allAccessDiscount: null,
   proOriginal: null,
   allAccessOriginal: null,
+  proWas: formatPrice(WAS_PRICES.pro),
+  allAccessWas: formatPrice(WAS_PRICES.allAccess),
+  proSave: savePercent(WAS_PRICES.pro, PRICES.pro),
+  allAccessSave: savePercent(WAS_PRICES.allAccess, PRICES.allAccess),
 };
 
 export const INDIA_PRICING: DisplayPricing = {
@@ -72,4 +92,8 @@ export const INDIA_PRICING: DisplayPricing = {
   allAccessDiscount: INDIA_DISCOUNT.allAccess,
   proOriginal: formatPrice(PRICES.pro),
   allAccessOriginal: formatPrice(PRICES.allAccess),
+  proWas: null,
+  allAccessWas: null,
+  proSave: null,
+  allAccessSave: null,
 };

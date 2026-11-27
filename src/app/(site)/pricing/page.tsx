@@ -12,6 +12,7 @@ import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { cn } from "@/lib/utils";
+import { SaleBadge } from "@/components/pricing/sale-badge";
 import { GLOBAL_PRICING, PRICES, type DisplayPricing } from "@/lib/pricing";
 import { getPricing } from "@/lib/region";
 
@@ -38,6 +39,8 @@ type Plan = {
   featured?: boolean;
   discount?: number | null;
   original?: string | null;
+  was?: string | null;
+  save?: number | null;
 };
 
 function buildPlans(pricing: DisplayPricing): Plan[] {
@@ -66,6 +69,8 @@ function buildPlans(pricing: DisplayPricing): Plan[] {
       featured: true,
       discount: pricing.proDiscount,
       original: pricing.proOriginal,
+      was: pricing.proWas,
+      save: pricing.proSave,
       features: [
         "Everything in Starter",
         `All ${components} components, including ${proComponents} Pro`,
@@ -85,6 +90,8 @@ function buildPlans(pricing: DisplayPricing): Plan[] {
       price: pricing.allAccess,
       discount: pricing.allAccessDiscount,
       original: pricing.allAccessOriginal,
+      was: pricing.allAccessWas,
+      save: pricing.allAccessSave,
       term: "one payment",
       pitch: "Exactly what Pro unlocks, paid once and yours for good.",
       features: [
@@ -285,6 +292,9 @@ export default async function PricingPage() {
                   <span className="text-[15px] text-muted-foreground">{p.term}</span>
                 </p>
                 {p.discount ? <IndiaDiscountBadge percent={p.discount} original={p.original} className="mt-3" /> : null}
+                {p.was && p.save ? <SaleBadge was={p.was} save={p.save} className="mt-3" /> : null}
+                {/* keeps the Starter card level with the two that carry a sale line */}
+                {p.name === "Starter" && pricing.proWas ? <div aria-hidden className="mt-3 h-[28px]" /> : null}
                 <p className="mt-3 text-[15px] text-muted-foreground">{p.pitch}</p>
                 <ul className="mt-6 space-y-3">
                   {p.features.map((f) => (
