@@ -360,3 +360,139 @@ html.dark .cx-horizon-glow {
     transition: none;
   }
 }
+
+/* ---------- The hero's code editor and the component it renders ---------- */
+/* Light by default; the dark theme swaps the variables. Nothing here animates. */
+.cx-ide {
+  --ide-fill: linear-gradient(#ffffff, #ffffff);
+  --ide-rim: linear-gradient(rgba(20, 20, 50, 0.16), rgba(20, 20, 50, 0.16));
+  --ide-shadow: 0 40px 80px -36px rgba(30, 25, 90, 0.45), 0 3px 10px rgba(20, 20, 50, 0.07);
+  --ide-line: rgba(20, 20, 50, 0.08);
+  --ide-light: rgba(20, 20, 50, 0.14);
+  --ide-tab: rgba(20, 20, 50, 0.45);
+  --ide-tab-hover: rgba(20, 20, 50, 0.75);
+  --ide-tab-on-bg: rgba(20, 20, 50, 0.06);
+  --ide-tab-on: #111114;
+  --ide-modified: #5b7cff;
+  --ide-text: #24242e;
+  --ide-gutter: rgba(20, 20, 50, 0.3);
+  --ide-gutter-on: rgba(20, 20, 50, 0.8);
+  --ide-active: linear-gradient(90deg, rgba(110, 91, 255, 0.1), rgba(110, 91, 255, 0.02) 60%, transparent);
+  --ide-status: rgba(20, 20, 50, 0.5);
+  --ide-ok: #1fa463;
+  --ide-glow: radial-gradient(closest-side, rgba(110, 91, 255, 0.26), rgba(0, 144, 247, 0.1) 60%, transparent);
+  /* sugar-high */
+  --sh-keyword: #8250df;
+  --sh-string: #0a7a3d;
+  --sh-comment: #6b7280;
+  --sh-identifier: #24242e;
+  --sh-sign: #6b6f7a;
+  --sh-class: #0550ae;
+  --sh-property: #953800;
+  --sh-entity: #953800;
+  --sh-jsxliterals: #24242e;
+}
+html.dark .cx-ide {
+  --ide-fill: linear-gradient(180deg, #15151d, #0a0a0f);
+  --ide-rim: conic-gradient(from 200deg, rgba(255, 255, 255, 0.85), #6e5bff 18%, rgba(0, 144, 247, 0.25) 38%, rgba(255, 255, 255, 0.06) 55%, rgba(242, 65, 107, 0.7) 80%, rgba(255, 255, 255, 0.85));
+  --ide-shadow: 0 50px 100px -40px rgba(20, 10, 80, 0.7), 0 0 60px -20px rgba(110, 91, 255, 0.35);
+  --ide-line: rgba(255, 255, 255, 0.07);
+  --ide-light: rgba(255, 255, 255, 0.16);
+  --ide-tab: rgba(255, 255, 255, 0.4);
+  --ide-tab-hover: rgba(255, 255, 255, 0.75);
+  --ide-tab-on-bg: rgba(255, 255, 255, 0.08);
+  --ide-tab-on: #ffffff;
+  --ide-modified: #7c9cff;
+  --ide-text: #e6e6eb;
+  --ide-gutter: rgba(255, 255, 255, 0.22);
+  --ide-gutter-on: rgba(255, 255, 255, 0.75);
+  --ide-active: linear-gradient(90deg, rgba(124, 92, 255, 0.16), rgba(124, 92, 255, 0.04) 60%, transparent);
+  --ide-status: rgba(255, 255, 255, 0.42);
+  --ide-ok: #6fe3a0;
+  --ide-glow: radial-gradient(closest-side, rgba(110, 91, 255, 0.34), rgba(0, 144, 247, 0.14) 60%, transparent);
+  --sh-keyword: #c792ea;
+  --sh-string: #c3e88d;
+  --sh-comment: #6b7280;
+  --sh-identifier: #e6e6eb;
+  --sh-sign: #9aa0aa;
+  --sh-class: #82aaff;
+  --sh-property: #ffcb6b;
+  --sh-entity: #f78c6c;
+  --sh-jsxliterals: #e6e6eb;
+}
+.cx-ide-card {
+  position: relative;
+  z-index: 1;
+  border: 1px solid transparent;
+  background: var(--ide-fill) padding-box, var(--ide-rim) border-box;
+  box-shadow: var(--ide-shadow);
+}
+.cx-ide-bar,
+.cx-ide-status {
+  border-color: var(--ide-line);
+}
+.cx-ide-bar {
+  border-bottom: 1px solid var(--ide-line);
+}
+.cx-ide-status {
+  border-top: 1px solid var(--ide-line);
+  color: var(--ide-status);
+}
+.cx-ide-ok {
+  color: var(--ide-ok);
+}
+.cx-ide-light {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ide-light);
+}
+.cx-ide-tab {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 7px;
+  border-radius: 7px;
+  padding: 5px 10px;
+  font: 12px var(--font-mono, ui-monospace, monospace);
+  color: var(--ide-tab);
+  transition: color 0.15s;
+}
+.cx-ide-tab:hover {
+  color: var(--ide-tab-hover);
+}
+.cx-ide-tab:focus-visible {
+  outline: 2px solid var(--ide-modified);
+  outline-offset: 1px;
+}
+.cx-ide-tab-on {
+  background: var(--ide-tab-on-bg);
+  color: var(--ide-tab-on);
+}
+.cx-ide-tab-on:hover {
+  color: var(--ide-tab-on);
+}
+.cx-ide-modified {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ide-modified);
+}
+.cx-ide-text {
+  color: var(--ide-text);
+}
+.cx-ide-gutter {
+  color: var(--ide-gutter);
+}
+.cx-ide-gutter [data-on] {
+  color: var(--ide-gutter-on);
+}
+.cx-ide-active {
+  background: var(--ide-active);
+  border-left: 2px solid var(--cx-violet);
+}
+.cx-ide-glow {
+  background: var(--ide-glow);
+  filter: blur(14px);
+  border-radius: 50%;
+}
