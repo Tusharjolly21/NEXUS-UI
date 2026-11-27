@@ -6,14 +6,15 @@ import Image from "next/image";
 import { COMMENTS } from "@/components/home/reddit-love";
 
 /** The headline block drifts up, fades and softens as the page scrolls away from it. */
-export function HeroCopy({ children, className }: { children: React.ReactNode; className?: string }) {
+export function HeroCopy({ children, className, blur: softens = true }: { children: React.ReactNode; className?: string; blur?: boolean }) {
   const reduce = !!useReducedMotion();
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 600], reduce ? [0, 0] : [0, -120]);
   const opacity = useTransform(scrollY, [0, 520], reduce ? [1, 1] : [1, 0]);
   const blur = useTransform(scrollY, [0, 520], reduce ? ["blur(0px)", "blur(0px)"] : ["blur(0px)", "blur(8px)"]);
+  // `blur: false` for the tile column: a blur filter over that many live components makes scrolling heavy.
   return (
-    <motion.div style={{ y, opacity, filter: blur }} className={className}>
+    <motion.div style={softens ? { y, opacity, filter: blur } : { y, opacity }} className={className}>
       {children}
     </motion.div>
   );

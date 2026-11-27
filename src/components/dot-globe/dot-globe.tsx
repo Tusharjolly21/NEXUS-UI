@@ -28,19 +28,51 @@ const toVec = (lat: number, lon: number): [number, number, number] => {
   return [Math.cos(la) * Math.sin(lo), Math.sin(la), Math.cos(la) * Math.cos(lo)];
 };
 
-// Sphere of dots on a Fibonacci lattice.
-const SPHERE: [number, number, number][] = (() => {
-  const out: [number, number, number][] = [];
-  const N = 1600;
+// Land outline: a 150 x 55 bitmap (2.4 degree cells, 76N to 55S, from 168W), one bit per cell, in hex.
+const LAND = { cols: 150, rows: 55, lat0: 76, lon0: -168, step: 2.3866666666666667, data: "00000102f803fffc00000003001ff800880000000037ce7c01fff00000000c18fffff07000003fc007f31fc1fff80001e0001fffffffff80007ffffffff2e0ff80000ffe5ffbffffffffffe0ffffffffe3d0fc07801e79ffffffffffffffd87fffffff10407800007dffffffffffffffffc07f7ffffe03801000007cfffffffffffffe3c000c03fffe03f0000008187fffffffffff8040003001ffffc3f800000c31ffffffffffff00c0000000fffff7fe00003c7fffffffffffff80800000007ffffffe00000fffffffffffffffa0000000003fffffa300000fffffffffffffff80000000003fffffe0000003ffebe7ffffffff00000000003fffff80000003d7c1cffffffffe20000000003fffff0000001e09cceffffffff800000000001ffffe0000003c053fe7ffffff1040000000001ffffe00000009e02bffffffff9880000000000ffffc0000000fe007ffffffff87000000000007fff00000003ff987ffffffff80000000000003fe800000003fffffefffffffc0000000000000fc080000007ffff7e7ffffff800000000000017800000000fffffbf41fffff00000000000000380c000001fffffdfe1ff7fc000000000000003cc0000000fffffdfe07c7e8000000000000000f80000000fffffefc0783e04000000000000001e0000001fffffef00701f0000000000000000020000001ffffff00030070000000000000000021f00000fffffff003002000000000000000000bfc00007fffffe0008000200000000000000003ff00003c7fffe00000c1000000000000000003ff8000003fffc0000143000000000000000007ff8000003fff800000cf600000000000000007fff000003fff0000004ec2000000000000000ffffc00001ffe00000062c1e00000000000000fffff00000ffe0000001000f100000000000007ffff00000ffe00000001504800000000000003fffe00000ffe00000000000000000000000003fffc00000ffe00000000062000000000000001fffc00001ffe200000003f20000000000000007ffc00001ffc600000003ff0000000000000007ff800000ff860000001fff8100000000000007ff000000ff840000003fffc000000000000007fc0000007f040000003fffc000000000000007fc0000007f000000003fffe00000000000000ff80000003e000000001fffe00000000000000ff00000003c000000001e1fc00000000000000fc00000000000000000100fc00000000000000fc000000000000000000007800000000000000f0000000000000000000000001800000000001e0000000000000000000001802000000000001e0000000000000000000000004000000000001c0000000000000000000000000000000000001c0000000000000100000000000000000000001c4000000000000000000000000000000000000c000000000000000000000000000" };
+const LAND_CELLS = (() => {
+  const grid = new Uint8Array(LAND.cols * LAND.rows);
+  const perRow = Math.ceil(LAND.cols / 4);
+  for (let row = 0; row < LAND.rows; row++) {
+    for (let chunk = 0; chunk < perRow; chunk++) {
+      const bits = parseInt(LAND.data[row * perRow + chunk], 16);
+      for (let bit = 0; bit < 4; bit++) {
+        const col = chunk * 4 + bit;
+        if (bits & (8 >> bit) && col < LAND.cols) grid[row * LAND.cols + col] = 1;
+      }
+    }
+  }
+  return grid;
+})();
+
+/** True when the point (degrees) is on land, as far as the outline can tell. */
+export function isLand(lat: number, lon: number) {
+  const lng = lon < LAND.lon0 ? lon + 360 : lon;
+  const col = Math.floor((lng - LAND.lon0) / LAND.step);
+  const row = Math.floor((LAND.lat0 - lat) / LAND.step);
+  if (col < 0 || col >= LAND.cols || row < 0 || row >= LAND.rows) return false;
+  return LAND_CELLS[row * LAND.cols + col] === 1;
+}
+
+// Sphere of dots on a Fibonacci lattice; the fourth number is 1 for dots that sit on land. Built the first time a globe
+// is drawn, not when this file loads, so a page that only imports it pays nothing.
+type Dot = [number, number, number, number];
+let SPHERE_CACHE: Dot[] | null = null;
+function sphere(): Dot[] {
+  if (SPHERE_CACHE) return SPHERE_CACHE;
+  const out: Dot[] = [];
+  const N = 5200;
   const g = Math.PI * (3 - Math.sqrt(5));
   for (let i = 0; i < N; i++) {
     const y = 1 - (i / (N - 1)) * 2;
     const r = Math.sqrt(1 - y * y);
     const t = g * i;
-    out.push([Math.cos(t) * r, y, Math.sin(t) * r]);
+    const x = Math.cos(t) * r;
+    const z = Math.sin(t) * r;
+    out.push([x, y, z, isLand((Math.asin(y) * 180) / Math.PI, (Math.atan2(x, z) * 180) / Math.PI) ? 1 : 0]);
   }
-  return out;
-})();
+  return (SPHERE_CACHE = out);
+}
 
 export interface DotGlobeProps {
   /** Canvas size in px (square). */
@@ -53,6 +85,8 @@ export interface DotGlobeProps {
   routes?: [string, string][];
   /** Turns slowly and tours cities until the user interacts. */
   autoplay?: boolean;
+  /** Draws only when something changes: no automatic spin, travelling arcs or pulsing pins. Dragging and choosing a city still work. */
+  still?: boolean;
 }
 
 /**
@@ -60,7 +94,7 @@ export interface DotGlobeProps {
  * it (it coasts and slows), or pick a city and it springs round to face you.
  * Flight arcs draw themselves along great circles between cities.
  */
-export function DotGlobe({ size = 340, accent = "#0071e3", cities = DOT_GLOBE_CITIES, routes = DOT_GLOBE_ROUTES, autoplay = false }: DotGlobeProps) {
+export function DotGlobe({ size = 340, accent = "#0071e3", cities = DOT_GLOBE_CITIES, routes = DOT_GLOBE_ROUTES, autoplay = false, still = false }: DotGlobeProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const yaw = useMotionValue(-20);
   const pitch = useMotionValue(-18);
@@ -106,12 +140,13 @@ export function DotGlobe({ size = 340, accent = "#0071e3", cities = DOT_GLOBE_CI
     cv.height = size * dpr;
     const R = size * 0.42;
     const C = size / 2;
+    const SPHERE = sphere();
     let raf = 0;
     let last = performance.now();
     const t0 = performance.now();
     const byId = Object.fromEntries(cities.map((c) => [c.id, c]));
 
-    const project = (v: [number, number, number], ya: number, pi: number) => {
+    const project = (v: readonly number[], ya: number, pi: number) => {
       // rotate around Y (yaw) then X (pitch)
       const cy = Math.cos(ya), sy = Math.sin(ya), cp = Math.cos(pi), sp = Math.sin(pi);
       const x1 = v[0] * cy + v[2] * sy;
@@ -121,12 +156,22 @@ export function DotGlobe({ size = 340, accent = "#0071e3", cities = DOT_GLOBE_CI
       return { x: C + x1 * R, y: C - y2 * R, z: z2 };
     };
 
+    // Draw only while on screen (and, when `still`, only after something changed), so idle globes cost nothing.
+    let visible = true;
+    let queued = false;
+    const schedule = () => {
+      if (queued || !visible) return;
+      queued = true;
+      raf = requestAnimationFrame(frame);
+    };
+
     const frame = (now: number) => {
+      queued = false;
       const dt = (now - last) / 1000;
       last = now;
       const isDark = dark.current;
       const ink = isDark ? "245,245,247" : "29,29,31";
-      if (spin.current && !drag.current) yaw.set(yaw.get() + dt * 8);
+      if (!still && spin.current && !drag.current) yaw.set(yaw.get() + dt * 8);
       const ya = rad(yaw.get()), pi = rad(pitch.get());
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, size, size);
@@ -143,15 +188,19 @@ export function DotGlobe({ size = 340, accent = "#0071e3", cities = DOT_GLOBE_CI
       for (const d of SPHERE) {
         const p = project(d, ya, pi);
         if (p.z < -0.15) continue;
-        const a = p.z < 0 ? 0.06 : 0.18 + p.z * 0.55;
-        ctx.fillStyle = `rgba(${ink},${a.toFixed(3)})`;
+        const land = d[3] === 1;
+        const front = Math.max(0, p.z);
+        const a = p.z < 0 ? (land ? 0.1 : 0.03) : land ? 0.4 + front * 0.6 : 0.07 + front * 0.14;
+        ctx.fillStyle = land && p.z >= 0 ? accent : `rgba(${ink},${a.toFixed(3)})`;
+        ctx.globalAlpha = land && p.z >= 0 ? Math.min(1, 0.35 + front * 0.65) : 1;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 0.6 + Math.max(0, p.z) * 0.9, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, (land ? 0.8 : 0.45) + front * (land ? 0.95 : 0.4), 0, Math.PI * 2);
         ctx.fill();
+        ctx.globalAlpha = 1;
       }
 
       // arcs
-      const phase = ((now - t0) / 2600) % 1;
+      const phase = still ? 0.5 : ((now - t0) / 2600) % 1;
       routes.forEach(([a, b], k) => {
         const A = byId[a], B = byId[b];
         if (!A || !B) return;
@@ -186,7 +235,7 @@ export function DotGlobe({ size = 340, accent = "#0071e3", cities = DOT_GLOBE_CI
       });
 
       // pins
-      const pulse = ((now - t0) / 1400) % 1;
+      const pulse = still ? 0.35 : ((now - t0) / 1400) % 1;
       cities.forEach((c) => {
         const p = project(toVec(c.lat, c.lon), ya, pi);
         if (p.z < 0) return;
@@ -218,11 +267,28 @@ export function DotGlobe({ size = 340, accent = "#0071e3", cities = DOT_GLOBE_CI
           ctx.fillText(c.name, p.x, p.y - 23);
         }
       });
-      raf = requestAnimationFrame(frame);
+      if (!still) schedule();
     };
-    raf = requestAnimationFrame(frame);
-    return () => cancelAnimationFrame(raf);
-  }, [size, accent, cities, routes, active, yaw, pitch]);
+
+    const io = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      last = performance.now();
+      if (visible) schedule();
+    });
+    io.observe(cv);
+    const offYaw = yaw.on("change", schedule);
+    const offPitch = pitch.on("change", schedule);
+    const mo = new MutationObserver(schedule);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    schedule();
+    return () => {
+      cancelAnimationFrame(raf);
+      io.disconnect();
+      mo.disconnect();
+      offYaw();
+      offPitch();
+    };
+  }, [size, accent, cities, routes, active, yaw, pitch, still]);
 
   useEffect(() => {
     if (!autoplay) return;

@@ -1,5 +1,4 @@
 import { HeroMilestone } from "@/components/home/hero-milestone";
-import { HeroSpotlight } from "@/components/home/hero-spotlight";
 import { HeroTutorial } from "@/components/home/hero-tutorial";
 import { HeroWord } from "@/components/home/hero-word";
 import { IfPro } from "@/components/pro/pro-access";
@@ -7,51 +6,22 @@ import { PillLink } from "@/components/site";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import type { DisplayPricing } from "@/lib/pricing";
 import { HeroCopy, HeroProof } from "./hero-motion";
-import { CodeToUi } from "./code-to-ui";
-
-/** Streaks of light that run along the grid lines: [row or column index, seconds, delay]. */
-const PULSES_H: [number, number, number][] = [
-  [2, 7, 0.4],
-  [5, 9, 3.2],
-  [8, 8, 5.6],
-];
-const PULSES_V: [number, number, number][] = [
-  [3, 8, 1.4],
-  [9, 10, 4.1],
-  [15, 7, 2.3],
-  [21, 9, 6.2],
-];
+import { HeroGlobe } from "./hero-globe";
+import { HeroTiles } from "./hero-tiles";
 
 /**
- * The opening. A blueprint grid with light running along its lines, the headline coming into focus,
- * and one app window below it playing real components, so the first thing a visitor sees is the
- * product working. Tucked under the floating nav so the grid starts at the very top.
+ * The opening. A blueprint grid under a soft light, the headline coming into focus, and on wide screens six real
+ * components to use right there, so the first thing a visitor sees is the product working. A lit horizon rises
+ * from the bottom edge. Nothing in the background moves. Tucked under the floating nav so the grid starts at the top.
  */
 export function CinematicHero({ pricing }: { pricing: DisplayPricing }) {
   return (
     <section className="relative -mt-[64px] overflow-hidden pb-20 pt-[128px] sm:pb-28 sm:pt-[150px]">
-      <div aria-hidden className="cx-grid">
-        {PULSES_H.map(([row, dur, delay]) => (
-          <span
-            key={`h${row}`}
-            className="cx-pulse-h"
-            style={{ top: row * 64 - 1, ["--dur" as string]: `${dur}s`, ["--delay" as string]: `${delay}s` }}
-          />
-        ))}
-        {PULSES_V.map(([col, dur, delay]) => (
-          <span
-            key={`v${col}`}
-            className="cx-pulse-v"
-            style={{ left: col * 64 - 1, ["--dur" as string]: `${dur}s`, ["--delay" as string]: `${delay}s` }}
-          />
-        ))}
-      </div>
-      <div aria-hidden className="cx-aurora">
-        <span />
-        <span />
-        <span />
-      </div>
-      <HeroSpotlight />
+      <div aria-hidden className="cx-grid" />
+      <div aria-hidden className="cx-bloom" />
+      <HeroGlobe />
+      <div aria-hidden className="cx-rim" />
+      <div aria-hidden className="cx-grain" />
 
       <div className="relative z-20 mx-auto grid max-w-[1200px] grid-cols-1 items-center px-4 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:gap-6">
         <HeroCopy className="min-w-0 text-center lg:text-left">
@@ -108,9 +78,23 @@ export function CinematicHero({ pricing }: { pricing: DisplayPricing }) {
           </div>
         </HeroCopy>
 
-        {/* wide screens: code typing itself into a running component, to the right */}
-        <HeroCopy className="cx-fade relative hidden lg:block">
-          <CodeToUi />
+        {/* wide screens: six live components, and what the library holds */}
+        <HeroCopy blur={false} className="cx-fade relative hidden lg:block">
+          <HeroTiles />
+          <dl className="cx-stats mt-7 grid grid-cols-3 gap-4 pt-5">
+            <div className="flex flex-col">
+              <dt className="font-mono text-[12.5px] text-muted-foreground">components</dt>
+              <dd className="order-first text-[26px] font-semibold tracking-tight text-foreground">{CATALOG_COUNTS.components}+</dd>
+            </div>
+            <div className="flex flex-col">
+              <dt className="font-mono text-[12.5px] text-muted-foreground">blocks</dt>
+              <dd className="order-first text-[26px] font-semibold tracking-tight text-foreground">{CATALOG_COUNTS.blocks}</dd>
+            </div>
+            <div className="flex flex-col">
+              <dt className="font-mono text-[12.5px] text-muted-foreground">free, full source</dt>
+              <dd className="order-first text-[26px] font-semibold tracking-tight text-foreground">{CATALOG_COUNTS.freeComponents}</dd>
+            </div>
+          </dl>
         </HeroCopy>
       </div>
 
