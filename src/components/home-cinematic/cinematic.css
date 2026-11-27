@@ -199,13 +199,21 @@ html.dark .cx {
   position: relative;
   padding: 1px;
   border-radius: 22px;
+  --cx-angle: 40deg;
   background:
     conic-gradient(from var(--cx-angle), transparent 0deg, transparent 250deg, var(--cx-blue) 290deg, var(--cx-violet) 320deg, var(--cx-pink) 345deg, transparent 360deg),
     var(--cx-hairline);
-  animation: cx-orbit 6s linear infinite;
+  /* The light rests on the edge and travels only while the frame is hovered: animating this property repaints the frame on
+     every frame, which is wasted work for something nobody is pointing at. */
+  animation: cx-orbit 6s linear infinite paused;
+}
+.cx-edge:hover,
+.cx-edge:focus-within {
+  animation-play-state: running;
 }
 @keyframes cx-orbit {
-  to { --cx-angle: 360deg; }
+  from { --cx-angle: 40deg; }
+  to { --cx-angle: 400deg; }
 }
 /* a soft spectrum glow behind a section */
 .cx-horizon {
@@ -361,138 +369,124 @@ html.dark .cx-horizon-glow {
   }
 }
 
-/* ---------- The hero's code editor and the component it renders ---------- */
-/* Light by default; the dark theme swaps the variables. Nothing here animates. */
-.cx-ide {
-  --ide-fill: linear-gradient(#ffffff, #ffffff);
-  --ide-rim: linear-gradient(rgba(20, 20, 50, 0.16), rgba(20, 20, 50, 0.16));
-  --ide-shadow: 0 40px 80px -36px rgba(30, 25, 90, 0.45), 0 3px 10px rgba(20, 20, 50, 0.07);
-  --ide-line: rgba(20, 20, 50, 0.08);
-  --ide-light: rgba(20, 20, 50, 0.14);
-  --ide-tab: rgba(20, 20, 50, 0.45);
-  --ide-tab-hover: rgba(20, 20, 50, 0.75);
-  --ide-tab-on-bg: rgba(20, 20, 50, 0.06);
-  --ide-tab-on: #111114;
-  --ide-modified: #5b7cff;
-  --ide-text: #24242e;
-  --ide-gutter: rgba(20, 20, 50, 0.3);
-  --ide-gutter-on: rgba(20, 20, 50, 0.8);
-  --ide-active: linear-gradient(90deg, rgba(110, 91, 255, 0.1), rgba(110, 91, 255, 0.02) 60%, transparent);
-  --ide-status: rgba(20, 20, 50, 0.5);
-  --ide-ok: #1fa463;
-  --ide-glow: radial-gradient(closest-side, rgba(110, 91, 255, 0.26), rgba(0, 144, 247, 0.1) 60%, transparent);
-  /* sugar-high */
-  --sh-keyword: #8250df;
-  --sh-string: #0a7a3d;
-  --sh-comment: #6b7280;
-  --sh-identifier: #24242e;
-  --sh-sign: #6b6f7a;
-  --sh-class: #0550ae;
-  --sh-property: #953800;
-  --sh-entity: #953800;
-  --sh-jsxliterals: #24242e;
+/* ---------- The hero's lit horizon, soft light and tiles. Nothing here animates. ---------- */
+/* Light that falls from the top corners */
+.cx-bloom {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(closest-side at 18% -8%, rgba(110, 91, 255, 0.2), transparent 70%) 0 0 / 900px 620px no-repeat,
+    radial-gradient(closest-side at 82% -8%, rgba(0, 144, 247, 0.16), transparent 70%) 100% 0 / 760px 560px no-repeat;
 }
-html.dark .cx-ide {
-  --ide-fill: linear-gradient(180deg, #15151d, #0a0a0f);
-  --ide-rim: conic-gradient(from 200deg, rgba(255, 255, 255, 0.85), #6e5bff 18%, rgba(0, 144, 247, 0.25) 38%, rgba(255, 255, 255, 0.06) 55%, rgba(242, 65, 107, 0.7) 80%, rgba(255, 255, 255, 0.85));
-  --ide-shadow: 0 50px 100px -40px rgba(20, 10, 80, 0.7), 0 0 60px -20px rgba(110, 91, 255, 0.35);
-  --ide-line: rgba(255, 255, 255, 0.07);
-  --ide-light: rgba(255, 255, 255, 0.16);
-  --ide-tab: rgba(255, 255, 255, 0.4);
-  --ide-tab-hover: rgba(255, 255, 255, 0.75);
-  --ide-tab-on-bg: rgba(255, 255, 255, 0.08);
-  --ide-tab-on: #ffffff;
-  --ide-modified: #7c9cff;
-  --ide-text: #e6e6eb;
-  --ide-gutter: rgba(255, 255, 255, 0.22);
-  --ide-gutter-on: rgba(255, 255, 255, 0.75);
-  --ide-active: linear-gradient(90deg, rgba(124, 92, 255, 0.16), rgba(124, 92, 255, 0.04) 60%, transparent);
-  --ide-status: rgba(255, 255, 255, 0.42);
-  --ide-ok: #6fe3a0;
-  --ide-glow: radial-gradient(closest-side, rgba(110, 91, 255, 0.34), rgba(0, 144, 247, 0.14) 60%, transparent);
-  --sh-keyword: #c792ea;
-  --sh-string: #c3e88d;
-  --sh-comment: #6b7280;
-  --sh-identifier: #e6e6eb;
-  --sh-sign: #9aa0aa;
-  --sh-class: #82aaff;
-  --sh-property: #ffcb6b;
-  --sh-entity: #f78c6c;
-  --sh-jsxliterals: #e6e6eb;
+html.dark .cx-bloom {
+  background:
+    radial-gradient(closest-side at 18% -8%, rgba(110, 91, 255, 0.28), transparent 70%) 0 0 / 900px 620px no-repeat,
+    radial-gradient(closest-side at 82% -8%, rgba(0, 144, 247, 0.18), transparent 70%) 100% 0 / 760px 560px no-repeat;
 }
-.cx-ide-card {
-  position: relative;
-  z-index: 1;
-  border: 1px solid transparent;
-  background: var(--ide-fill) padding-box, var(--ide-rim) border-box;
-  box-shadow: var(--ide-shadow);
-}
-.cx-ide-bar,
-.cx-ide-status {
-  border-color: var(--ide-line);
-}
-.cx-ide-bar {
-  border-bottom: 1px solid var(--ide-line);
-}
-.cx-ide-status {
-  border-top: 1px solid var(--ide-line);
-  color: var(--ide-status);
-}
-.cx-ide-ok {
-  color: var(--ide-ok);
-}
-.cx-ide-light {
-  width: 10px;
-  height: 10px;
+/* A huge disc whose top edge shows as a curved, lit horizon rising from the bottom of the hero */
+.cx-rim {
+  position: absolute;
+  left: 50%;
+  top: calc(100% - 78px);
+  width: 2400px;
+  height: 2400px;
+  translate: -50% 0;
   border-radius: 50%;
-  background: var(--ide-light);
+  pointer-events: none;
+  background: var(--background);
+  border-top: 1px solid rgba(110, 91, 255, 0.45);
+  box-shadow:
+    0 -2px 20px rgba(110, 91, 255, 0.35),
+    0 -60px 150px -20px rgba(110, 91, 255, 0.3),
+    0 -140px 280px -50px rgba(0, 144, 247, 0.2);
 }
-.cx-ide-tab {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 7px;
-  border-radius: 7px;
-  padding: 5px 10px;
-  font: 12px var(--font-mono, ui-monospace, monospace);
-  color: var(--ide-tab);
-  transition: color 0.15s;
+html.dark .cx-rim {
+  border-top-color: rgba(190, 180, 255, 0.6);
+  box-shadow:
+    0 -2px 22px rgba(150, 130, 255, 0.55),
+    0 -60px 150px -20px rgba(110, 91, 255, 0.65),
+    0 -140px 280px -50px rgba(0, 144, 247, 0.35);
 }
-.cx-ide-tab:hover {
-  color: var(--ide-tab-hover);
+/* Fine film grain, so the gradients don't band */
+.cx-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.045;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .7 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.cx-ide-tab:focus-visible {
-  outline: 2px solid var(--ide-modified);
-  outline-offset: 1px;
+html.dark .cx-grain {
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.cx-ide-tab-on {
-  background: var(--ide-tab-on-bg);
-  color: var(--ide-tab-on);
+/* The tiles: white cards on the light theme, faint glass on the dark one */
+.cx-tile {
+  background: #ffffff;
+  box-shadow: 0 0 0 0.5px rgba(20, 20, 50, 0.1), inset 0 1px 0 #ffffff, 0 24px 50px -28px rgba(30, 25, 100, 0.38);
 }
-.cx-ide-tab-on:hover {
-  color: var(--ide-tab-on);
+html.dark .cx-tile {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+    #0d0d13;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 30px 60px -30px rgba(0, 0, 0, 0.9);
 }
-.cx-ide-modified {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--ide-modified);
+.cx-tile-name {
+  color: rgba(20, 20, 50, 0.45);
 }
-.cx-ide-text {
-  color: var(--ide-text);
+html.dark .cx-tile-name {
+  color: rgba(255, 255, 255, 0.4);
 }
-.cx-ide-gutter {
-  color: var(--ide-gutter);
+.cx-tile-code {
+  background: rgba(20, 20, 50, 0.05);
+  color: #24242e;
 }
-.cx-ide-gutter [data-on] {
-  color: var(--ide-gutter-on);
+html.dark .cx-tile-code {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e6e6eb;
 }
-.cx-ide-active {
-  background: var(--ide-active);
-  border-left: 2px solid var(--cx-violet);
+.cx-tile-prompt {
+  color: rgba(20, 20, 50, 0.4);
 }
-.cx-ide-glow {
-  background: var(--ide-glow);
-  filter: blur(14px);
-  border-radius: 50%;
+html.dark .cx-tile-prompt {
+  color: rgba(255, 255, 255, 0.4);
+}
+.cx-tile-hl {
+  color: #5a3fe0;
+}
+html.dark .cx-tile-hl {
+  color: #a99bff;
+}
+.cx-tile-copy {
+  background: rgba(20, 20, 50, 0.06);
+  color: #24242e;
+  transition: background 0.15s;
+}
+.cx-tile-copy:hover {
+  background: rgba(20, 20, 50, 0.1);
+}
+html.dark .cx-tile-copy {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e9e9f1;
+}
+html.dark .cx-tile-copy:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+.cx-stats {
+  border-top: 1px solid var(--cx-hairline);
+}
+
+/* The hero's dotted globe: a big planet whose left edge curves in behind the tiles, fading out toward the headline.
+   Drawn once, never animated. */
+.cx-globe {
+  position: absolute;
+  right: -450px;
+  top: 50%;
+  translate: 0 -50%;
+  max-width: none;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 24%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 24%);
 }
