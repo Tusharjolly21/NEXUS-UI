@@ -10,7 +10,7 @@
  * bundler cut one chunk per module, and a page loads only the previews it shows.
  *
  * How: follows the barrel's `export * from` lines with the TypeScript parser, the same way build-home-snapshot.mjs does.
- * Previews written in component-previews-core.tsx load from that file; the rest from their own module.
+ * Each preview loads from the one module it lives in (src/registry/core/* for the ones that used to share one file).
  * Run `npm run previews:build` after adding a preview module or export (the build does it for you); `--check` fails if
  * the committed files are stale. A name missing from the map still works: the loader falls back to the barrel.
  *

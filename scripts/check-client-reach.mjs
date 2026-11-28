@@ -30,6 +30,8 @@ const GUARDED = [
   "src/app/(site)/page.tsx",
   "src/app/(static)/home-static/page.tsx",
   "src/app/(static)/home-static-in/page.tsx",
+  "src/app/(static)/components-static/page.tsx",
+  "src/app/(static)/components-static-in/page.tsx",
 ];
 const REGISTRY = "src/registry/component-previews.tsx";
 

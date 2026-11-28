@@ -1,0 +1,27 @@
+"use client";
+
+// Moved out of playgrounds.tsx so a component's page loads only its own playground.
+import { PrintStyles } from "@/components/print-styles";
+import type { Playground } from "../playground-types";
+
+export const playground: Playground = {
+    lightOnly: true,
+    componentName: "PrintStyles",
+    importPath: "@/components/print-styles",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "select", prop: "defaultStyle", label: "Starting style", options: ["original", "mac", "pocket", "newsprint", "riso"], defaultValue: "newsprint" },
+      { kind: "toggle", prop: "enableSound", label: "Sound", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto flex w-full max-w-[460px] justify-center">
+        <PrintStyles
+          key={`${String(v.autoplay)}-${String(v.defaultStyle)}`}
+          autoplay={v.autoplay as boolean}
+          defaultStyle={v.defaultStyle as "original" | "mac" | "pocket" | "newsprint" | "riso"}
+          enableSound={v.enableSound as boolean}
+        />
+      </div>
+    ),
+  };
