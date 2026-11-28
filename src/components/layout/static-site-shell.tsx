@@ -6,6 +6,8 @@ import { ScrollToTop } from "@/components/site/scroll-to-top";
 import { ProAccessProvider } from "@/components/pro/pro-access";
 import { preload } from "react-dom";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
+import type { PriceRegion } from "@/lib/pricing";
+import { pricingForRegion } from "@/lib/region";
 
 /**
  * SiteShell for a visitor who is known to be signed out, with nothing read per request, so the
@@ -14,13 +16,13 @@ import { CATALOG_COUNTS } from "@/lib/catalog/counts";
  * It is only reached through the rewrite in next.config.mjs, which sends the homepage here when the
  * request carries no sign-in cookie and no "launch banner closed" cookie. Anyone with either cookie
  * gets the regular SiteShell, so a signed-in visitor sees exactly what they always did. What this
- * renders is what SiteShell renders for that visitor: free plan, banner open. Keep the markup in sync
- * with SiteShell (src/components/layout/site-shell.tsx).
+ * renders is what SiteShell renders for that visitor: free plan, banner open, and the prices of the visitor's region
+ * (the upgrade dialog quotes them). Keep the markup in sync with SiteShell (src/components/layout/site-shell.tsx).
  */
-export function StaticSiteShell({ children }: { children: React.ReactNode }) {
+export function StaticSiteShell({ children, region = "global" }: { children: React.ReactNode; region?: PriceRegion }) {
   preload("/api/slots", { as: "fetch", crossOrigin: "anonymous" });
   return (
-    <ProAccessProvider isPro={false} plan="free" proCount={CATALOG_COUNTS.proComponents}>
+    <ProAccessProvider isPro={false} plan="free" proCount={CATALOG_COUNTS.proComponents} pricing={pricingForRegion(region)}>
       <div className="flex min-h-dvh flex-col">
         <a
           href="#site-main"

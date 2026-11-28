@@ -1,0 +1,450 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Check, Minus, Plus } from "lucide-react";
+import { CommentDeck } from "@/components/pricing/comment-deck";
+import { MemberStack } from "@/components/pricing/member-stack";
+import { PlanAction, PlanNotice, PlanTag } from "@/components/pricing/plan-action";
+import { IndiaDiscountBadge } from "@/components/pricing/india-discount-badge";
+import { TwentyFirstMilestone } from "@/components/home/twenty-first-milestone";
+import { PillLink, RainbowWord } from "@/components/site";
+import { BrandMark, type MarkName } from "@/components/mcp/brand-marks";
+import { blocksManifest } from "@/lib/catalog/blocks-manifest";
+import { CATALOG_COUNTS } from "@/lib/catalog/counts";
+import { createMetadata, siteConfig } from "@/lib/seo";
+import { cn } from "@/lib/utils";
+import { SaleBadge } from "@/components/pricing/sale-badge";
+import { GLOBAL_PRICING, PRICES, type DisplayPricing } from "@/lib/pricing";
+
+const { components, freeComponents, proComponents, templates, freeTemplates, blocks, videos, freeVideos, icons, freeIcons, proIcons } = CATALOG_COUNTS;
+const freeBlocks = blocksManifest.filter((b) => !b.premium).length;
+
+export const metadata: Metadata = {
+  ...createMetadata(
+    {
+      title: { absolute: "Nexus UI Pricing: Yearly Pro or Lifetime Access" },
+      description: `${freeComponents} Nexus UI components are free. Pro (${GLOBAL_PRICING.pro} a year) or All-Access (${GLOBAL_PRICING.allAccess} once) unlocks every component, template and block.`,
+      alternates: { canonical: "/pricing" },
+    },
+    { title: "Free to start. Pay once for everything.", kind: "Pricing" },
+  ),
+};
+
+type Plan = {
+  name: string;
+  price: string;
+  term: string;
+  pitch: string;
+  features: string[];
+  featured?: boolean;
+  discount?: number | null;
+  original?: string | null;
+  was?: string | null;
+  save?: number | null;
+};
+
+function buildPlans(pricing: DisplayPricing): Plan[] {
+  return [
+    {
+      name: "Starter",
+      price: pricing.free,
+      term: "free forever",
+      pitch: "The free components, free to use anywhere.",
+      features: [
+        `${freeComponents} components with full source`,
+        `${freeBlocks} of the ${blocks} section blocks`,
+        `${freeTemplates} full templates, plus a first look at all ${templates}`,
+        `${freeVideos} of the ${videos} videos with their prompt and source`,
+        `${freeIcons} animated icons, with their sounds`,
+        "Commercial and client projects",
+        "Install with the shadcn CLI",
+        "MCP server for your coding agent, free components",
+      ],
+    },
+    {
+      name: "Pro",
+      price: pricing.pro,
+      term: "per year",
+      pitch: "Everything Nexus UI makes, renewed yearly.",
+      featured: true,
+      discount: pricing.proDiscount,
+      original: pricing.proOriginal,
+      was: pricing.proWas,
+      save: pricing.proSave,
+      features: [
+        "Everything in Starter",
+        `All ${components} components, including ${proComponents} Pro`,
+        `Full source of all ${templates} templates`,
+        `All ${blocks} section blocks`,
+        `All ${videos} videos: prompt, source, live editing and render script`,
+        `All ${icons} animated icons: ${proIcons} more, with their sounds`,
+        "MCP server: Claude Code, Cursor and Codex add any component for you",
+        "Every new template, block and component as it ships",
+        "Request components, blocks and templates",
+        "Priority support, 24 to 48 hours",
+        "Cancel anytime",
+      ],
+    },
+    {
+      name: "All-Access",
+      price: pricing.allAccess,
+      discount: pricing.allAccessDiscount,
+      original: pricing.allAccessOriginal,
+      was: pricing.allAccessWas,
+      save: pricing.allAccessSave,
+      term: "one payment",
+      pitch: "Exactly what Pro unlocks, paid once and yours for good.",
+      features: [
+        "Everything in Pro",
+        "Every future release, for life",
+        "Requests and priority support, for life",
+        "One payment, never renews",
+      ],
+    },
+  ];
+}
+
+/** The stack every component is written in, shown under the title. */
+const STACK: { mark: MarkName; name: string }[] = [
+  { mark: "react", name: "React" },
+  { mark: "nextjs", name: "Next.js" },
+  { mark: "typescript", name: "TypeScript" },
+  { mark: "tailwind", name: "Tailwind CSS" },
+  { mark: "framer", name: "Framer Motion" },
+];
+
+/** The coding agents the MCP server works with. */
+const AGENTS: { mark: MarkName; bg: string }[] = [
+  { mark: "claude", bg: "bg-[#fbeee8]" },
+  { mark: "cursor", bg: "bg-[#1d1d1f] text-white" },
+  { mark: "vscode", bg: "bg-[#e8f3fc]" },
+  { mark: "openai", bg: "bg-[#f1f1f3]" },
+];
+
+type Cell = string | boolean;
+const COMPARE: [string, Cell, Cell, Cell][] = [
+  ["Animated components", `${freeComponents} free`, `All ${components}`, `All ${components}`],
+  ["Section blocks", `${freeBlocks} free`, `All ${blocks}`, `All ${blocks}`],
+  ["Template source", "Preview only", true, true],
+  ["Videos", `${freeVideos} free`, `All ${videos}`, `All ${videos}`],
+  ["Animated icons and sounds", `${freeIcons} free`, `All ${icons}`, `All ${icons}`],
+  ["MCP server for coding agents", "Free components", `All ${components}`, `All ${components}`],
+  ["Commercial and client use", true, true, true],
+  ["New templates, blocks and components", "Free items", true, true],
+  ["Requests", false, true, true],
+  ["Support", "Community", "Priority", "Priority"],
+  ["Access", "Forever", "While subscribed", "Forever"],
+  ["Billing", "Free", "Yearly, cancel anytime", "Once"],
+];
+
+function buildFaq(pricing: DisplayPricing) {
+  return [
+    {
+      q: "Are the components free?",
+      a: `${freeComponents} of the ${components} are free, with full source, for personal, commercial and client projects. Pro unlocks the other ${proComponents}: you can preview every one of them, but their source, install and playground come with Pro, along with the template source and the premium blocks.`,
+    },
+    {
+      q: "What can I use the components for?",
+      a: "Personal, commercial and client projects, as many as you like, with no credit needed. What you can't do is resell or hand out the source on its own, put it in a UI kit, library or template that competes with Nexus UI, or publish premium code in a public repository. The terms have the exact wording.",
+    },
+    {
+      q: "Can Claude Code or Cursor install them for me?",
+      a: "Yes, two ways. Connect the Nexus UI MCP server and your agent can search the library and add a component by name; or, since Nexus UI is a shadcn registry, any agent that can run a shell installs one with a single command. Free components need no key; Pro components need your API key. The MCP page has the setup for Claude Code, Cursor, VS Code and Codex.",
+    },
+    {
+      q: "What's the difference between Pro and All-Access?",
+      a: `Only how you pay. Both unlock every template, every block, everything we release next, requests and priority support. Pro is ${pricing.pro} a year and renews until you cancel. All-Access is ${pricing.allAccess} once and never expires.`,
+    },
+    {
+      q: "What happens if I cancel Pro?",
+      a: "You keep access until the end of the year you've paid for, and you keep using whatever you built. After that you can't download premium items or get updates unless you subscribe again.",
+    },
+    {
+      q: "Can I buy a single template?",
+      a: `Templates aren't sold one by one. ${freeTemplates} are free; Pro unlocks all ${templates}, plus everything we add later, for ${pricing.pro} a year, or ${pricing.allAccess} once for lifetime.`,
+    },
+    {
+      q: "Can I request a component or template?",
+      a: "Yes. Pro and All-Access members can send requests from the contact page. The most-asked-for ones get built next, and both plans get them as they ship.",
+    },
+    {
+      q: "Can I upgrade from Pro to All-Access?",
+      a: "Yes, any time. Buy All-Access, then cancel Pro from Billing or email us and we'll stop the renewal for you.",
+    },
+    {
+      q: "Are taxes included in the price?",
+      a: `${pricing.region === "india" ? "Any GST due is shown at checkout, with the full total, before you pay." : `No. ${pricing.pro} a year and ${pricing.allAccess} once are the prices before tax. Checkout adds GST, VAT or sales tax where your country requires it and shows the full total before you pay.`} Payments are handled by Dodo Payments, our merchant of record, who collect and remit the tax. In some countries you can pay in your local currency.`,
+    },
+    {
+      q: "Can I get a refund?",
+      a: "All-Access: a full refund if you ask within 7 days. Pro: if something doesn't work as described, write within 7 days and we'll fix it or refund you.",
+    },
+    {
+      q: "What comes with a video?",
+      a: `Every video plays in your browser with its own soundtrack. ${freeVideos} of the ${videos} come with everything: the build prompt, the React source, live editing of every word and colour, and a script that renders your edit to MP4. Pro unlocks the same for the rest.`,
+    },
+    {
+      q: "Are the animated icons free?",
+      a: `${freeIcons} of the ${icons} are free, with their sounds, for personal, commercial and client projects, with no sign-in. The other ${proIcons} are Pro: you can preview and play every one of them, but their code and sound come with Pro. The icon engine, the sound engine and the sound guide are free.`,
+    },
+    {
+      q: "How do I get the code after paying?",
+      a: "Sign in with the same email. Pro components show their code and playground right on their pages, every template page gets a Download source button, and Pro components and premium blocks install with the shadcn CLI using your API key.",
+    },
+  ];
+}
+
+// Structured data stays in USD whatever the visitor's region, so search results are consistent.
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: buildFaq(GLOBAL_PRICING).map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Nexus UI",
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Web",
+    url: `${siteConfig.url}/pricing`,
+    offers: [
+      { "@type": "Offer", name: "Starter", price: "0", priceCurrency: "USD" },
+      { "@type": "Offer", name: "Pro", price: String(PRICES.pro), priceCurrency: "USD" },
+      { "@type": "Offer", name: "All-Access", price: String(PRICES.allAccess), priceCurrency: "USD" },
+    ],
+  },
+];
+
+function CompareCell({ value }: { value: Cell }) {
+  if (value === true) return <Check className="mx-auto size-5 text-[#34c759]" aria-label="Included" />;
+  if (value === false) return <Minus className="mx-auto size-4 text-muted-foreground/60" aria-label="Not included" />;
+  return <span>{value}</span>;
+}
+
+/** The page for the prices it is given (see the regular route and src/app/(cached)/c/[region]). */
+export async function PricingPageContent({ pricing }: { pricing: DisplayPricing }) {
+  const plans = buildPlans(pricing);
+  const faq = buildFaq(pricing);
+
+  return (
+    <>
+      {jsonLd.map((d, i) => (
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(d) }} />
+      ))}
+
+      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-14 pt-[136px]">
+        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
+        <div className="relative mx-auto max-w-[1152px] text-center">
+          <h1 className="pg-display mx-auto max-w-[900px] text-[clamp(48px,8vw,84px)] text-foreground">
+            Free to start.
+            <br />
+            Pay once for <RainbowWord>everything</RainbowWord>.
+          </h1>
+          <p className="mx-auto mt-6 max-w-[600px] text-[19px] leading-[1.55] text-muted-foreground">
+            {freeComponents} components and {freeTemplates} templates are free. One plan unlocks every Pro component, all {templates} templates, every
+            block and the MCP server for your coding agent.
+          </p>
+          <ul aria-label="Built with" className="mt-7 flex flex-wrap items-center justify-center gap-2">
+            {STACK.map((t) => (
+              <li key={t.mark} title={t.name} className="pg-glass grid size-10 place-items-center rounded-xl bg-card">
+                <BrandMark name={t.mark} className="size-5" title={t.name} />
+              </li>
+            ))}
+            <li aria-hidden className="mx-1 hidden h-6 w-px bg-border sm:block" />
+            <li>
+              <Link
+                href="/mcp"
+                className="pg-glass group inline-flex items-center gap-2.5 rounded-full bg-card py-1.5 pl-1.5 pr-4 text-[14px] font-medium text-foreground transition-colors hover:bg-secondary"
+              >
+                <span className="flex items-center">
+                  {AGENTS.map((a, i) => (
+                    <span key={a.mark} className={cn("grid size-7 place-items-center rounded-full ring-2 ring-card", a.bg, i ? "-ml-2" : "")}>
+                      <BrandMark name={a.mark} className="size-3.5" />
+                    </span>
+                  ))}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <BrandMark name="mcp" className="size-3.5" />
+                  MCP server included
+                </span>
+                <span aria-hidden className="text-muted-foreground transition-transform group-hover:translate-x-0.5">›</span>
+              </Link>
+            </li>
+          </ul>
+          <PlanNotice />
+        </div>
+      </section>
+
+      <section aria-label="Plans" className="px-4 pb-24">
+        <div className="mx-auto max-w-[1152px]">
+          <MemberStack plan="all" className="mb-9" />
+          <div className="grid gap-5 lg:grid-cols-3">
+            {plans.map((p) => (
+              <article
+                key={p.name}
+                className={cn("pg-float relative flex flex-col rounded-tile p-7", p.featured ? "bg-card ring-2 ring-action" : "bg-card")}
+              >
+                {p.name !== "Starter" ? <PlanTag tier={p.name === "Pro" ? "pro" : "all-access"} featured={!!p.featured} /> : null}
+                <h2 className="text-[17px] font-semibold text-foreground">{p.name}</h2>
+                <p className="mt-3 flex items-baseline gap-2">
+                  <span className="text-[48px] font-semibold leading-none tracking-[-0.035em] text-foreground">{p.price}</span>
+                  <span className="text-[15px] text-muted-foreground">{p.term}</span>
+                </p>
+                {p.discount ? <IndiaDiscountBadge percent={p.discount} original={p.original} className="mt-3" /> : null}
+                {p.was && p.save ? <SaleBadge was={p.was} save={p.save} className="mt-3" /> : null}
+                {/* keeps the Starter card level with the two that carry a sale line */}
+                {p.name === "Starter" && pricing.proWas ? <div aria-hidden className="mt-3 h-[28px]" /> : null}
+                <p className="mt-3 text-[15px] text-muted-foreground">{p.pitch}</p>
+                <ul className="mt-6 space-y-3">
+                  {p.features.map((f) => (
+                    <li key={f} className="flex gap-2.5 text-[15px] text-foreground">
+                      <Check className="mt-0.5 size-4 shrink-0 text-action" aria-hidden />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-auto pt-8">
+                  {p.name === "Starter" ? (
+                    <PillLink href="/components" variant="white" className="w-full">
+                      Browse free components
+                    </PillLink>
+                  ) : p.name === "Pro" ? (
+                    <PlanAction tier="pro">Get Pro</PlanAction>
+                  ) : (
+                    <PlanAction tier="all-access" variant="cta">
+                      Get All-Access
+                    </PlanAction>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+          <p className="mx-auto mt-6 max-w-[640px] text-center text-[14px] leading-[1.55] text-muted-foreground">
+            {pricing.region === "india"
+              ? "Prices are in Indian rupees and paid with UPI. Any GST due is shown at checkout before you pay."
+              : "Prices are in US dollars and don't include tax. GST, VAT or sales tax is added at checkout based on your country, so the total can be higher than the price shown. In some countries you can pay in your local currency."}
+          </p>
+          <p className="mt-4 text-center text-[15px] text-muted-foreground">
+            Need something we don&apos;t have yet? Both plans include requests.{" "}
+            <Link href="/contact" className="text-link hover:underline hover:underline-offset-4">
+              Request a component ›
+            </Link>
+          </p>
+        </div>
+      </section>
+
+      <section aria-labelledby="agents" className="px-4 pb-24">
+        <div className="mx-auto max-w-[1152px] rounded-tile bg-tint-violet px-7 py-9 sm:px-10 md:flex md:items-center md:justify-between md:gap-10">
+          <div className="min-w-0">
+            <h2 id="agents" className="pg-display text-[clamp(28px,3.6vw,38px)] leading-[1.06] text-foreground">
+              Your coding agent can install them.
+            </h2>
+            <p className="mt-3 max-w-[620px] text-[16px] leading-[1.55] text-body">
+              Connect the Nexus UI MCP server to Claude Code, Cursor, VS Code or Codex and ask for a component by what it does: your agent finds
+              it and adds it to your project. Free components need no key; Pro components come through with your API key.
+            </p>
+          </div>
+          <div className="mt-6 flex shrink-0 flex-wrap gap-3 md:mt-0">
+            <PillLink href="/mcp" variant="white">
+              Connect the MCP
+            </PillLink>
+            <PillLink href="/claude-code" variant="white">
+              Use the shadcn CLI
+            </PillLink>
+          </div>
+        </div>
+      </section>
+
+      {/* Where the components are seen: our 21st.dev numbers */}
+      <TwentyFirstMilestone />
+
+      {/* What people say, as a pull quote and a deck of comments */}
+      <section className="overflow-hidden px-4 pb-28">
+        <div className="mx-auto max-w-[1152px]">
+          <CommentDeck allAccessPrice={pricing.allAccess} />
+        </div>
+      </section>
+
+      <section aria-labelledby="compare" className="px-4 pb-24">
+        <div className="mx-auto max-w-[1152px]">
+          <h2 id="compare" className="pg-display text-[clamp(36px,5vw,52px)] leading-[1.02] text-foreground">
+            Compare the plans
+          </h2>
+          <div className="pg-float mt-8 overflow-x-auto rounded-tile bg-card">
+            <table className="w-full min-w-[640px] text-[15px]">
+              <thead>
+                <tr className="border-b border-border/70 text-left">
+                  <th scope="col" className="px-6 py-4 font-medium text-muted-foreground">
+                    What you get
+                  </th>
+                  {plans.map((p) => (
+                    <th key={p.name} scope="col" className="w-[22%] px-6 py-4 text-center font-semibold text-foreground">
+                      {p.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARE.map(([label, ...cells]) => (
+                  <tr key={label} className="border-b border-border/50 last:border-0">
+                    <th scope="row" className="px-6 py-4 text-left font-medium text-foreground">
+                      {label}
+                    </th>
+                    {cells.map((c, i) => (
+                      <td key={i} className="px-6 py-4 text-center text-body">
+                        <CompareCell value={c} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-4 pb-24 sm:pb-28">
+        <div className="mx-auto grid max-w-[1152px] gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+          <div>
+            <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">Before you buy</h2>
+            <p className="mt-4 text-[18px] text-muted-foreground">
+              Something else?{" "}
+              <Link href="/contact" className="text-foreground underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground">
+                Write to us
+              </Link>
+              . The details are in the{" "}
+              <Link href="/terms" className="text-foreground underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground">
+                terms
+              </Link>
+              .
+            </p>
+          </div>
+          <div className="border-t border-border">
+            {faq.map((f) => (
+              <details key={f.q} className="group border-b border-border">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[17px] font-semibold tracking-[-0.3px] text-foreground [&::-webkit-details-marker]:hidden">
+                  {f.q}
+                  <Plus className="size-5 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-45 motion-reduce:transition-none" aria-hidden />
+                </summary>
+                <p className="max-w-[620px] pb-5 text-[15.5px] leading-relaxed text-muted-foreground">{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-4 pb-24">
+        <div className="relative mx-auto max-w-[1152px] overflow-hidden rounded-tile bg-[linear-gradient(to_right_bottom,var(--tint-peach),var(--tint-violet)_50%,var(--tint-sky))] px-6 py-24 text-center sm:py-28">
+          <h2 className="pg-display mx-auto max-w-[720px] text-[clamp(40px,7vw,64px)] leading-[1.02] text-foreground">
+            Start with the component you need today.
+          </h2>
+          <div className="mt-9">
+            <PillLink href="/components" variant="cta" className="h-14 px-8 text-[16px]">
+              Browse components
+            </PillLink>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

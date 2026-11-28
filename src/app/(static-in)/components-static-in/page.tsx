@@ -1,4 +1,3 @@
-import { ComponentsJsonLd } from "@/components/listing/components-jsonld";
 import { ComponentsPageContent } from "@/components/listing/components-page-content";
 import { metadata as componentsMetadata } from "@/app/(site)/components/page";
 import { pricingForRegion } from "@/lib/region";
@@ -8,10 +7,5 @@ export const metadata = componentsMetadata;
 export const revalidate = 3600;
 
 export default function ComponentsStaticIn() {
-  return (
-    <>
-      <ComponentsJsonLd />
-      <ComponentsPageContent pricing={pricingForRegion("india")} />
-    </>
-  );
+  return <ComponentsPageContent pricing={pricingForRegion("india")} />;
 }

@@ -26,12 +26,15 @@ process.chdir(root);
 /** Pages and layouts that must never ship the registry. */
 const GUARDED = [
   "src/app/(site)/layout.tsx",
-  "src/app/(static)/layout.tsx",
+  "src/app/(static)/components-static/layout.tsx",
+  "src/app/(static-in)/components-static-in/layout.tsx",
   "src/app/(site)/page.tsx",
   "src/app/(static)/home-static/page.tsx",
-  "src/app/(static)/home-static-in/page.tsx",
+  "src/app/(static-in)/home-static-in/page.tsx",
   "src/app/(static)/components-static/page.tsx",
-  "src/app/(static)/components-static-in/page.tsx",
+  "src/app/(static-in)/components-static-in/page.tsx",
+  "src/app/(static)/components-static/[slug]/page.tsx",
+  "src/app/(static-in)/components-static-in/[slug]/page.tsx",
 ];
 const REGISTRY = "src/registry/component-previews.tsx";
 

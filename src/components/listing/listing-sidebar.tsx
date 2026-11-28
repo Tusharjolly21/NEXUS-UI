@@ -3,7 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useCanonicalPathname } from "@/components/layout/canonical-pathname";
 import { ChevronDown, ChevronRight, Gift, LayoutGrid, Lock, Search, Sparkles, Volume2, X } from "lucide-react";
 import { useUrlParam } from "@/components/gallery/use-url-param";
 import { useProAccess } from "@/components/pro/pro-access";
@@ -141,7 +141,7 @@ function RailBody({
   /** Start with every group folded but the one you are in (the phone sheet, where the list would be very long). */
   foldOthers?: boolean;
 }) {
-  const pathname = usePathname();
+  const pathname = useCanonicalPathname();
   const { isPro } = useProAccess();
   const home = LISTING_HOME[title];
   const one = home?.one ?? "item";
@@ -366,7 +366,7 @@ export function ListingSidebar({
 }) {
   const list = React.useRef<HTMLDivElement>(null);
   const search = React.useRef<HTMLInputElement>(null);
-  const pathname = usePathname();
+  const pathname = useCanonicalPathname();
   React.useEffect(() => {
     const box = list.current;
     const here = box?.querySelector<HTMLElement>('[aria-current="page"]');
@@ -457,7 +457,7 @@ export function ListingBrowse({
   const bar = React.useRef<HTMLButtonElement>(null);
   const [barGone, setBarGone] = React.useState(false);
   const mounted = React.useSyncExternalStore(subscribeNever, () => true, () => false);
-  const pathname = usePathname();
+  const pathname = useCanonicalPathname();
   const here = groupOf(groups, pathname);
   const item = here?.items.find((i) => i.href === pathname);
 

@@ -1,0 +1,256 @@
+import { notFound, permanentRedirect } from "next/navigation";
+import type { Metadata } from "next";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import {
+  getLibraryComponent,
+  getPreviewExportName,
+  libraryComponents,
+} from "@/lib/catalog/library-components";
+import { createMetadata, shortDescription, siteConfig } from "@/lib/seo";
+import { ogShot } from "@/lib/og-shot";
+import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
+import { COMPONENT_FAQ } from "@/lib/catalog/component-faq";
+import { soundFaq, soundFor, typesFor } from "@/lib/catalog/component-sounds";
+import { getGuidesForComponent } from "@/lib/blog";
+import { getComponentCategoryHref, getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
+import { promptIdsFor } from "@/lib/build-prompts";
+import { getProTeaser } from "@/lib/registry-teaser";
+import { ComponentDetailPageClient } from "@/components/library/component-detail-page-client";
+import { allGalleryItems, hasBuildPrompt } from "@/lib/catalog/gallery-items";
+import { sessionCanAccessComponent, sessionHasPro } from "@/lib/component-access";
+
+type RegistryInstallInfo = {
+  dependencies?: string[];
+  files?: Array<{ target?: string; content?: string }>;
+};
+
+function toPascalCase(value: string) {
+  return value
+    .replace(/[^a-zA-Z0-9]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join("");
+}
+
+function getRegistryImport(
+  registryName: string,
+  componentName: string,
+  files: NonNullable<RegistryInstallInfo["files"]>,
+) {
+  const source = files.map((file) => file.content ?? "").join("\n");
+  const candidates = [
+    ...source.matchAll(/export\s+(?:default\s+)?(?:function|const|class)\s+([A-Za-z0-9_]+)/g),
+  ].map((match) => match[1]);
+  const expectedName = toPascalCase(componentName);
+  const exportName =
+    candidates.find((candidate) => candidate === expectedName) ??
+    candidates.find((candidate) => !/^[A-Z0-9_]+$/.test(candidate));
+
+  if (!exportName) return undefined;
+
+  const hasRootEntry = files.some(
+    (file) =>
+      file.target === `components/${registryName}.tsx` ||
+      file.target === `components/${registryName}/index.ts`,
+  );
+  const exportFile = files.find((file) => file.content?.includes(`export function ${exportName}`));
+  const importTarget = hasRootEntry
+    ? registryName
+    : exportFile?.target
+        ?.replace(/^components\//, "")
+        .replace(/\.(tsx|ts)$/, "") ?? registryName;
+
+  return `import { ${exportName} } from "@/components/${importTarget}";`;
+}
+
+async function getRegistryInstallInfo(
+  registryName: string,
+  componentName: string,
+  fallbackDependencies: string[],
+) {
+  try {
+    const contents = await readFile(
+      path.join(process.cwd(), ".generated", "registry", `${registryName}.json`),
+      "utf8",
+    );
+    const registryItem = JSON.parse(contents) as RegistryInstallInfo;
+
+    return {
+      dependencies: registryItem.dependencies ?? fallbackDependencies,
+      files: (registryItem.files ?? [])
+        .map((file) => file.target)
+        .filter((target): target is string => Boolean(target)),
+      registryImport: getRegistryImport(registryName, componentName, registryItem.files ?? []),
+    };
+  } catch {
+    return {
+      dependencies: fallbackDependencies,
+      files: [`components/${registryName}.tsx`],
+      registryImport: undefined,
+    };
+  }
+}
+
+/** JSON for a <script> tag: escape "<" so text can never close the tag early. */
+function jsonLdSafe(value: unknown) {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
+/** The page's metadata for a component, shared by the regular route and the cached copies (src/app/(static)). */
+export async function componentDetailMetadata(slug: string): Promise<Metadata> {
+  const item = getLibraryComponent(slug);
+  if (!item) return {};
+  const seo = COMPONENT_SEO[item.slug];
+  return createMetadata(
+    {
+      title: seo?.title ?? `${item.name} — Animated React Component`,
+      description: seo?.description ?? shortDescription(item.description),
+      openGraph: { title: `${item.name} · ${siteConfig.siteName}` },
+      alternates: { canonical: `/components/${item.slug}` },
+    },
+    { title: item.name, pro: item.premium, shot: ogShot("components", item.slug) },
+  );
+}
+
+/** The slugs of the components people look at most, which the cached copies build ahead of time (the rest build on first visit). */
+export function popularComponentSlugs(count: number): string[] {
+  return [...libraryComponents].sort((a, b) => b.trendingScore - a.trendingScore).slice(0, count).map((c) => c.slug);
+}
+
+/**
+ * A component's page. `signedOut` is for the cached copies, which are only ever served to visitors with no sign-in cookie:
+ * they have no Pro access, so a Pro component is locked and a free one is open, without reading the request. The regular
+ * route reads the visitor's session instead.
+ */
+export async function ComponentDetailContent({ slug, signedOut }: { slug: string; signedOut: boolean }) {
+  const item = getLibraryComponent(slug);
+  if (!item) notFound();
+  // Registry CLI aliases (e.g. gooey-input) resolve here too — send them to the one canonical URL.
+  if (item.slug !== slug) permanentRedirect(`/components/${item.slug}`);
+
+  const isPremium = signedOut ? false : await sessionHasPro();
+  // Pro code never reaches a browser without access: a locked page gets no source or usage code.
+  const locked = signedOut ? item.premium : !(await sessionCanAccessComponent(item.slug, item.premium));
+  const registryName = item.registryCliName ?? item.slug;
+  const installInfo = await getRegistryInstallInfo(registryName, item.name, item.dependencies);
+  // A locked Pro page shows the plain-English note from the top of the source (prose only, no code), so the idea is visible before the purchase.
+  const teaser = locked && item.premium ? await getProTeaser(registryName) : undefined;
+
+  const softwareJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    name: item.name,
+    description: item.description,
+    programmingLanguage: "TypeScript",
+    runtimePlatform: "Next.js",
+    url: `${siteConfig.url}/components/${slug}`,
+    isAccessibleForFree: !item.premium,
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: siteConfig.url },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Components",
+        item: `${siteConfig.url}/components`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: getComponentCategoryLabel(item.categorySlug),
+        item: `${siteConfig.url}${getComponentCategoryHref(item.categorySlug)}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: item.name,
+        item: `${siteConfig.url}/components/${item.slug}`,
+      },
+    ],
+  };
+
+  const soundQ = soundFaq(item.slug);
+  const faq = [...(COMPONENT_FAQ[item.slug] ?? []), ...(soundQ ? [soundQ] : [])];
+  const faqJsonLd = faq.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faq.map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+      }
+    : null;
+
+  const galleryItems = allGalleryItems();
+  const self = galleryItems.find((g) => g.slug === slug);
+  const related = self ? galleryItems.filter((g) => g.group === self.group && g.slug !== slug).slice(0, 4) : [];
+
+  // Free pages offer a few real Pro components from the same category (or the most popular overall).
+  const popularPro = libraryComponents.filter((c) => c.premium && c.slug !== item.slug).sort((a, b) => b.trendingScore - a.trendingScore);
+  const proPicks = (item.premium
+    ? []
+    : [...popularPro.filter((c) => c.categorySlug === item.categorySlug), ...popularPro]
+        .filter((c, i, all) => all.findIndex((x) => x.slug === c.slug) === i)
+        .slice(0, 3)
+  ).map((c) => ({ slug: c.slug, name: c.name }));
+
+  const variantPrompts =
+    item.previewSections && item.previewSections.length > 1
+      ? await promptIdsFor(item.slug, item.previewSections.map((s, i) => s.title ?? `${item.name}, variant ${i + 1}`))
+      : [];
+
+  const serializedPreviewSections = item.previewSections?.map((s) => ({
+    title: s.title,
+    reactSource: locked ? "" : s.reactSource,
+    previewExportName: getPreviewExportName(s.Preview),
+  }));
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      {faqJsonLd ? (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSafe(faqJsonLd) }} />
+      ) : null}
+      <ComponentDetailPageClient
+        slug={slug}
+        isPremium={isPremium}
+        name={item.name}
+        description={item.description}
+        categorySlug={item.categorySlug}
+        animationKinds={item.animationKinds}
+        tags={item.tags}
+        premium={item.premium}
+        registryCliName={item.registryCliName}
+        dependencies={installInfo.dependencies}
+        installedFiles={installInfo.files}
+        registryImport={installInfo.registryImport}
+        reactSource={locked ? undefined : item.reactSource}
+        locked={locked}
+        hasPrompt={hasBuildPrompt(item.slug)}
+        sound={soundFor(item.slug)}
+        typing={typesFor(item.slug)}
+        variantPrompts={variantPrompts}
+        props={item.props}
+        previewExportName={getPreviewExportName(item.Preview)}
+        serializedPreviewSections={serializedPreviewSections}
+        tint={self?.tint}
+        related={related}
+        faq={faq}
+        guides={getGuidesForComponent(item.slug)}
+        proPicks={proPicks}
+        teaser={teaser}
+      />
+    </>
+  );
+}
