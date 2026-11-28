@@ -2,11 +2,11 @@
 
 import * as React from "react";
 
-export type PieceId = "card" | "globe" | "avatars" | "scenes" | "apply" | "dictate";
+export type PieceId = "glyph" | "globe" | "avatars" | "scenes" | "apply" | "dictate";
 
 /** Two columns, each a stack of whole components with the same gap between them. */
 const COLUMNS: PieceId[][] = [
-  ["card", "globe", "avatars"],
+  ["glyph", "globe", "avatars"],
   ["scenes", "apply", "dictate"],
 ];
 
