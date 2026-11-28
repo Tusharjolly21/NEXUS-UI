@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import * as Previews from "@/registry/component-previews";
+import * as Previews from "@/registry/preview-proxies";
 import { blocksManifest, type BlockCategory, type BlockManifestEntry } from "./blocks-manifest";
 
 export type { BlockCategory, BlockManifestEntry };

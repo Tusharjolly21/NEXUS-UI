@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { capPixelRatio } from "./pixel-ratio-cap";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { Lock, LockOpen, Search, Sparkles, X } from "lucide-react";
@@ -218,6 +219,10 @@ export function ComponentGallery({
   });
   const shown = !paged ? matches.slice(0, limit) : matches.slice(0, infinite.count);
   const openItem = openSlug ? (items.find((i) => i.slug === openSlug) ?? null) : null;
+  // While the wall of tiles is what you are looking at, previews draw at a capped pixel ratio (see pixel-ratio-cap.ts);
+  // with the inspector open, the one preview it shows gets the full ratio.
+  const inspecting = openItem !== null;
+  React.useEffect(() => (inspecting ? undefined : capPixelRatio(1.5)), [inspecting]);
   const counts = React.useMemo(() => {
     const c = new Map<string, number>();
     for (const i of items) for (const k of i.interactions) c.set(k, (c.get(k) ?? 0) + 1);

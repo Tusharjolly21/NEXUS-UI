@@ -261,6 +261,18 @@ html.dark {
 
 /* Endless horizontal loop for the Reddit comments strip: the track holds two identical copies and
    slides by exactly one of them. */
+/* Pro spotlight (listing/pro-promo.tsx): transform-only, so neither forces layout */
+@keyframes pg-spot-push {
+  to { transform: scale(1.06); }
+}
+@keyframes pg-spot-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [style*="pg-spot"] { animation: none !important; }
+}
+
 @keyframes pg-marquee {
   to { transform: translateX(-50%); }
 }

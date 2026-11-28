@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { AnimationKind, ComponentCategorySlug } from "@/lib/catalog/taxonomy";
-import * as Previews from "@/registry/component-previews";
+import * as Previews from "@/registry/preview-proxies";
 import { COMPONENT_SOUNDS, ENABLE_SOUND_PROP } from "@/lib/catalog/component-sounds";
 
 export type LibraryComponent = {

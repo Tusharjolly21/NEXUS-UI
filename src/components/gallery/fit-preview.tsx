@@ -13,6 +13,39 @@ export const PREVIEW_FILL_CLASSES =
 export type Rect = readonly [x: number, y: number, w: number, h: number];
 
 /**
+ * Previews mount one at a time, a beat apart. A row of tiles scrolling into range used to mount all at once, and a few
+ * heavy previews in one frame is a long frame (the page stutters). A queue spreads that over a few frames; a tile that
+ * leaves range before its turn is simply skipped.
+ */
+const MOUNT_GAP_MS = 60;
+type MountJob = { run: () => void; cancelled: boolean };
+const mountQueue: MountJob[] = [];
+let draining = false;
+function drainMounts() {
+  if (draining) return;
+  draining = true;
+  const next = () => {
+    let job = mountQueue.shift();
+    while (job?.cancelled) job = mountQueue.shift();
+    if (!job) {
+      draining = false;
+      return;
+    }
+    job.run();
+    window.setTimeout(next, MOUNT_GAP_MS);
+  };
+  window.setTimeout(next, 0);
+}
+function enqueueMount(run: () => void): () => void {
+  const job: MountJob = { run, cancelled: false };
+  mountQueue.push(job);
+  drainMounts();
+  return () => {
+    job.cancelled = true;
+  };
+}
+
+/**
  * Renders a live preview on a fixed `canvas` and frames it on `focus` — the part of the canvas the
  * component actually occupies — so the component fills its tile at its own proportions instead of
  * being lost in an oversized stage or cropped by a generic one.
@@ -55,20 +88,33 @@ export function FitPreview({
     const node = ref.current;
     if (!node) return;
     // Mount near the viewport and unmount once well away from it, so scrolling a long wall never
-    // leaves hundreds of animated previews running at the same time.
-    // On a phone the window is smaller, so the margin is too: fewer previews alive at once where memory is tightest.
+    // leaves hundreds of animated previews running at the same time. The margin is small on purpose: every preview
+    // inside it is running (animating, drawing), including ones just off screen, so a wide margin is many previews
+    // of work nobody can see. On a phone it is smaller still, where memory is tightest.
     watchWebGL();
-    const margin = window.matchMedia("(max-width: 639px)").matches ? "300px" : "500px";
+    const margin = window.matchMedia("(max-width: 639px)").matches ? "150px" : "250px";
+    let cancelMount: (() => void) | null = null;
     const io = new IntersectionObserver(
       ([entry]) => {
-        setNear(entry.isIntersecting);
-        // one that just left gives its GPU context back; one that just arrived is noted as on the page
-        scheduleWebGLSweep(entry.isIntersecting ? 1500 : 400);
+        cancelMount?.();
+        cancelMount = null;
+        if (entry.isIntersecting) {
+          // mount in turn (see enqueueMount); the first tiles on the page mount first
+          cancelMount = enqueueMount(() => {
+            setNear(true);
+            scheduleWebGLSweep(1500);
+          });
+        } else {
+          setNear(false);
+          // one that just left gives its GPU context back
+          scheduleWebGLSweep(400);
+        }
       },
       { rootMargin: margin },
     );
     io.observe(node);
     return () => {
+      cancelMount?.();
       io.disconnect();
       scheduleWebGLSweep();
     };

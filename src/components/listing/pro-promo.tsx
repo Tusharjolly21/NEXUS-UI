@@ -93,14 +93,18 @@ function Spotlight() {
             exit={reduce ? { opacity: 0 } : { opacity: 0, x: "-12%", scale: 0.98 }}
             transition={{ type: "spring", stiffness: 160, damping: 26, mass: 0.9 }}
           >
-            <motion.div
-              className="absolute inset-0"
-              initial={{ scale: 1 }}
-              animate={running ? { scale: 1.06 } : { scale: 1.02 }}
-              transition={{ duration: HOLD / 1000 + 0.6, ease: "linear" }}
+            {/* The slow push-in is a CSS transform animation, so it runs on the compositor: driving it from script
+                changed the image's transform on every frame. Holding the card pauses it where it is. */}
+            <div
+              className="absolute inset-0 will-change-transform"
+              style={
+                reduce
+                  ? { transform: "scale(1.02)" }
+                  : { animation: `pg-spot-push ${HOLD / 1000 + 0.6}s linear forwards`, animationPlayState: running ? "running" : "paused" }
+              }
             >
               <Image src={`/og-shots/components/${item.slug}.jpg`} alt={`${item.name}, a Pro component`} fill sizes="280px" className="object-cover" />
-            </motion.div>
+            </div>
           </motion.div>
         </AnimatePresence>
         {/* a dark wash at the foot so the name reads on any shot */}
@@ -140,12 +144,11 @@ function Spotlight() {
               className="relative h-1 flex-1 overflow-hidden rounded-full bg-foreground/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
               {on ? (
-                <motion.span
+                // scaleX, not width: animating the width re-laid the page out on every frame
+                <span
                   key={`${step}-${running}`}
-                  className="absolute inset-y-0 left-0 rounded-full bg-foreground/70"
-                  initial={{ width: running ? "0%" : "100%" }}
-                  animate={{ width: "100%" }}
-                  transition={{ duration: running ? HOLD / 1000 : 0, ease: "linear" }}
+                  className="absolute inset-0 origin-left rounded-full bg-foreground/70"
+                  style={running ? { animation: `pg-spot-fill ${HOLD}ms linear forwards` } : undefined}
                 />
               ) : past ? (
                 <span className="absolute inset-0 rounded-full bg-foreground/35" />

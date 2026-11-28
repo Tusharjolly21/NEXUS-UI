@@ -40,6 +40,11 @@ jobs:
       - name: Generate registry
         run: node scripts/build-registry.mjs
 
+      # The preview loader map and proxies are generated from the registry's exports; a stale copy would send the whole
+      # registry (about 6 MB) to visitors again.
+      - name: Check preview loaders are up to date
+        run: node scripts/build-preview-loaders.mjs --check
+
       - name: Type-check
         run: npx tsc --noEmit
 
