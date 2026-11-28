@@ -8,7 +8,7 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { highlight } from "sugar-high";
 import { ArrowUpRight, Box, Check, ChevronRight, Code2, Copy, Link2, RotateCcw, Sparkles, X } from "lucide-react";
 import { buildSnippet, ControlRow, initialValues, Segmented } from "@/components/library/props-playground";
-import type { Playground, PlaygroundValues } from "@/lib/catalog/playgrounds";
+import { loadPlayground, type Playground, type PlaygroundValues } from "@/lib/catalog/playgrounds";
 import { SHADCN_REGISTRY_SCOPE } from "@/lib/registry-scope";
 import { cn } from "@/lib/utils";
 import { SoundSwitch, TypingSoundSwitch } from "@/components/site/sound-switch";
@@ -209,12 +209,12 @@ function Inspector({ item }: { item: GalleryItem }) {
         : "Copy prompt";
   const pickView = (v: "preview" | "code") => (v === "code" && locked ? requestUpgrade(item.name) : setView(v));
 
-  // Load the live controls (heavy: imports every playground component) only when inspecting.
+  // Load this component's live controls (they import the component) only when inspecting, and only its own.
   React.useEffect(() => {
     let alive = true;
-    import("@/lib/catalog/playgrounds").then(({ playgrounds }) => {
+    loadPlayground(item.slug).then((found) => {
       if (!alive) return;
-      const pg = playgrounds[item.slug] ?? null;
+      const pg = found ?? null;
       setPlayground(pg);
       if (pg) {
         setValues(readUrlValues(pg));

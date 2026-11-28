@@ -20,8 +20,8 @@ import {
   getComponentCategoryLabel,
   type ComponentCategorySlug,
 } from "@/lib/catalog/taxonomy";
-import { getPlayground } from "@/lib/catalog/playgrounds";
-import { LivePropsPlayground } from "@/components/library/props-playground";
+import { hasPlayground } from "@/lib/catalog/playgrounds";
+import { LivePlaygroundSection } from "@/components/library/live-playground-section";
 import { CodeBlock } from "@/components/code-block/code-block";
 import { GalleryTile, TileCell, TileGrid } from "@/components/gallery/gallery-tile";
 import { TINT_CLASSES, type GalleryItem, type TileTint } from "@/components/gallery/types";
@@ -1221,8 +1221,8 @@ export function ComponentDetailPageClient({
       }))
     : [{ title: name, code: reactSource ?? "", exportName: previewExportName }];
   const importName = getImportName(sections[0].code, name);
-  // the curated live playgrounds (12 components) replace the generic prop picker
-  const livePlayground = getPlayground(slug);
+  // a component with a live playground gets it in place of the generic prop picker (the playground loads on its own: see live-playground-section.tsx)
+  const hasLive = hasPlayground(slug);
 
   return (
     <>
@@ -1281,7 +1281,7 @@ export function ComponentDetailPageClient({
             <span className="mr-1 text-muted-foreground">On this page</span>
             {[
               { href: "#preview", label: "Preview and install", show: true },
-              { href: livePlayground ? "#playground-heading" : "#props-heading", label: livePlayground ? "Play with it" : "Props", show: !!livePlayground || !!props?.length },
+              { href: hasLive ? "#playground-heading" : "#props-heading", label: hasLive ? "Play with it" : "Props", show: hasLive || !!props?.length },
               { href: "#setup-heading", label: "Add to your project", show: true },
               { href: "#faq-heading", label: "Questions", show: faq.length > 0 },
             ]
@@ -1354,14 +1354,8 @@ export function ComponentDetailPageClient({
 
           {!premium ? <ProNudge slug={slug} name={name} picks={proPicks} placement="top" /> : null}
 
-          {livePlayground ? (
-            <section aria-labelledby="playground-heading" className="mt-20">
-              <SectionTitle id="playground-heading">Play with it</SectionTitle>
-              <p className="mb-6 mt-3 max-w-[560px] text-[17px] text-muted-foreground">
-                {livePlayground.blurb ?? "Move the controls and watch it change. Copy code gives you a snippet with only the props you changed."}
-              </p>
-              <LivePropsPlayground playground={livePlayground} name={name} description={description} locked={locked} />
-            </section>
+          {hasLive ? (
+            <LivePlaygroundSection slug={slug} name={name} description={description} locked={locked} />
           ) : (
             <ProLock locked={locked} name={name} label="Edit it with Pro">
               <PropsPlayground key={`${slug}-${importName}`} props={props} importName={importName} />
