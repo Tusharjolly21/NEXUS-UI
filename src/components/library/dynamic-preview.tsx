@@ -3,19 +3,28 @@
 import dynamic from "next/dynamic";
 import * as React from "react";
 import { RotateCcw } from "lucide-react";
+import { PREVIEW_LOADERS } from "@/registry/preview-loaders.generated";
 
 type PreviewComp = React.ComponentType<{ compact?: boolean }>;
 
 const cache = new Map<string, PreviewComp>();
 
+/**
+ * Loads the one module a preview lives in. Importing the whole registry barrel here would pull every component's code
+ * (about 6 MB of script) in for the first preview, so the generated map names the single module instead. A preview the
+ * map doesn't know yet (added without running `npm run previews:build`) still shows, through the barrel.
+ */
+function loadModule(exportName: string): Promise<Record<string, unknown>> {
+  const load = PREVIEW_LOADERS[exportName];
+  return load ? load() : (import("@/registry/component-previews") as Promise<Record<string, unknown>>);
+}
+
 function loadPreview(exportName: string): PreviewComp {
   if (!cache.has(exportName)) {
     const Comp = dynamic(
       () =>
-        import("@/registry/component-previews").then((m) => ({
-          default:
-            (m as unknown as Record<string, PreviewComp>)[exportName] ??
-            (() => null),
+        loadModule(exportName).then((m) => ({
+          default: (m[exportName] as PreviewComp | undefined) ?? (() => null),
         })),
       {
         ssr: false,

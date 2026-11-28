@@ -32,12 +32,11 @@ export function SearchCommand({ variant = "default" }: { variant?: "default" | "
     void loadPalette().then((m) => setPalette(() => m.SearchPalette));
   }, []);
 
-  /* The preview pane draws live components, whose code is large. Fetch it only when someone shows
-     intent (hover, focus, open), not for every visitor on every page. The catalog JSON follows the same rule. */
+  /* The catalog JSON is fetched only when someone shows intent (hover, focus, open), not for every visitor on every page.
+     The preview pane loads each live component itself, one at a time, when it is shown. */
   const warmWithPreviews = React.useCallback(() => {
     warm();
     void loadPalette().then((m) => m.loadCatalog());
-    void import("@/registry/component-previews");
   }, [warm]);
 
   /* Load the palette itself (small) in the background once the page has finished loading and the browser is idle. */

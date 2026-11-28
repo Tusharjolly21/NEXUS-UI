@@ -22,7 +22,7 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 process.chdir(root);
 
 const OUT = "src/lib/catalog/home-snapshot.generated.json";
-const REGISTRY = "src/registry/component-previews.tsx";
+const REGISTRY = "src/registry/preview-proxies.tsx";
 
 function resolveSpec(spec, from) {
   let base;
