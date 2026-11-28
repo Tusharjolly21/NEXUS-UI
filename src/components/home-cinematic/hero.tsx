@@ -29,7 +29,7 @@ export function CinematicHero({ pricing }: { pricing: DisplayPricing }) {
             <HeroMilestone />
           </div>
 
-          <h1 className="pg-display cx-sweep mt-8 text-[clamp(46px,8.6vw,108px)] text-foreground lg:text-[clamp(64px,6.6vw,96px)]">
+          <h1 className="pg-display mt-8 text-[clamp(46px,8.6vw,108px)] text-foreground lg:text-[clamp(64px,6.6vw,96px)]">
             <span className="cx-rise block" style={{ animationDelay: "0.15s" }}>
               Make your
             </span>

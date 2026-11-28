@@ -3,9 +3,9 @@
 import { AvatarGroup } from "@/components/avatar-group";
 import { CouponApply } from "@/components/coupon-apply";
 import { DictationCard } from "@/components/dictation-card";
+import { GlyphFlow } from "@/components/glyph-flow";
 import { HomeScenes } from "@/components/home-scenes";
 import { DOT_GLOBE_CITIES, DOT_GLOBE_ROUTES, DotGlobe } from "@/components/dot-globe";
-import { MetalCard } from "@/components/metal-card";
 import { PieceStack } from "./hero-tiles-frame";
 
 /** The same illustrated faces as the comment line under the buttons, on soft tints from the Nexus palette. */
@@ -29,7 +29,7 @@ export default function HeroTilesLive() {
   return (
     <PieceStack
       render={{
-        card: <MetalCard />,
+        glyph: <GlyphFlow idleFps={20} />,
         dictate: <DictationCard />,
         avatars: (
           <div className="cx-tile grid place-items-center rounded-[20px] py-4">

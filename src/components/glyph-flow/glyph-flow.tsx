@@ -28,6 +28,8 @@ export type GlyphFlowProps = {
   /** 0 to 1 */
   volume?: number;
   autoplay?: boolean;
+  /** Frames per second while nobody is pointing at it (it speeds up to every frame the moment someone does). Leave it out to draw every frame. */
+  idleFps?: number;
   className?: string;
 };
 
@@ -303,6 +305,7 @@ export default function GlyphFlow({
   enableSound = true,
   volume = 0.6,
   autoplay = false,
+  idleFps,
   className = "",
 }: GlyphFlowProps) {
   const reduce = useReducedMotion() ?? false;
@@ -372,6 +375,8 @@ export default function GlyphFlow({
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
       if (!vis) return;
+      // at rest, draw fewer frames: the characters only shimmer, and every frame costs a full redraw
+      if (idleFps && !hand.current.on && now - last < 1000 / idleFps - 2) return;
       const dt = Math.min(0.033, (now - last) / 1000);
       last = now;
       const t = (now - t0) / 1000;
@@ -459,7 +464,7 @@ export default function GlyphFlow({
       cancelAnimationFrame(raf);
       io.disconnect();
     };
-  }, [fields, pool, autoplay, reduce, accent]);
+  }, [fields, pool, autoplay, reduce, accent, idleFps]);
 
   const next = () => {
     const n = (shapeRef.current + 1) % shapes.length;
