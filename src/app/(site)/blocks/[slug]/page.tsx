@@ -77,7 +77,7 @@ import {
   FlippingWordsDemo,
   TextGenerateTypewriterDemo,
   TypewriterEffectDemo,
-} from "@/registry/blocks/block-variants";
+} from "@/registry/preview-proxies";
 import { BlockSection } from "./_section";
 
 type Props = { params: Promise<{ slug: string }> };
