@@ -3,7 +3,8 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useCanonicalPathname } from "@/components/layout/canonical-pathname";
 import { CreditCard, Key, LayoutDashboard, LogOut, Menu, ShoppingBag, User, X } from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { SoundSwitch } from "@/components/site/sound-switch";
@@ -83,7 +84,7 @@ function Logo() {
  * capsule drops its links so only the logo, search and the main action remain.
  */
 export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
-  const pathname = usePathname() ?? "/";
+  const pathname = useCanonicalPathname();
   const router = useRouter();
   const user = useUser();
   const [menuOpen, setMenuOpen] = React.useState(false);

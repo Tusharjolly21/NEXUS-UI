@@ -88,6 +88,7 @@ const nextConfig = {
     "/api/prompt/blocks/[id]": ["./content/build-prompts/blocks/*.md"],
     // The sounds page shows the library's own source.
     "/sounds": ["./src/lib/ui-sounds.ts"],
+    "/c/[region]/sounds": ["./src/lib/ui-sounds.ts"],
     // Block pages read section source at request time (only for sessions allowed to see it).
     "/blocks/[slug]": [
       "./public/og-shots/blocks/*.jpg",
@@ -98,14 +99,19 @@ const nextConfig = {
     // Component pages: the registry and build prompts, the guides that link to them (listed on the page;
     // this key used to appear twice, so the guides were dropped) and the share-card stills they check for.
     "/components/[slug]": ["./.generated/registry/**/*.json", "./content/build-prompts/*.md", "./content/blog/*.mdx", "./public/og-shots/components/*.jpg"],
+    // The cached copies of the component pages read the same files.
+    "/components-static/[slug]": ["./.generated/registry/**/*.json", "./content/build-prompts/*.md", "./content/blog/*.mdx", "./public/og-shots/components/*.jpg"],
+    "/components-static-in/[slug]": ["./.generated/registry/**/*.json", "./content/build-prompts/*.md", "./content/blog/*.mdx", "./public/og-shots/components/*.jpg"],
     // The share card reads its font and the picture it shows (src/app/api/og/route.tsx).
     "/api/og": ["./src/app/api/og/fonts/*", "./public/og-shots/**/*.jpg", "./public/videos/previews/*.jpg"],
     "/templates/[slug]": ["./public/og-shots/templates/*.jpg"],
     "/videos/[slug]": ["./public/videos/previews/*.jpg"],
+    "/c/[region]/videos/[slug]": ["./public/videos/previews/*.jpg"],
     // Pro build prompts live outside public/ and are only read by this gated route.
     "/api/prompt/[slug]": ["./content/build-prompts/*.md"],
     // Icon pages show each icon's own source, its sound score and the look helper, read at request time.
     "/icons/[slug]": ["./src/components/nx-icons/**/*.{ts,tsx}"],
+    "/c/[region]/icons": ["./src/components/nx-icons/**/*.{ts,tsx}"],
     "/icons/sounds": ["./src/components/nx-icons/sound-engine.ts", "./src/components/nx-icons/sound-kit.ts", "./src/components/nx-icons/material-sounds.ts"],
     "/api/icons/[slug]": ["./src/components/nx-icons/icons/*.tsx"],
     // Video prompts, source, kit and render script: same idea, read only by the gated route.
@@ -221,26 +227,47 @@ const nextConfig = {
       // any value: the regular page decides whether that banner id is the current one
       { type: "cookie", key: "nx-banner" },
     ];
-    // The pages served this way: the address visitors use, and the name of its cached copies.
+    // The pages served this way: the address visitors use, and where its cached copy for each price region lives
+    // (src/app/(static), (static-in) and (cached)/c/[region]). A path with one segment such as /components/:slug is a
+    // component page; category and type pages have two segments and are not matched.
     const cached = [
-      { source: "/", copy: "home-static" },
-      { source: "/components", copy: "components-static" },
+      { source: "/", global: "/home-static", india: "/home-static-in" },
+      { source: "/components", global: "/components-static", india: "/components-static-in" },
+      { source: "/components/:slug", global: "/components-static/:slug", india: "/components-static-in/:slug" },
+      { source: "/blog", global: "/c/global/blog", india: "/c/in/blog" },
+      { source: "/blog/:slug", global: "/c/global/blog/:slug", india: "/c/in/blog/:slug" },
+      { source: "/docs/introduction", global: "/c/global/docs/introduction", india: "/c/in/docs/introduction" },
+      { source: "/docs/installation", global: "/c/global/docs/installation", india: "/c/in/docs/installation" },
+      { source: "/docs/install-nextjs", global: "/c/global/docs/install-nextjs", india: "/c/in/docs/install-nextjs" },
+      { source: "/docs/install-tailwindcss", global: "/c/global/docs/install-tailwindcss", india: "/c/in/docs/install-tailwindcss" },
+      { source: "/docs/add-utilities", global: "/c/global/docs/add-utilities", india: "/c/in/docs/add-utilities" },
+      { source: "/docs/cli", global: "/c/global/docs/cli", india: "/c/in/docs/cli" },
+      { source: "/docs/icons", global: "/c/global/docs/icons", india: "/c/in/docs/icons" },
+      { source: "/docs/video-tutorial", global: "/c/global/docs/video-tutorial", india: "/c/in/docs/video-tutorial" },
+      { source: "/docs/videos", global: "/c/global/docs/videos", india: "/c/in/docs/videos" },
+      { source: "/changelog", global: "/c/global/changelog", india: "/c/in/changelog" },
+      { source: "/claude-code", global: "/c/global/claude-code", india: "/c/in/claude-code" },
+      { source: "/sounds", global: "/c/global/sounds", india: "/c/in/sounds" },
+      { source: "/icons", global: "/c/global/icons", india: "/c/in/icons" },
+      { source: "/mcp", global: "/c/global/mcp", india: "/c/in/mcp" },
+      { source: "/impact", global: "/c/global/impact", india: "/c/in/impact" },
+      { source: "/alternatives", global: "/c/global/alternatives", india: "/c/in/alternatives" },
+      { source: "/videos/:slug", global: "/c/global/videos/:slug", india: "/c/in/videos/:slug" },
+      { source: "/privacy", global: "/c/global/privacy", india: "/c/in/privacy" },
+      { source: "/terms", global: "/c/global/terms", india: "/c/in/terms" },
+      { source: "/refund-policy", global: "/c/global/refund-policy", india: "/c/in/refund-policy" },
+      { source: "/pricing", global: "/c/global/pricing", india: "/c/in/pricing" },
+      { source: "/blocks", global: "/c/global/blocks", india: "/c/in/blocks" },
+      { source: "/videos", global: "/c/global/videos", india: "/c/in/videos" },
     ];
+    const rule = (source, destination, country) => ({
+      source,
+      has: country === "in" ? [{ type: "header", key: "cf-ipcountry", value: "IN" }] : [{ type: "header", key: "cf-ipcountry" }],
+      missing: country === "in" ? notPersonalised : [...notPersonalised, { type: "header", key: "cf-ipcountry", value: "IN" }],
+      destination,
+    });
     return {
-      beforeFiles: cached.flatMap(({ source, copy }) => [
-        {
-          source,
-          has: [{ type: "header", key: "cf-ipcountry", value: "IN" }],
-          missing: notPersonalised,
-          destination: `/${copy}-in`,
-        },
-        {
-          source,
-          has: [{ type: "header", key: "cf-ipcountry" }],
-          missing: [...notPersonalised, { type: "header", key: "cf-ipcountry", value: "IN" }],
-          destination: `/${copy}`,
-        },
-      ]),
+      beforeFiles: cached.flatMap(({ source, global, india }) => [rule(source, india, "in"), rule(source, global, "global")]),
       afterFiles: [],
       fallback: [],
     };

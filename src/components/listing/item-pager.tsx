@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useCanonicalPathname } from "@/components/layout/canonical-pathname";
 import { ArrowLeft, ArrowRight, ChevronLeft } from "lucide-react";
 import { groupOf, LISTING_HOME, type SidebarGroup } from "./listing-sidebar";
 
@@ -11,7 +11,7 @@ import { groupOf, LISTING_HOME, type SidebarGroup } from "./listing-sidebar";
  * going back to the list.
  */
 export function ItemPager({ groups, title }: { groups: SidebarGroup[]; title: string }) {
-  const pathname = usePathname();
+  const pathname = useCanonicalPathname();
   const home = LISTING_HOME[title];
   // blocks list sections that live inside a block's page, so there the steps are the blocks themselves
   const byGroup = groups.length > 0 && groups.every((g) => g.href);
